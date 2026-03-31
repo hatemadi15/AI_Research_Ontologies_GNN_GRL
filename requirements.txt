@@ -1,0 +1,10 @@
+torch
+torch_geometric
+networkx
+sentence-transformers
+spacy
+google-generativeai
+pandas
+numpy
+scikit-learn
+matplotlib

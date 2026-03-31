@@ -1,0 +1,260 @@
+child,parent,type,score
+tests,a role,distrib,1.0
+a role,theory,distrib,1.0
+theory,regard,distrib,1.0
+regard,methods,distrib,1.0
+methods,respect,distrib,1.0
+respect,results,distrib,1.0
+results,contrast,distrib,1.0
+contrast,the case,distrib,1.0
+the case,an order,distrib,1.0
+an order,a result,distrib,1.0
+a result,research,distrib,1.0
+research,the order,distrib,1.0
+the order,the tests,distrib,1.0
+the tests,the effect,distrib,1.0
+the effect,this study,distrib,1.0
+this study,comparison,distrib,1.0
+comparison,the results,distrib,1.0
+the results,differences,distrib,1.0
+differences,the removal,distrib,1.0
+the removal,the process,distrib,1.0
+the process,this effect,distrib,1.0
+this effect,this finding,distrib,1.0
+this finding,the approach,distrib,1.0
+the approach,the presence,distrib,1.0
+the presence,these studies,distrib,1.0
+these studies,the influence,distrib,1.0
+the influence,the difference,distrib,1.0
+the difference,the interaction,distrib,1.0
+the interaction,the differences,distrib,1.0
+the differences,this contribution,distrib,1.0
+this contribution,this investigation,distrib,1.0
+this investigation,a conceptual change,distrib,1.0
+a conceptual change,inadequate understanding,distrib,1.0
+inadequate understanding,this alternative approach,distrib,1.0
+damage,failure,distrib,1.0
+failure,the resistance,distrib,1.0
+the resistance,the weak points,distrib,1.0
+the weak points,damage locations,distrib,1.0
+use,data,distrib,1.0
+data,table,distrib,1.0
+table,disks,distrib,1.0
+disks,volume,distrib,1.0
+volume,interest,distrib,1.0
+interest,applications,distrib,1.0
+cracks,a crack,distrib,1.0
+a crack,the crack,distrib,1.0
+the crack,crack growth,distrib,1.0
+crack growth,the crack tip,distrib,1.0
+the crack tip,the main crack,distrib,1.0
+the main crack,multi-gb cracks,distrib,1.0
+multi-gb cracks,a fatigue crack,distrib,1.0
+a fatigue crack,crack initiation,distrib,1.0
+crack initiation,single-gb cracks,distrib,1.0
+single-gb cracks,secondary cracks,distrib,1.0
+secondary cracks,crack propagation,distrib,1.0
+crack propagation,crack growth rate,distrib,1.0
+crack growth rate,fatigue crack initiation,distrib,1.0
+fatigue crack initiation,microstructurally short cracks,distrib,1.0
+microstructurally short cracks,a critically sized fatigue crack,distrib,1.0
+a critically sized fatigue crack,the intrinsic crack growth curve,distrib,1.0
+the intrinsic crack growth curve,preferential crack initiation sites,distrib,1.0
+fig,( fig,distrib,1.0
+( fig,figure,distrib,1.0
+figure,supplementary fig,distrib,1.0
+supplementary fig,( supplementary fig,distrib,1.0
+ebsd,ctbs,distrib,1.0
+ctbs,s 3 ctbs,distrib,1.0
+s 3 ctbs,ebsd data,distrib,1.0
+steel,grains,distrib,1.0
+grains,steels,distrib,1.0
+steels,alloys,distrib,1.0
+alloys,material,distrib,1.0
+material,al alloys,distrib,1.0
+al alloys,the grains,distrib,1.0
+the grains,extrusions,distrib,1.0
+extrusions,a material,distrib,1.0
+a material,plasticity,distrib,1.0
+plasticity,each alloy,distrib,1.0
+each alloy,the alloys,distrib,1.0
+the alloys,all alloys,distrib,1.0
+all alloys,protrusions,distrib,1.0
+protrusions,the material,distrib,1.0
+the material,the materials,distrib,1.0
+the materials,carbon steels,distrib,1.0
+carbon steels,microplasticity,distrib,1.0
+microplasticity,these materials,distrib,1.0
+these materials,grain boundaries,distrib,1.0
+grain boundaries,the three alloys,distrib,1.0
+the three alloys,the ua materials,distrib,1.0
+the ua materials,cyclic plasticity,distrib,1.0
+cyclic plasticity,engineering alloys,distrib,1.0
+engineering alloys,the microstructure,distrib,1.0
+the microstructure,the grain interior,distrib,1.0
+the grain interior,the grain interiors,distrib,1.0
+the grain interiors,high strength steels,distrib,1.0
+high strength steels,microstructural design,distrib,1.0
+microstructural design,plasticity-induced crack closure,distrib,1.0
+plasticity-induced crack closure,the precipitate-strengthened al alloys,distrib,1.0
+stress,strain,distrib,1.0
+strain,fatigue,distrib,1.0
+fatigue,tension,distrib,1.0
+tension,the stress,distrib,1.0
+the stress,strain rate,distrib,1.0
+strain rate,high strength,distrib,1.0
+high strength,fatigue failure,distrib,1.0
+fatigue failure,fatigue loading,distrib,1.0
+fatigue loading,the tensile axis,distrib,1.0
+the tensile axis,the fatigue life,distrib,1.0
+the fatigue life,tensile strength,distrib,1.0
+tensile strength,fatigue strength,distrib,1.0
+fatigue strength,the yield stress,distrib,1.0
+the yield stress,tensile strengths,distrib,1.0
+tensile strengths,high strain rates,distrib,1.0
+high strain rates,high cycle fatigue,distrib,1.0
+high cycle fatigue,the yield strength,distrib,1.0
+the yield strength,strain rate effect,distrib,1.0
+strain rate effect,mechanical strength,distrib,1.0
+mechanical strength,fatigue performance,distrib,1.0
+fatigue performance,strain rate effects,distrib,1.0
+strain rate effects,higher strain rates,distrib,1.0
+higher strain rates,the fatigue strength,distrib,1.0
+the fatigue strength,the tensile strength,distrib,1.0
+the tensile strength,the high cycle fatigue,distrib,1.0
+the high cycle fatigue,the strength increment,distrib,1.0
+the strength increment,the fatigue performance,distrib,1.0
+the fatigue performance,very high cycle fatigue,distrib,1.0
+very high cycle fatigue,ultimate tensile strength,distrib,1.0
+ultimate tensile strength,the strength differential,distrib,1.0
+the strength differential,no relevant strain rate effect,distrib,1.0
+no relevant strain rate effect,ultrasonic fatigue testing machines,distrib,1.0
+situ,the under,distrib,1.0
+the under,initiation,distrib,1.0
+initiation,the center,distrib,1.0
+the center,the square,distrib,1.0
+the square,the formation,distrib,1.0
+the formation,the initiation,distrib,1.0
+intrusions,inclusions,distrib,1.0
+time,the time,distrib,1.0
+the time,lifetime,distrib,1.0
+lifetime,the lifetime,distrib,1.0
+the lifetime,the literature,distrib,1.0
+the literature,the generation,distrib,1.0
+the surface,the oxide layer,distrib,1.0
+the oxide layer,the boundary plane,distrib,1.0
+the boundary plane,the outermost layer,distrib,1.0
+slip,slip systems,distrib,1.0
+slip systems,dislocations,distrib,1.0
+dislocations,dislocation motion,distrib,1.0
+dislocation motion,fewer dislocations,distrib,1.0
+fewer dislocations,trapped dislocations,distrib,1.0
+trapped dislocations,persistent slip bands,distrib,1.0
+persistent slip bands,some dislocation loops,distrib,1.0
+some dislocation loops,different slip plane families,distrib,1.0
+growth,increases,distrib,1.0
+increases,growth rates,distrib,1.0
+propagation,diffraction,distrib,1.0
+diffraction,coherent twin boundaries,distrib,1.0
+hydrogen,diffusion,distrib,1.0
+diffusion,hydrogen diffusion,distrib,1.0
+hydrogen diffusion,hydrogen embrittlement,distrib,1.0
+he,( h,distrib,1.0
+( h,$ ^,distrib,1.0
+$ ^,( b,distrib,1.0
+( b,( c,distrib,1.0
+( c,{ â—¦,distrib,1.0
+{ â—¦,$ c,distrib,1.0
+the mechanical energy,distinct physical mechanisms,distrib,1.0
+new paths,transportation structures,distrib,1.0
+peak,extreme environments,distrib,1.0
+argon,inconel,distrib,1.0
+samples,specimens,distrib,1.0
+specimens,the samples,distrib,1.0
+the samples,sample gauge,distrib,1.0
+sample gauge,the specimen,distrib,1.0
+the specimen,smooth samples,distrib,1.0
+smooth samples,the pa samples,distrib,1.0
+the pa samples,the ua samples,distrib,1.0
+the ua samples,h-charged samples,distrib,1.0
+5 mm,15 mm,distrib,1.0
+15 mm,thickness,distrib,1.0
+thickness,scale bar,distrib,1.0
+scale bar,magnitude,distrib,1.0
+magnitude,the thicker sample,distrib,1.0
+number,919 mpa,distrib,1.0
+919 mpa,a factor,distrib,1.0
+a factor,1726 mpa,distrib,1.0
+1726 mpa,1096 mpa,distrib,1.0
+1096 mpa,1170 mpa,distrib,1.0
+1170 mpa,1475 mpa,distrib,1.0
+1475 mpa,the number,distrib,1.0
+the number,a large number,distrib,1.0
+a large number,certain number,distrib,1.0
+certain number,the 1170 mpa batch,distrib,1.0
+new particles,the nucleation,distrib,1.0
+gbs,low-s,distrib,1.0
+low-s,low-s gbs,distrib,1.0
+low-s gbs,general gbs,distrib,1.0
+general gbs,the s-n curves,distrib,1.0
+loading,unloading,distrib,1.0
+unloading,cyclic loading,distrib,1.0
+cyclic loading,monotonic loading,distrib,1.0
+monotonic loading,static and dynamic loading,distrib,1.0
+training,engineers,distrib,1.0
+engineers,the training,distrib,1.0
+the training,the training process,distrib,1.0
+the training process,the training schedule,distrib,1.0
+the training schedule,the final training stress,distrib,1.0
+the final training stress,the stress controlled training schedule,distrib,1.0
+cycle,cycles,distrib,1.0
+cycles,cycling,distrib,1.0
+cycling,the cyclic,distrib,1.0
+the cyclic,450 cycles,distrib,1.0
+450 cycles,10 7 cycles,distrib,1.0
+10 7 cycles,cyclic training,distrib,1.0
+cyclic training,the early cycles,distrib,1.0
+the early cycles,the initial cycles,distrib,1.0
+hcf,the fcg,distrib,1.0
+the fcg,pfz ' s,distrib,1.0
+pfz ' s,the pfz,distrib,1.0
+the pfz,the pfz ' s,distrib,1.0
+the pfz ' s,the hcf performance,distrib,1.0
+the localization,this plastic localization,distrib,1.0
+precipitation,the condensation,distrib,1.0
+the condensation,nanoprecipitates,distrib,1.0
+nanoprecipitates,the precipitation,distrib,1.0
+the precipitation,adiabatic conditions,distrib,1.0
+adiabatic conditions,dynamic precipitation,distrib,1.0
+dynamic precipitation,precipitate-free zones,distrib,1.0
+precipitate-free zones,the precipitation process,distrib,1.0
+the precipitation process,the dynamic precipitation,distrib,1.0
+aa2024,aa6061,distrib,1.0
+aa6061,aa7050,distrib,1.0
+aa7050,the aa2024,distrib,1.0
+the aa2024,", aa6061 ( b",distrib,1.0
+", aa6061 ( b",aa7050 alloys,distrib,1.0
+uts,the ua,distrib,1.0
+the ua,aged ( ua,distrib,1.0
+aged ( ua,the ua state,distrib,1.0
+pa states,the pa state,distrib,1.0
+the pa state,the pa states,distrib,1.0
+vacancies,excess vacancies,distrib,1.0
+20 hz,20 khz,distrib,1.0
+20 khz,700 hz,distrib,1.0
+700 hz,a frequency,distrib,1.0
+a frequency,decreasing frequencies,distrib,1.0
+air,heat,distrib,1.0
+heat,oxygen,distrib,1.0
+oxygen,vacuum,distrib,1.0
+vacuum,lab air,distrib,1.0
+lab air,dry air,distrib,1.0
+dry air,humid air,distrib,1.0
+humid air,temperature,distrib,1.0
+temperature,heat treatment,distrib,1.0
+heat treatment,room temperature,distrib,1.0
+control type,displacement control,distrib,1.0
+50crmo4,42crmo4,distrib,1.0
+force-controlled cyclic tests,stress-controlled cyclic tests,distrib,1.0
+stress-controlled cyclic tests,displacement-controlled cyclic tests,distrib,1.0
+displacement-controlled cyclic tests,displacement-controlled cyclic test results,distrib,1.0

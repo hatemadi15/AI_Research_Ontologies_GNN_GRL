@@ -1,0 +1,13 @@
+Loading NLP models...
+DEBUG: Loaded 308 valid nodes (e.g., ['the tests', 'cycling', 'cycle'])
+DEBUG: Looking for sentences in C:\Users\user\Desktop\AI_Research_Automated\data\raw\dataset\fine_grained_ner
+DEBUG: Loaded 477 sentences.
+DEBUG: Sample sentence: 'It evolves around fatigue testing of mesoscale specimens to increase damage detection sensitivity , data fusion through multimodal registration to address data heterogeneity , and image-based image data-driven damage localization .'
+DEBUG: Starting pattern matching...
+------------------------------
+DEBUG SUMMARY:
+  - Regex Matches found in text: 54
+  - Matches where Subj/Obj were valid Nodes: 8
+  - Final Relations kept (High Similarity): 0
+------------------------------
+Result is still empty. Check the Summary above to see why.

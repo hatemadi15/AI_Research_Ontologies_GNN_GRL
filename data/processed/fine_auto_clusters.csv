@@ -1,0 +1,50 @@
+cluster_id,cluster_name,n_terms,top_terms
+8,Cluster_35terms,35,"tests, a role, theory, regard, methods"
+9,Cluster_33terms,33,"stress, strain, fatigue, tension, the stress"
+2,Cluster_31terms,31,"steel, grains, steels, alloys, material"
+35,Cluster_18terms,18,"cracks, a crack, the crack, crack growth, the crack tip"
+7,Cluster_11terms,11,"number, 919 mpa, a factor, 1726 mpa, 1096 mpa"
+1,Cluster_10terms,10,"air, heat, oxygen, vacuum, lab air"
+14,Cluster_9terms,9,"cycle, cycles, cycling, the cyclic, 450 cycles"
+38,Cluster_9terms,9,"samples, specimens, the samples, sample gauge, the specimen"
+33,Cluster_9terms,9,"slip, slip systems, dislocations, dislocation motion, fewer dislocations"
+12,Cluster_9terms,9,"precipitation, the condensation, nanoprecipitates, the precipitation, adiabatic conditions"
+4,Cluster_7terms,7,"situ, the under, initiation, the center, the square"
+19,Cluster_7terms,7,"he, ( h, $ ^, ( b, ( c"
+0,Cluster_7terms,7,"training, engineers, the training, the training process, the training schedule"
+16,Cluster_7terms,7,"use, data, table, disks, volume"
+6,Cluster_6terms,6,"hcf, the fcg, pfz ' s, the pfz, the pfz ' s"
+11,Cluster_6terms,6,"time, the time, lifetime, the lifetime, the literature"
+3,Cluster_6terms,6,"5 mm, 15 mm, thickness, scale bar, magnitude"
+48,Cluster_6terms,6,"aa2024, aa6061, aa7050, the aa2024, , aa6061 ( b"
+43,Cluster_5terms,5,"fig, ( fig, figure, supplementary fig, ( supplementary fig"
+23,Cluster_5terms,5,"loading, unloading, cyclic loading, monotonic loading, static and dynamic loading"
+25,Cluster_5terms,5,"gbs, low-s, low-s gbs, general gbs, the s-n curves"
+22,Cluster_5terms,5,"20 hz, 20 khz, 700 hz, a frequency, decreasing frequencies"
+13,Cluster_5terms,5,"damage, failure, the resistance, the weak points, damage locations"
+18,Cluster_4terms,4,"ebsd, ctbs, s 3 ctbs, ebsd data"
+21,Cluster_4terms,4,"hydrogen, diffusion, hydrogen diffusion, hydrogen embrittlement"
+15,Cluster_4terms,4,"the surface, the oxide layer, the boundary plane, the outermost layer"
+45,Cluster_4terms,4,"force-controlled cyclic tests, stress-controlled cyclic tests, displacement-controlled cyclic tests, displacement-controlled cyclic test results"
+32,Cluster_4terms,4,"uts, the ua, aged ( ua, the ua state"
+28,Cluster_3terms,3,"propagation, diffraction, coherent twin boundaries"
+36,Cluster_3terms,3,"growth, increases, growth rates"
+24,Cluster_3terms,3,"pa states, the pa state, the pa states"
+10,Cluster_2terms,2,"control type, displacement control"
+17,Cluster_2terms,2,"intrusions, inclusions"
+41,Cluster_2terms,2,"50crmo4, 42crmo4"
+44,Cluster_2terms,2,"vacancies, excess vacancies"
+27,Cluster_2terms,2,"new particles, the nucleation"
+5,Cluster_2terms,2,"argon, inconel"
+20,Cluster_2terms,2,"peak, extreme environments"
+42,Cluster_2terms,2,"new paths, transportation structures"
+29,Cluster_2terms,2,"the mechanical energy, distinct physical mechanisms"
+47,Cluster_2terms,2,"the localization, this plastic localization"
+30,Cluster_30,1,this work
+46,Cluster_46,1,a whole ( supplementary note
+37,Cluster_37,1,weight reduction
+34,Cluster_34,1,solute
+40,Cluster_40,1,the microstrains
+39,Cluster_39,1,yellow color hollow arrows
+31,Cluster_31,1,the electron beam direction
+26,Cluster_26,1,pulse pause mode
