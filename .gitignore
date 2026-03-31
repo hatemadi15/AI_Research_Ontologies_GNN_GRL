@@ -1,23 +1,16 @@
-# Ignore generated output contents
-data/processed/*
-!data/processed/.gitkeep
-
-# Ignore specific output files in the root
-cluster_output.txt
-
-# General output extensions
+# Data and output files
 *.csv
 *.pt
 *.png
-*.pkl
-*.json
 
-# Python caches
+# Text files used as output/logs (excluding essential code or documentation txt files if any are meant to be kept)
+# Note: If you have some .txt files you DO want to track (like requirements.txt), you can force add them later using `git add -f requirements.txt`
+*.txt
+!requirements.txt
+
+# Python cache / virtual environments
 __pycache__/
-*.pyc
-.ipynb_checkpoints/
-
-# Virtual environments
+*.py[cod]
+*$py.class
 venv/
-env/
 .env
