@@ -1,0 +1,23 @@
+# Ignore generated output contents
+data/processed/*
+!data/processed/.gitkeep
+
+# Ignore specific output files in the root
+cluster_output.txt
+
+# General output extensions
+*.csv
+*.pt
+*.png
+*.pkl
+*.json
+
+# Python caches
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Virtual environments
+venv/
+env/
+.env
