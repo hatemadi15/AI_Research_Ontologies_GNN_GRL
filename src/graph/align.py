@@ -23,7 +23,7 @@ import torch
 import pandas as pd
 from sentence_transformers import SentenceTransformer, util
 
-from config import DEFAULT_EMBEDDER_MODEL, LLM_ALIGNMENT
+from config import DEFAULT_EMBEDDER_MODEL, LLM_ALIGNMENT, LLM_API_KEY, LLM_MODEL
 
 # Get project root directory (2 levels up from this script)
 PROJECT_ROOT = os.path.dirname(
@@ -402,7 +402,7 @@ def llm_augment_alignment(alignments, class_map):
         else:
             try:
                 response = client.chat.completions.create(
-                    model="gpt-4o-mini",
+                    model=LLM_MODEL,
                     messages=[{
                         "role": "user",
                         "content": (
@@ -437,8 +437,8 @@ def expand_ontology_coverage(ref_classes, discovered, disc_sbert, class_map):
     """FIX 1b: LLM-Based Ontology Class Expansion (kept for API-key scenarios).
     Skipped if OPENAI_API_KEY is not available.
     """
-    if not os.getenv('OPENAI_API_KEY'):
-        print("No OPENAI_API_KEY, skipping LLM expansion")
+    if not LLM_API_KEY:
+        print("No LLM API key, skipping LLM expansion")
         return []
 
     try:
@@ -481,7 +481,7 @@ def expand_ontology_coverage(ref_classes, discovered, disc_sbert, class_map):
         else:
             try:
                 response = client.chat.completions.create(
-                    model="gpt-4o-mini",
+                    model=LLM_MODEL,
                     messages=[{"role": "user", "content": (
                         f"Generate 3 short synonym phrases for the materials "
                         f"science concept '{class_label}'. Return only the "
@@ -859,14 +859,14 @@ def run_alignment():
         print(f"Structural expansion failed: {e}")
 
     # LLM-Augmented Alignment for borderline pairs (if API key available)
-    if LLM_ALIGNMENT and os.getenv('OPENAI_API_KEY'):
+    if LLM_ALIGNMENT and LLM_API_KEY:
         try:
             alignments = llm_augment_alignment(alignments, class_map)
         except Exception as e:
             print(f"LLM alignment augmentation failed: {e}")
 
     # LLM-Based Ontology Class Expansion (if API key available)
-    if LLM_ALIGNMENT and os.getenv('OPENAI_API_KEY'):
+    if LLM_ALIGNMENT and LLM_API_KEY:
         try:
             expansion_alignments = expand_ontology_coverage(
                 ref_classes, discovered, disc_sbert, class_map
