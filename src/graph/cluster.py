@@ -89,7 +89,7 @@ def llm_name_cluster(terms, domain="materials mechanics"):
     """Use Gemini to propose an ontology class name for a cluster."""
     import google.generativeai as genai
     
-    api_key = os.getenv('AIzaSyBOXketnhkzGYYm4-s6Xwem1g9kHcOFxbg')
+    api_key = os.getenv('GEMINI_API_KEY')
     if not api_key:
         return f"Cluster_{len(terms)}terms"
     
