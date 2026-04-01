@@ -2,6 +2,8 @@
 *.csv
 *.pt
 *.png
+*.pkl
+data/processed/
 
 # Text files used as output/logs (excluding essential code or documentation txt files if any are meant to be kept)
 # Note: If you have some .txt files you DO want to track (like requirements.txt), you can force add them later using `git add -f requirements.txt`
