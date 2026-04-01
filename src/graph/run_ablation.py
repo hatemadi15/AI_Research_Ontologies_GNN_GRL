@@ -45,8 +45,9 @@ def run_ablation(preset_name):
     align.USE_COMBINED_SCORING = preset['USE_COMBINED_SCORING']
 
     # Update embedder model if specified in preset
-    from config import DEFAULT_EMBEDDER_MODEL
-    embedder_model = preset.get('embedder_model', DEFAULT_EMBEDDER_MODEL)
+    from config import get_config
+    _cfg = get_config()
+    embedder_model = preset.get('embedder_model', _cfg.get('embedder_model', 'all-MiniLM-L6-v2'))
     if embedder_model != align.EMBEDDER_MODEL:
         from sentence_transformers import SentenceTransformer
         print(f"  Switching embedder to: {embedder_model}")

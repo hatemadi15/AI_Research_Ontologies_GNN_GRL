@@ -4,15 +4,17 @@ align.py - MILA-style Bidirectional Ontology Alignment
 Aligns discovered terms/clusters to reference ontology using:
   - rdflib parsing of ALL classes from ontology.ttl (rdfs:label + altLabel + prefLabel)
   - No hardcoded 8-class fallback
-  - Term normalization (lowercase, lemmatize, strip articles)
+  - Term normalization (CamelCase split, lowercase, lemmatize, strip articles)
   - Combined scoring: 45% embedding + 15% Jaccard + 15% edit distance + 20% exact + 5% structure
   - Bidirectional matching (forward + backward) with 1-to-1 constraint
-  - GNN+text embedding fusion when available
+  - GNN similarity computed SEPARATELY (64d vs 64d) then weighted with text sim
+  - For reference classes without GNN embeddings, text-only similarity is used
   - Ablation flags for component toggling
 """
 
 import os
 import json
+import re
 import pickle
 from difflib import SequenceMatcher
 
@@ -42,19 +44,31 @@ USE_GNN_EMBEDDINGS = True
 USE_BIDIRECTIONAL = True
 USE_COMBINED_SCORING = True
 
+# GNN fusion weight: alpha * text_sim + (1-alpha) * gnn_sim
+GNN_FUSION_ALPHA = 0.7
+
 
 def normalize_term(term):
-    """Normalize a term: lowercase, strip articles, simple lemmatization."""
-    term = term.lower().strip()
+    """Normalize a term: CamelCase split, remove hyphens, lowercase, strip articles.
+
+    Handles compound NER types like "CrackGrowthBehaviour" -> "crack growth behaviour"
+    and ontology labels like "High-cycle fatigue" -> "high cycle fatigue".
+    """
+    term = term.strip()
+    # CamelCase splitting (handles "CrackGrowth" and "GNNModel")
+    term = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', term)
+    term = re.sub(r'(?<=[A-Z])(?=[A-Z][a-z])', ' ', term)
+    term = term.lower()
+    # Replace hyphens and underscores with spaces
+    term = re.sub(r'[-_]', ' ', term)
     # Strip leading articles
     for prefix in ('the ', 'a ', 'an '):
         if term.startswith(prefix):
             term = term[len(prefix):]
-    # CamelCase splitting
-    import re
-    term = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', term).lower()
     # Remove parentheticals
-    term = re.sub(r'\([^)]*\)', '', term).strip()
+    term = re.sub(r'\([^)]*\)', '', term)
+    # Collapse multiple spaces
+    term = re.sub(r'\s+', ' ', term).strip()
     return term
 
 
@@ -159,54 +173,53 @@ def load_gnn_embeddings():
     return None, None
 
 
-def fused_embedding(term, sbert_embed, gnn_embeds, gnn_map, alpha=0.5):
-    """Fuse SBERT and GNN embeddings for a term.
-
-    If GNN embedding available, returns alpha*GNN + (1-alpha)*SBERT (normalized).
-    Otherwise returns SBERT embedding.
-    """
-    if gnn_embeds is not None and gnn_map is not None and term in gnn_map:
-        gnn_idx = gnn_map[term]
-        if gnn_idx < gnn_embeds.shape[0]:
-            gnn_vec = gnn_embeds[gnn_idx]
-            # Project to same dim if needed (pad shorter with zeros)
-            sbert_vec = sbert_embed
-            max_dim = max(len(gnn_vec), len(sbert_vec))
-            gnn_padded = np.zeros(max_dim)
-            sbert_padded = np.zeros(max_dim)
-            gnn_padded[:len(gnn_vec)] = gnn_vec
-            sbert_padded[:len(sbert_vec)] = sbert_vec
-            fused = alpha * gnn_padded + (1 - alpha) * sbert_padded
-            norm = np.linalg.norm(fused)
-            if norm > 0:
-                fused = fused / norm
-            return fused
-    return sbert_embed
-
-
-def combined_score(disc_term, ref_term, disc_embed, ref_embed,
-                   G=None, disc_in_degree=0):
+def combined_score(disc_term, ref_term, disc_sbert_embed, ref_sbert_embed,
+                   G=None, disc_in_degree=0,
+                   disc_gnn_embed=None, ref_gnn_embed=None,
+                   alpha=GNN_FUSION_ALPHA):
     """Compute combined alignment score.
+
+    FIXED: GNN and text similarities computed SEPARATELY in their native
+    dimensions (text: 384d vs 384d, GNN: 64d vs 64d), then combined as:
+        combined_sim = alpha * text_sim + (1-alpha) * gnn_sim
+
+    For entities without GNN embeddings, text-only similarity is used.
 
     Weights: 45% embedding + 15% Jaccard + 15% edit + 20% exact + 5% structure
     """
     if not USE_COMBINED_SCORING:
-        # Fallback: pure embedding similarity
-        sim = util.cos_sim(
-            torch.tensor(disc_embed).unsqueeze(0),
-            torch.tensor(ref_embed).unsqueeze(0)
+        # Fallback: pure embedding similarity (text-only)
+        text_sim = util.cos_sim(
+            torch.tensor(disc_sbert_embed).float().unsqueeze(0),
+            torch.tensor(ref_sbert_embed).float().unsqueeze(0)
         )[0][0].item()
-        return sim
+        # Add GNN bonus if both have GNN embeddings
+        if disc_gnn_embed is not None and ref_gnn_embed is not None:
+            gnn_sim = util.cos_sim(
+                torch.tensor(disc_gnn_embed).float().unsqueeze(0),
+                torch.tensor(ref_gnn_embed).float().unsqueeze(0)
+            )[0][0].item()
+            return alpha * text_sim + (1 - alpha) * gnn_sim
+        return text_sim
 
     # Normalize terms
     d_norm = normalize_term(disc_term)
     r_norm = normalize_term(ref_term)
 
-    # 1. Embedding similarity (45%)
-    embed_sim = util.cos_sim(
-        torch.tensor(disc_embed).float().unsqueeze(0),
-        torch.tensor(ref_embed).float().unsqueeze(0)
+    # 1. Embedding similarity (45%) - separate text and GNN sims
+    text_sim = util.cos_sim(
+        torch.tensor(disc_sbert_embed).float().unsqueeze(0),
+        torch.tensor(ref_sbert_embed).float().unsqueeze(0)
     )[0][0].item()
+
+    if disc_gnn_embed is not None and ref_gnn_embed is not None:
+        gnn_sim = util.cos_sim(
+            torch.tensor(disc_gnn_embed).float().unsqueeze(0),
+            torch.tensor(ref_gnn_embed).float().unsqueeze(0)
+        )[0][0].item()
+        embed_sim = alpha * text_sim + (1 - alpha) * gnn_sim
+    else:
+        embed_sim = text_sim
 
     # 2. Jaccard similarity (15%)
     jacc = jaccard_similarity(d_norm, r_norm)
@@ -228,7 +241,9 @@ def combined_score(disc_term, ref_term, disc_embed, ref_embed,
     return score
 
 
-def bidirectional_alignment(discovered, ref_classes, disc_embeds, ref_embeds,
+def bidirectional_alignment(discovered, ref_classes,
+                            disc_sbert, ref_sbert,
+                            disc_gnn_map=None, ref_gnn_map=None,
                             G=None):
     """MILA-style bidirectional matching with 1-to-1 constraint.
 
@@ -243,9 +258,12 @@ def bidirectional_alignment(discovered, ref_classes, disc_embeds, ref_embeds,
     score_matrix = np.zeros((n_disc, n_ref))
     for i, d in enumerate(discovered):
         d_deg = G.in_degree(d) if G and d in G else 0
+        d_gnn = disc_gnn_map.get(d) if disc_gnn_map else None
         for j, r in enumerate(ref_classes):
+            r_gnn = ref_gnn_map.get(r) if ref_gnn_map else None
             score_matrix[i, j] = combined_score(
-                d, r, disc_embeds[i], ref_embeds[j], G, d_deg
+                d, r, disc_sbert[i], ref_sbert[j], G, d_deg,
+                disc_gnn_embed=d_gnn, ref_gnn_embed=r_gnn
             )
 
     if not USE_BIDIRECTIONAL:
@@ -326,7 +344,13 @@ def bidirectional_alignment(discovered, ref_classes, disc_embeds, ref_embeds,
 
 
 def run_alignment():
-    """Run the full MILA-style alignment pipeline."""
+    """Run the full MILA-style alignment pipeline.
+
+    FIXED GNN fusion: computes text similarity (384d) and GNN similarity (64d)
+    separately, then combines them with alpha weighting. Reference ontology
+    classes have NO GNN embeddings (they're not in the co-occurrence graph),
+    so text-only similarity is used for them.
+    """
     discovered, G = load_discovered()
     if not discovered:
         print("No discovered classes. Run taxonomy.py first.")
@@ -337,36 +361,35 @@ def run_alignment():
 
     print(f"\nAligning {len(discovered)} discovered -> {len(ref_classes)} reference classes")
 
-    # Load GNN embeddings for fusion
-    gnn_embeds, gnn_map = None, None
+    # Compute SBERT embeddings for both sides (always in native 384d)
+    disc_sbert = EMBEDDER.encode(discovered)
+    ref_sbert = EMBEDDER.encode(ref_classes)
+
+    # Load GNN embeddings separately (64d) - only discovered terms have them
+    disc_gnn_map = None
     if USE_GNN_EMBEDDINGS:
         gnn_embeds, gnn_map = load_gnn_embeddings()
+        if gnn_embeds is not None:
+            disc_gnn_map = {}
+            n_with_gnn = 0
+            for d in discovered:
+                if d in gnn_map:
+                    gnn_idx = gnn_map[d]
+                    if gnn_idx < gnn_embeds.shape[0]:
+                        disc_gnn_map[d] = gnn_embeds[gnn_idx]
+                        n_with_gnn += 1
+            print(f"GNN embeddings available for {n_with_gnn}/{len(discovered)} "
+                  f"discovered terms (dim={gnn_embeds.shape[1]})")
+            print(f"Reference classes have NO GNN embeddings -> text-only for ref")
+            print(f"Fusion: alpha={GNN_FUSION_ALPHA} (text-dominant)")
 
-    # Compute embeddings for discovered terms
-    disc_sbert = EMBEDDER.encode(discovered)
-    if USE_GNN_EMBEDDINGS and gnn_embeds is not None:
-        disc_embeds = np.array([
-            fused_embedding(d, disc_sbert[i], gnn_embeds, gnn_map)
-            for i, d in enumerate(discovered)
-        ])
-        print(f"Using fused GNN+SBERT embeddings (dim={disc_embeds.shape[1]})")
-    else:
-        disc_embeds = disc_sbert
-
-    # Compute embeddings for reference classes
-    ref_sbert = EMBEDDER.encode(ref_classes)
-    # Reference classes don't have GNN embeddings, use SBERT
-    # But we need same dimensionality
-    if disc_embeds.shape[1] != ref_sbert.shape[1]:
-        # Pad reference embeddings to match fused dimension
-        ref_embeds = np.zeros((len(ref_classes), disc_embeds.shape[1]))
-        ref_embeds[:, :ref_sbert.shape[1]] = ref_sbert
-    else:
-        ref_embeds = ref_sbert
+    # Reference classes don't have GNN embeddings (not in co-occurrence graph)
+    # So ref_gnn_map stays None -> text-only similarity for ref classes
 
     # Run bidirectional alignment
     alignments = bidirectional_alignment(
-        discovered, ref_classes, disc_embeds, ref_embeds, G
+        discovered, ref_classes, disc_sbert, ref_sbert,
+        disc_gnn_map=disc_gnn_map, ref_gnn_map=None, G=G
     )
 
     # Create results DataFrame
@@ -391,6 +414,7 @@ def run_alignment():
         'USE_GNN_EMBEDDINGS': USE_GNN_EMBEDDINGS,
         'USE_BIDIRECTIONAL': USE_BIDIRECTIONAL,
         'USE_COMBINED_SCORING': USE_COMBINED_SCORING,
+        'GNN_FUSION_ALPHA': GNN_FUSION_ALPHA,
         'n_discovered': len(discovered),
         'n_reference': len(ref_classes),
         'n_alignments': len(alignments),

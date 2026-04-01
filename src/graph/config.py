@@ -8,11 +8,28 @@ Defines ablation presets that toggle pipeline components:
   - Hearst patterns (vs distributional-only taxonomy)
   - Dependency parsing (vs pattern-only relations)
   - NER-type clustering (vs embedding-only clustering)
+  - LLM validation mode (OpenAI GPT-4o-mini)
+  - GNN architecture selection (sage/gat/rgcn)
   - Configurable embedding model (domain-specific vs general)
+  - Corpus augmentation (PubMed sentences)
 """
+
+import os
 
 # Default embedding model. Override per-preset or via environment variable.
 DEFAULT_EMBEDDER_MODEL = 'all-MiniLM-L6-v2'
+
+# LLM validation mode (requires OPENAI_API_KEY env var)
+LLM_MODE = False
+
+# GNN architecture: 'sage', 'gat', or 'rgcn'
+GNN_ARCHITECTURE = 'sage'
+
+# Corpus augmentation: add PubMed sentences to co-occurrence graph
+CORPUS_AUGMENT = os.environ.get("CORPUS_AUGMENT", "false").lower() == "true"
+CORPUS_AUGMENT_PATH = os.environ.get(
+    "CORPUS_AUGMENT_PATH", "data/pubmed_sentences.txt"
+)
 
 # Available domain-specific embedding models (tested and working):
 #   'all-MiniLM-L6-v2'                     - General-purpose, 384-dim (default)
@@ -102,6 +119,17 @@ ABLATION_PRESETS = {
         'embedder_model': 'allenai/scibert_scivocab_uncased',
     },
 }
+
+
+def get_config():
+    """Get the default pipeline configuration as a dict.
+
+    Returns a dict with at least 'embedder_model' and all ablation flags
+    from the full_pipeline preset.
+    """
+    conf = dict(ABLATION_PRESETS['full_pipeline'])
+    conf['embedder_model'] = conf.get('embedder_model', DEFAULT_EMBEDDER_MODEL)
+    return conf
 
 
 def get_preset(name):

@@ -20,7 +20,7 @@ import pandas as pd
 import torch
 from sentence_transformers import SentenceTransformer, util
 
-from config import DEFAULT_EMBEDDER_MODEL
+from config import get_config
 
 # Get project root directory (2 levels up from this script)
 PROJECT_ROOT = os.path.dirname(
@@ -36,7 +36,8 @@ CORPUS_FREQ_PATH = os.path.join(PROCESSED_DIR, 'corpus_frequencies.json')
 GNN_EMBED_PATH = os.path.join(PROCESSED_DIR, 'gnn_embeddings.npy')
 GNN_MAP_PATH = os.path.join(PROCESSED_DIR, 'gnn_embed_map.json')
 
-EMBEDDER_MODEL = os.environ.get('EMBEDDER_MODEL', DEFAULT_EMBEDDER_MODEL)
+_config = get_config()
+EMBEDDER_MODEL = os.environ.get('EMBEDDER_MODEL', _config.get('embedder_model', 'all-MiniLM-L6-v2'))
 embedder = SentenceTransformer(EMBEDDER_MODEL)
 
 # Hearst patterns: (hyponym, hypernym) extraction

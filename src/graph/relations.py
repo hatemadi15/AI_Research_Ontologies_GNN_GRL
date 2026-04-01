@@ -244,7 +244,6 @@ def extract_gnn_cooccurrence_relations(nodemap, gnn_embeds, threshold=0.7):
     rels = []
 
     # Compute pairwise similarity for high-sim pairs only
-    from torch import tensor as T
     embeds_t = torch.tensor(gnn_embeds, dtype=torch.float)
     # Process in batches to avoid memory issues
     batch_size = 100
@@ -361,11 +360,37 @@ def extract_rels():
 
     print("  Phase 2: Dependency parsing...")
     dep_count = 0
+    dep_extracted = []
     for doc in nlp.pipe(sents, batch_size=50):
         dep_rels = extract_dep_relations(doc, valid_terms, lemma_map)
+        dep_extracted.extend([(r, doc.text) for r in dep_rels])
         rels.extend(dep_rels)
         dep_count += len(dep_rels)
     print(f"    Dep parse relations: {dep_count}")
+
+    # LLM classification for dep-parse extracted relations
+    try:
+        from config import LLM_MODE as _LLM_MODE
+    except ImportError:
+        _LLM_MODE = False
+    if _LLM_MODE and dep_extracted:
+        try:
+            from llm_validator import classify_relation
+            llm_classified = 0
+            for rel_entry, context in dep_extracted:
+                try:
+                    llm_rel = classify_relation(
+                        rel_entry['subj'], rel_entry['obj'], context
+                    )
+                    if llm_rel and llm_rel != 'NONE':
+                        rel_entry['rel'] = llm_rel
+                        rel_entry['source'] = 'dep_parse+llm'
+                        llm_classified += 1
+                except Exception as e:
+                    pass  # Keep original dep-parse relation type
+            print(f"    LLM reclassified {llm_classified} dep-parse relations")
+        except ImportError as e:
+            print(f"    LLM classification unavailable: {e}")
 
     print("  Phase 3: GNN co-occurrence relations...")
     if gnn_embeds is not None:

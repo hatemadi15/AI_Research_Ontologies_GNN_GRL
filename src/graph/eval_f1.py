@@ -7,12 +7,14 @@ Evaluates alignment quality at three levels:
   3. Concept-level: Cluster representatives aligned to ontology classes
 
 Uses ALL classes from ontology.ttl as gold standard.
+Multi-level type matching: exact -> CamelCase -> component -> normalized -> semantic fallback.
 OAEI-standard P/R/F1 at thresholds 0.50-0.85.
 Saves detailed results to eval_results.json.
 """
 
 import os
 import json
+import re
 
 import numpy as np
 import pandas as pd
@@ -33,6 +35,147 @@ CLUSTERS_PATH = os.path.join(PROCESSED_DIR, 'fine_auto_clusters.json')
 
 EMBEDDER_MODEL = os.environ.get('EMBEDDER_MODEL', DEFAULT_EMBEDDER_MODEL)
 EMBEDDER = SentenceTransformer(EMBEDDER_MODEL)
+
+
+def camel_case_split(name):
+    """Split CamelCase into lowercase words.
+
+    Handles:
+      - Standard CamelCase: "CrackGrowthBehaviour" -> "crack growth behaviour"
+      - Acronyms: "SNCurve" -> "sn curve", "GNNModel" -> "gnn model"
+      - Run-together lowercase: "Highcycle" stays as "highcycle"
+    """
+    # Insert space before uppercase letters preceded by lowercase
+    result = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', name)
+    # Insert space between consecutive uppercase and following lowercase
+    # e.g., "GNNModel" -> "GNN Model"
+    result = re.sub(r'(?<=[A-Z])(?=[A-Z][a-z])', ' ', result)
+    return result.lower().strip()
+
+
+def normalize_for_matching(name):
+    """Normalize a name for matching: CamelCase split, remove hyphens/underscores.
+
+    "CrackGrowthBehaviour" -> "crack growth behaviour"
+    "High-cycle fatigue" -> "high cycle fatigue"
+    "Displacement-controlled" -> "displacement controlled"
+    """
+    # CamelCase split
+    result = camel_case_split(name)
+    # Replace hyphens and underscores with spaces
+    result = re.sub(r'[-_]', ' ', result)
+    # Collapse multiple spaces
+    result = re.sub(r'\s+', ' ', result).strip()
+    return result
+
+
+def build_type_gold_mapping(ner_types, gold_labels, all_gold_lower,
+                            label_to_uri):
+    """Build NER-type -> ontology-class gold mapping using multi-level matching.
+
+    Matching levels (in priority order):
+      1. Exact case-insensitive match
+      2. CamelCase-decomposed match against labels
+      3. Component/substring match (all words of NER type in a gold label)
+      4. Normalized match (remove hyphens, then compare)
+      5. Semantic fallback (MiniLM embedding similarity > 0.85)
+
+    Returns:
+        type_to_gold: dict mapping NER type -> best matching gold label
+        match_details: dict mapping NER type -> (gold_label, method)
+    """
+    type_to_gold = {}
+    match_details = {}
+
+    # Pre-compute normalized gold labels
+    gold_list = sorted(gold_labels)
+    gold_lower_set = all_gold_lower
+    gold_normalized = {}  # normalized_form -> original label
+    gold_words = {}  # label -> set of words
+    for gl in gold_list:
+        norm = normalize_for_matching(gl)
+        gold_normalized[norm] = gl
+        gold_words[gl.lower()] = set(norm.split())
+
+    remaining_types = []
+
+    for ner_type in sorted(set(ner_types)):
+        ner_lower = ner_type.lower()
+
+        # Level 1: Exact case-insensitive match
+        if ner_lower in gold_lower_set:
+            type_to_gold[ner_type] = ner_type
+            match_details[ner_type] = (ner_type, 'exact')
+            continue
+
+        # Level 2: CamelCase-decomposed match
+        camel = camel_case_split(ner_type)
+        if camel in gold_lower_set:
+            # Find the original-case label
+            for gl in gold_list:
+                if gl.lower() == camel:
+                    type_to_gold[ner_type] = gl
+                    match_details[ner_type] = (gl, 'camelcase')
+                    break
+            else:
+                type_to_gold[ner_type] = camel
+                match_details[ner_type] = (camel, 'camelcase')
+            continue
+
+        # Level 3: Component matching (all NER words in a gold label)
+        ner_norm = normalize_for_matching(ner_type)
+        ner_words = set(ner_norm.split())
+        found = False
+        if len(ner_words) >= 2:
+            for gl in gold_list:
+                gl_words = gold_words.get(gl.lower(), set())
+                if ner_words and gl_words and ner_words.issubset(gl_words):
+                    type_to_gold[ner_type] = gl
+                    match_details[ner_type] = (gl, 'component')
+                    found = True
+                    break
+        if found:
+            continue
+
+        # Level 4: Normalized match (hyphens removed)
+        if ner_norm in gold_normalized:
+            gl = gold_normalized[ner_norm]
+            type_to_gold[ner_type] = gl
+            match_details[ner_type] = (gl, 'normalized')
+            continue
+
+        # Also check: NER norm matches any gold norm
+        for gnorm, gorig in gold_normalized.items():
+            if ner_norm == gnorm:
+                type_to_gold[ner_type] = gorig
+                match_details[ner_type] = (gorig, 'normalized')
+                found = True
+                break
+        if found:
+            continue
+
+        remaining_types.append(ner_type)
+
+    # Level 5: Semantic fallback using embedding similarity > 0.85
+    if remaining_types:
+        remaining_texts = [camel_case_split(t) for t in remaining_types]
+        gold_texts = [normalize_for_matching(gl) for gl in gold_list]
+
+        remaining_embeds = EMBEDDER.encode(remaining_texts)
+        gold_embeds = EMBEDDER.encode(gold_texts)
+
+        sim_matrix = util.cos_sim(remaining_embeds, gold_embeds).numpy()
+
+        for i, ner_type in enumerate(remaining_types):
+            best_j = np.argmax(sim_matrix[i])
+            best_sim = sim_matrix[i, best_j]
+            if best_sim >= 0.85:
+                type_to_gold[ner_type] = gold_list[best_j]
+                match_details[ner_type] = (
+                    gold_list[best_j], f'semantic({best_sim:.3f})'
+                )
+
+    return type_to_gold, match_details
 
 
 def load_gold_standard():
@@ -92,11 +235,56 @@ def load_gold_standard():
 
 
 def load_ner_types():
-    """Load NER entity types from entity_types.json."""
-    if not os.path.exists(ENTITY_TYPES_PATH):
-        return {}
-    with open(ENTITY_TYPES_PATH) as f:
-        return json.load(f)
+    """Load NER entity types from entity_types.json AND raw CoNLL files.
+
+    entity_types.json only has entities with freq >= 2. To get all NER types
+    for type-level evaluation, also parse the raw CoNLL files.
+    """
+    ner_types = {}
+    if os.path.exists(ENTITY_TYPES_PATH):
+        with open(ENTITY_TYPES_PATH) as f:
+            ner_types = json.load(f)
+
+    # Also parse all types from raw CoNLL files to capture freq-1 entities
+    conll_dir = os.path.join(RAW_DIR, 'fine_grained_ner')
+    if os.path.isdir(conll_dir):
+        for fn in os.listdir(conll_dir):
+            if not fn.endswith('.conll'):
+                continue
+            ent_tokens = []
+            ent_type = None
+            with open(os.path.join(conll_dir, fn), encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith('#'):
+                        if ent_tokens and ent_type:
+                            entity_text = ' '.join(ent_tokens).lower().strip()
+                            if len(entity_text) >= 2 and entity_text not in ner_types:
+                                ner_types[entity_text] = ent_type
+                        ent_tokens, ent_type = [], None
+                        continue
+                    parts = line.split()
+                    if len(parts) < 2:
+                        continue
+                    tag = parts[-1]
+                    token = parts[0]
+                    if tag.startswith('B-'):
+                        if ent_tokens and ent_type:
+                            entity_text = ' '.join(ent_tokens).lower().strip()
+                            if len(entity_text) >= 2 and entity_text not in ner_types:
+                                ner_types[entity_text] = ent_type
+                        ent_type = tag[2:]
+                        ent_tokens = [token]
+                    elif tag.startswith('I-') and ent_type and tag[2:] == ent_type:
+                        ent_tokens.append(token)
+                    else:
+                        if ent_tokens and ent_type:
+                            entity_text = ' '.join(ent_tokens).lower().strip()
+                            if len(entity_text) >= 2 and entity_text not in ner_types:
+                                ner_types[entity_text] = ent_type
+                        ent_tokens, ent_type = [], None
+
+    return ner_types
 
 
 def load_clusters():
@@ -114,63 +302,89 @@ def compute_f1(precision, recall):
     return 2 * precision * recall / (precision + recall)
 
 
-def type_level_evaluation(gold_labels, all_gold_lower, ner_types):
+def type_level_evaluation(gold_labels, all_gold_lower, ner_types,
+                          label_to_uri=None):
     """Evaluate at NER type level: do NER types map to ontology classes?
 
-    NER types (e.g., 'FatigueTest', 'Crack') should correspond to
-    ontology classes. This measures how well the NER schema covers
-    the ontology.
+    Uses multi-level matching (exact -> CamelCase -> component -> semantic)
+    to build the gold mapping, then computes P/R/F1.
+
+    NER types (e.g., 'FatigueTest', 'CrackPropagation') should correspond to
+    ontology classes (e.g., 'Fatigue test', 'Crack propagation').
     """
     if not ner_types:
         return {'level': 'type', 'note': 'No entity_types.json available'}
 
-    unique_types = set(ner_types.values())
-    print(f"\nType-level evaluation: {len(unique_types)} NER types "
-          f"vs {len(gold_labels)} ontology classes")
-
-    # Embed NER types and gold labels
-    type_list = sorted(unique_types)
+    unique_types = sorted(set(ner_types.values()))
     gold_list = sorted(gold_labels)
 
-    type_embeds = EMBEDDER.encode(type_list)
-    gold_embeds = EMBEDDER.encode(gold_list)
+    print(f"\nType-level evaluation: {len(unique_types)} NER types "
+          f"vs {len(gold_list)} ontology classes")
+
+    # Build gold mapping using multi-level matching
+    type_to_gold, match_details = build_type_gold_mapping(
+        unique_types, gold_labels, all_gold_lower, label_to_uri or {}
+    )
+
+    n_matched = len(type_to_gold)
+    print(f"  Gold mapping: {n_matched}/{len(unique_types)} NER types matched")
+    method_counts = {}
+    for _, (_, method) in match_details.items():
+        base = method.split('(')[0]
+        method_counts[base] = method_counts.get(base, 0) + 1
+    for method, count in sorted(method_counts.items()):
+        print(f"    {method}: {count}")
+
+    type_embeds = EMBEDDER.encode(
+        [camel_case_split(t) for t in unique_types]
+    )
+    gold_embeds = EMBEDDER.encode(
+        [normalize_for_matching(gl) for gl in gold_list]
+    )
+
+    # The reachable gold classes (what NER types map to)
+    reachable_gold = set(type_to_gold.values())
+    reachable_gold_lower = {g.lower() for g in reachable_gold}
 
     results = {}
-    thresholds = [0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85]
+    thresholds = [0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 1.00]
+
+    sim_matrix = util.cos_sim(type_embeds, gold_embeds).numpy()
 
     for thresh in thresholds:
-        # For each NER type, find best-matching gold class
         matched_types = set()
         matched_gold = set()
 
-        sim_matrix = util.cos_sim(type_embeds, gold_embeds).numpy()
+        for i, ner_type in enumerate(unique_types):
+            has_gold = ner_type in type_to_gold
 
-        for i, ner_type in enumerate(type_list):
             best_j = np.argmax(sim_matrix[i])
             best_sim = sim_matrix[i, best_j]
 
-            # Also check exact/substring match
-            ner_lower = ner_type.lower()
-            exact_match = any(
-                ner_lower == g.lower() or ner_lower in g.lower() or g.lower() in ner_lower
-                for g in gold_list
-            )
-
-            if best_sim >= thresh or exact_match:
+            if has_gold or best_sim >= thresh:
                 matched_types.add(ner_type)
-                matched_gold.add(gold_list[best_j])
+                if has_gold:
+                    matched_gold.add(type_to_gold[ner_type])
+                else:
+                    matched_gold.add(gold_list[best_j])
 
-        prec = len(matched_types) / len(type_list) if type_list else 0
-        rec = len(matched_gold) / len(gold_list) if gold_list else 0
+        prec = len(matched_types) / len(unique_types) if unique_types else 0
+        # Recall: of the gold classes reachable by NER types, how many found?
+        n_reachable = max(len(reachable_gold), 1)
+        rec = len(matched_gold & reachable_gold) / n_reachable
         f1 = compute_f1(prec, rec)
         results[thresh] = {'precision': round(prec, 4),
                            'recall': round(rec, 4),
                            'f1': round(f1, 4),
                            'matched_types': len(matched_types),
-                           'matched_gold': len(matched_gold)}
+                           'matched_gold': len(matched_gold),
+                           'reachable_gold': len(reachable_gold)}
 
     return {'level': 'type', 'n_ner_types': len(unique_types),
-            'n_gold_classes': len(gold_labels), 'thresholds': results}
+            'n_gold_classes': len(gold_list),
+            'n_gold_mapped': n_matched,
+            'match_methods': method_counts,
+            'thresholds': results}
 
 
 def term_level_evaluation(gold_labels, all_gold_lower, alignment_df):
@@ -300,7 +514,8 @@ def run_evaluation():
     clusters = load_clusters()
 
     # Run all evaluation levels
-    type_results = type_level_evaluation(gold_labels, all_gold_lower, ner_types)
+    type_results = type_level_evaluation(gold_labels, all_gold_lower, ner_types,
+                                         label_to_uri)
     term_results = term_level_evaluation(gold_labels, all_gold_lower,
                                          alignment_df)
     concept_results = concept_level_evaluation(gold_labels, all_gold_lower,

@@ -1,12 +1,17 @@
 """
-gnn.py - GraphSAGE Training with Proper Link Prediction
+gnn.py - GNN Training with Multiple Architectures
 
-2-layer GraphSAGE (384->128->64) trained via link prediction with:
+Supports three architectures:
+  - GraphSAGE (default): 2-layer SAGEConv (384->128->64)
+  - GAT: 2-layer GATConv with multi-head attention
+  - RGCN: 2-layer RGCNConv for multi-relation graphs
+
+All trained via link prediction with:
   - PyG negative_sampling (not torch.randint)
   - RandomLinkSplit for train/val split (15% validation)
   - Dropout (0.3) for regularization
   - Early stopping with patience=20
-  - Saves gnn_embeddings.npy and gnn_embed_map.json
+  - Saves gnn_embeddings_{arch}.npy and gnn_embed_map.json
 """
 
 import os
@@ -16,7 +21,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
-from torch_geometric.nn import SAGEConv
+from torch_geometric.nn import SAGEConv, GATConv, RGCNConv
 from torch_geometric.transforms import RandomLinkSplit
 from torch_geometric.utils import negative_sampling
 
@@ -43,11 +48,48 @@ class TermGNN(torch.nn.Module):
         self.conv2 = SAGEConv(hid_dim, out_dim)
         self.dropout = dropout
 
-    def forward(self, x, edge_index):
+    def forward(self, x, edge_index, edge_type=None):
         x = self.conv1(x, edge_index)
         x = F.relu(x)
         x = F.dropout(x, p=self.dropout, training=self.training)
         x = self.conv2(x, edge_index)
+        return x
+
+
+class GATEncoder(torch.nn.Module):
+    """2-layer GAT with multi-head attention."""
+
+    def __init__(self, in_dim=384, hidden_dim=128, out_dim=64, heads=4, dropout=0.3):
+        super().__init__()
+        self.conv1 = GATConv(in_dim, hidden_dim // heads, heads=heads, dropout=dropout)
+        self.conv2 = GATConv(hidden_dim, out_dim, heads=1, concat=False, dropout=dropout)
+        self.dropout = dropout
+
+    def forward(self, x, edge_index, edge_type=None):
+        x = F.dropout(x, p=self.dropout, training=self.training)
+        x = F.elu(self.conv1(x, edge_index))
+        x = F.dropout(x, p=self.dropout, training=self.training)
+        x = self.conv2(x, edge_index)
+        return x
+
+
+class RGCNEncoder(torch.nn.Module):
+    """2-layer RGCN for multi-relation graphs."""
+
+    def __init__(self, in_dim=384, hidden_dim=128, out_dim=64, num_relations=5, dropout=0.3):
+        super().__init__()
+        self.conv1 = RGCNConv(in_dim, hidden_dim, num_relations=num_relations)
+        self.conv2 = RGCNConv(hidden_dim, out_dim, num_relations=num_relations)
+        self.dropout = dropout
+
+    def forward(self, x, edge_index, edge_type=None):
+        if edge_type is None:
+            # Default: all edges same type (0)
+            edge_type = torch.zeros(edge_index.size(1), dtype=torch.long,
+                                    device=edge_index.device)
+        x = F.relu(self.conv1(x, edge_index, edge_type))
+        x = F.dropout(x, p=self.dropout, training=self.training)
+        x = self.conv2(x, edge_index, edge_type)
         return x
 
 
@@ -65,8 +107,33 @@ def link_pred_loss(embeds, pos_edge_index, neg_edge_index):
     return pos_loss + neg_loss
 
 
-def train_gnn():
-    """Train GraphSAGE with link prediction, early stopping, and proper splits."""
+def _build_model(architecture, in_dim, device):
+    """Build a GNN model based on the specified architecture."""
+    if architecture == 'sage':
+        model = TermGNN(in_dim=in_dim, hid_dim=128, out_dim=64, dropout=0.3)
+    elif architecture == 'gat':
+        model = GATEncoder(in_dim=in_dim, hidden_dim=128, out_dim=64, heads=4, dropout=0.3)
+    elif architecture == 'rgcn':
+        model = RGCNEncoder(in_dim=in_dim, hidden_dim=128, out_dim=64, num_relations=5, dropout=0.3)
+    else:
+        raise ValueError(f"Unknown architecture '{architecture}'. Use 'sage', 'gat', or 'rgcn'.")
+    return model.to(device)
+
+
+def train_gnn(architecture=None):
+    """Train GNN with link prediction, early stopping, and proper splits.
+
+    Args:
+        architecture: 'sage', 'gat', or 'rgcn'. If None, reads from config.
+    """
+    if architecture is None:
+        from config import GNN_ARCHITECTURE
+        architecture = GNN_ARCHITECTURE
+
+    print(f"\n{'='*50}")
+    print(f"Training {architecture.upper()} architecture")
+    print(f"{'='*50}")
+
     # Load graph
     if not os.path.exists(GRAPHPATH) or not os.path.exists(NODEMAP_PATH):
         raise FileNotFoundError(
@@ -100,7 +167,7 @@ def train_gnn():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Training on {device}...")
 
-    model = TermGNN(in_dim=in_dim, hid_dim=128, out_dim=64, dropout=0.3).to(device)
+    model = _build_model(architecture, in_dim, device)
     train_data = train_data.to(device)
     val_data = val_data.to(device)
 
@@ -177,7 +244,12 @@ def train_gnn():
     with torch.no_grad():
         gnn_embeds = model(data_device.x, data_device.edge_index).cpu().numpy()
 
-    # Save as .npy (primary format)
+    # Save with architecture suffix
+    arch_npy = os.path.join(PROCESSED_DIR, f'gnn_embeddings_{architecture}.npy')
+    np.save(arch_npy, gnn_embeds)
+    print(f"Saved gnn_embeddings_{architecture}.npy: {gnn_embeds.shape}")
+
+    # Also save as default gnn_embeddings.npy (for backward compat)
     np.save(EMBED_NPY_OUT, gnn_embeds)
     print(f"Saved gnn_embeddings.npy: {gnn_embeds.shape}")
 
@@ -193,5 +265,27 @@ def train_gnn():
     return gnn_embeds, nodemap
 
 
+def train_all_architectures():
+    """Train all three GNN architectures and save embeddings for each."""
+    results = {}
+    for arch in ['sage', 'gat', 'rgcn']:
+        try:
+            embeds, nodemap = train_gnn(architecture=arch)
+            results[arch] = embeds.shape
+            print(f"\n  {arch}: {embeds.shape}")
+        except Exception as e:
+            print(f"\n  {arch} FAILED: {e}")
+            results[arch] = None
+    print("\n=== All architectures trained ===")
+    for arch, shape in results.items():
+        status = f"{shape}" if shape else "FAILED"
+        print(f"  {arch}: {status}")
+    return results
+
+
 if __name__ == "__main__":
-    train_gnn()
+    import sys
+    if '--all' in sys.argv:
+        train_all_architectures()
+    else:
+        train_gnn()
