@@ -8,7 +8,34 @@ Defines ablation presets that toggle pipeline components:
   - Hearst patterns (vs distributional-only taxonomy)
   - Dependency parsing (vs pattern-only relations)
   - NER-type clustering (vs embedding-only clustering)
+  - LLM validation mode (OpenAI GPT-4o-mini)
+  - GNN architecture selection (sage/gat/rgcn)
+  - Configurable embedding model (domain-specific vs general)
+  - Corpus augmentation (PubMed sentences)
 """
+
+import os
+
+# Default embedding model. Override per-preset or via environment variable.
+DEFAULT_EMBEDDER_MODEL = 'all-MiniLM-L6-v2'
+
+# LLM validation mode (requires OPENAI_API_KEY env var)
+LLM_MODE = False
+
+# GNN architecture: 'sage', 'gat', or 'rgcn'
+GNN_ARCHITECTURE = 'sage'
+
+# Corpus augmentation: add PubMed sentences to co-occurrence graph
+CORPUS_AUGMENT = os.environ.get("CORPUS_AUGMENT", "false").lower() == "true"
+CORPUS_AUGMENT_PATH = os.environ.get(
+    "CORPUS_AUGMENT_PATH", "data/pubmed_sentences.txt"
+)
+
+# Available domain-specific embedding models (tested and working):
+#   'all-MiniLM-L6-v2'                     - General-purpose, 384-dim (default)
+#   'allenai/specter'                       - Scientific paper embeddings, 768-dim
+#   'allenai/scibert_scivocab_uncased'      - SciBERT with mean pooling, 768-dim
+#   'sentence-transformers/all-mpnet-base-v2' - Stronger general model, 768-dim
 
 ABLATION_PRESETS = {
     'full_pipeline': {
@@ -19,6 +46,7 @@ ABLATION_PRESETS = {
         'USE_HEARST_PATTERNS': True,
         'USE_DEP_PARSING': True,
         'USE_NER_TYPE_CLUSTERING': True,
+        'embedder_model': DEFAULT_EMBEDDER_MODEL,
     },
     'no_gnn': {
         'description': 'SBERT embeddings only, no GNN',
@@ -28,6 +56,7 @@ ABLATION_PRESETS = {
         'USE_HEARST_PATTERNS': True,
         'USE_DEP_PARSING': True,
         'USE_NER_TYPE_CLUSTERING': True,
+        'embedder_model': DEFAULT_EMBEDDER_MODEL,
     },
     'no_bidirectional': {
         'description': 'Forward-only alignment (no backward pass)',
@@ -37,6 +66,7 @@ ABLATION_PRESETS = {
         'USE_HEARST_PATTERNS': True,
         'USE_DEP_PARSING': True,
         'USE_NER_TYPE_CLUSTERING': True,
+        'embedder_model': DEFAULT_EMBEDDER_MODEL,
     },
     'embedding_only': {
         'description': 'Pure embedding similarity, no combined scoring',
@@ -46,6 +76,7 @@ ABLATION_PRESETS = {
         'USE_HEARST_PATTERNS': True,
         'USE_DEP_PARSING': True,
         'USE_NER_TYPE_CLUSTERING': True,
+        'embedder_model': DEFAULT_EMBEDDER_MODEL,
     },
     'baseline_sbert': {
         'description': 'Baseline: SBERT only, forward matching, embedding similarity',
@@ -55,6 +86,7 @@ ABLATION_PRESETS = {
         'USE_HEARST_PATTERNS': False,
         'USE_DEP_PARSING': False,
         'USE_NER_TYPE_CLUSTERING': False,
+        'embedder_model': DEFAULT_EMBEDDER_MODEL,
     },
     'no_hearst': {
         'description': 'Distributional taxonomy only, no Hearst patterns',
@@ -64,8 +96,40 @@ ABLATION_PRESETS = {
         'USE_HEARST_PATTERNS': False,
         'USE_DEP_PARSING': True,
         'USE_NER_TYPE_CLUSTERING': True,
+        'embedder_model': DEFAULT_EMBEDDER_MODEL,
+    },
+    'domain_specter': {
+        'description': 'Full pipeline with SPECTER scientific embeddings',
+        'USE_GNN_EMBEDDINGS': True,
+        'USE_BIDIRECTIONAL': True,
+        'USE_COMBINED_SCORING': True,
+        'USE_HEARST_PATTERNS': True,
+        'USE_DEP_PARSING': True,
+        'USE_NER_TYPE_CLUSTERING': True,
+        'embedder_model': 'allenai/specter',
+    },
+    'domain_scibert': {
+        'description': 'Full pipeline with SciBERT embeddings',
+        'USE_GNN_EMBEDDINGS': True,
+        'USE_BIDIRECTIONAL': True,
+        'USE_COMBINED_SCORING': True,
+        'USE_HEARST_PATTERNS': True,
+        'USE_DEP_PARSING': True,
+        'USE_NER_TYPE_CLUSTERING': True,
+        'embedder_model': 'allenai/scibert_scivocab_uncased',
     },
 }
+
+
+def get_config():
+    """Get the default pipeline configuration as a dict.
+
+    Returns a dict with at least 'embedder_model' and all ablation flags
+    from the full_pipeline preset.
+    """
+    conf = dict(ABLATION_PRESETS['full_pipeline'])
+    conf['embedder_model'] = conf.get('embedder_model', DEFAULT_EMBEDDER_MODEL)
+    return conf
 
 
 def get_preset(name):

@@ -23,8 +23,11 @@ import torch
 from sentence_transformers import SentenceTransformer
 from torch_geometric.utils import from_networkx
 
-print("Loading embedding model...")
-embedder = SentenceTransformer('all-MiniLM-L6-v2')
+from config import DEFAULT_EMBEDDER_MODEL, CORPUS_AUGMENT, CORPUS_AUGMENT_PATH
+
+EMBEDDER_MODEL = os.environ.get('EMBEDDER_MODEL', DEFAULT_EMBEDDER_MODEL)
+print(f"Loading embedding model: {EMBEDDER_MODEL}")
+embedder = SentenceTransformer(EMBEDDER_MODEL)
 
 
 def parse_conll_bio(filepath):
@@ -214,6 +217,77 @@ def build_graph(datadir, mode='auto', ner_type='fine'):
     return pyg_data, nodemap, entity_types, corpus_freq, all_sentences
 
 
+def augment_with_corpus(corpus_path, existing_entities, existing_cooccurrence,
+                        existing_doc_freq, existing_sentences,
+                        weight_factor=0.5):
+    """Augment co-occurrence graph with noun-chunk entities from PubMed corpus.
+
+    Since PubMed sentences have no CoNLL tags, extracts noun chunks via spaCy.
+    Adds them with lower weight (weight_factor) compared to CoNLL entities (1.0).
+
+    Args:
+        corpus_path: Path to pubmed_sentences.txt
+        existing_entities: dict of entity_text -> entity_type from CoNLL
+        existing_cooccurrence: Counter of (t1, t2) -> count
+        existing_doc_freq: Counter of term -> doc_freq
+        existing_sentences: list of sentences from CoNLL
+        weight_factor: Weight multiplier for PubMed co-occurrences (default 0.5)
+
+    Returns:
+        Updated (cooccurrence, doc_freq, sentences, entity_type_map)
+    """
+    import spacy
+
+    if not os.path.exists(corpus_path):
+        print(f"  Corpus augmentation: file not found: {corpus_path}")
+        return existing_cooccurrence, existing_doc_freq, existing_sentences, existing_entities
+
+    print(f"  Loading PubMed corpus from {corpus_path}...")
+    with open(corpus_path, 'r', encoding='utf-8') as f:
+        pubmed_sentences = [line.strip() for line in f if line.strip()]
+    print(f"  PubMed sentences: {len(pubmed_sentences)}")
+
+    try:
+        nlp = spacy.load('en_core_web_sm')
+    except OSError:
+        print("  spaCy model not available, skipping corpus augmentation")
+        return existing_cooccurrence, existing_doc_freq, existing_sentences, existing_entities
+
+    # Extract noun chunks from PubMed sentences
+    pubmed_entities = []
+    for doc in nlp.pipe(pubmed_sentences, batch_size=100):
+        sent_ents = []
+        for chunk in doc.noun_chunks:
+            text = chunk.text.lower().strip()
+            if len(text) >= 2:
+                sent_ents.append(text)
+        pubmed_entities.append(sent_ents)
+
+    # Update document frequencies
+    for sent_ents in pubmed_entities:
+        unique_terms = set(sent_ents)
+        for term in unique_terms:
+            existing_doc_freq[term] += 1
+
+    # Update co-occurrences with lower weight
+    from itertools import combinations as combos
+    for sent_ents in pubmed_entities:
+        unique_in_sent = list(set(sent_ents))
+        if len(unique_in_sent) >= 2:
+            for t1, t2 in combos(sorted(unique_in_sent), 2):
+                # Weight PubMed co-occurrences lower
+                existing_cooccurrence[(t1, t2)] += weight_factor
+
+    # Add PubMed sentences
+    existing_sentences.extend(pubmed_sentences)
+
+    n_pubmed_terms = len(set(t for ents in pubmed_entities for t in ents))
+    print(f"  Corpus augmentation: +{n_pubmed_terms} unique terms, "
+          f"+{len(pubmed_sentences)} sentences")
+
+    return existing_cooccurrence, existing_doc_freq, existing_sentences, existing_entities
+
+
 if __name__ == "__main__":
     PROJECT_ROOT = os.path.dirname(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -245,6 +319,23 @@ if __name__ == "__main__":
         for s in sentences:
             f.write(s + '\n')
     print(f"Saved all_sentences.txt: {len(sentences)} sentences")
+
+    # Corpus augmentation (PubMed sentences)
+    if CORPUS_AUGMENT:
+        corpus_path = CORPUS_AUGMENT_PATH
+        if not os.path.isabs(corpus_path):
+            corpus_path = os.path.join(PROJECT_ROOT, corpus_path)
+        print(f"\nCorpus augmentation enabled: {corpus_path}")
+        cooccurrence, doc_freq_counter, sentences, ent_types = augment_with_corpus(
+            corpus_path, ent_types, Counter(), Counter(corp_freq), sentences
+        )
+        # Rebuild graph with augmented data
+        data_fine, map_fine, ent_types, corp_freq, sentences = build_graph(
+            os.path.join(base_raw, "fine_grained_ner"), 'auto', 'fine'
+        )
+        torch.save(data_fine, os.path.join(processed_dir, "graph_fine_auto.pt"))
+        torch.save(map_fine, os.path.join(processed_dir, "nodemap_fine_auto.pt"))
+        print("  Graph rebuilt with corpus augmentation")
 
     # Coarse-grained (baseline comparison)
     coarse_dir = os.path.join(base_raw, "coarse_grained_ner")

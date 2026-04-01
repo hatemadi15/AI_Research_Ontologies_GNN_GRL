@@ -4,7 +4,9 @@ networkx
 sentence-transformers
 spacy
 google-generativeai
+openai
 pandas
 numpy
 scikit-learn
 matplotlib
+rdflib

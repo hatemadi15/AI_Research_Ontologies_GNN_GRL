@@ -6,6 +6,7 @@ Clusters graph nodes using agglomerative clustering with:
   - NER-type-based sub-clustering when entity_types.json available
   - API key from environment variable (no hardcoded keys)
   - Optional Gemini LLM cluster naming
+  - Optional OpenAI LLM cluster naming (when LLM_MODE enabled)
 """
 
 import os
@@ -63,12 +64,23 @@ def load_graph(key):
                 gnn_idx = gnn_map[term]
                 if gnn_idx < gnn_embeds.shape[0]:
                     X[idx] = gnn_embeds[gnn_idx]
-        # Fill missing with SBERT features
+        # Fill missing with SBERT features (handle dimension mismatch)
         sbert_x = data.x.cpu().numpy()
-        for idx in range(len(nodemap)):
-            if np.allclose(X[idx], 0):
-                if idx < sbert_x.shape[0]:
-                    X[idx] = sbert_x[idx]
+        n_missing = sum(1 for idx in range(len(nodemap))
+                        if np.allclose(X[idx], 0))
+        if n_missing > 0:
+            if sbert_x.shape[1] == X.shape[1]:
+                for idx in range(len(nodemap)):
+                    if np.allclose(X[idx], 0) and idx < sbert_x.shape[0]:
+                        X[idx] = sbert_x[idx]
+            else:
+                # Dimension mismatch: fill with small random to avoid zero vectors
+                rng = np.random.default_rng(42)
+                for idx in range(len(nodemap)):
+                    if np.allclose(X[idx], 0):
+                        X[idx] = rng.normal(0, 0.01, X.shape[1])
+                print(f"  Filled {n_missing} missing embeddings with noise "
+                      f"(dim mismatch: GNN={X.shape[1]} vs SBERT={sbert_x.shape[1]})")
     else:
         print("  GNN embeddings not available, using SBERT features")
         X = data.x.cpu().numpy()
@@ -142,11 +154,33 @@ def cluster_graph(key, use_llm=False):
         else:
             cluster_names[cid] = f"Cluster_{cid}"
 
-    # LLM naming override (optional)
+    # LLM naming override (optional - Gemini)
     if use_llm:
         llm_names = llm_name_clusters(cluster_list)
         cluster_names.update(llm_names)
         print(f"  LLM named {len(llm_names)} clusters")
+
+    # OpenAI LLM naming for top-20 largest clusters (when LLM_MODE is enabled)
+    try:
+        from config import LLM_MODE as _LLM_MODE
+        if _LLM_MODE:
+            try:
+                from llm_validator import name_cluster as openai_name_cluster
+                sorted_clusters = sorted(cluster_list.items(),
+                                         key=lambda x: len(x[1]), reverse=True)
+                top_20 = sorted_clusters[:20]
+                for cid, terms in top_20:
+                    try:
+                        llm_name = openai_name_cluster(terms)
+                        cluster_names[cid] = llm_name
+                        print(f"    OpenAI named cluster {cid} ({len(terms)} terms): {llm_name}")
+                    except Exception as e:
+                        print(f"    OpenAI naming failed for cluster {cid}: {e}")
+                print(f"  OpenAI named up to {len(top_20)} clusters")
+            except ImportError as e:
+                print(f"  OpenAI LLM naming unavailable: {e}")
+    except ImportError:
+        pass
 
     cluster_df = pd.DataFrame({
         'cluster_id': list(cluster_list.keys()),
