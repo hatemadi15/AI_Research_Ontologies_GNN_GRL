@@ -326,16 +326,15 @@ if __name__ == "__main__":
         if not os.path.isabs(corpus_path):
             corpus_path = os.path.join(PROJECT_ROOT, corpus_path)
         print(f"\nCorpus augmentation enabled: {corpus_path}")
-        cooccurrence, doc_freq_counter, sentences, ent_types = augment_with_corpus(
+        _, _, augmented_sentences, _ = augment_with_corpus(
             corpus_path, ent_types, Counter(), Counter(corp_freq), sentences
         )
-        # Rebuild graph with augmented data
-        data_fine, map_fine, ent_types, corp_freq, sentences = build_graph(
-            os.path.join(base_raw, "fine_grained_ner"), 'auto', 'fine'
-        )
-        torch.save(data_fine, os.path.join(processed_dir, "graph_fine_auto.pt"))
-        torch.save(map_fine, os.path.join(processed_dir, "nodemap_fine_auto.pt"))
-        print("  Graph rebuilt with corpus augmentation")
+        # Save augmented sentences (includes PubMed)
+        with open(os.path.join(processed_dir, "all_sentences.txt"), 'w',
+                  encoding='utf-8') as f:
+            for s in augmented_sentences:
+                f.write(s + '\n')
+        print(f"  Saved augmented all_sentences.txt: {len(augmented_sentences)} sentences")
 
     # Coarse-grained (baseline comparison)
     coarse_dir = os.path.join(base_raw, "coarse_grained_ner")

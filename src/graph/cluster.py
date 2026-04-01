@@ -106,10 +106,104 @@ def optimal_nclusters(X, max_k=50):
     return best_k
 
 
+def ner_type_guided_clustering(X, inv_nodemap, nodemap, max_subcluster_size=20):
+    """NER-type-guided clustering: group by NER type first, then sub-cluster.
+
+    1. Groups entities by their NER type (one cluster per unique type, ~173 clusters)
+    2. Within each NER-type cluster, sub-clusters by SBERT similarity if > max_subcluster_size
+    3. Returns cluster_list and cluster_names dicts
+    """
+    entity_types = {}
+    if os.path.exists(ENTITY_TYPES_PATH):
+        with open(ENTITY_TYPES_PATH) as f:
+            entity_types = json.load(f)
+
+    if not entity_types:
+        print("  No entity types available, falling back to silhouette clustering")
+        return None, None
+
+    print(f"  NER-type-guided clustering with {len(set(entity_types.values()))} unique types")
+
+    # Group entities by NER type
+    type_groups = defaultdict(list)
+    untyped = []
+    for idx in range(X.shape[0]):
+        term = inv_nodemap[idx]
+        if term in entity_types:
+            type_groups[entity_types[term]].append((idx, term))
+        else:
+            untyped.append((idx, term))
+
+    cluster_list = {}
+    cluster_names = {}
+    cid = 0
+
+    for ner_type, members in sorted(type_groups.items()):
+        if len(members) <= max_subcluster_size:
+            # Small enough: one cluster for this NER type
+            cluster_list[cid] = sorted([term for _, term in members], key=len)
+            cluster_names[cid] = ner_type
+            cid += 1
+        else:
+            # Sub-cluster by embedding similarity
+            indices = [idx for idx, _ in members]
+            sub_X = X[indices]
+            # Target: sub-clusters of ~10-15 entities
+            n_sub = max(2, len(members) // 12)
+            try:
+                sub_clust = AgglomerativeClustering(
+                    n_clusters=n_sub, metric='cosine', linkage='average'
+                )
+                sub_labels = sub_clust.fit_predict(sub_X)
+                sub_groups = defaultdict(list)
+                for i, label in enumerate(sub_labels):
+                    sub_groups[label].append(members[i][1])
+                for sub_terms in sub_groups.values():
+                    cluster_list[cid] = sorted(sub_terms, key=len)
+                    cluster_names[cid] = ner_type
+                    cid += 1
+            except Exception:
+                # Fallback: single cluster
+                cluster_list[cid] = sorted([term for _, term in members], key=len)
+                cluster_names[cid] = ner_type
+                cid += 1
+
+    # Add untyped entities as separate clusters (grouped loosely)
+    if untyped:
+        if len(untyped) <= max_subcluster_size:
+            cluster_list[cid] = sorted([term for _, term in untyped], key=len)
+            cluster_names[cid] = "Untyped"
+            cid += 1
+        else:
+            indices = [idx for idx, _ in untyped]
+            sub_X = X[indices]
+            n_sub = max(2, len(untyped) // 12)
+            try:
+                sub_clust = AgglomerativeClustering(
+                    n_clusters=n_sub, metric='cosine', linkage='average'
+                )
+                sub_labels = sub_clust.fit_predict(sub_X)
+                sub_groups = defaultdict(list)
+                for i, label in enumerate(sub_labels):
+                    sub_groups[label].append(untyped[i][1])
+                for sub_terms in sub_groups.values():
+                    cluster_list[cid] = sorted(sub_terms, key=len)
+                    cluster_names[cid] = "Untyped"
+                    cid += 1
+            except Exception:
+                cluster_list[cid] = sorted([term for _, term in untyped], key=len)
+                cluster_names[cid] = "Untyped"
+                cid += 1
+
+    print(f"  NER-type clustering: {cid} clusters from {len(type_groups)} NER types")
+    return cluster_list, cluster_names
+
+
 def cluster_graph(key, use_llm=False):
     """Cluster graph nodes into term groups.
 
-    Uses GNN embeddings when available, with optional NER type sub-clustering.
+    Uses NER-type-guided clustering by default (NER_TYPE_CLUSTERING=true),
+    with fallback to silhouette-based agglomerative clustering.
     """
     X, inv_nodemap, nodemap = load_graph(key)
     if X is None:
@@ -117,42 +211,56 @@ def cluster_graph(key, use_llm=False):
 
     print(f"Processing {key}: {X.shape[0]} nodes, dim={X.shape[1]}")
 
-    n_clusters = optimal_nclusters(X)
-    clust = AgglomerativeClustering(
-        n_clusters=n_clusters, metric='cosine', linkage='average'
-    )
-    labels = clust.fit_predict(X)
+    # Check if NER-type-guided clustering is enabled
+    try:
+        from config import NER_TYPE_CLUSTERING
+    except ImportError:
+        NER_TYPE_CLUSTERING = True
 
-    clusters = defaultdict(list)
-    for idx, label in enumerate(labels):
-        term = inv_nodemap[idx]
-        clusters[label].append(term)
+    cluster_list = None
+    cluster_names = None
 
-    # Load entity types for enrichment if available
-    entity_types = {}
-    if os.path.exists(ENTITY_TYPES_PATH):
-        with open(ENTITY_TYPES_PATH) as f:
-            entity_types = json.load(f)
-        print(f"  Loaded {len(entity_types)} entity types for cluster enrichment")
+    if NER_TYPE_CLUSTERING:
+        cluster_list, cluster_names = ner_type_guided_clustering(
+            X, inv_nodemap, nodemap
+        )
 
-    # Sort terms within clusters
-    cluster_list = {
-        int(cid): sorted(terms, key=len)
-        for cid, terms in clusters.items()
-    }
+    if cluster_list is None:
+        # Fallback: silhouette-based clustering
+        print("  Using silhouette-based clustering (fallback)")
+        n_clusters = optimal_nclusters(X)
+        clust = AgglomerativeClustering(
+            n_clusters=n_clusters, metric='cosine', linkage='average'
+        )
+        labels = clust.fit_predict(X)
 
-    # Determine cluster names from dominant NER type
-    cluster_names = {}
-    for cid, terms in cluster_list.items():
-        type_counts = defaultdict(int)
-        for t in terms:
-            if t in entity_types:
-                type_counts[entity_types[t]] += 1
-        if type_counts:
-            dominant_type = max(type_counts, key=type_counts.get)
-            cluster_names[cid] = dominant_type
-        else:
-            cluster_names[cid] = f"Cluster_{cid}"
+        clusters = defaultdict(list)
+        for idx, label in enumerate(labels):
+            term = inv_nodemap[idx]
+            clusters[label].append(term)
+
+        cluster_list = {
+            int(cid): sorted(terms, key=len)
+            for cid, terms in clusters.items()
+        }
+
+        # Determine cluster names from dominant NER type
+        entity_types = {}
+        if os.path.exists(ENTITY_TYPES_PATH):
+            with open(ENTITY_TYPES_PATH) as f:
+                entity_types = json.load(f)
+
+        cluster_names = {}
+        for cid, terms in cluster_list.items():
+            type_counts = defaultdict(int)
+            for t in terms:
+                if t in entity_types:
+                    type_counts[entity_types[t]] += 1
+            if type_counts:
+                dominant_type = max(type_counts, key=type_counts.get)
+                cluster_names[cid] = dominant_type
+            else:
+                cluster_names[cid] = f"Cluster_{cid}"
 
     # LLM naming override (optional - Gemini)
     if use_llm:

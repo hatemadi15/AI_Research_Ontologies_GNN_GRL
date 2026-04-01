@@ -234,8 +234,16 @@ def extract_dep_relations(doc, valid_terms, lemma_map):
     return rels
 
 
-def extract_gnn_cooccurrence_relations(nodemap, gnn_embeds, threshold=0.7):
-    """Extract relations from GNN embedding similarity (co-occurrence)."""
+def extract_gnn_cooccurrence_relations(nodemap, gnn_embeds, threshold=0.90,
+                                       min_cooccurrence=3,
+                                       cooccurrence_counts=None):
+    """Extract relations from GNN embedding similarity (co-occurrence).
+
+    Args:
+        threshold: Minimum cosine similarity (default 0.90, raised from 0.65)
+        min_cooccurrence: Minimum co-occurrence count in sentences (default 3)
+        cooccurrence_counts: dict of (t1, t2) -> count from builder
+    """
     if gnn_embeds is None:
         return []
 
@@ -243,9 +251,23 @@ def extract_gnn_cooccurrence_relations(nodemap, gnn_embeds, threshold=0.7):
     n = gnn_embeds.shape[0]
     rels = []
 
+    # Load co-occurrence counts if not provided
+    if cooccurrence_counts is None:
+        cooc_path = os.path.join(PROCESSED_DIR, 'corpus_frequencies.json')
+        sentences = load_sentences()
+        # Build sentence-level co-occurrence counts
+        cooccurrence_counts = {}
+        valid_terms = set(nodemap.keys())
+        for sent in sentences:
+            sent_lower = sent.lower()
+            terms_in_sent = [t for t in valid_terms if t in sent_lower]
+            for i, t1 in enumerate(terms_in_sent):
+                for t2 in terms_in_sent[i+1:]:
+                    pair = tuple(sorted([t1, t2]))
+                    cooccurrence_counts[pair] = cooccurrence_counts.get(pair, 0) + 1
+
     # Compute pairwise similarity for high-sim pairs only
     embeds_t = torch.tensor(gnn_embeds, dtype=torch.float)
-    # Process in batches to avoid memory issues
     batch_size = 100
     for i in range(0, n, batch_size):
         end_i = min(i + batch_size, n)
@@ -258,15 +280,20 @@ def extract_gnn_cooccurrence_relations(nodemap, gnn_embeds, threshold=0.7):
                     t1 = inv_map.get(i + bi, '')
                     t2 = inv_map.get(j, '')
                     if t1 and t2:
-                        rels.append({
-                            'subj': t1,
-                            'rel': 'associatedWith',
-                            'obj': t2,
-                            'sim': round(sim_val, 4),
-                            'source': 'gnn_cooccurrence',
-                        })
+                        # Check minimum co-occurrence count
+                        pair = tuple(sorted([t1, t2]))
+                        cooc_count = cooccurrence_counts.get(pair, 0)
+                        if cooc_count >= min_cooccurrence:
+                            rels.append({
+                                'subj': t1,
+                                'rel': 'relatedTo',
+                                'obj': t2,
+                                'sim': round(sim_val, 4),
+                                'source': 'gnn_cooccurrence',
+                            })
 
-    print(f"  GNN co-occurrence relations: {len(rels)}")
+    print(f"  GNN co-occurrence relations (threshold={threshold}, "
+          f"min_cooc={min_cooccurrence}): {len(rels)}")
     return rels
 
 
@@ -394,10 +421,122 @@ def extract_rels():
 
     print("  Phase 3: GNN co-occurrence relations...")
     if gnn_embeds is not None:
+        try:
+            from config import GNN_COOCCURRENCE_THRESHOLD, GNN_MIN_COOCCURRENCE_COUNT
+        except ImportError:
+            GNN_COOCCURRENCE_THRESHOLD = 0.90
+            GNN_MIN_COOCCURRENCE_COUNT = 3
         gnn_rels = extract_gnn_cooccurrence_relations(
-            gnn_nodemap or nodemap, gnn_embeds, threshold=0.75
+            gnn_nodemap or nodemap, gnn_embeds,
+            threshold=GNN_COOCCURRENCE_THRESHOLD,
+            min_cooccurrence=GNN_MIN_COOCCURRENCE_COUNT,
         )
         rels.extend(gnn_rels)
+
+    # FIX 3b: LLM-Based Relation Classification for top GNN co-occurrence pairs
+    try:
+        from config import LLM_RELATIONS
+    except ImportError:
+        LLM_RELATIONS = False
+
+    if LLM_RELATIONS and os.getenv('OPENAI_API_KEY'):
+        try:
+            from llm_validator import _get_client, _load_cache, _save_cache, _cache_key
+
+            # Collect GNN co-occurrence relations and sort by similarity
+            gnn_rels_for_llm = [r for r in rels
+                                if r.get('source') == 'gnn_cooccurrence'
+                                and r.get('sim', 0) > 0]
+            gnn_rels_for_llm.sort(key=lambda x: -x.get('sim', 0))
+            gnn_rels_for_llm = gnn_rels_for_llm[:300]
+
+            if gnn_rels_for_llm:
+                print(f"  Phase 4: LLM relation classification for "
+                      f"{len(gnn_rels_for_llm)} top GNN pairs...")
+
+                # Load relation cache
+                rel_cache_path = os.path.join(PROCESSED_DIR,
+                                              'llm_relation_cache.json')
+                if os.path.exists(rel_cache_path):
+                    with open(rel_cache_path, 'r', encoding='utf-8') as f:
+                        rel_cache = json.load(f)
+                else:
+                    rel_cache = {}
+
+                client = _get_client()
+                cache = _load_cache()
+                llm_classified = 0
+                llm_calls = 0
+
+                RELATION_CHOICES = (
+                    "hasProperty, causeOf, influencedBy, isPartOf, composedOf, "
+                    "constrains, measures, initiatesAt, precedes, relatedTo, "
+                    "or NONE"
+                )
+
+                for rel_entry in gnn_rels_for_llm:
+                    subj = rel_entry['subj']
+                    obj = rel_entry['obj']
+                    pair_key = f"{subj}|||{obj}"
+
+                    key = _cache_key('llm_relation_v2', subj, obj)
+                    if key in cache:
+                        answer = cache[key]
+                    elif pair_key in rel_cache:
+                        answer = rel_cache[pair_key]
+                    else:
+                        try:
+                            response = client.chat.completions.create(
+                                model="gpt-4o-mini",
+                                messages=[{
+                                    "role": "user",
+                                    "content": (
+                                        f"What is the semantic relationship "
+                                        f"between '{subj}' and '{obj}' in "
+                                        f"materials science? Choose exactly one: "
+                                        f"{RELATION_CHOICES}."
+                                    )
+                                }],
+                                max_tokens=20,
+                                temperature=0.0,
+                            )
+                            answer = response.choices[0].message.content.strip()
+                            cache[key] = answer
+                            rel_cache[pair_key] = answer
+                            llm_calls += 1
+                        except Exception as e:
+                            continue
+
+                    # Update relation type if valid
+                    answer_clean = answer.strip().rstrip('.')
+                    valid_types = {
+                        'hasproperty': 'hasProperty',
+                        'causeof': 'causeOf',
+                        'influencedby': 'influencedBy',
+                        'ispartof': 'isPartOf',
+                        'composedof': 'composedOf',
+                        'constrains': 'constrains',
+                        'measures': 'measures',
+                        'initiatesat': 'initiatesAt',
+                        'precedes': 'precedes',
+                        'relatedto': 'relatedTo',
+                    }
+                    mapped = valid_types.get(answer_clean.lower())
+                    if mapped and mapped != 'NONE':
+                        rel_entry['rel'] = mapped
+                        rel_entry['source'] = 'gnn_cooccurrence+llm'
+                        llm_classified += 1
+
+                # Save relation cache
+                os.makedirs(PROCESSED_DIR, exist_ok=True)
+                with open(rel_cache_path, 'w', encoding='utf-8') as f:
+                    json.dump(rel_cache, f, indent=2, ensure_ascii=False)
+                _save_cache(cache)
+
+                print(f"    LLM relation classification: {llm_calls} API calls, "
+                      f"{llm_classified} reclassified")
+        except Exception as e:
+            print(f"  LLM relation classification failed: {e}")
 
     # Deduplicate
     seen = set()

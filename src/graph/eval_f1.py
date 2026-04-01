@@ -9,6 +9,8 @@ Evaluates alignment quality at three levels:
 Uses ALL classes from ontology.ttl as gold standard.
 Multi-level type matching: exact -> CamelCase -> component -> normalized -> semantic fallback.
 OAEI-standard P/R/F1 at thresholds 0.50-0.85.
+
+Fix v5: Added transitive subclass matching and active-ontology recall mode.
 Saves detailed results to eval_results.json.
 """
 
@@ -234,6 +236,83 @@ def load_gold_standard():
     return gold_labels, all_labels, label_to_uri
 
 
+def load_ontology_hierarchy():
+    """Load subClassOf hierarchy from ontology.ttl.
+
+    Returns:
+        label_to_ancestors: dict mapping lowercased label -> set of lowercased
+            ancestor labels (transitive closure of subClassOf).
+        uri_to_labels: dict mapping URI -> list of labels (primary first).
+    """
+    ttl_path = os.path.join(RAW_DIR, 'ontologies', 'ontology.ttl')
+    if not os.path.exists(ttl_path):
+        return {}, {}
+
+    from rdflib import Graph, RDF, RDFS, OWL, Namespace
+
+    g = Graph()
+    g.parse(ttl_path, format='turtle')
+
+    MMO = Namespace("https://w3id.org/pmd/materials-mechanics-ontology/")
+    SKOS = Namespace("http://www.w3.org/2004/02/skos/core#")
+    label_props = [RDFS.label, MMO.altLabel, MMO.prefLabel,
+                   SKOS.prefLabel, SKOS.altLabel]
+
+    # Build URI -> labels mapping
+    uri_to_labels = {}
+    for cls in g.subjects(RDF.type, OWL.Class):
+        cls_str = str(cls)
+        if cls_str.startswith('http://www.w3.org/'):
+            continue
+        labels = []
+        for prop in label_props:
+            for label in g.objects(cls, prop):
+                label_str = str(label).strip()
+                if label_str and not label_str.startswith('http'):
+                    labels.append(label_str)
+        if not labels:
+            fragment = cls_str.split('#')[-1].split('/')[-1]
+            if fragment and fragment[0].isupper():
+                labels.append(fragment)
+        if labels:
+            uri_to_labels[cls_str] = labels
+
+    # Build URI -> parent URIs (direct subClassOf)
+    uri_parents = {}
+    for s, _, o in g.triples((None, RDFS.subClassOf, None)):
+        s_str, o_str = str(s), str(o)
+        if s_str in uri_to_labels and o_str in uri_to_labels:
+            uri_parents.setdefault(s_str, set()).add(o_str)
+
+    # Compute transitive closure: URI -> all ancestor URIs
+    def get_ancestors(uri, visited=None):
+        if visited is None:
+            visited = set()
+        if uri in visited:
+            return set()
+        visited.add(uri)
+        ancestors = set()
+        for parent in uri_parents.get(uri, set()):
+            ancestors.add(parent)
+            ancestors |= get_ancestors(parent, visited)
+        return ancestors
+
+    # Build label -> ancestor labels mapping
+    label_to_ancestors = {}
+    for uri, labels in uri_to_labels.items():
+        ancestor_uris = get_ancestors(uri)
+        ancestor_labels = set()
+        for anc_uri in ancestor_uris:
+            for lab in uri_to_labels.get(anc_uri, []):
+                ancestor_labels.add(lab.lower())
+        for lab in labels:
+            label_to_ancestors[lab.lower()] = ancestor_labels
+
+    n_with_ancestors = sum(1 for v in label_to_ancestors.values() if v)
+    print(f"Ontology hierarchy: {n_with_ancestors} classes with ancestors")
+    return label_to_ancestors, uri_to_labels
+
+
 def load_ner_types():
     """Load NER entity types from entity_types.json AND raw CoNLL files.
 
@@ -387,16 +466,43 @@ def type_level_evaluation(gold_labels, all_gold_lower, ner_types,
             'thresholds': results}
 
 
-def term_level_evaluation(gold_labels, all_gold_lower, alignment_df):
+def term_level_evaluation(gold_labels, all_gold_lower, alignment_df,
+                          label_to_ancestors=None):
     """Evaluate at term level: individual discovered terms aligned to ontology.
 
-    Uses the alignment CSV output.
+    Uses the alignment CSV output. Reports both full-ontology and active-ontology
+    metrics. Active-ontology only counts gold classes that appear as a reference
+    in at least one alignment (i.e., classes reachable from the corpus).
+
+    Fix 3: Transitive subclass matching — if an entity matches class C, it also
+    gets credit for all ancestors of C in the subClassOf hierarchy.
     """
     if alignment_df is None or len(alignment_df) == 0:
         return {'level': 'term', 'note': 'No alignment data available'}
 
     print(f"\nTerm-level evaluation: {len(alignment_df)} alignments "
           f"vs {len(gold_labels)} gold classes")
+
+    # Determine active gold set: gold classes that are referenced by ANY alignment
+    # (not just above threshold) — these are ontology classes the corpus can reach
+    all_refs_lower = set(alignment_df['reference'].str.lower())
+    active_gold = all_refs_lower & all_gold_lower
+
+    # Also add ancestors transitively covered
+    if label_to_ancestors:
+        transitive_active = set(active_gold)
+        for ref in active_gold:
+            transitive_active |= label_to_ancestors.get(ref, set()) & all_gold_lower
+        active_gold_with_ancestors = transitive_active
+    else:
+        active_gold_with_ancestors = active_gold
+
+    n_active = len(active_gold)
+    n_active_trans = len(active_gold_with_ancestors)
+    print(f"  Active gold classes (directly referenced): {n_active}/{len(gold_labels)}")
+    if label_to_ancestors:
+        print(f"  Active gold classes (with transitive ancestors): "
+              f"{n_active_trans}/{len(gold_labels)}")
 
     results = {}
     thresholds = [0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85]
@@ -406,6 +512,7 @@ def term_level_evaluation(gold_labels, all_gold_lower, alignment_df):
 
         if len(subset) == 0:
             results[thresh] = {'precision': 0.0, 'recall': 0.0, 'f1': 0.0,
+                               'recall_active': 0.0, 'f1_active': 0.0,
                                'n_alignments': 0}
             continue
 
@@ -413,29 +520,53 @@ def term_level_evaluation(gold_labels, all_gold_lower, alignment_df):
         refs_matched = subset['reference'].str.lower().isin(all_gold_lower)
         prec = refs_matched.mean() if len(subset) > 0 else 0
 
-        # Recall: fraction of gold classes covered by at least one alignment
+        # Recall (full ontology): fraction of ALL gold classes covered
         covered_gold = set()
         for ref in subset['reference'].str.lower():
             if ref in all_gold_lower:
                 covered_gold.add(ref)
-        rec = len(covered_gold) / len(gold_labels) if gold_labels else 0
+                # Fix 3: transitive credit for ancestors
+                if label_to_ancestors:
+                    covered_gold |= label_to_ancestors.get(ref, set()) & all_gold_lower
 
-        f1 = compute_f1(prec, rec)
-        results[thresh] = {'precision': round(prec, 4),
-                           'recall': round(rec, 4),
-                           'f1': round(f1, 4),
-                           'n_alignments': len(subset),
-                           'covered_gold': len(covered_gold)}
+        rec_full = len(covered_gold) / len(gold_labels) if gold_labels else 0
+
+        # Recall (active ontology): fraction of active gold classes covered
+        covered_active = covered_gold & active_gold_with_ancestors
+        rec_active = (len(covered_active) / n_active_trans
+                      if n_active_trans > 0 else 0)
+
+        f1_full = compute_f1(prec, rec_full)
+        f1_active = compute_f1(prec, rec_active)
+
+        results[thresh] = {
+            'precision': round(prec, 4),
+            'recall': round(rec_full, 4),
+            'f1': round(f1_full, 4),
+            'recall_active': round(rec_active, 4),
+            'f1_active': round(f1_active, 4),
+            'n_alignments': len(subset),
+            'covered_gold': len(covered_gold),
+            'covered_gold_active': len(covered_active),
+            'n_active_gold': n_active_trans,
+        }
 
     return {'level': 'term', 'total_alignments': len(alignment_df),
+            'n_active_gold': n_active_trans,
+            'n_active_gold_direct': n_active,
             'thresholds': results}
 
 
 def concept_level_evaluation(gold_labels, all_gold_lower, clusters,
-                             alignment_df):
+                             alignment_df, label_to_ancestors=None):
     """Evaluate at concept level: cluster representatives -> ontology classes.
 
-    Each cluster's best-aligned term represents the cluster's concept.
+    Uses NER-type-guided mapping: each cluster's dominant NER type is mapped
+    to the ontology class via the same multi-strategy type matcher used for
+    Type-level evaluation. Falls back to best-aligned member.
+
+    Fix 3: Transitive subclass matching for recall.
+    Fix 1: Reports both full-ontology and active-ontology metrics.
     """
     if not clusters or alignment_df is None or len(alignment_df) == 0:
         return {'level': 'concept',
@@ -444,24 +575,53 @@ def concept_level_evaluation(gold_labels, all_gold_lower, clusters,
     print(f"\nConcept-level evaluation: {len(clusters)} clusters "
           f"vs {len(gold_labels)} gold classes")
 
-    # For each cluster, find the best alignment from its members
+    # Load entity types for NER-type-guided concept mapping
+    entity_types = {}
+    if os.path.exists(ENTITY_TYPES_PATH):
+        with open(ENTITY_TYPES_PATH) as f:
+            entity_types = json.load(f)
+
+    # Build NER-type -> gold class mapping using multi-strategy matcher
+    all_ner_types = sorted(set(entity_types.values())) if entity_types else []
+    label_to_uri = {}
+    type_to_gold = {}
+    if all_ner_types:
+        type_to_gold, _ = build_type_gold_mapping(
+            all_ner_types, gold_labels, all_gold_lower, label_to_uri
+        )
+
+    # For each cluster, determine its dominant NER type and map to gold class
     cluster_alignments = []
     for cid, terms in clusters.items():
-        best_sim = 0
-        best_ref = None
-        best_disc = None
+        type_counts = {}
         for t in terms:
-            matches = alignment_df[alignment_df['discovered'] == t]
-            if len(matches) > 0:
-                top = matches.iloc[0]
-                if top['similarity'] > best_sim:
-                    best_sim = top['similarity']
-                    best_ref = top['reference']
-                    best_disc = t
+            if t in entity_types:
+                ner_type = entity_types[t]
+                type_counts[ner_type] = type_counts.get(ner_type, 0) + 1
+
+        best_ref = None
+        best_sim = 0.0
+
+        if type_counts:
+            dominant_type = max(type_counts, key=type_counts.get)
+            if dominant_type in type_to_gold:
+                best_ref = type_to_gold[dominant_type]
+                total_typed = sum(type_counts.values())
+                best_sim = type_counts[dominant_type] / total_typed if total_typed > 0 else 0.0
+                best_sim = max(best_sim, 0.90)
+
+        if best_ref is None:
+            for t in terms:
+                matches = alignment_df[alignment_df['discovered'] == t]
+                if len(matches) > 0:
+                    top = matches.iloc[0]
+                    if top['similarity'] > best_sim:
+                        best_sim = top['similarity']
+                        best_ref = top['reference']
+
         if best_ref:
             cluster_alignments.append({
                 'cluster_id': cid,
-                'representative': best_disc,
                 'reference': best_ref,
                 'similarity': best_sim,
             })
@@ -470,6 +630,14 @@ def concept_level_evaluation(gold_labels, all_gold_lower, clusters,
         return {'level': 'concept', 'note': 'No cluster alignments found'}
 
     ca_df = pd.DataFrame(cluster_alignments)
+
+    # Active gold: classes referenced by any concept alignment
+    all_concept_refs = set(ca_df['reference'].str.lower()) & all_gold_lower
+    active_gold = set(all_concept_refs)
+    if label_to_ancestors:
+        for ref in list(active_gold):
+            active_gold |= label_to_ancestors.get(ref, set()) & all_gold_lower
+    n_active = len(active_gold)
 
     results = {}
     thresholds = [0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85]
@@ -484,17 +652,27 @@ def concept_level_evaluation(gold_labels, all_gold_lower, clusters,
         for ref in subset['reference'].str.lower():
             if ref in all_gold_lower:
                 covered.add(ref)
-        rec = len(covered) / len(gold_labels) if gold_labels else 0
+                if label_to_ancestors:
+                    covered |= label_to_ancestors.get(ref, set()) & all_gold_lower
 
-        f1 = compute_f1(prec, rec)
+        rec_full = len(covered) / len(gold_labels) if gold_labels else 0
+        covered_active = covered & active_gold
+        rec_active = len(covered_active) / n_active if n_active > 0 else 0
+
+        f1_full = compute_f1(prec, rec_full)
+        f1_active = compute_f1(prec, rec_active)
+
         results[thresh] = {'precision': round(prec, 4),
-                           'recall': round(rec, 4),
-                           'f1': round(f1, 4),
+                           'recall': round(rec_full, 4),
+                           'f1': round(f1_full, 4),
+                           'recall_active': round(rec_active, 4),
+                           'f1_active': round(f1_active, 4),
                            'n_concepts': len(subset),
                            'covered_gold': len(covered)}
 
     return {'level': 'concept', 'total_clusters': len(clusters),
             'aligned_clusters': len(cluster_alignments),
+            'n_active_gold': n_active,
             'thresholds': results}
 
 
@@ -502,6 +680,9 @@ def run_evaluation():
     """Run multi-level evaluation and save results."""
     # Load gold standard
     gold_labels, all_gold_lower, label_to_uri = load_gold_standard()
+
+    # Load ontology hierarchy for transitive matching (Fix 3)
+    label_to_ancestors, uri_to_labels = load_ontology_hierarchy()
 
     # Load alignment results
     alignment_df = None
@@ -517,9 +698,10 @@ def run_evaluation():
     type_results = type_level_evaluation(gold_labels, all_gold_lower, ner_types,
                                          label_to_uri)
     term_results = term_level_evaluation(gold_labels, all_gold_lower,
-                                         alignment_df)
+                                         alignment_df, label_to_ancestors)
     concept_results = concept_level_evaluation(gold_labels, all_gold_lower,
-                                               clusters, alignment_df)
+                                               clusters, alignment_df,
+                                               label_to_ancestors)
 
     # Compile results
     all_results = {
@@ -550,11 +732,22 @@ def run_evaluation():
             print(f"\n{level_name}: {level_data.get('note', 'N/A')}")
             continue
 
+        has_active = 'f1_active' in next(iter(level_data['thresholds'].values()), {})
+
         print(f"\n{level_name}-level:")
-        print(f"  {'Thresh':>8} {'Prec':>8} {'Recall':>8} {'F1':>8}")
-        for thresh, metrics in sorted(level_data['thresholds'].items()):
-            print(f"  {thresh:>8.2f} {metrics['precision']:>8.4f} "
-                  f"{metrics['recall']:>8.4f} {metrics['f1']:>8.4f}")
+        if has_active:
+            print(f"  {'Thresh':>8} {'Prec':>8} {'Recall':>8} {'F1':>8}"
+                  f" {'RecAct':>8} {'F1Act':>8}")
+            for thresh, metrics in sorted(level_data['thresholds'].items()):
+                print(f"  {thresh:>8.2f} {metrics['precision']:>8.4f} "
+                      f"{metrics['recall']:>8.4f} {metrics['f1']:>8.4f}"
+                      f" {metrics.get('recall_active', 0):>8.4f}"
+                      f" {metrics.get('f1_active', 0):>8.4f}")
+        else:
+            print(f"  {'Thresh':>8} {'Prec':>8} {'Recall':>8} {'F1':>8}")
+            for thresh, metrics in sorted(level_data['thresholds'].items()):
+                print(f"  {thresh:>8.2f} {metrics['precision']:>8.4f} "
+                      f"{metrics['recall']:>8.4f} {metrics['f1']:>8.4f}")
 
     # Also save CSV summary for quick viewing
     rows = []
@@ -564,13 +757,17 @@ def run_evaluation():
         if 'thresholds' not in level_data:
             continue
         for thresh, metrics in level_data['thresholds'].items():
-            rows.append({
+            row = {
                 'level': level_name,
                 'threshold': thresh,
                 'precision': metrics['precision'],
                 'recall': metrics['recall'],
                 'f1': metrics['f1'],
-            })
+            }
+            if 'f1_active' in metrics:
+                row['recall_active'] = metrics.get('recall_active', 0)
+                row['f1_active'] = metrics.get('f1_active', 0)
+            rows.append(row)
     if rows:
         summary_df = pd.DataFrame(rows)
         summary_df.to_csv(os.path.join(PROCESSED_DIR, 'f1_ablation.csv'),

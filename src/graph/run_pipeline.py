@@ -6,10 +6,11 @@ Correct execution order:
   2. gnn.py                - Train GraphSAGE, produce GNN embeddings
   3. cluster.py            - Cluster nodes (uses GNN embeddings)
   4. taxonomy.py           - Build taxonomy from clusters
-  5. align.py              - Align discovered terms to reference ontology
-  6. eval_f1.py            - Multi-level evaluation (type/term/concept)
-  7. relations.py          - Extract relations using patterns + dep parse + GNN
-  8. relations_axioms.py   - OWL axiom pruning of inconsistent relations
+  5. align.py              - Align to reference ontology (+ LLM augmentation & expansion)
+  6. rag_typing.py         - RAG-based term typing (optional, LLM-powered)
+  7. eval_f1.py            - Multi-level evaluation (type/term/concept)
+  8. relations.py          - Extract relations using patterns + dep parse + GNN + LLM
+  9. relations_axioms.py   - OWL axiom pruning of inconsistent relations
 """
 
 import subprocess
@@ -21,10 +22,11 @@ SCRIPTS = [
     "gnn.py",               # 2. Train GraphSAGE embeddings
     "cluster.py",           # 3. Cluster nodes (uses GNN embeddings)
     "taxonomy.py",          # 4. Build taxonomy from clusters
-    "align.py",             # 5. Align to reference ontology
-    "eval_f1.py",           # 6. Evaluate alignment quality
-    "relations.py",         # 7. Extract typed relations
-    "relations_axioms.py",  # 8. OWL axiom pruning
+    "align.py",             # 5. Align to reference ontology (+ LLM augmentation & expansion)
+    "rag_typing.py",        # 6. RAG-based term typing (optional, LLM-powered)
+    "eval_f1.py",           # 7. Evaluate alignment quality
+    "relations.py",         # 8. Extract typed relations (+ LLM classification)
+    "relations_axioms.py",  # 9. OWL axiom pruning
 ]
 
 
@@ -49,6 +51,10 @@ if __name__ == "__main__":
     os.chdir(script_dir)
     print(f"Working Directory: {os.getcwd()}")
     print(f"Pipeline stages: {' -> '.join(s.replace('.py', '') for s in SCRIPTS)}")
+
+    # Ensure corpus augmentation is enabled by default
+    if "CORPUS_AUGMENT" not in os.environ:
+        os.environ["CORPUS_AUGMENT"] = "true"
 
     for script in SCRIPTS:
         success = run_script(script)
