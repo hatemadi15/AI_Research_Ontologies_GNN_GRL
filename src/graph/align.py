@@ -434,21 +434,19 @@ def llm_augment_alignment(alignments, class_map):
 
 
 def expand_ontology_coverage(ref_classes, discovered, disc_sbert, class_map):
-    """FIX 1b: LLM-Based Ontology Class Expansion.
-
-    For ontology classes with NO matching entity:
-      - Query GPT-4o-mini for 3 synonym phrases
-      - Compute SBERT similarity between synonyms and all entities
-      - If any similarity > 0.55, create an alignment mapping
-    Caches all LLM responses to data/processed/llm_class_expansions.json.
+    """FIX 1b: LLM-Based Ontology Class Expansion (kept for API-key scenarios).
+    Skipped if OPENAI_API_KEY is not available.
     """
+    if not os.getenv('OPENAI_API_KEY'):
+        print("No OPENAI_API_KEY, skipping LLM expansion")
+        return []
+
     try:
         from llm_validator import _get_client, _load_cache, _save_cache, _cache_key
     except ImportError:
         print("llm_validator not available, skipping ontology expansion")
         return []
 
-    # Load or create expansion cache
     expansion_cache_path = os.path.join(PROCESSED_DIR, 'llm_class_expansions.json')
     if os.path.exists(expansion_cache_path):
         with open(expansion_cache_path, 'r', encoding='utf-8') as f:
@@ -456,29 +454,19 @@ def expand_ontology_coverage(ref_classes, discovered, disc_sbert, class_map):
     else:
         expansion_cache = {}
 
-    # Find unmatched classes: compute SBERT similarity of each ref to all discovered
     ref_sbert = EMBEDDER.encode(ref_classes)
-    from sentence_transformers import util as st_util
-    sim_matrix = st_util.cos_sim(
+    sim_matrix = util.cos_sim(
         torch.tensor(ref_sbert).float(),
         torch.tensor(disc_sbert).float()
     ).numpy()
 
-    # A class is "unmatched" if its best discovered similarity < 0.5
-    unmatched = []
-    for j, ref in enumerate(ref_classes):
-        best_sim = sim_matrix[j].max()
-        if best_sim < 0.5:
-            unmatched.append(ref)
-
-    print(f"Ontology expansion: {len(unmatched)}/{len(ref_classes)} classes unmatched")
-
+    unmatched = [ref for j, ref in enumerate(ref_classes)
+                 if sim_matrix[j].max() < 0.5]
+    print(f"LLM Ontology expansion: {len(unmatched)}/{len(ref_classes)} classes unmatched")
     if not unmatched:
         return []
 
-    # Limit total LLM calls (unmatched classes)
     unmatched = unmatched[:500]
-
     client = _get_client()
     cache = _load_cache()
     new_alignments = []
@@ -494,16 +482,12 @@ def expand_ontology_coverage(ref_classes, discovered, disc_sbert, class_map):
             try:
                 response = client.chat.completions.create(
                     model="gpt-4o-mini",
-                    messages=[{
-                        "role": "user",
-                        "content": (
-                            f"Generate 3 short synonym phrases for the materials "
-                            f"science concept '{class_label}'. Return only the "
-                            f"phrases, comma-separated."
-                        )
-                    }],
-                    max_tokens=60,
-                    temperature=0.0,
+                    messages=[{"role": "user", "content": (
+                        f"Generate 3 short synonym phrases for the materials "
+                        f"science concept '{class_label}'. Return only the "
+                        f"phrases, comma-separated."
+                    )}],
+                    max_tokens=60, temperature=0.0,
                 )
                 synonyms_str = response.choices[0].message.content.strip()
                 cache[key] = synonyms_str
@@ -513,19 +497,16 @@ def expand_ontology_coverage(ref_classes, discovered, disc_sbert, class_map):
                 print(f"  LLM error for class '{class_label}': {e}")
                 continue
 
-        # Parse synonyms
         synonyms = [s.strip() for s in synonyms_str.split(',') if s.strip()]
         if not synonyms:
             continue
 
-        # Compute SBERT similarity between synonyms and all discovered entities
         syn_embeds = EMBEDDER.encode(synonyms)
-        syn_sims = st_util.cos_sim(
+        syn_sims = util.cos_sim(
             torch.tensor(syn_embeds).float(),
             torch.tensor(disc_sbert).float()
         ).numpy()
 
-        # Check if any synonym matches any discovered entity > 0.55
         for si in range(len(synonyms)):
             best_idx = syn_sims[si].argmax()
             best_sim = syn_sims[si, best_idx]
@@ -536,15 +517,262 @@ def expand_ontology_coverage(ref_classes, discovered, disc_sbert, class_map):
                     'similarity': round(float(best_sim), 4),
                     'direction': 'llm_expansion',
                 })
-                break  # One match per class is enough
+                break
 
-    # Save expansion cache
     os.makedirs(PROCESSED_DIR, exist_ok=True)
     with open(expansion_cache_path, 'w', encoding='utf-8') as f:
         json.dump(expansion_cache, f, indent=2, ensure_ascii=False)
-
     _save_cache(cache)
-    print(f"  Expansion: {llm_calls} API calls, {len(new_alignments)} new alignments")
+    print(f"  LLM Expansion: {llm_calls} API calls, {len(new_alignments)} new alignments")
+    return new_alignments
+
+
+def expand_ontology_coverage_structural(ref_classes, discovered, disc_sbert,
+                                         class_map):
+    """FIX 2: Non-LLM ontology coverage expansion using ontology structure.
+
+    For each unmatched ontology class:
+      1. Get its rdfs:label and all alt/pref labels
+      2. Get labels of parent/child classes (via subClassOf)
+      3. Compute SBERT similarity between all text fragments and entities
+      4. If best match >= 0.45, create the alignment
+
+    This uses ontology structure to find indirect matches without LLM.
+    """
+    ttl_path = os.path.join(RAW_DIR, 'ontologies', 'ontology.ttl')
+    if not os.path.exists(ttl_path):
+        print("No ontology.ttl for structural expansion")
+        return []
+
+    from rdflib import Graph as RdfGraph, RDF, RDFS, OWL, Namespace
+
+    g = RdfGraph()
+    g.parse(ttl_path, format='turtle')
+
+    MMO = Namespace("https://w3id.org/pmd/materials-mechanics-ontology/")
+    SKOS = Namespace("http://www.w3.org/2004/02/skos/core#")
+    label_props = [RDFS.label, MMO.altLabel, MMO.prefLabel,
+                   SKOS.prefLabel, SKOS.altLabel]
+
+    # Build URI -> labels and URI -> parent/child URIs
+    uri_to_labels = {}
+    for cls in g.subjects(RDF.type, OWL.Class):
+        cls_str = str(cls)
+        if cls_str.startswith('http://www.w3.org/'):
+            continue
+        labels = []
+        for prop in label_props:
+            for label in g.objects(cls, prop):
+                label_str = str(label).strip()
+                if label_str and not label_str.startswith('http'):
+                    labels.append(label_str)
+        if not labels:
+            fragment = cls_str.split('#')[-1].split('/')[-1]
+            if fragment and fragment[0].isupper():
+                labels.append(fragment)
+        if labels:
+            uri_to_labels[cls_str] = labels
+
+    # Build parent/child maps
+    uri_parents = {}
+    uri_children = {}
+    for s, _, o in g.triples((None, RDFS.subClassOf, None)):
+        s_str, o_str = str(s), str(o)
+        if s_str in uri_to_labels and o_str in uri_to_labels:
+            uri_parents.setdefault(s_str, set()).add(o_str)
+            uri_children.setdefault(o_str, set()).add(s_str)
+
+    # Get rdfs:comment for each class
+    uri_comments = {}
+    for cls_uri in uri_to_labels:
+        for comment in g.objects(cls_uri, RDFS.comment):
+            c = str(comment).strip()
+            if c:
+                uri_comments[cls_uri] = c
+
+    # Build label -> URI mapping
+    label_to_uri = {}
+    for uri, labels in uri_to_labels.items():
+        for lab in labels:
+            label_to_uri[lab] = uri
+
+    # Compute direct similarity matrix
+    ref_sbert_embeds = EMBEDDER.encode(ref_classes)
+    sim_matrix = util.cos_sim(
+        torch.tensor(ref_sbert_embeds).float(),
+        torch.tensor(disc_sbert).float()
+    ).numpy()
+
+    # Find unmatched classes (best direct similarity < 0.5)
+    unmatched = []
+    for j, ref in enumerate(ref_classes):
+        best_sim = sim_matrix[j].max()
+        if best_sim < 0.5:
+            unmatched.append(ref)
+
+    print(f"Structural expansion: {len(unmatched)}/{len(ref_classes)} classes to expand")
+    if not unmatched:
+        return []
+
+    new_alignments = []
+    expansion_threshold = 0.45
+
+    for class_label in unmatched:
+        uri = label_to_uri.get(class_label)
+        if not uri:
+            continue
+
+        # Collect text fragments: own labels, parent labels, child labels, comment
+        text_fragments = list(uri_to_labels.get(uri, []))
+
+        for parent_uri in uri_parents.get(uri, set()):
+            text_fragments.extend(uri_to_labels.get(parent_uri, []))
+        for child_uri in uri_children.get(uri, set()):
+            text_fragments.extend(uri_to_labels.get(child_uri, []))
+
+        comment = uri_comments.get(uri)
+        if comment:
+            text_fragments.append(comment)
+
+        # Deduplicate and normalize
+        seen = set()
+        unique_fragments = []
+        for frag in text_fragments:
+            norm = normalize_term(frag)
+            if norm not in seen and len(norm) >= 2:
+                seen.add(norm)
+                unique_fragments.append(norm)
+
+        if not unique_fragments:
+            continue
+
+        # Compute similarity between fragments and all discovered entities
+        frag_embeds = EMBEDDER.encode(unique_fragments)
+        frag_sims = util.cos_sim(
+            torch.tensor(frag_embeds).float(),
+            torch.tensor(disc_sbert).float()
+        ).numpy()
+
+        # Find best match across all fragments
+        best_overall_sim = frag_sims.max()
+        if best_overall_sim >= expansion_threshold:
+            best_frag_idx, best_disc_idx = np.unravel_index(
+                frag_sims.argmax(), frag_sims.shape
+            )
+            new_alignments.append({
+                'discovered': discovered[best_disc_idx],
+                'reference': class_label,
+                'similarity': round(float(best_overall_sim), 4),
+                'direction': 'structural_expansion',
+            })
+
+    print(f"  Structural expansion: {len(new_alignments)} new alignments")
+    return new_alignments
+
+
+def add_multi_class_mappings(alignments, discovered, ref_classes,
+                             disc_sbert, ref_sbert, entity_types,
+                             disc_gnn_map=None, G=None):
+    """FIX 5: Entity-to-multiple-classes mapping.
+
+    Currently each entity maps to at most one class. But "fatigue crack
+    initiation" could map to "FatigueCrackInitiation", "CrackInitiation",
+    and "Fatigue". Allow entities to map to multiple classes above threshold.
+
+    FIX 4: Lower thresholds for high-confidence type matches:
+      - NER type exactly matches a gold class -> threshold 0.0 (auto-accept)
+      - NER type has CamelCase match -> threshold 0.30
+      - Default threshold: 0.40
+    """
+    from eval_f1 import normalize_for_matching, camel_case_split
+
+    # Build set of already-aligned (discovered, reference) pairs
+    existing = set()
+    for a in alignments:
+        existing.add((a['discovered'], a['reference']))
+
+    # Build NER type -> set of ref classes that match
+    ref_lower_to_original = {r.lower(): r for r in ref_classes}
+    ref_normalized = {}
+    for r in ref_classes:
+        norm = normalize_for_matching(r)
+        ref_normalized[norm] = r
+
+    # Compute similarity matrix for multi-mapping
+    sim_matrix = util.cos_sim(
+        torch.tensor(disc_sbert).float(),
+        torch.tensor(ref_sbert).float()
+    ).numpy()
+
+    new_alignments = []
+    n_type_auto = 0
+    n_multi = 0
+
+    for i, d in enumerate(discovered):
+        ner_type = entity_types.get(d)
+
+        # Determine threshold based on NER type match quality
+        base_threshold = 0.40
+
+        if ner_type:
+            ner_lower = ner_type.lower()
+            ner_camel = camel_case_split(ner_type)
+            ner_norm = normalize_for_matching(ner_type)
+
+            # Check each ref class for type-based threshold reduction
+            for j, r in enumerate(ref_classes):
+                if (d, r) in existing:
+                    continue
+
+                r_lower = r.lower()
+                r_norm = normalize_for_matching(r)
+
+                # FIX 4: Exact type match -> auto-accept
+                if ner_lower == r_lower or ner_camel == r_lower or ner_norm == r_norm:
+                    new_alignments.append({
+                        'discovered': d,
+                        'reference': r,
+                        'similarity': max(float(sim_matrix[i, j]), 0.85),
+                        'direction': 'type_match',
+                    })
+                    existing.add((d, r))
+                    n_type_auto += 1
+                    continue
+
+                # CamelCase partial match -> threshold 0.30
+                ner_words = set(ner_norm.split())
+                r_words = set(r_norm.split())
+                if len(ner_words) >= 2 and ner_words.issubset(r_words):
+                    if sim_matrix[i, j] >= 0.30:
+                        new_alignments.append({
+                            'discovered': d,
+                            'reference': r,
+                            'similarity': float(sim_matrix[i, j]),
+                            'direction': 'type_component',
+                        })
+                        existing.add((d, r))
+                        n_type_auto += 1
+                        continue
+
+        # FIX 5: Multi-class mapping — find ALL classes above threshold
+        top_indices = np.argsort(sim_matrix[i])[::-1]
+        for j in top_indices:
+            if sim_matrix[i, j] < base_threshold:
+                break
+            r = ref_classes[j]
+            if (d, r) in existing:
+                continue
+            new_alignments.append({
+                'discovered': d,
+                'reference': r,
+                'similarity': float(sim_matrix[i, j]),
+                'direction': 'multi_class',
+            })
+            existing.add((d, r))
+            n_multi += 1
+
+    print(f"  Multi-class mapping: {n_type_auto} type-matched, "
+          f"{n_multi} additional multi-class")
     return new_alignments
 
 
@@ -552,9 +780,12 @@ def run_alignment():
     """Run the full MILA-style alignment pipeline.
 
     FIXED GNN fusion: computes text similarity (384d) and GNN similarity (64d)
-    separately, then combines them with alpha weighting. Reference ontology
-    classes have NO GNN embeddings (they're not in the co-occurrence graph),
-    so text-only similarity is used for them.
+    separately, then combines them with alpha weighting.
+
+    v5 fixes:
+      - Fix 2: Non-LLM structural ontology expansion
+      - Fix 4: Lower thresholds for type-matched entities
+      - Fix 5: Entity-to-multiple-classes mapping
     """
     discovered, G = load_discovered()
     if not discovered:
@@ -594,23 +825,47 @@ def run_alignment():
             print(f"Reference classes have NO GNN embeddings -> text-only for ref")
             print(f"Fusion: alpha={GNN_FUSION_ALPHA} (text-dominant)")
 
-    # Reference classes don't have GNN embeddings (not in co-occurrence graph)
-    # So ref_gnn_map stays None -> text-only similarity for ref classes
-
-    # Run bidirectional alignment
+    # Run bidirectional alignment (1-to-1 primary alignments)
     alignments = bidirectional_alignment(
         discovered, ref_classes, disc_sbert, ref_sbert,
         disc_gnn_map=disc_gnn_map, ref_gnn_map=None, G=G
     )
 
-    # FIX 4: LLM-Augmented Alignment for borderline pairs
+    # Load entity types for type-based threshold adjustment
+    entity_types_path = os.path.join(PROCESSED_DIR, 'entity_types.json')
+    entity_types = {}
+    if os.path.exists(entity_types_path):
+        with open(entity_types_path) as f:
+            entity_types = json.load(f)
+
+    # FIX 4 + FIX 5: Multi-class mapping with type-aware thresholds
+    multi_alignments = add_multi_class_mappings(
+        alignments, discovered, ref_classes, disc_sbert, ref_sbert,
+        entity_types, disc_gnn_map=disc_gnn_map, G=G
+    )
+    if multi_alignments:
+        alignments.extend(multi_alignments)
+        print(f"  Added {len(multi_alignments)} multi-class alignments")
+
+    # FIX 2: Non-LLM structural ontology expansion
+    try:
+        structural_alignments = expand_ontology_coverage_structural(
+            ref_classes, discovered, disc_sbert, class_map
+        )
+        if structural_alignments:
+            alignments.extend(structural_alignments)
+            print(f"  Added {len(structural_alignments)} structural expansion alignments")
+    except Exception as e:
+        print(f"Structural expansion failed: {e}")
+
+    # LLM-Augmented Alignment for borderline pairs (if API key available)
     if LLM_ALIGNMENT and os.getenv('OPENAI_API_KEY'):
         try:
             alignments = llm_augment_alignment(alignments, class_map)
         except Exception as e:
             print(f"LLM alignment augmentation failed: {e}")
 
-    # FIX 1b: LLM-Based Ontology Class Expansion
+    # LLM-Based Ontology Class Expansion (if API key available)
     if LLM_ALIGNMENT and os.getenv('OPENAI_API_KEY'):
         try:
             expansion_alignments = expand_ontology_coverage(
@@ -618,9 +873,9 @@ def run_alignment():
             )
             if expansion_alignments:
                 alignments.extend(expansion_alignments)
-                print(f"  Added {len(expansion_alignments)} expansion alignments")
+                print(f"  Added {len(expansion_alignments)} LLM expansion alignments")
         except Exception as e:
-            print(f"Ontology expansion failed: {e}")
+            print(f"LLM ontology expansion failed: {e}")
 
     # Create results DataFrame
     df = pd.DataFrame(alignments).sort_values('similarity', ascending=False)
@@ -628,14 +883,18 @@ def run_alignment():
     df.to_csv(os.path.join(PROCESSED_DIR, 'ontology_alignment.csv'), index=False)
 
     # Stats
-    n_mutual = sum(1 for a in alignments if a['direction'] == 'mutual')
-    n_forward = sum(1 for a in alignments if a['direction'] == 'forward')
-    n_backward = sum(1 for a in alignments if a['direction'] == 'backward')
+    direction_counts = {}
+    for a in alignments:
+        d = a.get('direction', 'unknown')
+        direction_counts[d] = direction_counts.get(d, 0) + 1
+
     avg_sim = df['similarity'].mean() if len(df) > 0 else 0
 
     print(f"\nAlignment results:")
     print(f"  Total: {len(alignments)} alignments")
-    print(f"  Mutual: {n_mutual}, Forward: {n_forward}, Backward: {n_backward}")
+    for direction, count in sorted(direction_counts.items()):
+        print(f"  {direction}: {count}")
+    print(f"  Unique gold classes covered: {df['reference'].nunique()}")
     print(f"  Avg similarity: {avg_sim:.4f}")
     print(f"  Saved to {os.path.join(PROCESSED_DIR, 'ontology_alignment.csv')}")
 
@@ -648,7 +907,10 @@ def run_alignment():
         'n_discovered': len(discovered),
         'n_reference': len(ref_classes),
         'n_alignments': len(alignments),
-        'n_mutual': n_mutual,
+        'n_mutual': direction_counts.get('mutual', 0),
+        'n_multi_class': direction_counts.get('multi_class', 0),
+        'n_type_match': direction_counts.get('type_match', 0),
+        'n_structural_expansion': direction_counts.get('structural_expansion', 0),
         'avg_similarity': round(avg_sim, 4),
     }
     with open(os.path.join(PROCESSED_DIR, 'alignment_config.json'), 'w') as f:
