@@ -42,7 +42,7 @@ EMBED_PT_OUT = os.path.join(PROCESSED_DIR, 'gnn_embeds.pt')
 class TermGNN(torch.nn.Module):
     """2-layer GraphSAGE with dropout."""
 
-    def __init__(self, in_dim=384, hid_dim=128, out_dim=64, dropout=0.3):
+    def __init__(self, in_dim=384, hid_dim=256, out_dim=384, dropout=0.3):
         super().__init__()
         self.conv1 = SAGEConv(in_dim, hid_dim)
         self.conv2 = SAGEConv(hid_dim, out_dim)
@@ -59,7 +59,7 @@ class TermGNN(torch.nn.Module):
 class GATEncoder(torch.nn.Module):
     """2-layer GAT with multi-head attention."""
 
-    def __init__(self, in_dim=384, hidden_dim=128, out_dim=64, heads=4, dropout=0.3):
+    def __init__(self, in_dim=384, hidden_dim=256, out_dim=384, heads=4, dropout=0.3):
         super().__init__()
         self.conv1 = GATConv(in_dim, hidden_dim // heads, heads=heads, dropout=dropout)
         self.conv2 = GATConv(hidden_dim, out_dim, heads=1, concat=False, dropout=dropout)
@@ -76,7 +76,7 @@ class GATEncoder(torch.nn.Module):
 class RGCNEncoder(torch.nn.Module):
     """2-layer RGCN for multi-relation graphs."""
 
-    def __init__(self, in_dim=384, hidden_dim=128, out_dim=64, num_relations=5, dropout=0.3):
+    def __init__(self, in_dim=384, hidden_dim=256, out_dim=384, num_relations=5, dropout=0.3):
         super().__init__()
         self.conv1 = RGCNConv(in_dim, hidden_dim, num_relations=num_relations)
         self.conv2 = RGCNConv(hidden_dim, out_dim, num_relations=num_relations)
@@ -84,7 +84,6 @@ class RGCNEncoder(torch.nn.Module):
 
     def forward(self, x, edge_index, edge_type=None):
         if edge_type is None:
-            # Default: all edges same type (0)
             edge_type = torch.zeros(edge_index.size(1), dtype=torch.long,
                                     device=edge_index.device)
         x = F.relu(self.conv1(x, edge_index, edge_type))
@@ -107,14 +106,30 @@ def link_pred_loss(embeds, pos_edge_index, neg_edge_index):
     return pos_loss + neg_loss
 
 
-def _build_model(architecture, in_dim, device):
-    """Build a GNN model based on the specified architecture."""
+def _build_model(architecture, in_dim, device, out_dim=None):
+    """Build a GNN model based on the specified architecture.
+
+    Args:
+        architecture: 'sage', 'gat', or 'rgcn'
+        in_dim: Input feature dimension
+        device: torch device
+        out_dim: Output dimension. Default reads from config.GNN_HIDDEN_DIM (384).
+                 Use 64 for legacy ablation.
+    """
+    if out_dim is None:
+        try:
+            from config import GNN_HIDDEN_DIM
+            out_dim = GNN_HIDDEN_DIM
+        except ImportError:
+            out_dim = 384
+    hid_dim = 256
+
     if architecture == 'sage':
-        model = TermGNN(in_dim=in_dim, hid_dim=128, out_dim=64, dropout=0.3)
+        model = TermGNN(in_dim=in_dim, hid_dim=hid_dim, out_dim=out_dim, dropout=0.3)
     elif architecture == 'gat':
-        model = GATEncoder(in_dim=in_dim, hidden_dim=128, out_dim=64, heads=4, dropout=0.3)
+        model = GATEncoder(in_dim=in_dim, hidden_dim=hid_dim, out_dim=out_dim, heads=4, dropout=0.3)
     elif architecture == 'rgcn':
-        model = RGCNEncoder(in_dim=in_dim, hidden_dim=128, out_dim=64, num_relations=5, dropout=0.3)
+        model = RGCNEncoder(in_dim=in_dim, hidden_dim=hid_dim, out_dim=out_dim, num_relations=5, dropout=0.3)
     else:
         raise ValueError(f"Unknown architecture '{architecture}'. Use 'sage', 'gat', or 'rgcn'.")
     return model.to(device)

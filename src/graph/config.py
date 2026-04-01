@@ -26,9 +26,9 @@ LLM_MODE = False
 GNN_ARCHITECTURE = 'sage'
 
 # Corpus augmentation: add PubMed sentences to co-occurrence graph
-CORPUS_AUGMENT = os.environ.get("CORPUS_AUGMENT", "false").lower() == "true"
+CORPUS_AUGMENT = os.environ.get("CORPUS_AUGMENT", "true").lower() == "true"
 CORPUS_AUGMENT_PATH = os.environ.get(
-    "CORPUS_AUGMENT_PATH", "data/pubmed_sentences.txt"
+    "CORPUS_AUGMENT_PATH", "data/raw/dataset/pubmed_sentences.txt"
 )
 
 # LLM-Augmented Alignment: boost/penalize borderline similarity pairs via GPT-4o-mini
@@ -39,6 +39,16 @@ LLM_RELATIONS = os.environ.get("LLM_RELATIONS", "true").lower() == "true"
 
 # RAG-Based Term Typing: use LLM + context to type ambiguous entities
 RAG_TYPING = os.environ.get("RAG_TYPING", "true").lower() == "true"
+
+# NER-type-guided clustering (groups entities by NER type first, then sub-clusters)
+NER_TYPE_CLUSTERING = os.environ.get("NER_TYPE_CLUSTERING", "true").lower() == "true"
+
+# GNN hidden dimension: 384 matches SBERT dim, 64 is legacy
+GNN_HIDDEN_DIM = int(os.environ.get("GNN_HIDDEN_DIM", "384"))
+
+# GNN co-occurrence relation threshold
+GNN_COOCCURRENCE_THRESHOLD = float(os.environ.get("GNN_COOCCURRENCE_THRESHOLD", "0.90"))
+GNN_MIN_COOCCURRENCE_COUNT = int(os.environ.get("GNN_MIN_COOCCURRENCE_COUNT", "3"))
 
 # Available domain-specific embedding models (tested and working):
 #   'all-MiniLM-L6-v2'                     - General-purpose, 384-dim (default)

@@ -52,6 +52,10 @@ if __name__ == "__main__":
     print(f"Working Directory: {os.getcwd()}")
     print(f"Pipeline stages: {' -> '.join(s.replace('.py', '') for s in SCRIPTS)}")
 
+    # Ensure corpus augmentation is enabled by default
+    if "CORPUS_AUGMENT" not in os.environ:
+        os.environ["CORPUS_AUGMENT"] = "true"
+
     for script in SCRIPTS:
         success = run_script(script)
         if not success:

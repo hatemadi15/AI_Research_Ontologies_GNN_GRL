@@ -570,11 +570,13 @@ def run_alignment():
     disc_sbert = EMBEDDER.encode(discovered)
     ref_sbert = EMBEDDER.encode(ref_classes)
 
-    # Load GNN embeddings separately (64d) - only discovered terms have them
+    # Load GNN embeddings - only discovered terms have them
     disc_gnn_map = None
     if USE_GNN_EMBEDDINGS:
         gnn_embeds, gnn_map = load_gnn_embeddings()
         if gnn_embeds is not None:
+            gnn_dim = gnn_embeds.shape[1]
+            sbert_dim = disc_sbert.shape[1]
             disc_gnn_map = {}
             n_with_gnn = 0
             for d in discovered:
@@ -584,7 +586,11 @@ def run_alignment():
                         disc_gnn_map[d] = gnn_embeds[gnn_idx]
                         n_with_gnn += 1
             print(f"GNN embeddings available for {n_with_gnn}/{len(discovered)} "
-                  f"discovered terms (dim={gnn_embeds.shape[1]})")
+                  f"discovered terms (dim={gnn_dim})")
+            if gnn_dim == sbert_dim:
+                print(f"GNN dim matches SBERT dim ({gnn_dim}d) - no projection needed")
+            else:
+                print(f"GNN dim ({gnn_dim}d) differs from SBERT ({sbert_dim}d) - separate similarity")
             print(f"Reference classes have NO GNN embeddings -> text-only for ref")
             print(f"Fusion: alpha={GNN_FUSION_ALPHA} (text-dominant)")
 
