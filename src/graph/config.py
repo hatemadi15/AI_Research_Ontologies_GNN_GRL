@@ -31,6 +31,15 @@ CORPUS_AUGMENT_PATH = os.environ.get(
     "CORPUS_AUGMENT_PATH", "data/pubmed_sentences.txt"
 )
 
+# LLM-Augmented Alignment: boost/penalize borderline similarity pairs via GPT-4o-mini
+LLM_ALIGNMENT = os.environ.get("LLM_ALIGNMENT", "true").lower() == "true"
+
+# LLM-Based Relation Classification: reclassify top GNN co-occurrence pairs
+LLM_RELATIONS = os.environ.get("LLM_RELATIONS", "true").lower() == "true"
+
+# RAG-Based Term Typing: use LLM + context to type ambiguous entities
+RAG_TYPING = os.environ.get("RAG_TYPING", "true").lower() == "true"
+
 # Available domain-specific embedding models (tested and working):
 #   'all-MiniLM-L6-v2'                     - General-purpose, 384-dim (default)
 #   'allenai/specter'                       - Scientific paper embeddings, 768-dim
