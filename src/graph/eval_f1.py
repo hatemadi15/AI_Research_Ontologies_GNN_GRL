@@ -18,6 +18,8 @@ import numpy as np
 import pandas as pd
 from sentence_transformers import SentenceTransformer, util
 
+from config import DEFAULT_EMBEDDER_MODEL
+
 # Get project root directory
 PROJECT_ROOT = os.path.dirname(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -29,7 +31,8 @@ ALIGNMENT_PATH = os.path.join(PROCESSED_DIR, 'ontology_alignment.csv')
 ENTITY_TYPES_PATH = os.path.join(PROCESSED_DIR, 'entity_types.json')
 CLUSTERS_PATH = os.path.join(PROCESSED_DIR, 'fine_auto_clusters.json')
 
-EMBEDDER = SentenceTransformer('all-MiniLM-L6-v2')
+EMBEDDER_MODEL = os.environ.get('EMBEDDER_MODEL', DEFAULT_EMBEDDER_MODEL)
+EMBEDDER = SentenceTransformer(EMBEDDER_MODEL)
 
 
 def load_gold_standard():

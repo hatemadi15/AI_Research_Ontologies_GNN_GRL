@@ -21,6 +21,8 @@ import torch
 import pandas as pd
 from sentence_transformers import SentenceTransformer, util
 
+from config import DEFAULT_EMBEDDER_MODEL
+
 # Get project root directory (2 levels up from this script)
 PROJECT_ROOT = os.path.dirname(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -32,7 +34,8 @@ TAXONOMY_PATH = os.path.join(PROCESSED_DIR, 'taxonomy_graph.pkl')
 GNN_EMBED_PATH = os.path.join(PROCESSED_DIR, 'gnn_embeddings.npy')
 GNN_MAP_PATH = os.path.join(PROCESSED_DIR, 'gnn_embed_map.json')
 
-EMBEDDER = SentenceTransformer('all-MiniLM-L6-v2')
+EMBEDDER_MODEL = os.environ.get('EMBEDDER_MODEL', DEFAULT_EMBEDDER_MODEL)
+EMBEDDER = SentenceTransformer(EMBEDDER_MODEL)
 
 # Ablation flags
 USE_GNN_EMBEDDINGS = True

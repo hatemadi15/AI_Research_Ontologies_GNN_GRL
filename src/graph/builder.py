@@ -23,8 +23,11 @@ import torch
 from sentence_transformers import SentenceTransformer
 from torch_geometric.utils import from_networkx
 
-print("Loading embedding model...")
-embedder = SentenceTransformer('all-MiniLM-L6-v2')
+from config import DEFAULT_EMBEDDER_MODEL
+
+EMBEDDER_MODEL = os.environ.get('EMBEDDER_MODEL', DEFAULT_EMBEDDER_MODEL)
+print(f"Loading embedding model: {EMBEDDER_MODEL}")
+embedder = SentenceTransformer(EMBEDDER_MODEL)
 
 
 def parse_conll_bio(filepath):

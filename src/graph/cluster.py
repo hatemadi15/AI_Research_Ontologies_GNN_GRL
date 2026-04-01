@@ -63,12 +63,23 @@ def load_graph(key):
                 gnn_idx = gnn_map[term]
                 if gnn_idx < gnn_embeds.shape[0]:
                     X[idx] = gnn_embeds[gnn_idx]
-        # Fill missing with SBERT features
+        # Fill missing with SBERT features (only if dimensions match)
         sbert_x = data.x.cpu().numpy()
-        for idx in range(len(nodemap)):
-            if np.allclose(X[idx], 0):
-                if idx < sbert_x.shape[0]:
-                    X[idx] = sbert_x[idx]
+        n_missing = sum(1 for idx in range(len(nodemap))
+                        if np.allclose(X[idx], 0))
+        if n_missing > 0:
+            if sbert_x.shape[1] == X.shape[1]:
+                for idx in range(len(nodemap)):
+                    if np.allclose(X[idx], 0) and idx < sbert_x.shape[0]:
+                        X[idx] = sbert_x[idx]
+            else:
+                # Dimension mismatch: fill with small random to avoid zero vectors
+                rng = np.random.default_rng(42)
+                for idx in range(len(nodemap)):
+                    if np.allclose(X[idx], 0):
+                        X[idx] = rng.normal(0, 0.01, X.shape[1])
+                print(f"  Filled {n_missing} missing embeddings with noise "
+                      f"(dim mismatch: GNN={X.shape[1]} vs SBERT={sbert_x.shape[1]})")
     else:
         print("  GNN embeddings not available, using SBERT features")
         X = data.x.cpu().numpy()

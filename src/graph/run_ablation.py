@@ -44,6 +44,15 @@ def run_ablation(preset_name):
     align.USE_BIDIRECTIONAL = preset['USE_BIDIRECTIONAL']
     align.USE_COMBINED_SCORING = preset['USE_COMBINED_SCORING']
 
+    # Update embedder model if specified in preset
+    from config import DEFAULT_EMBEDDER_MODEL
+    embedder_model = preset.get('embedder_model', DEFAULT_EMBEDDER_MODEL)
+    if embedder_model != align.EMBEDDER_MODEL:
+        from sentence_transformers import SentenceTransformer
+        print(f"  Switching embedder to: {embedder_model}")
+        align.EMBEDDER_MODEL = embedder_model
+        align.EMBEDDER = SentenceTransformer(embedder_model)
+
     # Run alignment
     start_time = time.time()
     try:
@@ -54,6 +63,10 @@ def run_ablation(preset_name):
 
     # Run evaluation
     import eval_f1
+    if embedder_model != eval_f1.EMBEDDER_MODEL:
+        from sentence_transformers import SentenceTransformer
+        eval_f1.EMBEDDER_MODEL = embedder_model
+        eval_f1.EMBEDDER = SentenceTransformer(embedder_model)
     try:
         eval_f1.run_evaluation()
     except Exception as e:

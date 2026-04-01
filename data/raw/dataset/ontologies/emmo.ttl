@@ -1,0 +1,410 @@
+@prefix : <https://w3id.org/emmo#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@base <https://w3id.org/emmo#> .
+
+<https://w3id.org/emmo/emmo> rdf:type owl:Ontology ;
+    dcterms:title "Elementary Multiperspective Material Ontology (EMMO)"@en ;
+    dcterms:abstract "Minimal EMMO representation with key upper-level classes relevant to materials science alignment. Derived from EMMO 1.0.3 class hierarchy."@en ;
+    owl:versionInfo "1.0.3-minimal" .
+
+# =====================================================================
+# Top-level EMMO classes
+# =====================================================================
+
+:EMMO_Entity rdf:type owl:Class ;
+    rdfs:label "Entity"@en ;
+    skos:prefLabel "Entity"@en ;
+    skos:definition "The root class of EMMO."@en .
+
+# --- Item branch (physical objects and their parts) ---
+:EMMO_Item rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Entity ;
+    rdfs:label "Item"@en ;
+    skos:prefLabel "Item"@en ;
+    skos:altLabel "Physical object"@en ;
+    skos:definition "A real world object that has spatial extent."@en .
+
+:EMMO_Material rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Item ;
+    rdfs:label "Material"@en ;
+    skos:prefLabel "Material"@en ;
+    skos:altLabel "Substance"@en ;
+    skos:definition "Matter with specific composition and microstructure."@en .
+
+:EMMO_ManufacturedProduct rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Item ;
+    rdfs:label "Manufactured product"@en ;
+    skos:prefLabel "Manufactured product"@en ;
+    skos:altLabel "Component"@en ;
+    skos:definition "An item produced by a manufacturing process."@en .
+
+:EMMO_Specimen rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Item ;
+    rdfs:label "Specimen"@en ;
+    skos:prefLabel "Specimen"@en ;
+    skos:altLabel "Test specimen"@en ;
+    skos:definition "An item prepared for testing or measurement."@en .
+
+:EMMO_Object rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Item ;
+    rdfs:label "Object"@en ;
+    skos:prefLabel "Object"@en ;
+    skos:definition "A distinct physical entity."@en .
+
+# --- Process branch ---
+:EMMO_Process rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Entity ;
+    rdfs:label "Process"@en ;
+    skos:prefLabel "Process"@en ;
+    skos:definition "A temporal entity that unfolds over time."@en .
+
+:EMMO_ManufacturingProcess rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Process ;
+    rdfs:label "Manufacturing process"@en ;
+    skos:prefLabel "Manufacturing process"@en ;
+    skos:altLabel "Manufacturing"@en ;
+    skos:definition "A process that transforms material into a product."@en .
+
+:EMMO_Test rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Process ;
+    rdfs:label "Test"@en ;
+    skos:prefLabel "Test"@en ;
+    skos:altLabel "Testing"@en ;
+    skos:definition "A process that evaluates properties of materials or components."@en .
+
+:EMMO_FatigueTest rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Test ;
+    rdfs:label "Fatigue test"@en ;
+    skos:prefLabel "Fatigue test"@en ;
+    skos:altLabel "Fatigue testing"@en ;
+    skos:definition "A test subjecting material to cyclic loading."@en .
+
+:EMMO_MechanicalTest rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Test ;
+    rdfs:label "Mechanical test"@en ;
+    skos:prefLabel "Mechanical test"@en ;
+    skos:definition "A test evaluating mechanical properties."@en .
+
+:EMMO_Measurement rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Process ;
+    rdfs:label "Measurement"@en ;
+    skos:prefLabel "Measurement"@en ;
+    skos:definition "A process that assigns a quantity to a property."@en .
+
+:EMMO_Simulation rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Process ;
+    rdfs:label "Simulation"@en ;
+    skos:prefLabel "Simulation"@en ;
+    skos:altLabel "Modelling"@en ;
+    skos:definition "A computational process that models physical phenomena."@en .
+
+:EMMO_Treatment rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Process ;
+    rdfs:label "Treatment"@en ;
+    skos:prefLabel "Treatment"@en ;
+    skos:altLabel "Surface treatment"@en ;
+    skos:definition "A process that modifies material properties."@en .
+
+# --- Property branch ---
+:EMMO_Property rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Entity ;
+    rdfs:label "Property"@en ;
+    skos:prefLabel "Property"@en ;
+    skos:definition "A quality or characteristic of an entity."@en .
+
+:EMMO_MechanicalProperty rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Property ;
+    rdfs:label "Mechanical property"@en ;
+    skos:prefLabel "Mechanical property"@en ;
+    skos:definition "A property related to mechanical behavior."@en .
+
+:EMMO_PhysicalProperty rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Property ;
+    rdfs:label "Physical property"@en ;
+    skos:prefLabel "Physical property"@en ;
+    skos:definition "A measurable physical characteristic."@en .
+
+:EMMO_ChemicalProperty rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Property ;
+    rdfs:label "Chemical property"@en ;
+    skos:prefLabel "Chemical property"@en ;
+    skos:definition "A property related to chemical composition."@en .
+
+:EMMO_Strength rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_MechanicalProperty ;
+    rdfs:label "Strength"@en ;
+    skos:prefLabel "Strength"@en ;
+    skos:altLabel "Material strength"@en ;
+    skos:definition "Resistance to deformation or fracture."@en .
+
+:EMMO_Hardness rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_MechanicalProperty ;
+    rdfs:label "Hardness"@en ;
+    skos:prefLabel "Hardness"@en ;
+    skos:definition "Resistance to localized plastic deformation."@en .
+
+:EMMO_Stress rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_MechanicalProperty ;
+    rdfs:label "Stress"@en ;
+    skos:prefLabel "Stress"@en ;
+    skos:definition "Force per unit area."@en .
+
+:EMMO_Strain rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_MechanicalProperty ;
+    rdfs:label "Strain"@en ;
+    skos:prefLabel "Strain"@en ;
+    skos:definition "Deformation per unit length."@en .
+
+:EMMO_FatigueLife rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_MechanicalProperty ;
+    rdfs:label "Fatigue life"@en ;
+    skos:prefLabel "Fatigue life"@en ;
+    skos:altLabel "Fatigue lifetime"@en ;
+    skos:definition "Number of cycles to failure under cyclic loading."@en .
+
+:EMMO_Roughness rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_PhysicalProperty ;
+    rdfs:label "Roughness"@en ;
+    skos:prefLabel "Roughness"@en ;
+    skos:altLabel "Surface roughness"@en ;
+    skos:definition "Surface texture irregularity."@en .
+
+:EMMO_Temperature rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_PhysicalProperty ;
+    rdfs:label "Temperature"@en ;
+    skos:prefLabel "Temperature"@en ;
+    skos:definition "Degree of hotness or coldness."@en .
+
+:EMMO_Frequency rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_PhysicalProperty ;
+    rdfs:label "Frequency"@en ;
+    skos:prefLabel "Frequency"@en ;
+    skos:altLabel "Loading frequency"@en ;
+    skos:definition "Number of cycles per unit time."@en .
+
+# --- Quantity / Measurement result ---
+:EMMO_Quantity rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Entity ;
+    rdfs:label "Quantity"@en ;
+    skos:prefLabel "Quantity"@en ;
+    skos:altLabel "Measured quantity"@en ;
+    skos:definition "A numerical value with a unit."@en .
+
+# --- Phenomenon branch ---
+:EMMO_Phenomenon rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Entity ;
+    rdfs:label "Phenomenon"@en ;
+    skos:prefLabel "Phenomenon"@en ;
+    skos:definition "An observable occurrence or event."@en .
+
+:EMMO_Mechanism rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Phenomenon ;
+    rdfs:label "Mechanism"@en ;
+    skos:prefLabel "Mechanism"@en ;
+    skos:altLabel "Damage mechanism"@en ;
+    skos:definition "The causal chain explaining a phenomenon."@en .
+
+:EMMO_Fatigue rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Phenomenon ;
+    rdfs:label "Fatigue"@en ;
+    skos:prefLabel "Fatigue"@en ;
+    skos:altLabel "Material fatigue"@en ;
+    skos:definition "Progressive structural damage under cyclic loading."@en .
+
+:EMMO_Fracture rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Phenomenon ;
+    rdfs:label "Fracture"@en ;
+    skos:prefLabel "Fracture"@en ;
+    skos:definition "Separation of a body into pieces."@en .
+
+:EMMO_Corrosion rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Phenomenon ;
+    rdfs:label "Corrosion"@en ;
+    skos:prefLabel "Corrosion"@en ;
+    skos:definition "Degradation of material by chemical reaction."@en .
+
+:EMMO_Deformation rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Phenomenon ;
+    rdfs:label "Deformation"@en ;
+    skos:prefLabel "Deformation"@en ;
+    skos:altLabel "Plastic deformation"@en ;
+    skos:definition "Change in shape of a body under load."@en .
+
+:EMMO_CrackGrowth rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Phenomenon ;
+    rdfs:label "Crack growth"@en ;
+    skos:prefLabel "Crack growth"@en ;
+    skos:altLabel "Crack propagation"@en ;
+    skos:definition "Extension of a crack through a material."@en .
+
+:EMMO_CrackInitiation rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Phenomenon ;
+    rdfs:label "Crack initiation"@en ;
+    skos:prefLabel "Crack initiation"@en ;
+    skos:altLabel "Crack nucleation"@en ;
+    skos:definition "Formation of a new crack in a material."@en .
+
+# --- State branch ---
+:EMMO_State rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Entity ;
+    rdfs:label "State"@en ;
+    skos:prefLabel "State"@en ;
+    skos:definition "A particular condition of an entity at a point in time."@en .
+
+:EMMO_Phase rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_State ;
+    rdfs:label "Phase"@en ;
+    skos:prefLabel "Phase"@en ;
+    skos:altLabel "Material phase"@en ;
+    skos:definition "A distinct form of matter."@en .
+
+:EMMO_CrystalStructure rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_State ;
+    rdfs:label "Crystal structure"@en ;
+    skos:prefLabel "Crystal structure"@en ;
+    skos:altLabel "Crystallographic structure"@en ;
+    skos:definition "Arrangement of atoms in a crystalline solid."@en .
+
+# --- Defect branch ---
+:EMMO_Defect rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Entity ;
+    rdfs:label "Defect"@en ;
+    skos:prefLabel "Defect"@en ;
+    skos:altLabel "Material defect"@en ;
+    skos:definition "An irregularity in a material's structure."@en .
+
+:EMMO_Crack rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Defect ;
+    rdfs:label "Crack"@en ;
+    skos:prefLabel "Crack"@en ;
+    skos:definition "A fracture surface in a material."@en .
+
+:EMMO_MicrostructuralDefect rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Defect ;
+    rdfs:label "Microstructural defect"@en ;
+    skos:prefLabel "Microstructural defect"@en ;
+    skos:altLabel "Inclusion"@en ;
+    skos:definition "A defect at the microstructural level."@en .
+
+:EMMO_Void rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Defect ;
+    rdfs:label "Void"@en ;
+    skos:prefLabel "Void"@en ;
+    skos:altLabel "Pore"@en ;
+    skos:definition "An empty space within a material."@en .
+
+:EMMO_Dislocation rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Defect ;
+    rdfs:label "Dislocation"@en ;
+    skos:prefLabel "Dislocation"@en ;
+    skos:definition "A linear crystallographic defect."@en .
+
+:EMMO_Damage rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Defect ;
+    rdfs:label "Damage"@en ;
+    skos:prefLabel "Damage"@en ;
+    skos:altLabel "Material damage"@en ;
+    skos:definition "Degradation of material integrity."@en .
+
+# --- Microstructure ---
+:EMMO_Microstructure rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Entity ;
+    rdfs:label "Microstructure"@en ;
+    skos:prefLabel "Microstructure"@en ;
+    skos:definition "The fine-scale structure of a material."@en .
+
+:EMMO_Grain rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Microstructure ;
+    rdfs:label "Grain"@en ;
+    skos:prefLabel "Grain"@en ;
+    skos:altLabel "Crystal grain"@en ;
+    skos:definition "A single crystallite in a polycrystalline material."@en .
+
+:EMMO_GrainBoundary rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Microstructure ;
+    rdfs:label "Grain boundary"@en ;
+    skos:prefLabel "Grain boundary"@en ;
+    skos:definition "The interface between two grains."@en .
+
+:EMMO_SlipBand rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Microstructure ;
+    rdfs:label "Slip band"@en ;
+    skos:prefLabel "Slip band"@en ;
+    skos:altLabel "Persistent slip band"@en ;
+    skos:definition "A region of concentrated dislocation activity."@en .
+
+:EMMO_Precipitate rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Microstructure ;
+    rdfs:label "Precipitate"@en ;
+    skos:prefLabel "Precipitate"@en ;
+    skos:definition "A solid phase formed within a matrix material."@en .
+
+# --- Model / Data ---
+:EMMO_Model rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Entity ;
+    rdfs:label "Model"@en ;
+    skos:prefLabel "Model"@en ;
+    skos:altLabel "Mathematical model"@en ;
+    skos:definition "A representation of a real-world system."@en .
+
+:EMMO_DataSet rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Entity ;
+    rdfs:label "Data set"@en ;
+    skos:prefLabel "Data set"@en ;
+    skos:altLabel "Dataset"@en ;
+    skos:definition "A collection of data."@en .
+
+:EMMO_Equation rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Model ;
+    rdfs:label "Equation"@en ;
+    skos:prefLabel "Equation"@en ;
+    skos:altLabel "Constitutive equation"@en ;
+    skos:definition "A mathematical relation between quantities."@en .
+
+# --- Spatial entities ---
+:EMMO_SpatialEntity rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Entity ;
+    rdfs:label "Spatial entity"@en ;
+    skos:prefLabel "Spatial entity"@en ;
+    skos:definition "An entity defined by spatial extent."@en .
+
+:EMMO_Surface rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_SpatialEntity ;
+    rdfs:label "Surface"@en ;
+    skos:prefLabel "Surface"@en ;
+    skos:definition "The outer boundary of a body."@en .
+
+:EMMO_Region rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_SpatialEntity ;
+    rdfs:label "Region"@en ;
+    skos:prefLabel "Region"@en ;
+    skos:altLabel "Zone"@en ;
+    skos:definition "A bounded spatial area."@en .
+
+# --- Loading / Conditions ---
+:EMMO_Loading rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Process ;
+    rdfs:label "Loading"@en ;
+    skos:prefLabel "Loading"@en ;
+    skos:altLabel "Mechanical loading"@en ;
+    skos:definition "Application of forces or displacements."@en .
+
+:EMMO_CyclicLoading rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Loading ;
+    rdfs:label "Cyclic loading"@en ;
+    skos:prefLabel "Cyclic loading"@en ;
+    skos:altLabel "Fatigue loading"@en ;
+    skos:definition "Repeated loading and unloading."@en .
+
+:EMMO_Environment rdf:type owl:Class ;
+    rdfs:subClassOf :EMMO_Entity ;
+    rdfs:label "Environment"@en ;
+    skos:prefLabel "Environment"@en ;
+    skos:altLabel "Test environment"@en ;
+    skos:definition "External conditions surrounding a test or process."@en .
