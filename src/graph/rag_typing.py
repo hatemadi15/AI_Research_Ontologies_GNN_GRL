@@ -19,7 +19,7 @@ import numpy as np
 import torch
 from sentence_transformers import SentenceTransformer, util
 
-from config import DEFAULT_EMBEDDER_MODEL, RAG_TYPING
+from config import DEFAULT_EMBEDDER_MODEL, RAG_TYPING, LLM_API_KEY, LLM_MODEL
 
 PROJECT_ROOT = os.path.dirname(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -112,8 +112,8 @@ def run_rag_typing():
         print("RAG_TYPING disabled, skipping")
         return
 
-    if not os.getenv('OPENAI_API_KEY'):
-        print("OPENAI_API_KEY not set, skipping RAG typing")
+    if not LLM_API_KEY:
+        print("LLM API key not set, skipping RAG typing")
         return
 
     try:
@@ -199,7 +199,7 @@ def run_rag_typing():
         else:
             try:
                 response = client.chat.completions.create(
-                    model="gpt-4o-mini",
+                    model=LLM_MODEL,
                     messages=[{
                         "role": "user",
                         "content": (

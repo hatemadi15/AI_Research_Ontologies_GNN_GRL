@@ -19,8 +19,13 @@ import os
 # Default embedding model. Override per-preset or via environment variable.
 DEFAULT_EMBEDDER_MODEL = 'all-MiniLM-L6-v2'
 
-# LLM validation mode (requires OPENAI_API_KEY env var)
+# LLM validation mode (requires OPENROUTER_API_KEY or OPENAI_API_KEY env var)
 LLM_MODE = False
+
+# ---- LLM backend configuration (OpenRouter by default) ----
+LLM_BASE_URL = os.environ.get("LLM_BASE_URL", "https://openrouter.ai/api/v1")
+LLM_MODEL = os.environ.get("LLM_MODEL", "openai/gpt-4o-mini")
+LLM_API_KEY = os.environ.get("OPENROUTER_API_KEY", os.environ.get("OPENAI_API_KEY", ""))
 
 # GNN architecture: 'sage', 'gat', or 'rgcn'
 GNN_ARCHITECTURE = 'sage'
