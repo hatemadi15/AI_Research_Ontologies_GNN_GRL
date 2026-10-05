@@ -1,10 +1,10 @@
 """
-rag_typing.py - RAG-Based Term Typing using GPT-4o-mini
+rag_typing.py - RAG-Based Term Typing using the configured LLM
 
 For entities with low-confidence NER type assignments or no NER type:
   - Get top-5 candidate ontology classes by SBERT embedding similarity
   - Build prompt with entity context + candidate classes
-  - Query GPT-4o-mini to select best matching class
+  - Query the LLM (config.LLM_MODEL) to select best matching class
   - Use the answer as type assignment
 
 Inspired by SBU-NLP (#1 at LLMs4OL 2025).
@@ -19,7 +19,7 @@ import numpy as np
 import torch
 from sentence_transformers import SentenceTransformer, util
 
-from config import DEFAULT_EMBEDDER_MODEL, RAG_TYPING
+from config import DEFAULT_EMBEDDER_MODEL, RAG_TYPING, LLM_API_KEY, LLM_MODEL
 
 PROJECT_ROOT = os.path.dirname(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -105,15 +105,15 @@ def run_rag_typing():
 
     For entities with low-confidence or missing NER types:
     1. Get top-5 candidate ontology classes by SBERT similarity
-    2. Query GPT-4o-mini with entity + context + candidates
+    2. Query the LLM with entity + context + candidates
     3. Update entity type assignments
     """
     if not RAG_TYPING:
         print("RAG_TYPING disabled, skipping")
         return
 
-    if not os.getenv('OPENAI_API_KEY'):
-        print("OPENAI_API_KEY not set, skipping RAG typing")
+    if not LLM_API_KEY:
+        print("LLM API key not set, skipping RAG typing")
         return
 
     try:
@@ -199,7 +199,7 @@ def run_rag_typing():
         else:
             try:
                 response = client.chat.completions.create(
-                    model="gpt-4o-mini",
+                    model=LLM_MODEL,
                     messages=[{
                         "role": "user",
                         "content": (

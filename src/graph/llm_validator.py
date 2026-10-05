@@ -1,12 +1,12 @@
 """
-llm_validator.py - LLM Validation Layer using OpenAI GPT-4o-mini
+llm_validator.py - LLM Validation Layer using OpenRouter (OpenAI-compatible)
 
 Provides LLM-backed validation for:
   - Cluster naming: propose ontology class names for term clusters
   - Alignment tie-breaking: select best match from candidates
   - Edge/relation disambiguation: classify relation types between entities
 
-Uses os.getenv('OPENAI_API_KEY') for authentication. NEVER hardcodes the key.
+Uses config.LLM_API_KEY / config.LLM_BASE_URL / config.LLM_MODEL for backend.
 Responses are cached to avoid redundant API calls.
 """
 
@@ -15,6 +15,7 @@ import json
 import hashlib
 
 from openai import OpenAI
+from config import LLM_API_KEY, LLM_BASE_URL, LLM_MODEL
 
 # Absolute paths
 PROJECT_ROOT = os.path.dirname(
@@ -28,16 +29,16 @@ _client = None
 
 
 def _get_client():
-    """Get or create OpenAI client."""
+    """Get or create OpenAI-compatible client (defaults to OpenRouter)."""
     global _client
     if _client is None:
-        api_key = os.getenv('OPENAI_API_KEY')
+        api_key = LLM_API_KEY
         if not api_key:
             raise RuntimeError(
-                "OPENAI_API_KEY environment variable not set. "
-                "Set it before enabling LLM_MODE."
+                "OPENROUTER_API_KEY (or OPENAI_API_KEY) environment variable not set. "
+                "Set it before enabling LLM features."
             )
-        _client = OpenAI(api_key=api_key)
+        _client = OpenAI(api_key=api_key, base_url=LLM_BASE_URL)
     return _client
 
 
@@ -59,15 +60,20 @@ def _save_cache(cache):
 
 
 def _cache_key(func_name, *args):
-    """Generate a deterministic cache key from function name and args."""
-    raw = json.dumps([func_name] + list(args), sort_keys=True, default=str)
+    """Generate a deterministic cache key from model, function name and args.
+
+    The model is part of the key so that switching LLM_MODEL (or provider)
+    never returns answers cached from a different model.
+    """
+    raw = json.dumps([LLM_MODEL, func_name] + list(args), sort_keys=True,
+                     default=str)
     return hashlib.sha256(raw.encode()).hexdigest()[:16]
 
 
 # ============== Cluster Naming ==============
 
 def name_cluster(terms, top_k=10):
-    """Use GPT-4o-mini to name a cluster of related terms.
+    """Use the configured LLM to name a cluster of related terms.
 
     Args:
         terms: List of terms in the cluster.
@@ -84,7 +90,7 @@ def name_cluster(terms, top_k=10):
 
     client = _get_client()
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=LLM_MODEL,
         messages=[{
             "role": "system",
             "content": (
@@ -131,7 +137,7 @@ def confirm_alignment(discovered_term, candidate_matches):
 
     client = _get_client()
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=LLM_MODEL,
         messages=[{
             "role": "system",
             "content": (
@@ -185,7 +191,7 @@ def classify_relation(subject, object_, context_sentence):
 
     client = _get_client()
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=LLM_MODEL,
         messages=[{
             "role": "system",
             "content": (

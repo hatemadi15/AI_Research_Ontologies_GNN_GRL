@@ -439,7 +439,8 @@ def extract_rels():
     except ImportError:
         LLM_RELATIONS = False
 
-    if LLM_RELATIONS and os.getenv('OPENAI_API_KEY'):
+    from config import LLM_API_KEY, LLM_MODEL
+    if LLM_RELATIONS and LLM_API_KEY:
         try:
             from llm_validator import _get_client, _load_cache, _save_cache, _cache_key
 
@@ -477,7 +478,8 @@ def extract_rels():
                 for rel_entry in gnn_rels_for_llm:
                     subj = rel_entry['subj']
                     obj = rel_entry['obj']
-                    pair_key = f"{subj}|||{obj}"
+                    # Model-specific so answers from another model are never reused
+                    pair_key = f"{LLM_MODEL}|||{subj}|||{obj}"
 
                     key = _cache_key('llm_relation_v2', subj, obj)
                     if key in cache:
@@ -487,7 +489,7 @@ def extract_rels():
                     else:
                         try:
                             response = client.chat.completions.create(
-                                model="gpt-4o-mini",
+                                model=LLM_MODEL,
                                 messages=[{
                                     "role": "user",
                                     "content": (
