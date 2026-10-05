@@ -117,8 +117,9 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
 |---|---|---|---|---|---|---|---|
 | fixed split (seed 0), 5 model seeds | fine | 5 seeds | 72.99 ± 1.53 [70.86, 75.12] | 67.99 | 72.28 | 74.97 | 69.92 |
 | fixed split (seed 0), 5 model seeds | coarse | 5 seeds | 75.57 ± 1.03 [74.14, 77.01] | 67.14 | 75.87 | 77.11 | 72.32 |
+| new random split per seed | fine | 5 seeds | 73.91 ± 3.28 [69.36, 78.45] | 71.19 | 73.98 | 76.26 | 69.92 |
 
-> **Still running when this snapshot was taken:** the NER split check (`--vary-split` and `--leave-one-paper-out`). These rows will be added when the runs finish.
+> **Still running when this snapshot was taken:** the rest of the NER split check (coarse `--vary-split`, `--leave-one-paper-out`). These rows will be added when the runs finish.
 
 **Reading the numbers**
 * The old "Term F1 0.91" corresponds to *0.12* pairwise alignment F1. The
