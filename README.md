@@ -113,10 +113,10 @@ reported only to show the size of the leak.
 
 | Granularity | Classes | Published (5 seeds) | This repo, CPU | Strict IOB2 | Seeds |
 |---|---|---|---|---|---|
-| fine | 27 | 69.92 | 72.65 ± 1.28 | 74.63 | 3 |
-| coarse | 27 | 72.32 | 75.39 ± 1.25 | 77.05 | 3 |
+| fine | 27 | 69.92 | 73.29 ± 1.57 | 75.23 | 4 |
+| coarse | 27 | 72.32 | 75.39 ± 1.08 | 77.00 | 4 |
 
-> **Still running when this snapshot was taken:** the remaining MatSciBERT NER seeds (5 per granularity are planned). These rows will be added when the runs finish.
+> **Still running when this snapshot was taken:** the last MatSciBERT NER seed per granularity (5 per granularity are planned). These rows will be added when the runs finish.
 
 **Reading the numbers**
 * The old "Term F1 0.91" corresponds to *0.12* pairwise alignment F1. The
@@ -130,7 +130,7 @@ reported only to show the size of the leak.
   taxonomy and relation extractors were never designed to recover MMO
   `subClassOf` edges or restrictions; see the roadmap.
 * Ablations: no component changes typing significantly. The GNN adds 0.006 (0.384 vs 0.378, McNemar p = 0.69), and the whole pipeline beats the plain-SBERT baseline by 0.029 (p = 0.08). The GNN embeddings *hurt* clustering (ARI 0.035 vs 0.195 with plain SBERT). The oracle preset (gold types allowed) reaches 1.000, which is what the v5 evaluation was effectively reporting.
-* NER: our MatSciBERT reproduction reaches 72.65 (fine, 3 seeds) and 75.39 (coarse, 3 seeds) test F1, against the published 69.92 / 72.32. All seeds share one random split (the paper's split is not published), so before calling this SOTA, run all 5 seeds with `--vary-split` and `--leave-one-paper-out` and test significance.
+* NER: our MatSciBERT reproduction reaches 73.29 (fine, 4 seeds) and 75.39 (coarse, 4 seeds) test F1, against the published 69.92 / 72.32. All seeds share one random split (the paper's split is not published), so before calling this SOTA, run all 5 seeds with `--vary-split` and `--leave-one-paper-out` and test significance.
 <!-- RESULTS:END -->
 
 ## Evaluation

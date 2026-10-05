@@ -44,7 +44,7 @@
   "paper_test_f1": 69.92,
   "config": {
     "seeds": [
-      2
+      3
     ],
     "split_seed": 0,
     "vary_split": false,
@@ -844,9 +844,282 @@
       ],
       "run_id": "seed2",
       "runtime_sec": 526.5
+    },
+    {
+      "f1": 75.23,
+      "precision": 72.47,
+      "recall": 78.2,
+      "f1_strict": 77.04,
+      "per_class": {
+        "Alloy": {
+          "precision": 0.95,
+          "recall": 1.0,
+          "f1-score": 0.9744,
+          "support": 19.0
+        },
+        "Crack": {
+          "precision": 0.8667,
+          "recall": 1.0,
+          "f1-score": 0.9286,
+          "support": 13.0
+        },
+        "CrackInitation": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 6.0
+        },
+        "DataSet": {
+          "precision": 0.5,
+          "recall": 0.5,
+          "f1-score": 0.5,
+          "support": 10.0
+        },
+        "FatigueLifetime": {
+          "precision": 0.8,
+          "recall": 1.0,
+          "f1-score": 0.8889,
+          "support": 4.0
+        },
+        "FatigueTest": {
+          "precision": 0.8889,
+          "recall": 0.8,
+          "f1-score": 0.8421,
+          "support": 10.0
+        },
+        "FatigueTestSpecimen": {
+          "precision": 1.0,
+          "recall": 0.6667,
+          "f1-score": 0.8,
+          "support": 6.0
+        },
+        "GrainBoundary": {
+          "precision": 0.5,
+          "recall": 0.5833,
+          "f1-score": 0.5385,
+          "support": 12.0
+        },
+        "LoadingType": {
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1-score": 0.6667,
+          "support": 2.0
+        },
+        "Location": {
+          "precision": 0.6667,
+          "recall": 0.8571,
+          "f1-score": 0.75,
+          "support": 7.0
+        },
+        "MaterialClass": {
+          "precision": 0.6471,
+          "recall": 0.8462,
+          "f1-score": 0.7333,
+          "support": 13.0
+        },
+        "MechanicalProperty": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 6.0
+        },
+        "MechanicalTestDataSet": {
+          "precision": 0.625,
+          "recall": 0.8333,
+          "f1-score": 0.7143,
+          "support": 6.0
+        },
+        "MechanicalTreatment": {
+          "precision": 0.625,
+          "recall": 0.7143,
+          "f1-score": 0.6667,
+          "support": 7.0
+        },
+        "Mechanism": {
+          "precision": 0.5517,
+          "recall": 0.8,
+          "f1-score": 0.6531,
+          "support": 20.0
+        },
+        "Microstructure": {
+          "precision": 0.75,
+          "recall": 1.0,
+          "f1-score": 0.8571,
+          "support": 3.0
+        },
+        "MicrostructureEntity": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 12.0
+        },
+        "StateDescriptor": {
+          "precision": 0.6111,
+          "recall": 0.6111,
+          "f1-score": 0.6111,
+          "support": 18.0
+        },
+        "StrainRate": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 5.0
+        },
+        "StressAmplitude": {
+          "precision": 0.1667,
+          "recall": 0.5,
+          "f1-score": 0.25,
+          "support": 2.0
+        },
+        "TensileUltimateStrength": {
+          "precision": 0.7,
+          "recall": 1.0,
+          "f1-score": 0.8235,
+          "support": 7.0
+        },
+        "TensileYieldStrength": {
+          "precision": 0.375,
+          "recall": 0.375,
+          "f1-score": 0.375,
+          "support": 8.0
+        },
+        "TestSpecimen": {
+          "precision": 0.5,
+          "recall": 0.75,
+          "f1-score": 0.6,
+          "support": 4.0
+        },
+        "TestingMachine": {
+          "precision": 0.8889,
+          "recall": 0.4706,
+          "f1-score": 0.6154,
+          "support": 17.0
+        },
+        "TestingMedium": {
+          "precision": 0.8571,
+          "recall": 1.0,
+          "f1-score": 0.9231,
+          "support": 6.0
+        },
+        "TwinBoundary": {
+          "precision": 0.7778,
+          "recall": 0.7778,
+          "f1-score": 0.7778,
+          "support": 9.0
+        },
+        "Value": {
+          "precision": 0.9394,
+          "recall": 0.9118,
+          "f1-score": 0.9254,
+          "support": 34.0
+        },
+        "micro avg": {
+          "precision": 0.7247,
+          "recall": 0.782,
+          "f1-score": 0.7523,
+          "support": 266.0
+        },
+        "macro avg": {
+          "precision": 0.6921,
+          "recall": 0.7777,
+          "f1-score": 0.7191,
+          "support": 266.0
+        },
+        "weighted avg": {
+          "precision": 0.7418,
+          "recall": 0.782,
+          "f1-score": 0.7506,
+          "support": 266.0
+        }
+      },
+      "seed": 3,
+      "best_epoch": 11,
+      "val_f1": 70.36,
+      "n_train": 309,
+      "n_val": 71,
+      "n_test": 96,
+      "history": [
+        {
+          "epoch": 0,
+          "train_loss": 55.493,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 1,
+          "train_loss": 23.6335,
+          "val_f1": 10.67
+        },
+        {
+          "epoch": 2,
+          "train_loss": 15.7016,
+          "val_f1": 35.85
+        },
+        {
+          "epoch": 3,
+          "train_loss": 9.4831,
+          "val_f1": 54.77
+        },
+        {
+          "epoch": 4,
+          "train_loss": 5.9326,
+          "val_f1": 60.0
+        },
+        {
+          "epoch": 5,
+          "train_loss": 3.6037,
+          "val_f1": 60.52
+        },
+        {
+          "epoch": 6,
+          "train_loss": 2.3417,
+          "val_f1": 65.26
+        },
+        {
+          "epoch": 7,
+          "train_loss": 1.5214,
+          "val_f1": 65.86
+        },
+        {
+          "epoch": 8,
+          "train_loss": 1.1179,
+          "val_f1": 67.3
+        },
+        {
+          "epoch": 9,
+          "train_loss": 0.8238,
+          "val_f1": 69.21
+        },
+        {
+          "epoch": 10,
+          "train_loss": 0.5795,
+          "val_f1": 69.12
+        },
+        {
+          "epoch": 11,
+          "train_loss": 0.4348,
+          "val_f1": 70.36
+        },
+        {
+          "epoch": 12,
+          "train_loss": 0.3311,
+          "val_f1": 68.2
+        },
+        {
+          "epoch": 13,
+          "train_loss": 0.2618,
+          "val_f1": 67.92
+        },
+        {
+          "epoch": 14,
+          "train_loss": 0.2024,
+          "val_f1": 69.03
+        }
+      ],
+      "run_id": "seed3",
+      "runtime_sec": 777.4
     }
   ],
-  "test_f1_mean": 72.65,
-  "test_f1_std": 1.28,
-  "test_f1_strict_mean": 74.63
+  "test_f1_mean": 73.29,
+  "test_f1_std": 1.57,
+  "test_f1_strict_mean": 75.23
 }

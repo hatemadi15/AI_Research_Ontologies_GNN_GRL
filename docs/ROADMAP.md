@@ -10,14 +10,14 @@ expectations from the literature, not results.
 <!-- STANDING:START -->
 | Task | Best leakage-free result in this repo | Reference |
 |---|---|---|
-| NER, fine / coarse (MatSciBERT, MaterioMiner protocol) | fine: 72.65 ± 1.28 (3 seeds) vs published 69.92; coarse: 75.39 ± 1.25 (3 seeds) vs published 72.32 | 69.92 / 72.32 (Kumar et al. 2024) |
+| NER, fine / coarse (MatSciBERT, MaterioMiner protocol) | fine: 73.29 ± 1.57 (4 seeds) vs published 69.92; coarse: 75.39 ± 1.08 (4 seeds) vs published 72.32 | 69.92 / 72.32 (Kumar et al. 2024) |
 | Term typing, 315 terms, pipeline (zero-shot) | accuracy 0.384 (LLM on: 0.429) | majority class 0.083 |
 | Term typing, 5-fold CV baselines | hybrid 0.496; hybrid + LLM 0.654 (set F1 0.598) | LLMs4OL 2025 MatOnto best F1 0.667 (different dataset) |
 | Clustering vs gold classes | ARI 0.035, B-cubed F1 0.183 (all-singletons baseline 0.475) | – |
 | Taxonomy, class level | edge F1 0.006; precision vs closure 0.027 (chance 0.013) | LLMs4OL 2025 MatOnto best F1 0.662 (different dataset) |
 | Relations, class level vs 70 restrictions | F1 0.000 | no text-level gold exists |
 
-> **Still running when this snapshot was taken:** the remaining MatSciBERT NER seeds (5 per granularity are planned). These rows will be added when the runs finish.
+> **Still running when this snapshot was taken:** the last MatSciBERT NER seed per granularity (5 per granularity are planned). These rows will be added when the runs finish.
 
 Full tables: [README](../README.md#results).
 <!-- STANDING:END -->
