@@ -1,0 +1,197 @@
+{
+  "oracle": false,
+  "oracle_flags": {
+    "ORACLE_TYPES": false,
+    "NER_TYPE_CLUSTERING": false
+  },
+  "universe": {
+    "n_terms": 315,
+    "n_ambiguous_terms": 47,
+    "n_gold_classes": 111,
+    "n_majority_classes": 98,
+    "gold_term_spans_given": true
+  },
+  "reference_majority_class": {
+    "class": "https://w3id.org/pmd/materials-mechanics-ontology/Mechanism",
+    "accuracy": 0.0825
+  },
+  "prediction_source": "legacy alignment CSV: v5 ontology_alignment.csv (LLM on)",
+  "warning": "Predictions come from an external alignment file; the evaluator cannot tell whether they used gold types (v5 files did, via type_match rows).",
+  "typing": {
+    "n_terms": 315,
+    "n_predicted": 299,
+    "coverage": 0.9492,
+    "n_correct": 233,
+    "accuracy": 0.7397,
+    "precision": 0.7793,
+    "recall": 0.7397,
+    "f1": 0.759,
+    "set_precision": 0.7793,
+    "set_recall": 0.623,
+    "set_f1": 0.6924,
+    "macro_f1": 0.675,
+    "n_majority_classes": 98,
+    "class_precision": 0.7636,
+    "class_recall": 0.7568,
+    "class_f1": 0.7602,
+    "n_active_classes": 111,
+    "acc@1": 0.7397,
+    "acc@3": 0.7873,
+    "acc@5": 0.8032,
+    "h_precision": 0.8545,
+    "h_recall": 0.8358,
+    "h_f1": 0.845,
+    "aurc": 0.2249,
+    "accuracy_ci95": [
+      0.6921,
+      0.7905
+    ],
+    "fixed_threshold": 0.5,
+    "thresholds": {
+      "0.3": {
+        "precision": 0.7785,
+        "recall": 0.7365,
+        "f1": 0.7569,
+        "n_predicted": 298
+      },
+      "0.4": {
+        "precision": 0.7778,
+        "recall": 0.7333,
+        "f1": 0.7549,
+        "n_predicted": 297
+      },
+      "0.5": {
+        "precision": 0.7804,
+        "recall": 0.7333,
+        "f1": 0.7561,
+        "n_predicted": 296
+      },
+      "0.6": {
+        "precision": 0.7804,
+        "recall": 0.7333,
+        "f1": 0.7561,
+        "n_predicted": 296
+      },
+      "0.7": {
+        "precision": 0.7924,
+        "recall": 0.727,
+        "f1": 0.7583,
+        "n_predicted": 289
+      },
+      "0.8": {
+        "precision": 0.9124,
+        "recall": 0.5619,
+        "f1": 0.6955,
+        "n_predicted": 194
+      }
+    }
+  },
+  "alignment_rows": {
+    "n_rows": 2528,
+    "thresholds": {
+      "0.5": {
+        "precision": 0.1773,
+        "recall": 0.7032,
+        "f1": 0.2833,
+        "n_rows": 1483
+      },
+      "0.55": {
+        "precision": 0.1822,
+        "recall": 0.7005,
+        "f1": 0.2892,
+        "n_rows": 1438
+      },
+      "0.6": {
+        "precision": 0.2201,
+        "recall": 0.6925,
+        "f1": 0.334,
+        "n_rows": 1177
+      },
+      "0.65": {
+        "precision": 0.3176,
+        "recall": 0.6818,
+        "f1": 0.4333,
+        "n_rows": 803
+      },
+      "0.7": {
+        "precision": 0.4911,
+        "recall": 0.6604,
+        "f1": 0.5633,
+        "n_rows": 503
+      },
+      "0.75": {
+        "precision": 0.5994,
+        "recall": 0.516,
+        "f1": 0.5546,
+        "n_rows": 322
+      },
+      "0.8": {
+        "precision": 0.7148,
+        "recall": 0.516,
+        "f1": 0.5994,
+        "n_rows": 270
+      },
+      "0.85": {
+        "precision": 0.7934,
+        "recall": 0.5134,
+        "f1": 0.6234,
+        "n_rows": 242
+      }
+    }
+  },
+  "clustering": {
+    "ari": 0.78,
+    "v_measure": 0.9648,
+    "nmi": 0.9648,
+    "n_clusters": 105,
+    "bcubed_precision": 0.957,
+    "bcubed_recall": 0.8633,
+    "bcubed_f1": 0.9077,
+    "baseline_singletons": {
+      "ari": 0.0,
+      "v_measure": 0.8371,
+      "nmi": 0.8371,
+      "n_clusters": 315,
+      "bcubed_precision": 1.0,
+      "bcubed_recall": 0.3111,
+      "bcubed_f1": 0.4746
+    },
+    "baseline_one_cluster": {
+      "ari": 0.0,
+      "v_measure": 0.0,
+      "nmi": 0.0,
+      "n_clusters": 1,
+      "bcubed_precision": 0.0246,
+      "bcubed_recall": 1.0,
+      "bcubed_f1": 0.0481
+    }
+  },
+  "taxonomy": {
+    "n_edges": 30,
+    "precision_closure": 0.1667,
+    "inverted": 0.2667,
+    "precision": 0.0667,
+    "recall": 0.022,
+    "f1": 0.0331,
+    "n_gold_edges": 91,
+    "random_precision_closure": 0.0132,
+    "n_term_edges": 146,
+    "diagnostic_gold_lifted": {
+      "n_edges": 7,
+      "precision_closure": 0.2857,
+      "inverted": 0.4286,
+      "precision": 0.2857,
+      "recall": 0.022,
+      "f1": 0.0408,
+      "n_gold_edges": 91,
+      "random_precision_closure": 0.0132
+    }
+  },
+  "dataset_checks": {
+    "note": "Properties of the dataset, not model metrics. The old \"Type F1\" (~0.997) measured only this label/ontology overlap.",
+    "n_fine_ner_types": 177,
+    "ner_types_resolvable_by_local_name": 177,
+    "n_ontology_classes": 428,
+    "n_restriction_triples": 70
+  }
+}

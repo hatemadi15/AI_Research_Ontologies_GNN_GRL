@@ -1,0 +1,334 @@
+{
+  "task": "term typing (gold term spans given) on MaterioMiner -> MMO",
+  "config": {
+    "min_df": 2,
+    "n_terms": 315,
+    "n_classes": 428,
+    "n_splits": 5,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "embedder": "all-MiniLM-L6-v2",
+    "knn_k": 5,
+    "lambda": 0.5,
+    "llm": true,
+    "llm_calls": 315,
+    "llm_model": "openai/gpt-4o-mini"
+  },
+  "methods": {
+    "majority": {
+      "setting": "supervised-CV",
+      "mean_over_folds": {
+        "accuracy": 0.0826,
+        "set_f1": 0.0756,
+        "macro_f1": 0.0032,
+        "acc@3": 0.0826,
+        "acc@5": 0.0826,
+        "h_f1": 0.076,
+        "coverage": 1.0,
+        "acc_seen_classes": 0.097,
+        "acc_unseen_classes": 0.0
+      },
+      "std_over_folds": {
+        "accuracy": 0.0063,
+        "set_f1": 0.0067,
+        "macro_f1": 0.0003,
+        "acc@3": 0.0063,
+        "acc@5": 0.0063,
+        "h_f1": 0.0094,
+        "coverage": 0.0,
+        "acc_seen_classes": 0.0095,
+        "acc_unseen_classes": 0.0
+      },
+      "n_fold_runs": 15,
+      "pooled_first_seed": {
+        "accuracy": 0.0825,
+        "set_precision": 0.0825,
+        "set_recall": 0.0695,
+        "set_f1": 0.0755,
+        "macro_f1": 0.0014,
+        "h_f1": 0.0759,
+        "coverage": 1.0
+      },
+      "accuracy_ci95_first_seed": [
+        0.0508,
+        0.1143
+      ]
+    },
+    "exact": {
+      "setting": "zero-shot",
+      "mean_over_folds": {
+        "accuracy": 0.1523,
+        "set_f1": 0.2234,
+        "macro_f1": 0.1721,
+        "acc@3": 0.1523,
+        "acc@5": 0.1523,
+        "h_f1": 0.3059,
+        "coverage": 0.1713,
+        "acc_seen_classes": 0.0966,
+        "acc_unseen_classes": 0.4662
+      },
+      "std_over_folds": {
+        "accuracy": 0.0308,
+        "set_f1": 0.0412,
+        "macro_f1": 0.032,
+        "acc@3": 0.0308,
+        "acc@5": 0.0308,
+        "h_f1": 0.0716,
+        "coverage": 0.0426,
+        "acc_seen_classes": 0.0276,
+        "acc_unseen_classes": 0.1118
+      },
+      "n_fold_runs": 15,
+      "pooled_first_seed": {
+        "accuracy": 0.1524,
+        "set_precision": 0.8889,
+        "set_recall": 0.1283,
+        "set_f1": 0.2243,
+        "macro_f1": 0.321,
+        "h_f1": 0.3085,
+        "coverage": 0.1714
+      },
+      "accuracy_ci95_first_seed": [
+        0.1143,
+        0.1937
+      ]
+    },
+    "label": {
+      "setting": "zero-shot",
+      "mean_over_folds": {
+        "accuracy": 0.3555,
+        "set_f1": 0.325,
+        "macro_f1": 0.3531,
+        "acc@3": 0.4445,
+        "acc@5": 0.4921,
+        "h_f1": 0.5087,
+        "coverage": 1.0,
+        "acc_seen_classes": 0.2899,
+        "acc_unseen_classes": 0.737
+      },
+      "std_over_folds": {
+        "accuracy": 0.0435,
+        "set_f1": 0.0384,
+        "macro_f1": 0.0497,
+        "acc@3": 0.0534,
+        "acc@5": 0.0393,
+        "h_f1": 0.0559,
+        "coverage": 0.0,
+        "acc_seen_classes": 0.0491,
+        "acc_unseen_classes": 0.1152
+      },
+      "n_fold_runs": 15,
+      "pooled_first_seed": {
+        "accuracy": 0.3556,
+        "set_precision": 0.3556,
+        "set_recall": 0.2995,
+        "set_f1": 0.3251,
+        "macro_f1": 0.4456,
+        "h_f1": 0.5093,
+        "coverage": 1.0
+      },
+      "accuracy_ci95_first_seed": [
+        0.3048,
+        0.4063
+      ]
+    },
+    "definition": {
+      "setting": "zero-shot",
+      "mean_over_folds": {
+        "accuracy": 0.3207,
+        "set_f1": 0.293,
+        "macro_f1": 0.3504,
+        "acc@3": 0.4445,
+        "acc@5": 0.4953,
+        "h_f1": 0.4796,
+        "coverage": 1.0,
+        "acc_seen_classes": 0.2635,
+        "acc_unseen_classes": 0.6607
+      },
+      "std_over_folds": {
+        "accuracy": 0.058,
+        "set_f1": 0.0504,
+        "macro_f1": 0.0518,
+        "acc@3": 0.067,
+        "acc@5": 0.0646,
+        "h_f1": 0.0602,
+        "coverage": 0.0,
+        "acc_seen_classes": 0.0551,
+        "acc_unseen_classes": 0.1094
+      },
+      "n_fold_runs": 15,
+      "pooled_first_seed": {
+        "accuracy": 0.3206,
+        "set_precision": 0.3206,
+        "set_recall": 0.2701,
+        "set_f1": 0.2932,
+        "macro_f1": 0.4618,
+        "h_f1": 0.4799,
+        "coverage": 1.0
+      },
+      "accuracy_ci95_first_seed": [
+        0.273,
+        0.3746
+      ]
+    },
+    "label+def": {
+      "setting": "zero-shot",
+      "mean_over_folds": {
+        "accuracy": 0.3555,
+        "set_f1": 0.3249,
+        "macro_f1": 0.3722,
+        "acc@3": 0.4508,
+        "acc@5": 0.5112,
+        "h_f1": 0.509,
+        "coverage": 1.0,
+        "acc_seen_classes": 0.2823,
+        "acc_unseen_classes": 0.7779
+      },
+      "std_over_folds": {
+        "accuracy": 0.0421,
+        "set_f1": 0.0362,
+        "macro_f1": 0.0468,
+        "acc@3": 0.0571,
+        "acc@5": 0.0414,
+        "h_f1": 0.0553,
+        "coverage": 0.0,
+        "acc_seen_classes": 0.0496,
+        "acc_unseen_classes": 0.0885
+      },
+      "n_fold_runs": 15,
+      "pooled_first_seed": {
+        "accuracy": 0.3556,
+        "set_precision": 0.3556,
+        "set_recall": 0.2995,
+        "set_f1": 0.3251,
+        "macro_f1": 0.4911,
+        "h_f1": 0.5089,
+        "coverage": 1.0
+      },
+      "accuracy_ci95_first_seed": [
+        0.3048,
+        0.4032
+      ]
+    },
+    "knn": {
+      "setting": "supervised-CV",
+      "mean_over_folds": {
+        "accuracy": 0.4158,
+        "set_f1": 0.3806,
+        "macro_f1": 0.3127,
+        "acc@3": 0.5715,
+        "acc@5": 0.6298,
+        "h_f1": 0.5141,
+        "coverage": 1.0,
+        "acc_seen_classes": 0.4882,
+        "acc_unseen_classes": 0.0
+      },
+      "std_over_folds": {
+        "accuracy": 0.0503,
+        "set_f1": 0.0484,
+        "macro_f1": 0.053,
+        "acc@3": 0.0445,
+        "acc@5": 0.0481,
+        "h_f1": 0.0491,
+        "coverage": 0.0,
+        "acc_seen_classes": 0.0614,
+        "acc_unseen_classes": 0.0
+      },
+      "n_fold_runs": 15,
+      "pooled_first_seed": {
+        "accuracy": 0.4349,
+        "set_precision": 0.4349,
+        "set_recall": 0.3663,
+        "set_f1": 0.3977,
+        "macro_f1": 0.2002,
+        "h_f1": 0.5249,
+        "coverage": 1.0
+      },
+      "accuracy_ci95_first_seed": [
+        0.3778,
+        0.4921
+      ]
+    },
+    "hybrid": {
+      "setting": "supervised-CV",
+      "mean_over_folds": {
+        "accuracy": 0.4963,
+        "set_f1": 0.4543,
+        "macro_f1": 0.4297,
+        "acc@3": 0.7111,
+        "acc@5": 0.7715,
+        "h_f1": 0.6116,
+        "coverage": 1.0,
+        "acc_seen_classes": 0.507,
+        "acc_unseen_classes": 0.4554
+      },
+      "std_over_folds": {
+        "accuracy": 0.0413,
+        "set_f1": 0.0417,
+        "macro_f1": 0.0396,
+        "acc@3": 0.0551,
+        "acc@5": 0.0624,
+        "h_f1": 0.056,
+        "coverage": 0.0,
+        "acc_seen_classes": 0.0502,
+        "acc_unseen_classes": 0.1325
+      },
+      "n_fold_runs": 15,
+      "pooled_first_seed": {
+        "accuracy": 0.5111,
+        "set_precision": 0.5111,
+        "set_recall": 0.4305,
+        "set_f1": 0.4673,
+        "macro_f1": 0.3906,
+        "h_f1": 0.618,
+        "coverage": 1.0
+      },
+      "accuracy_ci95_first_seed": [
+        0.454,
+        0.5683
+      ]
+    },
+    "hybrid+llm": {
+      "setting": "supervised-CV + LLM",
+      "mean_over_folds": {
+        "accuracy": 0.654,
+        "set_f1": 0.5977,
+        "macro_f1": 0.6056,
+        "acc@3": 0.7587,
+        "acc@5": 0.7778,
+        "h_f1": 0.7419,
+        "coverage": 1.0,
+        "acc_seen_classes": 0.6323,
+        "acc_unseen_classes": 0.7856
+      },
+      "std_over_folds": {
+        "accuracy": 0.0836,
+        "set_f1": 0.0725,
+        "macro_f1": 0.055,
+        "acc@3": 0.0848,
+        "acc@5": 0.0731,
+        "h_f1": 0.0763,
+        "coverage": 0.0,
+        "acc_seen_classes": 0.0927,
+        "acc_unseen_classes": 0.0863
+      },
+      "n_fold_runs": 5,
+      "pooled_first_seed": {
+        "accuracy": 0.654,
+        "set_precision": 0.654,
+        "set_recall": 0.5508,
+        "set_f1": 0.598,
+        "macro_f1": 0.6145,
+        "h_f1": 0.742,
+        "coverage": 1.0
+      },
+      "accuracy_ci95_first_seed": [
+        0.5968,
+        0.7079
+      ]
+    }
+  }
+}

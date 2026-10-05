@@ -1,0 +1,265 @@
+{
+  "oracle": false,
+  "oracle_flags": {
+    "ORACLE_TYPES": false,
+    "NER_TYPE_CLUSTERING": false
+  },
+  "universe": {
+    "n_terms": 315,
+    "n_ambiguous_terms": 47,
+    "n_gold_classes": 111,
+    "n_majority_classes": 98,
+    "gold_term_spans_given": true
+  },
+  "reference_majority_class": {
+    "class": "https://w3id.org/pmd/materials-mechanics-ontology/Mechanism",
+    "accuracy": 0.0825
+  },
+  "prediction_source": "predicted_types.json",
+  "typing_before_rag": {
+    "n_terms": 315,
+    "n_predicted": 315,
+    "coverage": 1.0,
+    "n_correct": 121,
+    "accuracy": 0.3841,
+    "precision": 0.3841,
+    "recall": 0.3841,
+    "f1": 0.3841,
+    "set_precision": 0.3841,
+    "set_recall": 0.3235,
+    "set_f1": 0.3512,
+    "macro_f1": 0.4565,
+    "n_majority_classes": 98,
+    "class_precision": 0.5462,
+    "class_recall": 0.6396,
+    "class_f1": 0.5892,
+    "n_active_classes": 111,
+    "acc@1": 0.3841,
+    "acc@3": 0.4698,
+    "acc@5": 0.5016,
+    "h_precision": 0.4879,
+    "h_recall": 0.5614,
+    "h_f1": 0.522,
+    "aurc": 0.3935,
+    "accuracy_ci95": [
+      0.3302,
+      0.4349
+    ],
+    "fixed_threshold": 0.5,
+    "thresholds": {
+      "0.3": {
+        "precision": 0.5123,
+        "recall": 0.3302,
+        "f1": 0.4015,
+        "n_predicted": 203
+      },
+      "0.4": {
+        "precision": 0.5742,
+        "recall": 0.2825,
+        "f1": 0.3787,
+        "n_predicted": 155
+      },
+      "0.5": {
+        "precision": 0.633,
+        "recall": 0.219,
+        "f1": 0.3255,
+        "n_predicted": 109
+      },
+      "0.6": {
+        "precision": 0.8269,
+        "recall": 0.1365,
+        "f1": 0.2343,
+        "n_predicted": 52
+      },
+      "0.7": {
+        "precision": 0.8824,
+        "recall": 0.0952,
+        "f1": 0.1719,
+        "n_predicted": 34
+      },
+      "0.8": {
+        "precision": 1.0,
+        "recall": 0.019,
+        "f1": 0.0374,
+        "n_predicted": 6
+      }
+    }
+  },
+  "typing": {
+    "n_terms": 315,
+    "n_predicted": 315,
+    "coverage": 1.0,
+    "n_correct": 121,
+    "accuracy": 0.3841,
+    "precision": 0.3841,
+    "recall": 0.3841,
+    "f1": 0.3841,
+    "set_precision": 0.3841,
+    "set_recall": 0.3235,
+    "set_f1": 0.3512,
+    "macro_f1": 0.4565,
+    "n_majority_classes": 98,
+    "class_precision": 0.5462,
+    "class_recall": 0.6396,
+    "class_f1": 0.5892,
+    "n_active_classes": 111,
+    "acc@1": 0.3841,
+    "acc@3": 0.4698,
+    "acc@5": 0.5016,
+    "h_precision": 0.4879,
+    "h_recall": 0.5614,
+    "h_f1": 0.522,
+    "aurc": 0.3935,
+    "accuracy_ci95": [
+      0.3302,
+      0.4349
+    ],
+    "fixed_threshold": 0.5,
+    "thresholds": {
+      "0.3": {
+        "precision": 0.5123,
+        "recall": 0.3302,
+        "f1": 0.4015,
+        "n_predicted": 203
+      },
+      "0.4": {
+        "precision": 0.5742,
+        "recall": 0.2825,
+        "f1": 0.3787,
+        "n_predicted": 155
+      },
+      "0.5": {
+        "precision": 0.633,
+        "recall": 0.219,
+        "f1": 0.3255,
+        "n_predicted": 109
+      },
+      "0.6": {
+        "precision": 0.8269,
+        "recall": 0.1365,
+        "f1": 0.2343,
+        "n_predicted": 52
+      },
+      "0.7": {
+        "precision": 0.8824,
+        "recall": 0.0952,
+        "f1": 0.1719,
+        "n_predicted": 34
+      },
+      "0.8": {
+        "precision": 1.0,
+        "recall": 0.019,
+        "f1": 0.0374,
+        "n_predicted": 6
+      }
+    }
+  },
+  "alignment_rows": {
+    "n_rows": 3842,
+    "thresholds": {
+      "0.5": {
+        "precision": 0.074,
+        "recall": 0.3369,
+        "f1": 0.1214,
+        "n_rows": 1702
+      },
+      "0.55": {
+        "precision": 0.0886,
+        "recall": 0.2914,
+        "f1": 0.1359,
+        "n_rows": 1230
+      },
+      "0.6": {
+        "precision": 0.1072,
+        "recall": 0.2513,
+        "f1": 0.1503,
+        "n_rows": 877
+      },
+      "0.65": {
+        "precision": 0.1358,
+        "recall": 0.2059,
+        "f1": 0.1637,
+        "n_rows": 567
+      },
+      "0.7": {
+        "precision": 0.1902,
+        "recall": 0.1765,
+        "f1": 0.1831,
+        "n_rows": 347
+      },
+      "0.75": {
+        "precision": 0.2448,
+        "recall": 0.1257,
+        "f1": 0.1661,
+        "n_rows": 192
+      },
+      "0.8": {
+        "precision": 0.3371,
+        "recall": 0.0802,
+        "f1": 0.1296,
+        "n_rows": 89
+      },
+      "0.85": {
+        "precision": 0.4222,
+        "recall": 0.0508,
+        "f1": 0.0907,
+        "n_rows": 45
+      }
+    }
+  },
+  "clustering": {
+    "ari": 0.0354,
+    "v_measure": 0.4342,
+    "nmi": 0.4342,
+    "n_clusters": 11,
+    "bcubed_precision": 0.1084,
+    "bcubed_recall": 0.5884,
+    "bcubed_f1": 0.1831,
+    "baseline_singletons": {
+      "ari": 0.0,
+      "v_measure": 0.8371,
+      "nmi": 0.8371,
+      "n_clusters": 315,
+      "bcubed_precision": 1.0,
+      "bcubed_recall": 0.3111,
+      "bcubed_f1": 0.4746
+    },
+    "baseline_one_cluster": {
+      "ari": 0.0,
+      "v_measure": 0.0,
+      "nmi": 0.0,
+      "n_clusters": 1,
+      "bcubed_precision": 0.0246,
+      "bcubed_recall": 1.0,
+      "bcubed_f1": 0.0481
+    }
+  },
+  "taxonomy": {
+    "n_edges": 219,
+    "precision_closure": 0.0274,
+    "inverted": 0.0137,
+    "precision": 0.0046,
+    "recall": 0.011,
+    "f1": 0.0065,
+    "n_gold_edges": 91,
+    "random_precision_closure": 0.0132,
+    "n_term_edges": 315,
+    "diagnostic_gold_lifted": {
+      "n_edges": 211,
+      "precision_closure": 0.0427,
+      "inverted": 0.0237,
+      "precision": 0.0332,
+      "recall": 0.0769,
+      "f1": 0.0464,
+      "n_gold_edges": 91,
+      "random_precision_closure": 0.0132
+    }
+  },
+  "dataset_checks": {
+    "note": "Properties of the dataset, not model metrics. The old \"Type F1\" (~0.997) measured only this label/ontology overlap.",
+    "n_fine_ner_types": 177,
+    "ner_types_resolvable_by_local_name": 177,
+    "n_ontology_classes": 428,
+    "n_restriction_triples": 70
+  }
+}
