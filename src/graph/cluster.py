@@ -1,31 +1,29 @@
 """
-cluster.py - Term Clustering with GNN Embeddings and NER Types
+cluster.py - Term Clustering with GNN Embeddings
 
-Clusters graph nodes using agglomerative clustering with:
-  - GNN embeddings when available (preferred over raw SBERT)
-  - NER-type-based sub-clustering when entity_types.json available
-  - API key from environment variable (no hardcoded keys)
-  - Optional Gemini LLM cluster naming
-  - Optional LLM cluster naming via llm_validator (when LLM_MODE enabled)
+Clusters graph nodes with agglomerative clustering (cosine, average linkage),
+choosing the number of clusters by silhouette score:
+  - GNN embeddings when available and USE_GNN_EMBEDDINGS is on (fine graph
+    only; the GNN is trained on the fine graph), SBERT node features otherwise
+  - Cluster names are cosmetic: the most frequent term of the cluster, or an
+    LLM-proposed name (USE_LLM_CLUSTERING with Gemini / LLM_MODE)
+
+NER-type-guided clustering (one cluster per gold NER type, sub-clustered by
+embedding) uses the gold annotations, so it is only available as an oracle
+component (NER_TYPE_CLUSTERING, which defaults to ORACLE_TYPES).
 """
 
 import os
 import json
+from collections import Counter, defaultdict
 
 import numpy as np
-import torch
-import pandas as pd
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.metrics import silhouette_score
-from collections import defaultdict
 
-# Get project root directory (2 levels up from this script)
-PROJECT_ROOT = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-)
-PROCESSED_DIR = os.path.join(PROJECT_ROOT, "data", "processed")
+from config import (GOLD_TYPES_FILE, LLM_MODE, NER_TYPE_CLUSTERING,
+                    ORACLE_TYPES, PROCESSED_DIR, USE_GNN_EMBEDDINGS)
 
-# Paths
 GRAPHPATHS = {
     'fine_auto': os.path.join(PROCESSED_DIR, 'graph_fine_auto.pt'),
     'coarse': os.path.join(PROCESSED_DIR, 'graph_coarse.pt')
@@ -36,11 +34,14 @@ NODEMAPPATHS = {
 }
 GNN_EMBED_PATH = os.path.join(PROCESSED_DIR, 'gnn_embeddings.npy')
 GNN_MAP_PATH = os.path.join(PROCESSED_DIR, 'gnn_embed_map.json')
-ENTITY_TYPES_PATH = os.path.join(PROCESSED_DIR, 'entity_types.json')
+GOLD_TYPES_PATH = os.path.join(PROCESSED_DIR, GOLD_TYPES_FILE)
+CORPUS_FREQ_PATH = os.path.join(PROCESSED_DIR, 'corpus_frequencies.json')
 
 
 def load_graph(key):
-    """Load PyG data and inverse node->term map."""
+    """Load node features and the inverse node->term map for a graph."""
+    import torch
+
     graph_path = GRAPHPATHS[key]
     nodemap_path = NODEMAPPATHS[key]
     if not (os.path.exists(graph_path) and os.path.exists(nodemap_path)):
@@ -50,41 +51,24 @@ def load_graph(key):
     data = torch.load(graph_path, weights_only=False)
     nodemap = torch.load(nodemap_path, weights_only=False)
     inv_nodemap = {idx: term for term, idx in nodemap.items()}
+    X = data.x.cpu().numpy()
 
-    # Use GNN embeddings if available, otherwise fall back to SBERT
-    if os.path.exists(GNN_EMBED_PATH) and os.path.exists(GNN_MAP_PATH):
-        print(f"  Using GNN embeddings from {GNN_EMBED_PATH}")
+    # The GNN is trained on the fine graph only; the coarse baseline always
+    # uses its own SBERT node features.
+    if (key == 'fine_auto' and USE_GNN_EMBEDDINGS
+            and os.path.exists(GNN_EMBED_PATH) and os.path.exists(GNN_MAP_PATH)):
         gnn_embeds = np.load(GNN_EMBED_PATH)
         with open(GNN_MAP_PATH) as f:
             gnn_map = json.load(f)
-        # Reorder to match nodemap ordering
-        X = np.zeros((len(nodemap), gnn_embeds.shape[1]))
-        for term, idx in nodemap.items():
-            if term in gnn_map:
-                gnn_idx = gnn_map[term]
-                if gnn_idx < gnn_embeds.shape[0]:
-                    X[idx] = gnn_embeds[gnn_idx]
-        # Fill missing with SBERT features (handle dimension mismatch)
-        sbert_x = data.x.cpu().numpy()
-        n_missing = sum(1 for idx in range(len(nodemap))
-                        if np.allclose(X[idx], 0))
-        if n_missing > 0:
-            if sbert_x.shape[1] == X.shape[1]:
-                for idx in range(len(nodemap)):
-                    if np.allclose(X[idx], 0) and idx < sbert_x.shape[0]:
-                        X[idx] = sbert_x[idx]
-            else:
-                # Dimension mismatch: fill with small random to avoid zero vectors
-                rng = np.random.default_rng(42)
-                for idx in range(len(nodemap)):
-                    if np.allclose(X[idx], 0):
-                        X[idx] = rng.normal(0, 0.01, X.shape[1])
-                print(f"  Filled {n_missing} missing embeddings with noise "
-                      f"(dim mismatch: GNN={X.shape[1]} vs SBERT={sbert_x.shape[1]})")
+        missing = [t for t in nodemap if t not in gnn_map]
+        if not missing:
+            print(f"  Using GNN embeddings from {GNN_EMBED_PATH}")
+            X = np.stack([gnn_embeds[gnn_map[inv_nodemap[i]]]
+                          for i in range(len(nodemap))])
+        else:
+            print(f"  GNN embeddings miss {len(missing)} terms, using SBERT features")
     else:
-        print("  GNN embeddings not available, using SBERT features")
-        X = data.x.cpu().numpy()
-
+        print("  Using SBERT node features")
     return X, inv_nodemap, nodemap
 
 
@@ -106,25 +90,22 @@ def optimal_nclusters(X, max_k=50):
     return best_k
 
 
-def ner_type_guided_clustering(X, inv_nodemap, nodemap, max_subcluster_size=20):
-    """NER-type-guided clustering: group by NER type first, then sub-cluster.
+def ner_type_guided_clustering(X, inv_nodemap, max_subcluster_size=20):
+    """ORACLE: group terms by their gold majority NER type, then sub-cluster.
 
-    1. Groups entities by their NER type (one cluster per unique type, ~173 clusters)
-    2. Within each NER-type cluster, sub-clusters by SBERT similarity if > max_subcluster_size
-    3. Returns cluster_list and cluster_names dicts
+    Uses the gold annotations (gold_term_types.json); only called when
+    NER_TYPE_CLUSTERING is enabled.
     """
-    entity_types = {}
-    if os.path.exists(ENTITY_TYPES_PATH):
-        with open(ENTITY_TYPES_PATH) as f:
-            entity_types = json.load(f)
-
-    if not entity_types:
-        print("  No entity types available, falling back to silhouette clustering")
+    if not os.path.exists(GOLD_TYPES_PATH):
+        print("  No gold types available, falling back to silhouette clustering")
         return None, None
+    with open(GOLD_TYPES_PATH) as f:
+        gold_types = json.load(f)
+    entity_types = {t: max(sorted(c), key=c.get) for t, c in gold_types.items() if c}
 
-    print(f"  NER-type-guided clustering with {len(set(entity_types.values()))} unique types")
+    print(f"  [ORACLE] NER-type-guided clustering with "
+          f"{len(set(entity_types.values()))} gold types")
 
-    # Group entities by NER type
     type_groups = defaultdict(list)
     untyped = []
     for idx in range(X.shape[0]):
@@ -133,134 +114,69 @@ def ner_type_guided_clustering(X, inv_nodemap, nodemap, max_subcluster_size=20):
             type_groups[entity_types[term]].append((idx, term))
         else:
             untyped.append((idx, term))
+    if untyped:
+        type_groups['Untyped'] = untyped
 
     cluster_list = {}
     cluster_names = {}
     cid = 0
-
     for ner_type, members in sorted(type_groups.items()):
         if len(members) <= max_subcluster_size:
-            # Small enough: one cluster for this NER type
-            cluster_list[cid] = sorted([term for _, term in members], key=len)
+            groups = [[term for _, term in members]]
+        else:
+            sub_X = X[[idx for idx, _ in members]]
+            n_sub = max(2, len(members) // 12)
+            sub_labels = AgglomerativeClustering(
+                n_clusters=n_sub, metric='cosine', linkage='average'
+            ).fit_predict(sub_X)
+            sub_groups = defaultdict(list)
+            for i, label in enumerate(sub_labels):
+                sub_groups[label].append(members[i][1])
+            groups = [sub_groups[k] for k in sorted(sub_groups)]
+        for terms in groups:
+            cluster_list[cid] = sorted(terms, key=lambda t: (len(t), t))
             cluster_names[cid] = ner_type
             cid += 1
-        else:
-            # Sub-cluster by embedding similarity
-            indices = [idx for idx, _ in members]
-            sub_X = X[indices]
-            # Target: sub-clusters of ~10-15 entities
-            n_sub = max(2, len(members) // 12)
-            try:
-                sub_clust = AgglomerativeClustering(
-                    n_clusters=n_sub, metric='cosine', linkage='average'
-                )
-                sub_labels = sub_clust.fit_predict(sub_X)
-                sub_groups = defaultdict(list)
-                for i, label in enumerate(sub_labels):
-                    sub_groups[label].append(members[i][1])
-                for sub_terms in sub_groups.values():
-                    cluster_list[cid] = sorted(sub_terms, key=len)
-                    cluster_names[cid] = ner_type
-                    cid += 1
-            except Exception:
-                # Fallback: single cluster
-                cluster_list[cid] = sorted([term for _, term in members], key=len)
-                cluster_names[cid] = ner_type
-                cid += 1
 
-    # Add untyped entities as separate clusters (grouped loosely)
-    if untyped:
-        if len(untyped) <= max_subcluster_size:
-            cluster_list[cid] = sorted([term for _, term in untyped], key=len)
-            cluster_names[cid] = "Untyped"
-            cid += 1
-        else:
-            indices = [idx for idx, _ in untyped]
-            sub_X = X[indices]
-            n_sub = max(2, len(untyped) // 12)
-            try:
-                sub_clust = AgglomerativeClustering(
-                    n_clusters=n_sub, metric='cosine', linkage='average'
-                )
-                sub_labels = sub_clust.fit_predict(sub_X)
-                sub_groups = defaultdict(list)
-                for i, label in enumerate(sub_labels):
-                    sub_groups[label].append(untyped[i][1])
-                for sub_terms in sub_groups.values():
-                    cluster_list[cid] = sorted(sub_terms, key=len)
-                    cluster_names[cid] = "Untyped"
-                    cid += 1
-            except Exception:
-                cluster_list[cid] = sorted([term for _, term in untyped], key=len)
-                cluster_names[cid] = "Untyped"
-                cid += 1
-
-    print(f"  NER-type clustering: {cid} clusters from {len(type_groups)} NER types")
+    print(f"  NER-type clustering: {cid} clusters from {len(type_groups)} types")
     return cluster_list, cluster_names
 
 
 def cluster_graph(key, use_llm=False):
-    """Cluster graph nodes into term groups.
-
-    Uses NER-type-guided clustering by default (NER_TYPE_CLUSTERING=true),
-    with fallback to silhouette-based agglomerative clustering.
-    """
+    """Cluster graph nodes into term groups."""
     X, inv_nodemap, nodemap = load_graph(key)
     if X is None:
         return None, None
 
     print(f"Processing {key}: {X.shape[0]} nodes, dim={X.shape[1]}")
 
-    # Check if NER-type-guided clustering is enabled
-    try:
-        from config import NER_TYPE_CLUSTERING
-    except ImportError:
-        NER_TYPE_CLUSTERING = True
-
-    cluster_list = None
-    cluster_names = None
-
-    if NER_TYPE_CLUSTERING:
-        cluster_list, cluster_names = ner_type_guided_clustering(
-            X, inv_nodemap, nodemap
-        )
+    cluster_list = cluster_names = None
+    if NER_TYPE_CLUSTERING and key == 'fine_auto':
+        if not ORACLE_TYPES:
+            print("  WARNING: NER_TYPE_CLUSTERING uses gold types; results are "
+                  "an oracle upper bound")
+        cluster_list, cluster_names = ner_type_guided_clustering(X, inv_nodemap)
 
     if cluster_list is None:
-        # Fallback: silhouette-based clustering
-        print("  Using silhouette-based clustering (fallback)")
         n_clusters = optimal_nclusters(X)
-        clust = AgglomerativeClustering(
+        labels = AgglomerativeClustering(
             n_clusters=n_clusters, metric='cosine', linkage='average'
-        )
-        labels = clust.fit_predict(X)
-
+        ).fit_predict(X)
         clusters = defaultdict(list)
         for idx, label in enumerate(labels):
-            term = inv_nodemap[idx]
-            clusters[label].append(term)
+            clusters[int(label)].append(inv_nodemap[idx])
+        cluster_list = {cid: sorted(terms, key=lambda t: (len(t), t))
+                        for cid, terms in sorted(clusters.items())}
 
-        cluster_list = {
-            int(cid): sorted(terms, key=len)
-            for cid, terms in clusters.items()
+        # Cosmetic names: the most frequent term of each cluster
+        corpus_freq = {}
+        if os.path.exists(CORPUS_FREQ_PATH):
+            with open(CORPUS_FREQ_PATH) as f:
+                corpus_freq = json.load(f)
+        cluster_names = {
+            cid: max(terms, key=lambda t: (corpus_freq.get(t, 0), -len(t)))
+            for cid, terms in cluster_list.items()
         }
-
-        # Determine cluster names from dominant NER type
-        entity_types = {}
-        if os.path.exists(ENTITY_TYPES_PATH):
-            with open(ENTITY_TYPES_PATH) as f:
-                entity_types = json.load(f)
-
-        cluster_names = {}
-        for cid, terms in cluster_list.items():
-            type_counts = defaultdict(int)
-            for t in terms:
-                if t in entity_types:
-                    type_counts[entity_types[t]] += 1
-            if type_counts:
-                dominant_type = max(type_counts, key=type_counts.get)
-                cluster_names[cid] = dominant_type
-            else:
-                cluster_names[cid] = f"Cluster_{cid}"
 
     # LLM naming override (optional - Gemini)
     if use_llm:
@@ -269,42 +185,32 @@ def cluster_graph(key, use_llm=False):
         print(f"  LLM named {len(llm_names)} clusters")
 
     # LLM naming (llm_validator) for top-20 largest clusters (when LLM_MODE is enabled)
-    try:
-        from config import LLM_MODE as _LLM_MODE
-        if _LLM_MODE:
-            try:
-                from llm_validator import name_cluster as openai_name_cluster
-                sorted_clusters = sorted(cluster_list.items(),
-                                         key=lambda x: len(x[1]), reverse=True)
-                top_20 = sorted_clusters[:20]
-                for cid, terms in top_20:
-                    try:
-                        llm_name = openai_name_cluster(terms)
-                        cluster_names[cid] = llm_name
-                        print(f"    LLM named cluster {cid} ({len(terms)} terms): {llm_name}")
-                    except Exception as e:
-                        print(f"    LLM naming failed for cluster {cid}: {e}")
-                print(f"  LLM named up to {len(top_20)} clusters")
-            except ImportError as e:
-                print(f"  LLM naming unavailable: {e}")
-    except ImportError:
-        pass
+    if LLM_MODE:
+        try:
+            from llm_validator import name_cluster
+            top_20 = sorted(cluster_list.items(), key=lambda x: -len(x[1]))[:20]
+            for cid, terms in top_20:
+                try:
+                    cluster_names[cid] = name_cluster(terms)
+                except Exception as e:
+                    print(f"    LLM naming failed for cluster {cid}: {e}")
+            print(f"  LLM named up to {len(top_20)} clusters")
+        except ImportError as e:
+            print(f"  LLM naming unavailable: {e}")
 
+    import pandas as pd
     cluster_df = pd.DataFrame({
         'cluster_id': list(cluster_list.keys()),
         'cluster_name': [cluster_names.get(cid, f"Cluster_{cid}")
                          for cid in cluster_list.keys()],
         'n_terms': [len(terms) for terms in cluster_list.values()],
         'top_terms': [', '.join(terms[:5]) for terms in cluster_list.values()]
-    }).sort_values('n_terms', ascending=False)
+    }).sort_values(['n_terms', 'cluster_id'], ascending=[False, True])
 
     return cluster_df, cluster_list
 
 
 # ============== Gemini LLM Integration ==============
-LLM_MODE = False  # Disabled by default; set to True or use env var
-
-
 def llm_name_cluster(terms, domain="materials mechanics"):
     """Use Gemini to propose an ontology class name for a cluster."""
     import google.generativeai as genai
@@ -339,24 +245,25 @@ def llm_name_clusters(cluster_list):
 
 
 if __name__ == '__main__':
-    os.makedirs(PROCESSED_DIR, exist_ok=True)
+    import pandas as pd
 
-    # Check env var for LLM mode
+    os.makedirs(PROCESSED_DIR, exist_ok=True)
     use_llm = os.getenv('USE_LLM_CLUSTERING', '').lower() in ('1', 'true', 'yes')
-    if use_llm:
-        LLM_MODE = True
 
     results = {}
     for key in ['fine_auto', 'coarse']:
-        df, clusters = cluster_graph(key, use_llm=LLM_MODE)
+        df, clusters = cluster_graph(key, use_llm=use_llm)
         if df is not None:
             df.to_csv(os.path.join(PROCESSED_DIR, f'{key}_clusters.csv'),
                       index=False)
             with open(os.path.join(PROCESSED_DIR, f'{key}_clusters.json'),
                       'w', encoding='utf-8') as f:
-                json.dump(clusters, f, indent=2, ensure_ascii=False)
+                json.dump({str(k): v for k, v in clusters.items()}, f,
+                          indent=2, ensure_ascii=False)
             results[key] = df.head(10)
-            print(f"Saved {key} clusters: {len(clusters)} groups")
+            sizes = Counter(len(v) for v in clusters.values())
+            print(f"Saved {key} clusters: {len(clusters)} groups "
+                  f"({sizes.get(1, 0)} singletons)")
 
     if results:
         summary = pd.concat([df.assign(graph=key) for key, df in results.items()])
