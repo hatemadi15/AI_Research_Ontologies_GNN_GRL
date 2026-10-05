@@ -16,5 +16,5 @@ reviewers check the reported numbers.
 | `term_typing_mindf1.json` | `term_typing_baseline.py --min-df 1` | the same baselines on all 1,055 annotated surfaces (no LLM) |
 | `ner_results_fine.json`, `ner_results_coarse.json` | `ner_baseline.py` | MatSciBERT NER under the MaterioMiner protocol, per seed |
 
-The NER files hold the seeds finished so far (see `runs`); they are updated
-as the remaining seeds of the 5-seed protocol finish.
+The NER files hold all 5 model seeds per granularity (see `runs`), trained on
+one fixed random split (`--split-seed 0`).

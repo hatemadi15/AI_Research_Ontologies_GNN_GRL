@@ -10,14 +10,12 @@ expectations from the literature, not results.
 <!-- STANDING:START -->
 | Task | Best leakage-free result in this repo | Reference |
 |---|---|---|
-| NER, fine / coarse (MatSciBERT, MaterioMiner protocol) | fine: 73.29 ± 1.57 (4 seeds) vs published 69.92; coarse: 75.39 ± 1.08 (4 seeds) vs published 72.32 | 69.92 / 72.32 (Kumar et al. 2024) |
+| NER, fine / coarse (MatSciBERT, MaterioMiner protocol) | fine: 72.99 ± 1.53 (5 seeds) vs published 69.92; coarse: 75.57 ± 1.03 (5 seeds) vs published 72.32 | 69.92 / 72.32 (Kumar et al. 2024) |
 | Term typing, 315 terms, pipeline (zero-shot) | accuracy 0.384 (LLM on: 0.429) | majority class 0.083 |
 | Term typing, 5-fold CV baselines | hybrid 0.496; hybrid + LLM 0.654 (set F1 0.598) | LLMs4OL 2025 MatOnto best F1 0.667 (different dataset) |
 | Clustering vs gold classes | ARI 0.035, B-cubed F1 0.183 (all-singletons baseline 0.475) | – |
 | Taxonomy, class level | edge F1 0.006; precision vs closure 0.027 (chance 0.013) | LLMs4OL 2025 MatOnto best F1 0.662 (different dataset) |
 | Relations, class level vs 70 restrictions | F1 0.000 | no text-level gold exists |
-
-> **Still running when this snapshot was taken:** the last MatSciBERT NER seed per granularity (5 per granularity are planned). These rows will be added when the runs finish.
 
 Full tables: [README](../README.md#results).
 <!-- STANDING:END -->
@@ -56,16 +54,18 @@ The pipeline currently consumes gold spans. A real end-to-end system needs NER,
 and NER is the only task with a published SOTA on this data.
 1. **Check that the reproduction holds across splits before claiming SOTA.**
    The plain MatSciBERT baseline in `ner_baseline.py` already scores above the
-   published numbers on our random split (§1). The paper's split is not
+   published numbers on our random split (§1); every one of its 5 seeds per
+   granularity is above the published mean. The paper's split is not
    published and the test set has only about 96 sentences, so a few points of
-   split-to-split variance are expected.
-   - Finish 5 seeds × 2 granularities.
-   - Re-run with `--vary-split` (a new split per seed) and with
+   split-to-split variance are expected (the seed-to-seed range alone is
+   70.8–75.2 fine-grained).
+   - Done: 5 seeds × 2 granularities on one fixed split.
+   - Next: re-run with `--vary-split` (a new split per seed) and with
      `--leave-one-paper-out`.
    - Compare systems on the same splits with a paired bootstrap over test
      sentences.
 
-   A CPU run takes 13–25 minutes; on one GPU the whole protocol takes minutes.
+   A CPU run takes 9–25 minutes; on one GPU the whole protocol takes minutes.
 2. **Hierarchy-aware multi-task training.** Coarse labels are the fine labels
    propagated up the MMO taxonomy, so a joint fine + coarse head (or a loss
    over the label hierarchy) shares signal with the 85 fine classes that have
