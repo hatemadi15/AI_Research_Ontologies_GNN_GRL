@@ -84,6 +84,22 @@ def test_bootstrap_is_deterministic():
     assert metrics.accuracy_ci(pred, GOLD, seed=3) == metrics.accuracy_ci(pred, GOLD, seed=3)
 
 
+def test_mcnemar_exact():
+    gold = {f't{i}': {'A'} for i in range(10)}
+    good = {t: 'A' for t in gold}
+    worse = {t: ('A' if i < 4 else 'B') for i, t in enumerate(sorted(gold))}
+    res = metrics.mcnemar_exact(good, worse, gold)
+    assert (res['only_a'], res['only_b']) == (6, 0)
+    assert res['accuracy_diff'] == 0.6
+    assert res['p_value'] == pytest.approx(2 / 2 ** 6, abs=1e-4)
+    assert metrics.mcnemar_exact(worse, good, gold)['p_value'] == res['p_value']
+    # 4 vs 2 discordant terms: p = 2 * (1 + 6 + 15) / 64, far from significant
+    mixed = dict(good, t4='B', t5='B')
+    other = dict(good, t0='B', t1='B', t2='B', t3='B')
+    assert metrics.mcnemar_exact(mixed, other, gold)['p_value'] == pytest.approx(0.6875)
+    assert metrics.mcnemar_exact(good, good, gold)['p_value'] == 1.0
+
+
 def test_pairwise_alignment_rows():
     rows = [('crack', 'Crack', 0.9), ('crack', 'Alloy', 0.8), ('alloy', 'Alloy', 0.4),
             ('unknown', 'Crack', 0.99)]

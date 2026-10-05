@@ -10,14 +10,14 @@ expectations from the literature, not results.
 <!-- STANDING:START -->
 | Task | Best leakage-free result in this repo | Reference |
 |---|---|---|
-| NER, fine / coarse (MatSciBERT, MaterioMiner protocol) | run pending (`ner_baseline.py`) | 69.92 / 72.32 (Kumar et al. 2024) |
+| NER, fine / coarse (MatSciBERT, MaterioMiner protocol) | fine: 73.55 ± 0.02 (2 seeds) vs published 69.92; coarse: 73.62 (1 seed) vs published 72.32 | 69.92 / 72.32 (Kumar et al. 2024) |
 | Term typing, 315 terms, pipeline (zero-shot) | accuracy 0.384 (LLM on: 0.429) | majority class 0.083 |
 | Term typing, 5-fold CV baselines | hybrid 0.496; hybrid + LLM 0.654 (set F1 0.598) | LLMs4OL 2025 MatOnto best F1 0.667 (different dataset) |
 | Clustering vs gold classes | ARI 0.035, B-cubed F1 0.183 (all-singletons baseline 0.475) | – |
 | Taxonomy, class level | edge F1 0.006; precision vs closure 0.027 (chance 0.013) | LLMs4OL 2025 MatOnto best F1 0.662 (different dataset) |
 | Relations, class level vs 70 restrictions | F1 0.000 | no text-level gold exists |
 
-> **Still running when this snapshot was taken:** the ablation suite, the MatSciBERT NER seeds. These rows will be added when the runs finish.
+> **Still running when this snapshot was taken:** the remaining MatSciBERT NER seeds (5 per granularity are planned). These rows will be added when the runs finish.
 
 Full tables: [README](../README.md#results).
 <!-- STANDING:END -->
@@ -41,10 +41,12 @@ not be reused.
 ### P0: Keep the evaluation honest (partly done in this PR)
 - Done: leakage-free typing, alignment, clustering, taxonomy and relation
   metrics; the gold file is isolated behind `ORACLE_TYPES`; a unit test
-  enforces that; deterministic runs; CI.
+  enforces that; deterministic runs; CI; paired exact McNemar tests
+  (`metrics.mcnemar_exact`) for every ablation preset.
 - Next: report every headline number as mean ± std over seeds or folds plus a
   bootstrap CI (the test sets are tiny: 96 NER test sentences, 315 terms). Use
-  paired bootstrap tests when claiming an improvement.
+  paired tests (McNemar for typing, paired bootstrap over sentences for NER)
+  whenever claiming an improvement.
 - Next: write one results JSON per run (git SHA, config, seed, model ids) and
   never tune thresholds or prompts on test folds. `FIXED_THRESHOLD` and the
   baseline hyper-parameters are fixed in advance for this reason.
@@ -52,9 +54,18 @@ not be reused.
 ### P1: Beat the published NER numbers (69.92 / 72.32)
 The pipeline currently consumes gold spans. A real end-to-end system needs NER,
 and NER is the only task with a published SOTA on this data.
-1. **Reproduce MatSciBERT first** with `ner_baseline.py` on a GPU (5 seeds × 2
-   granularities, about 10 minutes on one GPU). The CPU reproduction in this
-   PR is in §1.
+1. **Check that the reproduction holds across splits before claiming SOTA.**
+   The plain MatSciBERT baseline in `ner_baseline.py` already scores above the
+   published numbers on our random split (§1). The paper's split is not
+   published and the test set has only about 96 sentences, so a few points of
+   split-to-split variance are expected.
+   - Finish 5 seeds × 2 granularities.
+   - Re-run with `--vary-split` (a new split per seed) and with
+     `--leave-one-paper-out`.
+   - Compare systems on the same splits with a paired bootstrap over test
+     sentences.
+
+   A CPU run takes 13–25 minutes; on one GPU the whole protocol takes minutes.
 2. **Hierarchy-aware multi-task training.** Coarse labels are the fine labels
    propagated up the MMO taxonomy, so a joint fine + coarse head (or a loss
    over the label hierarchy) shares signal with the 85 fine classes that have
@@ -108,8 +119,14 @@ Diagnosis from this PR:
   similarities were meaningless; they drove clustering, taxonomy and 2,207
   "GNN relations" in v5.
 - After the fix (residual projection, lr 1e-3, chosen on validation
-  link-prediction loss), the GNN contributes through term-side score
-  smoothing. Its measured effect is in the ablation table.
+  link-prediction loss), the GNN contributes only through term-side score
+  smoothing, and the ablations show that this does not matter:
+  - typing accuracy is 0.384 with it and 0.378 without (McNemar p = 0.69);
+  - clustering on the GNN embeddings is far worse than on plain SBERT
+    (ARI 0.035 vs 0.195).
+- Link-prediction embeddings encode which terms co-occur, not which class
+  they belong to. The steps below train the graph model for the typing
+  objective instead.
 
 Next:
 1. **Heterogeneous term–class graph.**
@@ -158,7 +175,7 @@ chance at class level. For a Task C-style result:
 
 | Week | Work | Exit criterion |
 |---|---|---|
-| 1 | GPU NER reproduction (5 seeds × 2), class weights, CRF | Mean F1 within 1 point of 69.92 / 72.32, with error bars |
-| 2 | Domain-adaptive pre-training + hierarchy-aware multi-task NER, ensembles | Beats 69.92 / 72.32 by more than the bootstrap CI |
+| 1 | GPU NER reproduction (5 seeds × 2, varied splits, leave-one-paper-out), class weights, CRF | Baseline mean ± std on every split protocol; it stays at or above 69.92 / 72.32 on varied splits |
+| 2 | Domain-adaptive pre-training + hierarchy-aware multi-task NER, ensembles | Beats the reproduced baseline on the same splits (paired bootstrap, p < 0.05) and 69.92 / 72.32 on average |
 | 3 | Context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | Typing accuracy above the hybrid + LLM baseline (§1) |
 | 4 | Class-level taxonomy (LLM or cross-encoder + arborescence); relation annotation pilot | First class-level taxonomy F1 above chance; relation guidelines |

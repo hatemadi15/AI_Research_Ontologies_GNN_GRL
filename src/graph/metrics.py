@@ -17,6 +17,7 @@ Conventions
 Only the standard library is needed, except clustering_metrics (scikit-learn).
 """
 
+import math
 import random
 from collections import Counter, defaultdict
 
@@ -228,6 +229,27 @@ def accuracy_ci(pred, gold, n_boot=1000, seed=0):
             for t in sorted(gold)]
     return bootstrap_ci(hits, lambda xs: safe_div(sum(xs), len(xs)),
                         n_boot=n_boot, seed=seed)
+
+
+def mcnemar_exact(pred_a, pred_b, gold):
+    """Exact two-sided McNemar test of two systems' accuracy on the same terms.
+
+    Only discordant terms count: only_a = terms system A gets right and B gets
+    wrong, only_b the reverse. p is the two-sided binomial(only_a + only_b,
+    0.5) tail. Use it before claiming that one configuration beats another.
+    """
+    only_a = only_b = 0
+    for t in gold:
+        a_ok = pred_a.get(t) is not None and pred_a.get(t) in gold[t]
+        b_ok = pred_b.get(t) is not None and pred_b.get(t) in gold[t]
+        only_a += int(a_ok and not b_ok)
+        only_b += int(b_ok and not a_ok)
+    n = only_a + only_b
+    tail = sum(math.comb(n, i) for i in range(min(only_a, only_b) + 1))
+    p = min(1.0, 2 * tail / 2 ** n) if n else 1.0
+    return {'only_a': only_a, 'only_b': only_b,
+            'accuracy_diff': _r(safe_div(only_a - only_b, len(gold))),
+            'p_value': _r(p)}
 
 
 # ---------------------------------------------------------------------------

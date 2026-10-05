@@ -66,6 +66,7 @@ reported only to show the size of the leak.
 | Majority-class reference | – | 0.083 | – | – | – | – |
 | **Pipeline v6, LLM off** | no | 0.384 [0.33, 0.43] | 0.351 | 0.457 | 0.502 | 0.522 |
 | **Pipeline v6, LLM on** (RAG re-ranking) | no | 0.429 [0.38, 0.48] | 0.392 | 0.478 | 0.502 | 0.591 |
+| Pipeline v6, ORACLE (upper bound) | **yes** | 1.000 [1.00, 1.00] | 0.914 | 0.908 | 1.000 | 1.000 |
 | v5 outputs re-scored, LLM off | **yes** (leak) | 0.571 [0.51, 0.62] (coverage 0.67) | 0.615 | 0.349 | 0.648 | 0.703 |
 | v5 outputs re-scored, LLM on | **yes** (leak) | 0.740 [0.69, 0.79] (coverage 0.95) | 0.692 | 0.675 | 0.803 | 0.845 |
 
@@ -92,7 +93,30 @@ reported only to show the size of the leak.
 | Taxonomy | – | class-level edge F1 (precision vs closure; chance 0.013) | 0.000 (0.069) | 0.006 (0.027) | 0.025 (0.031) |
 | Relations | partial-entity recall 0.925 | class-level F1 vs 70 restrictions | – | 0.000 | 0.000 |
 
-> **Still running when this snapshot was taken:** the ablation suite, the MatSciBERT NER seeds. These rows will be added when the runs finish.
+#### Ablations (`run_ablation.py`, LLM off; oracle = upper bound)
+
+Δ is the paired typing-accuracy difference to `full_pipeline` on the same 315 terms; p is the exact McNemar test.
+
+| Preset | Typing acc. | Δ vs full (p) | Set F1 | Macro-F1 | Hier. F1 | Clust. ARI | Taxonomy P (closure) | Relation class-F1 |
+|---|---|---|---|---|---|---|---|---|
+| full_pipeline | 0.384 | – | 0.351 | 0.457 | 0.522 | 0.035 | 0.027 | 0.000 |
+| no_gnn | 0.378 | -0.006 (0.69) | 0.345 | 0.459 | 0.517 | 0.195 | 0.037 | 0.000 |
+| no_bidirectional | 0.384 | +0.000 (1.00) | 0.351 | 0.457 | 0.522 | 0.035 | 0.027 | 0.000 |
+| embedding_only | 0.365 | -0.019 (0.24) | 0.334 | 0.451 | 0.512 | 0.035 | 0.022 | 0.000 |
+| no_hearst | 0.384 | +0.000 (1.00) | 0.351 | 0.457 | 0.522 | 0.035 | 0.029 | 0.000 |
+| no_dep_parsing | 0.384 | +0.000 (1.00) | 0.351 | 0.457 | 0.522 | 0.035 | 0.027 | 0.000 |
+| no_corpus_augment | 0.381 | -0.003 (1.00) | 0.348 | 0.456 | 0.518 | 0.082 | 0.010 | 0.000 |
+| baseline_sbert | 0.356 | -0.029 (0.08) | 0.325 | 0.446 | 0.509 | 0.195 | 0.033 | 0.000 |
+| oracle *(oracle)* | 1.000 | +0.616 (<0.001) | 0.914 | 0.908 | 1.000 | 0.863 | 0.136 | 0.002 |
+
+#### NER (MatSciBERT, MaterioMiner protocol, seqeval entity F1)
+
+| Granularity | Classes | Published (5 seeds) | This repo, CPU | Strict IOB2 | Seeds |
+|---|---|---|---|---|---|
+| fine | 27 | 69.92 | 73.55 ± 0.02 | 75.69 | 2 |
+| coarse | 27 | 72.32 | 73.62 | 75.53 | 1 |
+
+> **Still running when this snapshot was taken:** the remaining MatSciBERT NER seeds (5 per granularity are planned). These rows will be added when the runs finish.
 
 **Reading the numbers**
 * The old "Term F1 0.91" corresponds to *0.12* pairwise alignment F1. The
@@ -105,6 +129,8 @@ reported only to show the size of the leak.
 * Taxonomy and relations are near zero at class level. The term-level
   taxonomy and relation extractors were never designed to recover MMO
   `subClassOf` edges or restrictions; see the roadmap.
+* Ablations: no component changes typing significantly. The GNN adds 0.006 (0.384 vs 0.378, McNemar p = 0.69), and the whole pipeline beats the plain-SBERT baseline by 0.029 (p = 0.08). The GNN embeddings *hurt* clustering (ARI 0.035 vs 0.195 with plain SBERT). The oracle preset (gold types allowed) reaches 1.000, which is what the v5 evaluation was effectively reporting.
+* NER: our MatSciBERT reproduction reaches 73.55 (fine, 2 seeds) and 73.62 (coarse, 1 seed) test F1, against the published 69.92 / 72.32. All seeds share one random split (the paper's split is not published), so before calling this SOTA, run all 5 seeds with `--vary-split` and `--leave-one-paper-out` and test significance.
 <!-- RESULTS:END -->
 
 ## Evaluation
@@ -164,7 +190,7 @@ default model `openai/gpt-4o-mini`) or `OPENAI_API_KEY`. `LLM_MODEL` and
 ```bash
 python src/graph/run_pipeline.py                    # full pipeline (cleans stale outputs)
 python src/graph/run_pipeline.py --from align.py    # resume from a stage
-python src/graph/run_ablation.py                    # all ablations, LLM off
+python src/graph/run_ablation.py                    # all ablations, LLM off, paired tests vs full
 python src/graph/term_typing_baseline.py [--llm]    # cross-validated typing baselines
 python src/graph/ner_baseline.py --granularity both --seeds 0 1 2 3 4   # GPU recommended
 python src/graph/eval_f1.py --legacy-alignment-csv old/ontology_alignment.csv  # score old outputs

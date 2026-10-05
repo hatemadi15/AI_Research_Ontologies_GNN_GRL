@@ -10,7 +10,9 @@ plus the first stage that has to be re-run. The runner
      data/processed/ablations/<preset>/ and re-runs the pipeline from the
      preset's first affected stage with PROCESSED_DIR pointing there,
   3. collects the leakage-free metrics (eval_results.json,
-     relation_eval_results.json) into ablation_summary.csv/.json.
+     relation_eval_results.json) into ablation_summary.csv/.json, with an
+     exact McNemar test of each preset's typing against the base preset
+     (typing_diff_vs_base, typing_mcnemar_p).
 
 All presets run with the LLM features off unless --llm is given, so the
 comparison is deterministic and free. Presets marked oracle use gold types
@@ -20,6 +22,8 @@ Usage:
     python run_ablation.py                          # all presets except the
                                                     # embedder presets
     python run_ablation.py --preset no_gnn          # one preset (+ base)
+    python run_ablation.py --summarize-only         # rebuild the summary from
+                                                    # existing preset outputs
     python run_ablation.py --list                   # list presets
 """
 
@@ -32,7 +36,8 @@ import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from config import ABLATION_PRESETS, DEFAULT_PROCESSED_DIR, get_preset, list_presets  # noqa: E402
+from config import (ABLATION_PRESETS, DEFAULT_PROCESSED_DIR, PREDICTED_TYPES_BASE_FILE,  # noqa: E402
+                    PREDICTED_TYPES_FILE, get_preset, list_presets)
 from run_pipeline import SCRIPTS, run_stages, stage_env  # noqa: E402
 
 ABLATION_DIR = os.path.join(DEFAULT_PROCESSED_DIR, "ablations")
@@ -118,8 +123,54 @@ def summarize(name, out_dir, elapsed):
         'taxonomy_precision_closure': tx.get('precision_closure'),
         'relations': rel.get('n_relations'),
         'relations_class_f1': rel.get('predicted_typing', {}).get('f1'),
-        'runtime_sec': round(elapsed, 1),
+        'runtime_sec': round(elapsed, 1) if elapsed is not None else None,
     }
+
+
+def typing_predictions(out_dir):
+    """The typing decision a preset was scored on (as in eval_f1)."""
+    from eval_f1 import load_predictions
+    for fn in (PREDICTED_TYPES_FILE, PREDICTED_TYPES_BASE_FILE):
+        path = os.path.join(out_dir, fn)
+        if os.path.exists(path):
+            return load_predictions(path)[0]
+    return None
+
+
+def add_paired_tests(rows):
+    """Exact McNemar test of each preset's typing against the base preset.
+
+    With 315 terms, accuracy differences of a few points are often noise, so
+    the summary reports the paired p-value next to every difference.
+    """
+    import metrics
+    from eval_f1 import load_gold
+    from ontology_utils import load_ontology
+
+    for row in rows:
+        row['typing_diff_vs_base'] = None
+        row['typing_mcnemar_p'] = None
+    base = typing_predictions(preset_dir(BASE_PRESET))
+    if base is None:
+        return
+    _, gold, _, _ = load_gold(load_ontology())
+    for row in rows:
+        if row['preset'] == BASE_PRESET:
+            continue
+        pred = typing_predictions(preset_dir(row['preset']))
+        if pred is None:
+            continue
+        test = metrics.mcnemar_exact(pred, base, gold)
+        row['typing_diff_vs_base'] = test['accuracy_diff']
+        row['typing_mcnemar_p'] = test['p_value']
+
+
+def previous_runtimes():
+    path = os.path.join(ABLATION_DIR, 'ablation_summary.json')
+    if not os.path.exists(path):
+        return {}
+    with open(path) as f:
+        return {r['preset']: r.get('runtime_sec') for r in json.load(f)}
 
 
 def main():
@@ -128,6 +179,9 @@ def main():
                         help='preset(s) to run (repeatable); default: all')
     parser.add_argument('--llm', action='store_true',
                         help='keep the LLM features on (costs API calls)')
+    parser.add_argument('--summarize-only', action='store_true',
+                        help='rebuild the summary from existing preset outputs '
+                             'without running any stage')
     parser.add_argument('--list', action='store_true', help='list presets')
     args = parser.parse_args()
 
@@ -142,8 +196,15 @@ def main():
     names = [BASE_PRESET] + [n for n in names if n != BASE_PRESET]
 
     rows = []
+    runtimes = previous_runtimes() if args.summarize_only else {}
     for name in names:
-        row = run_preset(name, llm=args.llm)
+        if args.summarize_only:
+            if not os.path.exists(os.path.join(preset_dir(name), 'eval_results.json')):
+                print(f"  Preset {name}: no results in {preset_dir(name)}")
+                continue
+            row = summarize(name, preset_dir(name), runtimes.get(name))
+        else:
+            row = run_preset(name, llm=args.llm)
         if row is None:
             print(f"  Preset {name} failed")
             continue
@@ -151,14 +212,16 @@ def main():
 
     if not rows:
         return
+    add_paired_tests(rows)
     import pandas as pd
     os.makedirs(ABLATION_DIR, exist_ok=True)
     df = pd.DataFrame(rows)
     df.to_csv(os.path.join(ABLATION_DIR, 'ablation_summary.csv'), index=False)
     with open(os.path.join(ABLATION_DIR, 'ablation_summary.json'), 'w') as f:
         json.dump(rows, f, indent=2)
-    cols = ['preset', 'oracle', 'typing_accuracy', 'typing_set_f1', 'typing_macro_f1',
-            'typing_h_f1', 'clustering_ari', 'taxonomy_f1', 'relations_class_f1']
+    cols = ['preset', 'oracle', 'typing_accuracy', 'typing_mcnemar_p', 'typing_set_f1',
+            'typing_macro_f1', 'typing_h_f1', 'clustering_ari', 'taxonomy_f1',
+            'relations_class_f1']
     print("\n" + "=" * 100)
     print("ABLATION SUMMARY (leakage-free metrics; oracle rows are upper bounds)")
     print("=" * 100)
