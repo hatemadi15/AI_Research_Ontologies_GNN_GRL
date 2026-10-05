@@ -1,8 +1,0 @@
-﻿Loading C:\Users\user\Desktop\AI_Research_Automated\data\processed\ontology_alignment_llm.csv...
-+LLM Confirmed: P=0.26 R=0.67 F1=0.37
-
-Variable Threshold Results:
-   thresh      prec       rec        f1
-0    0.85  0.257143  0.666667  0.371134
-1    0.75  0.369427  0.666667  0.475410
-2    0.65  0.318182  0.666667  0.430769

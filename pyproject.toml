@@ -1,0 +1,20 @@
+[project]
+name = "ai-research-ontologies-gnn-grl"
+version = "0.6.0"
+description = "Ontology learning on MaterioMiner: co-occurrence graphs, GNN embeddings, term typing and leakage-free evaluation"
+requires-python = ">=3.10"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src/graph", "tests"]
+
+[tool.ruff.lint]
+# Errors that indicate real bugs: syntax errors, undefined names, unused or
+# redefined imports/variables.
+select = ["E9", "F63", "F7", "F82", "F401", "F811", "F841"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src/graph"]
+addopts = "-q"

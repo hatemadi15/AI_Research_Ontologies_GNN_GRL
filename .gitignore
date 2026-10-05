@@ -9,6 +9,7 @@ data/processed/
 # Note: If you have some .txt files you DO want to track (like requirements.txt), you can force add them later using `git add -f requirements.txt`
 *.txt
 !requirements.txt
+!requirements-dev.txt
 
 # Python cache / virtual environments
 __pycache__/
@@ -16,3 +17,7 @@ __pycache__/
 *$py.class
 venv/
 .env
+
+# Test / tool caches
+.pytest_cache/
+.ruff_cache/
