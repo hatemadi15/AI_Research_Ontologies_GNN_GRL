@@ -10,14 +10,12 @@ expectations from the literature, not results.
 <!-- STANDING:START -->
 | Task | Best leakage-free result in this repo | Reference |
 |---|---|---|
-| NER, fine / coarse (MatSciBERT, MaterioMiner protocol) | fine: micro 72.99 [70.86, 75.12] (macro 67.99) on the fixed split, 73.91 [69.36, 78.45] over 5 new splits, 43.51 leaving one paper out; coarse: micro 75.57 [74.14, 77.01] (macro 67.14) on the fixed split, 74.57 [73.15, 75.98] over 5 new splits | 69.92 / 72.32 (Kumar et al. 2024; averaging not stated) |
+| NER, fine / coarse (MatSciBERT, MaterioMiner protocol) | fine: micro 72.99 [70.86, 75.12] (macro 67.99) on the fixed split, 73.91 [69.36, 78.45] over 5 new splits, 43.51 leaving one paper out; coarse: micro 75.57 [74.14, 77.01] (macro 67.14) on the fixed split, 74.57 [73.15, 75.98] over 5 new splits, 54.34 leaving one paper out | 69.92 / 72.32 (Kumar et al. 2024; averaging not stated) |
 | Term typing, 315 terms, pipeline (zero-shot) | accuracy 0.384 (LLM on: 0.429) | majority class 0.083 |
 | Term typing, 5-fold CV baselines | hybrid 0.496; hybrid + LLM 0.654 (set F1 0.598) | LLMs4OL 2025 MatOnto best F1 0.667 (different dataset) |
 | Clustering vs gold classes | ARI 0.035, B-cubed F1 0.183 (all-singletons baseline 0.475) | – |
 | Taxonomy, class level | edge F1 0.006; precision vs closure 0.027 (chance 0.013) | LLMs4OL 2025 MatOnto best F1 0.662 (different dataset) |
 | Relations, class level vs 70 restrictions | F1 0.000 | no text-level gold exists |
-
-> **Still running when this snapshot was taken:** the coarse-grained leave-one-paper-out NER runs. These rows will be added when the runs finish.
 
 Full tables: [README](../README.md#results).
 <!-- STANDING:END -->
@@ -26,7 +24,7 @@ Full tables: [README](../README.md#results).
 
 | Task | Published reference | Comparable today? |
 |---|---|---|
-| **NER on MaterioMiner** (span + class, seqeval entity F1) | MatSciBERT 69.92 fine-grained (top-27 classes) / 72.32 coarse-grained, random 65/15/20 split, 5 seeds ([Kumar et al., Sci Data 2024](https://www.nature.com/articles/s41597-024-03926-5)). Out-of-distribution: about 60 for MatSciBERT and about 50 for GPT-4 in-context learning ([Sci Rep 2025](https://www.nature.com/articles/s41598-025-03619-y)) | **Yes**, via `ner_baseline.py`. The paper's split is not published, so compare mean ± std. |
+| **NER on MaterioMiner** (span + class, seqeval entity F1) | MatSciBERT 69.92 fine-grained (top-27 classes) / 72.32 coarse-grained, random 65/15/20 split, 5 seeds, averaging not stated ([Kumar et al., Sci Data 2024](https://www.nature.com/articles/s41597-024-03926-5)). Out-of-distribution (different protocol): roughly 60 micro F1 for MatSciBERT (read from a figure), 36% above GPT-4 in-context learning ([Sci Rep 2025](https://www.nature.com/articles/s41598-025-03619-y)) | **Yes**, via `ner_baseline.py`. The paper's split is not published, so compare means with 95% CIs over several splits (§1). |
 | **Term typing**, gold spans given (MaterioMiner → MMO) | No published number. Closest public task: LLMs4OL 2025 Task B on MatOnto, best F1 0.667 (IRIS) ([overview](https://www.tib-op.org/ojs/index.php/ocp/article/view/2913)) | Our baselines establish the first numbers. MatOnto is a different dataset. |
 | **Taxonomy discovery** | LLMs4OL 2025 Task C on MatOnto, best F1 0.662 (SBU-NLP) | Not yet: the pipeline builds term-level is-a edges, which is a different task. |
 | **Relation extraction** | No text-level gold in MaterioMiner | No. Only class-level checks against 70 ontology restrictions are possible. |
@@ -73,7 +71,9 @@ and NER is the only task with a published SOTA on this data.
    - Done: 5 seeds × 2 granularities on the fixed split and on 5 new splits,
      with micro, macro and weighted F1 and 95% CIs (`summary` in the results
      JSON).
-   - Running: `--leave-one-paper-out`.
+   - Done: `--leave-one-paper-out` (§1). Micro F1 averaged over the four
+     held-out papers is 43.5 fine-grained and 54.3 coarse-grained, 20–30
+     points below the random splits.
    - Next: compare every new system with this baseline on the same splits
      (paired bootstrap over test sentences). A fine-grained SOTA claim needs
      a significant gain over the baseline, not just a higher mean.
@@ -99,8 +99,12 @@ and NER is the only task with a published SOTA on this data.
    agreement with the teacher model, and add them as weak supervision.
 8. **Ensembles.** Average across seeds and backbones (MatSciBERT, SciBERT,
    PubMedBERT, DeBERTa-v3-large); this usually gives a reliable +1–2.
-9. **Report out-of-distribution results** with `--leave-one-paper-out`. It is
-   cheap and closer to real use than random sentence splits.
+9. **Track out-of-distribution results** with `--leave-one-paper-out` for
+   every change. It is cheap and closer to real use than random sentence
+   splits. The baseline drops from about 74 to 44 (fine-grained) and 54
+   (coarse-grained) on an unseen paper. That gap is larger than any
+   in-distribution gain on this list, so items 5–7 should be judged on this
+   protocol as well.
 
 ### P2: Term typing (LLMs4OL Task B style)
 The cross-validated hybrid + LLM baseline is far ahead of the pipeline's
@@ -188,7 +192,7 @@ chance at class level. For a Task C-style result:
 
 | Week | Work | Exit criterion |
 |---|---|---|
-| 1 | GPU NER reproduction (5 seeds × 2, varied splits, leave-one-paper-out), class weights, CRF | Baseline mean ± std on every split protocol; it stays at or above 69.92 / 72.32 on varied splits |
+| 1 | Class weights and CRF on the reproduced baseline (the baseline on all three split protocols is done, §1) | A paired, significant gain over the baseline on the varied splits, also measured leaving one paper out |
 | 2 | Domain-adaptive pre-training + hierarchy-aware multi-task NER, ensembles | Beats the reproduced baseline on the same splits (paired bootstrap, p < 0.05) and 69.92 / 72.32 on average |
 | 3 | Context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | Typing accuracy above the hybrid + LLM baseline (§1) |
 | 4 | Class-level taxonomy (LLM or cross-encoder + arborescence); relation annotation pilot | First class-level taxonomy F1 above chance; relation guidelines |
