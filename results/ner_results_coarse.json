@@ -35,7 +35,7 @@
   "paper_test_f1": 72.32,
   "config": {
     "seeds": [
-      1
+      2
     ],
     "split_seed": 0,
     "vary_split": false,
@@ -595,9 +595,286 @@
       ],
       "run_id": "seed1",
       "runtime_sec": 922.2
+    },
+    {
+      "f1": 76.22,
+      "precision": 72.83,
+      "recall": 79.95,
+      "f1_strict": 77.8,
+      "per_class": {
+        "CEL": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 5.0
+        },
+        "CGE": {
+          "precision": 0.4,
+          "recall": 0.4,
+          "f1-score": 0.4,
+          "support": 5.0
+        },
+        "CHP": {
+          "precision": 0.8235,
+          "recall": 0.6667,
+          "f1-score": 0.7368,
+          "support": 21.0
+        },
+        "DAM": {
+          "precision": 0.8,
+          "recall": 0.7273,
+          "f1-score": 0.7619,
+          "support": 22.0
+        },
+        "DAT": {
+          "precision": 0.7333,
+          "recall": 0.6875,
+          "f1-score": 0.7097,
+          "support": 16.0
+        },
+        "DEF": {
+          "precision": 0.7812,
+          "recall": 0.8333,
+          "f1-score": 0.8065,
+          "support": 30.0
+        },
+        "EQU": {
+          "precision": 0.7241,
+          "recall": 0.75,
+          "f1-score": 0.7368,
+          "support": 28.0
+        },
+        "ETP": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 6.0
+        },
+        "LOC": {
+          "precision": 0.7692,
+          "recall": 0.9091,
+          "f1-score": 0.8333,
+          "support": 11.0
+        },
+        "MAC": {
+          "precision": 0.7059,
+          "recall": 0.9231,
+          "f1-score": 0.8,
+          "support": 13.0
+        },
+        "MAT": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 19.0
+        },
+        "MEC": {
+          "precision": 0.569,
+          "recall": 0.825,
+          "f1-score": 0.6735,
+          "support": 40.0
+        },
+        "MEP": {
+          "precision": 0.7381,
+          "recall": 0.8611,
+          "f1-score": 0.7949,
+          "support": 36.0
+        },
+        "MFP": {
+          "precision": 0.3846,
+          "recall": 0.625,
+          "f1-score": 0.4762,
+          "support": 8.0
+        },
+        "MIC": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 18.0
+        },
+        "MIP": {
+          "precision": 0.25,
+          "recall": 0.5,
+          "f1-score": 0.3333,
+          "support": 4.0
+        },
+        "MOD": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 2.0
+        },
+        "MTP": {
+          "precision": 0.5556,
+          "recall": 0.7895,
+          "f1-score": 0.6522,
+          "support": 19.0
+        },
+        "OBJ": {
+          "precision": 0.9,
+          "recall": 0.9474,
+          "f1-score": 0.9231,
+          "support": 19.0
+        },
+        "ODE": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "PQT": {
+          "precision": 0.6667,
+          "recall": 0.4286,
+          "f1-score": 0.5217,
+          "support": 14.0
+        },
+        "PRO": {
+          "precision": 0.5333,
+          "recall": 0.5714,
+          "f1-score": 0.5517,
+          "support": 14.0
+        },
+        "PRP": {
+          "precision": 0.1667,
+          "recall": 0.25,
+          "f1-score": 0.2,
+          "support": 4.0
+        },
+        "SDE": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 1.0
+        },
+        "STD": {
+          "precision": 0.7368,
+          "recall": 0.8235,
+          "f1-score": 0.7778,
+          "support": 17.0
+        },
+        "VAL": {
+          "precision": 0.9697,
+          "recall": 0.9412,
+          "f1-score": 0.9552,
+          "support": 34.0
+        },
+        "micro avg": {
+          "precision": 0.7283,
+          "recall": 0.7995,
+          "f1-score": 0.7622,
+          "support": 409.0
+        },
+        "macro avg": {
+          "precision": 0.6618,
+          "recall": 0.71,
+          "f1-score": 0.6786,
+          "support": 409.0
+        },
+        "weighted avg": {
+          "precision": 0.7457,
+          "recall": 0.7995,
+          "f1-score": 0.7656,
+          "support": 409.0
+        }
+      },
+      "seed": 2,
+      "best_epoch": 13,
+      "val_f1": 71.45,
+      "n_train": 309,
+      "n_val": 71,
+      "n_test": 96,
+      "history": [
+        {
+          "epoch": 0,
+          "train_loss": 58.8579,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 1,
+          "train_loss": 31.1588,
+          "val_f1": 11.43
+        },
+        {
+          "epoch": 2,
+          "train_loss": 19.7282,
+          "val_f1": 42.96
+        },
+        {
+          "epoch": 3,
+          "train_loss": 11.5591,
+          "val_f1": 56.82
+        },
+        {
+          "epoch": 4,
+          "train_loss": 6.9195,
+          "val_f1": 59.97
+        },
+        {
+          "epoch": 5,
+          "train_loss": 4.202,
+          "val_f1": 59.29
+        },
+        {
+          "epoch": 6,
+          "train_loss": 2.7438,
+          "val_f1": 63.95
+        },
+        {
+          "epoch": 7,
+          "train_loss": 1.8551,
+          "val_f1": 64.74
+        },
+        {
+          "epoch": 8,
+          "train_loss": 1.3627,
+          "val_f1": 66.03
+        },
+        {
+          "epoch": 9,
+          "train_loss": 0.9292,
+          "val_f1": 66.94
+        },
+        {
+          "epoch": 10,
+          "train_loss": 0.7415,
+          "val_f1": 68.6
+        },
+        {
+          "epoch": 11,
+          "train_loss": 0.5016,
+          "val_f1": 69.57
+        },
+        {
+          "epoch": 12,
+          "train_loss": 0.3499,
+          "val_f1": 68.6
+        },
+        {
+          "epoch": 13,
+          "train_loss": 0.2948,
+          "val_f1": 71.45
+        },
+        {
+          "epoch": 14,
+          "train_loss": 0.268,
+          "val_f1": 69.54
+        },
+        {
+          "epoch": 15,
+          "train_loss": 0.2534,
+          "val_f1": 68.52
+        },
+        {
+          "epoch": 16,
+          "train_loss": 0.2157,
+          "val_f1": 67.5
+        }
+      ],
+      "run_id": "seed2",
+      "runtime_sec": 833.5
     }
   ],
-  "test_f1_mean": 74.97,
-  "test_f1_std": 1.35,
-  "test_f1_strict_mean": 76.68
+  "test_f1_mean": 75.39,
+  "test_f1_std": 1.25,
+  "test_f1_strict_mean": 77.05
 }
