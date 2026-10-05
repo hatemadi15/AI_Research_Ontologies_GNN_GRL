@@ -65,6 +65,7 @@ reported only to show the size of the leak.
 |---|---|---|---|---|---|---|
 | Majority-class reference | – | 0.083 | – | – | – | – |
 | **Pipeline v6, LLM off** | no | 0.384 [0.33, 0.43] | 0.351 | 0.457 | 0.502 | 0.522 |
+| **Pipeline v6, LLM on** (RAG re-ranking) | no | 0.429 [0.38, 0.48] | 0.392 | 0.478 | 0.502 | 0.591 |
 | v5 outputs re-scored, LLM off | **yes** (leak) | 0.571 [0.51, 0.62] (coverage 0.67) | 0.615 | 0.349 | 0.648 | 0.703 |
 | v5 outputs re-scored, LLM on | **yes** (leak) | 0.740 [0.69, 0.79] (coverage 0.95) | 0.692 | 0.675 | 0.803 | 0.845 |
 
@@ -86,20 +87,21 @@ reported only to show the size of the leak.
 | Level | Old v5 metric (invalid) | Leakage-free metric | v5 outputs | v6 LLM off | v6 LLM on |
 |---|---|---|---|---|---|
 | Type | Type F1 0.997 | – (dataset property: 177/177 labels are class names) | – | – | – |
-| Term | Term F1@0.5 0.893 (0.935 LLM on) | alignment pairwise F1@0.5 | 0.273 | 0.121 | – |
-| Concept | Concept F1 0.447 | clustering ARI / B-cubed F1 | 0.775 / 0.907 (gold-type clusters) | 0.035 / 0.183 | – / – |
-| Taxonomy | – | class-level edge F1 (precision vs closure; chance 0.013) | 0.000 (0.069) | 0.006 (0.027) | – (–) |
-| Relations | partial-entity recall 0.925 | class-level F1 vs 70 restrictions | – | 0.000 | – |
+| Term | Term F1@0.5 0.893 (0.935 LLM on) | alignment pairwise F1@0.5 | 0.273 | 0.121 | 0.131 |
+| Concept | Concept F1 0.447 | clustering ARI / B-cubed F1 | 0.775 / 0.907 (gold-type clusters) | 0.035 / 0.183 | 0.035 / 0.183 |
+| Taxonomy | – | class-level edge F1 (precision vs closure; chance 0.013) | 0.000 (0.069) | 0.006 (0.027) | 0.025 (0.031) |
+| Relations | partial-entity recall 0.925 | class-level F1 vs 70 restrictions | – | 0.000 | 0.000 |
 
-> **Still running when this snapshot was taken:** the pipeline with LLM features on, the ablation suite, the MatSciBERT NER seeds. These rows will be added when the runs finish.
+> **Still running when this snapshot was taken:** the ablation suite, the MatSciBERT NER seeds. These rows will be added when the runs finish.
 
 **Reading the numbers**
 * The old "Term F1 0.91" corresponds to *0.12* pairwise alignment F1. The
   v5 outputs score higher (0.27, and 0.57–0.74 typing accuracy) only because
   their top-1 rows were the gold classes injected by `type_match`.
-* The pipeline's zero-shot typing (0.38) beats plain label matching (0.36) but
-  stays well below the supervised hybrid (0.50) and hybrid + LLM (0.65)
-  baselines. Closing that gap is the first item of the roadmap.
+* The pipeline's zero-shot typing (0.38; 0.43 with LLM re-ranking) beats plain
+  label matching (0.36) but stays well below the supervised hybrid (0.50) and
+  hybrid + LLM (0.65) baselines, which can also use labelled terms. Closing
+  that gap is the first item of the roadmap.
 * Taxonomy and relations are near zero at class level. The term-level
   taxonomy and relation extractors were never designed to recover MMO
   `subClassOf` edges or restrictions; see the roadmap.
