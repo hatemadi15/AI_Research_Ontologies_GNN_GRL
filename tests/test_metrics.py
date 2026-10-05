@@ -100,6 +100,17 @@ def test_mcnemar_exact():
     assert metrics.mcnemar_exact(good, good, gold)['p_value'] == 1.0
 
 
+def test_mean_ci():
+    res = metrics.mean_ci([1, 2, 3, 4, 5])
+    assert res['n'] == 5 and res['mean'] == 3.0
+    assert res['sd'] == pytest.approx(1.5811, abs=1e-4)
+    # t(0.975, df=4) = 2.7764 -> half-width 2.7764 * 1.5811 / sqrt(5) = 1.9632
+    assert res['ci'] == [pytest.approx(1.0368, abs=1e-3), pytest.approx(4.9632, abs=1e-3)]
+    assert metrics.mean_ci([7.5])['ci'] == [7.5, 7.5]
+    assert metrics.mean_ci([])['n'] == 0
+    assert metrics.mean_ci([1, 2, 3, 4, 5], confidence=0.9)['ci'][0] > res['ci'][0]
+
+
 def test_pairwise_alignment_rows():
     rows = [('crack', 'Crack', 0.9), ('crack', 'Alloy', 0.8), ('alloy', 'Alloy', 0.4),
             ('unknown', 'Crack', 0.99)]

@@ -14,11 +14,13 @@ Conventions
   - pred[t]: predicted class URI, or None when the system abstains. Terms that
     are missing from `pred` count as abstentions, i.e. errors for recall.
 
-Only the standard library is needed, except clustering_metrics (scikit-learn).
+Only the standard library is needed, except clustering_metrics (scikit-learn)
+and mean_ci (SciPy, a scikit-learn dependency).
 """
 
 import math
 import random
+import statistics
 from collections import Counter, defaultdict
 
 
@@ -250,6 +252,26 @@ def mcnemar_exact(pred_a, pred_b, gold):
     return {'only_a': only_a, 'only_b': only_b,
             'accuracy_diff': _r(safe_div(only_a - only_b, len(gold))),
             'p_value': _r(p)}
+
+
+def mean_ci(values, confidence=0.95):
+    """Mean of repeated runs (seeds, splits) with a Student-t confidence interval.
+
+    The interval uses the sample SD (n - 1); with a single value it collapses
+    to that value. Use it to compare a mean over a few runs with a published
+    number: with 5 runs the half-width is 2.78 sample SDs / sqrt(5).
+    """
+    vals = [float(v) for v in values]
+    n = len(vals)
+    if not n:
+        return {'n': 0, 'mean': 0.0, 'sd': 0.0, 'ci': [0.0, 0.0]}
+    mean = statistics.fmean(vals)
+    if n == 1:
+        return {'n': 1, 'mean': _r(mean), 'sd': 0.0, 'ci': [_r(mean), _r(mean)]}
+    from scipy import stats
+    sd = statistics.stdev(vals)
+    half = float(stats.t.ppf((1 + confidence) / 2, n - 1)) * sd / math.sqrt(n)
+    return {'n': n, 'mean': _r(mean), 'sd': _r(sd), 'ci': [_r(mean - half), _r(mean + half)]}
 
 
 # ---------------------------------------------------------------------------

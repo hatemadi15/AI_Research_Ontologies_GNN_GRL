@@ -17,4 +17,8 @@ reviewers check the reported numbers.
 | `ner_results_fine.json`, `ner_results_coarse.json` | `ner_baseline.py` | MatSciBERT NER under the MaterioMiner protocol, per seed |
 
 The NER files hold all 5 model seeds per granularity (see `runs`), trained on
-one fixed random split (`--split-seed 0`).
+one fixed random split (`--split-seed 0`). Their `summary` gives, for micro,
+strict micro, macro and support-weighted F1, the mean, the population SD and
+the 95% Student-t CI over runs. Files with a `_random_split_vary` suffix use a
+new random split per seed; `_leave_one_paper_out` files train on three papers
+and test on the fourth.

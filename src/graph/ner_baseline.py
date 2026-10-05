@@ -23,10 +23,16 @@ runs.
   - Model: m3rg-iitd/matscibert, first-subword labelling, AdamW + linear
     warm-up, gradient clipping, early stopping on validation F1.
   - Metrics: seqeval micro F1 in default (conlleval) mode (primary) and
-    strict IOB2 mode, plus per-class scores.
+    strict IOB2 mode, plus per-class scores. The 2024 paper does not state
+    its averaging ("averaging over the five random initializations and
+    entity types"); the authors' 2025 follow-up uses micro F1. Macro and
+    support-weighted F1 are therefore reported as well: on this data macro F1
+    is several points lower than micro F1.
 
-Results are written to <PROCESSED_DIR>/ner/ner_results_<granularity>.json
-after every seed, and completed seeds are skipped when re-run.
+Results are written to <PROCESSED_DIR>/ner/ner_results_<granularity>[_<protocol>].json
+after every run, and completed runs are skipped when re-run; re-running a
+finished protocol only refreshes its `summary` (mean, population SD and 95%
+Student-t CI over runs for micro, strict micro, macro and weighted F1).
 
 Usage:
   python ner_baseline.py --granularity fine --seeds 0 1 2 3 4
@@ -42,6 +48,7 @@ import time
 from collections import Counter
 
 import conll
+import metrics
 from config import PROCESSED_DIR, RAW_DIR
 
 PAPER_F1 = {'fine': 69.92, 'coarse': 72.32}
@@ -242,6 +249,38 @@ def train_one(seed, train, val, test, labels, args, device):
     return result
 
 
+def summarize(results):
+    """Aggregate the runs of one protocol into the results dict (in place).
+
+    test_f1_mean / test_f1_std / test_f1_strict_mean keep their meaning
+    (micro F1, population SD). `summary` adds, per F1 average, the mean, the
+    population SD, the 95% Student-t CI of the mean and the per-run values.
+    """
+    runs = results['runs']
+    if not runs:
+        return results
+    f1s = [r['f1'] for r in runs]
+    results['test_f1_mean'] = round(statistics.mean(f1s), 2)
+    results['test_f1_std'] = round(statistics.pstdev(f1s), 2) if len(f1s) > 1 else 0.0
+    results['test_f1_strict_mean'] = round(statistics.mean(r['f1_strict'] for r in runs), 2)
+    series = {
+        'micro': f1s,
+        'micro_strict': [r['f1_strict'] for r in runs],
+        'macro': [100 * r['per_class']['macro avg']['f1-score'] for r in runs],
+        'weighted': [100 * r['per_class']['weighted avg']['f1-score'] for r in runs],
+    }
+    summary = {'n_runs': len(runs), 'run_ids': [r.get('run_id') for r in runs]}
+    for name, vals in series.items():
+        summary[name] = {
+            'mean': round(statistics.mean(vals), 2),
+            'pop_sd': round(statistics.pstdev(vals), 2) if len(vals) > 1 else 0.0,
+            'ci95': [round(x, 2) for x in metrics.mean_ci(vals)['ci']],
+            'per_run': [round(v, 2) for v in vals],
+        }
+    results['summary'] = summary
+    return results
+
+
 def make_folds(data, args):
     """[(name, train, val, test)] for the chosen protocol."""
     if args.leave_one_paper_out:
@@ -317,17 +356,23 @@ def run(args):
             res['run_id'] = run_id
             res['runtime_sec'] = round(time.time() - start, 1)
             results['runs'].append(res)
-            f1s = [r['f1'] for r in results['runs']]
-            results['test_f1_mean'] = round(statistics.mean(f1s), 2)
-            results['test_f1_std'] = round(statistics.pstdev(f1s), 2) if len(f1s) > 1 else 0.0
-            results['test_f1_strict_mean'] = round(
-                statistics.mean(r['f1_strict'] for r in results['runs']), 2)
+            summarize(results)
             with open(out_path, 'w') as f:
                 json.dump(results, f, indent=2)
+            # the published numbers are in-distribution; no reference for held-out papers
+            ref = ('' if args.leave_one_paper_out
+                   else f" (paper {PAPER_F1[granularity]})")
             print(f"  {run_id}: test F1 {res['f1']:.2f} (strict {res['f1_strict']:.2f}), "
                   f"best epoch {res['best_epoch']}, {res['runtime_sec']:.0f}s; "
-                  f"running mean {results['test_f1_mean']:.2f} "
-                  f"(paper {PAPER_F1[granularity]})", flush=True)
+                  f"running mean {results['test_f1_mean']:.2f}{ref}", flush=True)
+        if results['runs']:
+            summarize(results)
+            with open(out_path, 'w') as f:
+                json.dump(results, f, indent=2)
+            s = results['summary']
+            print(f"  micro F1 {s['micro']['mean']:.2f} 95% CI {s['micro']['ci95']}, "
+                  f"macro {s['macro']['mean']:.2f}, weighted {s['weighted']['mean']:.2f} "
+                  f"over {s['n_runs']} runs")
         print(f"Saved {out_path}")
 
 
