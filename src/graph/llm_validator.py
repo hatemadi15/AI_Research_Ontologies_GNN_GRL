@@ -60,15 +60,20 @@ def _save_cache(cache):
 
 
 def _cache_key(func_name, *args):
-    """Generate a deterministic cache key from function name and args."""
-    raw = json.dumps([func_name] + list(args), sort_keys=True, default=str)
+    """Generate a deterministic cache key from model, function name and args.
+
+    The model is part of the key so that switching LLM_MODEL (or provider)
+    never returns answers cached from a different model.
+    """
+    raw = json.dumps([LLM_MODEL, func_name] + list(args), sort_keys=True,
+                     default=str)
     return hashlib.sha256(raw.encode()).hexdigest()[:16]
 
 
 # ============== Cluster Naming ==============
 
 def name_cluster(terms, top_k=10):
-    """Use GPT-4o-mini to name a cluster of related terms.
+    """Use the configured LLM to name a cluster of related terms.
 
     Args:
         terms: List of terms in the cluster.

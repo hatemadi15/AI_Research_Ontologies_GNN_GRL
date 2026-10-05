@@ -8,7 +8,7 @@ Defines ablation presets that toggle pipeline components:
   - Hearst patterns (vs distributional-only taxonomy)
   - Dependency parsing (vs pattern-only relations)
   - NER-type clustering (vs embedding-only clustering)
-  - LLM validation mode (OpenAI GPT-4o-mini)
+  - LLM validation mode (OpenRouter or OpenAI, see the LLM_* settings)
   - GNN architecture selection (sage/gat/rgcn)
   - Configurable embedding model (domain-specific vs general)
   - Corpus augmentation (PubMed sentences)
@@ -22,10 +22,30 @@ DEFAULT_EMBEDDER_MODEL = 'all-MiniLM-L6-v2'
 # LLM validation mode (requires OPENROUTER_API_KEY or OPENAI_API_KEY env var)
 LLM_MODE = False
 
-# ---- LLM backend configuration (OpenRouter by default) ----
-LLM_BASE_URL = os.environ.get("LLM_BASE_URL", "https://openrouter.ai/api/v1")
-LLM_MODEL = os.environ.get("LLM_MODEL", "openai/gpt-4o-mini")
-LLM_API_KEY = os.environ.get("OPENROUTER_API_KEY", os.environ.get("OPENAI_API_KEY", ""))
+# ---- LLM backend configuration ----
+# The provider is chosen from whichever key is set, so a key is never sent to
+# another provider's endpoint: OPENROUTER_API_KEY -> OpenRouter (preferred),
+# otherwise OPENAI_API_KEY -> OpenAI. LLM_BASE_URL / LLM_MODEL override the
+# provider defaults (e.g. to use another OpenAI-compatible endpoint or model).
+_OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
+_OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
+if _OPENROUTER_API_KEY:
+    LLM_PROVIDER = "openrouter"
+    LLM_API_KEY = _OPENROUTER_API_KEY
+    _DEFAULT_LLM_BASE_URL = "https://openrouter.ai/api/v1"
+    _DEFAULT_LLM_MODEL = "openai/gpt-4o-mini"
+elif _OPENAI_API_KEY:
+    LLM_PROVIDER = "openai"
+    LLM_API_KEY = _OPENAI_API_KEY
+    _DEFAULT_LLM_BASE_URL = "https://api.openai.com/v1"
+    _DEFAULT_LLM_MODEL = "gpt-4o-mini"
+else:
+    LLM_PROVIDER = None
+    LLM_API_KEY = ""
+    _DEFAULT_LLM_BASE_URL = "https://openrouter.ai/api/v1"
+    _DEFAULT_LLM_MODEL = "openai/gpt-4o-mini"
+LLM_BASE_URL = os.environ.get("LLM_BASE_URL", _DEFAULT_LLM_BASE_URL)
+LLM_MODEL = os.environ.get("LLM_MODEL", _DEFAULT_LLM_MODEL)
 
 # GNN architecture: 'sage', 'gat', or 'rgcn'
 GNN_ARCHITECTURE = 'sage'
@@ -36,7 +56,7 @@ CORPUS_AUGMENT_PATH = os.environ.get(
     "CORPUS_AUGMENT_PATH", "data/raw/dataset/pubmed_sentences.txt"
 )
 
-# LLM-Augmented Alignment: boost/penalize borderline similarity pairs via GPT-4o-mini
+# LLM-Augmented Alignment: boost/penalize borderline similarity pairs via the configured LLM
 LLM_ALIGNMENT = os.environ.get("LLM_ALIGNMENT", "true").lower() == "true"
 
 # LLM-Based Relation Classification: reclassify top GNN co-occurrence pairs

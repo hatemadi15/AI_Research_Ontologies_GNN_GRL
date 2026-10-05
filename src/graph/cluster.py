@@ -6,7 +6,7 @@ Clusters graph nodes using agglomerative clustering with:
   - NER-type-based sub-clustering when entity_types.json available
   - API key from environment variable (no hardcoded keys)
   - Optional Gemini LLM cluster naming
-  - Optional OpenAI LLM cluster naming (when LLM_MODE enabled)
+  - Optional LLM cluster naming via llm_validator (when LLM_MODE enabled)
 """
 
 import os
@@ -268,7 +268,7 @@ def cluster_graph(key, use_llm=False):
         cluster_names.update(llm_names)
         print(f"  LLM named {len(llm_names)} clusters")
 
-    # OpenAI LLM naming for top-20 largest clusters (when LLM_MODE is enabled)
+    # LLM naming (llm_validator) for top-20 largest clusters (when LLM_MODE is enabled)
     try:
         from config import LLM_MODE as _LLM_MODE
         if _LLM_MODE:
@@ -281,12 +281,12 @@ def cluster_graph(key, use_llm=False):
                     try:
                         llm_name = openai_name_cluster(terms)
                         cluster_names[cid] = llm_name
-                        print(f"    OpenAI named cluster {cid} ({len(terms)} terms): {llm_name}")
+                        print(f"    LLM named cluster {cid} ({len(terms)} terms): {llm_name}")
                     except Exception as e:
-                        print(f"    OpenAI naming failed for cluster {cid}: {e}")
-                print(f"  OpenAI named up to {len(top_20)} clusters")
+                        print(f"    LLM naming failed for cluster {cid}: {e}")
+                print(f"  LLM named up to {len(top_20)} clusters")
             except ImportError as e:
-                print(f"  OpenAI LLM naming unavailable: {e}")
+                print(f"  LLM naming unavailable: {e}")
     except ImportError:
         pass
 

@@ -347,7 +347,7 @@ def llm_augment_alignment(alignments, class_map):
     """FIX 4: LLM-Augmented Alignment.
 
     For entity↔class pairs with borderline similarity (0.35-0.65):
-      - Query GPT-4o-mini: is the entity semantically related to the class?
+      - Query the configured LLM: is the entity semantically related to the class?
       - If YES: boost score by +0.15
       - If NO: reduce by -0.15
     Limited to max 500 pairs, prioritized by closeness to threshold center (0.5).
@@ -435,7 +435,7 @@ def llm_augment_alignment(alignments, class_map):
 
 def expand_ontology_coverage(ref_classes, discovered, disc_sbert, class_map):
     """FIX 1b: LLM-Based Ontology Class Expansion (kept for API-key scenarios).
-    Skipped if OPENAI_API_KEY is not available.
+    Skipped if no LLM API key (OPENROUTER_API_KEY / OPENAI_API_KEY) is set.
     """
     if not LLM_API_KEY:
         print("No LLM API key, skipping LLM expansion")
@@ -474,10 +474,12 @@ def expand_ontology_coverage(ref_classes, discovered, disc_sbert, class_map):
 
     for class_label in unmatched:
         key = _cache_key('expand_class', class_label)
+        # Model-specific so answers from another model are never reused
+        expansion_key = f"{LLM_MODEL}|||{class_label}"
         if key in cache:
             synonyms_str = cache[key]
-        elif class_label in expansion_cache:
-            synonyms_str = expansion_cache[class_label]
+        elif expansion_key in expansion_cache:
+            synonyms_str = expansion_cache[expansion_key]
         else:
             try:
                 response = client.chat.completions.create(
@@ -491,7 +493,7 @@ def expand_ontology_coverage(ref_classes, discovered, disc_sbert, class_map):
                 )
                 synonyms_str = response.choices[0].message.content.strip()
                 cache[key] = synonyms_str
-                expansion_cache[class_label] = synonyms_str
+                expansion_cache[expansion_key] = synonyms_str
                 llm_calls += 1
             except Exception as e:
                 print(f"  LLM error for class '{class_label}': {e}")
