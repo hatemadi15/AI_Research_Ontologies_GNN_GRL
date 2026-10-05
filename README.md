@@ -118,8 +118,9 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
 | fixed split (seed 0), 5 model seeds | fine | 5 seeds | 72.99 ± 1.53 [70.86, 75.12] | 67.99 | 72.28 | 74.97 | 69.92 |
 | fixed split (seed 0), 5 model seeds | coarse | 5 seeds | 75.57 ± 1.03 [74.14, 77.01] | 67.14 | 75.87 | 77.11 | 72.32 |
 | new random split per seed | fine | 5 seeds | 73.91 ± 3.28 [69.36, 78.45] | 71.19 | 73.98 | 76.26 | 69.92 |
+| new random split per seed | coarse | 5 seeds | 74.57 ± 1.02 [73.15, 75.98] | 65.53 | 74.46 | 76.24 | 72.32 |
 
-> **Still running when this snapshot was taken:** the rest of the NER split check (coarse `--vary-split`, `--leave-one-paper-out`). These rows will be added when the runs finish.
+> **Still running when this snapshot was taken:** the leave-one-paper-out NER runs (`--leave-one-paper-out`). These rows will be added when the runs finish.
 
 **Reading the numbers**
 * The old "Term F1 0.91" corresponds to *0.12* pairwise alignment F1. The
@@ -134,7 +135,7 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
   `subClassOf` edges or restrictions; see the roadmap.
 * Ablations: no component changes typing significantly. The GNN adds 0.006 (0.384 vs 0.378, McNemar p = 0.69), and the whole pipeline beats the plain-SBERT baseline by 0.029 (p = 0.08). The GNN embeddings *hurt* clustering (ARI 0.035 vs 0.195 with plain SBERT). The oracle preset (gold types allowed) reaches 1.000, which is what the v5 evaluation was effectively reporting.
 * NER, fixed split: plain MatSciBERT reaches micro F1 72.99 (fine) and 75.57 (coarse) over 5 seeds, against the published 69.92 / 72.32. Macro F1 is much lower (67.99 / 67.14), so the comparison favours this repo only if the paper's "averaging over ... entity types" means micro averaging, as in the authors' 2025 follow-up.
-* NER across splits: the check with a new random split per seed (`--vary-split`) and with one paper held out (`--leave-one-paper-out`) is running. Until it finishes, the fixed-split gain is not a SOTA claim.
+* NER across splits (`--vary-split`, a new random split per seed, micro F1; pre-registered rule: the gain holds if the 95% CI lies above the published number): fine-grained the gain is not significant: 73.91, 95% CI [69.36, 78.45] includes 69.92; coarse-grained the gain holds: 74.57, 95% CI [73.15, 75.98], above 72.32. Macro F1 across splits is 71.19 (fine) and 65.53 (coarse).
 <!-- RESULTS:END -->
 
 ## Evaluation

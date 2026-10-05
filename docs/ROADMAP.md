@@ -10,14 +10,14 @@ expectations from the literature, not results.
 <!-- STANDING:START -->
 | Task | Best leakage-free result in this repo | Reference |
 |---|---|---|
-| NER, fine / coarse (MatSciBERT, MaterioMiner protocol) | fine: micro 72.99 [70.86, 75.12] (macro 67.99) on the fixed split, 73.91 [69.36, 78.45] over 5 new splits; coarse: micro 75.57 [74.14, 77.01] (macro 67.14) on the fixed split | 69.92 / 72.32 (Kumar et al. 2024; averaging not stated) |
+| NER, fine / coarse (MatSciBERT, MaterioMiner protocol) | fine: micro 72.99 [70.86, 75.12] (macro 67.99) on the fixed split, 73.91 [69.36, 78.45] over 5 new splits; coarse: micro 75.57 [74.14, 77.01] (macro 67.14) on the fixed split, 74.57 [73.15, 75.98] over 5 new splits | 69.92 / 72.32 (Kumar et al. 2024; averaging not stated) |
 | Term typing, 315 terms, pipeline (zero-shot) | accuracy 0.384 (LLM on: 0.429) | majority class 0.083 |
 | Term typing, 5-fold CV baselines | hybrid 0.496; hybrid + LLM 0.654 (set F1 0.598) | LLMs4OL 2025 MatOnto best F1 0.667 (different dataset) |
 | Clustering vs gold classes | ARI 0.035, B-cubed F1 0.183 (all-singletons baseline 0.475) | – |
 | Taxonomy, class level | edge F1 0.006; precision vs closure 0.027 (chance 0.013) | LLMs4OL 2025 MatOnto best F1 0.662 (different dataset) |
 | Relations, class level vs 70 restrictions | F1 0.000 | no text-level gold exists |
 
-> **Still running when this snapshot was taken:** the rest of the NER split check (coarse `--vary-split`, `--leave-one-paper-out`). These rows will be added when the runs finish.
+> **Still running when this snapshot was taken:** the leave-one-paper-out NER runs (`--leave-one-paper-out`). These rows will be added when the runs finish.
 
 Full tables: [README](../README.md#results).
 <!-- STANDING:END -->
@@ -55,22 +55,28 @@ not be reused.
 The pipeline currently consumes gold spans. A real end-to-end system needs NER,
 and NER is the only task with a published SOTA on this data.
 1. **Check that the reproduction holds across splits before claiming SOTA.**
-   The plain MatSciBERT baseline in `ner_baseline.py` already scores above the
-   published numbers in micro F1 on our random split (§1). Two caveats:
-   - The paper's split is not published and the test set has only about 96
-     sentences, so a few points of split-to-split variance are expected (the
-     seed-to-seed range alone is 70.8–75.2 fine-grained).
+   Result with a new random split per seed (`--vary-split`, 5 splits, micro
+   F1). The rule, fixed before the runs: the gain holds only if the 95% CI
+   lies above the published number.
+   - Coarse-grained: 74.57, 95% CI [73.15, 75.98] vs 72.32. The gain holds.
+   - Fine-grained: 73.91, 95% CI [69.36, 78.45] vs 69.92. Not significant;
+     single splits range from 70.9 to 80.1.
+
+   Caveats:
    - The 2024 paper does not say how its F1 is averaged. The authors' 2025
-     follow-up uses micro F1, as we do, but our macro F1 (68.0 / 67.1) is
-     below the published numbers.
+     follow-up uses micro F1, as we do. Our macro F1 is far below the
+     published number for coarse (65.5 across splits) and close to it for
+     fine (71.2).
+   - Each test split has only about 96 sentences.
 
    Steps:
-   - Done: 5 seeds × 2 granularities on one fixed split, with micro, macro
-     and weighted F1 and 95% CIs (`summary` in the results JSON).
-   - Running: `--vary-split` (a new split per seed) and
-     `--leave-one-paper-out`.
-   - Compare systems on the same splits with a paired bootstrap over test
-     sentences.
+   - Done: 5 seeds × 2 granularities on the fixed split and on 5 new splits,
+     with micro, macro and weighted F1 and 95% CIs (`summary` in the results
+     JSON).
+   - Running: `--leave-one-paper-out`.
+   - Next: compare every new system with this baseline on the same splits
+     (paired bootstrap over test sentences). A fine-grained SOTA claim needs
+     a significant gain over the baseline, not just a higher mean.
 
    A CPU run takes 9–25 minutes; on one GPU the whole protocol takes minutes.
 2. **Hierarchy-aware multi-task training.** Coarse labels are the fine labels
