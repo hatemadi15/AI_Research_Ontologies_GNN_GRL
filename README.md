@@ -109,12 +109,12 @@ reported only to show the size of the leak.
 | baseline_sbert | 0.356 | -0.029 (0.08) | 0.325 | 0.446 | 0.509 | 0.195 | 0.033 | 0.000 |
 | oracle *(oracle)* | 1.000 | +0.616 (<0.001) | 0.914 | 0.908 | 1.000 | 0.863 | 0.136 | 0.002 |
 
-#### NER (MatSciBERT, MaterioMiner protocol, seqeval entity F1)
+#### NER (MatSciBERT, MaterioMiner protocol, seqeval entity F1; mean ± population SD over seeds)
 
 | Granularity | Classes | Published (5 seeds) | This repo, CPU | Strict IOB2 | Seeds |
 |---|---|---|---|---|---|
 | fine | 27 | 69.92 | 73.55 ± 0.02 | 75.69 | 2 |
-| coarse | 27 | 72.32 | 73.62 | 75.53 | 1 |
+| coarse | 27 | 72.32 | 74.97 ± 1.35 | 76.68 | 2 |
 
 > **Still running when this snapshot was taken:** the remaining MatSciBERT NER seeds (5 per granularity are planned). These rows will be added when the runs finish.
 
@@ -130,7 +130,7 @@ reported only to show the size of the leak.
   taxonomy and relation extractors were never designed to recover MMO
   `subClassOf` edges or restrictions; see the roadmap.
 * Ablations: no component changes typing significantly. The GNN adds 0.006 (0.384 vs 0.378, McNemar p = 0.69), and the whole pipeline beats the plain-SBERT baseline by 0.029 (p = 0.08). The GNN embeddings *hurt* clustering (ARI 0.035 vs 0.195 with plain SBERT). The oracle preset (gold types allowed) reaches 1.000, which is what the v5 evaluation was effectively reporting.
-* NER: our MatSciBERT reproduction reaches 73.55 (fine, 2 seeds) and 73.62 (coarse, 1 seed) test F1, against the published 69.92 / 72.32. All seeds share one random split (the paper's split is not published), so before calling this SOTA, run all 5 seeds with `--vary-split` and `--leave-one-paper-out` and test significance.
+* NER: our MatSciBERT reproduction reaches 73.55 (fine, 2 seeds) and 74.97 (coarse, 2 seeds) test F1, against the published 69.92 / 72.32. All seeds share one random split (the paper's split is not published), so before calling this SOTA, run all 5 seeds with `--vary-split` and `--leave-one-paper-out` and test significance.
 <!-- RESULTS:END -->
 
 ## Evaluation

@@ -10,7 +10,7 @@ expectations from the literature, not results.
 <!-- STANDING:START -->
 | Task | Best leakage-free result in this repo | Reference |
 |---|---|---|
-| NER, fine / coarse (MatSciBERT, MaterioMiner protocol) | fine: 73.55 ± 0.02 (2 seeds) vs published 69.92; coarse: 73.62 (1 seed) vs published 72.32 | 69.92 / 72.32 (Kumar et al. 2024) |
+| NER, fine / coarse (MatSciBERT, MaterioMiner protocol) | fine: 73.55 ± 0.02 (2 seeds) vs published 69.92; coarse: 74.97 ± 1.35 (2 seeds) vs published 72.32 | 69.92 / 72.32 (Kumar et al. 2024) |
 | Term typing, 315 terms, pipeline (zero-shot) | accuracy 0.384 (LLM on: 0.429) | majority class 0.083 |
 | Term typing, 5-fold CV baselines | hybrid 0.496; hybrid + LLM 0.654 (set F1 0.598) | LLMs4OL 2025 MatOnto best F1 0.667 (different dataset) |
 | Clustering vs gold classes | ARI 0.035, B-cubed F1 0.183 (all-singletons baseline 0.475) | – |
