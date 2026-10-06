@@ -11,14 +11,12 @@ expectations from the literature, not results.
 | Task | Best leakage-free result in this repo | Reference |
 |---|---|---|
 | NER, fine / coarse (MatSciBERT, MaterioMiner protocol) | fine: micro 72.99 [70.86, 75.12] (macro 67.99) on the fixed split, 73.91 [69.36, 78.45] over 5 new splits, 43.51 leaving one paper out; coarse: micro 75.57 [74.14, 77.01] (macro 67.14) on the fixed split, 74.57 [73.15, 75.98] over 5 new splits, 54.34 leaving one paper out | 69.92 / 72.32 (Kumar et al. 2024; averaging not stated) |
-| NER with the CRF head (`--crf`) | fine: micro 76.36 [71.00, 81.73] over 5 new splits, 49.44 leaving one paper out; coarse: micro 78.15 [76.61, 79.69] over 5 new splits | same; the in-distribution fine-grained gain disappears under strict IOB2 scoring |
+| NER with the CRF head (`--crf`) | fine: micro 76.36 [71.00, 81.73] over 5 new splits, 49.44 leaving one paper out; coarse: micro 78.15 [76.61, 79.69] over 5 new splits, 59.82 leaving one paper out | same; the in-distribution fine-grained gain over the baseline disappears under strict IOB2 scoring |
 | Term typing, 315 terms, pipeline (zero-shot) | accuracy 0.384 (LLM on: 0.429) | majority class 0.083 |
 | Term typing, 5-fold CV baselines | hybrid 0.496; hybrid + LLM 0.654 (set F1 0.598) | LLMs4OL 2025 MatOnto best F1 0.667 (different dataset) |
 | Clustering vs gold classes | ARI 0.035, B-cubed F1 0.183 (all-singletons baseline 0.475) | – |
 | Taxonomy, class level | edge F1 0.006; precision vs closure 0.027 (chance 0.013) | LLMs4OL 2025 MatOnto best F1 0.662 (different dataset) |
 | Relations, class level vs 70 restrictions | F1 0.000 | no text-level gold exists |
-
-> **Still running when this snapshot was taken:** the last CRF run (coarse-grained, leave one paper out). These rows will be added when the runs finish.
 
 Full tables: [README](../README.md#results).
 <!-- STANDING:END -->
@@ -44,10 +42,13 @@ not be reused.
   metrics; the gold file is isolated behind `ORACLE_TYPES`; a unit test
   enforces that; deterministic runs; CI; paired exact McNemar tests
   (`metrics.mcnemar_exact`) for every ablation preset.
-- Next: report every headline number as mean ± std over seeds or folds plus a
-  bootstrap CI (the test sets are tiny: 96 NER test sentences, 315 terms). Use
-  paired tests (McNemar for typing, paired bootstrap over sentences for NER)
-  whenever claiming an improvement.
+- Done for NER: mean ± SD and 95% CIs over seeds, splits and held-out
+  papers, and paired differences by split and model seed
+  (`ner_baseline.py --compare`).
+- Next: report every other headline number as mean ± std over seeds or folds
+  plus a CI (the test sets are tiny: 96 NER test sentences, 315 terms). Use
+  paired tests (McNemar for typing, paired differences by split and seed for
+  NER) whenever claiming an improvement.
 - Next: write one results JSON per run (git SHA, config, seed, model ids) and
   never tune thresholds or prompts on test folds. `FIXED_THRESHOLD` and the
   baseline hyper-parameters are fixed in advance for this reason.
@@ -55,6 +56,14 @@ not be reused.
 ### P1: Beat the published NER numbers (69.92 / 72.32)
 The pipeline currently consumes gold spans. A real end-to-end system needs NER,
 and NER is the only task with a published SOTA on this data.
+
+Status: with the CRF head (item 4), both granularities pass the
+pre-registered check across 5 random splits, if the paper reports micro F1:
+- fine-grained: 76.36 [71.00, 81.73] vs 69.92;
+- coarse-grained: 78.15 [76.61, 79.69] vs 72.32.
+
+The largest remaining gap is out of distribution (item 9).
+
 1. **Check that the reproduction holds across splits before claiming SOTA.**
    Result with a new random split per seed (`--vary-split`, 5 splits, micro
    F1). The rule, fixed before the runs: the gain holds only if the 95% CI
@@ -77,19 +86,57 @@ and NER is the only task with a published SOTA on this data.
    - Done: `--leave-one-paper-out` (§1). Micro F1 averaged over the four
      held-out papers is 43.5 fine-grained and 54.3 coarse-grained, 20–30
      points below the random splits.
-   - Next: compare every new system with this baseline on the same splits
-     (paired bootstrap over test sentences). A fine-grained SOTA claim needs
-     a significant gain over the baseline, not just a higher mean.
+   - Done: paired comparison with this baseline on the same splits and model
+     seeds (`--compare`, `results/ner_comparisons.json`). A fine-grained SOTA
+     claim needs a significant gain over the baseline, not just a higher
+     mean; the CRF head has one (item 4).
 
    A CPU run takes 9–25 minutes; on one GPU the whole protocol takes minutes.
 2. **Hierarchy-aware multi-task training.** Coarse labels are the fine labels
    propagated up the MMO taxonomy, so a joint fine + coarse head (or a loss
    over the label hierarchy) shares signal with the 85 fine classes that have
    ≤ 3 examples. *(est. +1–3 F1 fine-grained)*
-3. **Class-balanced or focal loss** (`--class-weights` is implemented) for the
-   minority classes the paper names as the main weakness. *(est. +0.5–2)*
+3. **Class-balanced or focal loss** for the minority classes the paper names
+   as the main weakness. *(est. +0.5–2)*
+
+   Measured with `--class-weights` (inverse square-root label frequency): no
+   significant change in any of the four paired comparisons.
+
+   | Micro F1 Δ [95% CI] | Fine-grained | Coarse-grained |
+   |---|---|---|
+   | 5 random splits | −0.24 [−3.09, +2.61] | +0.41 [−2.31, +3.13] |
+   | Leaving one paper out | +1.81 [−4.28, +7.89] | +0.91 [−5.15, +6.98] |
+
+   Macro F1, which gives rare classes more weight, does not change
+   significantly either. Not adopted. A focal loss targets the same
+   imbalance, so it now ranks below items 2 and 5.
 4. **CRF or span-based decoding** to cut span errors, which are about 10% of
    errors in the 2025 study. *(est. +0.5–1.5)*
+
+   Measured with `--crf`: a linear-chain CRF over first-subword emissions
+   whose transitions forbid invalid IOB2 sequences. It improves all four
+   paired comparisons, by more than the estimate.
+
+   | Δ [95% CI] | Fine-grained | Coarse-grained |
+   |---|---|---|
+   | Micro F1, 5 random splits | +2.46 [+0.39, +4.52] | +3.58 [+2.43, +4.74] |
+   | Strict IOB2 micro F1, 5 random splits | +0.10 [−2.08, +2.29] | +1.91 [+1.17, +2.65] |
+   | Micro F1, leaving one paper out | +5.94 [+2.70, +9.18] | +5.47 [+0.43, +10.52] |
+   | Strict IOB2 micro F1, leaving one paper out | +4.40 [+2.09, +6.72] | +3.03 [−1.00, +7.07] |
+
+   Under strict IOB2 scoring, the in-distribution fine-grained gain vanishes.
+   It comes from no longer emitting stray I- tags, which seqeval's default
+   scoring counts as entities. The baseline's own strict F1 is already 76.26
+   [72.52, 80.01]. The coarse-grained gain across random splits and the
+   fine-grained gain on an unseen paper survive strict scoring.
+
+   Next:
+   - Use `--crf` for every new NER experiment, and judge items 2 and 5–8
+     against the CRF results rather than the plain baseline.
+   - Report strict micro F1 next to the default.
+   - For models without a CRF, constrained decoding (repair or drop stray
+     I- tags) gives the span-validity part of the gain for free.
+   - Span-based decoding remains untested.
 5. **Domain-adaptive pre-training.** Continue MLM on the 19k PubMed sentences
    already in the repo, plus open-access fatigue papers, before fine-tuning.
    *(est. +1–3)*
@@ -105,9 +152,9 @@ and NER is the only task with a published SOTA on this data.
 9. **Track out-of-distribution results** with `--leave-one-paper-out` for
    every change. It is cheap and closer to real use than random sentence
    splits. The baseline drops from about 74 to 44 (fine-grained) and 54
-   (coarse-grained) on an unseen paper. That gap is larger than any
-   in-distribution gain on this list, so items 5–7 should be judged on this
-   protocol as well.
+   (coarse-grained) on an unseen paper; the CRF head lifts these to 49 and
+   60. That gap is larger than any in-distribution gain on this list, so
+   items 5–7 should be judged on this protocol as well.
 
 ### P2: Term typing (LLMs4OL Task B style)
 The cross-validated hybrid + LLM baseline is far ahead of the pipeline's
@@ -195,7 +242,7 @@ chance at class level. For a Task C-style result:
 
 | Week | Work | Exit criterion |
 |---|---|---|
-| 1 | Class weights and CRF on the reproduced baseline (the baseline on all three split protocols is done, §1) | A paired, significant gain over the baseline on the varied splits, also measured leaving one paper out |
-| 2 | Domain-adaptive pre-training + hierarchy-aware multi-task NER, ensembles | Beats the reproduced baseline on the same splits (paired bootstrap, p < 0.05) and 69.92 / 72.32 on average |
+| 1 | Done: class weights (no significant change) and CRF (significant gain in all four comparisons), P1 items 3–4 | Met by the CRF head |
+| 2 | Domain-adaptive pre-training + hierarchy-aware multi-task NER, ensembles, all with `--crf` | A paired gain over the CRF results on the varied splits (95% CI above 0), also measured leaving one paper out |
 | 3 | Context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | Typing accuracy above the hybrid + LLM baseline (§1) |
 | 4 | Class-level taxonomy (LLM or cross-encoder + arborescence); relation annotation pilot | First class-level taxonomy F1 above chance; relation guidelines |
