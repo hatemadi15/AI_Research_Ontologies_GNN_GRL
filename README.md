@@ -129,8 +129,9 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
 | Variant | Protocol | Granularity | Pairs | Variant micro F1 [95% CI] | Δ micro [95% CI] | Δ macro [95% CI] | Δ strict micro |
 |---|---|---|---|---|---|---|---|
 | class-weighted loss | new random split per seed | fine | 5 | 73.67 [69.77, 77.56] | -0.24 [-3.09, +2.61] | +0.02 [-4.99, +5.02] | -0.64 |
+| class-weighted loss | new random split per seed | coarse | 5 | 74.98 [71.87, 78.08] | +0.41 [-2.31, +3.13] | +2.18 [-3.08, +7.45] | +0.39 |
 
-> **Still running when this snapshot was taken:** the remaining NER variant runs (class weights: coarse and leave-one-paper-out; CRF: all). These rows will be added when the runs finish.
+> **Still running when this snapshot was taken:** the remaining NER variant runs (class weights: leave-one-paper-out; CRF: all). These rows will be added when the runs finish.
 
 **Reading the numbers**
 * The old "Term F1 0.91" corresponds to *0.12* pairwise alignment F1. The
@@ -147,7 +148,7 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
 * NER, fixed split: plain MatSciBERT reaches micro F1 72.99 (fine) and 75.57 (coarse) over 5 seeds, against the published 69.92 / 72.32. Macro F1 is much lower (67.99 / 67.14), so the comparison favours this repo only if the paper's "averaging over ... entity types" means micro averaging, as in the authors' 2025 follow-up.
 * NER across splits (`--vary-split`, a new random split per seed, micro F1; pre-registered rule: the gain holds if the 95% CI lies above the published number): fine-grained the gain is not significant: 73.91, 95% CI [69.36, 78.45] includes 69.92; coarse-grained the gain holds: 74.57, 95% CI [73.15, 75.98], above 72.32. Macro F1 across splits is 71.19 (fine) and 65.53 (coarse).
 * NER out of distribution (`--leave-one-paper-out`: train on three papers, test on the fourth): micro F1 43.51 fine-grained (per paper 38.9–47.2) and 54.34 coarse-grained (per paper 50.4–60.0). These numbers are not comparable with 69.92 / 72.32.
-* NER, class-weighted loss vs the baseline (paired micro-F1 difference): fine-grained no significant change (-0.24, 95% CI [-3.09, +2.61]) across the 5 random splits.
+* NER, class-weighted loss vs the baseline (paired micro-F1 difference): fine-grained no significant change (-0.24, 95% CI [-3.09, +2.61]); coarse-grained no significant change (+0.41, 95% CI [-2.31, +3.13]) across the 5 random splits.
 <!-- RESULTS:END -->
 
 ## Evaluation
