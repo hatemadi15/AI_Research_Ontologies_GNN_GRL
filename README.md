@@ -11,9 +11,11 @@ all of it **without leaking gold labels**.
 > reported *Type F1 0.997, Term F1 0.911/0.956, Concept F1 0.447* and claimed
 > to beat SOTA. Those numbers are not valid. The gold NER labels (which *are*
 > MMO class names) were fed into the predictions, and the metrics never
-> checked whether a term received the right class. Details and the
-> before/after comparison are in [Evaluation](#evaluation) and
-> [docs/ROADMAP.md](docs/ROADMAP.md). All numbers below are leakage-free.
+> checked whether a term received the right class.
+> [PR #5](https://github.com/hatemadi15/AI_Research_Ontologies_GNN_GRL/pull/5)
+> removed the leakage and replaced the metrics; the before/after comparison
+> is in [Evaluation](#evaluation) and [docs/ROADMAP.md](docs/ROADMAP.md). All
+> numbers below are leakage-free.
 
 ## Data
 
@@ -49,6 +51,24 @@ Stand-alone baselines:
   (label/definition matching, kNN, hybrid, LLM re-ranking).
 * `ner_baseline.py`: MatSciBERT NER under the MaterioMiner protocol. This is
   the only setting with published SOTA numbers.
+  - Split protocols: the fixed split, a new random split per seed
+    (`--vary-split`), or training on three papers and testing on the fourth
+    (`--leave-one-paper-out`).
+  - Training variants: a class-weighted loss (`--class-weights`) or a CRF head
+    with IOB2 constraints (`--crf`).
+  - `--compare` pairs every variant run with the baseline run on the same
+    split and seed.
+
+## Repository layout
+
+| Path | Content |
+|---|---|
+| `src/graph/` | pipeline stages, evaluators, baselines, `run_pipeline.py`, `run_ablation.py` |
+| `data/raw/dataset/` | MaterioMiner CoNLL files (`fine_grained_ner/`, `coarse_grained_ner/`), the MMO and upper ontologies (`ontologies/`), PubMed sentences |
+| `data/processed/` | outputs of pipeline and baseline runs (not versioned) |
+| `results/` | versioned JSON snapshots behind every number in this README (see [results/README.md](results/README.md)) |
+| `docs/ROADMAP.md` | where the project stands and the prioritised next steps |
+| `tests/` | unit tests, run by CI |
 
 ## Results
 
@@ -58,6 +78,20 @@ All numbers are leakage-free and come from the JSON files in [`results/`](result
 are given to the pipeline and the typing baselines. "Gold types used" marks
 outputs whose predictions had access to the gold labels: those rows are
 reported only to show the size of the leak.
+
+**At a glance** (95% CIs in brackets; details below)
+
+| Task | Result in this repo | Reference |
+|---|---|---|
+| NER, fine-grained, 5 random splits (micro F1) | 73.91 [69.36, 78.45] | published 69.92: not significantly better |
+| NER, coarse-grained, 5 random splits (micro F1) | 74.57 [73.15, 75.98] | published 72.32: **beaten** if the paper used micro F1 |
+| NER on an unseen paper (leave one paper out) | 43.51 fine, 54.34 coarse | no published equivalent |
+| NER with a class-weighted loss: paired gain over the baseline | fine -0.24 [-3.09, +2.61]; coarse +0.41 [-2.31, +3.13] | counts only if the CI lies above 0 |
+| NER with a CRF head: paired gain over the baseline | fine +2.46 [+0.39, +4.52]; coarse +3.58 [+2.43, +4.74] | counts only if the CI lies above 0 |
+| NER, fine-grained with the CRF head, 5 random splits (micro F1) | 76.36 [71.00, 81.73] | published 69.92: **beaten** if the paper used micro F1; the gain comes from valid spans only (see below) |
+| NER, coarse-grained with the CRF head, 5 random splits (micro F1) | 78.15 [76.61, 79.69] | published 72.32: **beaten** if the paper used micro F1; +1.91 of the gain survives strict IOB2 scoring |
+| Term typing, 315 terms, pipeline (zero-shot) | accuracy 0.384 (0.429 with LLM re-ranking) | supervised + LLM baseline 0.654; majority class 0.083 |
+| Clustering / taxonomy / relations, class level | ARI 0.035 / edge F1 0.006 / F1 0.000 | near chance; see the roadmap |
 
 #### Term typing: 315 graph terms, gold spans given
 
@@ -122,6 +156,21 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
 | leave one paper out | fine | 4 papers | 43.51 ± 3.19 [37.65, 49.37] | 35.58 | 40.61 | 45.04 | – (out of distribution) |
 | leave one paper out | coarse | 4 papers | 54.34 ± 3.50 [47.91, 60.78] | 43.14 | 53.73 | 56.78 | – (out of distribution) |
 
+#### NER training variants vs the baseline (paired by split and model seed)
+
+Δ = variant − baseline on the same split and model seed, with the 95% Student-t CI of the mean difference. Pre-registered rule: a variant improves on the baseline only if the micro-F1 interval over the 5 random splits lies entirely above 0.
+
+| Variant | Protocol | Granularity | Pairs | Variant micro F1 [95% CI] | Δ micro [95% CI] | Δ macro [95% CI] | Δ strict micro |
+|---|---|---|---|---|---|---|---|
+| class-weighted loss | new random split per seed | fine | 5 | 73.67 [69.77, 77.56] | -0.24 [-3.09, +2.61] | +0.02 [-4.99, +5.02] | -0.64 |
+| class-weighted loss | new random split per seed | coarse | 5 | 74.98 [71.87, 78.08] | +0.41 [-2.31, +3.13] | +2.18 [-3.08, +7.45] | +0.39 |
+| class-weighted loss | leave one paper out | fine | 4 | 45.32 [36.99, 53.64] | +1.81 [-4.28, +7.89] | -0.73 [-5.84, +4.38] | +1.75 |
+| class-weighted loss | leave one paper out | coarse | 4 | 55.26 [50.15, 60.36] | +0.91 [-5.15, +6.98] | +2.88 [-7.08, +12.84] | +0.76 |
+| CRF head | new random split per seed | fine | 5 | 76.36 [71.00, 81.73] | +2.46 [+0.39, +4.52] | +3.06 [-0.07, +6.18] | +0.10 |
+| CRF head | new random split per seed | coarse | 5 | 78.15 [76.61, 79.69] | +3.58 [+2.43, +4.74] | +4.90 [+2.37, +7.43] | +1.91 |
+| CRF head | leave one paper out | fine | 4 | 49.44 [41.00, 57.89] | +5.94 [+2.70, +9.18] | +4.18 [+1.29, +7.08] | +4.40 |
+| CRF head | leave one paper out | coarse | 4 | 59.82 [54.15, 65.49] | +5.47 [+0.43, +10.52] | +5.85 [+1.37, +10.32] | +3.03 |
+
 **Reading the numbers**
 * The old "Term F1 0.91" corresponds to *0.12* pairwise alignment F1. The
   v5 outputs score higher (0.27, and 0.57–0.74 typing accuracy) only because
@@ -137,6 +186,9 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
 * NER, fixed split: plain MatSciBERT reaches micro F1 72.99 (fine) and 75.57 (coarse) over 5 seeds, against the published 69.92 / 72.32. Macro F1 is much lower (67.99 / 67.14), so the comparison favours this repo only if the paper's "averaging over ... entity types" means micro averaging, as in the authors' 2025 follow-up.
 * NER across splits (`--vary-split`, a new random split per seed, micro F1; pre-registered rule: the gain holds if the 95% CI lies above the published number): fine-grained the gain is not significant: 73.91, 95% CI [69.36, 78.45] includes 69.92; coarse-grained the gain holds: 74.57, 95% CI [73.15, 75.98], above 72.32. Macro F1 across splits is 71.19 (fine) and 65.53 (coarse).
 * NER out of distribution (`--leave-one-paper-out`: train on three papers, test on the fourth): micro F1 43.51 fine-grained (per paper 38.9–47.2) and 54.34 coarse-grained (per paper 50.4–60.0). These numbers are not comparable with 69.92 / 72.32.
+* NER, class-weighted loss vs the baseline (paired micro-F1 difference): fine-grained no significant change (-0.24, 95% CI [-3.09, +2.61]; strict IOB2 -0.64 [-3.36, +2.08]); coarse-grained no significant change (+0.41, 95% CI [-2.31, +3.13]; strict IOB2 +0.39 [-1.76, +2.54]) across the 5 random splits. Leaving one paper out: fine-grained no significant change (+1.81, 95% CI [-4.28, +7.89]; strict IOB2 +1.75 [-3.92, +7.43]); coarse-grained no significant change (+0.91, 95% CI [-5.15, +6.98]; strict IOB2 +0.76 [-4.42, +5.94]).
+* NER, CRF head vs the baseline (paired micro-F1 difference): fine-grained improves (+2.46, 95% CI [+0.39, +4.52]; strict IOB2 +0.10 [-2.08, +2.29]); coarse-grained improves (+3.58, 95% CI [+2.43, +4.74]; strict IOB2 +1.91 [+1.17, +2.65]) across the 5 random splits. Leaving one paper out: fine-grained improves (+5.94, 95% CI [+2.70, +9.18]; strict IOB2 +4.40 [+2.09, +6.72]); coarse-grained improves (+5.47, 95% CI [+0.43, +10.52]; strict IOB2 +3.03 [-1.00, +7.07]). Pre-registered SOTA check (a paired gain over the baseline and a 95% CI above the published number): met for fine-grained 76.36 [71.00, 81.73] vs 69.92; coarse-grained 78.15 [76.61, 79.69] vs 72.32, if the paper reports micro F1.
+* Why the CRF helps (exploratory, not pre-registered): it never predicts an invalid I- tag, while seqeval's default (conlleval) scoring counts the baseline's stray I- tags as extra, mostly wrong entities; strict IOB2 scoring ignores them. Fine-grained: precision 71.0 → 76.7, recall 77.1 → 76.1; under strict IOB2 scoring the two are level (+0.10 [-2.08, +2.29]), so the gain is span validity alone. Dropping invalid tags from the baseline's output gives the same benefit for free: its strict F1 is 76.26 [72.52, 80.01] against the published 69.92. Coarse-grained: precision 71.4 → 77.5, recall 78.1 → 78.9; under strict IOB2 scoring the CRF still gains +1.91 [+1.17, +2.65], so part of the gain is better recognition.
 <!-- RESULTS:END -->
 
 ## Evaluation
@@ -161,6 +213,24 @@ compared with the term's annotated class(es). `eval_f1.py` reports:
 * **Relations:** extracted triples lifted to class level and compared with the
   ontology restrictions, with sub-property matching (`causeOf` ⊑
   `prov:influenced`).
+
+**NER** (`ner_baseline.py`) is evaluated end to end, with no gold spans given:
+* **Metric:** entity-level seqeval F1 (exact span and type). Micro F1 is
+  primary; macro, support-weighted and strict IOB2 F1 are reported alongside.
+  The authors' 2025 follow-up uses micro averaging; the 2024 paper does not
+  say.
+* **Protocols:**
+  - the fixed split with 5 model seeds;
+  - a new random split per seed (5 splits);
+  - leave one paper out (4 folds, out of distribution).
+* **Intervals:** every result has a 95% Student-t CI over runs. Training
+  variants are compared with the baseline run by run, on the same split and
+  model seed.
+* **Rules, fixed before the runs:**
+  - a gain over the paper holds only if the CI over the 5 random splits lies
+    above the published number;
+  - a variant improves on the baseline only if the CI of the paired
+    difference lies above 0.
 
 **What was wrong before (v5):**
 1. `align.py` auto-accepted each term's *gold* class at similarity ≥ 0.85.
@@ -198,9 +268,18 @@ python src/graph/run_pipeline.py                    # full pipeline (cleans stal
 python src/graph/run_pipeline.py --from align.py    # resume from a stage
 python src/graph/run_ablation.py                    # all ablations, LLM off, paired tests vs full
 python src/graph/term_typing_baseline.py [--llm]    # cross-validated typing baselines
-python src/graph/ner_baseline.py --granularity both --seeds 0 1 2 3 4   # GPU recommended
 python src/graph/eval_f1.py --legacy-alignment-csv old/ontology_alignment.csv  # score old outputs
+
+# NER (GPU recommended; on CPU one run takes 10-30 minutes)
+python src/graph/ner_baseline.py --granularity both --seeds 0 1 2 3 4      # fixed split
+python src/graph/ner_baseline.py --granularity both --vary-split           # new split per seed
+python src/graph/ner_baseline.py --granularity both --leave-one-paper-out --seeds 0
+python src/graph/ner_baseline.py --granularity fine --vary-split --crf     # or --class-weights
+python src/graph/ner_baseline.py --compare results                         # paired variant vs baseline
 ```
+
+NER runs write `data/processed/ner/ner_results_<granularity>[_<protocol>][_<variant>].json`
+after every run and skip finished runs when restarted.
 
 Configuration is read from environment variables (see `src/graph/config.py`):
 `ORACLE_TYPES`, `USE_GNN_EMBEDDINGS`, `USE_BIDIRECTIONAL`, `USE_COMBINED_SCORING`,
@@ -218,11 +297,15 @@ pytest
 ```
 
 CI (GitHub Actions) runs ruff and the test suite on every push and pull request.
+The CRF tests (`tests/test_ner_crf.py`) need torch, so they are skipped where it
+is missing, as in CI; run them locally after installing torch.
 
 ## Next steps
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the prioritised plan to raise the
-metrics and to compete with the published state of the art.
+metrics and to compete with the published state of the art. For NER, the CRF
+head (`--crf`) beats the plain baseline in all four paired comparisons, so new
+NER experiments should use it and be compared against its results.
 
 ## License
 

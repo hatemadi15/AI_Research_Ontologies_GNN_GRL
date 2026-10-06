@@ -1,0 +1,542 @@
+{
+  "ner_results_coarse_leave_one_paper_out_crf": {
+    "variant": "crf",
+    "granularity": "coarse",
+    "protocol": "leave_one_paper_out",
+    "baseline_file": "ner_results_coarse_leave_one_paper_out.json",
+    "n_pairs": 4,
+    "run_ids": [
+      "10.1007_s11340-021-00758-x.conll",
+      "10.1038_ncomms7164.conll",
+      "10.1038_s41467-020-19071-7.conll",
+      "10.3390_met10111458.conll"
+    ],
+    "micro": {
+      "mean_diff": 5.47,
+      "ci95": [
+        0.43,
+        10.52
+      ],
+      "per_run": [
+        9.76,
+        2.87,
+        5.98,
+        3.29
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": 3.03,
+      "ci95": [
+        -1.0,
+        7.07
+      ],
+      "per_run": [
+        6.5,
+        0.52,
+        3.06,
+        2.05
+      ]
+    },
+    "macro": {
+      "mean_diff": 5.85,
+      "ci95": [
+        1.37,
+        10.32
+      ],
+      "per_run": [
+        6.57,
+        3.82,
+        9.52,
+        3.47
+      ]
+    },
+    "weighted": {
+      "mean_diff": 5.04,
+      "ci95": [
+        0.35,
+        9.72
+      ],
+      "per_run": [
+        8.99,
+        2.68,
+        5.57,
+        2.9
+      ]
+    }
+  },
+  "ner_results_coarse_leave_one_paper_out_cw": {
+    "variant": "cw",
+    "granularity": "coarse",
+    "protocol": "leave_one_paper_out",
+    "baseline_file": "ner_results_coarse_leave_one_paper_out.json",
+    "n_pairs": 4,
+    "run_ids": [
+      "10.1007_s11340-021-00758-x.conll",
+      "10.1038_ncomms7164.conll",
+      "10.1038_s41467-020-19071-7.conll",
+      "10.3390_met10111458.conll"
+    ],
+    "micro": {
+      "mean_diff": 0.91,
+      "ci95": [
+        -5.15,
+        6.98
+      ],
+      "per_run": [
+        4.65,
+        -2.15,
+        3.74,
+        -2.59
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": 0.76,
+      "ci95": [
+        -4.42,
+        5.94
+      ],
+      "per_run": [
+        4.19,
+        -1.83,
+        2.89,
+        -2.21
+      ]
+    },
+    "macro": {
+      "mean_diff": 2.88,
+      "ci95": [
+        -7.08,
+        12.84
+      ],
+      "per_run": [
+        7.0,
+        -3.44,
+        9.37,
+        -1.41
+      ]
+    },
+    "weighted": {
+      "mean_diff": 1.6,
+      "ci95": [
+        -4.67,
+        7.87
+      ],
+      "per_run": [
+        5.71,
+        -2.28,
+        4.19,
+        -1.21
+      ]
+    }
+  },
+  "ner_results_coarse_random_split_vary_crf": {
+    "variant": "crf",
+    "granularity": "coarse",
+    "protocol": "random_split_vary",
+    "baseline_file": "ner_results_coarse_random_split_vary.json",
+    "n_pairs": 5,
+    "run_ids": [
+      "seed0",
+      "seed1",
+      "seed2",
+      "seed3",
+      "seed4"
+    ],
+    "micro": {
+      "mean_diff": 3.58,
+      "ci95": [
+        2.43,
+        4.74
+      ],
+      "per_run": [
+        2.99,
+        4.95,
+        3.93,
+        3.53,
+        2.52
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": 1.91,
+      "ci95": [
+        1.17,
+        2.65
+      ],
+      "per_run": [
+        1.08,
+        2.4,
+        2.55,
+        1.92,
+        1.61
+      ]
+    },
+    "macro": {
+      "mean_diff": 4.9,
+      "ci95": [
+        2.37,
+        7.43
+      ],
+      "per_run": [
+        3.12,
+        8.29,
+        3.95,
+        5.21,
+        3.94
+      ]
+    },
+    "weighted": {
+      "mean_diff": 3.25,
+      "ci95": [
+        2.21,
+        4.29
+      ],
+      "per_run": [
+        2.81,
+        4.3,
+        3.54,
+        3.51,
+        2.09
+      ]
+    }
+  },
+  "ner_results_coarse_random_split_vary_cw": {
+    "variant": "cw",
+    "granularity": "coarse",
+    "protocol": "random_split_vary",
+    "baseline_file": "ner_results_coarse_random_split_vary.json",
+    "n_pairs": 5,
+    "run_ids": [
+      "seed0",
+      "seed1",
+      "seed2",
+      "seed3",
+      "seed4"
+    ],
+    "micro": {
+      "mean_diff": 0.41,
+      "ci95": [
+        -2.31,
+        3.13
+      ],
+      "per_run": [
+        2.35,
+        2.76,
+        -0.86,
+        -2.47,
+        0.27
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": 0.39,
+      "ci95": [
+        -1.76,
+        2.54
+      ],
+      "per_run": [
+        2.62,
+        1.4,
+        -0.65,
+        -1.83,
+        0.42
+      ]
+    },
+    "macro": {
+      "mean_diff": 2.18,
+      "ci95": [
+        -3.08,
+        7.45
+      ],
+      "per_run": [
+        3.54,
+        8.58,
+        -0.1,
+        -2.68,
+        1.58
+      ]
+    },
+    "weighted": {
+      "mean_diff": 0.52,
+      "ci95": [
+        -2.15,
+        3.19
+      ],
+      "per_run": [
+        2.42,
+        3.09,
+        -1.05,
+        -1.84,
+        -0.01
+      ]
+    }
+  },
+  "ner_results_fine_leave_one_paper_out_crf": {
+    "variant": "crf",
+    "granularity": "fine",
+    "protocol": "leave_one_paper_out",
+    "baseline_file": "ner_results_fine_leave_one_paper_out.json",
+    "n_pairs": 4,
+    "run_ids": [
+      "10.1007_s11340-021-00758-x.conll",
+      "10.1038_ncomms7164.conll",
+      "10.1038_s41467-020-19071-7.conll",
+      "10.3390_met10111458.conll"
+    ],
+    "micro": {
+      "mean_diff": 5.94,
+      "ci95": [
+        2.7,
+        9.18
+      ],
+      "per_run": [
+        7.48,
+        5.22,
+        7.67,
+        3.38
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": 4.4,
+      "ci95": [
+        2.09,
+        6.72
+      ],
+      "per_run": [
+        5.06,
+        4.13,
+        5.91,
+        2.51
+      ]
+    },
+    "macro": {
+      "mean_diff": 4.18,
+      "ci95": [
+        1.29,
+        7.08
+      ],
+      "per_run": [
+        3.56,
+        4.05,
+        6.71,
+        2.41
+      ]
+    },
+    "weighted": {
+      "mean_diff": 4.17,
+      "ci95": [
+        0.72,
+        7.63
+      ],
+      "per_run": [
+        3.45,
+        3.7,
+        7.29,
+        2.25
+      ]
+    }
+  },
+  "ner_results_fine_leave_one_paper_out_cw": {
+    "variant": "cw",
+    "granularity": "fine",
+    "protocol": "leave_one_paper_out",
+    "baseline_file": "ner_results_fine_leave_one_paper_out.json",
+    "n_pairs": 4,
+    "run_ids": [
+      "10.1007_s11340-021-00758-x.conll",
+      "10.1038_ncomms7164.conll",
+      "10.1038_s41467-020-19071-7.conll",
+      "10.3390_met10111458.conll"
+    ],
+    "micro": {
+      "mean_diff": 1.81,
+      "ci95": [
+        -4.28,
+        7.89
+      ],
+      "per_run": [
+        5.81,
+        3.0,
+        -3.33,
+        1.75
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": 1.75,
+      "ci95": [
+        -3.92,
+        7.43
+      ],
+      "per_run": [
+        5.48,
+        3.32,
+        -2.87,
+        1.09
+      ]
+    },
+    "macro": {
+      "mean_diff": -0.73,
+      "ci95": [
+        -5.84,
+        4.38
+      ],
+      "per_run": [
+        2.7,
+        -0.69,
+        -5.03,
+        0.09
+      ]
+    },
+    "weighted": {
+      "mean_diff": 2.06,
+      "ci95": [
+        -2.41,
+        6.54
+      ],
+      "per_run": [
+        5.1,
+        3.21,
+        -1.52,
+        1.46
+      ]
+    }
+  },
+  "ner_results_fine_random_split_vary_crf": {
+    "variant": "crf",
+    "granularity": "fine",
+    "protocol": "random_split_vary",
+    "baseline_file": "ner_results_fine_random_split_vary.json",
+    "n_pairs": 5,
+    "run_ids": [
+      "seed0",
+      "seed1",
+      "seed2",
+      "seed3",
+      "seed4"
+    ],
+    "micro": {
+      "mean_diff": 2.46,
+      "ci95": [
+        0.39,
+        4.52
+      ],
+      "per_run": [
+        5.19,
+        2.56,
+        1.53,
+        2.17,
+        0.83
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": 0.1,
+      "ci95": [
+        -2.08,
+        2.29
+      ],
+      "per_run": [
+        2.46,
+        1.29,
+        -0.51,
+        -0.76,
+        -1.97
+      ]
+    },
+    "macro": {
+      "mean_diff": 3.06,
+      "ci95": [
+        -0.07,
+        6.18
+      ],
+      "per_run": [
+        6.64,
+        4.12,
+        3.03,
+        1.3,
+        0.19
+      ]
+    },
+    "weighted": {
+      "mean_diff": 2.06,
+      "ci95": [
+        0.07,
+        4.04
+      ],
+      "per_run": [
+        4.28,
+        2.52,
+        2.23,
+        1.32,
+        -0.06
+      ]
+    }
+  },
+  "ner_results_fine_random_split_vary_cw": {
+    "variant": "cw",
+    "granularity": "fine",
+    "protocol": "random_split_vary",
+    "baseline_file": "ner_results_fine_random_split_vary.json",
+    "n_pairs": 5,
+    "run_ids": [
+      "seed0",
+      "seed1",
+      "seed2",
+      "seed3",
+      "seed4"
+    ],
+    "micro": {
+      "mean_diff": -0.24,
+      "ci95": [
+        -3.09,
+        2.61
+      ],
+      "per_run": [
+        -3.33,
+        -2.0,
+        1.95,
+        0.86,
+        1.31
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": -0.64,
+      "ci95": [
+        -3.36,
+        2.08
+      ],
+      "per_run": [
+        -3.47,
+        -2.4,
+        1.5,
+        0.07,
+        1.09
+      ]
+    },
+    "macro": {
+      "mean_diff": 0.02,
+      "ci95": [
+        -4.99,
+        5.02
+      ],
+      "per_run": [
+        -5.15,
+        -3.18,
+        2.56,
+        4.44,
+        1.41
+      ]
+    },
+    "weighted": {
+      "mean_diff": 0.63,
+      "ci95": [
+        -2.43,
+        3.68
+      ],
+      "per_run": [
+        -2.92,
+        -0.97,
+        2.72,
+        2.11,
+        2.2
+      ]
+    }
+  }
+}

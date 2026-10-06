@@ -54,6 +54,66 @@ def test_leave_one_paper_out_tests_each_paper_once():
         assert len(val) == round(0.15 * (len(data) - len(test)))
 
 
+def test_variant_names_and_resume_isolation(tmp_path):
+    assert nb.variant_name(SimpleNamespace(class_weights=False)) == 'baseline'
+    assert nb.variant_name(SimpleNamespace(class_weights=True)) == 'cw'
+    assert nb.variant_name(SimpleNamespace(class_weights=False, crf=True)) == 'crf'
+    # a file written before variants existed holds baseline runs
+    path = tmp_path / 'ner_results_fine_random_split_vary.json'
+    path.write_text('{"labels": ["A"], "model": "m", "runs": [{"run_id": "seed0"}]}')
+    assert nb.resumable_runs(str(path), ['A'], 'm', 'baseline') == [{'run_id': 'seed0'}]
+    assert nb.resumable_runs(str(path), ['A'], 'm', 'cw') == []
+    assert nb.resumable_runs(str(path), ['B'], 'm', 'baseline') == []
+    assert nb.resumable_runs(str(tmp_path / 'missing.json'), ['A'], 'm', 'baseline') == []
+    assert nb.VARIANT_FILE.match('ner_results_fine_random_split_vary_cw.json')
+    assert nb.VARIANT_FILE.match('ner_results_coarse_leave_one_paper_out_crf.json')
+    assert not nb.VARIANT_FILE.match('ner_results_fine_random_split_vary.json')
+    assert not nb.VARIANT_FILE.match('ner_results_fine_random_split_vary_cw_smoke16.json')
+
+
+def test_compare_to_baseline_pairs_runs_by_id():
+    base = {'runs': [_run('seed0', 70.0, 72.0, 60.0, 69.0),
+                     _run('seed1', 74.0, 76.0, 64.0, 73.0),
+                     _run('seed2', 72.0, 74.0, 62.0, 71.0)]}
+    variant = {'runs': [_run('seed1', 75.0, 77.0, 66.0, 74.0),
+                        _run('seed0', 71.0, 73.0, 61.0, 70.0),
+                        _run('seed2', 74.0, 75.0, 61.0, 72.0),
+                        _run('seed9', 99.0, 99.0, 99.0, 99.0)]}   # no baseline partner
+    comp = nb.compare_to_baseline(base, variant)
+    assert comp['n_pairs'] == 3 and comp['run_ids'] == ['seed1', 'seed0', 'seed2']
+    assert comp['micro']['per_run'] == [1.0, 1.0, 2.0]
+    assert comp['micro']['mean_diff'] == pytest.approx(1.33, abs=0.01)
+    assert comp['macro']['per_run'] == [2.0, 1.0, -1.0]
+    lo, hi = comp['micro']['ci95']
+    assert lo < 1.33 < hi
+
+
+def test_compare_all_writes_comparisons(tmp_path):
+    import json
+    base = {'protocol': 'random_split_vary', 'runs': [_run('seed0', 70.0, 72.0, 60.0, 69.0),
+                                                      _run('seed1', 74.0, 76.0, 64.0, 73.0)]}
+    var = {'protocol': 'random_split_vary', 'runs': [_run('seed0', 72.0, 73.0, 61.0, 70.0),
+                                                     _run('seed1', 75.0, 77.0, 66.0, 74.0)]}
+    (tmp_path / 'ner_results_fine_random_split_vary.json').write_text(json.dumps(base))
+    (tmp_path / 'ner_results_fine_random_split_vary_cw.json').write_text(json.dumps(var))
+    (tmp_path / 'ner_results_coarse_leave_one_paper_out_crf.json').write_text(json.dumps(var))
+    comps = nb.compare_all(str(tmp_path))
+    assert list(comps) == ['ner_results_fine_random_split_vary_cw']   # no coarse baseline
+    c = comps['ner_results_fine_random_split_vary_cw']
+    assert (c['variant'], c['granularity'], c['n_pairs']) == ('cw', 'fine', 2)
+    assert c['micro']['per_run'] == [2.0, 1.0]
+    assert json.loads((tmp_path / 'ner_comparisons.json').read_text()) == comps
+
+
+def test_bio_constraints():
+    labels = ['O', 'B-A', 'I-A', 'B-B', 'I-B']
+    allowed, start = nb.bio_allowed(labels)
+    ok = {(p, c) for i, p in enumerate(labels) for j, c in enumerate(labels) if allowed[i][j]}
+    assert ('B-A', 'I-A') in ok and ('I-A', 'I-A') in ok and ('O', 'B-B') in ok
+    assert ('O', 'I-A') not in ok and ('B-B', 'I-A') not in ok and ('I-B', 'I-A') not in ok
+    assert start == [True, True, False, True, False]
+
+
 def test_random_split_protocol():
     assert nb.make_folds(_corpus(), SimpleNamespace(leave_one_paper_out=False)) is None
     tr, va, te = nb.random_split(476, 0)
