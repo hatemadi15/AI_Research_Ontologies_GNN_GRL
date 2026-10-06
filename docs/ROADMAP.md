@@ -17,7 +17,7 @@ expectations from the literature, not results.
 | Taxonomy, class level | edge F1 0.006; precision vs closure 0.027 (chance 0.013) | LLMs4OL 2025 MatOnto best F1 0.662 (different dataset) |
 | Relations, class level vs 70 restrictions | F1 0.000 | no text-level gold exists |
 
-> **Still running when this snapshot was taken:** the CRF leave-one-paper-out runs. These rows will be added when the runs finish.
+> **Still running when this snapshot was taken:** the last CRF run (coarse-grained, leave one paper out). These rows will be added when the runs finish.
 
 Full tables: [README](../README.md#results).
 <!-- STANDING:END -->

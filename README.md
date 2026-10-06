@@ -168,8 +168,9 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
 | class-weighted loss | leave one paper out | coarse | 4 | 55.26 [50.15, 60.36] | +0.91 [-5.15, +6.98] | +2.88 [-7.08, +12.84] | +0.76 |
 | CRF head | new random split per seed | fine | 5 | 76.36 [71.00, 81.73] | +2.46 [+0.39, +4.52] | +3.06 [-0.07, +6.18] | +0.10 |
 | CRF head | new random split per seed | coarse | 5 | 78.15 [76.61, 79.69] | +3.58 [+2.43, +4.74] | +4.90 [+2.37, +7.43] | +1.91 |
+| CRF head | leave one paper out | fine | 4 | 49.44 [41.00, 57.89] | +5.94 [+2.70, +9.18] | +4.18 [+1.29, +7.08] | +4.40 |
 
-> **Still running when this snapshot was taken:** the CRF leave-one-paper-out runs. These rows will be added when the runs finish.
+> **Still running when this snapshot was taken:** the last CRF run (coarse-grained, leave one paper out). These rows will be added when the runs finish.
 
 **Reading the numbers**
 * The old "Term F1 0.91" corresponds to *0.12* pairwise alignment F1. The
@@ -187,7 +188,7 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
 * NER across splits (`--vary-split`, a new random split per seed, micro F1; pre-registered rule: the gain holds if the 95% CI lies above the published number): fine-grained the gain is not significant: 73.91, 95% CI [69.36, 78.45] includes 69.92; coarse-grained the gain holds: 74.57, 95% CI [73.15, 75.98], above 72.32. Macro F1 across splits is 71.19 (fine) and 65.53 (coarse).
 * NER out of distribution (`--leave-one-paper-out`: train on three papers, test on the fourth): micro F1 43.51 fine-grained (per paper 38.9–47.2) and 54.34 coarse-grained (per paper 50.4–60.0). These numbers are not comparable with 69.92 / 72.32.
 * NER, class-weighted loss vs the baseline (paired micro-F1 difference): fine-grained no significant change (-0.24, 95% CI [-3.09, +2.61]; strict IOB2 -0.64 [-3.36, +2.08]); coarse-grained no significant change (+0.41, 95% CI [-2.31, +3.13]; strict IOB2 +0.39 [-1.76, +2.54]) across the 5 random splits. Leaving one paper out: fine-grained no significant change (+1.81, 95% CI [-4.28, +7.89]; strict IOB2 +1.75 [-3.92, +7.43]); coarse-grained no significant change (+0.91, 95% CI [-5.15, +6.98]; strict IOB2 +0.76 [-4.42, +5.94]).
-* NER, CRF head vs the baseline (paired micro-F1 difference): fine-grained improves (+2.46, 95% CI [+0.39, +4.52]; strict IOB2 +0.10 [-2.08, +2.29]); coarse-grained improves (+3.58, 95% CI [+2.43, +4.74]; strict IOB2 +1.91 [+1.17, +2.65]) across the 5 random splits. With this variant fine-grained 76.36 [71.00, 81.73] clears 69.92; coarse-grained 78.15 [76.61, 79.69] clears 72.32 on its own.
+* NER, CRF head vs the baseline (paired micro-F1 difference): fine-grained improves (+2.46, 95% CI [+0.39, +4.52]; strict IOB2 +0.10 [-2.08, +2.29]); coarse-grained improves (+3.58, 95% CI [+2.43, +4.74]; strict IOB2 +1.91 [+1.17, +2.65]) across the 5 random splits. Leaving one paper out: fine-grained improves (+5.94, 95% CI [+2.70, +9.18]; strict IOB2 +4.40 [+2.09, +6.72]). With this variant fine-grained 76.36 [71.00, 81.73] clears 69.92; coarse-grained 78.15 [76.61, 79.69] clears 72.32 on its own.
 * Why the CRF helps (exploratory, not pre-registered): it never predicts an invalid I- tag, while seqeval's default (conlleval) scoring counts the baseline's stray I- tags as extra, mostly wrong entities; strict IOB2 scoring ignores them. Fine-grained: precision 71.0 → 76.7, recall 77.1 → 76.1; under strict IOB2 scoring the two are level (+0.10 [-2.08, +2.29]), so the gain is span validity alone. Dropping invalid tags from the baseline's output gives the same benefit for free: its strict F1 is 76.26 [72.52, 80.01] against the published 69.92. Coarse-grained: precision 71.4 → 77.5, recall 78.1 → 78.9; under strict IOB2 scoring the CRF still gains +1.91 [+1.17, +2.65], so part of the gain is better recognition.
 <!-- RESULTS:END -->
 
