@@ -1,0 +1,72 @@
+{
+  "ner_results_fine_random_split_vary_cw": {
+    "variant": "cw",
+    "granularity": "fine",
+    "protocol": "random_split_vary",
+    "baseline_file": "ner_results_fine_random_split_vary.json",
+    "n_pairs": 5,
+    "run_ids": [
+      "seed0",
+      "seed1",
+      "seed2",
+      "seed3",
+      "seed4"
+    ],
+    "micro": {
+      "mean_diff": -0.24,
+      "ci95": [
+        -3.09,
+        2.61
+      ],
+      "per_run": [
+        -3.33,
+        -2.0,
+        1.95,
+        0.86,
+        1.31
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": -0.64,
+      "ci95": [
+        -3.36,
+        2.08
+      ],
+      "per_run": [
+        -3.47,
+        -2.4,
+        1.5,
+        0.07,
+        1.09
+      ]
+    },
+    "macro": {
+      "mean_diff": 0.02,
+      "ci95": [
+        -4.99,
+        5.02
+      ],
+      "per_run": [
+        -5.15,
+        -3.18,
+        2.56,
+        4.44,
+        1.41
+      ]
+    },
+    "weighted": {
+      "mean_diff": 0.63,
+      "ci95": [
+        -2.43,
+        3.68
+      ],
+      "per_run": [
+        -2.92,
+        -0.97,
+        2.72,
+        2.11,
+        2.2
+      ]
+    }
+  }
+}
