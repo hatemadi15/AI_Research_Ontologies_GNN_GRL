@@ -105,6 +105,15 @@ def test_compare_all_writes_comparisons(tmp_path):
     assert json.loads((tmp_path / 'ner_comparisons.json').read_text()) == comps
 
 
+def test_bio_constraints():
+    labels = ['O', 'B-A', 'I-A', 'B-B', 'I-B']
+    allowed, start = nb.bio_allowed(labels)
+    ok = {(p, c) for i, p in enumerate(labels) for j, c in enumerate(labels) if allowed[i][j]}
+    assert ('B-A', 'I-A') in ok and ('I-A', 'I-A') in ok and ('O', 'B-B') in ok
+    assert ('O', 'I-A') not in ok and ('B-B', 'I-A') not in ok and ('I-B', 'I-A') not in ok
+    assert start == [True, True, False, True, False]
+
+
 def test_random_split_protocol():
     assert nb.make_folds(_corpus(), SimpleNamespace(leave_one_paper_out=False)) is None
     tr, va, te = nb.random_split(476, 0)
