@@ -34,15 +34,22 @@ after every run, and completed runs are skipped when re-run; re-running a
 finished protocol only refreshes its `summary` (mean, population SD and 95%
 Student-t CI over runs for micro, strict micro, macro and weighted F1).
 
+Training variants (ROADMAP P1) write their own files with a `_cw` or `_crf`
+suffix; `--compare` pairs them with the baseline run by run (same split and
+model seed) and writes ner_comparisons.json.
+
 Usage:
   python ner_baseline.py --granularity fine --seeds 0 1 2 3 4
   python ner_baseline.py --granularity coarse --epochs 2 --max-train 32   # smoke test
+  python ner_baseline.py --granularity fine --vary-split --class-weights
+  python ner_baseline.py --compare                                        # paired comparison
 """
 
 import argparse
 import json
 import os
 import random
+import re
 import statistics
 import time
 from collections import Counter
@@ -249,6 +256,41 @@ def train_one(seed, train, val, test, labels, args, device):
     return result
 
 
+# F1 averages reported for every run (seqeval, in %): micro is the primary one
+F1_AVERAGES = {
+    'micro': lambda r: r['f1'],
+    'micro_strict': lambda r: r['f1_strict'],
+    'macro': lambda r: 100 * r['per_class']['macro avg']['f1-score'],
+    'weighted': lambda r: 100 * r['per_class']['weighted avg']['f1-score'],
+}
+
+# Results files of training variants: ner_results_<granularity>[_<protocol>]_<variant>.json
+VARIANT_FILE = re.compile(r'^ner_results_(fine|coarse)(_random_split_vary|_leave_one_paper_out)?'
+                          r'_(cw|crf)\.json$')
+
+
+def variant_name(args):
+    """Training variant of a run: 'baseline', 'cw' (class weights) or 'crf'."""
+    if getattr(args, 'crf', False):
+        return 'crf'
+    return 'cw' if args.class_weights else 'baseline'
+
+
+def resumable_runs(path, labels, model, variant):
+    """Runs of an earlier invocation that this one may reuse.
+
+    Only runs with the same labels, model and training variant count; files
+    written before variants existed are baseline runs.
+    """
+    if not os.path.exists(path):
+        return []
+    with open(path) as f:
+        previous = json.load(f)
+    same = (previous.get('labels') == labels and previous.get('model') == model
+            and previous.get('variant', 'baseline') == variant)
+    return previous.get('runs', []) if same else []
+
+
 def summarize(results):
     """Aggregate the runs of one protocol into the results dict (in place).
 
@@ -263,12 +305,7 @@ def summarize(results):
     results['test_f1_mean'] = round(statistics.mean(f1s), 2)
     results['test_f1_std'] = round(statistics.pstdev(f1s), 2) if len(f1s) > 1 else 0.0
     results['test_f1_strict_mean'] = round(statistics.mean(r['f1_strict'] for r in runs), 2)
-    series = {
-        'micro': f1s,
-        'micro_strict': [r['f1_strict'] for r in runs],
-        'macro': [100 * r['per_class']['macro avg']['f1-score'] for r in runs],
-        'weighted': [100 * r['per_class']['weighted avg']['f1-score'] for r in runs],
-    }
+    series = {name: [get(r) for r in runs] for name, get in F1_AVERAGES.items()}
     summary = {'n_runs': len(runs), 'run_ids': [r.get('run_id') for r in runs]}
     for name, vals in series.items():
         summary[name] = {
@@ -279,6 +316,58 @@ def summarize(results):
         }
     results['summary'] = summary
     return results
+
+
+def compare_to_baseline(base, variant):
+    """Paired differences (variant - baseline) over runs with the same run_id.
+
+    Runs are paired by run_id (seed<k> for random splits, the held-out paper
+    for leave-one-paper-out), so both members of a pair share the split and the
+    model seed. For every F1 average: the per-run differences, their mean and
+    the 95% Student-t CI of the mean difference.
+    """
+    base_runs = {r.get('run_id'): r for r in base['runs']}
+    pairs = [(base_runs[r['run_id']], r) for r in variant['runs']
+             if r.get('run_id') in base_runs]
+    out = {'n_pairs': len(pairs), 'run_ids': [v['run_id'] for _, v in pairs]}
+    for name, get in F1_AVERAGES.items():
+        diffs = [get(v) - get(b) for b, v in pairs]
+        out[name] = {
+            'mean_diff': round(statistics.mean(diffs), 2) if diffs else 0.0,
+            'ci95': [round(x, 2) for x in metrics.mean_ci(diffs)['ci']],
+            'per_run': [round(d, 2) for d in diffs],
+        }
+    return out
+
+
+def compare_all(directory):
+    """Pair every variant results file in `directory` with its baseline file.
+
+    Writes <directory>/ner_comparisons.json and returns its content.
+    """
+    comparisons = {}
+    for fn in sorted(os.listdir(directory)):
+        m = VARIANT_FILE.match(fn)
+        if not m:
+            continue
+        base_fn = f"ner_results_{m.group(1)}{m.group(2) or ''}.json"
+        if not os.path.exists(os.path.join(directory, base_fn)):
+            print(f"  {fn}: no baseline file {base_fn}, skipped")
+            continue
+        with open(os.path.join(directory, base_fn)) as f:
+            base = json.load(f)
+        with open(os.path.join(directory, fn)) as f:
+            var = json.load(f)
+        comp = compare_to_baseline(base, var)
+        comparisons[fn[:-len('.json')]] = {
+            'variant': m.group(3), 'granularity': m.group(1),
+            'protocol': var.get('protocol'), 'baseline_file': base_fn, **comp}
+        d = comp['micro']
+        print(f"  {fn}: micro F1 difference {d['mean_diff']:+.2f}, 95% CI {d['ci95']} "
+              f"over {comp['n_pairs']} paired runs")
+    with open(os.path.join(directory, 'ner_comparisons.json'), 'w') as f:
+        json.dump(comparisons, f, indent=2)
+    return comparisons
 
 
 def make_folds(data, args):
@@ -314,25 +403,23 @@ def run(args):
         data = [(t, restrict_tags(g, keep), d) for t, g, d in data]
         protocol = 'leave_one_paper_out' if args.leave_one_paper_out else (
             'random_split_vary' if args.vary_split else 'random_split_fixed')
+        variant = variant_name(args)
         suffix = '' if protocol == 'random_split_fixed' else f'_{protocol}'
+        if variant != 'baseline':
+            suffix += f'_{variant}'
         if args.max_train:
             suffix += f'_smoke{args.max_train}'
         out_path = os.path.join(out_dir, f'ner_results_{granularity}{suffix}.json')
-        results = {'granularity': granularity, 'protocol': protocol,
+        results = {'granularity': granularity, 'protocol': protocol, 'variant': variant,
                    'model': args.model, 'labels': labels, 'label_tie': tie_info,
                    'paper_test_f1': PAPER_F1[granularity],
                    'config': {k: v for k, v in vars(args).items()
-                              if k not in ('granularity',)},
-                   'runs': []}
-        if os.path.exists(out_path):
-            with open(out_path) as f:
-                previous = json.load(f)
-            if previous.get('labels') == labels and previous.get('model') == args.model:
-                results['runs'] = previous.get('runs', [])
+                              if k not in ('granularity', 'compare')},
+                   'runs': resumable_runs(out_path, labels, args.model, variant)}
         done = {r.get('run_id') for r in results['runs']}
 
         print(f"\n=== NER {granularity}: {len(data)} sentences, {len(labels)} classes, "
-              f"protocol {protocol}, device {device} ===")
+              f"protocol {protocol}, variant {variant}, device {device} ===")
         if tie_info:
             print(f"  label cut tie: {tie_info}")
 
@@ -397,7 +484,16 @@ def main():
                         help='limit training sentences (smoke tests)')
     parser.add_argument('--device', default=None)
     parser.add_argument('--threads', type=int, default=0)
-    run(parser.parse_args())
+    parser.add_argument('--compare', nargs='?', const=os.path.join(PROCESSED_DIR, 'ner'),
+                        default=None, metavar='DIR',
+                        help='no training: pair every variant results file in DIR '
+                             '(default: <PROCESSED_DIR>/ner) with its baseline and '
+                             'write ner_comparisons.json')
+    args = parser.parse_args()
+    if args.compare:
+        compare_all(args.compare)
+        return
+    run(args)
 
 
 if __name__ == '__main__':
