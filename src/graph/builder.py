@@ -1,104 +1,59 @@
 """
 builder.py - CoNLL BIO Tag Parser & Co-occurrence Graph Builder
 
-Parses CoNLL files with BIO-tagged NER entities, builds a co-occurrence
-graph with PMI-weighted edges, and produces typed node embeddings.
+Parses the CoNLL files with BIO-tagged NER entities, builds a co-occurrence
+graph with PMI-weighted edges between terms, and encodes the terms with a
+sentence-transformer as node features.
 
-Outputs:
-  - graph_fine_auto.pt: PyG Data with node features and PMI edges
-  - nodemap_fine_auto.pt: term -> node_id mapping
-  - entity_types.json: term -> NER type mapping
-  - corpus_frequencies.json: term -> document frequency
-  - all_sentences.txt: reconstructed sentences for downstream use
+Nodes are the annotated entity texts occurring in >= 2 sentences
+(conll.MIN_TERM_DF); they are the "discovered terms" of the pipeline and the
+term universe of the evaluation.
+
+Corpus augmentation (CORPUS_AUGMENT, default on): known terms are located in
+the PubMed sentences with a word-boundary matcher, PMI is computed on PubMed
+separately, and PubMed edges are added with weight AUGMENT_WEIGHT * PMI. Only
+term pairs seen >= AUGMENT_MIN_PAIR_COUNT times are used, and very short or
+purely numeric terms are not matched (they are mostly noise outside the
+annotated papers). The node set is unchanged.
+
+Outputs (in config.PROCESSED_DIR):
+  - graph_fine_auto.pt / nodemap_fine_auto.pt: PyG graph and term -> node id
+  - gold_term_types.json: term -> {NER type: mention count}. These are GOLD
+    labels: only the evaluation and ORACLE_TYPES components may read them.
+  - corpus_frequencies.json: term -> number of annotated sentences
+  - conll_sentences.txt: the annotated sentences
+  - all_sentences.txt: annotated sentences (+ PubMed sentences if augmented)
+  - graph_coarse.pt / nodemap_coarse.pt: coarse-grained baseline graph
 """
 
 import os
+import re
 import json
 import math
 from itertools import combinations
-from collections import Counter, defaultdict
+from collections import Counter
 
-import networkx as nx
-import torch
-from sentence_transformers import SentenceTransformer
-from torch_geometric.utils import from_networkx
+import conll
+from config import (CORPUS_AUGMENT, CORPUS_AUGMENT_PATH, EMBEDDER_MODEL,
+                    GOLD_TYPES_FILE, PROCESSED_DIR, PROJECT_ROOT, RAW_DIR)
+from text_match import TermMatcher
 
-from config import DEFAULT_EMBEDDER_MODEL, CORPUS_AUGMENT, CORPUS_AUGMENT_PATH
+# PubMed co-occurrence settings
+AUGMENT_WEIGHT = 0.5
+AUGMENT_MIN_PAIR_COUNT = 3
+AUGMENT_MIN_TERM_LENGTH = 3
 
-EMBEDDER_MODEL = os.environ.get('EMBEDDER_MODEL', DEFAULT_EMBEDDER_MODEL)
-print(f"Loading embedding model: {EMBEDDER_MODEL}")
-embedder = SentenceTransformer(EMBEDDER_MODEL)
+_EMBEDDER = None
 
 
-def parse_conll_bio(filepath):
-    """Parse a CoNLL file extracting BIO-tagged entities with their types.
-
-    Returns:
-        sentences: list of reconstructed sentence strings
-        doc_entities: list of (entity_text, entity_type) per sentence
-    """
-    sentences = []
-    doc_entities = []
-    current_tokens = []
-    current_entities = []
-
-    # State for multi-token entity assembly
-    ent_tokens = []
-    ent_type = None
-
-    def flush_entity():
-        nonlocal ent_tokens, ent_type
-        if ent_tokens and ent_type:
-            entity_text = ' '.join(ent_tokens).lower().strip()
-            if len(entity_text) >= 2:
-                current_entities.append((entity_text, ent_type))
-        ent_tokens = []
-        ent_type = None
-
-    with open(filepath, 'r', encoding='utf-8') as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                # Sentence boundary
-                flush_entity()
-                if current_tokens:
-                    sentences.append(' '.join(current_tokens))
-                    doc_entities.append(list(current_entities))
-                    current_tokens = []
-                    current_entities = []
-                continue
-
-            if line.startswith('#'):
-                continue
-
-            parts = line.split()
-            if len(parts) < 2:
-                continue
-
-            token = parts[0]
-            tag = parts[-1]  # BIO tag is last column
-            current_tokens.append(token)
-
-            if tag.startswith('B-'):
-                flush_entity()
-                ent_type = tag[2:]
-                ent_tokens = [token]
-            elif tag.startswith('I-') and ent_type:
-                tag_type = tag[2:]
-                if tag_type == ent_type:
-                    ent_tokens.append(token)
-                else:
-                    flush_entity()
-            else:
-                flush_entity()
-
-    # Handle last sentence if file doesn't end with blank line
-    flush_entity()
-    if current_tokens:
-        sentences.append(' '.join(current_tokens))
-        doc_entities.append(list(current_entities))
-
-    return sentences, doc_entities
+def _get_embedder():
+    """Load the sentence-transformer lazily (only when encoding)."""
+    global _EMBEDDER
+    if _EMBEDDER is None:
+        from sentence_transformers import SentenceTransformer
+        print(f"Loading embedding model: {EMBEDDER_MODEL}")
+        _EMBEDDER = SentenceTransformer(EMBEDDER_MODEL)
+    return _EMBEDDER
 
 
 def compute_pmi(cooccurrence_counts, term_doc_freq, total_docs):
@@ -116,235 +71,165 @@ def compute_pmi(cooccurrence_counts, term_doc_freq, total_docs):
     return pmi_edges
 
 
-def build_graph(datadir, mode='auto', ner_type='fine'):
-    """Build co-occurrence graph from CoNLL BIO-tagged files.
-
-    Args:
-        datadir: Directory containing .conll files
-        mode: Extraction mode ('auto' uses BIO tags)
-        ner_type: Label for this graph variant
-
-    Returns:
-        pyg_data: PyG Data object with embeddings and edges
-        nodemap: dict mapping term -> node index
-        entity_types: dict mapping term -> NER type
-        corpus_freq: dict mapping term -> document frequency
-        all_sentences: list of all reconstructed sentences
-    """
-    files = sorted([f for f in os.listdir(datadir) if f.endswith('.conll')])
-    print(f"Processing {ner_type} ({mode}): {len(files)} files...")
-
-    all_sentences = []
-    all_doc_entities = []
-    entity_type_map = {}  # term -> NER type (first seen)
-
-    for filename in files:
-        filepath = os.path.join(datadir, filename)
-        sentences, doc_entities = parse_conll_bio(filepath)
-        all_sentences.extend(sentences)
-        all_doc_entities.extend(doc_entities)
-
-        # Track entity types
-        for sent_ents in doc_entities:
-            for ent_text, ent_type in sent_ents:
-                if ent_text not in entity_type_map:
-                    entity_type_map[ent_text] = ent_type
-
-    print(f"  Parsed {len(all_sentences)} sentences, "
-          f"{sum(len(e) for e in all_doc_entities)} entity mentions")
-
-    # Count document frequency (how many sentences each term appears in)
-    term_doc_freq = Counter()
-    for sent_ents in all_doc_entities:
-        unique_terms = set(ent_text for ent_text, _ in sent_ents)
-        for term in unique_terms:
-            term_doc_freq[term] += 1
-
-    # Filter: keep terms appearing in >= 2 sentences
-    valid_terms = {t for t, c in term_doc_freq.items() if c >= 2}
-    print(f"  Valid terms (freq >= 2): {len(valid_terms)}")
-
-    # Build co-occurrence counts
-    cooccurrence = Counter()
-    for sent_ents in all_doc_entities:
-        unique_in_sent = list(set(
-            ent_text for ent_text, _ in sent_ents if ent_text in valid_terms
-        ))
-        if len(unique_in_sent) >= 2:
-            for t1, t2 in combinations(sorted(unique_in_sent), 2):
-                cooccurrence[(t1, t2)] += 1
-
-    # Compute PMI-weighted edges
-    total_docs = len(all_doc_entities)
-    pmi_edges = compute_pmi(cooccurrence, term_doc_freq, total_docs)
-    print(f"  PMI edges (positive): {len(pmi_edges)}")
-
-    # Build node list and map
-    # Include all valid terms that appear in at least one PMI edge
-    terms_in_edges = set()
-    for (t1, t2) in pmi_edges:
-        terms_in_edges.add(t1)
-        terms_in_edges.add(t2)
-
-    # Also include valid terms not in edges (isolated but frequent)
-    all_valid = sorted(valid_terms)
-    nodemap = {term: i for i, term in enumerate(all_valid)}
-
-    # Compute embeddings
-    print(f"  Encoding {len(all_valid)} terms...")
-    node_embeddings = embedder.encode(all_valid, show_progress_bar=True)
-    x = torch.tensor(node_embeddings, dtype=torch.float)
-
-    # Build NetworkX graph
-    G = nx.Graph()
-    G.add_nodes_from(range(len(all_valid)))
-    for (t1, t2), pmi_val in pmi_edges.items():
-        if t1 in nodemap and t2 in nodemap:
-            G.add_edge(nodemap[t1], nodemap[t2], weight=pmi_val)
-
-    print(f"  {ner_type}-{mode} graph: {G.number_of_nodes()} nodes, "
-          f"{G.number_of_edges()} edges")
-
-    # Convert to PyG
-    pyg_data = from_networkx(G)
-    pyg_data.x = x
-
-    # Filter entity types to valid terms only
-    entity_types = {t: entity_type_map[t] for t in all_valid
-                    if t in entity_type_map}
-    corpus_freq = {t: term_doc_freq[t] for t in all_valid}
-
-    return pyg_data, nodemap, entity_types, corpus_freq, all_sentences
+def sentence_cooccurrence(sentence_terms, vocabulary):
+    """Document frequencies and pair counts of terms per sentence."""
+    term_df = Counter()
+    pair_counts = Counter()
+    for terms in sentence_terms:
+        unique = sorted(set(t for t in terms if t in vocabulary))
+        for t in unique:
+            term_df[t] += 1
+        for t1, t2 in combinations(unique, 2):
+            pair_counts[(t1, t2)] += 1
+    return term_df, pair_counts
 
 
-def augment_with_corpus(corpus_path, existing_entities, existing_cooccurrence,
-                        existing_doc_freq, existing_sentences,
-                        weight_factor=0.5):
-    """Augment co-occurrence graph with noun-chunk entities from PubMed corpus.
-
-    Since PubMed sentences have no CoNLL tags, extracts noun chunks via spaCy.
-    Adds them with lower weight (weight_factor) compared to CoNLL entities (1.0).
-
-    Args:
-        corpus_path: Path to pubmed_sentences.txt
-        existing_entities: dict of entity_text -> entity_type from CoNLL
-        existing_cooccurrence: Counter of (t1, t2) -> count
-        existing_doc_freq: Counter of term -> doc_freq
-        existing_sentences: list of sentences from CoNLL
-        weight_factor: Weight multiplier for PubMed co-occurrences (default 0.5)
+def augment_with_corpus(corpus_path, terms,
+                        min_pair_count=AUGMENT_MIN_PAIR_COUNT,
+                        min_term_length=AUGMENT_MIN_TERM_LENGTH):
+    """PMI edges between known terms computed on the PubMed sentences.
 
     Returns:
-        Updated (cooccurrence, doc_freq, sentences, entity_type_map)
+        pubmed_sentences: list of sentence strings
+        pmi_edges: dict (t1, t2) -> PMI on PubMed (pairs seen >= min_pair_count)
+        n_terms_found: number of known terms occurring in the corpus
     """
-    import spacy
-
     if not os.path.exists(corpus_path):
         print(f"  Corpus augmentation: file not found: {corpus_path}")
-        return existing_cooccurrence, existing_doc_freq, existing_sentences, existing_entities
+        return [], {}, 0
 
-    print(f"  Loading PubMed corpus from {corpus_path}...")
     with open(corpus_path, 'r', encoding='utf-8') as f:
         pubmed_sentences = [line.strip() for line in f if line.strip()]
     print(f"  PubMed sentences: {len(pubmed_sentences)}")
 
-    try:
-        nlp = spacy.load('en_core_web_sm')
-    except OSError:
-        print("  spaCy model not available, skipping corpus augmentation")
-        return existing_cooccurrence, existing_doc_freq, existing_sentences, existing_entities
+    matchable = [t for t in terms
+                 if len(t) >= min_term_length and re.search('[a-z]', t)]
+    matcher = TermMatcher(matchable)
+    sentence_terms = [matcher.terms_in(s) for s in pubmed_sentences]
+    term_df, pair_counts = sentence_cooccurrence(sentence_terms, set(matchable))
+    frequent_pairs = Counter({p: c for p, c in pair_counts.items()
+                              if c >= min_pair_count})
+    pmi_edges = compute_pmi(frequent_pairs, term_df, len(pubmed_sentences))
+    print(f"  Corpus augmentation: {len(term_df)}/{len(terms)} terms found, "
+          f"{len(pmi_edges)} PubMed PMI edges (pair count >= {min_pair_count})")
+    return pubmed_sentences, pmi_edges, len(term_df)
 
-    # Extract noun chunks from PubMed sentences
-    pubmed_entities = []
-    for doc in nlp.pipe(pubmed_sentences, batch_size=100):
-        sent_ents = []
-        for chunk in doc.noun_chunks:
-            text = chunk.text.lower().strip()
-            if len(text) >= 2:
-                sent_ents.append(text)
-        pubmed_entities.append(sent_ents)
 
-    # Update document frequencies
-    for sent_ents in pubmed_entities:
-        unique_terms = set(sent_ents)
-        for term in unique_terms:
-            existing_doc_freq[term] += 1
+def build_graph(datadir, ner_type='fine', pubmed_edges=None):
+    """Build the co-occurrence graph from CoNLL BIO-tagged files.
 
-    # Update co-occurrences with lower weight
-    from itertools import combinations as combos
-    for sent_ents in pubmed_entities:
-        unique_in_sent = list(set(sent_ents))
-        if len(unique_in_sent) >= 2:
-            for t1, t2 in combos(sorted(unique_in_sent), 2):
-                # Weight PubMed co-occurrences lower
-                existing_cooccurrence[(t1, t2)] += weight_factor
+    Args:
+        datadir: Directory containing .conll files
+        ner_type: Label for this graph variant
+        pubmed_edges: optional dict (t1, t2) -> PubMed PMI to add (weighted)
 
-    # Add PubMed sentences
-    existing_sentences.extend(pubmed_sentences)
+    Returns:
+        pyg_data: PyG Data object with embeddings and edges
+        nodemap: dict mapping term -> node index
+        gold_types: dict mapping term -> {NER type: mention count}
+        corpus_freq: dict mapping term -> sentence frequency
+        sentences: list of all reconstructed annotated sentences
+    """
+    import networkx as nx
+    import torch
+    from torch_geometric.utils import from_networkx
 
-    n_pubmed_terms = len(set(t for ents in pubmed_entities for t in ents))
-    print(f"  Corpus augmentation: +{n_pubmed_terms} unique terms, "
-          f"+{len(pubmed_sentences)} sentences")
+    sentences, doc_entities, _ = conll.load_corpus(datadir)
+    n_mentions = sum(len(e) for e in doc_entities)
+    print(f"Processing {ner_type}: {len(sentences)} sentences, "
+          f"{n_mentions} entity mentions")
 
-    return existing_cooccurrence, existing_doc_freq, existing_sentences, existing_entities
+    term_df = conll.term_document_frequency(doc_entities)
+    all_valid = conll.valid_terms(doc_entities)
+    valid = set(all_valid)
+    print(f"  Valid terms (freq >= {conll.MIN_TERM_DF}): {len(all_valid)}")
+
+    _, cooccurrence = sentence_cooccurrence(
+        [[t for t, _ in sent_ents] for sent_ents in doc_entities], valid)
+    pmi_edges = compute_pmi(cooccurrence, term_df, len(doc_entities))
+    print(f"  PMI edges (positive): {len(pmi_edges)}")
+
+    edge_weights = dict(pmi_edges)
+    if pubmed_edges:
+        added = 0
+        for pair, pmi in pubmed_edges.items():
+            if pair[0] in valid and pair[1] in valid:
+                if pair not in edge_weights:
+                    added += 1
+                edge_weights[pair] = edge_weights.get(pair, 0.0) + AUGMENT_WEIGHT * pmi
+        print(f"  Augmented edges: +{added} PubMed-only edges "
+              f"({len(pmi_edges)} edges from the annotated papers)")
+
+    nodemap = {term: i for i, term in enumerate(all_valid)}
+
+    print(f"  Encoding {len(all_valid)} terms...")
+    node_embeddings = _get_embedder().encode(all_valid, show_progress_bar=False)
+    x = torch.tensor(node_embeddings, dtype=torch.float)
+
+    G = nx.Graph()
+    G.add_nodes_from(range(len(all_valid)))
+    for (t1, t2), weight in sorted(edge_weights.items()):
+        G.add_edge(nodemap[t1], nodemap[t2], weight=weight)
+
+    print(f"  {ner_type} graph: {G.number_of_nodes()} nodes, "
+          f"{G.number_of_edges()} edges")
+
+    pyg_data = from_networkx(G)
+    pyg_data.x = x
+
+    type_counts = conll.term_type_counts(doc_entities)
+    gold_types = {t: dict(sorted(type_counts[t].items())) for t in all_valid}
+    corpus_freq = {t: term_df[t] for t in all_valid}
+    return pyg_data, nodemap, gold_types, corpus_freq, sentences
+
+
+def _write_lines(path, lines):
+    with open(path, 'w', encoding='utf-8') as f:
+        for line in lines:
+            f.write(line + '\n')
 
 
 if __name__ == "__main__":
-    PROJECT_ROOT = os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    )
-    base_raw = os.path.join(PROJECT_ROOT, "data", "raw", "dataset")
-    processed_dir = os.path.join(PROJECT_ROOT, "data", "processed")
-    os.makedirs(processed_dir, exist_ok=True)
+    import torch
 
-    # Fine-grained NER (primary)
-    data_fine, map_fine, ent_types, corp_freq, sentences = build_graph(
-        os.path.join(base_raw, "fine_grained_ner"), 'auto', 'fine'
-    )
-    torch.save(data_fine, os.path.join(processed_dir, "graph_fine_auto.pt"))
-    torch.save(map_fine, os.path.join(processed_dir, "nodemap_fine_auto.pt"))
+    os.makedirs(PROCESSED_DIR, exist_ok=True)
+    fine_dir = os.path.join(RAW_DIR, "fine_grained_ner")
 
-    # Save entity types
-    with open(os.path.join(processed_dir, "entity_types.json"), 'w') as f:
-        json.dump(ent_types, f, indent=2)
-    print(f"Saved entity_types.json: {len(ent_types)} typed entities")
-
-    # Save corpus frequencies
-    with open(os.path.join(processed_dir, "corpus_frequencies.json"), 'w') as f:
-        json.dump(corp_freq, f, indent=2)
-    print(f"Saved corpus_frequencies.json: {len(corp_freq)} terms")
-
-    # Save all sentences
-    with open(os.path.join(processed_dir, "all_sentences.txt"), 'w',
-              encoding='utf-8') as f:
-        for s in sentences:
-            f.write(s + '\n')
-    print(f"Saved all_sentences.txt: {len(sentences)} sentences")
-
-    # Corpus augmentation (PubMed sentences)
+    pubmed_sentences, pubmed_edges = [], None
     if CORPUS_AUGMENT:
         corpus_path = CORPUS_AUGMENT_PATH
         if not os.path.isabs(corpus_path):
             corpus_path = os.path.join(PROJECT_ROOT, corpus_path)
-        print(f"\nCorpus augmentation enabled: {corpus_path}")
-        _, _, augmented_sentences, _ = augment_with_corpus(
-            corpus_path, ent_types, Counter(), Counter(corp_freq), sentences
-        )
-        # Save augmented sentences (includes PubMed)
-        with open(os.path.join(processed_dir, "all_sentences.txt"), 'w',
-                  encoding='utf-8') as f:
-            for s in augmented_sentences:
-                f.write(s + '\n')
-        print(f"  Saved augmented all_sentences.txt: {len(augmented_sentences)} sentences")
+        print(f"Corpus augmentation enabled: {corpus_path}")
+        _, fine_entities, _ = conll.load_corpus(fine_dir)
+        pubmed_sentences, pubmed_edges, _ = augment_with_corpus(
+            corpus_path, conll.valid_terms(fine_entities))
 
-    # Coarse-grained (baseline comparison)
-    coarse_dir = os.path.join(base_raw, "coarse_grained_ner")
+    # Fine-grained NER (primary)
+    data_fine, map_fine, gold_types, corp_freq, sentences = build_graph(
+        fine_dir, 'fine', pubmed_edges=pubmed_edges)
+    torch.save(data_fine, os.path.join(PROCESSED_DIR, "graph_fine_auto.pt"))
+    torch.save(map_fine, os.path.join(PROCESSED_DIR, "nodemap_fine_auto.pt"))
+
+    with open(os.path.join(PROCESSED_DIR, GOLD_TYPES_FILE), 'w') as f:
+        json.dump(gold_types, f, indent=2)
+    print(f"Saved {GOLD_TYPES_FILE}: {len(gold_types)} terms (gold labels)")
+
+    with open(os.path.join(PROCESSED_DIR, "corpus_frequencies.json"), 'w') as f:
+        json.dump(corp_freq, f, indent=2)
+    print(f"Saved corpus_frequencies.json: {len(corp_freq)} terms")
+
+    _write_lines(os.path.join(PROCESSED_DIR, "conll_sentences.txt"), sentences)
+    all_sentences = sentences + pubmed_sentences
+    _write_lines(os.path.join(PROCESSED_DIR, "all_sentences.txt"), all_sentences)
+    print(f"Saved all_sentences.txt: {len(all_sentences)} sentences "
+          f"({len(pubmed_sentences)} from PubMed)")
+
+    # Coarse-grained (baseline comparison, no augmentation)
+    coarse_dir = os.path.join(RAW_DIR, "coarse_grained_ner")
     if os.path.exists(coarse_dir) and os.listdir(coarse_dir):
-        data_coarse, map_coarse, _, _, _ = build_graph(
-            coarse_dir, 'auto', 'coarse'
-        )
-        torch.save(data_coarse,
-                    os.path.join(processed_dir, "graph_coarse.pt"))
-        torch.save(map_coarse,
-                    os.path.join(processed_dir, "nodemap_coarse.pt"))
+        data_coarse, map_coarse, _, _, _ = build_graph(coarse_dir, 'coarse')
+        torch.save(data_coarse, os.path.join(PROCESSED_DIR, "graph_coarse.pt"))
+        torch.save(map_coarse, os.path.join(PROCESSED_DIR, "nodemap_coarse.pt"))
 
     print("Done: graph built from BIO-tagged NER entities.")

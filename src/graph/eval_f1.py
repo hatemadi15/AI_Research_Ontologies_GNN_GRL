@@ -1,779 +1,349 @@
 """
-eval_f1.py - Multi-level Ontology Alignment Evaluation
+eval_f1.py - Leakage-free Multi-level Evaluation
 
-Evaluates alignment quality at three levels:
-  1. Type-level: NER entity types mapped to ontology classes
-  2. Term-level: Individual entity mentions aligned to ontology classes
-  3. Concept-level: Cluster representatives aligned to ontology classes
+What is evaluated
+  The pipeline starts from the gold entity spans of MaterioMiner (term
+  extraction is not evaluated here). The evaluation universe is the set of
+  graph terms (entity texts in >= 2 annotated sentences, 315 terms). Each term
+  has one or more gold classes: its annotated fine-grained NER types, which
+  are MMO class names (all 177 resolve to a class of ontology.ttl).
 
-Uses ALL classes from ontology.ttl as gold standard.
-Multi-level type matching: exact -> CamelCase -> component -> normalized -> semantic fallback.
-OAEI-standard P/R/F1 at thresholds 0.50-0.85.
+Levels
+  1. Typing (primary): the pipeline's decision per term
+     (predicted_types.json) vs. the term's gold classes. Reports accuracy
+     (= P = R = F1 at full coverage) with a bootstrap 95% CI, LLMs4OL Task-B
+     set precision/recall/F1, macro-F1 over majority classes, acc@1/3/5,
+     hierarchical P/R/F1 (ancestors without the ontology root), the area
+     under the risk-coverage curve, and a score-threshold sweep.
+  2. Alignment rows (ontology_alignment.csv): pairwise P/R/F1 per
+     similarity threshold; a row counts only if its class is a gold class of
+     the term. This replaces the old "Term F1", whose precision only checked
+     that the target was *some* ontology label.
+  3. Clustering (concept level): ARI / V-measure / NMI / B-cubed of the term
+     clusters vs. majority classes, with all-singletons and one-cluster
+     baselines. (The old concept level derived each cluster's class from the
+     gold types.)
+  4. Taxonomy (class level): term is-a edges lifted to class edges through
+     the predicted types and compared with the ontology's subClassOf.
+  5. Dataset checks (not model metrics): e.g. how many NER labels resolve to
+     ontology classes - the old "Type F1" measured only this.
 
-Fix v5: Added transitive subclass matching and active-ontology recall mode.
-Saves detailed results to eval_results.json.
+The results record whether ORACLE_TYPES / NER_TYPE_CLUSTERING were on; such
+runs are upper bounds, not model results.
+
+Usage:
+  python eval_f1.py
+  python eval_f1.py --legacy-alignment-csv path/to/ontology_alignment.csv
+      (score the top-1 row per term of an old alignment file, e.g. v5)
 """
 
 import os
 import json
-import re
+import argparse
 
-import numpy as np
 import pandas as pd
-from sentence_transformers import SentenceTransformer, util
 
-from config import DEFAULT_EMBEDDER_MODEL
-
-# Get project root directory
-PROJECT_ROOT = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-)
-PROCESSED_DIR = os.path.join(PROJECT_ROOT, "data", "processed")
-RAW_DIR = os.path.join(PROJECT_ROOT, "data", "raw", "dataset")
+import conll
+import metrics
+from config import (NER_TYPE_CLUSTERING, ORACLE_TYPES, PREDICTED_TYPES_BASE_FILE,
+                    PREDICTED_TYPES_FILE, PROCESSED_DIR, RAW_DIR)
+from ontology_utils import load_ontology
 
 ALIGNMENT_PATH = os.path.join(PROCESSED_DIR, 'ontology_alignment.csv')
-ENTITY_TYPES_PATH = os.path.join(PROCESSED_DIR, 'entity_types.json')
 CLUSTERS_PATH = os.path.join(PROCESSED_DIR, 'fine_auto_clusters.json')
+TAXONOMY_EDGES_PATH = os.path.join(PROCESSED_DIR, 'taxonomy_edges.csv')
 
-EMBEDDER_MODEL = os.environ.get('EMBEDDER_MODEL', DEFAULT_EMBEDDER_MODEL)
-EMBEDDER = SentenceTransformer(EMBEDDER_MODEL)
-
-
-def camel_case_split(name):
-    """Split CamelCase into lowercase words.
-
-    Handles:
-      - Standard CamelCase: "CrackGrowthBehaviour" -> "crack growth behaviour"
-      - Acronyms: "SNCurve" -> "sn curve", "GNNModel" -> "gnn model"
-      - Run-together lowercase: "Highcycle" stays as "highcycle"
-    """
-    # Insert space before uppercase letters preceded by lowercase
-    result = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', name)
-    # Insert space between consecutive uppercase and following lowercase
-    # e.g., "GNNModel" -> "GNN Model"
-    result = re.sub(r'(?<=[A-Z])(?=[A-Z][a-z])', ' ', result)
-    return result.lower().strip()
+# Typing-score thresholds for the abstention sweep. FIXED_THRESHOLD is chosen
+# in advance; report it (or the full-coverage accuracy), not the best value.
+TYPING_THRESHOLDS = [0.3, 0.4, 0.5, 0.6, 0.7, 0.8]
+FIXED_THRESHOLD = 0.5
+ALIGNMENT_THRESHOLDS = [0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85]
 
 
-def normalize_for_matching(name):
-    """Normalize a name for matching: CamelCase split, remove hyphens/underscores.
+def load_gold(onto):
+    """Universe terms with their gold class sets and majority class."""
+    _, doc_entities, _ = conll.load_corpus(os.path.join(RAW_DIR, 'fine_grained_ner'))
+    terms = conll.valid_terms(doc_entities)
+    counts = conll.term_type_counts(doc_entities)
+    majority_types = conll.majority_types(doc_entities, terms)
 
-    "CrackGrowthBehaviour" -> "crack growth behaviour"
-    "High-cycle fatigue" -> "high cycle fatigue"
-    "Displacement-controlled" -> "displacement controlled"
-    """
-    # CamelCase split
-    result = camel_case_split(name)
-    # Replace hyphens and underscores with spaces
-    result = re.sub(r'[-_]', ' ', result)
-    # Collapse multiple spaces
-    result = re.sub(r'\s+', ' ', result).strip()
-    return result
+    def resolve(ner_type):
+        return onto.resolve(ner_type) or f'UNRESOLVED:{ner_type}'
 
-
-def build_type_gold_mapping(ner_types, gold_labels, all_gold_lower,
-                            label_to_uri):
-    """Build NER-type -> ontology-class gold mapping using multi-level matching.
-
-    Matching levels (in priority order):
-      1. Exact case-insensitive match
-      2. CamelCase-decomposed match against labels
-      3. Component/substring match (all words of NER type in a gold label)
-      4. Normalized match (remove hyphens, then compare)
-      5. Semantic fallback (MiniLM embedding similarity > 0.85)
-
-    Returns:
-        type_to_gold: dict mapping NER type -> best matching gold label
-        match_details: dict mapping NER type -> (gold_label, method)
-    """
-    type_to_gold = {}
-    match_details = {}
-
-    # Pre-compute normalized gold labels
-    gold_list = sorted(gold_labels)
-    gold_lower_set = all_gold_lower
-    gold_normalized = {}  # normalized_form -> original label
-    gold_words = {}  # label -> set of words
-    for gl in gold_list:
-        norm = normalize_for_matching(gl)
-        gold_normalized[norm] = gl
-        gold_words[gl.lower()] = set(norm.split())
-
-    remaining_types = []
-
-    for ner_type in sorted(set(ner_types)):
-        ner_lower = ner_type.lower()
-
-        # Level 1: Exact case-insensitive match
-        if ner_lower in gold_lower_set:
-            type_to_gold[ner_type] = ner_type
-            match_details[ner_type] = (ner_type, 'exact')
-            continue
-
-        # Level 2: CamelCase-decomposed match
-        camel = camel_case_split(ner_type)
-        if camel in gold_lower_set:
-            # Find the original-case label
-            for gl in gold_list:
-                if gl.lower() == camel:
-                    type_to_gold[ner_type] = gl
-                    match_details[ner_type] = (gl, 'camelcase')
-                    break
-            else:
-                type_to_gold[ner_type] = camel
-                match_details[ner_type] = (camel, 'camelcase')
-            continue
-
-        # Level 3: Component matching (all NER words in a gold label)
-        ner_norm = normalize_for_matching(ner_type)
-        ner_words = set(ner_norm.split())
-        found = False
-        if len(ner_words) >= 2:
-            for gl in gold_list:
-                gl_words = gold_words.get(gl.lower(), set())
-                if ner_words and gl_words and ner_words.issubset(gl_words):
-                    type_to_gold[ner_type] = gl
-                    match_details[ner_type] = (gl, 'component')
-                    found = True
-                    break
-        if found:
-            continue
-
-        # Level 4: Normalized match (hyphens removed)
-        if ner_norm in gold_normalized:
-            gl = gold_normalized[ner_norm]
-            type_to_gold[ner_type] = gl
-            match_details[ner_type] = (gl, 'normalized')
-            continue
-
-        # Also check: NER norm matches any gold norm
-        for gnorm, gorig in gold_normalized.items():
-            if ner_norm == gnorm:
-                type_to_gold[ner_type] = gorig
-                match_details[ner_type] = (gorig, 'normalized')
-                found = True
-                break
-        if found:
-            continue
-
-        remaining_types.append(ner_type)
-
-    # Level 5: Semantic fallback using embedding similarity > 0.85
-    if remaining_types:
-        remaining_texts = [camel_case_split(t) for t in remaining_types]
-        gold_texts = [normalize_for_matching(gl) for gl in gold_list]
-
-        remaining_embeds = EMBEDDER.encode(remaining_texts)
-        gold_embeds = EMBEDDER.encode(gold_texts)
-
-        sim_matrix = util.cos_sim(remaining_embeds, gold_embeds).numpy()
-
-        for i, ner_type in enumerate(remaining_types):
-            best_j = np.argmax(sim_matrix[i])
-            best_sim = sim_matrix[i, best_j]
-            if best_sim >= 0.85:
-                type_to_gold[ner_type] = gold_list[best_j]
-                match_details[ner_type] = (
-                    gold_list[best_j], f'semantic({best_sim:.3f})'
-                )
-
-    return type_to_gold, match_details
+    gold = {t: {resolve(ty) for ty in counts[t]} for t in terms}
+    majority = {t: resolve(majority_types[t]) for t in terms}
+    return terms, gold, majority, doc_entities
 
 
-def load_gold_standard():
-    """Parse ALL classes from ontology.ttl as gold standard.
-
-    Returns:
-        gold_labels: list of primary class labels
-        all_labels: set of all labels (including alt/pref)
-        label_to_uri: mapping label -> ontology URI
-    """
-    ttl_path = os.path.join(RAW_DIR, 'ontologies', 'ontology.ttl')
-    if not os.path.exists(ttl_path):
-        raise FileNotFoundError(f"Ontology not found: {ttl_path}")
-
-    from rdflib import Graph, RDF, RDFS, OWL, Namespace
-
-    g = Graph()
-    g.parse(ttl_path, format='turtle')
-
-    MMO = Namespace("https://w3id.org/pmd/materials-mechanics-ontology/")
-    SKOS = Namespace("http://www.w3.org/2004/02/skos/core#")
-
-    label_props = [RDFS.label, MMO.altLabel, MMO.prefLabel,
-                   SKOS.prefLabel, SKOS.altLabel]
-
-    gold_labels = []
-    all_labels = set()
-    label_to_uri = {}
-
-    for cls in g.subjects(RDF.type, OWL.Class):
-        cls_str = str(cls)
-        if cls_str.startswith('http://www.w3.org/'):
-            continue
-
-        labels = []
-        for prop in label_props:
-            for label in g.objects(cls, prop):
-                label_str = str(label).strip()
-                if label_str and not label_str.startswith('http'):
-                    labels.append(label_str)
-
-        if not labels:
-            fragment = cls_str.split('#')[-1].split('/')[-1]
-            if fragment and fragment[0].isupper():
-                labels.append(fragment)
-
-        if labels:
-            primary = labels[0]
-            gold_labels.append(primary)
-            for lab in labels:
-                all_labels.add(lab.lower())
-                label_to_uri[lab.lower()] = cls_str
-
-    print(f"Gold standard: {len(gold_labels)} classes, "
-          f"{len(all_labels)} labels")
-    return gold_labels, all_labels, label_to_uri
+def load_predictions(path):
+    """Predictions, scores and ranked candidates from predicted_types*.json."""
+    with open(path, encoding='utf-8') as f:
+        data = json.load(f)
+    pred = {t: p.get('class_uri') for t, p in data.items()}
+    scores = {t: float(p.get('score', 0.0)) for t, p in data.items()}
+    cand = {}
+    for t, p in data.items():
+        ranked = [c[0] for c in p.get('top5', [])]
+        if pred[t] in ranked:
+            ranked.remove(pred[t])
+        cand[t] = [pred[t]] + ranked
+    return pred, scores, cand
 
 
-def load_ontology_hierarchy():
-    """Load subClassOf hierarchy from ontology.ttl.
-
-    Returns:
-        label_to_ancestors: dict mapping lowercased label -> set of lowercased
-            ancestor labels (transitive closure of subClassOf).
-        uri_to_labels: dict mapping URI -> list of labels (primary first).
-    """
-    ttl_path = os.path.join(RAW_DIR, 'ontologies', 'ontology.ttl')
-    if not os.path.exists(ttl_path):
-        return {}, {}
-
-    from rdflib import Graph, RDF, RDFS, OWL, Namespace
-
-    g = Graph()
-    g.parse(ttl_path, format='turtle')
-
-    MMO = Namespace("https://w3id.org/pmd/materials-mechanics-ontology/")
-    SKOS = Namespace("http://www.w3.org/2004/02/skos/core#")
-    label_props = [RDFS.label, MMO.altLabel, MMO.prefLabel,
-                   SKOS.prefLabel, SKOS.altLabel]
-
-    # Build URI -> labels mapping
-    uri_to_labels = {}
-    for cls in g.subjects(RDF.type, OWL.Class):
-        cls_str = str(cls)
-        if cls_str.startswith('http://www.w3.org/'):
-            continue
-        labels = []
-        for prop in label_props:
-            for label in g.objects(cls, prop):
-                label_str = str(label).strip()
-                if label_str and not label_str.startswith('http'):
-                    labels.append(label_str)
-        if not labels:
-            fragment = cls_str.split('#')[-1].split('/')[-1]
-            if fragment and fragment[0].isupper():
-                labels.append(fragment)
-        if labels:
-            uri_to_labels[cls_str] = labels
-
-    # Build URI -> parent URIs (direct subClassOf)
-    uri_parents = {}
-    for s, _, o in g.triples((None, RDFS.subClassOf, None)):
-        s_str, o_str = str(s), str(o)
-        if s_str in uri_to_labels and o_str in uri_to_labels:
-            uri_parents.setdefault(s_str, set()).add(o_str)
-
-    # Compute transitive closure: URI -> all ancestor URIs
-    def get_ancestors(uri, visited=None):
-        if visited is None:
-            visited = set()
-        if uri in visited:
-            return set()
-        visited.add(uri)
-        ancestors = set()
-        for parent in uri_parents.get(uri, set()):
-            ancestors.add(parent)
-            ancestors |= get_ancestors(parent, visited)
-        return ancestors
-
-    # Build label -> ancestor labels mapping
-    label_to_ancestors = {}
-    for uri, labels in uri_to_labels.items():
-        ancestor_uris = get_ancestors(uri)
-        ancestor_labels = set()
-        for anc_uri in ancestor_uris:
-            for lab in uri_to_labels.get(anc_uri, []):
-                ancestor_labels.add(lab.lower())
-        for lab in labels:
-            label_to_ancestors[lab.lower()] = ancestor_labels
-
-    n_with_ancestors = sum(1 for v in label_to_ancestors.values() if v)
-    print(f"Ontology hierarchy: {n_with_ancestors} classes with ancestors")
-    return label_to_ancestors, uri_to_labels
+def _row_class_uri(row, onto):
+    if 'class_uri' in row and isinstance(row['class_uri'], str) and row['class_uri']:
+        return row['class_uri']
+    return onto.resolve(str(row['reference']))
 
 
-def load_ner_types():
-    """Load NER entity types from entity_types.json AND raw CoNLL files.
-
-    entity_types.json only has entities with freq >= 2. To get all NER types
-    for type-level evaluation, also parse the raw CoNLL files.
-    """
-    ner_types = {}
-    if os.path.exists(ENTITY_TYPES_PATH):
-        with open(ENTITY_TYPES_PATH) as f:
-            ner_types = json.load(f)
-
-    # Also parse all types from raw CoNLL files to capture freq-1 entities
-    conll_dir = os.path.join(RAW_DIR, 'fine_grained_ner')
-    if os.path.isdir(conll_dir):
-        for fn in os.listdir(conll_dir):
-            if not fn.endswith('.conll'):
-                continue
-            ent_tokens = []
-            ent_type = None
-            with open(os.path.join(conll_dir, fn), encoding='utf-8') as f:
-                for line in f:
-                    line = line.strip()
-                    if not line or line.startswith('#'):
-                        if ent_tokens and ent_type:
-                            entity_text = ' '.join(ent_tokens).lower().strip()
-                            if len(entity_text) >= 2 and entity_text not in ner_types:
-                                ner_types[entity_text] = ent_type
-                        ent_tokens, ent_type = [], None
-                        continue
-                    parts = line.split()
-                    if len(parts) < 2:
-                        continue
-                    tag = parts[-1]
-                    token = parts[0]
-                    if tag.startswith('B-'):
-                        if ent_tokens and ent_type:
-                            entity_text = ' '.join(ent_tokens).lower().strip()
-                            if len(entity_text) >= 2 and entity_text not in ner_types:
-                                ner_types[entity_text] = ent_type
-                        ent_type = tag[2:]
-                        ent_tokens = [token]
-                    elif tag.startswith('I-') and ent_type and tag[2:] == ent_type:
-                        ent_tokens.append(token)
-                    else:
-                        if ent_tokens and ent_type:
-                            entity_text = ' '.join(ent_tokens).lower().strip()
-                            if len(entity_text) >= 2 and entity_text not in ner_types:
-                                ner_types[entity_text] = ent_type
-                        ent_tokens, ent_type = [], None
-
-    return ner_types
+def alignment_rows(csv_path, onto):
+    """(term, class_uri, similarity) rows of an alignment CSV."""
+    df = pd.read_csv(csv_path)
+    rows = []
+    for _, row in df.iterrows():
+        uri = _row_class_uri(row, onto)
+        rows.append((str(row['discovered']), uri, float(row['similarity'])))
+    return rows
 
 
-def load_clusters():
-    """Load clusters from JSON."""
+def predictions_from_alignment_csv(csv_path, onto):
+    """Legacy mode: top-1 row per term (by similarity) as the typing decision."""
+    best = {}
+    ranked = {}
+    for term, uri, sim in alignment_rows(csv_path, onto):
+        ranked.setdefault(term, []).append((sim, uri))
+        if term not in best or sim > best[term][0]:
+            best[term] = (sim, uri)
+    pred = {t: u for t, (s, u) in best.items()}
+    scores = {t: s for t, (s, u) in best.items()}
+    cand = {}
+    for t, items in ranked.items():
+        seen = []
+        for _, uri in sorted(items, key=lambda x: -x[0]):
+            if uri not in seen:
+                seen.append(uri)
+        cand[t] = seen
+    return pred, scores, cand
+
+
+def evaluate_typing(pred, scores, cand, gold, majority, onto):
+    def ancestors(c):
+        if c in onto.classes:
+            return onto.ancestors(c, include_self=True)
+        return {c}
+
+    res = metrics.typing_metrics(pred, gold, majority)
+    res.update(metrics.topk_accuracy(cand, gold, ks=(1, 3, 5)))
+    res.update(metrics.hierarchical_prf(pred, gold, majority, ancestors))
+    res.update(metrics.risk_coverage(pred, scores, gold))
+    res['accuracy_ci95'] = metrics.accuracy_ci(pred, gold)
+    res['fixed_threshold'] = FIXED_THRESHOLD
+    res['thresholds'] = metrics.threshold_sweep(pred, scores, gold, TYPING_THRESHOLDS)
+    return res
+
+
+def evaluate_clustering(majority):
     if not os.path.exists(CLUSTERS_PATH):
-        return {}
+        return {'note': 'no clusters file'}
     with open(CLUSTERS_PATH) as f:
-        return json.load(f)
-
-
-def compute_f1(precision, recall):
-    """Standard F1 from precision and recall."""
-    if precision + recall == 0:
-        return 0.0
-    return 2 * precision * recall / (precision + recall)
-
-
-def type_level_evaluation(gold_labels, all_gold_lower, ner_types,
-                          label_to_uri=None):
-    """Evaluate at NER type level: do NER types map to ontology classes?
-
-    Uses multi-level matching (exact -> CamelCase -> component -> semantic)
-    to build the gold mapping, then computes P/R/F1.
-
-    NER types (e.g., 'FatigueTest', 'CrackPropagation') should correspond to
-    ontology classes (e.g., 'Fatigue test', 'Crack propagation').
-    """
-    if not ner_types:
-        return {'level': 'type', 'note': 'No entity_types.json available'}
-
-    unique_types = sorted(set(ner_types.values()))
-    gold_list = sorted(gold_labels)
-
-    print(f"\nType-level evaluation: {len(unique_types)} NER types "
-          f"vs {len(gold_list)} ontology classes")
-
-    # Build gold mapping using multi-level matching
-    type_to_gold, match_details = build_type_gold_mapping(
-        unique_types, gold_labels, all_gold_lower, label_to_uri or {}
-    )
-
-    n_matched = len(type_to_gold)
-    print(f"  Gold mapping: {n_matched}/{len(unique_types)} NER types matched")
-    method_counts = {}
-    for _, (_, method) in match_details.items():
-        base = method.split('(')[0]
-        method_counts[base] = method_counts.get(base, 0) + 1
-    for method, count in sorted(method_counts.items()):
-        print(f"    {method}: {count}")
-
-    type_embeds = EMBEDDER.encode(
-        [camel_case_split(t) for t in unique_types]
-    )
-    gold_embeds = EMBEDDER.encode(
-        [normalize_for_matching(gl) for gl in gold_list]
-    )
-
-    # The reachable gold classes (what NER types map to)
-    reachable_gold = set(type_to_gold.values())
-    reachable_gold_lower = {g.lower() for g in reachable_gold}
-
-    results = {}
-    thresholds = [0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 1.00]
-
-    sim_matrix = util.cos_sim(type_embeds, gold_embeds).numpy()
-
-    for thresh in thresholds:
-        matched_types = set()
-        matched_gold = set()
-
-        for i, ner_type in enumerate(unique_types):
-            has_gold = ner_type in type_to_gold
-
-            best_j = np.argmax(sim_matrix[i])
-            best_sim = sim_matrix[i, best_j]
-
-            if has_gold or best_sim >= thresh:
-                matched_types.add(ner_type)
-                if has_gold:
-                    matched_gold.add(type_to_gold[ner_type])
-                else:
-                    matched_gold.add(gold_list[best_j])
-
-        prec = len(matched_types) / len(unique_types) if unique_types else 0
-        # Recall: of the gold classes reachable by NER types, how many found?
-        n_reachable = max(len(reachable_gold), 1)
-        rec = len(matched_gold & reachable_gold) / n_reachable
-        f1 = compute_f1(prec, rec)
-        results[thresh] = {'precision': round(prec, 4),
-                           'recall': round(rec, 4),
-                           'f1': round(f1, 4),
-                           'matched_types': len(matched_types),
-                           'matched_gold': len(matched_gold),
-                           'reachable_gold': len(reachable_gold)}
-
-    return {'level': 'type', 'n_ner_types': len(unique_types),
-            'n_gold_classes': len(gold_list),
-            'n_gold_mapped': n_matched,
-            'match_methods': method_counts,
-            'thresholds': results}
-
-
-def term_level_evaluation(gold_labels, all_gold_lower, alignment_df,
-                          label_to_ancestors=None):
-    """Evaluate at term level: individual discovered terms aligned to ontology.
-
-    Uses the alignment CSV output. Reports both full-ontology and active-ontology
-    metrics. Active-ontology only counts gold classes that appear as a reference
-    in at least one alignment (i.e., classes reachable from the corpus).
-
-    Fix 3: Transitive subclass matching — if an entity matches class C, it also
-    gets credit for all ancestors of C in the subClassOf hierarchy.
-    """
-    if alignment_df is None or len(alignment_df) == 0:
-        return {'level': 'term', 'note': 'No alignment data available'}
-
-    print(f"\nTerm-level evaluation: {len(alignment_df)} alignments "
-          f"vs {len(gold_labels)} gold classes")
-
-    # Determine active gold set: gold classes that are referenced by ANY alignment
-    # (not just above threshold) — these are ontology classes the corpus can reach
-    all_refs_lower = set(alignment_df['reference'].str.lower())
-    active_gold = all_refs_lower & all_gold_lower
-
-    # Also add ancestors transitively covered
-    if label_to_ancestors:
-        transitive_active = set(active_gold)
-        for ref in active_gold:
-            transitive_active |= label_to_ancestors.get(ref, set()) & all_gold_lower
-        active_gold_with_ancestors = transitive_active
-    else:
-        active_gold_with_ancestors = active_gold
-
-    n_active = len(active_gold)
-    n_active_trans = len(active_gold_with_ancestors)
-    print(f"  Active gold classes (directly referenced): {n_active}/{len(gold_labels)}")
-    if label_to_ancestors:
-        print(f"  Active gold classes (with transitive ancestors): "
-              f"{n_active_trans}/{len(gold_labels)}")
-
-    results = {}
-    thresholds = [0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85]
-
-    for thresh in thresholds:
-        subset = alignment_df[alignment_df['similarity'] >= thresh]
-
-        if len(subset) == 0:
-            results[thresh] = {'precision': 0.0, 'recall': 0.0, 'f1': 0.0,
-                               'recall_active': 0.0, 'f1_active': 0.0,
-                               'n_alignments': 0}
-            continue
-
-        # Precision: fraction of alignments that match a real gold class
-        refs_matched = subset['reference'].str.lower().isin(all_gold_lower)
-        prec = refs_matched.mean() if len(subset) > 0 else 0
-
-        # Recall (full ontology): fraction of ALL gold classes covered
-        covered_gold = set()
-        for ref in subset['reference'].str.lower():
-            if ref in all_gold_lower:
-                covered_gold.add(ref)
-                # Fix 3: transitive credit for ancestors
-                if label_to_ancestors:
-                    covered_gold |= label_to_ancestors.get(ref, set()) & all_gold_lower
-
-        rec_full = len(covered_gold) / len(gold_labels) if gold_labels else 0
-
-        # Recall (active ontology): fraction of active gold classes covered
-        covered_active = covered_gold & active_gold_with_ancestors
-        rec_active = (len(covered_active) / n_active_trans
-                      if n_active_trans > 0 else 0)
-
-        f1_full = compute_f1(prec, rec_full)
-        f1_active = compute_f1(prec, rec_active)
-
-        results[thresh] = {
-            'precision': round(prec, 4),
-            'recall': round(rec_full, 4),
-            'f1': round(f1_full, 4),
-            'recall_active': round(rec_active, 4),
-            'f1_active': round(f1_active, 4),
-            'n_alignments': len(subset),
-            'covered_gold': len(covered_gold),
-            'covered_gold_active': len(covered_active),
-            'n_active_gold': n_active_trans,
-        }
-
-    return {'level': 'term', 'total_alignments': len(alignment_df),
-            'n_active_gold': n_active_trans,
-            'n_active_gold_direct': n_active,
-            'thresholds': results}
-
-
-def concept_level_evaluation(gold_labels, all_gold_lower, clusters,
-                             alignment_df, label_to_ancestors=None):
-    """Evaluate at concept level: cluster representatives -> ontology classes.
-
-    Uses NER-type-guided mapping: each cluster's dominant NER type is mapped
-    to the ontology class via the same multi-strategy type matcher used for
-    Type-level evaluation. Falls back to best-aligned member.
-
-    Fix 3: Transitive subclass matching for recall.
-    Fix 1: Reports both full-ontology and active-ontology metrics.
-    """
-    if not clusters or alignment_df is None or len(alignment_df) == 0:
-        return {'level': 'concept',
-                'note': 'No clusters or alignment data available'}
-
-    print(f"\nConcept-level evaluation: {len(clusters)} clusters "
-          f"vs {len(gold_labels)} gold classes")
-
-    # Load entity types for NER-type-guided concept mapping
-    entity_types = {}
-    if os.path.exists(ENTITY_TYPES_PATH):
-        with open(ENTITY_TYPES_PATH) as f:
-            entity_types = json.load(f)
-
-    # Build NER-type -> gold class mapping using multi-strategy matcher
-    all_ner_types = sorted(set(entity_types.values())) if entity_types else []
-    label_to_uri = {}
-    type_to_gold = {}
-    if all_ner_types:
-        type_to_gold, _ = build_type_gold_mapping(
-            all_ner_types, gold_labels, all_gold_lower, label_to_uri
-        )
-
-    # For each cluster, determine its dominant NER type and map to gold class
-    cluster_alignments = []
-    for cid, terms in clusters.items():
-        type_counts = {}
-        for t in terms:
-            if t in entity_types:
-                ner_type = entity_types[t]
-                type_counts[ner_type] = type_counts.get(ner_type, 0) + 1
-
-        best_ref = None
-        best_sim = 0.0
-
-        if type_counts:
-            dominant_type = max(type_counts, key=type_counts.get)
-            if dominant_type in type_to_gold:
-                best_ref = type_to_gold[dominant_type]
-                total_typed = sum(type_counts.values())
-                best_sim = type_counts[dominant_type] / total_typed if total_typed > 0 else 0.0
-                best_sim = max(best_sim, 0.90)
-
-        if best_ref is None:
-            for t in terms:
-                matches = alignment_df[alignment_df['discovered'] == t]
-                if len(matches) > 0:
-                    top = matches.iloc[0]
-                    if top['similarity'] > best_sim:
-                        best_sim = top['similarity']
-                        best_ref = top['reference']
-
-        if best_ref:
-            cluster_alignments.append({
-                'cluster_id': cid,
-                'reference': best_ref,
-                'similarity': best_sim,
-            })
-
-    if not cluster_alignments:
-        return {'level': 'concept', 'note': 'No cluster alignments found'}
-
-    ca_df = pd.DataFrame(cluster_alignments)
-
-    # Active gold: classes referenced by any concept alignment
-    all_concept_refs = set(ca_df['reference'].str.lower()) & all_gold_lower
-    active_gold = set(all_concept_refs)
-    if label_to_ancestors:
-        for ref in list(active_gold):
-            active_gold |= label_to_ancestors.get(ref, set()) & all_gold_lower
-    n_active = len(active_gold)
-
-    results = {}
-    thresholds = [0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85]
-
-    for thresh in thresholds:
-        subset = ca_df[ca_df['similarity'] >= thresh]
-
-        refs_matched = subset['reference'].str.lower().isin(all_gold_lower)
-        prec = refs_matched.mean() if len(subset) > 0 else 0
-
-        covered = set()
-        for ref in subset['reference'].str.lower():
-            if ref in all_gold_lower:
-                covered.add(ref)
-                if label_to_ancestors:
-                    covered |= label_to_ancestors.get(ref, set()) & all_gold_lower
-
-        rec_full = len(covered) / len(gold_labels) if gold_labels else 0
-        covered_active = covered & active_gold
-        rec_active = len(covered_active) / n_active if n_active > 0 else 0
-
-        f1_full = compute_f1(prec, rec_full)
-        f1_active = compute_f1(prec, rec_active)
-
-        results[thresh] = {'precision': round(prec, 4),
-                           'recall': round(rec_full, 4),
-                           'f1': round(f1_full, 4),
-                           'recall_active': round(rec_active, 4),
-                           'f1_active': round(f1_active, 4),
-                           'n_concepts': len(subset),
-                           'covered_gold': len(covered)}
-
-    return {'level': 'concept', 'total_clusters': len(clusters),
-            'aligned_clusters': len(cluster_alignments),
-            'n_active_gold': n_active,
-            'thresholds': results}
-
-
-def run_evaluation():
-    """Run multi-level evaluation and save results."""
-    # Load gold standard
-    gold_labels, all_gold_lower, label_to_uri = load_gold_standard()
-
-    # Load ontology hierarchy for transitive matching (Fix 3)
-    label_to_ancestors, uri_to_labels = load_ontology_hierarchy()
-
-    # Load alignment results
-    alignment_df = None
-    if os.path.exists(ALIGNMENT_PATH):
-        alignment_df = pd.read_csv(ALIGNMENT_PATH)
-        print(f"Loaded alignment: {len(alignment_df)} entries")
-
-    # Load NER types and clusters
-    ner_types = load_ner_types()
-    clusters = load_clusters()
-
-    # Run all evaluation levels
-    type_results = type_level_evaluation(gold_labels, all_gold_lower, ner_types,
-                                         label_to_uri)
-    term_results = term_level_evaluation(gold_labels, all_gold_lower,
-                                         alignment_df, label_to_ancestors)
-    concept_results = concept_level_evaluation(gold_labels, all_gold_lower,
-                                               clusters, alignment_df,
-                                               label_to_ancestors)
-
-    # Compile results
-    all_results = {
-        'gold_standard': {
-            'n_classes': len(gold_labels),
-            'n_labels': len(all_gold_lower),
-        },
-        'type_level': type_results,
-        'term_level': term_results,
-        'concept_level': concept_results,
+        clusters = json.load(f)
+    cluster_of = {t: cid for cid, terms in clusters.items() for t in terms
+                  if t in majority}
+    return metrics.clustering_metrics(cluster_of, majority)
+
+
+def evaluate_taxonomy(pred, gold, majority, onto):
+    if not os.path.exists(TAXONOMY_EDGES_PATH):
+        return {'note': 'no taxonomy edges file'}
+    edges = pd.read_csv(TAXONOMY_EDGES_PATH)
+    active = set().union(*gold.values()) & set(onto.classes)
+
+    def lift(type_of):
+        lifted = set()
+        for child, parent in zip(edges['child'], edges['parent']):
+            c, p = type_of.get(child), type_of.get(parent)
+            if c in onto.classes and p in onto.classes and c != p:
+                lifted.add((c, p))
+        return lifted
+
+    res = metrics.taxonomy_edge_metrics(lift(pred), onto, active)
+    res['n_term_edges'] = int(len(edges))
+    # Diagnostic: lifting through the gold majority types isolates the quality
+    # of the term-level edges from typing errors (gold used only to evaluate).
+    res['diagnostic_gold_lifted'] = metrics.taxonomy_edge_metrics(
+        lift(majority), onto, active)
+    return res
+
+
+def dataset_checks(doc_entities, onto):
+    types = sorted({ty for sent in doc_entities for _, ty in sent})
+    by_local = sum(1 for ty in types if ty in onto.local_to_uri)
+    return {
+        'note': 'Properties of the dataset, not model metrics. The old '
+                '"Type F1" (~0.997) measured only this label/ontology overlap.',
+        'n_fine_ner_types': len(types),
+        'ner_types_resolvable_by_local_name': by_local,
+        'n_ontology_classes': len(onto.classes),
+        'n_restriction_triples': len(onto.restriction_triples()),
     }
 
-    # Save detailed results
-    results_path = os.path.join(PROCESSED_DIR, 'eval_results.json')
-    with open(results_path, 'w') as f:
-        json.dump(all_results, f, indent=2)
-    print(f"\nSaved detailed results to {results_path}")
 
-    # Print summary table
+def majority_class_reference(gold, majority):
+    """Accuracy of always predicting the most frequent majority class."""
+    top = max(sorted(set(majority.values())),
+              key=lambda c: sum(1 for t in majority if majority[t] == c))
+    return {'class': top,
+            'accuracy': round(metrics.safe_div(
+                sum(1 for t in gold if top in gold[t]), len(gold)), 4)}
+
+
+def run_evaluation(legacy_alignment_csv=None, out_path=None):
+    onto = load_ontology()
+    terms, gold, majority, doc_entities = load_gold(onto)
+    n_ambiguous = sum(1 for t in terms if len(gold[t]) > 1)
+    print(f"Universe: {len(terms)} terms ({n_ambiguous} with >1 gold class), "
+          f"{len(set().union(*gold.values()))} gold classes")
+
+    results = {
+        'oracle': bool(ORACLE_TYPES or NER_TYPE_CLUSTERING),
+        'oracle_flags': {'ORACLE_TYPES': ORACLE_TYPES,
+                         'NER_TYPE_CLUSTERING': NER_TYPE_CLUSTERING},
+        'universe': {'n_terms': len(terms), 'n_ambiguous_terms': n_ambiguous,
+                     'n_gold_classes': len(set().union(*gold.values())),
+                     'n_majority_classes': len(set(majority.values())),
+                     'gold_term_spans_given': True},
+        'reference_majority_class': majority_class_reference(gold, majority),
+    }
+
+    if legacy_alignment_csv:
+        print(f"Legacy mode: top-1 row per term of {legacy_alignment_csv}")
+        pred, scores, cand = predictions_from_alignment_csv(legacy_alignment_csv, onto)
+        results['prediction_source'] = f'legacy alignment CSV: {legacy_alignment_csv}'
+        results['warning'] = ('Predictions come from an external alignment file; the '
+                              'evaluator cannot tell whether they used gold types '
+                              '(v5 files did, via type_match rows).')
+        align_csv = legacy_alignment_csv
+    else:
+        pred_path = os.path.join(PROCESSED_DIR, PREDICTED_TYPES_FILE)
+        if not os.path.exists(pred_path):
+            pred_path = os.path.join(PROCESSED_DIR, PREDICTED_TYPES_BASE_FILE)
+        pred, scores, cand = load_predictions(pred_path)
+        results['prediction_source'] = os.path.basename(pred_path)
+        align_csv = ALIGNMENT_PATH
+        base_path = os.path.join(PROCESSED_DIR, PREDICTED_TYPES_BASE_FILE)
+        if os.path.exists(base_path) and pred_path != base_path:
+            bp, bs, bc = load_predictions(base_path)
+            results['typing_before_rag'] = evaluate_typing(bp, bs, bc, gold, majority, onto)
+
+    results['typing'] = evaluate_typing(pred, scores, cand, gold, majority, onto)
+
+    if os.path.exists(align_csv):
+        rows = alignment_rows(align_csv, onto)
+        results['alignment_rows'] = {
+            'n_rows': len(rows),
+            'thresholds': metrics.pairwise_alignment_metrics(
+                rows, gold, ALIGNMENT_THRESHOLDS),
+        }
+    results['clustering'] = evaluate_clustering(majority)
+    results['taxonomy'] = evaluate_taxonomy(pred, gold, majority, onto)
+    results['dataset_checks'] = dataset_checks(doc_entities, onto)
+
+    out_path = out_path or os.path.join(PROCESSED_DIR, 'eval_results.json')
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    with open(out_path, 'w') as f:
+        json.dump(results, f, indent=2)
+    print_summary(results)
+    write_summary_csv(results, os.path.join(os.path.dirname(out_path), 'eval_summary.csv'))
+    print(f"\nSaved detailed results to {out_path}")
+    return results
+
+
+def summary_rows(results):
+    """Flat (metric, value) pairs of the headline numbers."""
+    ty = results['typing']
+    rows = [
+        ('typing_accuracy', ty['accuracy']),
+        ('typing_set_f1', ty['set_f1']),
+        ('typing_macro_f1', ty['macro_f1']),
+        ('typing_acc@5', ty['acc@5']),
+        ('typing_h_f1', ty['h_f1']),
+        ('typing_aurc', ty['aurc']),
+        (f"typing_f1@{FIXED_THRESHOLD}", ty['thresholds'][str(FIXED_THRESHOLD)]['f1']),
+    ]
+    al = results.get('alignment_rows', {}).get('thresholds', {})
+    if al:
+        rows.append(('alignment_pairwise_f1@0.5', al['0.5']['f1']))
+    cl = results.get('clustering', {})
+    if 'ari' in cl:
+        rows += [('clustering_ari', cl['ari']), ('clustering_v_measure', cl['v_measure']),
+                 ('clustering_bcubed_f1', cl['bcubed_f1'])]
+    tx = results.get('taxonomy', {})
+    if 'f1' in tx:
+        rows += [('taxonomy_edge_f1', tx['f1']),
+                 ('taxonomy_precision_closure', tx['precision_closure'])]
+    return rows
+
+
+def write_summary_csv(results, path):
+    pd.DataFrame(summary_rows(results), columns=['metric', 'value']).assign(
+        oracle=results['oracle']).to_csv(path, index=False)
+
+
+def print_summary(results):
     print("\n" + "=" * 70)
-    print("EVALUATION SUMMARY")
+    title = "EVALUATION SUMMARY (leakage-free)"
+    if results['oracle']:
+        title += "  [ORACLE RUN: upper bound, gold types used]"
+    print(title)
     print("=" * 70)
+    if 'warning' in results:
+        print(f"WARNING: {results['warning']}")
+    ty = results['typing']
+    ref = results['reference_majority_class']
+    print(f"Typing ({ty['n_terms']} terms, coverage {ty['coverage']:.2f}):")
+    print(f"  accuracy {ty['accuracy']:.4f}  95% CI {ty['accuracy_ci95']}  "
+          f"(majority-class reference {ref['accuracy']:.4f})")
+    print(f"  set P/R/F1 {ty['set_precision']:.4f}/{ty['set_recall']:.4f}/"
+          f"{ty['set_f1']:.4f}   macro-F1 {ty['macro_f1']:.4f}")
+    print(f"  acc@1/3/5 {ty['acc@1']:.4f}/{ty['acc@3']:.4f}/{ty['acc@5']:.4f}   "
+          f"hierarchical F1 {ty['h_f1']:.4f}   AURC {ty['aurc']:.4f}")
+    print(f"  {'thresh':>7} {'P':>7} {'R':>7} {'F1':>7} {'n':>5}")
+    for th, m in ty['thresholds'].items():
+        print(f"  {float(th):>7.2f} {m['precision']:>7.4f} {m['recall']:>7.4f} "
+              f"{m['f1']:>7.4f} {m['n_predicted']:>5}")
+    if 'typing_before_rag' in results:
+        b = results['typing_before_rag']
+        print(f"  (before LLM re-ranking: accuracy {b['accuracy']:.4f}, "
+              f"set F1 {b['set_f1']:.4f})")
+    al = results.get('alignment_rows')
+    if al:
+        print(f"\nAlignment rows ({al['n_rows']}), pairwise:")
+        print(f"  {'thresh':>7} {'P':>7} {'R':>7} {'F1':>7} {'rows':>6}")
+        for th, m in al['thresholds'].items():
+            print(f"  {float(th):>7.2f} {m['precision']:>7.4f} {m['recall']:>7.4f} "
+                  f"{m['f1']:>7.4f} {m['n_rows']:>6}")
+    cl = results.get('clustering', {})
+    if 'ari' in cl:
+        print(f"\nClustering ({cl['n_clusters']} clusters): ARI {cl['ari']:.4f}  "
+              f"V {cl['v_measure']:.4f}  B-cubed F1 {cl['bcubed_f1']:.4f}  "
+              f"(singletons B3-F1 {cl['baseline_singletons']['bcubed_f1']:.4f}, "
+              f"one-cluster {cl['baseline_one_cluster']['bcubed_f1']:.4f})")
+    tx = results.get('taxonomy', {})
+    if 'f1' in tx:
+        print(f"\nTaxonomy (class level, {tx['n_edges']} lifted edges): "
+              f"P {tx['precision']:.4f} R {tx['recall']:.4f} F1 {tx['f1']:.4f}  "
+              f"P_closure {tx['precision_closure']:.4f} "
+              f"(chance {tx['random_precision_closure']:.4f})")
 
-    for level_name, level_data in [('Type', type_results),
-                                    ('Term', term_results),
-                                    ('Concept', concept_results)]:
-        if 'thresholds' not in level_data:
-            print(f"\n{level_name}: {level_data.get('note', 'N/A')}")
-            continue
 
-        has_active = 'f1_active' in next(iter(level_data['thresholds'].values()), {})
-
-        print(f"\n{level_name}-level:")
-        if has_active:
-            print(f"  {'Thresh':>8} {'Prec':>8} {'Recall':>8} {'F1':>8}"
-                  f" {'RecAct':>8} {'F1Act':>8}")
-            for thresh, metrics in sorted(level_data['thresholds'].items()):
-                print(f"  {thresh:>8.2f} {metrics['precision']:>8.4f} "
-                      f"{metrics['recall']:>8.4f} {metrics['f1']:>8.4f}"
-                      f" {metrics.get('recall_active', 0):>8.4f}"
-                      f" {metrics.get('f1_active', 0):>8.4f}")
-        else:
-            print(f"  {'Thresh':>8} {'Prec':>8} {'Recall':>8} {'F1':>8}")
-            for thresh, metrics in sorted(level_data['thresholds'].items()):
-                print(f"  {thresh:>8.2f} {metrics['precision']:>8.4f} "
-                      f"{metrics['recall']:>8.4f} {metrics['f1']:>8.4f}")
-
-    # Also save CSV summary for quick viewing
-    rows = []
-    for level_name, level_data in [('type', type_results),
-                                    ('term', term_results),
-                                    ('concept', concept_results)]:
-        if 'thresholds' not in level_data:
-            continue
-        for thresh, metrics in level_data['thresholds'].items():
-            row = {
-                'level': level_name,
-                'threshold': thresh,
-                'precision': metrics['precision'],
-                'recall': metrics['recall'],
-                'f1': metrics['f1'],
-            }
-            if 'f1_active' in metrics:
-                row['recall_active'] = metrics.get('recall_active', 0)
-                row['f1_active'] = metrics.get('f1_active', 0)
-            rows.append(row)
-    if rows:
-        summary_df = pd.DataFrame(rows)
-        summary_df.to_csv(os.path.join(PROCESSED_DIR, 'f1_ablation.csv'),
-                          index=False)
-        print(f"\nSaved summary CSV to f1_ablation.csv")
+def main():
+    parser = argparse.ArgumentParser(description='Leakage-free evaluation')
+    parser.add_argument('--legacy-alignment-csv', default=None,
+                        help='score the top-1 row per term of an alignment CSV')
+    parser.add_argument('--out', default=None, help='output JSON path')
+    args = parser.parse_args()
+    run_evaluation(args.legacy_alignment_csv, args.out)
 
 
 if __name__ == "__main__":
-    run_evaluation()
+    main()

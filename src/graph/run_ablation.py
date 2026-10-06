@@ -1,103 +1,188 @@
 """
-run_ablation.py - Automated Ablation Experiment Runner
+run_ablation.py - Environment-driven Ablation Runner
 
-Runs the alignment + evaluation pipeline under different ablation
-configurations and collects comparative results.
+Every preset in config.ABLATION_PRESETS is a set of environment overrides
+plus the first stage that has to be re-run. The runner
+
+  1. runs the base configuration ('full_pipeline') into
+     data/processed/ablations/full_pipeline,
+  2. for every other preset copies the base outputs into
+     data/processed/ablations/<preset>/ and re-runs the pipeline from the
+     preset's first affected stage with PROCESSED_DIR pointing there,
+  3. collects the leakage-free metrics (eval_results.json,
+     relation_eval_results.json) into ablation_summary.csv/.json, with an
+     exact McNemar test of each preset's typing against the base preset
+     (typing_diff_vs_base, typing_mcnemar_p).
+
+All presets run with the LLM features off unless --llm is given, so the
+comparison is deterministic and free. Presets marked oracle use gold types
+and are upper bounds, not model results.
 
 Usage:
-    python run_ablation.py                          # Run all presets
-    python run_ablation.py --preset full_pipeline   # Run one preset
-    python run_ablation.py --list                   # List presets
+    python run_ablation.py                          # all presets except the
+                                                    # embedder presets
+    python run_ablation.py --preset no_gnn          # one preset (+ base)
+    python run_ablation.py --summarize-only         # rebuild the summary from
+                                                    # existing preset outputs
+    python run_ablation.py --list                   # list presets
 """
 
 import argparse
 import json
 import os
+import shutil
 import sys
 import time
 
-import pandas as pd
-
-# Add parent to path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from config import ABLATION_PRESETS, get_preset, list_presets
+from config import (ABLATION_PRESETS, DEFAULT_PROCESSED_DIR, PREDICTED_TYPES_BASE_FILE,  # noqa: E402
+                    PREDICTED_TYPES_FILE, get_preset, list_presets)
+from run_pipeline import SCRIPTS, run_stages, stage_env  # noqa: E402
 
-PROJECT_ROOT = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-)
-PROCESSED_DIR = os.path.join(PROJECT_ROOT, "data", "processed")
-ABLATION_DIR = os.path.join(PROCESSED_DIR, "ablation_results")
+ABLATION_DIR = os.path.join(DEFAULT_PROCESSED_DIR, "ablations")
+BASE_PRESET = 'full_pipeline'
+# Downloading/encoding with large embedders is slow; run them explicitly
+DEFAULT_SKIP = {'domain_specter', 'domain_scibert'}
+LLM_OFF = {'LLM_ALIGNMENT': 'false', 'LLM_RELATIONS': 'false',
+           'RAG_TYPING': 'false', 'LLM_MODE': 'false'}
 
 
-def run_ablation(preset_name):
-    """Run alignment and evaluation with a specific ablation preset."""
-    preset = get_preset(preset_name)
-    print(f"\n{'=' * 60}")
-    print(f"ABLATION: {preset_name}")
-    print(f"  {preset['description']}")
-    print(f"{'=' * 60}")
+def preset_dir(name):
+    return os.path.join(ABLATION_DIR, name)
 
-    # Set ablation flags by modifying align.py module globals
-    import align
-    align.USE_GNN_EMBEDDINGS = preset['USE_GNN_EMBEDDINGS']
-    align.USE_BIDIRECTIONAL = preset['USE_BIDIRECTIONAL']
-    align.USE_COMBINED_SCORING = preset['USE_COMBINED_SCORING']
 
-    # Update embedder model if specified in preset
-    from config import get_config
-    _cfg = get_config()
-    embedder_model = preset.get('embedder_model', _cfg.get('embedder_model', 'all-MiniLM-L6-v2'))
-    if embedder_model != align.EMBEDDER_MODEL:
-        from sentence_transformers import SentenceTransformer
-        print(f"  Switching embedder to: {embedder_model}")
-        align.EMBEDDER_MODEL = embedder_model
-        align.EMBEDDER = SentenceTransformer(embedder_model)
+def copy_base_outputs(src, dst):
+    """Copy the base run's files (not its evaluation results) to dst."""
+    os.makedirs(dst, exist_ok=True)
+    for fn in os.listdir(src):
+        path = os.path.join(src, fn)
+        if os.path.isfile(path) and not fn.startswith(('eval_', 'relation_eval')):
+            shutil.copy2(path, os.path.join(dst, fn))
 
-    # Run alignment
-    start_time = time.time()
-    try:
-        align.run_alignment()
-    except Exception as e:
-        print(f"  Alignment failed: {e}")
-        return None
 
-    # Run evaluation
-    import eval_f1
-    if embedder_model != eval_f1.EMBEDDER_MODEL:
-        from sentence_transformers import SentenceTransformer
-        eval_f1.EMBEDDER_MODEL = embedder_model
-        eval_f1.EMBEDDER = SentenceTransformer(embedder_model)
-    try:
-        eval_f1.run_evaluation()
-    except Exception as e:
-        print(f"  Evaluation failed: {e}")
-        return None
+def run_preset(name, llm=False):
+    """Run one preset; returns its summary row (or None on failure)."""
+    preset = get_preset(name)
+    out_dir = preset_dir(name)
+    env_over = dict(preset['env'])
+    if not llm:
+        env_over.update(LLM_OFF)
+    env_over['PROCESSED_DIR'] = out_dir
 
-    elapsed = time.time() - start_time
-
-    # Collect results
-    results_path = os.path.join(PROCESSED_DIR, 'eval_results.json')
-    if os.path.exists(results_path):
-        with open(results_path) as f:
-            results = json.load(f)
+    from_stage = preset['from_stage']
+    if name != BASE_PRESET and from_stage != SCRIPTS[0]:
+        if not os.path.exists(os.path.join(preset_dir(BASE_PRESET), 'eval_results.json')):
+            print(f"Base run missing; running '{BASE_PRESET}' first")
+            if run_preset(BASE_PRESET, llm) is None:
+                return None
+        if os.path.isdir(out_dir):
+            shutil.rmtree(out_dir)
+        copy_base_outputs(preset_dir(BASE_PRESET), out_dir)
     else:
-        results = {}
+        if os.path.isdir(out_dir):
+            shutil.rmtree(out_dir)
+        os.makedirs(out_dir)
 
-    results['preset'] = preset_name
-    results['config'] = {k: v for k, v in preset.items()
-                         if k.startswith('USE_')}
-    results['elapsed_seconds'] = round(elapsed, 2)
+    print(f"\n{'#' * 70}\nABLATION: {name} - {preset['description']}\n"
+          f"  overrides: {preset['env'] or '(defaults)'}; from {from_stage}\n{'#' * 70}")
+    start = time.time()
+    stages = SCRIPTS[SCRIPTS.index(from_stage):]
+    if not run_stages(stages, stage_env(env_over)):
+        return None
+    return summarize(name, out_dir, time.time() - start)
 
-    return results
+
+def summarize(name, out_dir, elapsed):
+    with open(os.path.join(out_dir, 'eval_results.json')) as f:
+        ev = json.load(f)
+    rel = {}
+    rel_path = os.path.join(out_dir, 'relation_eval_results.json')
+    if os.path.exists(rel_path):
+        with open(rel_path) as f:
+            rel = json.load(f)
+    ty = ev['typing']
+    cl = ev.get('clustering', {})
+    tx = ev.get('taxonomy', {})
+    al = ev.get('alignment_rows', {}).get('thresholds', {}).get('0.5', {})
+    return {
+        'preset': name,
+        'oracle': ev['oracle'],
+        'typing_accuracy': ty['accuracy'],
+        'typing_accuracy_ci95': ty['accuracy_ci95'],
+        'typing_set_f1': ty['set_f1'],
+        'typing_macro_f1': ty['macro_f1'],
+        'typing_acc@5': ty['acc@5'],
+        'typing_h_f1': ty['h_f1'],
+        'typing_aurc': ty['aurc'],
+        'alignment_pairwise_f1@0.5': al.get('f1'),
+        'clustering_ari': cl.get('ari'),
+        'clustering_bcubed_f1': cl.get('bcubed_f1'),
+        'n_clusters': cl.get('n_clusters'),
+        'taxonomy_f1': tx.get('f1'),
+        'taxonomy_precision_closure': tx.get('precision_closure'),
+        'relations': rel.get('n_relations'),
+        'relations_class_f1': rel.get('predicted_typing', {}).get('f1'),
+        'runtime_sec': round(elapsed, 1) if elapsed is not None else None,
+    }
+
+
+def typing_predictions(out_dir):
+    """The typing decision a preset was scored on (as in eval_f1)."""
+    from eval_f1 import load_predictions
+    for fn in (PREDICTED_TYPES_FILE, PREDICTED_TYPES_BASE_FILE):
+        path = os.path.join(out_dir, fn)
+        if os.path.exists(path):
+            return load_predictions(path)[0]
+    return None
+
+
+def add_paired_tests(rows):
+    """Exact McNemar test of each preset's typing against the base preset.
+
+    With 315 terms, accuracy differences of a few points are often noise, so
+    the summary reports the paired p-value next to every difference.
+    """
+    import metrics
+    from eval_f1 import load_gold
+    from ontology_utils import load_ontology
+
+    for row in rows:
+        row['typing_diff_vs_base'] = None
+        row['typing_mcnemar_p'] = None
+    base = typing_predictions(preset_dir(BASE_PRESET))
+    if base is None:
+        return
+    _, gold, _, _ = load_gold(load_ontology())
+    for row in rows:
+        if row['preset'] == BASE_PRESET:
+            continue
+        pred = typing_predictions(preset_dir(row['preset']))
+        if pred is None:
+            continue
+        test = metrics.mcnemar_exact(pred, base, gold)
+        row['typing_diff_vs_base'] = test['accuracy_diff']
+        row['typing_mcnemar_p'] = test['p_value']
+
+
+def previous_runtimes():
+    path = os.path.join(ABLATION_DIR, 'ablation_summary.json')
+    if not os.path.exists(path):
+        return {}
+    with open(path) as f:
+        return {r['preset']: r.get('runtime_sec') for r in json.load(f)}
 
 
 def main():
     parser = argparse.ArgumentParser(description="Run ablation experiments")
-    parser.add_argument('--preset', type=str, default=None,
-                        help='Run a specific preset')
-    parser.add_argument('--list', action='store_true',
-                        help='List available presets')
+    parser.add_argument('--preset', action='append', default=None,
+                        help='preset(s) to run (repeatable); default: all')
+    parser.add_argument('--llm', action='store_true',
+                        help='keep the LLM features on (costs API calls)')
+    parser.add_argument('--summarize-only', action='store_true',
+                        help='rebuild the summary from existing preset outputs '
+                             'without running any stage')
+    parser.add_argument('--list', action='store_true', help='list presets')
     args = parser.parse_args()
 
     if args.list:
@@ -105,57 +190,43 @@ def main():
         list_presets()
         return
 
+    names = args.preset or [n for n in ABLATION_PRESETS if n not in DEFAULT_SKIP]
+    if BASE_PRESET not in names:
+        names = [BASE_PRESET] + names
+    names = [BASE_PRESET] + [n for n in names if n != BASE_PRESET]
+
+    rows = []
+    runtimes = previous_runtimes() if args.summarize_only else {}
+    for name in names:
+        if args.summarize_only:
+            if not os.path.exists(os.path.join(preset_dir(name), 'eval_results.json')):
+                print(f"  Preset {name}: no results in {preset_dir(name)}")
+                continue
+            row = summarize(name, preset_dir(name), runtimes.get(name))
+        else:
+            row = run_preset(name, llm=args.llm)
+        if row is None:
+            print(f"  Preset {name} failed")
+            continue
+        rows.append(row)
+
+    if not rows:
+        return
+    add_paired_tests(rows)
+    import pandas as pd
     os.makedirs(ABLATION_DIR, exist_ok=True)
-
-    if args.preset:
-        presets_to_run = [args.preset]
-    else:
-        presets_to_run = list(ABLATION_PRESETS.keys())
-
-    all_results = []
-    for preset_name in presets_to_run:
-        result = run_ablation(preset_name)
-        if result:
-            # Save individual result
-            result_path = os.path.join(
-                ABLATION_DIR, f'{preset_name}_results.json'
-            )
-            with open(result_path, 'w') as f:
-                json.dump(result, f, indent=2)
-            all_results.append(result)
-            print(f"  Saved: {result_path}")
-
-    # Summary comparison
-    if len(all_results) > 1:
-        print(f"\n{'=' * 60}")
-        print("ABLATION SUMMARY")
-        print(f"{'=' * 60}")
-
-        rows = []
-        for r in all_results:
-            preset = r.get('preset', '?')
-            for level in ['type_level', 'term_level', 'concept_level']:
-                level_data = r.get(level, {})
-                if 'thresholds' in level_data:
-                    # Use threshold 0.65 as representative
-                    metrics = level_data['thresholds'].get(
-                        0.65, level_data['thresholds'].get('0.65', {})
-                    )
-                    if metrics:
-                        rows.append({
-                            'preset': preset,
-                            'level': level.replace('_level', ''),
-                            'P@0.65': metrics.get('precision', 0),
-                            'R@0.65': metrics.get('recall', 0),
-                            'F1@0.65': metrics.get('f1', 0),
-                        })
-
-        if rows:
-            summary_df = pd.DataFrame(rows)
-            print(summary_df.to_string(index=False))
-            summary_path = os.path.join(ABLATION_DIR, 'ablation_summary.csv')
-            summary_df.to_csv(summary_path, index=False)
-            print(f"\nSaved: {summary_path}")
+    df = pd.DataFrame(rows)
+    df.to_csv(os.path.join(ABLATION_DIR, 'ablation_summary.csv'), index=False)
+    with open(os.path.join(ABLATION_DIR, 'ablation_summary.json'), 'w') as f:
+        json.dump(rows, f, indent=2)
+    cols = ['preset', 'oracle', 'typing_accuracy', 'typing_mcnemar_p', 'typing_set_f1',
+            'typing_macro_f1', 'typing_h_f1', 'clustering_ari', 'taxonomy_f1',
+            'relations_class_f1']
+    print("\n" + "=" * 100)
+    print("ABLATION SUMMARY (leakage-free metrics; oracle rows are upper bounds)")
+    print("=" * 100)
+    print(df[cols].to_string(index=False))
+    print(f"\nSaved: {os.path.join(ABLATION_DIR, 'ablation_summary.csv')}")
 
 
 if __name__ == '__main__':

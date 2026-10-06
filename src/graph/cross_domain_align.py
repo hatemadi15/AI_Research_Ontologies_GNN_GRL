@@ -24,14 +24,8 @@ import numpy as np
 import pandas as pd
 from sentence_transformers import SentenceTransformer, util
 
-from config import get_config
-
-PROJECT_ROOT = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-)
-PROCESSED_DIR = os.path.join(PROJECT_ROOT, "data", "processed")
-RAW_DIR = os.path.join(PROJECT_ROOT, "data", "raw", "dataset")
-ONTOLOGY_DIR = os.path.join(RAW_DIR, "ontologies")
+from config import EMBEDDER_MODEL, PROCESSED_DIR
+from ontology_utils import load_ontology
 
 # Manually-defined upper-level ontology classes
 
@@ -68,11 +62,11 @@ BFO_CLASSES = {
 
 
 def normalize_term(term):
-    term = term.lower().strip()
+    # Split CamelCase *before* lowercasing (lowercasing first made the split a no-op)
+    term = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', term.strip()).lower()
     for prefix in ('the ', 'a ', 'an '):
         if term.startswith(prefix):
             term = term[len(prefix):]
-    term = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', term).lower()
     term = re.sub(r'\([^)]*\)', '', term).strip()
     return term
 
@@ -90,46 +84,10 @@ def edit_distance_similarity(s1, s2):
 
 
 def load_local_ontology():
-    ttl_path = os.path.join(ONTOLOGY_DIR, 'ontology.ttl')
-    if not os.path.exists(ttl_path):
-        raise FileNotFoundError(f"Domain ontology not found: {ttl_path}")
-
-    from rdflib import Graph, RDF, RDFS, OWL, Namespace
-
-    g = Graph()
-    g.parse(ttl_path, format='turtle')
-
-    MMO = Namespace("https://w3id.org/pmd/materials-mechanics-ontology/")
-    SKOS = Namespace("http://www.w3.org/2004/02/skos/core#")
-
-    label_props = [RDFS.label, MMO.altLabel, MMO.prefLabel,
-                   SKOS.prefLabel, SKOS.altLabel]
-
-    primary_labels = []
-    all_labels = set()
-
-    for cls in g.subjects(RDF.type, OWL.Class):
-        cls_str = str(cls)
-        if cls_str.startswith('http://www.w3.org/'):
-            continue
-
-        labels = []
-        for prop in label_props:
-            for label in g.objects(cls, prop):
-                label_str = str(label).strip()
-                if label_str and not label_str.startswith('http'):
-                    labels.append(label_str)
-
-        if not labels:
-            fragment = cls_str.split('#')[-1].split('/')[-1]
-            if fragment and fragment[0].isupper():
-                labels.append(fragment)
-
-        if labels:
-            primary_labels.append(labels[0])
-            for lab in labels:
-                all_labels.add(lab)
-
+    """Primary labels and all labels of the MaterioMiner (MMO) classes."""
+    onto = load_ontology()
+    primary_labels = [onto.primary_label(u) for u in onto.uris]
+    all_labels = {lab for u in onto.uris for lab in onto.labels(u)}
     print(f"  MaterioMiner ontology: {len(primary_labels)} classes, "
           f"{len(all_labels)} total labels")
     return primary_labels, all_labels
@@ -386,8 +344,7 @@ def generate_quality_report(emmo_stats, bfo_stats, output_path):
 
 
 def run_cross_domain_alignment(embedder_model=None):
-    config = get_config()
-    model_name = embedder_model or config.get('embedder_model', 'all-MiniLM-L6-v2')
+    model_name = embedder_model or EMBEDDER_MODEL
     print(f"Cross-domain alignment using embedder: {model_name}")
     embedder = SentenceTransformer(model_name)
 

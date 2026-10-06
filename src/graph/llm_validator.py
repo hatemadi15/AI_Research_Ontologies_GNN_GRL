@@ -14,15 +14,10 @@ import os
 import json
 import hashlib
 
-from openai import OpenAI
-from config import LLM_API_KEY, LLM_BASE_URL, LLM_MODEL
+from config import LLM_API_KEY, LLM_BASE_URL, LLM_CACHE_PATH, LLM_MODEL
 
-# Absolute paths
-PROJECT_ROOT = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-)
-PROCESSED_DIR = os.path.join(PROJECT_ROOT, "data", "processed")
-CACHE_PATH = os.path.join(PROCESSED_DIR, 'llm_cache.json')
+# Shared across runs and ablation presets; keys include the model name
+CACHE_PATH = LLM_CACHE_PATH
 
 # Lazy-initialized client
 _client = None
@@ -38,6 +33,7 @@ def _get_client():
                 "OPENROUTER_API_KEY (or OPENAI_API_KEY) environment variable not set. "
                 "Set it before enabling LLM features."
             )
+        from openai import OpenAI
         _client = OpenAI(api_key=api_key, base_url=LLM_BASE_URL)
     return _client
 
@@ -53,10 +49,13 @@ def _load_cache():
 
 
 def _save_cache(cache):
-    """Save LLM response cache to disk."""
-    os.makedirs(PROCESSED_DIR, exist_ok=True)
-    with open(CACHE_PATH, 'w', encoding='utf-8') as f:
+    """Save LLM response cache to disk (atomically, so an interrupted run
+    cannot leave a truncated cache file behind)."""
+    os.makedirs(os.path.dirname(CACHE_PATH), exist_ok=True)
+    tmp_path = CACHE_PATH + '.tmp'
+    with open(tmp_path, 'w', encoding='utf-8') as f:
         json.dump(cache, f, indent=2, ensure_ascii=False)
+    os.replace(tmp_path, CACHE_PATH)
 
 
 def _cache_key(func_name, *args):

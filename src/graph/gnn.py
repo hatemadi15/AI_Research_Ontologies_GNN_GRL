@@ -2,7 +2,8 @@
 gnn.py - GNN Training with Multiple Architectures
 
 Supports three architectures:
-  - GraphSAGE (default): 2-layer SAGEConv (384->128->64)
+  - GraphSAGE (default): 2-layer SAGEConv (in_dim -> 256 -> GNN_HIDDEN_DIM,
+    384 by default)
   - GAT: 2-layer GATConv with multi-head attention
   - RGCN: 2-layer RGCNConv for multi-relation graphs
 
@@ -11,6 +12,7 @@ All trained via link prediction with:
   - RandomLinkSplit for train/val split (15% validation)
   - Dropout (0.3) for regularization
   - Early stopping with patience=20
+  - Seeded (config.SEED) Python/NumPy/torch RNGs, so runs are reproducible
   - Saves gnn_embeddings_{arch}.npy and gnn_embed_map.json
 """
 
@@ -25,11 +27,7 @@ from torch_geometric.nn import SAGEConv, GATConv, RGCNConv
 from torch_geometric.transforms import RandomLinkSplit
 from torch_geometric.utils import negative_sampling
 
-# Absolute paths
-PROJECT_ROOT = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-)
-PROCESSED_DIR = os.path.join(PROJECT_ROOT, "data", "processed")
+from config import PROCESSED_DIR, set_seed
 
 GRAPHPATH = os.path.join(PROCESSED_DIR, 'graph_fine_auto.pt')
 NODEMAP_PATH = os.path.join(PROCESSED_DIR, 'nodemap_fine_auto.pt')
@@ -38,22 +36,42 @@ EMBED_MAP_OUT = os.path.join(PROCESSED_DIR, 'gnn_embed_map.json')
 # Legacy path for backward compat with relations.py
 EMBED_PT_OUT = os.path.join(PROCESSED_DIR, 'gnn_embeds.pt')
 
+LEARNING_RATE = 1e-3
+
+
+def effective_rank(embeds):
+    """Exponential of the entropy of the normalised singular values.
+
+    Used as a collapse guard: SBERT features have an effective rank of ~95;
+    a value near 1 means all embeddings lie on a single line.
+    """
+    centered = embeds - embeds.mean(axis=0, keepdims=True)
+    sv = np.linalg.svd(centered, compute_uv=False)
+    p = sv ** 2 / max(float((sv ** 2).sum()), 1e-12)
+    return float(np.exp(-(p * np.log(p + 1e-12)).sum()))
+
 
 class TermGNN(torch.nn.Module):
-    """2-layer GraphSAGE with dropout."""
+    """2-layer GraphSAGE with dropout and a residual input projection.
+
+    The residual path keeps the SBERT semantics in the output; without it the
+    link-prediction objective collapsed the embeddings to rank ~1 (all terms
+    on one line), which made every downstream cosine similarity meaningless.
+    """
 
     def __init__(self, in_dim=384, hid_dim=256, out_dim=384, dropout=0.3):
         super().__init__()
         self.conv1 = SAGEConv(in_dim, hid_dim)
         self.conv2 = SAGEConv(hid_dim, out_dim)
+        self.skip = torch.nn.Linear(in_dim, out_dim, bias=False)
         self.dropout = dropout
 
     def forward(self, x, edge_index, edge_type=None):
-        x = self.conv1(x, edge_index)
-        x = F.relu(x)
-        x = F.dropout(x, p=self.dropout, training=self.training)
-        x = self.conv2(x, edge_index)
-        return x
+        h = self.conv1(x, edge_index)
+        h = F.relu(h)
+        h = F.dropout(h, p=self.dropout, training=self.training)
+        h = self.conv2(h, edge_index)
+        return h + self.skip(x)
 
 
 class GATEncoder(torch.nn.Module):
@@ -63,14 +81,15 @@ class GATEncoder(torch.nn.Module):
         super().__init__()
         self.conv1 = GATConv(in_dim, hidden_dim // heads, heads=heads, dropout=dropout)
         self.conv2 = GATConv(hidden_dim, out_dim, heads=1, concat=False, dropout=dropout)
+        self.skip = torch.nn.Linear(in_dim, out_dim, bias=False)
         self.dropout = dropout
 
     def forward(self, x, edge_index, edge_type=None):
-        x = F.dropout(x, p=self.dropout, training=self.training)
-        x = F.elu(self.conv1(x, edge_index))
-        x = F.dropout(x, p=self.dropout, training=self.training)
-        x = self.conv2(x, edge_index)
-        return x
+        h = F.dropout(x, p=self.dropout, training=self.training)
+        h = F.elu(self.conv1(h, edge_index))
+        h = F.dropout(h, p=self.dropout, training=self.training)
+        h = self.conv2(h, edge_index)
+        return h + self.skip(x)
 
 
 class RGCNEncoder(torch.nn.Module):
@@ -80,16 +99,17 @@ class RGCNEncoder(torch.nn.Module):
         super().__init__()
         self.conv1 = RGCNConv(in_dim, hidden_dim, num_relations=num_relations)
         self.conv2 = RGCNConv(hidden_dim, out_dim, num_relations=num_relations)
+        self.skip = torch.nn.Linear(in_dim, out_dim, bias=False)
         self.dropout = dropout
 
     def forward(self, x, edge_index, edge_type=None):
         if edge_type is None:
             edge_type = torch.zeros(edge_index.size(1), dtype=torch.long,
                                     device=edge_index.device)
-        x = F.relu(self.conv1(x, edge_index, edge_type))
-        x = F.dropout(x, p=self.dropout, training=self.training)
-        x = self.conv2(x, edge_index, edge_type)
-        return x
+        h = F.relu(self.conv1(x, edge_index, edge_type))
+        h = F.dropout(h, p=self.dropout, training=self.training)
+        h = self.conv2(h, edge_index, edge_type)
+        return h + self.skip(x)
 
 
 def link_pred_loss(embeds, pos_edge_index, neg_edge_index):
@@ -144,6 +164,11 @@ def train_gnn(architecture=None):
     if architecture is None:
         from config import GNN_ARCHITECTURE
         architecture = GNN_ARCHITECTURE
+    # Bit-for-bit reproducible training: multi-threaded CPU scatter/sum order
+    # otherwise changes the embeddings by ~1e-7 between identical runs.
+    set_seed()
+    torch.set_num_threads(1)
+    torch.use_deterministic_algorithms(True, warn_only=True)
 
     print(f"\n{'='*50}")
     print(f"Training {architecture.upper()} architecture")
@@ -158,7 +183,6 @@ def train_gnn(architecture=None):
 
     data = torch.load(GRAPHPATH, weights_only=False)
     nodemap = torch.load(NODEMAP_PATH, weights_only=False)
-    inv_nodemap = {idx: term for term, idx in nodemap.items()}
     num_nodes = data.num_nodes
     print(f"Loaded graph: {num_nodes} nodes, {data.num_edges} edges")
 
@@ -186,7 +210,9 @@ def train_gnn(architecture=None):
     train_data = train_data.to(device)
     val_data = val_data.to(device)
 
-    optimizer = optim.Adam(model.parameters(), lr=0.01, weight_decay=1e-5)
+    # lr 1e-3 (was 1e-2): selected on the validation link-prediction loss/AUC
+    # (no gold labels involved); 1e-2 made training unstable across seeds.
+    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-5)
 
     # Early stopping
     patience = 20
@@ -258,6 +284,12 @@ def train_gnn(architecture=None):
     data_device = data.to(device)
     with torch.no_grad():
         gnn_embeds = model(data_device.x, data_device.edge_index).cpu().numpy()
+
+    erank = effective_rank(gnn_embeds)
+    print(f"Embedding effective rank: {erank:.1f} "
+          f"(input features: {effective_rank(data.x.cpu().numpy()):.1f})")
+    if erank < 2.0:
+        print("  WARNING: GNN embeddings collapsed (effective rank < 2)")
 
     # Save with architecture suffix
     arch_npy = os.path.join(PROCESSED_DIR, f'gnn_embeddings_{architecture}.npy')

@@ -6,6 +6,9 @@ Renders the knowledge graph with three views:
   2. Relations: top-50 high-confidence non-taxonomic relations, colored by type
   3. Combined KG: taxonomy (solid) + relations (dashed) in one graph
 
+Nodes are coloured by their predicted ontology class (predicted_types.json);
+the palette is built from the classes that occur.
+
 Outputs saved to data/processed/:
   - taxonomy_graph.png
   - relations_graph.png
@@ -24,30 +27,16 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
-# Absolute paths
-PROJECT_ROOT = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-)
-PROCESSED_DIR = os.path.join(PROJECT_ROOT, "data", "processed")
+from config import PREDICTED_TYPES_FILE, PROCESSED_DIR
 
 TAXONOMY_PATH = os.path.join(PROCESSED_DIR, 'taxonomy_graph.pkl')
 RELATIONS_PATH = os.path.join(PROCESSED_DIR, 'relations.csv')
-ENTITY_TYPES_PATH = os.path.join(PROCESSED_DIR, 'entity_types.json')
+PREDICTED_TYPES_PATH = os.path.join(PROCESSED_DIR, PREDICTED_TYPES_FILE)
 CORPUS_FREQ_PATH = os.path.join(PROCESSED_DIR, 'corpus_frequencies.json')
 
-# NER type -> color mapping
-NER_COLORS = {
-    'Material': '#1f77b4',
-    'Process': '#ff7f0e',
-    'Property': '#2ca02c',
-    'Characterization': '#d62728',
-    'Microstructure': '#9467bd',
-    'Phenomenon': '#8c564b',
-    'Environment': '#e377c2',
-    'Application': '#7f7f7f',
-    'Measurement': '#bcbd22',
-    'Defect': '#17becf',
-}
+# Colours for the most frequent predicted classes; the rest are grey
+PALETTE = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
+           '#8c564b', '#e377c2', '#bcbd22', '#17becf', '#7f7f7f']
 DEFAULT_NODE_COLOR = '#aaaaaa'
 
 # Relation type -> color mapping
@@ -75,10 +64,22 @@ DEFAULT_EDGE_COLOR = '#888888'
 
 
 def _load_entity_types():
-    if os.path.exists(ENTITY_TYPES_PATH):
-        with open(ENTITY_TYPES_PATH, 'r') as f:
-            return json.load(f)
+    """Term -> predicted class label (the pipeline's typing decision)."""
+    if os.path.exists(PREDICTED_TYPES_PATH):
+        with open(PREDICTED_TYPES_PATH, 'r', encoding='utf-8') as f:
+            return {t: p.get('label', '') for t, p in json.load(f).items()}
     return {}
+
+
+def _type_colors(nodes, entity_types):
+    """Palette for the most frequent types among the drawn nodes."""
+    counts = {}
+    for n in nodes:
+        t = entity_types.get(n, '')
+        if t:
+            counts[t] = counts.get(t, 0) + 1
+    top = sorted(counts, key=lambda t: (-counts[t], t))[:len(PALETTE)]
+    return {t: PALETTE[i] for i, t in enumerate(top)}
 
 
 def _load_corpus_frequencies():
@@ -88,9 +89,8 @@ def _load_corpus_frequencies():
     return {}
 
 
-def _node_color(node, entity_types):
-    ner_type = entity_types.get(node, '')
-    return NER_COLORS.get(ner_type, DEFAULT_NODE_COLOR)
+def _node_color(node, entity_types, colors):
+    return colors.get(entity_types.get(node, ''), DEFAULT_NODE_COLOR)
 
 
 def _node_size(node, corpus_freq, min_size=200, max_size=2000):
@@ -121,7 +121,8 @@ def plot_taxonomy():
     fig, ax = plt.subplots(1, 1, figsize=(20, 16))
     pos = nx.spring_layout(G, k=2, seed=42, iterations=50)
 
-    node_colors = [_node_color(n, entity_types) for n in G.nodes()]
+    colors = _type_colors(G.nodes(), entity_types)
+    node_colors = [_node_color(n, entity_types, colors) for n in G.nodes()]
     node_sizes = [_node_size(n, corpus_freq) for n in G.nodes()]
 
     nx.draw_networkx_edges(G, pos, ax=ax, edge_color='#555555', alpha=0.7,
@@ -136,8 +137,8 @@ def plot_taxonomy():
         if t:
             present_types.add(t)
     legend_patches = [
-        mpatches.Patch(color=NER_COLORS.get(t, DEFAULT_NODE_COLOR), label=t)
-        for t in sorted(present_types)
+        mpatches.Patch(color=colors[t], label=t)
+        for t in sorted(present_types) if t in colors
     ]
     if legend_patches:
         ax.legend(handles=legend_patches, loc='upper left', fontsize=9)
@@ -181,7 +182,8 @@ def plot_relations():
     fig, ax = plt.subplots(1, 1, figsize=(20, 16))
     pos = nx.spring_layout(G, k=2, seed=42, iterations=50)
 
-    node_colors = [_node_color(n, entity_types) for n in G.nodes()]
+    colors = _type_colors(G.nodes(), entity_types)
+    node_colors = [_node_color(n, entity_types, colors) for n in G.nodes()]
     node_sizes = [_node_size(n, corpus_freq) for n in G.nodes()]
 
     nx.draw_networkx_edges(G, pos, ax=ax, edge_color=edge_colors, alpha=0.7,
@@ -252,7 +254,8 @@ def plot_knowledge_graph():
     fig, ax = plt.subplots(1, 1, figsize=(20, 16))
     pos = nx.spring_layout(G, k=2, seed=42, iterations=50)
 
-    node_colors = [_node_color(n, entity_types) for n in G.nodes()]
+    colors = _type_colors(G.nodes(), entity_types)
+    node_colors = [_node_color(n, entity_types, colors) for n in G.nodes()]
     node_sizes = [_node_size(n, corpus_freq) for n in G.nodes()]
 
     solid_edges = [e for e in G.edges() if edge_styles.get(e) == 'solid']
@@ -291,8 +294,9 @@ def plot_knowledge_graph():
         if t:
             present_types.add(t)
     for t in sorted(present_types):
-        legend_patches.append(
-            mpatches.Patch(color=NER_COLORS.get(t, DEFAULT_NODE_COLOR), label=f"Node: {t}"))
+        if t in colors:
+            legend_patches.append(
+                mpatches.Patch(color=colors[t], label=f"Node: {t}"))
 
     if legend_patches:
         ax.legend(handles=legend_patches, loc='upper left', fontsize=7, ncol=2)
