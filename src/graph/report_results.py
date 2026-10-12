@@ -29,11 +29,15 @@ seed. Its `reference` field says which run: `baseline` (plain MatSciBERT) or
     `baseline`. Also feeds the "At a glance" table and the ROADMAP standing table.
   * "NER week-2 variants vs the CRF head": variants `crf_mt` (multi-task), `crf_dapt`
     (domain-adaptive pre-training) and `crf_ens3` (3-model ensemble), reference `crf`.
+    Its intro notes that these runs use 2 CPU threads and the CRF head 3; once the
+    `crf_m0` comparisons are complete it also gives their difference to the CRF head,
+    the effect of the thread count alone.
     Nothing from this table goes into "At a glance" or the standing table yet.
 
-Which entries are shown is decided by an allow-list of variants plus the reference,
-so anything else in the file is never displayed: ensemble members (`crf_m0`,
-`crf_m100`, `crf_m200`), bare-tag variants, comparisons against another reference.
+Which entries get a row or a verdict is decided by an allow-list of variants plus the
+reference, so anything else in the file never gets one: ensemble members (`crf_m0`,
+`crf_m100`, `crf_m200`; `crf_m0` only appears in the thread-count note above),
+bare-tag variants, comparisons against another reference.
 A row or verdict needs a complete comparison: 5 pairs for random splits (5 splits or
 5 model seeds), 4 for leave one paper out. Until the first complete week-2 comparison
 exists the generated text is identical to what it was before they were supported.
@@ -383,6 +387,27 @@ def ner_variants_table(res):
         "the micro-F1 interval over the 5 random splits lies entirely above 0.\n")
 
 
+THREAD_NOTE = ("Week-2 runs use 2 CPU threads and the CRF head 3. With the same seeds, the "
+               "thread count alone changes a run (floating-point summation order), which adds "
+               "noise to each difference.")
+
+
+def thread_note(res):
+    """THREAD_NOTE, plus the measured effect once the `crf_m0` comparisons are complete.
+
+    `crf_m0` is the CRF head re-run with 2 threads on the same splits and model seeds, so
+    its difference to the CRF head is the effect of the thread count alone.
+    """
+    comps = res.comparisons()
+    found = [(g, find_comparison(comps, g, 'random_split_vary', 'crf_m0', 'crf'))
+             for g in GRANULARITIES]
+    parts = [f"{g}-grained {delta_cell(c['micro'])}" for g, c in found if c]
+    if not parts:
+        return THREAD_NOTE
+    return (f"{THREAD_NOTE} Re-running the CRF head with 2 threads (ensemble member `crf_m0`) "
+            f"changes micro F1 by {' and '.join(parts)} over the 5 random splits.")
+
+
 def ner_week2_table(res):
     """Multi-task, domain-adaptive pre-training and the 3-model ensemble against the CRF head."""
     return comparison_table(
@@ -390,7 +415,8 @@ def ner_week2_table(res):
         "\n#### NER week-2 variants vs the CRF head (paired by split and model seed)\n",
         "Δ = variant − CRF head on the same split and model seed, with the 95% Student-t CI of "
         "the mean difference. Pre-registered rule: a variant improves on the CRF head only if "
-        "the micro-F1 interval over the 5 random splits lies entirely above 0.\n")
+        f"the micro-F1 interval over the 5 random splits lies entirely above 0. "
+        f"{thread_note(res)}\n")
 
 
 def build_tables(res):

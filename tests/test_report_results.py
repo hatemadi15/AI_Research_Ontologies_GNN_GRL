@@ -161,6 +161,24 @@ def test_week2_table_follows_the_baseline_table_with_the_same_columns(tmp_path):
            "splits lies entirely above 0." in intro
 
 
+def test_week2_intro_notes_the_thread_count_and_its_measured_effect(tmp_path):
+    ws = Workspace(tmp_path)
+    ws.compare('crf_mt', 'fine', 'random_split_vary', own=(77.56, 72.4, 82.7))
+    ws.compare('crf_m0', 'fine', 'random_split_vary', n_pairs=3, micro=(-1.1, -2.9, 0.7))
+    readme, _ = ws.generate()
+    assert section(readme, WEEK2_HEADING)[2].endswith(f"lies entirely above 0. {rr.THREAD_NOTE}")
+
+    # complete crf_m0 comparisons add the measured effect, but never a row
+    ws.compare('crf_m0', 'fine', 'random_split_vary', micro=(-1.1, -2.9, 0.7))
+    ws.compare('crf_m0', 'coarse', 'random_split_vary', micro=(0.4, -1.0, 1.8))
+    readme, _ = ws.generate()
+    assert section(readme, WEEK2_HEADING)[2].endswith(
+        f"{rr.THREAD_NOTE} Re-running the CRF head with 2 threads (ensemble member `crf_m0`) "
+        "changes micro F1 by fine-grained -1.10 [-2.90, +0.70] and coarse-grained "
+        "+0.40 [-1.00, +1.80] over the 5 random splits.")
+    assert len(table_rows(readme, WEEK2_HEADING)) == 1
+
+
 def test_week2_verdict_lines(tmp_path):
     ws = Workspace(tmp_path)
     # multi-task: improves / no significant change over the splits, hurts leaving a paper out
@@ -261,7 +279,7 @@ def test_incomplete_and_member_entries_leave_the_output_unchanged(tmp_path):
     assert ws.generate() == before
 
 
-def test_ensemble_members_are_never_shown(tmp_path):
+def test_ensemble_members_get_no_row_or_verdict(tmp_path):
     ws = Workspace(tmp_path)
     ws.compare('crf_ens3', 'fine', 'random_split_vary', micro=(2.0, 0.6, 3.4),
                own=(78.36, 73.0, 83.7))
@@ -275,7 +293,12 @@ def test_ensemble_members_are_never_shown(tmp_path):
     assert [row.split(' | ')[0] for row in table_rows(readme, WEEK2_HEADING)] == [
         '| 3-model ensemble']
     assert BASELINE_HEADING not in readme
-    for text in (readme, roadmap):
+    # the one place a member appears: crf_m0 vs the CRF head as the thread-count effect
+    note = (f"{rr.THREAD_NOTE} Re-running the CRF head with 2 threads (ensemble member "
+            "`crf_m0`) changes micro F1 by fine-grained +5.00 [+4.00, +6.00] over the 5 random "
+            "splits.")
+    assert readme.count(note) == 1
+    for text in (readme.replace(note, ''), roadmap):
         assert 'crf_m' not in text and '88.88' not in text and '+5.00' not in text
     assert len(bullets(readme, '* NER, ')) == 1
 

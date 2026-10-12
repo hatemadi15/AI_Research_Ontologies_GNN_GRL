@@ -202,6 +202,77 @@
       ]
     }
   },
+  "ner_results_coarse_random_split_vary_crf_mt": {
+    "variant": "crf_mt",
+    "granularity": "coarse",
+    "protocol": "random_split_vary",
+    "reference": "crf",
+    "reference_file": "ner_results_coarse_random_split_vary_crf.json",
+    "n_pairs": 5,
+    "run_ids": [
+      "seed0",
+      "seed1",
+      "seed2",
+      "seed3",
+      "seed4"
+    ],
+    "micro": {
+      "mean_diff": 0.24,
+      "ci95": [
+        -2.54,
+        3.02
+      ],
+      "per_run": [
+        3.01,
+        1.38,
+        -1.18,
+        -2.73,
+        0.71
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": 0.24,
+      "ci95": [
+        -2.54,
+        3.02
+      ],
+      "per_run": [
+        3.01,
+        1.38,
+        -1.18,
+        -2.73,
+        0.71
+      ]
+    },
+    "macro": {
+      "mean_diff": -1.08,
+      "ci95": [
+        -5.32,
+        3.17
+      ],
+      "per_run": [
+        1.28,
+        -0.82,
+        -0.56,
+        -6.88,
+        1.6
+      ]
+    },
+    "weighted": {
+      "mean_diff": 0.28,
+      "ci95": [
+        -2.56,
+        3.11
+      ],
+      "per_run": [
+        2.52,
+        1.72,
+        -0.86,
+        -3.14,
+        1.14
+      ]
+    }
+  },
   "ner_results_coarse_random_split_vary_cw": {
     "variant": "cw",
     "granularity": "coarse",
@@ -473,6 +544,77 @@
         2.23,
         1.32,
         -0.06
+      ]
+    }
+  },
+  "ner_results_fine_random_split_vary_crf_mt": {
+    "variant": "crf_mt",
+    "granularity": "fine",
+    "protocol": "random_split_vary",
+    "reference": "crf",
+    "reference_file": "ner_results_fine_random_split_vary_crf.json",
+    "n_pairs": 5,
+    "run_ids": [
+      "seed0",
+      "seed1",
+      "seed2",
+      "seed3",
+      "seed4"
+    ],
+    "micro": {
+      "mean_diff": 2.46,
+      "ci95": [
+        -0.91,
+        5.84
+      ],
+      "per_run": [
+        0.25,
+        2.1,
+        1.2,
+        1.6,
+        7.17
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": 2.46,
+      "ci95": [
+        -0.91,
+        5.84
+      ],
+      "per_run": [
+        0.25,
+        2.1,
+        1.2,
+        1.6,
+        7.17
+      ]
+    },
+    "macro": {
+      "mean_diff": 2.52,
+      "ci95": [
+        -3.89,
+        8.93
+      ],
+      "per_run": [
+        -0.89,
+        -2.37,
+        1.56,
+        3.44,
+        10.85
+      ]
+    },
+    "weighted": {
+      "mean_diff": 2.02,
+      "ci95": [
+        -1.67,
+        5.7
+      ],
+      "per_run": [
+        -1.04,
+        1.75,
+        0.59,
+        1.89,
+        6.89
       ]
     }
   },

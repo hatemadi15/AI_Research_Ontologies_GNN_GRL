@@ -96,6 +96,19 @@ The largest remaining gap is out of distribution (item 9).
    propagated up the MMO taxonomy, so a joint fine + coarse head (or a loss
    over the label hierarchy) shares signal with the 85 fine classes that have
    ≤ 3 examples. *(est. +1–3 F1 fine-grained)*
+
+   Measured with `--crf --multi-task`: one MatSciBERT encoder with a CRF head
+   per granularity, against the CRF head on the same splits and model seeds.
+   No significant change across the 5 random splits, so it is not adopted
+   under the pre-registered rule.
+
+   | Micro F1 Δ [95% CI] | Fine-grained | Coarse-grained |
+   |---|---|---|
+   | 5 random splits | +2.46 [−0.91, +5.84] | +0.24 [−2.54, +3.02] |
+   | Leaving one paper out | running | running |
+
+   All five fine-grained differences are positive (+0.25 to +7.17), but one
+   split (+7.17) gives most of the mean and the interval includes 0.
 3. **Class-balanced or focal loss** for the minority classes the paper names
    as the main weakness. *(est. +0.5–2)*
 
@@ -140,6 +153,11 @@ The largest remaining gap is out of distribution (item 9).
 5. **Domain-adaptive pre-training.** Continue MLM on the 19k PubMed sentences
    already in the repo, plus open-access fatigue papers, before fine-tuning.
    *(est. +1–3)*
+
+   Pre-training is done (`dapt_mlm.py`, PubMed sentences only): 3 epochs on
+   18,353 sentences, after dropping 1 duplicate and 13 sentences that share a
+   word 8-gram with MaterioMiner. Held-out MLM perplexity fell from 12.17 to
+   5.51 (`results/dapt_mlm.json`). The NER runs with `--crf` are running.
 6. **Label semantics.** Bi-encoder span–type matching (BINDER, GLiNER-style)
    with the 420 MMO `skos:definition`s as type descriptions. This helps rare
    and unseen classes, and it supports the full 177-class setting, not just
@@ -282,3 +300,9 @@ the 5 random splits lies above 0. The same comparison over the 4 held-out
 papers is reported as out-of-distribution robustness, and strict IOB2 and
 macro F1 are reported alongside. Results are reported in the order above;
 runs may overlap when CPU is free.
+
+Deviation, noted after the first runs: two jobs share the 4 CPUs, so the
+week-2 runs use 2 threads where the CRF results used 3. The thread count
+alone changes a run with the same seeds (fine-grained split 0: 78.76 with 3
+threads, 76.37 with 2), which adds noise to every difference. The `crf_m0`
+ensemble members re-run the CRF head with 2 threads and measure the effect.

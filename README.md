@@ -171,6 +171,15 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
 | CRF head | leave one paper out | fine | 4 | 49.44 [41.00, 57.89] | +5.94 [+2.70, +9.18] | +4.18 [+1.29, +7.08] | +4.40 |
 | CRF head | leave one paper out | coarse | 4 | 59.82 [54.15, 65.49] | +5.47 [+0.43, +10.52] | +5.85 [+1.37, +10.32] | +3.03 |
 
+#### NER week-2 variants vs the CRF head (paired by split and model seed)
+
+Δ = variant − CRF head on the same split and model seed, with the 95% Student-t CI of the mean difference. Pre-registered rule: a variant improves on the CRF head only if the micro-F1 interval over the 5 random splits lies entirely above 0. Week-2 runs use 2 CPU threads and the CRF head 3. With the same seeds, the thread count alone changes a run (floating-point summation order), which adds noise to each difference.
+
+| Variant | Protocol | Granularity | Pairs | Variant micro F1 [95% CI] | Δ micro [95% CI] | Δ macro [95% CI] | Δ strict micro |
+|---|---|---|---|---|---|---|---|
+| multi-task (fine + coarse heads) | new random split per seed | fine | 5 | 78.83 [74.09, 83.57] | +2.46 [-0.91, +5.84] | +2.52 [-3.89, +8.93] | +2.46 |
+| multi-task (fine + coarse heads) | new random split per seed | coarse | 5 | 78.39 [75.24, 81.54] | +0.24 [-2.54, +3.02] | -1.08 [-5.32, +3.17] | +0.24 |
+
 **Reading the numbers**
 * The old "Term F1 0.91" corresponds to *0.12* pairwise alignment F1. The
   v5 outputs score higher (0.27, and 0.57–0.74 typing accuracy) only because
@@ -189,6 +198,7 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
 * NER, class-weighted loss vs the baseline (paired micro-F1 difference): fine-grained no significant change (-0.24, 95% CI [-3.09, +2.61]; strict IOB2 -0.64 [-3.36, +2.08]); coarse-grained no significant change (+0.41, 95% CI [-2.31, +3.13]; strict IOB2 +0.39 [-1.76, +2.54]) across the 5 random splits. Leaving one paper out: fine-grained no significant change (+1.81, 95% CI [-4.28, +7.89]; strict IOB2 +1.75 [-3.92, +7.43]); coarse-grained no significant change (+0.91, 95% CI [-5.15, +6.98]; strict IOB2 +0.76 [-4.42, +5.94]).
 * NER, CRF head vs the baseline (paired micro-F1 difference): fine-grained improves (+2.46, 95% CI [+0.39, +4.52]; strict IOB2 +0.10 [-2.08, +2.29]); coarse-grained improves (+3.58, 95% CI [+2.43, +4.74]; strict IOB2 +1.91 [+1.17, +2.65]) across the 5 random splits. Leaving one paper out: fine-grained improves (+5.94, 95% CI [+2.70, +9.18]; strict IOB2 +4.40 [+2.09, +6.72]); coarse-grained improves (+5.47, 95% CI [+0.43, +10.52]; strict IOB2 +3.03 [-1.00, +7.07]). Pre-registered SOTA check (a paired gain over the baseline and a 95% CI above the published number): met for fine-grained 76.36 [71.00, 81.73] vs 69.92; coarse-grained 78.15 [76.61, 79.69] vs 72.32, if the paper reports micro F1.
 * Why the CRF helps (exploratory, not pre-registered): it never predicts an invalid I- tag, while seqeval's default (conlleval) scoring counts the baseline's stray I- tags as extra, mostly wrong entities; strict IOB2 scoring ignores them. Fine-grained: precision 71.0 → 76.7, recall 77.1 → 76.1; under strict IOB2 scoring the two are level (+0.10 [-2.08, +2.29]), so the gain is span validity alone. Dropping invalid tags from the baseline's output gives the same benefit for free: its strict F1 is 76.26 [72.52, 80.01] against the published 69.92. Coarse-grained: precision 71.4 → 77.5, recall 78.1 → 78.9; under strict IOB2 scoring the CRF still gains +1.91 [+1.17, +2.65], so part of the gain is better recognition.
+* NER, multi-task (fine + coarse heads) vs the CRF head (paired micro-F1 difference): fine-grained no significant change (+2.46, 95% CI [-0.91, +5.84]; strict IOB2 +2.46 [-0.91, +5.84]); coarse-grained no significant change (+0.24, 95% CI [-2.54, +3.02]; strict IOB2 +0.24 [-2.54, +3.02]) across the 5 random splits.
 <!-- RESULTS:END -->
 
 ## Evaluation
