@@ -159,7 +159,19 @@ The largest remaining gap is out of distribution (item 9).
    Pre-training is done (`dapt_mlm.py`, PubMed sentences only): 3 epochs on
    18,353 sentences, after dropping 1 duplicate and 13 sentences that share a
    word 8-gram with MaterioMiner. Held-out MLM perplexity fell from 12.17 to
-   5.51 (`results/dapt_mlm.json`). The NER runs with `--crf` are running.
+   5.51 (`results/dapt_mlm.json`).
+
+   Fine-tuned with `--crf` from this checkpoint, against the CRF head on the
+   same splits and model seeds: no significant change across the 5 random
+   splits, so it is not adopted under the pre-registered rule.
+
+   | Micro F1 Δ [95% CI] | Fine-grained | Coarse-grained |
+   |---|---|---|
+   | 5 random splits | +0.68 [−2.55, +3.90] | −0.07 [−3.01, +2.86] |
+   | Leaving one paper out | running | running |
+
+   The lower perplexity on PubMed text did not carry over to MaterioMiner.
+   The second corpus named above, open-access fatigue papers, was not used.
 6. **Label semantics.** Bi-encoder span–type matching (BINDER, GLiNER-style)
    with the 420 MMO `skos:definition`s as type descriptions. This helps rare
    and unseen classes, and it supports the full 177-class setting, not just
