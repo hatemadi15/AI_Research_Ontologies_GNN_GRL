@@ -1,4 +1,9 @@
-"""NER baseline protocol helpers (no torch or model download needed)."""
+"""NER baseline protocol helpers (no torch or model download needed).
+
+The tiny-model run tests at the end need torch, transformers, seqeval and scipy
+and are skipped without them.
+"""
+import json
 from types import SimpleNamespace
 
 import pytest
@@ -54,6 +59,27 @@ def test_leave_one_paper_out_tests_each_paper_once():
         assert len(val) == round(0.15 * (len(data) - len(test)))
 
 
+def test_leave_one_paper_out_folds_as_corpus_positions():
+    data = _corpus()
+    args = SimpleNamespace(leave_one_paper_out=True, split_seed=0)
+    folds, positions = nb.make_folds(data, args), nb.make_folds(data, args, indices=True)
+    for (doc, train, val, test), (doc_i, train_i, val_i, test_i) in zip(folds, positions):
+        assert doc_i == doc
+        assert [data[i] for i in train_i] == train and [data[i] for i in val_i] == val
+        assert [data[i] for i in test_i] == test
+        assert test_i == [i for i, x in enumerate(data) if x[2] == doc]    # corpus order
+        assert sorted(train_i + val_i + test_i) == list(range(len(data)))
+    assert nb.make_folds(data, SimpleNamespace(leave_one_paper_out=False), indices=True) is None
+
+
+def test_prediction_fields_join_the_tags_of_each_sentence():
+    test = [(['a', 'b'], ['B-X', 'O'], 'p.conll'), (['c'], ['O'], 'p.conll')]
+    got = nb.prediction_fields((7, 3), test, [['B-X', 'I-X'], ['O']])
+    assert got == {'test_index': [7, 3], 'test_gold': ['B-X O', 'O'],
+                   'test_pred': ['B-X I-X', 'O']}
+    assert all(type(i) is int for i in got['test_index'])
+
+
 def test_variant_names_and_resume_isolation(tmp_path):
     assert nb.variant_name(SimpleNamespace(class_weights=False)) == 'baseline'
     assert nb.variant_name(SimpleNamespace(class_weights=True)) == 'cw'
@@ -65,10 +91,113 @@ def test_variant_names_and_resume_isolation(tmp_path):
     assert nb.resumable_runs(str(path), ['A'], 'm', 'cw') == []
     assert nb.resumable_runs(str(path), ['B'], 'm', 'baseline') == []
     assert nb.resumable_runs(str(tmp_path / 'missing.json'), ['A'], 'm', 'baseline') == []
-    assert nb.VARIANT_FILE.match('ner_results_fine_random_split_vary_cw.json')
-    assert nb.VARIANT_FILE.match('ner_results_coarse_leave_one_paper_out_crf.json')
-    assert not nb.VARIANT_FILE.match('ner_results_fine_random_split_vary.json')
-    assert not nb.VARIANT_FILE.match('ner_results_fine_random_split_vary_cw_smoke16.json')
+
+
+def test_variant_names_with_tags():
+    def name(**kw):
+        return nb.variant_name(SimpleNamespace(
+            **{'class_weights': False, 'crf': False, 'tag': None, **kw}))
+    assert name(tag='') == name() == 'baseline'
+    assert name(tag='m100') == 'm100'                    # the baseline is named by the tag alone
+    assert name(class_weights=True, tag='m100') == 'cw_m100'
+    assert name(crf=True, tag='m100') == 'crf_m100'
+    assert nb.variant_name(SimpleNamespace(class_weights=False, tag='x1')) == 'x1'   # no crf field
+    # the file suffix follows the variant name; smoke tests append to it
+    assert nb.result_suffix('random_split_fixed', 'baseline') == ''
+    assert nb.result_suffix('random_split_fixed', 'crf_m100') == '_crf_m100'
+    assert nb.result_suffix('random_split_vary', 'baseline') == '_random_split_vary'
+    assert nb.result_suffix('leave_one_paper_out', 'm100') == '_leave_one_paper_out_m100'
+
+
+def test_reference_variant():
+    assert nb.reference_variant('crf_m100') == 'crf'
+    assert nb.reference_variant('cw_m100') == 'cw'
+    assert [nb.reference_variant(v) for v in ('cw', 'crf', 'm100', 'baseline')] == ['baseline'] * 4
+    # only the underscore after crf / cw makes a tagged variant, not a shared prefix
+    assert nb.reference_variant('crf2') == nb.reference_variant('cwx') == 'baseline'
+
+
+def test_result_file_names_parse_to_protocol_and_variant():
+    parse = nb.parse_result_name
+    # the baseline file of a protocol is no variant named like the protocol
+    assert parse('ner_results_fine_random_split_vary.json') == (
+        'fine', 'random_split_vary', 'baseline')
+    assert parse('ner_results_coarse_leave_one_paper_out.json') == (
+        'coarse', 'leave_one_paper_out', 'baseline')
+    assert parse('ner_results_fine.json') == ('fine', 'random_split_fixed', 'baseline')
+    assert parse('ner_results_fine_random_split_vary_cw.json') == (
+        'fine', 'random_split_vary', 'cw')
+    assert parse('ner_results_coarse_leave_one_paper_out_crf_m100.json') == (
+        'coarse', 'leave_one_paper_out', 'crf_m100')
+    # without a protocol part the file belongs to the fixed split
+    assert parse('ner_results_fine_crf.json') == ('fine', 'random_split_fixed', 'crf')
+    assert parse('ner_results_fine_m100.json') == ('fine', 'random_split_fixed', 'm100')
+    # smoke-test files keep their marker in the variant; other files are no results
+    assert parse('ner_results_fine_random_split_vary_crf_m100_smoke16.json') == (
+        'fine', 'random_split_vary', 'crf_m100_smoke16')
+    assert parse('ner_results_fine_random_split_vary_smoke16.json')[2] == 'smoke16'
+    for fn in ('ner_comparisons.json', 'ner_results_fine.json.bak', 'ner_results_medium.json',
+               'ner_results_fine_CRF.json', 'ner_results_fine_.json', 'ner_results_fine_a-b.json'):
+        assert parse(fn) is None
+    # every name a run can write reads back
+    for protocol in ('random_split_fixed', 'random_split_vary', 'leave_one_paper_out'):
+        for variant in ('baseline', 'cw', 'crf', 'm100', 'cw_m100', 'crf_m100'):
+            fn = f'ner_results_coarse{nb.result_suffix(protocol, variant)}.json'
+            assert parse(fn) == ('coarse', protocol, variant)
+
+
+def test_resume_isolation_for_seed_offset_and_predictions(tmp_path):
+    path = tmp_path / 'ner_results_fine_random_split_vary_crf_m100.json'
+    runs = [{'run_id': 'seed0', 'test_pred': ['O']}, {'run_id': 'seed1'}]   # seed1: no predictions
+
+    def write(config):
+        path.write_text(json.dumps({'labels': ['A'], 'model': 'm', 'variant': 'crf_m100',
+                                    'config': config, 'runs': runs}))
+
+    def resumable(*args, **kwargs):
+        return nb.resumable_runs(str(path), ['A'], 'm', 'crf_m100', *args, **kwargs)
+
+    write({'seed_offset': 100})
+    assert resumable(100) == runs
+    assert resumable(200) == [] and resumable(0) == [] and resumable() == []
+    assert resumable(100, save_predictions=True) == runs[:1]
+    assert resumable(200, save_predictions=True) == []
+    write({'seed_offset': 100, 'save_predictions': False})
+    assert resumable(100, save_predictions=True) == runs[:1]      # the stored flag is no matter
+    # files written before offsets existed have none stored: offset 0
+    write({})
+    assert resumable() == runs and resumable(100) == []
+    path.write_text('{"labels": ["A"], "model": "m", "variant": "crf_m100", "runs": []}')
+    assert resumable() == [] and resumable(100) == []
+
+
+def test_seed_offset_needs_a_tag_and_tags_are_checked(capsys):
+    args = nb.parse_args(['--crf', '--tag', 'm100', '--seed-offset', '100', '--save-predictions'])
+    assert (args.tag, args.seed_offset, args.save_predictions) == ('m100', 100, True)
+    args = nb.parse_args([])
+    assert (args.tag, args.seed_offset, args.save_predictions) == (None, 0, False)
+    assert nb.parse_args(['--tag', 'rerun']).seed_offset == 0      # a tag alone is fine
+    assert nb.parse_args(['--seed-offset', '0']).tag is None
+    for argv in (['--seed-offset', '100'], ['--crf', '--seed-offset', '-1']):
+        with pytest.raises(SystemExit):
+            nb.parse_args(argv)
+        assert '--seed-offset needs --tag' in capsys.readouterr().err
+    for tag in ('M100', 'm_100', 'm-100', 'm 100', ''):
+        with pytest.raises(SystemExit):
+            nb.parse_args(['--tag', tag])
+        assert 'invalid tag' in capsys.readouterr().err
+    # a bare tag must not take the name of a plain variant: that file holds other results
+    for tag in ('baseline', 'cw', 'crf'):
+        with pytest.raises(SystemExit):
+            nb.parse_args(['--tag', tag])
+        assert 'would overwrite' in capsys.readouterr().err
+    assert nb.parse_args(['--crf', '--tag', 'cw']).tag == 'cw'      # crf_cw is a variant of its own
+    # model seeds are seed + offset and set_seed rejects negative ones
+    with pytest.raises(SystemExit):
+        nb.parse_args(['--tag', 'x', '--seed-offset', '-1'])
+    assert 'must not be negative' in capsys.readouterr().err
+    args = nb.parse_args(['--tag', 'x', '--seeds', '5', '6', '--seed-offset', '-5'])
+    assert args.seed_offset == -5
 
 
 def test_compare_to_baseline_pairs_runs_by_id():
@@ -89,7 +218,6 @@ def test_compare_to_baseline_pairs_runs_by_id():
 
 
 def test_compare_all_writes_comparisons(tmp_path):
-    import json
     base = {'protocol': 'random_split_vary', 'runs': [_run('seed0', 70.0, 72.0, 60.0, 69.0),
                                                       _run('seed1', 74.0, 76.0, 64.0, 73.0)]}
     var = {'protocol': 'random_split_vary', 'runs': [_run('seed0', 72.0, 73.0, 61.0, 70.0),
@@ -101,7 +229,48 @@ def test_compare_all_writes_comparisons(tmp_path):
     assert list(comps) == ['ner_results_fine_random_split_vary_cw']   # no coarse baseline
     c = comps['ner_results_fine_random_split_vary_cw']
     assert (c['variant'], c['granularity'], c['n_pairs']) == ('cw', 'fine', 2)
+    assert c['reference'] == 'baseline' and 'baseline_file' not in c
+    assert c['reference_file'] == 'ner_results_fine_random_split_vary.json'
     assert c['micro']['per_run'] == [2.0, 1.0]
+    assert json.loads((tmp_path / 'ner_comparisons.json').read_text()) == comps
+
+
+def test_compare_all_pairs_tagged_variants_with_their_reference(tmp_path, capsys):
+    vary, lopo = 'ner_results_fine_random_split_vary', 'ner_results_fine_leave_one_paper_out'
+
+    def write(name, run_id, micro, protocol, **extra):
+        run = dict(_run(run_id, micro, micro + 2, micro - 10, micro - 1), **extra)
+        (tmp_path / f'{name}.json').write_text(json.dumps({'protocol': protocol, 'runs': [run]}))
+
+    write(vary, 'seed0', 70.0, 'random_split_vary')
+    write(vary + '_crf', 'seed0', 72.0, 'random_split_vary')
+    write(vary + '_crf_m100', 'seed0', 75.0, 'random_split_vary', seed=100)  # same split, new seed
+    write(vary + '_x2', 'seed0', 73.0, 'random_split_vary')                  # bare tag
+    write(vary + '_crf_m100_smoke16', 'seed0', 99.0, 'random_split_vary')
+    write(vary + '_smoke16', 'seed0', 99.0, 'random_split_vary')
+    write(lopo, 'a.conll', 60.0, 'leave_one_paper_out')
+    write(lopo + '_cw', 'a.conll', 61.0, 'leave_one_paper_out')
+    write(lopo + '_cw_m100', 'a.conll', 64.0, 'leave_one_paper_out')
+    write('ner_results_coarse_crf_m100', 'seed0', 80.0, 'random_split_fixed')   # no coarse crf file
+    (tmp_path / 'ner_comparisons.json').write_text('{"stale": {}}')
+    comps = nb.compare_all(str(tmp_path))
+    # the baselines, the smoke files and the old comparisons are not compared
+    assert list(comps) == [lopo + '_cw', lopo + '_cw_m100', vary + '_crf', vary + '_crf_m100',
+                           vary + '_x2']
+    ref = {k: (c['variant'], c['reference'], c['reference_file']) for k, c in comps.items()}
+    assert ref == {lopo + '_cw': ('cw', 'baseline', lopo + '.json'),
+                   lopo + '_cw_m100': ('cw_m100', 'cw', lopo + '_cw.json'),
+                   vary + '_crf': ('crf', 'baseline', vary + '.json'),
+                   vary + '_crf_m100': ('crf_m100', 'crf', vary + '_crf.json'),
+                   vary + '_x2': ('x2', 'baseline', vary + '.json')}
+    diffs = {k: c['micro']['per_run'] for k, c in comps.items()}
+    assert diffs == {lopo + '_cw': [1.0], lopo + '_cw_m100': [3.0], vary + '_crf': [2.0],
+                     vary + '_crf_m100': [3.0], vary + '_x2': [3.0]}
+    assert comps[vary + '_crf_m100']['run_ids'] == ['seed0']
+    assert all('baseline_file' not in c and c['granularity'] == 'fine' for c in comps.values())
+    assert comps[lopo + '_cw']['protocol'] == 'leave_one_paper_out'
+    assert 'ner_results_coarse_crf_m100.json: no reference file ner_results_coarse_crf.json' \
+        in capsys.readouterr().out
     assert json.loads((tmp_path / 'ner_comparisons.json').read_text()) == comps
 
 
@@ -121,3 +290,152 @@ def test_random_split_protocol():
     assert not set(tr) & set(va) and not set(tr) & set(te) and not set(va) & set(te)
     assert nb.random_split(476, 0) == (tr, va, te)
     assert nb.random_split(476, 1) != (tr, va, te)
+
+
+# --- runs with a tiny random model (torch, transformers, seqeval and scipy; skipped without)
+TOY_WORDS = ['steel', 'alloy', 'tensile', 'strength', 'yield', 'room', 'temperature', 'high']
+LEGACY_RUN_KEYS = {'f1', 'precision', 'recall', 'f1_strict', 'per_class', 'seed', 'best_epoch',
+                   'val_f1', 'n_train', 'n_val', 'n_test', 'history', 'run_id', 'runtime_sec'}
+PREDICTION_KEYS = {'test_index', 'test_gold', 'test_pred'}
+
+
+def _toy_ner_corpus():
+    """24 sentences of four 'papers'; the extra words make every length different.
+
+    Each sentence has two MAT, two PROP and one COND entity, so `--top-k 2` drops COND.
+    """
+    data = []
+    for p, doc in enumerate(('a.conll', 'b.conll', 'c.conll', 'd.conll')):
+        for k in range(6):
+            extra = 6 * p + k
+            data.append((['steel', 'alloy', 'tensile', 'strengths', 'yield', 'room',
+                          'temperature'] + ['high'] * extra,
+                         ['B-MAT', 'B-MAT', 'B-PROP', 'I-PROP', 'B-PROP', 'B-COND',
+                          'I-COND'] + ['O'] * extra, doc))
+    return data
+
+
+@pytest.fixture(scope='module')
+def tiny_model(tmp_path_factory):
+    """A tiny random BERT with a word-piece vocabulary ('strengths' is two subwords)."""
+    torch = pytest.importorskip('torch')
+    transformers = pytest.importorskip('transformers')
+    pytest.importorskip('seqeval')
+    pytest.importorskip('scipy')
+    path = tmp_path_factory.mktemp('tiny_bert')
+    vocab = ['[PAD]', '[UNK]', '[CLS]', '[SEP]', '[MASK]', *TOY_WORDS, '##s']
+    (path / 'vocab.txt').write_text('\n'.join(vocab) + '\n')
+    transformers.BertTokenizerFast(str(path / 'vocab.txt')).save_pretrained(path)
+    torch.manual_seed(0)
+    transformers.BertModel(transformers.BertConfig(
+        vocab_size=len(vocab), hidden_size=16, num_hidden_layers=1, num_attention_heads=2,
+        intermediate_size=32, max_position_embeddings=64)).save_pretrained(path)
+    return str(path)
+
+
+@pytest.fixture
+def tiny_run(tiny_model, tmp_path, monkeypatch):
+    """run(*flags): ner_baseline.run on the toy corpus (two classes kept) in tmp_path/ner."""
+    monkeypatch.setattr(nb, 'PROCESSED_DIR', str(tmp_path))
+    monkeypatch.setattr(nb, 'load_split_corpus', lambda granularity: _toy_ner_corpus())
+
+    def run(*flags):
+        nb.run(nb.parse_args(['--granularity', 'fine', '--top-k', '2', '--model', tiny_model,
+                              '--epochs', '1', '--threads', '1', '--device', 'cpu', *flags]))
+    return run
+
+
+def _load(tmp_path, name):
+    return json.loads((tmp_path / 'ner' / name).read_text())
+
+
+def _toy_data():
+    """The toy corpus as `run` sees it: tags outside the kept classes mapped to O."""
+    corpus = _toy_ner_corpus()
+    labels, _ = nb.select_labels(corpus, 2)
+    return labels, [(t, nb.restrict_tags(g, set(labels)), d) for t, g, d in corpus]
+
+
+def test_run_stores_predictions_and_offsets_only_the_model_seed(tiny_run, tmp_path):
+    tiny_run('--vary-split', '--seeds', '0', '1', '--crf', '--tag', 't1', '--seed-offset', '100',
+             '--save-predictions')
+    res = _load(tmp_path, 'ner_results_fine_random_split_vary_crf_t1.json')
+    labels, data = _toy_data()
+    assert labels == ['MAT', 'PROP']
+    assert (res['variant'], res['protocol']) == ('crf_t1', 'random_split_vary')
+    assert (res['config']['tag'], res['config']['seed_offset']) == ('t1', 100)
+    assert [r['run_id'] for r in res['runs']] == ['seed0', 'seed1']      # run ids ignore the offset
+    assert [r['seed'] for r in res['runs']] == [100, 101]                # the model seed
+    for run, split_seed in zip(res['runs'], (0, 1)):                     # ... and so does the split
+        index = run['test_index']
+        assert set(run) == LEGACY_RUN_KEYS | PREDICTION_KEYS
+        assert index == nb.random_split(len(data), split_seed)[2]
+        assert run['n_test'] == len(index) == len(run['test_gold']) == len(run['test_pred'])
+        # gold tags are those of the corpus at test_index, after restrict_tags (no COND left)
+        assert run['test_gold'] == [' '.join(data[i][1]) for i in index]
+        assert not any('COND' in gold for gold in run['test_gold'])
+        # one predicted tag per word, from the kept classes (also for 'strengths', 2 subwords)
+        assert all(len(pred.split()) == len(data[i][0]) for pred, i in zip(run['test_pred'], index))
+        assert set(' '.join(run['test_pred']).split()) <= {
+            'O', 'B-MAT', 'I-MAT', 'B-PROP', 'I-PROP'}
+
+
+def test_leave_one_paper_out_run_stores_the_held_out_paper(tiny_run, tmp_path):
+    tiny_run('--leave-one-paper-out', '--seeds', '3', '--tag', 't1', '--seed-offset', '10',
+             '--save-predictions')
+    res = _load(tmp_path, 'ner_results_fine_leave_one_paper_out_t1.json')
+    _, data = _toy_data()
+    assert res['variant'] == 't1'                                        # a bare tag, no cw / crf
+    assert [r['run_id'] for r in res['runs']] == ['a.conll', 'b.conll', 'c.conll', 'd.conll']
+    assert {r['seed'] for r in res['runs']} == {13}                      # seeds[0] + offset
+    for run in res['runs']:
+        index = run['test_index']
+        assert index == [i for i, x in enumerate(data) if x[2] == run['run_id']]
+        assert run['test_gold'] == [' '.join(data[i][1]) for i in index]
+        assert [len(p.split()) for p in run['test_pred']] == [len(data[i][0]) for i in index]
+
+
+def test_fixed_split_run_keeps_the_split_seed_under_an_offset(tiny_run, tmp_path):
+    tiny_run('--split-seed', '3', '--seeds', '0', '1', '--tag', 't1', '--seed-offset', '7',
+             '--save-predictions')
+    res = _load(tmp_path, 'ner_results_fine_t1.json')
+    _, data = _toy_data()
+    assert [(r['run_id'], r['seed']) for r in res['runs']] == [('seed0', 7), ('seed1', 8)]
+    assert all(r['test_index'] == nb.random_split(len(data), 3)[2] for r in res['runs'])
+
+
+def test_run_resumes_only_matching_offsets_and_predictions(tiny_run, tmp_path, monkeypatch):
+    calls = []
+    train_one = nb.train_one
+
+    def counting(seed, *args, **kwargs):
+        calls.append(seed)
+        return train_one(seed, *args, **kwargs)
+    monkeypatch.setattr(nb, 'train_one', counting)
+    baseline = tmp_path / 'ner' / 'ner_results_fine.json'
+
+    tiny_run('--seeds', '0', '1')                  # the default path: fixed split, no extra fields
+    res = _load(tmp_path, baseline.name)
+    assert (res['variant'], res['protocol']) == ('baseline', 'random_split_fixed')
+    assert [(r['run_id'], r['seed']) for r in res['runs']] == [('seed0', 0), ('seed1', 1)]
+    assert all(set(r) == LEGACY_RUN_KEYS for r in res['runs'])
+    assert res['config']['seed_offset'] == 0 and calls == [0, 1]
+    tiny_run('--seeds', '0', '1')                  # finished runs are skipped ...
+    assert calls == [0, 1]
+    tiny_run('--seeds', '0', '1', '--save-predictions')   # ... unless they lack predictions
+    assert calls == [0, 1, 0, 1]
+    assert all(PREDICTION_KEYS <= set(r) for r in _load(tmp_path, baseline.name)['runs'])
+    tiny_run('--seeds', '0', '1', '--save-predictions')
+    assert calls == [0, 1, 0, 1]
+
+    before = baseline.read_text()
+    tiny_run('--seeds', '0', '1', '--tag', 't2', '--seed-offset', '5')   # its own file
+    assert calls[4:] == [5, 6] and baseline.read_text() == before
+    tagged = _load(tmp_path, 'ner_results_fine_t2.json')
+    assert [(r['run_id'], r['seed']) for r in tagged['runs']] == [('seed0', 5), ('seed1', 6)]
+    tiny_run('--seeds', '0', '1', '--tag', 't2', '--seed-offset', '5')   # same offset: reused
+    assert calls[4:] == [5, 6]
+    tiny_run('--seeds', '0', '1', '--tag', 't2', '--seed-offset', '7')   # other offset: not mixed
+    assert calls[4:] == [5, 6, 7, 8]
+    runs = _load(tmp_path, 'ner_results_fine_t2.json')['runs']
+    assert [(r['run_id'], r['seed']) for r in runs] == [('seed0', 7), ('seed1', 8)]

@@ -3,7 +3,8 @@
     "variant": "crf",
     "granularity": "coarse",
     "protocol": "leave_one_paper_out",
-    "baseline_file": "ner_results_coarse_leave_one_paper_out.json",
+    "reference": "baseline",
+    "reference_file": "ner_results_coarse_leave_one_paper_out.json",
     "n_pairs": 4,
     "run_ids": [
       "10.1007_s11340-021-00758-x.conll",
@@ -68,7 +69,8 @@
     "variant": "cw",
     "granularity": "coarse",
     "protocol": "leave_one_paper_out",
-    "baseline_file": "ner_results_coarse_leave_one_paper_out.json",
+    "reference": "baseline",
+    "reference_file": "ner_results_coarse_leave_one_paper_out.json",
     "n_pairs": 4,
     "run_ids": [
       "10.1007_s11340-021-00758-x.conll",
@@ -133,7 +135,8 @@
     "variant": "crf",
     "granularity": "coarse",
     "protocol": "random_split_vary",
-    "baseline_file": "ner_results_coarse_random_split_vary.json",
+    "reference": "baseline",
+    "reference_file": "ner_results_coarse_random_split_vary.json",
     "n_pairs": 5,
     "run_ids": [
       "seed0",
@@ -203,7 +206,8 @@
     "variant": "cw",
     "granularity": "coarse",
     "protocol": "random_split_vary",
-    "baseline_file": "ner_results_coarse_random_split_vary.json",
+    "reference": "baseline",
+    "reference_file": "ner_results_coarse_random_split_vary.json",
     "n_pairs": 5,
     "run_ids": [
       "seed0",
@@ -273,7 +277,8 @@
     "variant": "crf",
     "granularity": "fine",
     "protocol": "leave_one_paper_out",
-    "baseline_file": "ner_results_fine_leave_one_paper_out.json",
+    "reference": "baseline",
+    "reference_file": "ner_results_fine_leave_one_paper_out.json",
     "n_pairs": 4,
     "run_ids": [
       "10.1007_s11340-021-00758-x.conll",
@@ -338,7 +343,8 @@
     "variant": "cw",
     "granularity": "fine",
     "protocol": "leave_one_paper_out",
-    "baseline_file": "ner_results_fine_leave_one_paper_out.json",
+    "reference": "baseline",
+    "reference_file": "ner_results_fine_leave_one_paper_out.json",
     "n_pairs": 4,
     "run_ids": [
       "10.1007_s11340-021-00758-x.conll",
@@ -403,7 +409,8 @@
     "variant": "crf",
     "granularity": "fine",
     "protocol": "random_split_vary",
-    "baseline_file": "ner_results_fine_random_split_vary.json",
+    "reference": "baseline",
+    "reference_file": "ner_results_fine_random_split_vary.json",
     "n_pairs": 5,
     "run_ids": [
       "seed0",
@@ -473,7 +480,8 @@
     "variant": "cw",
     "granularity": "fine",
     "protocol": "random_split_vary",
-    "baseline_file": "ner_results_fine_random_split_vary.json",
+    "reference": "baseline",
+    "reference_file": "ner_results_fine_random_split_vary.json",
     "n_pairs": 5,
     "run_ids": [
       "seed0",

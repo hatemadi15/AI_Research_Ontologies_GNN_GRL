@@ -38,13 +38,21 @@ finished protocol only refreshes its `summary` (mean, population SD and 95%
 Student-t CI over runs for micro, strict micro, macro and weighted F1).
 
 Training variants (ROADMAP P1) write their own files with a `_cw` or `_crf`
-suffix; `--compare` pairs them with the baseline run by run (same split and
-model seed) and writes ner_comparisons.json.
+suffix. `--tag NAME` appends a tag to the variant (`crf_m100`; a bare `m100`
+for the baseline). `--seed-offset N` (needs a tag) adds N to every model seed
+but keeps the data split and the run ids. `--save-predictions` stores per run
+the corpus positions of the test sentences and their gold and predicted tags.
+
+`--compare` pairs every variant file with a reference file of the same
+granularity and protocol, run by run (run_id), and writes ner_comparisons.json:
+`crf_<tag>` with the `crf` file, `cw_<tag>` with `cw`, anything else (`cw`,
+`crf`, a bare tag) with the baseline file.
 
 Usage:
   python ner_baseline.py --granularity fine --seeds 0 1 2 3 4
   python ner_baseline.py --granularity coarse --epochs 2 --max-train 32   # smoke test
   python ner_baseline.py --granularity fine --vary-split --class-weights
+  python ner_baseline.py --vary-split --crf --tag m100 --seed-offset 100 --save-predictions
   python ner_baseline.py --compare                                        # paired comparison
 """
 
@@ -196,6 +204,17 @@ def score(gold_tags, pred_tags):
     }
 
 
+def prediction_fields(test_index, test, test_pred):
+    """Per-sentence test predictions of a run (--save-predictions).
+
+    test_index: positions of the test sentences in the corpus; test_gold and
+    test_pred: their gold and predicted IOB2 tags, joined by single spaces.
+    """
+    return {'test_index': [int(i) for i in test_index],
+            'test_gold': [' '.join(tags) for _, tags, _ in test],
+            'test_pred': [' '.join(tags) for tags in test_pred]}
+
+
 # CRF head (--crf). Transitions start at zero and need far larger steps than the
 # encoder, so they get their own learning rate (100x the default encoder rate),
 # fixed in advance rather than tuned.
@@ -325,7 +344,12 @@ def class_weights(features, n_labels):
     return weights / weights.mean()
 
 
-def train_one(seed, train, val, test, labels, args, device):
+def train_one(seed, train, val, test, labels, args, device, test_index=None):
+    """Fine-tune and test once; `seed` is the model seed (--seed-offset included).
+
+    test_index (positions of `test` in the corpus) is stored with the
+    predictions when --save-predictions is set.
+    """
     import torch
     from transformers import (AutoModelForTokenClassification, AutoTokenizer,
                               get_linear_schedule_with_warmup, set_seed)
@@ -399,6 +423,8 @@ def train_one(seed, train, val, test, labels, args, device):
     result.update({'seed': seed, 'best_epoch': best[2], 'val_f1': best[0],
                    'n_train': len(train), 'n_val': len(val), 'n_test': len(test),
                    'history': history})
+    if getattr(args, 'save_predictions', False):
+        result.update(prediction_fields(test_index, test, test_pred))
     return result
 
 
@@ -410,31 +436,77 @@ F1_AVERAGES = {
     'weighted': lambda r: 100 * r['per_class']['weighted avg']['f1-score'],
 }
 
-# Results files of training variants: ner_results_<granularity>[_<protocol>]_<variant>.json
-VARIANT_FILE = re.compile(r'^ner_results_(fine|coarse)(_random_split_vary|_leave_one_paper_out)?'
-                          r'_(cw|crf)\.json$')
+# Results files: ner_results_<granularity>[_<protocol>][_<variant>].json. The protocol
+# part is absent for the fixed split, the variant part for the baseline. The protocol
+# is tried first, so the baseline file of a protocol never reads as a variant named
+# like the protocol.
+RESULT_FILE = re.compile(r'ner_results_(fine|coarse)(?:_(random_split_vary|leave_one_paper_out))?'
+                         r'(?:_([a-z0-9_]+))?\.json')
+PLAIN_VARIANTS = ('baseline', 'cw', 'crf')    # untagged variants: a bare tag must not reuse one
 
 
 def variant_name(args):
-    """Training variant of a run: 'baseline', 'cw' (class weights) or 'crf'."""
+    """Training variant of a run: 'baseline', 'cw' (class weights) or 'crf', then the tag.
+
+    A tag is appended with an underscore (crf_m100); the baseline is named by it alone.
+    """
     if getattr(args, 'crf', False):
-        return 'crf'
-    return 'cw' if args.class_weights else 'baseline'
+        name = 'crf'
+    else:
+        name = 'cw' if args.class_weights else 'baseline'
+    tag = getattr(args, 'tag', None)
+    if not tag:
+        return name
+    return tag if name == 'baseline' else f'{name}_{tag}'
 
 
-def resumable_runs(path, labels, model, variant):
+def reference_variant(variant):
+    """Variant that a variant is compared with ('baseline': the baseline file).
+
+    crf_<tag> is compared with crf and cw_<tag> with cw; cw, crf and a bare tag
+    with the baseline.
+    """
+    for base in ('crf', 'cw'):
+        if variant.startswith(f'{base}_'):
+            return base
+    return 'baseline'
+
+
+def result_suffix(protocol, variant):
+    """File-name part after the granularity (none for the fixed split and the baseline)."""
+    suffix = '' if protocol == 'random_split_fixed' else f'_{protocol}'
+    return suffix if variant == 'baseline' else f'{suffix}_{variant}'
+
+
+def parse_result_name(fn):
+    """(granularity, protocol, variant) of a results file name; None for other files.
+
+    The protocol is as in the results ('random_split_fixed' without a protocol
+    part) and the variant is 'baseline' for the baseline file of a protocol.
+    """
+    m = RESULT_FILE.fullmatch(fn)
+    if not m:
+        return None
+    return m.group(1), m.group(2) or 'random_split_fixed', m.group(3) or 'baseline'
+
+
+def resumable_runs(path, labels, model, variant, seed_offset=0, save_predictions=False):
     """Runs of an earlier invocation that this one may reuse.
 
-    Only runs with the same labels, model and training variant count; files
-    written before variants existed are baseline runs.
+    Only runs with the same labels, model, training variant and seed offset
+    count; files written before variants existed are baseline runs, and files
+    without a stored offset have offset 0. With `save_predictions`, runs that
+    did not store their predictions are not reused.
     """
     if not os.path.exists(path):
         return []
     with open(path) as f:
         previous = json.load(f)
     same = (previous.get('labels') == labels and previous.get('model') == model
-            and previous.get('variant', 'baseline') == variant)
-    return previous.get('runs', []) if same else []
+            and previous.get('variant', 'baseline') == variant
+            and previous.get('config', {}).get('seed_offset', 0) == seed_offset)
+    runs = previous.get('runs', []) if same else []
+    return [r for r in runs if 'test_pred' in r] if save_predictions else runs
 
 
 def summarize(results):
@@ -468,9 +540,11 @@ def compare_to_baseline(base, variant):
     """Paired differences (variant - baseline) over runs with the same run_id.
 
     Runs are paired by run_id (seed<k> for random splits, the held-out paper
-    for leave-one-paper-out), so both members of a pair share the split and the
-    model seed. For every F1 average: the per-run differences, their mean and
-    the 95% Student-t CI of the mean difference.
+    for leave-one-paper-out), so both members of a pair share the split (and
+    the model seed, unless one file used --seed-offset). `base` is the
+    reference results (the baseline, or crf / cw for tagged variants of those).
+    For every F1 average: the per-run differences, their mean and the 95%
+    Student-t CI of the mean difference.
     """
     base_runs = {r.get('run_id'): r for r in base['runs']}
     pairs = [(base_runs[r['run_id']], r) for r in variant['runs']
@@ -487,47 +561,59 @@ def compare_to_baseline(base, variant):
 
 
 def compare_all(directory):
-    """Pair every variant results file in `directory` with its baseline file.
+    """Pair every variant results file in `directory` with its reference file.
 
-    Writes <directory>/ner_comparisons.json and returns its content.
+    The reference (see reference_variant) has the same granularity and
+    protocol; smoke-test files and the baseline files themselves are not
+    compared. Writes <directory>/ner_comparisons.json and returns its content.
     """
     comparisons = {}
     for fn in sorted(os.listdir(directory)):
-        m = VARIANT_FILE.match(fn)
-        if not m:
+        parsed = parse_result_name(fn)
+        if parsed is None or parsed[2] == 'baseline' or 'smoke' in parsed[2]:
             continue
-        base_fn = f"ner_results_{m.group(1)}{m.group(2) or ''}.json"
-        if not os.path.exists(os.path.join(directory, base_fn)):
-            print(f"  {fn}: no baseline file {base_fn}, skipped")
+        granularity, protocol, variant = parsed
+        reference = reference_variant(variant)
+        ref_fn = f"ner_results_{granularity}{result_suffix(protocol, reference)}.json"
+        if not os.path.exists(os.path.join(directory, ref_fn)):
+            print(f"  {fn}: no reference file {ref_fn}, skipped")
             continue
-        with open(os.path.join(directory, base_fn)) as f:
-            base = json.load(f)
+        with open(os.path.join(directory, ref_fn)) as f:
+            ref = json.load(f)
         with open(os.path.join(directory, fn)) as f:
             var = json.load(f)
-        comp = compare_to_baseline(base, var)
+        comp = compare_to_baseline(ref, var)
         comparisons[fn[:-len('.json')]] = {
-            'variant': m.group(3), 'granularity': m.group(1),
-            'protocol': var.get('protocol'), 'baseline_file': base_fn, **comp}
+            'variant': variant, 'granularity': granularity,
+            'protocol': var.get('protocol'), 'reference': reference,
+            'reference_file': ref_fn, **comp}
         d = comp['micro']
-        print(f"  {fn}: micro F1 difference {d['mean_diff']:+.2f}, 95% CI {d['ci95']} "
-              f"over {comp['n_pairs']} paired runs")
+        print(f"  {fn}: micro F1 difference {d['mean_diff']:+.2f} vs {reference}, "
+              f"95% CI {d['ci95']} over {comp['n_pairs']} paired runs")
     with open(os.path.join(directory, 'ner_comparisons.json'), 'w') as f:
         json.dump(comparisons, f, indent=2)
     return comparisons
 
 
-def make_folds(data, args):
-    """[(name, train, val, test)] for the chosen protocol."""
+def make_folds(data, args, indices=False):
+    """[(name, train, val, test)] for leave-one-paper-out; None for random splits.
+
+    The parts are lists of data tuples, or of their positions in `data` when
+    `indices` is set (the test positions go with the stored predictions).
+    """
     if args.leave_one_paper_out:
         folds = []
         for doc in sorted({d for _, _, d in data}):
-            rest = [x for x in data if x[2] != doc]
+            rest = [i for i, x in enumerate(data) if x[2] != doc]
             order = list(range(len(rest)))
             random.Random(args.split_seed).shuffle(order)
             n_val = round(0.15 * len(rest))
             val = [rest[i] for i in order[:n_val]]
             train = [rest[i] for i in order[n_val:]]
-            folds.append((doc, train, val, [x for x in data if x[2] == doc]))
+            test = [i for i, x in enumerate(data) if x[2] == doc]
+            if not indices:
+                train, val, test = ([data[i] for i in part] for part in (train, val, test))
+            folds.append((doc, train, val, test))
         return folds
     return None
 
@@ -550,9 +636,7 @@ def run(args):
         protocol = 'leave_one_paper_out' if args.leave_one_paper_out else (
             'random_split_vary' if args.vary_split else 'random_split_fixed')
         variant = variant_name(args)
-        suffix = '' if protocol == 'random_split_fixed' else f'_{protocol}'
-        if variant != 'baseline':
-            suffix += f'_{variant}'
+        suffix = result_suffix(protocol, variant)
         if args.max_train:
             suffix += f'_smoke{args.max_train}'
         out_path = os.path.join(out_dir, f'ner_results_{granularity}{suffix}.json')
@@ -561,31 +645,33 @@ def run(args):
                    'paper_test_f1': PAPER_F1[granularity],
                    'config': {k: v for k, v in vars(args).items()
                               if k not in ('granularity', 'compare')},
-                   'runs': resumable_runs(out_path, labels, args.model, variant)}
+                   'runs': resumable_runs(out_path, labels, args.model, variant,
+                                          args.seed_offset, args.save_predictions)}
         done = {r.get('run_id') for r in results['runs']}
 
+        offset = f", seed offset {args.seed_offset}" if args.seed_offset else ''
         print(f"\n=== NER {granularity}: {len(data)} sentences, {len(labels)} classes, "
-              f"protocol {protocol}, variant {variant}, device {device} ===")
+              f"protocol {protocol}, variant {variant}{offset}, device {device} ===")
         if tie_info:
             print(f"  label cut tie: {tie_info}")
 
-        folds = make_folds(data, args)
+        folds = make_folds(data, args, indices=True)     # parts as positions in `data`
         if folds is None:
             folds = []
             for seed in args.seeds:
                 split_seed = seed if args.vary_split else args.split_seed
-                tr, va, te = random_split(len(data), split_seed)
-                folds.append((f'seed{seed}', [data[i] for i in tr],
-                              [data[i] for i in va], [data[i] for i in te]))
-        for run_id, train, val, test in folds:
+                folds.append((f'seed{seed}', *random_split(len(data), split_seed)))
+        for run_id, tr, va, te in folds:
             if run_id in done:
                 print(f"  {run_id}: already done, skipping")
                 continue
+            train, val, test = ([data[i] for i in part] for part in (tr, va, te))
             if args.max_train:
                 train = train[:args.max_train]
             seed = int(run_id[4:]) if run_id.startswith('seed') else args.seeds[0]
+            seed += args.seed_offset      # the model seed moves, the split and run_id do not
             start = time.time()
-            res = train_one(seed, train, val, test, labels, args, device)
+            res = train_one(seed, train, val, test, labels, args, device, test_index=te)
             res['run_id'] = run_id
             res['runtime_sec'] = round(time.time() - start, 1)
             results['runs'].append(res)
@@ -609,7 +695,14 @@ def run(args):
         print(f"Saved {out_path}")
 
 
-def main():
+def tag_name(value):
+    """argparse type of --tag: lowercase letters and digits (the tag goes into file names)."""
+    if not re.fullmatch(r'[a-z0-9]+', value):
+        raise argparse.ArgumentTypeError(f"invalid tag {value!r}: use lowercase letters and digits")
+    return value
+
+
+def parse_args(argv=None):
     parser = argparse.ArgumentParser(description='MatSciBERT NER baseline')
     parser.add_argument('--granularity', choices=['fine', 'coarse', 'both'], default='both')
     parser.add_argument('--seeds', type=int, nargs='+', default=[0, 1, 2, 3, 4])
@@ -630,6 +723,15 @@ def main():
     variant.add_argument('--crf', action='store_true',
                          help='linear-chain CRF head with IOB2 constraints and Viterbi '
                               'decoding (files tagged _crf)')
+    parser.add_argument('--tag', type=tag_name, default=None, metavar='NAME',
+                        help='appended to the variant name and the results file (crf + m100: '
+                             'crf_m100; baseline + m100: m100); lowercase letters and digits')
+    parser.add_argument('--seed-offset', type=int, default=0,
+                        help='added to every model seed; the data split and the run ids do '
+                             'not change, so runs still pair with the default ones (needs --tag)')
+    parser.add_argument('--save-predictions', action='store_true',
+                        help='store test_index, test_gold and test_pred (space-joined IOB2 '
+                             'tags per test sentence) in every run')
     parser.add_argument('--max-train', type=int, default=0,
                         help='limit training sentences (smoke tests)')
     parser.add_argument('--device', default=None)
@@ -637,9 +739,22 @@ def main():
     parser.add_argument('--compare', nargs='?', const=os.path.join(PROCESSED_DIR, 'ner'),
                         default=None, metavar='DIR',
                         help='no training: pair every variant results file in DIR '
-                             '(default: <PROCESSED_DIR>/ner) with its baseline and '
-                             'write ner_comparisons.json')
-    args = parser.parse_args()
+                             '(default: <PROCESSED_DIR>/ner) with its reference (the baseline; '
+                             'crf / cw for tagged variants of those) and write '
+                             'ner_comparisons.json')
+    args = parser.parse_args(argv)
+    if args.seed_offset and not args.tag:
+        parser.error('--seed-offset needs --tag, so that offset runs get their own results file')
+    if args.tag and variant_name(args) in PLAIN_VARIANTS:
+        parser.error(f'--tag {args.tag} would overwrite the results of the '
+                     f'{variant_name(args)} variant')
+    if min(args.seeds) + args.seed_offset < 0:
+        parser.error('model seeds (seed + --seed-offset) must not be negative')
+    return args
+
+
+def main():
+    args = parse_args()
     if args.compare:
         compare_all(args.compare)
         return
