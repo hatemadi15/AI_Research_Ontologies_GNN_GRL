@@ -300,6 +300,10 @@ CI (GitHub Actions) runs ruff and the test suite on every push and pull request.
 The CRF tests (`tests/test_ner_crf.py`) need torch, so they are skipped where it
 is missing, as in CI; run them locally after installing torch.
 
+After adding or changing files in `results/`, regenerate the results sections of
+this README and the ROADMAP with `python src/graph/report_results.py`. The test
+suite fails while they are out of date; `--check` prints the difference.
+
 ## Next steps
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the prioritised plan to raise the
