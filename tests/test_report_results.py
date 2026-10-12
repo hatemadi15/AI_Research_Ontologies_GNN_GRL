@@ -207,6 +207,29 @@ def test_week2_verdict_lines(tmp_path):
     assert 'week-2' not in roadmap
 
 
+def test_ensemble_vs_its_members_bullet(tmp_path):
+    ws = Workspace(tmp_path)
+    ws.compare('crf_ens3', 'fine', 'random_split_vary', micro=(3.39, -1.36, 8.14))
+    start = '* NER, 3-model ensemble vs the mean'
+    readme, _ = ws.generate()
+    assert bullets(readme, start) == []                     # no ensemble results file yet
+
+    def ens_file(granularity, protocol, n_runs, gain):
+        (ws.results / rr.ner_file(granularity, protocol, 'crf_ens3')).write_text(json.dumps({
+            'paper_test_f1': 69.92,
+            'summary': {'n_runs': n_runs, 'micro': {'mean': 79.76, 'ci95': [76.14, 83.38]},
+                        'vs_member_mean': stat(*gain)}}))
+    ens_file('fine', 'random_split_vary', 5, (2.47, 1.19, 3.75))
+    ens_file('coarse', 'random_split_vary', 3, (1.0, -1.0, 3.0))    # incomplete: left out
+    ens_file('fine', 'leave_one_paper_out', 4, (1.5, -0.5, 3.5))
+    readme, roadmap = ws.generate()
+    assert bullets(readme, start) == [
+        "* NER, 3-model ensemble vs the mean of its own members on the same split (exploratory, "
+        "not pre-registered; no single reference run enters): fine-grained +2.47 [+1.19, +3.75] "
+        "across the 5 random splits; fine-grained +1.50 [-0.50, +3.50] leaving one paper out."]
+    assert start not in roadmap
+
+
 @pytest.mark.parametrize('micro, word', [
     ((1.0, 0.01, 2.0), 'improves'),
     ((1.0, 0.0, 2.0), 'no significant change'),      # the interval must lie entirely above 0

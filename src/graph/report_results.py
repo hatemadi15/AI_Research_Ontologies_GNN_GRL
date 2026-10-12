@@ -581,7 +581,32 @@ def ner_notes(res):
     note += crf_explanation(res, comps, vary)
     for var, name in WEEK2_VARIANTS.items():
         note += verdict_line(res, comps, var, name, 'crf', 'the CRF head')
+    note += ensemble_member_note(res)
     return note
+
+
+def ensemble_member_note(res):
+    """Exploratory bullet: the 3-model vote against the mean of its own members.
+
+    Read from `summary.vs_member_mean` of the crf_ens3 results files that have all
+    their runs ('' if none has).
+    """
+    parts = []
+    for protocol, phrase in (('random_split_vary', 'across the 5 random splits'),
+                             ('leave_one_paper_out', 'leaving one paper out')):
+        found = []
+        for g in GRANULARITIES:
+            r = res.get(ner_file(g, protocol, 'crf_ens3'))
+            gain = dig(r, 'summary', 'vs_member_mean')
+            if gain and has_runs(r, REQUIRED_PAIRS[protocol]):
+                found.append(f"{g}-grained {delta_cell(gain)}")
+        if found:
+            parts.append(f"{'; '.join(found)} {phrase}")
+    if not parts:
+        return ''
+    return ("* NER, 3-model ensemble vs the mean of its own members on the same split "
+            "(exploratory, not pre-registered; no single reference run enters): "
+            + '; '.join(parts) + ".\n")
 
 
 # --------------------------------------------------------------------------------

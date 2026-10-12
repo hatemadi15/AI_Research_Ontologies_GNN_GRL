@@ -457,6 +457,10 @@ def test_end_to_end_results_schema(tmp_path, capsys):
     assert res['test_f1_mean'] == pytest.approx(83.335, abs=0.01)
     assert {'micro', 'micro_strict', 'macro', 'weighted'} <= set(s)
     assert s['micro']['ci95'][0] < s['micro']['mean'] < s['micro']['ci95'][1]
+    # the vote minus the mean of its members, run by run: 100 - 76.19, 66.67 - 49.20
+    gain = s['vs_member_mean']
+    assert gain['per_run'] == [23.81, 17.47] and gain['mean_diff'] == 20.64
+    assert gain['ci95'][0] < gain['mean_diff'] < gain['ci95'][1]
     # the printed report: a line per run and the micro F1 with its CI
     printed = capsys.readouterr().out
     assert 'seed0: ensemble F1 100.00' in printed and 'members 85.71 57.14 85.71' in printed
@@ -479,6 +483,8 @@ def test_ensemble_of_identical_members_reproduces_the_member(tmp_path, capsys):
         for key in ('f1', 'precision', 'recall', 'f1_strict', 'per_class'):
             assert run[key] == own[key]
         assert run['member_f1'] == [own['f1']] * 3
+    assert res['summary']['vs_member_mean'] == {'mean_diff': 0.0, 'ci95': [0.0, 0.0],
+                                                'per_run': [0.0, 0.0]}
     warnings = [ln for ln in capsys.readouterr().err.splitlines() if ln.startswith('warning:')]
     assert len(warnings) == 3 and NAMES[0] in warnings[0]   # all three pairs are identical
 

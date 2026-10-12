@@ -25,7 +25,9 @@ against a single model, run by run (same run_id, same test sentences).
     members' variant without its m<N> tag plus ens<k>: crf_m0, crf_m100,
     crf_m200 give crf_ens3. Every run adds n_members, member_f1,
     member_f1_strict and invalid_i_tags to the seqeval metrics; the summary is
-    that of ner_baseline.summarize.
+    that of ner_baseline.summarize plus `vs_member_mean`: the vote's micro F1
+    minus the mean of its members', per run, with its mean and 95% CI
+    (exploratory: what the vote adds over one model of the same kind).
 
 Usage:
   python ner_ensemble.py --members FILE FILE FILE [--out PATH]
@@ -40,6 +42,7 @@ import statistics
 import sys
 from collections import Counter
 
+import metrics
 from ner_baseline import score, summarize
 
 VOTING = 'entity_strict_majority'
@@ -256,6 +259,19 @@ def ensemble_run(run_id, runs):
     return res
 
 
+def member_gain(runs):
+    """Micro F1 of the vote minus the mean of its members' micro F1, run by run.
+
+    `ner_baseline.py --compare` pairs the ensemble with a single reference model;
+    this pairs it with its own members on the same test sentences, so a lucky or
+    unlucky reference run does not enter. Exploratory, not part of the decision rule.
+    """
+    diffs = [r['f1'] - statistics.fmean(r['member_f1']) for r in runs]
+    return {'mean_diff': round(statistics.fmean(diffs), 2),
+            'ci95': [round(x, 2) for x in metrics.mean_ci(diffs)['ci']],
+            'per_run': [round(d, 2) for d in diffs]}
+
+
 def combine(members, names):
     """Results (ner_baseline schema) of the majority-vote ensemble of the parsed member files."""
     check_members(members, names)
@@ -268,7 +284,10 @@ def combine(members, names):
                'label_tie': first['label_tie'], 'paper_test_f1': first['paper_test_f1'],
                'config': {'members': list(names), 'voting': VOTING, 'k': len(members)},
                'runs': [ensemble_run(run_id, [b[run_id] for b in by_id]) for run_id in by_id[0]]}
-    return summarize(results)
+    summarize(results)
+    if results['runs']:
+        results['summary']['vs_member_mean'] = member_gain(results['runs'])
+    return results
 
 
 def run(paths, out=None):
