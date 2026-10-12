@@ -243,6 +243,42 @@ chance at class level. For a Task C-style result:
 | Week | Work | Exit criterion |
 |---|---|---|
 | 1 | Done: class weights (no significant change) and CRF (significant gain in all four comparisons), P1 items 3–4 | Met by the CRF head |
-| 2 | Domain-adaptive pre-training + hierarchy-aware multi-task NER, ensembles, all with `--crf` | A paired gain over the CRF results on the varied splits (95% CI above 0), also measured leaving one paper out |
+| 2 | Multi-task NER (fine + coarse heads), domain-adaptive pre-training and ensembles, in that order, all with `--crf` (protocol below) | A paired gain over the CRF results on the varied splits (95% CI above 0), also measured leaving one paper out |
 | 3 | Context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | Typing accuracy above the hybrid + LLM baseline (§1) |
 | 4 | Class-level taxonomy (LLM or cross-encoder + arborescence); relation annotation pilot | First class-level taxonomy F1 above chance; relation guidelines |
+
+### Week 2 protocol (fixed before any run)
+
+The reference is the CRF head (`--crf`) on the same splits and model seeds:
+the 5 random splits (`--vary-split`) and the 4 held-out papers. Each variant
+changes one thing; every other setting is that of the CRF runs.
+
+1. **Multi-task training** (`--crf --multi-task`, P1 item 2).
+   - One MatSciBERT encoder with a CRF head per granularity. The loss is the
+     fine NLL plus the coarse NLL, weighted equally.
+   - Each head trains on exactly the sentences and tags of its single-task
+     run. The fine and coarse files tokenise 15 of the 476 sentences
+     differently; those enter as two examples, each labelled for one head.
+   - Each granularity's test score uses the epoch with its best validation
+     F1, as in the single-task runs. One run gives both granularities.
+2. **Domain-adaptive pre-training** (`dapt_mlm.py`, then
+   `--crf --model <checkpoint>`, P1 item 5).
+   - Continued masked-LM training of MatSciBERT on
+     `data/raw/dataset/pubmed_sentences.txt`. Duplicates and every sentence
+     that shares a word 8-gram with MaterioMiner text are dropped first, so
+     no evaluation text is seen.
+   - 15% masking (80/10/10), lr 5e-5, batch 32, at most 128 tokens,
+     3 epochs; the last checkpoint is used. 5% of the sentences are held out
+     to report MLM perplexity.
+3. **Ensembles** (`ner_ensemble.py`, P1 item 8).
+   - Three CRF models per split: model seeds K, K + 100 and K + 200 on
+     split K, and seeds 0, 100 and 200 for each held-out paper.
+   - Entity-level majority vote: an entity is kept if at least 2 of the 3
+     models predict the same span and type.
+
+Decision rule, as in week 1: a variant improves on the CRF head for a
+granularity only if the 95% CI of the mean paired micro-F1 difference over
+the 5 random splits lies above 0. The same comparison over the 4 held-out
+papers is reported as out-of-distribution robustness, and strict IOB2 and
+macro F1 are reported alongside. Results are reported in the order above;
+runs may overlap when CPU is free.
