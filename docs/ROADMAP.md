@@ -162,16 +162,17 @@ The largest remaining gap is out of distribution (item 9).
    5.51 (`results/dapt_mlm.json`).
 
    Fine-tuned with `--crf` from this checkpoint, against the CRF head on the
-   same splits and model seeds: no significant change across the 5 random
-   splits, so it is not adopted under the pre-registered rule.
+   same splits and model seeds: no significant change in any of the four
+   paired comparisons, so it is not adopted.
 
    | Micro F1 Δ [95% CI] | Fine-grained | Coarse-grained |
    |---|---|---|
    | 5 random splits | +0.68 [−2.55, +3.90] | −0.07 [−3.01, +2.86] |
-   | Leaving one paper out | running | running |
+   | Leaving one paper out | −0.91 [−3.13, +1.31] | −1.06 [−3.25, +1.12] |
 
-   The lower perplexity on PubMed text did not carry over to MaterioMiner.
-   The second corpus named above, open-access fatigue papers, was not used.
+   The lower perplexity on PubMed text did not carry over to MaterioMiner;
+   on unseen papers 6 of the 8 differences are negative. The second corpus
+   named above, open-access fatigue papers, was not used.
 6. **Label semantics.** Bi-encoder span–type matching (BINDER, GLiNER-style)
    with the 420 MMO `skos:definition`s as type descriptions. This helps rare
    and unseen classes, and it supports the full 177-class setting, not just
