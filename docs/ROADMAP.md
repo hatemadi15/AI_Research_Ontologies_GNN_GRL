@@ -99,16 +99,18 @@ The largest remaining gap is out of distribution (item 9).
 
    Measured with `--crf --multi-task`: one MatSciBERT encoder with a CRF head
    per granularity, against the CRF head on the same splits and model seeds.
-   No significant change across the 5 random splits, so it is not adopted
-   under the pre-registered rule.
+   No significant change in any of the four paired comparisons, so it is not
+   adopted.
 
    | Micro F1 Δ [95% CI] | Fine-grained | Coarse-grained |
    |---|---|---|
    | 5 random splits | +2.46 [−0.91, +5.84] | +0.24 [−2.54, +3.02] |
-   | Leaving one paper out | running | running |
+   | Leaving one paper out | +0.11 [−8.56, +8.79] | −1.30 [−4.80, +2.20] |
 
-   All five fine-grained differences are positive (+0.25 to +7.17), but one
-   split (+7.17) gives most of the mean and the interval includes 0.
+   All five fine-grained differences across random splits are positive
+   (+0.25 to +7.17), but one split (+7.17) gives most of the mean and the
+   interval includes 0. On unseen papers the fine-grained differences range
+   from −6.21 to +4.89.
 3. **Class-balanced or focal loss** for the minority classes the paper names
    as the main weakness. *(est. +0.5–2)*
 
