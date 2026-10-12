@@ -4,6 +4,8 @@ The tiny-model run tests at the end need torch, transformers, seqeval and scipy
 and are skipped without them.
 """
 import json
+import os
+import sys
 from types import SimpleNamespace
 
 import pytest
@@ -169,6 +171,80 @@ def test_resume_isolation_for_seed_offset_and_predictions(tmp_path):
     assert resumable() == runs and resumable(100) == []
     path.write_text('{"labels": ["A"], "model": "m", "variant": "crf_m100", "runs": []}')
     assert resumable() == [] and resumable(100) == []
+
+
+def _stored(path, **fields):
+    """A results file of two crf_m100 runs, seed offset 100; only seed0 stored predictions."""
+    results = {'labels': ['A', 'B'], 'model': 'm', 'variant': 'crf_m100',
+               'config': {'seed_offset': 100},
+               'runs': [{'run_id': 'seed0', 'test_pred': ['O']}, {'run_id': 'seed1'}]}
+    path.write_text(json.dumps({**results, **fields}))
+    return str(path)
+
+
+def test_check_overwrite_names_the_file_the_reason_and_the_fix(tmp_path):
+    path = _stored(tmp_path / 'ner_results_fine_crf_m100.json')
+    same = {'labels': ['A', 'B'], 'model': 'm', 'variant': 'crf_m100', 'seed_offset': 100}
+    nb.check_overwrite(path, **same)                       # a matching file resumes as before
+    assert nb.resumable_runs(path, **same) == json.loads(
+        (tmp_path / 'ner_results_fine_crf_m100.json').read_text())['runs']
+    for change, reason in (({'model': 'dapt'}, "model: 'm' in the file, 'dapt' now"),
+                           ({'seed_offset': 200}, 'seed_offset: 100 in the file, 200 now'),
+                           ({'variant': 'crf_x'}, "variant: 'crf_m100' in the file, 'crf_x' now"),
+                           ({'labels': ['A', 'C']}, "labels: ['B'] only in the file, ['C'] only now"),
+                           ({'labels': ['B', 'A']}, 'labels: the same classes in another order')):
+        with pytest.raises(nb.OverwriteError) as err:
+            nb.check_overwrite(path, **{**same, **change})
+        message = str(err.value)
+        assert message.startswith(f'{path}: ') and reason in message
+        assert '(2 of 2 stored)' in message and '--tag NAME' in message and '--overwrite' in message
+    with pytest.raises(nb.OverwriteError, match="'x' now; seed_offset: 100 in the file, 0 now"):
+        nb.check_overwrite(path, **{**same, 'model': 'x', 'seed_offset': 0})   # every reason
+    # --save-predictions: the runs that stored none would be replaced
+    with pytest.raises(nb.OverwriteError,
+                       match=r"runs \['seed1'\] have no stored predictions\) .* \(1 of 2 stored\)"):
+        nb.check_overwrite(path, **same, save_predictions=True)
+    # nothing to lose: no file, no runs, every run with predictions, a file from before variants
+    nb.check_overwrite(str(tmp_path / 'missing.json'), **same)
+    nb.check_overwrite(_stored(tmp_path / 'empty.json', runs=[]), **{**same, 'model': 'x'})
+    nb.check_overwrite(_stored(tmp_path / 'pred.json', runs=[{'run_id': 's', 'test_pred': []}]),
+                       **same, save_predictions=True)
+    (tmp_path / 'old.json').write_text('{"labels": ["A"], "model": "m", "runs": [{"run_id": "s"}]}')
+    nb.check_overwrite(str(tmp_path / 'old.json'), ['A'], 'm', 'baseline')
+
+
+def test_results_files_may_be_replaced_with_overwrite_or_in_smoke_tests(tmp_path):
+    files = [(_stored(tmp_path / 'f.json', model=nb.DEFAULT_MODEL), ['A', 'B'])]
+    args = ['--crf', '--tag', 'm100', '--seed-offset']
+    nb.check_results_files(nb.parse_args(args + ['100']), files)          # same offset: resumed
+    with pytest.raises(nb.OverwriteError, match='seed_offset: 100 in the file, 200 now'):
+        nb.check_results_files(nb.parse_args(args + ['200']), files)
+    nb.check_results_files(nb.parse_args(args + ['200', '--overwrite']), files)
+    nb.check_results_files(nb.parse_args(args + ['200', '--max-train', '16']), files)
+    assert nb.parse_args([]).overwrite is False
+    # how a run is invoked, not a setting of its results: not stored, so the config is as before
+    assert 'overwrite' not in nb.stored_config(nb.parse_args(['--crf', '--overwrite']))
+
+
+def test_run_stops_before_any_training(tmp_path, monkeypatch):
+    """A coarse file that cannot be resumed stops a run of both granularities before fine trains."""
+    monkeypatch.setattr(nb, 'PROCESSED_DIR', str(tmp_path))
+    monkeypatch.setattr(nb, 'load_split_corpus', lambda granularity: _toy_ner_corpus())
+    monkeypatch.setattr(nb, 'train_one', lambda *args, **kwargs: pytest.fail('trained'))
+    (tmp_path / 'ner').mkdir()
+    coarse = tmp_path / 'ner' / 'ner_results_coarse_random_split_vary_crf.json'
+    coarse.write_text(json.dumps({'labels': ['COND', 'MAT', 'PROP'], 'model': 'other',
+                                  'variant': 'crf', 'runs': [{'run_id': 'seed0'}]}))
+    before = coarse.read_text()
+    argv = ['--crf', '--vary-split', '--seeds', '0']
+    with pytest.raises(nb.OverwriteError, match=f"{coarse.name}: .*model: 'other' in the file, "
+                                                f"'{nb.DEFAULT_MODEL}' now"):
+        nb.run(nb.parse_args(argv))
+    assert coarse.read_text() == before and os.listdir(tmp_path / 'ner') == [coarse.name]
+    monkeypatch.setattr(sys, 'argv', ['ner_baseline.py', *argv])
+    with pytest.raises(SystemExit) as exit_info:        # the command line reports it as an error
+        nb.main()
+    assert str(exit_info.value.code).startswith(f'error: {coarse}: ')
 
 
 def test_seed_offset_needs_a_tag_and_tags_are_checked(capsys):
@@ -422,7 +498,11 @@ def test_run_resumes_only_matching_offsets_and_predictions(tiny_run, tmp_path, m
     assert res['config']['seed_offset'] == 0 and calls == [0, 1]
     tiny_run('--seeds', '0', '1')                  # finished runs are skipped ...
     assert calls == [0, 1]
-    tiny_run('--seeds', '0', '1', '--save-predictions')   # ... unless they lack predictions
+    before = baseline.read_text()                  # ... runs without predictions are not reused
+    with pytest.raises(nb.OverwriteError, match='have no stored predictions'):
+        tiny_run('--seeds', '0', '1', '--save-predictions')   # and not replaced by accident
+    assert calls == [0, 1] and baseline.read_text() == before
+    tiny_run('--seeds', '0', '1', '--save-predictions', '--overwrite')
     assert calls == [0, 1, 0, 1]
     assert all(PREDICTION_KEYS <= set(r) for r in _load(tmp_path, baseline.name)['runs'])
     tiny_run('--seeds', '0', '1', '--save-predictions')
@@ -435,7 +515,11 @@ def test_run_resumes_only_matching_offsets_and_predictions(tiny_run, tmp_path, m
     assert [(r['run_id'], r['seed']) for r in tagged['runs']] == [('seed0', 5), ('seed1', 6)]
     tiny_run('--seeds', '0', '1', '--tag', 't2', '--seed-offset', '5')   # same offset: reused
     assert calls[4:] == [5, 6]
-    tiny_run('--seeds', '0', '1', '--tag', 't2', '--seed-offset', '7')   # other offset: not mixed
+    with pytest.raises(nb.OverwriteError, match='seed_offset: 5 in the file, 7 now'):
+        tiny_run('--seeds', '0', '1', '--tag', 't2', '--seed-offset', '7')   # other offset: not mixed
+    assert calls[4:] == [5, 6]
+    tiny_run('--seeds', '0', '1', '--tag', 't2', '--seed-offset', '7', '--overwrite')
     assert calls[4:] == [5, 6, 7, 8]
     runs = _load(tmp_path, 'ner_results_fine_t2.json')['runs']
     assert [(r['run_id'], r['seed']) for r in runs] == [('seed0', 7), ('seed1', 8)]
+    assert 'overwrite' not in _load(tmp_path, 'ner_results_fine_t2.json')['config']
