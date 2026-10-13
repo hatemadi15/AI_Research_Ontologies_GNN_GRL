@@ -59,6 +59,15 @@ head's CRF. Each head is tested with the snapshot of its best validation F1.
 One run writes both files (`_crf_mt`, single-task schema plus `multi_task`);
 a run counts as done once both files hold it.
 
+`--label-semantics` (with `--crf`; ROADMAP §4, week-3 protocol, variant 2)
+replaces the linear token classifier by a label-semantic head: the score of B-X
+(I-X) is the dot product of the token's state with W_B e_X (W_I e_X), e_X the
+embedding of a description of X, and O has a learned vector (make_label_head).
+The descriptions (ner_label_text.py: MMO definitions of the fine-grained
+classes, the MMO classes annotated with each coarse-grained type) are embedded
+in every run by the pre-trained encoder, before fine-tuning. Files `_crf_ls`,
+compared with `crf`; the config stores the SHA-256 of the descriptions.
+
 `--compare` pairs every variant file with a reference file of the same
 granularity and protocol, run by run (run_id), and writes ner_comparisons.json:
 `crf_mt` and `crf_<tag>` with the `crf` file, `cw_<tag>` with `cw`, anything
@@ -70,6 +79,7 @@ Usage:
   python ner_baseline.py --granularity fine --vary-split --class-weights
   python ner_baseline.py --vary-split --crf --tag m100 --seed-offset 100 --save-predictions
   python ner_baseline.py --vary-split --crf --multi-task                  # fine + coarse heads
+  python ner_baseline.py --vary-split --crf --label-semantics             # description head
   python ner_baseline.py --compare                                        # paired comparison
 """
 
@@ -86,6 +96,7 @@ from types import SimpleNamespace
 
 import conll
 import metrics
+import ner_label_text
 from config import PROCESSED_DIR, RAW_DIR
 
 PAPER_F1 = {'fine': 69.92, 'coarse': 72.32}
@@ -363,11 +374,109 @@ def class_weights(features, n_labels):
     return weights / weights.mean()
 
 
-def train_one(seed, train, val, test, labels, args, device, test_index=None):
+# Label-semantic head (--label-semantics): descriptions are cut to this many tokens
+DESCRIPTION_MAX_TOKENS = 128
+
+
+def label_descriptions(granularity, labels):
+    """Descriptions of `labels`, in their order (ner_label_text).
+
+    Fine: from the MMO definitions; coarse: from the fine-grained classes of the
+    corpus annotated with each type.
+    """
+    if granularity == 'fine':
+        return ner_label_text.fine_descriptions(labels)
+    return ner_label_text.coarse_descriptions(labels, load_split_corpus('fine'),
+                                              load_split_corpus('coarse'))
+
+
+def embed_descriptions(encoder, tokenizer, texts, device, max_tokens=DESCRIPTION_MAX_TOKENS):
+    """(len(texts), hidden): the mean last-layer state of `encoder` over each text's tokens.
+
+    Each text is encoded alone, cut to max_tokens (special tokens included), in eval
+    mode and without gradient; the special tokens are left out of the mean.
+    """
+    import torch
+    training = encoder.training
+    encoder.eval()
+    rows = []
+    with torch.no_grad():
+        for text in texts:
+            enc = tokenizer(text, truncation=True, max_length=max_tokens,
+                            return_special_tokens_mask=True, return_tensors='pt')
+            states = encoder(input_ids=enc['input_ids'].to(device),
+                             attention_mask=enc['attention_mask'].to(device)).last_hidden_state
+            rows.append(states[0][enc['special_tokens_mask'][0].to(device) == 0].mean(0))
+    encoder.train(training)
+    return torch.stack(rows)
+
+
+_HEAD_CLASS = None
+
+
+def make_label_head(embeddings, config):
+    """Label-semantic token head over (n_labels, hidden) description embeddings.
+
+    It gives the 1 + 2 * n_labels scores of the tag list. Defined on first use, like
+    the CRF, so that importing this module does not need torch.
+    """
+    global _HEAD_CLASS
+    if _HEAD_CLASS is None:
+        _HEAD_CLASS = _define_label_head()
+    return _HEAD_CLASS(embeddings, config.hidden_size, config.initializer_range)
+
+
+def _define_label_head():
+    import torch
+
+    class LabelSemanticHead(torch.nn.Module):
+        """Tag scores in the order of the tag list: O, then B-X and I-X for each label X.
+
+        score(t, O) = h_t . v_O, score(t, B-X) = h_t . (W_B e_X) and score(t, I-X) =
+        h_t . (W_I e_X), each plus a learned bias per tag. e_X is the embedding of the
+        description of X, a frozen buffer (`descriptions`); W_B and W_I (hidden x
+        hidden) and v_O are learned.
+        """
+
+        def __init__(self, embeddings, hidden_size, std):
+            super().__init__()
+            n_labels, dim = embeddings.shape
+            # Initialisation: one factor for all labels scales the embeddings so that the mean
+            # of |e_X|^2 is 1 (a linear map absorbs a common factor), and W_B, W_I and v_O start
+            # as N(0, std^2), std the initializer_range of the default classifier, with zero
+            # bias. The entries of W_B e_X are then N(0, std^2 |e_X|^2), on average over the
+            # labels those of a row of the default classifier, so the initial logits have its
+            # magnitude (MatSciBERT: SD 0.43 fine-grained, 0.41 coarse-grained, against 0.48).
+            # Scaling the embeddings rather than shrinking W keeps the weights at the
+            # classifier's scale, relative to which AdamW's steps (about lr) are as small.
+            rms = embeddings.pow(2).sum(1).mean().sqrt()
+            self.register_buffer('descriptions', embeddings / rms)
+            self.w_b = torch.nn.Parameter(torch.empty(hidden_size, dim))
+            self.w_i = torch.nn.Parameter(torch.empty(hidden_size, dim))
+            self.v_o = torch.nn.Parameter(torch.empty(hidden_size))
+            self.bias = torch.nn.Parameter(torch.zeros(1 + 2 * n_labels))
+            for weight in (self.w_b, self.w_i, self.v_o):
+                torch.nn.init.normal_(weight, mean=0.0, std=std)
+
+        def tag_vectors(self):
+            """(1 + 2 * n_labels, hidden): v_O, then W_B e_X and W_I e_X for each label X."""
+            e = self.descriptions
+            pairs = torch.stack([e @ self.w_b.T, e @ self.w_i.T], dim=1)
+            return torch.cat([self.v_o.unsqueeze(0), pairs.flatten(0, 1)])
+
+        def forward(self, hidden):
+            return torch.nn.functional.linear(hidden, self.tag_vectors(), self.bias)
+
+    return LabelSemanticHead
+
+
+def train_one(seed, train, val, test, labels, args, device, test_index=None, descriptions=None):
     """Fine-tune and test once; `seed` is the model seed (--seed-offset included).
 
     test_index (positions of `test` in the corpus) is stored with the
-    predictions when --save-predictions is set.
+    predictions when --save-predictions is set. descriptions (--label-semantics):
+    a text per label of `labels`; the token classifier is then a label-semantic
+    head over their embeddings by the pre-trained encoder (make_label_head).
     """
     import torch
     from transformers import (AutoModelForTokenClassification, AutoTokenizer,
@@ -383,6 +492,11 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None):
     model = AutoModelForTokenClassification.from_pretrained(
         args.model, num_labels=len(label_list), id2label=id2label, label2id=label2id
     ).to(device)
+    if descriptions is not None:
+        # embedded before any fine-tuning; the head replaces the linear classifier
+        assert len(descriptions) == len(labels), 'one description per label'
+        embeddings = embed_descriptions(model.base_model, tokenizer, descriptions, device)
+        model.classifier = make_label_head(embeddings, model.config).to(device)
     pad_id = tokenizer.pad_token_id
     crf = make_crf(label_list).to(device) if getattr(args, 'crf', False) else None
 
@@ -718,17 +832,20 @@ F1_AVERAGES = {
 RESULT_FILE = re.compile(r'ner_results_(fine|coarse)(?:_(random_split_vary|leave_one_paper_out))?'
                          r'(?:_([a-z0-9_]+))?\.json')
 # untagged variants: a tagged variant must not take the name of one (--crf --tag mt: crf_mt)
-PLAIN_VARIANTS = ('baseline', 'cw', 'crf', 'crf_mt')
+PLAIN_VARIANTS = ('baseline', 'cw', 'crf', 'crf_mt', 'crf_ls')
 
 
 def variant_name(args):
-    """Training variant of a run: 'baseline', 'cw', 'crf' or 'crf_mt', then the tag.
+    """Training variant of a run: 'baseline', 'cw', 'crf', 'crf_mt' or 'crf_ls', then the tag.
 
-    'cw' is --class-weights and 'crf_mt' is --crf --multi-task. A tag is appended
-    with an underscore (crf_m100); the baseline is named by it alone.
+    'cw' is --class-weights, 'crf_mt' is --crf --multi-task and 'crf_ls' is --crf
+    --label-semantics. A tag is appended with an underscore (crf_m100); the baseline
+    is named by it alone.
     """
     if getattr(args, 'crf', False):
         name = 'crf_mt' if getattr(args, 'multi_task', False) else 'crf'
+        if getattr(args, 'label_semantics', False):
+            name = 'crf_ls'
     else:
         name = 'cw' if args.class_weights else 'baseline'
     tag = getattr(args, 'tag', None)
@@ -740,8 +857,8 @@ def variant_name(args):
 def reference_variant(variant):
     """Variant that a variant is compared with ('baseline': the baseline file).
 
-    crf_mt[_<tag>] and crf_<tag> are compared with crf and cw_<tag> with cw; cw,
-    crf and a bare tag with the baseline.
+    crf_mt[_<tag>], crf_ls[_<tag>] and crf_<tag> are compared with crf and cw_<tag>
+    with cw; cw, crf and a bare tag with the baseline.
     """
     for base in ('crf', 'cw'):
         if variant.startswith(f'{base}_'):
@@ -1002,6 +1119,9 @@ def run(args):
         return
     granularities = ['fine', 'coarse'] if args.granularity == 'both' else [args.granularity]
     tasks = {g: granularity_data(g, args) for g in granularities}
+    semantics = getattr(args, 'label_semantics', False)
+    descriptions = {g: label_descriptions(g, tasks[g][1]) if semantics else None
+                    for g in granularities}
     # every results file is checked before any training, so a run never stops halfway
     check_results_files(args, [(results_path(out_dir, g, args), tasks[g][1])
                                for g in granularities])
@@ -1018,6 +1138,9 @@ def run(args):
                    'paper_test_f1': PAPER_F1[granularity], 'config': stored_config(args),
                    'runs': resumable_runs(out_path, labels, args.model, variant,
                                           args.seed_offset, args.save_predictions)}
+        if semantics:
+            results['config']['label_descriptions_sha256'] = ner_label_text.descriptions_sha256(
+                labels, descriptions[granularity])
         done = {r.get('run_id') for r in results['runs']}
 
         offset = f", seed offset {args.seed_offset}" if args.seed_offset else ''
@@ -1025,6 +1148,9 @@ def run(args):
               f"protocol {protocol}, variant {variant}{offset}, device {device} ===")
         if tie_info:
             print(f"  label cut tie: {tie_info}")
+        if semantics:
+            print(f"  label descriptions: sha256 "
+                  f"{results['config']['label_descriptions_sha256'][:12]}")
 
         folds = make_folds(data, args, indices=True)     # parts as positions in `data`
         if folds is None:
@@ -1042,7 +1168,8 @@ def run(args):
             seed = int(run_id[4:]) if run_id.startswith('seed') else args.seeds[0]
             seed += args.seed_offset      # the model seed moves, the split and run_id do not
             start = time.time()
-            res = train_one(seed, train, val, test, labels, args, device, test_index=te)
+            res = train_one(seed, train, val, test, labels, args, device, test_index=te,
+                            descriptions=descriptions[granularity])
             res['run_id'] = run_id
             res['runtime_sec'] = round(time.time() - start, 1)
             results['runs'].append(res)
@@ -1178,6 +1305,11 @@ def parse_args(argv=None):
                         help='with --crf and --granularity both: one encoder with a fine and a '
                              'coarse CRF head, trained together; each run writes a fine and a '
                              'coarse results file (files tagged _crf_mt)')
+    parser.add_argument('--label-semantics', action='store_true', default=argparse.SUPPRESS,
+                        help='with --crf: score the tags of each label from an embedding of its '
+                             'description (fine: MMO definition; coarse: the MMO classes '
+                             'annotated with the type) instead of a linear classifier (files '
+                             'tagged _crf_ls)')
     parser.add_argument('--tag', type=tag_name, default=None, metavar='NAME',
                         help='appended to the variant name and the results file (crf + m100: '
                              'crf_m100; baseline + m100: m100); lowercase letters and digits')
@@ -1205,6 +1337,11 @@ def parse_args(argv=None):
     args = parser.parse_args(argv)
     if args.seed_offset and not args.tag:
         parser.error('--seed-offset needs --tag, so that offset runs get their own results file')
+    if getattr(args, 'label_semantics', False):
+        if not args.crf:
+            parser.error('--label-semantics needs --crf (its scores are the CRF emissions)')
+        if getattr(args, 'multi_task', False):
+            parser.error('--label-semantics is not available with --multi-task')
     if getattr(args, 'multi_task', False):
         if not args.crf:
             parser.error('--multi-task needs --crf (a CRF head per granularity)')
