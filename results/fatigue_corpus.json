@@ -1,0 +1,4336 @@
+{
+  "script": "src/graph/build_fatigue_corpus.py",
+  "protocol": "docs/ROADMAP.md, Week 3 protocol, item 5 (In-domain pre-training)",
+  "selection": {
+    "source": "Europe PMC REST API",
+    "search_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+    "fulltext_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/{pmcid}/fullTextXML",
+    "result_type": "core",
+    "query": "OPEN_ACCESS:y AND HAS_FT:y AND TITLE:fatigue AND (TITLE:(\"alloy\" OR \"alloys\" OR \"steel\" OR \"steels\" OR \"superalloy\" OR \"superalloys\" OR \"metal\" OR \"metals\" OR \"metallic\" OR \"titanium\" OR \"aluminium\" OR \"aluminum\" OR \"magnesium\" OR \"nickel\" OR \"copper\" OR \"iron\" OR \"zinc\" OR \"cobalt\" OR \"brass\" OR \"bronze\" OR \"solder\" OR \"inconel\" OR \"hastelloy\" OR \"nitinol\" OR \"Ti-6Al-4V\" OR \"Ti6Al4V\" OR \"weld\" OR \"welds\" OR \"welded\" OR \"welding\" OR \"weldment\" OR \"weldments\" OR \"powder bed fusion\" OR \"selective laser melting\" OR \"electron beam melting\" OR \"directed energy deposition\" OR \"wire arc additive manufacturing\") OR ABSTRACT:(\"alloy\" OR \"alloys\" OR \"steel\" OR \"steels\" OR \"superalloy\" OR \"superalloys\" OR \"metal\" OR \"metals\" OR \"metallic\" OR \"titanium\" OR \"aluminium\" OR \"aluminum\" OR \"magnesium\" OR \"nickel\" OR \"copper\" OR \"iron\" OR \"zinc\" OR \"cobalt\" OR \"brass\" OR \"bronze\" OR \"solder\" OR \"inconel\" OR \"hastelloy\" OR \"nitinol\" OR \"Ti-6Al-4V\" OR \"Ti6Al4V\" OR \"weld\" OR \"welds\" OR \"welded\" OR \"welding\" OR \"weldment\" OR \"weldments\" OR \"powder bed fusion\" OR \"selective laser melting\" OR \"electron beam melting\" OR \"directed energy deposition\" OR \"wire arc additive manufacturing\"))",
+    "search_filters": "OPEN_ACCESS:y AND HAS_FT:y AND TITLE:fatigue",
+    "material_terms": [
+      "alloy",
+      "alloys",
+      "steel",
+      "steels",
+      "superalloy",
+      "superalloys",
+      "metal",
+      "metals",
+      "metallic",
+      "titanium",
+      "aluminium",
+      "aluminum",
+      "magnesium",
+      "nickel",
+      "copper",
+      "iron",
+      "zinc",
+      "cobalt",
+      "brass",
+      "bronze",
+      "solder",
+      "inconel",
+      "hastelloy",
+      "nitinol",
+      "Ti-6Al-4V",
+      "Ti6Al4V",
+      "weld",
+      "welds",
+      "welded",
+      "welding",
+      "weldment",
+      "weldments",
+      "powder bed fusion",
+      "selective laser melting",
+      "electron beam melting",
+      "directed energy deposition",
+      "wire arc additive manufacturing"
+    ],
+    "exclude_title_terms": [
+      "patients",
+      "muscle",
+      "muscles",
+      "muscular",
+      "cancer",
+      "cancers",
+      "syndrome",
+      "cognitive",
+      "mental",
+      "sleep",
+      "depression",
+      "depressive",
+      "anxiety",
+      "covid",
+      "disease",
+      "diseases",
+      "disorder",
+      "disorders",
+      "symptom",
+      "symptoms",
+      "supplement",
+      "supplements",
+      "supplementation",
+      "deficiency",
+      "anemia",
+      "anaemia",
+      "vitamin",
+      "vitamins",
+      "serum",
+      "exercise",
+      "sclerosis",
+      "nutritional",
+      "dietary",
+      "inflammatory",
+      "inflammation",
+      "mice",
+      "mouse",
+      "rats",
+      "women",
+      "adults",
+      "children",
+      "elderly",
+      "athletes",
+      "workers",
+      "quality of life",
+      "author correction",
+      "erratum",
+      "corrigendum",
+      "retraction"
+    ],
+    "excluded_dois": [
+      "10.1007/s11340-021-00758-x",
+      "10.1038/ncomms7164",
+      "10.1038/s41467-020-19071-7",
+      "10.3390/met10111458"
+    ],
+    "local_filters": [
+      "a PMCID",
+      "DOI not in excluded_dois",
+      "language eng",
+      "the token 'fatigue' in the title",
+      "a material term in the title or abstract",
+      "no exclusion term in the title"
+    ],
+    "order": "PMCIDs sorted as strings, then random.Random(0).shuffle"
+  },
+  "settings": {
+    "seed": 0,
+    "target_pool": 60000,
+    "max_sentences": 40000,
+    "chunk": 10,
+    "min_words": 5,
+    "max_words": 120,
+    "min_alpha_fraction": 0.5,
+    "max_inline_formula_chars": 30,
+    "ngram": 8,
+    "language": "eng",
+    "page_size": 500,
+    "min_request_interval_seconds": 0.25,
+    "timeout_seconds": 60,
+    "retries": 4,
+    "backoff_seconds": 2.0,
+    "abbreviations": [
+      "approx",
+      "at",
+      "ca",
+      "cf",
+      "eq",
+      "eqs",
+      "fig",
+      "figs",
+      "no",
+      "nos",
+      "pp",
+      "ref",
+      "refs",
+      "resp",
+      "sec",
+      "sect",
+      "vol",
+      "vs",
+      "wt",
+      "et al"
+    ],
+    "dotted_abbreviations": "(?:[A-Za-z]{1,2}\\.)+[A-Za-z]{1,2}",
+    "skipped_sections": "^[\\d.\\s]*(acknowledg|funding|conflicts? of interest|competing interests?|author contributions?|data availability|availability of data|ethic|abbreviations|nomenclature|supplementary|references|declarations?|disclosure)"
+  },
+  "counts": {
+    "hits": 1277,
+    "api_hit_count": 1277,
+    "hits_rejected": 96,
+    "eligible_articles": 1181,
+    "articles_used": 346,
+    "articles_downloaded": 346,
+    "failed_downloads": 0,
+    "articles_without_text": 0,
+    "target_reached": true,
+    "paragraphs": 14449,
+    "raw_sentences": 64031,
+    "cut_by_formula": 3296,
+    "length_filtered": 548,
+    "length_filtered_by": {
+      "too_short": 516,
+      "too_long": 12,
+      "non_alphabetic": 20
+    },
+    "after_length_filter": 60187,
+    "duplicates_dropped": 97,
+    "overlap_dropped": 15,
+    "pool": 60075,
+    "kept": 40000
+  },
+  "rejected_by_reason": {
+    "no_pmcid": 4,
+    "title_term:symptoms": 2,
+    "title_term:cancer": 1,
+    "title_term:serum": 1,
+    "title_term:disease": 4,
+    "title_term:patients": 23,
+    "title_term:cognitive": 1,
+    "title_term:syndrome": 10,
+    "title_term:muscle": 5,
+    "title_term:deficiency": 7,
+    "title_term:supplementation": 7,
+    "title_term:exercise": 6,
+    "excluded_doi": 1,
+    "title_term:disorders": 1,
+    "title_term:inflammatory": 1,
+    "no_fatigue_in_title": 2,
+    "title_term:mental": 4,
+    "title_term:inflammation": 1,
+    "title_term:vitamin": 1,
+    "title_term:author correction": 2,
+    "title_term:sleep": 3,
+    "title_term:vitamins": 1,
+    "title_term:anemia": 1,
+    "title_term:supplement": 1,
+    "title_term:supplements": 1,
+    "title_term:workers": 1,
+    "title_term:covid": 2,
+    "title_term:mouse": 1,
+    "title_term:women": 1
+  },
+  "excluded_by_title": [
+    {
+      "pmcid": "PMC12460836",
+      "term": "symptoms",
+      "title": "In transfusion-dependent thalassemia, neuronal damage biomarkers are associated with affective and chronic fatigue symptoms."
+    },
+    {
+      "pmcid": "PMC13465117",
+      "term": "cancer",
+      "title": "Ferroptosis Inducers Combined with Copper Ionophores Aggravate Lung Cancer-Related Fatigue via GSH Depletion and FKBP5-Associated Impairment of Nrf2/HO-1 Signaling."
+    },
+    {
+      "pmcid": "PMC13402490",
+      "term": "serum",
+      "title": "Association of serum 25-hydroxyvitamin D levels with fatigue severity in adults: A cross-sectional study."
+    },
+    {
+      "pmcid": "PMC13265746",
+      "term": "disease",
+      "title": "Effects of B vitamins and magnesium on fatigue, disease activity and quality of life in inflammatory bowel disease."
+    },
+    {
+      "pmcid": "PMC13516697",
+      "term": "patients",
+      "title": "The Influence of Serum Iron Levels on Depression, Anxiety, Fatigue, Neuropathic Pain and MR Disease Activity in Patients with Multiple Sclerosis."
+    },
+    {
+      "pmcid": "PMC12859211",
+      "term": "cognitive",
+      "title": "The effect of iron deposition on cognitive fatigue in multiple sclerosis."
+    },
+    {
+      "pmcid": "PMC13130256",
+      "term": "syndrome",
+      "title": "The immune checkpoint pathophysiology of depression and chronic fatigue syndrome due to preeclampsia: focus on sCD80 and sCTLA-4."
+    },
+    {
+      "pmcid": "PMC12822411",
+      "term": "muscle",
+      "title": "HUWE1 in Skeletal Muscle Prevents Muscle Fatigue via Maintaining Iron and Calcium Homeostasis."
+    },
+    {
+      "pmcid": "PMC13352125",
+      "term": "deficiency",
+      "title": "Gastric Antral Vascular Ectasia (GAVE), or \"Watermelon Stomach,\" Is Associated With Chronic Occult Gastrointestinal Blood Loss, Leading to Iron-Deficiency Anaemia and an Increased Risk of Falls Due to Fatigue and Reduced Physiological Reserve."
+    },
+    {
+      "pmcid": "PMC12530587",
+      "term": "supplementation",
+      "title": "Efficacy of 8-week oral iron supplementation on fatigue and physical capacity in young women with iron deficiency anemia: An uncontrolled pilot clinical trial."
+    },
+    {
+      "pmcid": "PMC13016132",
+      "term": "deficiency",
+      "title": "Effects of Education on Treatment Adherence and Fatigue in Individuals with Treatment-Inadherent Iron Deficiency Anemia: A Randomized Trial in T\u00fcrkiye."
+    },
+    {
+      "pmcid": "PMC13517046",
+      "term": "syndrome",
+      "title": "Micronutrition as a Therapeutic Strategy for Mitochondrial Dysfunction in Myalgic Encephalomyelitis/Chronic Fatigue Syndrome and Fibromyalgia: A Narrative Review."
+    },
+    {
+      "pmcid": "PMC11730394",
+      "term": "disease",
+      "title": "Iron deficiency and fatigue in inflammatory bowel disease: A systematic review."
+    },
+    {
+      "pmcid": "PMC12683127",
+      "term": "exercise",
+      "title": "Study on anti-fatigue effect and mechanism of iron source combined with Angelica sinensis and Agrimonia pilosa on pigeons under exercise stress."
+    },
+    {
+      "pmcid": "PMC12836532",
+      "term": "patients",
+      "title": "Prevalence of functional iron deficiency in patients with malignancies and its impact on fatigue-specific quality of life."
+    },
+    {
+      "pmcid": "PMC13245459",
+      "term": "deficiency",
+      "title": "Erratum: Effects of Education on Treatment Adherence and Fatigue in Individuals with Treatment-Inadherent Iron Deficiency Anemia: A Randomized Trial in T\u00fcrkiye [Corrigendum]."
+    },
+    {
+      "pmcid": "PMC13388313",
+      "term": "exercise",
+      "title": "Research progress in exercise-induced fatigue monitoring and injury early warning based on flexible sensing textiles and deep learning."
+    },
+    {
+      "pmcid": "PMC11676191",
+      "term": "patients",
+      "title": "The Mediating Role of Gut Microbiota on the Association Between Dietary Quality and Cancer-Related Fatigue Among Breast Cancer Patients: A Cross-Sectional Study."
+    },
+    {
+      "pmcid": "PMC12983178",
+      "term": "disorders",
+      "title": "Prevalence and Multivariate Impact of Musculoskeletal Disorders on General Health, Occupational Fatigue, and Productivity in an Industrial Workforce."
+    },
+    {
+      "pmcid": "PMC13117010",
+      "term": "patients",
+      "title": "Prevalence of Fatigue Among Inflammatory Bowel Disease Patients at a Tertiary Center in Saudi Arabia."
+    },
+    {
+      "pmcid": "PMC11281175",
+      "term": "patients",
+      "title": "Widespread Myalgia and Chronic Fatigue: Phagocytes from Macrophagic Myofasciitis Patients Exposed to Aluminum Oxyhydroxide-Adjuvanted Vaccine Exhibit Specific Inflammatory, Autophagic, and Mitochondrial Responses."
+    },
+    {
+      "pmcid": "PMC12320131",
+      "term": "inflammatory",
+      "title": "Plasma hepcidin level is elevated by water immersion-induced central fatigue via hepatic inflammatory response in male and female rats."
+    },
+    {
+      "pmcid": "PMC11841881",
+      "term": "mental",
+      "title": "Mental fatigue in golf: A systematic review."
+    },
+    {
+      "pmcid": "PMC12408823",
+      "term": "inflammation",
+      "title": "Heightened innate immunity may trigger chronic inflammation, fatigue and post-exertional malaise in ME/CFS."
+    },
+    {
+      "pmcid": "PMC12677511",
+      "term": "mental",
+      "title": "Effects of music intervention on golf-specific skill performance of golfers under mental fatigue: Protocol for a randomized controlled trial."
+    },
+    {
+      "pmcid": "PMC10245357",
+      "term": "vitamin",
+      "title": "Association of magnesium and vitamin D status with grip strength and fatigue in older adults: a 4-week observational study of geriatric participants undergoing rehabilitation."
+    },
+    {
+      "pmcid": "PMC12216631",
+      "term": "disease",
+      "title": "Affective and chronic fatigue symptoms are associated with serum neuronal damage markers in Parkinson's disease."
+    },
+    {
+      "pmcid": "PMC12358331",
+      "term": "patients",
+      "title": "Positional and dimensional temporomandibular joint osseous changes in patients treated with the forsus fatigue resistant device: a non-randomized clinical trial."
+    },
+    {
+      "pmcid": "PMC9849256",
+      "term": "author correction",
+      "title": "Author Correction: Characterization of internal fatigue cracks in aluminum alloys by simulation of phase contrast tomography."
+    },
+    {
+      "pmcid": "PMC9498000",
+      "term": "patients",
+      "title": "Chronic Fatigue Syndrome in Patients with Deteriorated Iron Metabolism."
+    },
+    {
+      "pmcid": "PMC11803534",
+      "term": "deficiency",
+      "title": "Effect of Ferric Derisomaltose on Fatigue in Iron Deficiency Anemia Associated With Abnormal Uterine Bleeding."
+    },
+    {
+      "pmcid": "PMC11857234",
+      "term": "sleep",
+      "title": "Validation of Psychometric Tools for Assessing Fatigue, Mood, and Sleep Quality: Application in the PREVES-STOP Study."
+    },
+    {
+      "pmcid": "PMC11357109",
+      "term": "patients",
+      "title": "Electrolytes as predictors of fibro fatigue scores in Long-COVID patients."
+    },
+    {
+      "pmcid": "PMC11802442",
+      "term": "patients",
+      "title": "Actors influencing cancer-related fatigue and the construction of a risk prediction model in lung cancer patients."
+    },
+    {
+      "pmcid": "PMC9932653",
+      "term": "supplementation",
+      "title": "Influence of iron supplementation on fatigue, mood states and sweating profiles of healthy non-anemic athletes during a training exercise: A double-blind, randomized, placebo-controlled, parallel-group study."
+    },
+    {
+      "pmcid": "PMC8133867",
+      "term": "supplementation",
+      "title": "The effect of zinc supplementation on fatigue among elderly community dwellers: A parallel clinical trial."
+    },
+    {
+      "pmcid": "PMC8300692",
+      "term": "syndrome",
+      "title": "Effect of Melatonin Plus Zinc Supplementation on Fatigue Perception in Myalgic Encephalomyelitis/Chronic Fatigue Syndrome: A Randomized, Double-Blind, Placebo-Controlled Trial."
+    },
+    {
+      "pmcid": "PMC8227404",
+      "term": "exercise",
+      "title": "Synthesis of Icariin-Zinc and its Protective Effect on Exercise Fatigue and Reproductive System Related Glands in Male Rats."
+    },
+    {
+      "pmcid": "PMC11723387",
+      "term": "syndrome",
+      "title": "Effectiveness of the SYNCHRONIZE + Brief Intervention in Improving Mediterranean Diet Adherence, Nutritional Quality and Intake Pattern in Persons with Fibromyalgia and Chronic Fatigue Syndrome."
+    },
+    {
+      "pmcid": "PMC7019700",
+      "term": "vitamins",
+      "title": "Vitamins and Minerals for Energy, Fatigue and Cognition: A Narrative Review of the Biochemical and Clinical Evidence."
+    },
+    {
+      "pmcid": "PMC7943415",
+      "term": "patients",
+      "title": "Iron deficiency, fatigue and muscle strength and function in older hospitalized patients."
+    },
+    {
+      "pmcid": "PMC10742551",
+      "term": "muscle",
+      "title": "A Novel Ergonomic Curette Design Reduces Dental Prophylaxis-Induced Muscle Work and Fatigue."
+    },
+    {
+      "pmcid": "PMC10170130",
+      "term": "author correction",
+      "title": "Author Correction: Reliability modeling of the fatigue life of lead-free solder joints at different testing temperatures and load levels using the Arrhenius model."
+    },
+    {
+      "pmcid": "PMC11053797",
+      "term": "patients",
+      "title": "Potential Anti-Inflammatory and Anti-Fatigue Effects of an Oral Food Supplement in Long COVID Patients."
+    },
+    {
+      "pmcid": "PMC10856024",
+      "term": "anemia",
+      "title": "Maternal Fatigue after Postpartum Anemia Treatment with Intravenous Ferric Carboxymaltose vs. Intravenous Ferric Derisomaltose vs. Oral Ferrous Sulphate: A Randomized Controlled Trial."
+    },
+    {
+      "pmcid": "PMC9195328",
+      "term": "patients",
+      "title": "Safety and efficacy of Ninjin'yoeito along with iron supplementation therapy for preoperative anemia, fatigue, and anxiety in patients with gynecological disease: an open-label, single-center, randomized phase-II trial."
+    },
+    {
+      "pmcid": "PMC12433824",
+      "term": "supplement",
+      "title": "The role of nutritional supplement on post-stroke fatigue: a pilot randomized controlled trial."
+    },
+    {
+      "pmcid": "PMC10181316",
+      "term": "symptoms",
+      "title": "Nutrient Therapy for the Improvement of Fatigue Symptoms."
+    },
+    {
+      "pmcid": "PMC7449957",
+      "term": "supplementation",
+      "title": "The effects of intravenous iron supplementation on fatigue and general health in non-anemic blood donors with iron deficiency: a randomized placebo-controlled superiority trial."
+    },
+    {
+      "pmcid": "PMC7558798",
+      "term": "patients",
+      "title": "The Role of Iron Metabolism in Fatigue, Depression, and Quality of Life in Multiple Sclerosis Patients."
+    },
+    {
+      "pmcid": "PMC7284357",
+      "term": "syndrome",
+      "title": "The Effect of Parenteral or Oral Iron Supplementation on Fatigue, Sleep, Quality of Life and Restless Legs Syndrome in Iron-Deficient Blood Donors: A Secondary Analysis of the IronWoMan RCT."
+    },
+    {
+      "pmcid": "PMC7577027",
+      "term": "supplements",
+      "title": "Is fatigue a cue to obtain iron supplements in Odisha, India? A mixed methods investigation."
+    },
+    {
+      "pmcid": "PMC10548648",
+      "term": "patients",
+      "title": "Symptom burden, fatigue, sleep quality and perceived social support in hemodialysis patients with musculoskeletal discomfort: a single center experience from Egypt."
+    },
+    {
+      "pmcid": "PMC8714972",
+      "term": "exercise",
+      "title": "Lactobacillus fermentum CQPC08 Attenuates Exercise-Induced Fatigue in Mice Through Its Antioxidant Effects and Effective Intervention of Galactooligosaccharide."
+    },
+    {
+      "pmcid": "PMC7889990",
+      "term": "workers",
+      "title": "The effects of ergonomic intervention on the musculoskeletal complaints and fatigue experienced by workers in the traditional metal casting industry."
+    },
+    {
+      "pmcid": "PMC10647745",
+      "term": "syndrome",
+      "title": "Yeast Beta-Glucan Supplementation with Multivitamins Attenuates Cognitive Impairments in Individuals with Myalgic Encephalomyelitis/Chronic Fatigue Syndrome: A Randomized, Double-Blind, Placebo-Controlled Trial."
+    },
+    {
+      "pmcid": "PMC10730797",
+      "term": "sleep",
+      "title": "Sleep quality, fatigue, societal participation and health-related quality of life in kidney transplant recipients: a cross-sectional and longitudinal cohort study."
+    },
+    {
+      "pmcid": "PMC9589528",
+      "term": "covid",
+      "title": "Long-COVID post-viral chronic fatigue and affective symptoms are associated with oxidative damage, lowered antioxidant defenses and inflammation: a proof of concept and mechanism study."
+    },
+    {
+      "pmcid": "PMC10218617",
+      "term": "covid",
+      "title": "The Effects of Arginine-Based Supplements on Fatigue Levels following COVID-19 Infection: A Prospective Study in Romania."
+    },
+    {
+      "pmcid": "PMC10765444",
+      "term": "exercise",
+      "title": "Does sodium bicarbonate based extra-cellular buffering support reduce high intensity exercise-induced fatigue and enhance short-term recovery assessed by selected blood biochemical indices?"
+    },
+    {
+      "pmcid": "PMC8173150",
+      "term": "mouse",
+      "title": "The Effect of Lactobacillus plantarum CQPC02 on Fatigue and Biochemical Oxidation Levels in a Mouse Model of Physical Exhaustion."
+    },
+    {
+      "pmcid": "PMC5892776",
+      "term": "supplementation",
+      "title": "Efficacy of iron supplementation on fatigue and physical capacity in non-anaemic iron-deficient adults: a systematic review of randomised controlled trials."
+    },
+    {
+      "pmcid": "PMC9238249",
+      "term": "patients",
+      "title": "Oxaloacetate Treatment For Mental And Physical Fatigue In Myalgic Encephalomyelitis/Chronic Fatigue Syndrome (ME/CFS) and Long-COVID fatigue patients: a non-randomized controlled clinical trial."
+    },
+    {
+      "pmcid": "PMC8941458",
+      "term": "deficiency",
+      "title": "Health-related quality of life and fatigue in children and adults with pyruvate kinase deficiency."
+    },
+    {
+      "pmcid": "PMC9263197",
+      "term": "exercise",
+      "title": "Trilobatin, a Naturally Occurring Food Additive, Ameliorates Exhaustive Exercise-Induced Fatigue in Mice: Involvement of Nrf2/ARE/Ferroptosis Signaling Pathway."
+    },
+    {
+      "pmcid": "PMC5431345",
+      "term": "mental",
+      "title": "Serotonergic dysfunctions and abnormal iron metabolism: Relevant to mental fatigue of Parkinson disease."
+    },
+    {
+      "pmcid": "PMC7417892",
+      "term": "syndrome",
+      "title": "Mapping of pathological change in chronic fatigue syndrome using the ratio of T1- and T2-weighted MRI scans."
+    },
+    {
+      "pmcid": "PMC3968354",
+      "term": "patients",
+      "title": "Dietary intake of nutrients and its correlation with fatigue in multiple sclerosis patients."
+    },
+    {
+      "pmcid": "PMC7068528",
+      "term": "supplementation",
+      "title": "Supplementation with a Bioactive Melon Concentrate in Humans and Animals: Prevention of Oxidative Damages and Fatigue in the Context of a Moderate or Eccentric Physical Activity."
+    },
+    {
+      "pmcid": "PMC5433302",
+      "term": "patients",
+      "title": "Effects of zinc supplementation on fatigue and quality of life in patients with colorectal cancer."
+    },
+    {
+      "pmcid": "PMC8541833",
+      "term": "syndrome",
+      "title": "Intersections between pneumonia, lowered oxygen saturation percentage and immune activation mediate depression, anxiety, and chronic fatigue syndrome-like symptoms due to COVID-19: A nomothetic network approach."
+    },
+    {
+      "pmcid": "PMC4172582",
+      "term": "supplementation",
+      "title": "Four weeks of IV iron supplementation reduces perceived fatigue and mood disturbance in distance runners."
+    },
+    {
+      "pmcid": "PMC4434873",
+      "term": "deficiency",
+      "title": "Qualitative and quantitative validation of the FACIT-fatigue scale in iron deficiency anemia."
+    },
+    {
+      "pmcid": "PMC6836014",
+      "term": "patients",
+      "title": "Decrease in Serum Vitamin D Level of Older Patients with Fatigue."
+    },
+    {
+      "pmcid": "PMC6266448",
+      "term": "disease",
+      "title": "Fatigue as an Extra-Intestinal Manifestation of Celiac Disease: A Systematic Review."
+    },
+    {
+      "pmcid": "PMC4219000",
+      "term": "deficiency",
+      "title": "Prevalence of iron deficiency on ICU discharge and its relation with fatigue: a multicenter prospective study."
+    },
+    {
+      "pmcid": "PMC6194982",
+      "term": "patients",
+      "title": "The association between the prevalence of restless leg syndrome, fatigue, and sleep quality in patients undergoing hemodialysis."
+    },
+    {
+      "pmcid": "PMC4326197",
+      "term": "women",
+      "title": "Intravenous iron isomaltoside 1000 administered by high single-dose infusions or standard medical care for the treatment of fatigue in women after postpartum haemorrhage: study protocol for a randomised controlled trial."
+    },
+    {
+      "pmcid": "PMC3416828",
+      "term": "muscle",
+      "title": "Muscle damage and its relationship with muscle fatigue during a half-iron triathlon."
+    },
+    {
+      "pmcid": "PMC6309570",
+      "term": "syndrome",
+      "title": "Hyperintense sensorimotor T1 spin echo MRI is associated with brainstem abnormality in chronic fatigue syndrome."
+    },
+    {
+      "pmcid": "PMC5592428",
+      "term": "patients",
+      "title": "Restless legs syndrome is contributing to fatigue and low quality of life levels in hemodialysis patients."
+    },
+    {
+      "pmcid": "PMC5131563",
+      "term": "muscle",
+      "title": "The Role of Parvalbumin, Sarcoplasmatic Reticulum Calcium Pump Rate, Rates of Cross-Bridge Dynamics, and Ryanodine Receptor Calcium Current on Peripheral Muscle Fatigue: A Simulation Study."
+    },
+    {
+      "pmcid": "PMC4153327",
+      "term": "mental",
+      "title": "Iron deficiency, cognition, mental health and fatigue in women of childbearing age: a systematic review."
+    },
+    {
+      "pmcid": "PMC4352065",
+      "term": "patients",
+      "title": "Effects of nutritional supplementation on fatigue, and autonomic and immune dysfunction in patients with end-stage renal disease: a randomized, double-blind, placebo-controlled, multicenter trial."
+    },
+    {
+      "pmcid": "PMC3875063",
+      "term": "sleep",
+      "title": "P05.07. Chronic Fatigue, Depression, and Sleep Disturbances in a 20-year-old Male Collegiate Basketball Player: A Case Report"
+    },
+    {
+      "pmcid": "PMC3430927",
+      "term": "muscle",
+      "title": "Assessment of muscle fatigue associated with prolonged standing in the workplace."
+    },
+    {
+      "pmcid": "PMC3201900",
+      "term": "patients",
+      "title": "Complementary and alternative medicine for patients with chronic fatigue syndrome: a systematic review."
+    },
+    {
+      "pmcid": "PMC3850462",
+      "term": "syndrome",
+      "title": "A multidisciplinary approach to study a couple of monozygotic twins discordant for the chronic fatigue syndrome: a focus on potential salivary biomarkers."
+    },
+    {
+      "pmcid": "PMC1360067",
+      "term": "patients",
+      "title": "Increase of free Mg2+ in the skeletal muscle of chronic fatigue syndrome patients."
+    }
+  ],
+  "failed": [],
+  "articles": [
+    {
+      "pmcid": "PMC7603216",
+      "doi": "10.3390/ma13204642",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Monotonic and Fatigue Behavior of EBM Manufactured Ti-6Al-4V Solid Samples: Experimental, Analytical and Numerical Investigations.",
+      "pool_sentences": 189,
+      "corpus_sentences": 124
+    },
+    {
+      "pmcid": "PMC7558536",
+      "doi": "10.3390/ma13184014",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Life Appraisal and Its Corrected Stress Intensity Factor for Repaired Off-CentrallyCracked Aluminum Plates.",
+      "pool_sentences": 108,
+      "corpus_sentences": 82
+    },
+    {
+      "pmcid": "PMC11766723",
+      "doi": "10.3390/ma18020221",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Life Analysis of Titanium Torsion Spring Based on Continuous Damage Mechanics.",
+      "pool_sentences": 163,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC7795221",
+      "doi": "10.3390/ma14010176",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Crack Growth and Fracture of Internal Fixation Materials in In Vivo Environments-A Review.",
+      "pool_sentences": 205,
+      "corpus_sentences": 150
+    },
+    {
+      "pmcid": "PMC9679467",
+      "doi": "10.1016/j.dib.2022.108666",
+      "year": "2022",
+      "journal": "Data in brief",
+      "license": "cc by",
+      "title": "Data analysis of striation spacing, lifetime, and crack length in crankshaft ductile cast iron under cyclic bending loading through high-cycle fatigue regime.",
+      "pool_sentences": 128,
+      "corpus_sentences": 85
+    },
+    {
+      "pmcid": "PMC5503321",
+      "doi": "10.3390/ma10030248",
+      "year": "2017",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Necessary Conditions for Nonlinear Ultrasonic Modulation Generation Given a Localized Fatigue Crack in a Plate-Like Structure.",
+      "pool_sentences": 135,
+      "corpus_sentences": 87
+    },
+    {
+      "pmcid": "PMC6419647",
+      "doi": "10.1080/14686996.2019.1580483",
+      "year": "2019",
+      "journal": "Science and technology of advanced materials",
+      "license": "cc by-nc",
+      "title": "Corrosion fatigue in DLC-coated articulating implants: an accelerated methodology to predict realistic interface lifetime.",
+      "pool_sentences": 256,
+      "corpus_sentences": 168
+    },
+    {
+      "pmcid": "PMC9125847",
+      "doi": "10.1186/s12903-022-02215-0",
+      "year": "2022",
+      "journal": "BMC oral health",
+      "license": "cc by",
+      "title": "Effect of NaOCl and EDTA irrigating solutions on the cyclic fatigue resistance of EdgeTaper Platinum instruments.",
+      "pool_sentences": 95,
+      "corpus_sentences": 67
+    },
+    {
+      "pmcid": "PMC12119894",
+      "doi": "10.1038/s41598-025-03776-0",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Fatigue safety factor of a transonic centrifugal compressor impeller subject to blade thickness.",
+      "pool_sentences": 156,
+      "corpus_sentences": 112
+    },
+    {
+      "pmcid": "PMC11287150",
+      "doi": "10.1016/j.identj.2024.01.014",
+      "year": "2024",
+      "journal": "International dental journal",
+      "license": "cc by-nc-nd",
+      "title": "The Role of Pecking Motion Depths in Dynamic Cyclic Fatigue Resistance: In Vitro Study.",
+      "pool_sentences": 122,
+      "corpus_sentences": 71
+    },
+    {
+      "pmcid": "PMC9323467",
+      "doi": "10.3390/ma15145037",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Influence Mechanisms of Inclusion Types on Rotating Bending Fatigue Properties of SAE52100 Bearing Steel.",
+      "pool_sentences": 61,
+      "corpus_sentences": 49
+    },
+    {
+      "pmcid": "PMC7867088",
+      "doi": "10.3390/ma14030666",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Corroded Surface Morphology on Ultra-Low Cycle Fatigue of Steel Bridge Piers.",
+      "pool_sentences": 161,
+      "corpus_sentences": 114
+    },
+    {
+      "pmcid": "PMC6631715",
+      "doi": "10.3390/ma12122024",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Modeling Containing Hardening Particles and Grain Orientation for Aluminum Alloy FSW Joints.",
+      "pool_sentences": 192,
+      "corpus_sentences": 122
+    },
+    {
+      "pmcid": "PMC7601125",
+      "doi": "10.3390/ma13204531",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Increasing Fatigue Life of 09Mn2Si Steel by Helical Rolling: Theoretical-Experimental Study on Governing Role of Grain Boundaries.",
+      "pool_sentences": 402,
+      "corpus_sentences": 271
+    },
+    {
+      "pmcid": "PMC9822044",
+      "doi": "10.3390/ma16010365",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The Numerical Fatigue Life Analysis of a Conformal HPDC Mould Core Additively Manufactured from Maraging Steel.",
+      "pool_sentences": 284,
+      "corpus_sentences": 191
+    },
+    {
+      "pmcid": "PMC12734813",
+      "doi": "10.3390/ma18245670",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Laser Shock Peening Times on Low-Cycle Fatigue Properties and Fracture Mechanism of Additive TA15 Titanium Alloy.",
+      "pool_sentences": 161,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC12518543",
+      "doi": "10.1038/s41598-025-19600-8",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "A rapid resistance heating apparatus for thermal shock and fatigue testing of oxidation resistant coatings.",
+      "pool_sentences": 166,
+      "corpus_sentences": 118
+    },
+    {
+      "pmcid": "PMC8125649",
+      "doi": "10.3390/ma14092372",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Low Cycle Fatigue Life Assessment Based on the Accumulated Plastic Strain Energy Density.",
+      "pool_sentences": 157,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC8950987",
+      "doi": "10.3390/ma15062210",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Simplified Approach for the Corrosion Fatigue Assessment of Steel Structures in Aggressive Environments.",
+      "pool_sentences": 250,
+      "corpus_sentences": 150
+    },
+    {
+      "pmcid": "PMC9002832",
+      "doi": "10.3390/s22072540",
+      "year": "2022",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Gaussian Process State Space Model Fusion Physical Model and Residual Analysis for Fatigue Evaluation.",
+      "pool_sentences": 158,
+      "corpus_sentences": 94
+    },
+    {
+      "pmcid": "PMC10151339",
+      "doi": "10.1038/s41597-023-02150-x",
+      "year": "2023",
+      "journal": "Scientific data",
+      "license": "cc by",
+      "title": "Fatigue database of additively manufactured alloys.",
+      "pool_sentences": 286,
+      "corpus_sentences": 183
+    },
+    {
+      "pmcid": "PMC10658384",
+      "doi": "10.1016/j.sdentj.2023.07.014",
+      "year": "2023",
+      "journal": "The Saudi dental journal",
+      "license": "cc by-nc-nd",
+      "title": "Cyclic shear fatigue of orthodontic brackets bonded to enamel using self-adhering flowable composites.",
+      "pool_sentences": 116,
+      "corpus_sentences": 74
+    },
+    {
+      "pmcid": "PMC11432783",
+      "doi": "10.3390/ma17184543",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Investigations of Metallurgical Differences in AISI 347 and Their Influence on Deformation and Transformation Behaviour and Resulting Fatigue Life.",
+      "pool_sentences": 320,
+      "corpus_sentences": 223
+    },
+    {
+      "pmcid": "PMC6982211",
+      "doi": "10.3390/ma13010220",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Low Cycle Fatigue Properties of Sc-Modified AA2519-T62 Extrusion.",
+      "pool_sentences": 95,
+      "corpus_sentences": 69
+    },
+    {
+      "pmcid": "PMC6947212",
+      "doi": "10.3390/ma12244203",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Influences of Horizontal and Vertical Build Orientations and Post-Fabrication Processes on the Fatigue Behavior of Stainless Steel 316L Produced by Selective Laser Melting.",
+      "pool_sentences": 239,
+      "corpus_sentences": 166
+    },
+    {
+      "pmcid": "PMC9709895",
+      "doi": "10.22037/iej.v16i2.31006",
+      "year": "2021",
+      "journal": "Iranian endodontic journal",
+      "license": "cc by-nc-sa",
+      "title": "Evaluation of the Cyclic and Torsional Fatigue Resistance of Thermally Treated Hyflex CM versus Aurum Blue Nickel-titanium Rotary Instruments.",
+      "pool_sentences": 91,
+      "corpus_sentences": 67
+    },
+    {
+      "pmcid": "PMC5744336",
+      "doi": "10.3390/ma10121401",
+      "year": "2017",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Walker Parameter for Mean Stress Correction in Fatigue Testing of Al-7%Si-Mg Alloy Castings.",
+      "pool_sentences": 83,
+      "corpus_sentences": 54
+    },
+    {
+      "pmcid": "PMC7215716",
+      "doi": "10.3390/ma13081948",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Microstructural and Very High Cycle Fatigue (VHCF) Behavior of Ti6Al4V-A Comparative Study.",
+      "pool_sentences": 157,
+      "corpus_sentences": 100
+    },
+    {
+      "pmcid": "PMC13508633",
+      "doi": "10.1016/j.identj.2026.111087",
+      "year": "2026",
+      "journal": "International dental journal",
+      "license": "cc by-nc-nd",
+      "title": "Study on the Effect and Mechanism of Synchronous Irrigation on the Cyclic Fatigue Resistance of Dental Rotary NiTi Instruments.",
+      "pool_sentences": 148,
+      "corpus_sentences": 101
+    },
+    {
+      "pmcid": "PMC12348867",
+      "doi": "10.3390/ma18153542",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Research on Fatigue Life Prediction Method of Spot-Welded Joints Based on Machine Learning.",
+      "pool_sentences": 282,
+      "corpus_sentences": 191
+    },
+    {
+      "pmcid": "PMC8124607",
+      "doi": "10.3390/ma14092331",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Correction: Wang et al. Generalized SCF Formula of Out-Of-Plane Gusset Welded Joints and Assessment of Fatigue Life Extension by Additional Weld. Materials 2021, 14, 1249.",
+      "pool_sentences": 6,
+      "corpus_sentences": 2
+    },
+    {
+      "pmcid": "PMC5457003",
+      "doi": "10.3390/ma9120984",
+      "year": "2016",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fretting Fatigue Experiment and Analysis of AlSi9Cu2Mg Alloy.",
+      "pool_sentences": 147,
+      "corpus_sentences": 97
+    },
+    {
+      "pmcid": "PMC6567059",
+      "doi": "10.3390/ma12101615",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Improvement of Cyclic Void Growth Model for Ultra-Low Cycle Fatigue Prediction of Steel Bridge Piers.",
+      "pool_sentences": 144,
+      "corpus_sentences": 97
+    },
+    {
+      "pmcid": "PMC8481248",
+      "doi": "10.1038/s41598-021-98631-3",
+      "year": "2021",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Influence of relative density on quasi-static and fatigue failure of lattice structures in Ti6Al4V produced by laser powder bed fusion.",
+      "pool_sentences": 202,
+      "corpus_sentences": 132
+    },
+    {
+      "pmcid": "PMC5037585",
+      "doi": "10.1186/s13018-016-0439-1",
+      "year": "2016",
+      "journal": "Journal of orthopaedic surgery and research",
+      "license": "cc by",
+      "title": "The effect of contouring on fatigue resistance of three types of fracture fixation plates.",
+      "pool_sentences": 88,
+      "corpus_sentences": 57
+    },
+    {
+      "pmcid": "PMC6264088",
+      "doi": "10.3390/s18113973",
+      "year": "2018",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Monitoring Fatigue Damage of Modular Bridge Expansion Joints Using Piezoceramic Transducers.",
+      "pool_sentences": 198,
+      "corpus_sentences": 132
+    },
+    {
+      "pmcid": "PMC9091384",
+      "doi": "10.13107/jocr.2022.v12.i01.2618",
+      "year": "2022",
+      "journal": "Journal of orthopaedic case reports",
+      "license": "cc by-nc-sa",
+      "title": "Fatigue Failure of Outer Metal Dome of Bipolar Monoblock Shell in Hemiarthroplasty Hip: Case Report and Review of Literature.",
+      "pool_sentences": 85,
+      "corpus_sentences": 61
+    },
+    {
+      "pmcid": "PMC10672576",
+      "doi": null,
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Shot Peening on the Low-Cycle Fatigue Behavior of an AA2519-T62 Friction-Stir-Welded Butt Joint",
+      "pool_sentences": 115,
+      "corpus_sentences": 76
+    },
+    {
+      "pmcid": "PMC10837797",
+      "doi": "10.4317/jced.60870",
+      "year": "2024",
+      "journal": "Journal of clinical and experimental dentistry",
+      "license": "cc by",
+      "title": "Comparison of dynamic cyclic fatigue resistance of Reciproc\u00ae Blue and WaveOne\u00ae Gold after sterilization and/or immersion in sodium hypochlorite.",
+      "pool_sentences": 146,
+      "corpus_sentences": 100
+    },
+    {
+      "pmcid": "PMC10895534",
+      "doi": "10.6026/973206300191348",
+      "year": "2023",
+      "journal": "Bioinformation",
+      "license": "cc by",
+      "title": "Effect of NaOCl on cyclic fatigue resistance.",
+      "pool_sentences": 119,
+      "corpus_sentences": 87
+    },
+    {
+      "pmcid": "PMC7998464",
+      "doi": "10.3390/ma14061331",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Solution Annealing on Fatigue Crack Propagation in the AISI 304L TRIP Steel.",
+      "pool_sentences": 168,
+      "corpus_sentences": 112
+    },
+    {
+      "pmcid": "PMC5551741",
+      "doi": "10.3390/ma10070698",
+      "year": "2017",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Combined High and Low Cycle Fatigue Model for Life Prediction of Turbine Blades.",
+      "pool_sentences": 118,
+      "corpus_sentences": 89
+    },
+    {
+      "pmcid": "PMC11677222",
+      "doi": "10.3390/ma17246112",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Study on Fatigue Behavior and Fracture Mechanism of LMD Ti-6.5Al-3.5Mo-1.5Zr-0.3Si Alloy Based on Microstructure.",
+      "pool_sentences": 167,
+      "corpus_sentences": 114
+    },
+    {
+      "pmcid": "PMC6213901",
+      "doi": "10.3390/ma11101920",
+      "year": "2018",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Damage Evaluation Using Nonlinear Lamb Waves with Quasi Phase-Velocity Matching at Low Frequency.",
+      "pool_sentences": 170,
+      "corpus_sentences": 120
+    },
+    {
+      "pmcid": "PMC10882158",
+      "doi": "10.1016/j.vas.2024.100341",
+      "year": "2024",
+      "journal": "Veterinary and animal science",
+      "license": "cc by-nc-nd",
+      "title": "Fatigue analysis of canine tracheal stents using the finite element method.",
+      "pool_sentences": 103,
+      "corpus_sentences": 70
+    },
+    {
+      "pmcid": "PMC12113137",
+      "doi": "10.3390/medicina61050830",
+      "year": "2025",
+      "journal": "Medicina (Kaunas, Lithuania)",
+      "license": "cc by",
+      "title": "Understanding Cyclic Fatigue in Three Nickel-Titanium Pediatric Files: An In Vitro Study for Enhanced Patient Care.",
+      "pool_sentences": 143,
+      "corpus_sentences": 91
+    },
+    {
+      "pmcid": "PMC8510334",
+      "doi": "10.3390/ma14195854",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Steel Fibre Reinforcement on Flexural Fatigue Behaviour of Notched Structural Concrete.",
+      "pool_sentences": 162,
+      "corpus_sentences": 106
+    },
+    {
+      "pmcid": "PMC6715821",
+      "doi": "10.1016/j.dib.2019.104338",
+      "year": "2019",
+      "journal": "Data in brief",
+      "license": "cc by",
+      "title": "Data of dynamic microscale strain distributions of Ti-6Al-4V alloys in dwell fatigue tests.",
+      "pool_sentences": 31,
+      "corpus_sentences": 17
+    },
+    {
+      "pmcid": "PMC7321290",
+      "doi": "10.3390/ma13112470",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Comparative Analysis of Fatigue EnergyCharacteristics of S355J2 Steel Subjected toMulti-Axis Loads.",
+      "pool_sentences": 181,
+      "corpus_sentences": 116
+    },
+    {
+      "pmcid": "PMC9698355",
+      "doi": "10.3390/mi13111890",
+      "year": "2022",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Study on the Fatigue Strength of Welding Line in Injection Molding Products under Different Tensile Conditions.",
+      "pool_sentences": 109,
+      "corpus_sentences": 69
+    },
+    {
+      "pmcid": "PMC9328485",
+      "doi": "10.4317/jced.59747",
+      "year": "2022",
+      "journal": "Journal of clinical and experimental dentistry",
+      "license": "cc by",
+      "title": "A comparative study of cyclic fatigue of 6 endodontic systems. An in vitro study.",
+      "pool_sentences": 74,
+      "corpus_sentences": 44
+    },
+    {
+      "pmcid": "PMC7915358",
+      "doi": "10.3390/ma14040737",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Failure from Inner Surfaces of Additive Manufactured Ti-6Al-4V Components.",
+      "pool_sentences": 108,
+      "corpus_sentences": 71
+    },
+    {
+      "pmcid": "PMC9784356",
+      "doi": "10.3390/ma15248808",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Statistical Characterization of Strain-Controlled Low-Cycle Fatigue Behavior of Structural Steels and Aluminium Material.",
+      "pool_sentences": 213,
+      "corpus_sentences": 137
+    },
+    {
+      "pmcid": "PMC7061136",
+      "doi": "10.1155/2020/3190938",
+      "year": "2020",
+      "journal": "International journal of dentistry",
+      "license": "cc by",
+      "title": "Cyclic Fatigue Comparison of TruNatomy, Twisted File, and ProTaper Next Rotary Systems.",
+      "pool_sentences": 60,
+      "corpus_sentences": 35
+    },
+    {
+      "pmcid": "PMC6265854",
+      "doi": "10.3390/ma11112261",
+      "year": "2018",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Promising Tensile and Fatigue Properties of Commercially Pure Titanium Processed by Rotary Swaging and Annealing Treatment.",
+      "pool_sentences": 123,
+      "corpus_sentences": 93
+    },
+    {
+      "pmcid": "PMC6804112",
+      "doi": "10.3390/ma12193261",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Flexural Fatigue Performance of Steel Fiber Reinforced Expanded-Shales Lightweight Concrete Superposed Beams with Initial Static-Load Cracks.",
+      "pool_sentences": 169,
+      "corpus_sentences": 124
+    },
+    {
+      "pmcid": "PMC13136381",
+      "doi": "10.1038/s41467-026-70290-w",
+      "year": "2026",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "High-accuracy fatigue life prediction and early fracture warning for ferromagnetic metals via spin correlation amplification.",
+      "pool_sentences": 382,
+      "corpus_sentences": 250
+    },
+    {
+      "pmcid": "PMC9821714",
+      "doi": "10.3390/ma16010032",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Short-Time Fatigue Life Estimation for Heat Treated Low Carbon Steels by Applying Electrical Resistance and Magnetic Barkhausen Noise.",
+      "pool_sentences": 162,
+      "corpus_sentences": 116
+    },
+    {
+      "pmcid": "PMC12348550",
+      "doi": "10.3390/ma18153551",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Corrosion-Induced Damage on Fatigue Behavior Degradation of ZCuAl8Mn13Fe3Ni2 Nickel-Aluminum Bronze Under Accelerated Conditions.",
+      "pool_sentences": 277,
+      "corpus_sentences": 179
+    },
+    {
+      "pmcid": "PMC6597091",
+      "doi": "10.1371/journal.pone.0218973",
+      "year": "2019",
+      "journal": "PloS one",
+      "license": "cc by",
+      "title": "Computational modeling of fatigue crack propagation in butt welded joints subjected to axial load.",
+      "pool_sentences": 119,
+      "corpus_sentences": 85
+    },
+    {
+      "pmcid": "PMC11595802",
+      "doi": "10.3390/ma17225677",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Steel Catenary Riser Fatigue Assessment: Fracture Mechanics Approach Versus S-N Curve Method.",
+      "pool_sentences": 152,
+      "corpus_sentences": 104
+    },
+    {
+      "pmcid": "PMC10096990",
+      "doi": "10.3390/polym15071767",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Fatigue and Wear Performance of Autoclave-Processed and Vacuum-Infused Carbon Fibre Reinforced Polymer Gears.",
+      "pool_sentences": 327,
+      "corpus_sentences": 210
+    },
+    {
+      "pmcid": "PMC7435962",
+      "doi": "10.3390/ma13153248",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Mechanism of Precipitate Microstructure Affecting Fatigue Behavior of 7020 Aluminum Alloy.",
+      "pool_sentences": 200,
+      "corpus_sentences": 134
+    },
+    {
+      "pmcid": "PMC9000152",
+      "doi": "10.3390/ma15072367",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Study of Microstructure and Fatigue in Aluminum/Steel Butt Joints Made by CMT Fusion-Brazing Technology.",
+      "pool_sentences": 177,
+      "corpus_sentences": 128
+    },
+    {
+      "pmcid": "PMC11820652",
+      "doi": "10.3390/ma18030692",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Static and Fatigue Properties of Rhenium-Alloyed Inconel 718 Produced by Powder Bed Fusion Additive Manufacturing.",
+      "pool_sentences": 221,
+      "corpus_sentences": 150
+    },
+    {
+      "pmcid": "PMC10055788",
+      "doi": "10.3390/mi14030588",
+      "year": "2023",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Effects of Voids on Thermal Fatigue Reliability of Solder Joints on Inner Rings in Ball Grid Array Packaging by Finite Element Analysis.",
+      "pool_sentences": 134,
+      "corpus_sentences": 85
+    },
+    {
+      "pmcid": "PMC9104331",
+      "doi": "10.3390/ma15093403",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "An Approach for Predicting the Low-Cycle-Fatigue Crack Initiation Life of Ultrafine-Grained Aluminum Alloy Considering Inhomogeneous Deformation and Microscale Multiaxial Strain.",
+      "pool_sentences": 226,
+      "corpus_sentences": 150
+    },
+    {
+      "pmcid": "PMC7013610",
+      "doi": "10.3390/ma13020294",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Study on Short Fatigue Crack Behaviour of LZ50 Steel Under Non-Proportional Loading.",
+      "pool_sentences": 107,
+      "corpus_sentences": 74
+    },
+    {
+      "pmcid": "PMC11173911",
+      "doi": "10.3390/ma17112576",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Optimizing the Utilization of Steel Slag in Cement-Stabilized Base Layers: Insights from Freeze-Thaw and Fatigue Testing.",
+      "pool_sentences": 206,
+      "corpus_sentences": 141
+    },
+    {
+      "pmcid": "PMC5615712",
+      "doi": "10.3390/ma10091057",
+      "year": "2017",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Properties of the Ultra-High Strength Steel TM210A.",
+      "pool_sentences": 84,
+      "corpus_sentences": 61
+    },
+    {
+      "pmcid": "PMC10707544",
+      "doi": "10.3390/ma16237420",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "An Equivalent Structural Stress-Based Frequency-Domain Fatigue Assessment Approach for Welded Structures under Random Loading.",
+      "pool_sentences": 190,
+      "corpus_sentences": 129
+    },
+    {
+      "pmcid": "PMC12625016",
+      "doi": "10.1186/s12903-025-07164-y",
+      "year": "2025",
+      "journal": "BMC oral health",
+      "license": "cc by-nc-nd",
+      "title": "Cyclic fatigue resistance, number of uses, and morphological/chemical analysis of RCS Rainbow Files, VDW Rotate and ProTaper Ultimate: in vitro study.",
+      "pool_sentences": 183,
+      "corpus_sentences": 134
+    },
+    {
+      "pmcid": "PMC9693051",
+      "doi": "10.3390/ma15228010",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Characteristics of 7050-T7451 Aluminum Alloy Friction Stir Welding Joints and the Stress Ratio Effect.",
+      "pool_sentences": 116,
+      "corpus_sentences": 68
+    },
+    {
+      "pmcid": "PMC9694675",
+      "doi": "10.3390/ma15227927",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Low Cycle Fatigue Behavior of Plastically Pre-Strained HSLA S355MC and S460MC Steels.",
+      "pool_sentences": 138,
+      "corpus_sentences": 88
+    },
+    {
+      "pmcid": "PMC13165340",
+      "doi": "10.3390/ma19091770",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Corrosion, Fatigue and Corrosion Protection of Metals and Their Alloys in Various Environments.",
+      "pool_sentences": 61,
+      "corpus_sentences": 40
+    },
+    {
+      "pmcid": "PMC12734833",
+      "doi": "10.3390/ma18245614",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Failure Mechanisms and Changes in Load-Bearing Capacity of Sinusoidal Corrugated Girders Under Fatigue and Static Loading.",
+      "pool_sentences": 390,
+      "corpus_sentences": 262
+    },
+    {
+      "pmcid": "PMC10938357",
+      "doi": "10.14744/eej.2023.71676",
+      "year": "2024",
+      "journal": "European endodontic journal",
+      "license": "cc by-nc",
+      "title": "Impact of Angle of File Access and Location of Canal Curvature on the Dynamic Cyclic Fatigue of Nickel Titanium Rotary Instruments.",
+      "pool_sentences": 87,
+      "corpus_sentences": 59
+    },
+    {
+      "pmcid": "PMC6001791",
+      "doi": "10.1002/jbm.a.36380",
+      "year": "2018",
+      "journal": "Journal of biomedical materials research. Part A",
+      "license": "cc by-nc",
+      "title": "Fatigue and quasi-static mechanical behavior of bio-degradable porous biomaterials based on magnesium alloys.",
+      "pool_sentences": 185,
+      "corpus_sentences": 118
+    },
+    {
+      "pmcid": "PMC6696314",
+      "doi": "10.3390/ma12152471",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Impact of Electrocautery on Fatigue Life of Spinal Fusion Constructs-An In Vitro Biomechanical Study.",
+      "pool_sentences": 138,
+      "corpus_sentences": 94
+    },
+    {
+      "pmcid": "PMC12009417",
+      "doi": "10.1038/s41598-025-89959-1",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "The influence of ultrasonic shot peening on the microstructure and fatigue behavior of TC17 alloy.",
+      "pool_sentences": 134,
+      "corpus_sentences": 83
+    },
+    {
+      "pmcid": "PMC8707568",
+      "doi": "10.3390/ma14247895",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Microstructure and Defect-Based Fatigue Mechanism Evaluation of Brazed Coaxial Ti/Al2O3 Joints for Enhanced Endoprosthesis Design.",
+      "pool_sentences": 176,
+      "corpus_sentences": 124
+    },
+    {
+      "pmcid": "PMC4483337",
+      "doi": "10.4317/jced.52267",
+      "year": "2015",
+      "journal": "Journal of clinical and experimental dentistry",
+      "license": "cc by",
+      "title": "Post-fatigue fracture resistance of metal core crowns: press-on metal ceramic versus a conventional veneering system.",
+      "pool_sentences": 94,
+      "corpus_sentences": 57
+    },
+    {
+      "pmcid": "PMC9403619",
+      "doi": "10.1007/s10853-009-3855-3",
+      "year": "2009",
+      "journal": "Journal of materials science",
+      "license": "cc by-nc",
+      "title": "Failure behavior of coated nickel-based superalloy under thermomechanical fatigue.",
+      "pool_sentences": 119,
+      "corpus_sentences": 74
+    },
+    {
+      "pmcid": "PMC4854742",
+      "doi": null,
+      "year": "2015",
+      "journal": "Journal of dentistry (Tehran, Iran)",
+      "license": null,
+      "title": "Comparison of Cyclic Fatigue Resistance of Five Nickel Titanium Rotary File Systems with Different Manufacturing Techniques.",
+      "pool_sentences": 112,
+      "corpus_sentences": 68
+    },
+    {
+      "pmcid": "PMC5459176",
+      "doi": "10.3390/ma10020133",
+      "year": "2017",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Multi-Pass Ultrasonic Surface Rolling on the Mechanical and Fatigue Properties of HIP Ti-6Al-4V Alloy.",
+      "pool_sentences": 195,
+      "corpus_sentences": 137
+    },
+    {
+      "pmcid": "PMC11051539",
+      "doi": "10.3390/jfb15040085",
+      "year": "2024",
+      "journal": "Journal of functional biomaterials",
+      "license": "cc by",
+      "title": "Assessment of the Cyclic Fatigue Performance of the Novel Protaper Ultimate File System Used in Different Kinematics: An In Vitro Study.",
+      "pool_sentences": 105,
+      "corpus_sentences": 68
+    },
+    {
+      "pmcid": "PMC9457783",
+      "doi": "10.3390/ma15176114",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "In Situ Measurement of Cyclic Plastic Zone and Internal Strain Response of Q&P Steel near Fatigue Crack Tip Region Based on Micro-DIC.",
+      "pool_sentences": 163,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC13284194",
+      "doi": "10.1038/s41598-026-58449-3",
+      "year": "2026",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Wear, fatigue characteristics, and antibacterial performance of UHMWPE reinforced with HAP+TiO2 for biomedical applications.",
+      "pool_sentences": 237,
+      "corpus_sentences": 159
+    },
+    {
+      "pmcid": "PMC4487288",
+      "doi": "10.6028/jres.119.002",
+      "year": "2014",
+      "journal": "Journal of research of the National Institute of Standards and Technology",
+      "license": "cc0",
+      "title": "Sensitivity Analysis of Fatigue Crack Growth Model for API Steels in Gaseous Hydrogen.",
+      "pool_sentences": 88,
+      "corpus_sentences": 52
+    },
+    {
+      "pmcid": "PMC10488850",
+      "doi": "10.3390/ma16176003",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "FEM Simulations of Fatigue Crack Initiation in the Oligocrystalline Microstructure of Stents.",
+      "pool_sentences": 188,
+      "corpus_sentences": 129
+    },
+    {
+      "pmcid": "PMC6888446",
+      "doi": "10.3390/ma12223728",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fracture and Fatigue of Titanium Narrow Dental Implants: New Trends in Order to Improve the Mechanical Response.",
+      "pool_sentences": 97,
+      "corpus_sentences": 59
+    },
+    {
+      "pmcid": "PMC7514448",
+      "doi": null,
+      "year": "2019",
+      "journal": "Entropy (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "An Entropy-Based Failure Prediction Model for the Creep and Fatigue of Metallic Materials",
+      "pool_sentences": 152,
+      "corpus_sentences": 96
+    },
+    {
+      "pmcid": "PMC9605430",
+      "doi": "10.3390/ma15207144",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "High-Cycle Fatigue Behavior and Corresponding Microscale Deformation Mechanisms of Metastable Ti55511 Alloy with A Basket-Weave Microstructure.",
+      "pool_sentences": 112,
+      "corpus_sentences": 79
+    },
+    {
+      "pmcid": "PMC7520684",
+      "doi": "10.1155/2020/8830163",
+      "year": "2020",
+      "journal": "International journal of dentistry",
+      "license": "cc by",
+      "title": "Resistance to Cyclic Fatigue of Nickel-Titanium Files Immersed in Sodium Hypochlorite at Body Temperature.",
+      "pool_sentences": 94,
+      "corpus_sentences": 64
+    },
+    {
+      "pmcid": "PMC8234405",
+      "doi": "10.3390/ma14123348",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Robust Numerical Methodology for Fatigue Damage Evolution Simulation in Composites.",
+      "pool_sentences": 172,
+      "corpus_sentences": 119
+    },
+    {
+      "pmcid": "PMC5458989",
+      "doi": "10.3390/ma10050532",
+      "year": "2017",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Static and Fatigue Behavior Investigation of Artificial Notched Steel Reinforcement.",
+      "pool_sentences": 120,
+      "corpus_sentences": 87
+    },
+    {
+      "pmcid": "PMC5459094",
+      "doi": "10.3390/ma10050485",
+      "year": "2017",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Hydrogen Assisted Cracking in Pearlitic Steel Rods: The Role of Residual Stresses Generated by Fatigue Precracking.",
+      "pool_sentences": 130,
+      "corpus_sentences": 81
+    },
+    {
+      "pmcid": "PMC11312799",
+      "doi": "10.3390/ma17153836",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Crack Monitoring Method Based on the Lamb Wave Damage Index.",
+      "pool_sentences": 220,
+      "corpus_sentences": 140
+    },
+    {
+      "pmcid": "PMC4053613",
+      "doi": "10.4103/1305-7456.115407",
+      "year": "2013",
+      "journal": "European journal of dentistry",
+      "license": "cc by-nc-sa",
+      "title": "Stability of external and internal implant connections after a fatigue test.",
+      "pool_sentences": 82,
+      "corpus_sentences": 57
+    },
+    {
+      "pmcid": "PMC7700305",
+      "doi": "10.3390/jcm9113755",
+      "year": "2020",
+      "journal": "Journal of clinical medicine",
+      "license": "cc by",
+      "title": "The Influence of NiTi Alloy on the Cyclic Fatigue Resistance of Endodontic Files.",
+      "pool_sentences": 100,
+      "corpus_sentences": 67
+    },
+    {
+      "pmcid": "PMC8831527",
+      "doi": "10.1038/s41467-022-28481-8",
+      "year": "2022",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Atomic mechanism of near threshold fatigue crack growth in vacuum.",
+      "pool_sentences": 153,
+      "corpus_sentences": 93
+    },
+    {
+      "pmcid": "PMC8123035",
+      "doi": "10.3390/ma14092155",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Cyclic Fatigue of Dental NiTi Instruments after Plasma Nitriding.",
+      "pool_sentences": 111,
+      "corpus_sentences": 70
+    },
+    {
+      "pmcid": "PMC13363152",
+      "doi": "10.3390/ma19132710",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Microstructural Change Due to Aging and Its Effect on Fatigue Properties in Sn-Sb-Ag-Ni-Ge Alloy.",
+      "pool_sentences": 123,
+      "corpus_sentences": 88
+    },
+    {
+      "pmcid": "PMC12028867",
+      "doi": "10.3390/ma18081887",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Low-Cycle Fatigue Life Prediction of Titanium-Based Intermetallic Alloys Using Machine Learning and Finite Element Analysis.",
+      "pool_sentences": 165,
+      "corpus_sentences": 113
+    },
+    {
+      "pmcid": "PMC9369594",
+      "doi": "10.3390/ma15155378",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Influence of Heat and Thermochemical Treatment Parameters on C75 Steel Fatigue Resistance.",
+      "pool_sentences": 176,
+      "corpus_sentences": 108
+    },
+    {
+      "pmcid": "PMC10733410",
+      "doi": "10.1038/s41598-023-49846-z",
+      "year": "2023",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Strain-based method for fatigue failure prediction of additively manufactured lattice structures.",
+      "pool_sentences": 221,
+      "corpus_sentences": 141
+    },
+    {
+      "pmcid": "PMC12298908",
+      "doi": "10.3390/ma18143309",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Crystal Plasticity Phase-Field Study on the Effects of Grain Boundary Degradation on the Fatigue Behavior of a Nickel-Based Superalloy.",
+      "pool_sentences": 315,
+      "corpus_sentences": 208
+    },
+    {
+      "pmcid": "PMC9412696",
+      "doi": "10.3390/ma15165617",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Importance of Build Design Parameters to the Fatigue Strength of Ti6Al4V in Electron Beam Melting Additive Manufacturing.",
+      "pool_sentences": 256,
+      "corpus_sentences": 171
+    },
+    {
+      "pmcid": "PMC12898354",
+      "doi": "10.3390/ma19030514",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The Study of Low-Cycle Fatigue Properties and Microstructure Along the Thickness Direction of a 460 MPa Marine Engineering Steel.",
+      "pool_sentences": 191,
+      "corpus_sentences": 124
+    },
+    {
+      "pmcid": "PMC8123767",
+      "doi": "10.3390/ma14092251",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Performance Evaluation of AZ31B Magnesium Alloy Based on Statistical Analysis of Self-Heating.",
+      "pool_sentences": 280,
+      "corpus_sentences": 193
+    },
+    {
+      "pmcid": "PMC6163757",
+      "doi": "10.3390/ma11091778",
+      "year": "2018",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Stress Ratio and Notch Effects on the Very High Cycle Fatigue Properties of a Near-Alpha Titanium Alloy.",
+      "pool_sentences": 198,
+      "corpus_sentences": 140
+    },
+    {
+      "pmcid": "PMC12734418",
+      "doi": "10.3390/ma18245621",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Evaluation of Lower Limit of Fatigue Strength in High Cycle and Very High Cycle Fatigue Regime.",
+      "pool_sentences": 166,
+      "corpus_sentences": 114
+    },
+    {
+      "pmcid": "PMC5615738",
+      "doi": "10.3390/ma10091084",
+      "year": "2017",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Multiple Fatigue Failure Behaviors and Long-Life Prediction Approach of Carburized Cr-Ni Steel with Variable Stress Ratio.",
+      "pool_sentences": 227,
+      "corpus_sentences": 159
+    },
+    {
+      "pmcid": "PMC11766943",
+      "doi": "10.3390/ma18020230",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Life Prediction of FRP-Strengthened Reinforced Concrete Beams Based on Soft Computing Techniques.",
+      "pool_sentences": 138,
+      "corpus_sentences": 90
+    },
+    {
+      "pmcid": "PMC11881276",
+      "doi": "10.1186/s12903-025-05708-w",
+      "year": "2025",
+      "journal": "BMC oral health",
+      "license": "cc by-nc-nd",
+      "title": "Thermal behavior and cyclic fatigue resistance of three contemporary NiTi heat-treated single-file systems: metallurgical study.",
+      "pool_sentences": 175,
+      "corpus_sentences": 111
+    },
+    {
+      "pmcid": "PMC7770403",
+      "doi": "10.34172/joddd.2020.032",
+      "year": "2020",
+      "journal": "Journal of dental research, dental clinics, dental prospects",
+      "license": "cc by",
+      "title": "Cyclic fatigue resistance of VDW.ROTATE and Reciproc Blue nickel-titanium files at root canal temperature.",
+      "pool_sentences": 82,
+      "corpus_sentences": 53
+    },
+    {
+      "pmcid": "PMC7143173",
+      "doi": "10.3390/ma13061429",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue of Narrow Dental Implants: Influence of the Hardening Method.",
+      "pool_sentences": 109,
+      "corpus_sentences": 70
+    },
+    {
+      "pmcid": "PMC12472067",
+      "doi": "10.3390/ma18184336",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Stress-Strain Hysteresis Loop-Based Machine Learning Models for Predicting Metal Fatigue Life Under Uncertainty.",
+      "pool_sentences": 221,
+      "corpus_sentences": 149
+    },
+    {
+      "pmcid": "PMC9785840",
+      "doi": "10.3390/jfb13040281",
+      "year": "2022",
+      "journal": "Journal of functional biomaterials",
+      "license": "cc by",
+      "title": "Comparison of Regular and Speed Sintering on Low-Temperature Degradation and Fatigue Resistance of Translucent Zirconia Crowns for Implants: An In Vitro Study.",
+      "pool_sentences": 98,
+      "corpus_sentences": 73
+    },
+    {
+      "pmcid": "PMC12428905",
+      "doi": "10.3390/ma18173931",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Origin of Bilinear Low Cycle Fatigue in Ti-6Al-4V Alloy: A Crystal Plasticity Study.",
+      "pool_sentences": 242,
+      "corpus_sentences": 162
+    },
+    {
+      "pmcid": "PMC7514600",
+      "doi": "10.3390/e21020117",
+      "year": "2019",
+      "journal": "Entropy (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "An Entropy-Based Neighborhood Rough Set and PSO-SVRM Model for Fatigue Life Prediction of Titanium Alloy Welded Joints.",
+      "pool_sentences": 143,
+      "corpus_sentences": 92
+    },
+    {
+      "pmcid": "PMC11693883",
+      "doi": "10.1016/j.heliyon.2024.e40181",
+      "year": "2024",
+      "journal": "Heliyon",
+      "license": "cc by-nc",
+      "title": "Improvement of beam type element models of welded tubular junctions for fatigue analysis using artificial neural networks.",
+      "pool_sentences": 146,
+      "corpus_sentences": 92
+    },
+    {
+      "pmcid": "PMC6415018",
+      "doi": "10.3390/polym10030264",
+      "year": "2018",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Prestressed Unbonded Reinforcement System with Multiple CFRP Plates for Fatigue Strengthening of Steel Members.",
+      "pool_sentences": 126,
+      "corpus_sentences": 89
+    },
+    {
+      "pmcid": "PMC13467639",
+      "doi": "10.3390/ma19153301",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Unusual Failures Associated with Cracks That Nucleated from Corrosion Damage in Fatigue Tests on AA 7085-T7452 Specimens.",
+      "pool_sentences": 232,
+      "corpus_sentences": 146
+    },
+    {
+      "pmcid": "PMC7765217",
+      "doi": "10.3390/ma13245711",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The Effect of Baking Heat Treatment on the Fatigue Strength and Life of Shot Peened 4340M Landing Gear Steel.",
+      "pool_sentences": 112,
+      "corpus_sentences": 86
+    },
+    {
+      "pmcid": "PMC7578988",
+      "doi": "10.3390/ma13194282",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effects of Molybdenum Addition on Rolling Contact Fatigue of Locomotive Wheels under Rolling-Sliding Condition.",
+      "pool_sentences": 217,
+      "corpus_sentences": 139
+    },
+    {
+      "pmcid": "PMC5509091",
+      "doi": "10.3390/ma9080641",
+      "year": "2016",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Healing of Fatigue Crack in 1045 Steel by Using Eddy Current Treatment.",
+      "pool_sentences": 149,
+      "corpus_sentences": 96
+    },
+    {
+      "pmcid": "PMC11722642",
+      "doi": "10.3390/s25010150",
+      "year": "2024",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Experiment and Failure Mechanism Analysis of Aircraft Titanium Alloy Wing-Body Connection Joint.",
+      "pool_sentences": 215,
+      "corpus_sentences": 138
+    },
+    {
+      "pmcid": "PMC5506967",
+      "doi": "10.3390/ma10040388",
+      "year": "2017",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Analysis of the Mechanical Behavior, Creep Resistance and Uniaxial Fatigue Strength of Martensitic Steel X46Cr13.",
+      "pool_sentences": 175,
+      "corpus_sentences": 107
+    },
+    {
+      "pmcid": "PMC7239677",
+      "doi": "10.5395/rde.2020.45.e25",
+      "year": "2020",
+      "journal": "Restorative dentistry & endodontics",
+      "license": "cc by-nc",
+      "title": "Influence of autoclave sterilization procedures on the cyclic fatigue resistance of heat-treated nickel-titanium instruments: a systematic review.",
+      "pool_sentences": 122,
+      "corpus_sentences": 75
+    },
+    {
+      "pmcid": "PMC12986619",
+      "doi": "10.3390/nano16050321",
+      "year": "2026",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Comprehensive Review on the Enhancement Mechanism of Fatigue Performance in Titanium Alloys via Laser Shock Peening.",
+      "pool_sentences": 169,
+      "corpus_sentences": 114
+    },
+    {
+      "pmcid": "PMC12303124",
+      "doi": "10.14744/eej.2025.95866",
+      "year": "2025",
+      "journal": "European endodontic journal",
+      "license": "cc by-nc",
+      "title": "Influence of Thermal Pretreatments on the Cyclic Fatigue Resistance of Novel Reciprocating Nickel-Titanium Files: A Comparison of Low- and High-Temperature Modified Systems.",
+      "pool_sentences": 151,
+      "corpus_sentences": 93
+    },
+    {
+      "pmcid": "PMC8123902",
+      "doi": "10.3390/ma14092256",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Evaluation of the Cyclic Fatigue of Two Single Files at Body and Room Temperature with Different Radii of Curvature.",
+      "pool_sentences": 98,
+      "corpus_sentences": 61
+    },
+    {
+      "pmcid": "PMC7287896",
+      "doi": "10.3390/ma13102381",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Microstructure and Low Cycle Fatigue Properties of AA5083 H111 Friction Stir Welded Joint.",
+      "pool_sentences": 131,
+      "corpus_sentences": 89
+    },
+    {
+      "pmcid": "PMC7412324",
+      "doi": "10.3390/ma13143121",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Corrosion and Surface Finishing on Fatigue Behavior of Friction Stir Welded EN AW-5754 Aluminum Alloy Using Various Tool Configurations.",
+      "pool_sentences": 232,
+      "corpus_sentences": 162
+    },
+    {
+      "pmcid": "PMC9860982",
+      "doi": "10.3390/ma16020701",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Experimental and Theoretical Study on the Fatigue Crack Propagation in Stud Shear Connectors.",
+      "pool_sentences": 198,
+      "corpus_sentences": 134
+    },
+    {
+      "pmcid": "PMC13073364",
+      "doi": "10.3390/ma19071284",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Study on the Relation Between Polished Surface Integrity and Fatigue Behavior of Low-Alloy Steel.",
+      "pool_sentences": 246,
+      "corpus_sentences": 171
+    },
+    {
+      "pmcid": "PMC6064018",
+      "doi": "10.22037/iej.v13i3.18637",
+      "year": "2018",
+      "journal": "Iranian endodontic journal",
+      "license": "cc by",
+      "title": "Cyclic Fatigue Resistance of Heat-Treated Nickel-Titanium Instruments.",
+      "pool_sentences": 80,
+      "corpus_sentences": 54
+    },
+    {
+      "pmcid": "PMC10971635",
+      "doi": "10.3390/jcm13061632",
+      "year": "2024",
+      "journal": "Journal of clinical medicine",
+      "license": "cc by",
+      "title": "Influence of Narrow Titanium Dental Implant Diameter on Fatigue Behavior: A Comparison between Unitary and Splinted Implants.",
+      "pool_sentences": 121,
+      "corpus_sentences": 83
+    },
+    {
+      "pmcid": "PMC7916768",
+      "doi": "10.3390/ma14040856",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Test of 6082 Aluminum Alloy under Random Load with Controlled Kurtosis.",
+      "pool_sentences": 97,
+      "corpus_sentences": 65
+    },
+    {
+      "pmcid": "PMC10744865",
+      "doi": "10.3390/ma16247552",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "An Overview on Fatigue of High-Entropy Alloys.",
+      "pool_sentences": 304,
+      "corpus_sentences": 200
+    },
+    {
+      "pmcid": "PMC8399811",
+      "doi": "10.3390/ma14164724",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Energy Dissipated in Fatigue and Creep Conditions.",
+      "pool_sentences": 162,
+      "corpus_sentences": 113
+    },
+    {
+      "pmcid": "PMC7757954",
+      "doi": "10.14744/eej.2017.17012",
+      "year": "2017",
+      "journal": "European endodontic journal",
+      "license": "cc by-nc",
+      "title": "Influence of Continuous or Reciprocating Optimum Torque Reverse Motion on Cyclic Fatigue Resistance of Two Single-File Nickel-Titanium Rotary Instruments.",
+      "pool_sentences": 93,
+      "corpus_sentences": 69
+    },
+    {
+      "pmcid": "PMC5459140",
+      "doi": "10.3390/ma10020155",
+      "year": "2017",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fretting Fatigue with Cylindrical-On-Flat Contact: Crack Nucleation, Crack Path and Fatigue Life.",
+      "pool_sentences": 218,
+      "corpus_sentences": 145
+    },
+    {
+      "pmcid": "PMC13514897",
+      "doi": "10.3390/ma19163509",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "High-Strength Steel in Civil Engineering Structures: A Review of Material Behaviour, Durability, Fatigue and Component Performance.",
+      "pool_sentences": 287,
+      "corpus_sentences": 184
+    },
+    {
+      "pmcid": "PMC8704409",
+      "doi": "10.3390/ma14247653",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Investigation of the Fatigue Stress of Orthotropic Steel Decks Based on an Arch Bridge with the Application of the Arlequin Method.",
+      "pool_sentences": 131,
+      "corpus_sentences": 77
+    },
+    {
+      "pmcid": "PMC7688033",
+      "doi": "10.4103/1735-3327.292069",
+      "year": "2020",
+      "journal": "Dental research journal",
+      "license": "cc by-nc-sa",
+      "title": "Effect of deep cryogenic treatment on cyclic fatigue resistance of controlled memory wire nickel-titanium rotary instruments.",
+      "pool_sentences": 95,
+      "corpus_sentences": 70
+    },
+    {
+      "pmcid": "PMC10672935",
+      "doi": null,
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Research on Surface Integrity and Fatigue Properties in the Turning of TC17 Titanium Alloy Based on the Response Surface Method",
+      "pool_sentences": 187,
+      "corpus_sentences": 125
+    },
+    {
+      "pmcid": "PMC7515188",
+      "doi": "10.3390/e21070685",
+      "year": "2019",
+      "journal": "Entropy (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Thermodynamics of Fatigue: Degradation-Entropy Generation Methodology for System and Process Characterization and Failure Analysis.",
+      "pool_sentences": 269,
+      "corpus_sentences": 179
+    },
+    {
+      "pmcid": "PMC11767169",
+      "doi": "10.3390/ma18020336",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Microstructural Influences on High Cycle Fatigue Crack Initiation Mechanism in Ti-Al-Mo-Cr-V-Nb-Zr-Sn Metastable \u03b2 Titanium Alloy.",
+      "pool_sentences": 205,
+      "corpus_sentences": 142
+    },
+    {
+      "pmcid": "PMC13028030",
+      "doi": "10.3390/ma19061210",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Life Prediction of TC4 Titanium Alloy Bolted Structures in Thermal Environments Below 400 \u00b0C Using an Enhanced DFR Method.",
+      "pool_sentences": 187,
+      "corpus_sentences": 122
+    },
+    {
+      "pmcid": "PMC13514270",
+      "doi": "10.3390/jfb17080399",
+      "year": "2026",
+      "journal": "Journal of functional biomaterials",
+      "license": "cc by",
+      "title": "Association Between Cross-Sectional Geometry and Cyclic Fatigue Resistance of Nickel-Titanium Endodontic Instruments: A Systematic Review.",
+      "pool_sentences": 213,
+      "corpus_sentences": 136
+    },
+    {
+      "pmcid": "PMC6190129",
+      "doi": "10.3390/mi7030049",
+      "year": "2016",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Digital Micromirror Device (DMD)-Based High-Cycle Torsional Fatigue Testing Micromachine for 1D Nanomaterials.",
+      "pool_sentences": 87,
+      "corpus_sentences": 60
+    },
+    {
+      "pmcid": "PMC3791795",
+      "doi": "10.1155/2013/421410",
+      "year": "2013",
+      "journal": "TheScientificWorldJournal",
+      "license": "cc by",
+      "title": "Balance fatigue design of cast steel nodes in tubular steel structures.",
+      "pool_sentences": 103,
+      "corpus_sentences": 73
+    },
+    {
+      "pmcid": "PMC7837779",
+      "doi": "10.1155/2021/6676005",
+      "year": "2021",
+      "journal": "International journal of dentistry",
+      "license": "cc by",
+      "title": "Impact of Peracetic Acid on the Dynamic Cyclic Fatigue of Heat-Treated Nickel-Titanium Rotary Endodontic Instrument.",
+      "pool_sentences": 194,
+      "corpus_sentences": 125
+    },
+    {
+      "pmcid": "PMC4758181",
+      "doi": "10.1016/j.dib.2016.01.059",
+      "year": "2016",
+      "journal": "Data in brief",
+      "license": "cc by",
+      "title": "Data related to cyclic deformation and fatigue behavior of direct laser deposited Ti-6Al-4V with and without heat treatment.",
+      "pool_sentences": 27,
+      "corpus_sentences": 18
+    },
+    {
+      "pmcid": "PMC8658891",
+      "doi": "10.3390/ma14237480",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Properties of Hot-Dip Galvanized AISI 1020 Normalized Steel in Tension-Compression and Tension-Tension Loading.",
+      "pool_sentences": 127,
+      "corpus_sentences": 85
+    },
+    {
+      "pmcid": "PMC12471831",
+      "doi": "10.3390/ma18184426",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Comparative Analysis of the Fatigue Strength of Aluminium and Copper Wires Used for Power Cables.",
+      "pool_sentences": 252,
+      "corpus_sentences": 164
+    },
+    {
+      "pmcid": "PMC9571411",
+      "doi": "10.3390/ma15196926",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Influence of Constant Magnetic Field upon Fatigue Life of Commercially Pure Titanium.",
+      "pool_sentences": 101,
+      "corpus_sentences": 55
+    },
+    {
+      "pmcid": "PMC11051310",
+      "doi": "10.3390/ma17081868",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Considerations on the Failure Mechanisms at Fatigue Loading of 1018 Steel Samples Coated with Wip-C1 by Cold Spray.",
+      "pool_sentences": 202,
+      "corpus_sentences": 124
+    },
+    {
+      "pmcid": "PMC8587931",
+      "doi": "10.3390/ma14216674",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Life of Austenitic Steel 304 Bolts Strengthened by Surface Treatment with Graphene Oxide Layer and Surface Shot Peening.",
+      "pool_sentences": 136,
+      "corpus_sentences": 88
+    },
+    {
+      "pmcid": "PMC10648984",
+      "doi": "10.3390/ma16216975",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Frictional Wear and Thermal Fatigue Properties of Die Steel after Ultrasound-Assisted Alloying.",
+      "pool_sentences": 171,
+      "corpus_sentences": 118
+    },
+    {
+      "pmcid": "PMC12845659",
+      "doi": "10.3390/s26020650",
+      "year": "2026",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Crack Length Estimation Using Acoustic Emissions Technique-Based Convolutional Neural Networks.",
+      "pool_sentences": 408,
+      "corpus_sentences": 278
+    },
+    {
+      "pmcid": "PMC11206074",
+      "doi": null,
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The Effect of Implantoplasty on the Fatigue Behavior and Corrosion Resistance in Titanium Dental Implants",
+      "pool_sentences": 178,
+      "corpus_sentences": 120
+    },
+    {
+      "pmcid": "PMC12081560",
+      "doi": "10.1007/s11340-025-01153-6",
+      "year": "2025",
+      "journal": "Experimental mechanics",
+      "license": "cc by",
+      "title": "An Experimental Method for Fatigue Testing Cast Iron Water Pipes Using Combined Internal Water Pressure and Bending Loads.",
+      "pool_sentences": 254,
+      "corpus_sentences": 172
+    },
+    {
+      "pmcid": "PMC11277644",
+      "doi": "10.3390/ma17143390",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Study on the Deformation Behavior of Two Phases during the Low Cycle Fatigue of UNS S32750 Duplex Stainless Steel.",
+      "pool_sentences": 162,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC11443500",
+      "doi": "10.1039/d4ra03304c",
+      "year": "2024",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Mechanical, fatigue and super plasticity properties of Cu-Al-Mn, Cu-Al-Be-Mn shape memory alloy and their metal matrix composites.",
+      "pool_sentences": 251,
+      "corpus_sentences": 170
+    },
+    {
+      "pmcid": "PMC7472164",
+      "doi": "10.3390/s20164383",
+      "year": "2020",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Performance Evaluation of a Carbon Nanotube Sensor for Fatigue Crack Monitoring of Metal Structures.",
+      "pool_sentences": 166,
+      "corpus_sentences": 106
+    },
+    {
+      "pmcid": "PMC9918193",
+      "doi": "10.3390/ma16030994",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Temperature-Dependent Viscoplasticity Model for the Hot Work Steel X38CrMoV5-3, Including Thermal and Cyclic Softening under Thermomechanical Fatigue Loading.",
+      "pool_sentences": 412,
+      "corpus_sentences": 254
+    },
+    {
+      "pmcid": "PMC11595364",
+      "doi": "10.3390/ma17225612",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Hydrogen on High Cycle Fatigue Properties of L360 Pipeline Steel Notched Specimens.",
+      "pool_sentences": 141,
+      "corpus_sentences": 99
+    },
+    {
+      "pmcid": "PMC8911660",
+      "doi": "10.3390/ma15051926",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Crack Growth Behavior of CP-Ti Cruciform Specimens with Mixed Mode I-II Crack under Biaxial Loading.",
+      "pool_sentences": 154,
+      "corpus_sentences": 97
+    },
+    {
+      "pmcid": "PMC5455371",
+      "doi": "10.3390/ma8105325",
+      "year": "2015",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Behavior of a Box-Type Welded Structure of Hydraulic Support Used in Coal Mine.",
+      "pool_sentences": 141,
+      "corpus_sentences": 97
+    },
+    {
+      "pmcid": "PMC7516445",
+      "doi": "10.3390/e22010024",
+      "year": "2019",
+      "journal": "Entropy (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Low Cycle Fatigue Life Prediction Using Unified Mechanics Theory in Ti-6Al-4V Alloys.",
+      "pool_sentences": 205,
+      "corpus_sentences": 124
+    },
+    {
+      "pmcid": "PMC7412069",
+      "doi": "10.3390/ma13143192",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Uncertainty Modeling of Fatigue Crack Growth and Probabilistic Life Prediction for Welded Joints of Nuclear Stainless Steel.",
+      "pool_sentences": 141,
+      "corpus_sentences": 86
+    },
+    {
+      "pmcid": "PMC6401968",
+      "doi": "10.3390/polym11010130",
+      "year": "2019",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Fatigue Life Prediction of Reinforced Concrete Beams Strengthened with CFRP: Study Based on an Accumulative Damage Model.",
+      "pool_sentences": 157,
+      "corpus_sentences": 98
+    },
+    {
+      "pmcid": "PMC7603187",
+      "doi": "10.3390/ma13204651",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Hot-Rolling and a Subsequent Direct-Quenching Process Enable Superior High-Cycle Fatigue Resistance in Ultra-High Strength Low Alloy Steels.",
+      "pool_sentences": 197,
+      "corpus_sentences": 129
+    },
+    {
+      "pmcid": "PMC10096338",
+      "doi": "10.3390/ma16072638",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Complex Interdependency of Microstructure, Mechanical Properties, Fatigue Resistance, and Residual Stress of Austenitic Stainless Steels AISI 304L.",
+      "pool_sentences": 212,
+      "corpus_sentences": 138
+    },
+    {
+      "pmcid": "PMC10224267",
+      "doi": "10.3390/ma16103682",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Influence of Repair Welding on the Fatigue Behavior of S355J2 T-Joints.",
+      "pool_sentences": 166,
+      "corpus_sentences": 106
+    },
+    {
+      "pmcid": "PMC8510475",
+      "doi": "10.3390/ma14195885",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Estimation of the Plastic Zone in Fatigue via Micro-Indentation.",
+      "pool_sentences": 220,
+      "corpus_sentences": 137
+    },
+    {
+      "pmcid": "PMC2672078",
+      "doi": "10.1186/1749-799x-4-11",
+      "year": "2009",
+      "journal": "Journal of orthopaedic surgery and research",
+      "license": "cc by",
+      "title": "Fatigue strength of common tibial intramedullary nail distal locking screws.",
+      "pool_sentences": 95,
+      "corpus_sentences": 62
+    },
+    {
+      "pmcid": "PMC9369538",
+      "doi": "10.3390/ma15155224",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Experimental Research on Fatigue Crack Growth Behavior of Diffusion-Bonded Titanium Alloy Laminates with Preset Unbonded Areas.",
+      "pool_sentences": 235,
+      "corpus_sentences": 157
+    },
+    {
+      "pmcid": "PMC12692832",
+      "doi": "10.3390/ma18235361",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Study on the Fatigue and Healing Characteristics of Steel Slag Asphalt Concrete.",
+      "pool_sentences": 220,
+      "corpus_sentences": 143
+    },
+    {
+      "pmcid": "PMC5615648",
+      "doi": "10.3390/ma10090993",
+      "year": "2017",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Performance of Ti-6Al-4V Additively Manufactured Specimens with Integrated Capillaries of an Embedded Structural Health Monitoring System.",
+      "pool_sentences": 286,
+      "corpus_sentences": 191
+    },
+    {
+      "pmcid": "PMC9904491",
+      "doi": "10.1371/journal.pone.0281263",
+      "year": "2023",
+      "journal": "PloS one",
+      "license": "cc by",
+      "title": "Amazing epsilon-shaped trend for fretting fatigue characteristics in AM60 magnesium alloy under stress-controlled cyclic conditions at bending loads with zero mean stress.",
+      "pool_sentences": 160,
+      "corpus_sentences": 98
+    },
+    {
+      "pmcid": "PMC9160766",
+      "doi": "10.5395/rde.2022.47.e16",
+      "year": "2022",
+      "journal": "Restorative dentistry & endodontics",
+      "license": "cc by-nc",
+      "title": "Comparison of the cyclic fatigue resistance of One Curve, F6 Skytaper, Protaper Next, and Hyflex CM endodontic files.",
+      "pool_sentences": 92,
+      "corpus_sentences": 62
+    },
+    {
+      "pmcid": "PMC12720239",
+      "doi": "10.1021/acs.jpcc.5c06348",
+      "year": "2025",
+      "journal": "The journal of physical chemistry. C, Nanomaterials and interfaces",
+      "license": "cc by",
+      "title": "Structure-Function Correlation in Switchable DTE@MOF Hybrids: Tracking Local Dynamics and Fatigue Pathways.",
+      "pool_sentences": 187,
+      "corpus_sentences": 128
+    },
+    {
+      "pmcid": "PMC8347604",
+      "doi": "10.3390/ma14154318",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The Fatigue Behaviors of a Medium-Carbon Pearlitic Wheel-Steel with Elongated Sulfides in High-Cycle and Very-High-Cycle Regimes.",
+      "pool_sentences": 166,
+      "corpus_sentences": 110
+    },
+    {
+      "pmcid": "PMC12428920",
+      "doi": "10.3390/ma18173943",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Performance Analysis of Weathering Steel Bridge Decks Under Residual Stress Conditions.",
+      "pool_sentences": 252,
+      "corpus_sentences": 171
+    },
+    {
+      "pmcid": "PMC9869776",
+      "doi": "10.7717/peerj.14656",
+      "year": "2023",
+      "journal": "PeerJ",
+      "license": "cc by",
+      "title": "Cyclic fatigue resistance of EdgeTaper Platinum, Protaper Gold, and TruNatomy Prime rotary files before and after autoclave sterilization.",
+      "pool_sentences": 133,
+      "corpus_sentences": 90
+    },
+    {
+      "pmcid": "PMC9861807",
+      "doi": "10.3390/ma16020708",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Corrosion Fatigue Degradation Characteristics of Galvanized and Galfan High-Strength Steel Wire.",
+      "pool_sentences": 260,
+      "corpus_sentences": 170
+    },
+    {
+      "pmcid": "PMC8836977",
+      "doi": "10.3390/ma15030718",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The Characterization of Fatigue Damage of 316L Stainless Steel Parts Formed by Selective Laser Melting with Harmonic Generation Technique.",
+      "pool_sentences": 142,
+      "corpus_sentences": 98
+    },
+    {
+      "pmcid": "PMC8781175",
+      "doi": "10.3390/ma15020567",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "On the Corrosion Fatigue of Magnesium Alloys Aimed at Biomedical Applications: New Insights from the Influence of Testing Frequency and Surface Modification of the Alloy ZK60.",
+      "pool_sentences": 209,
+      "corpus_sentences": 138
+    },
+    {
+      "pmcid": "PMC7040827",
+      "doi": "10.3390/ma13030741",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Sample Size and Crystal Orientation on the Fatigue Behaviour of Single Crystalline Microbeams.",
+      "pool_sentences": 219,
+      "corpus_sentences": 152
+    },
+    {
+      "pmcid": "PMC6479882",
+      "doi": "10.3390/ma12071040",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue and Corrosion Fatigue Behaviour of Brazed Stainless Steel Joints AISI 304L/BAu-4 in Synthetic Exhaust Gas Condensate.",
+      "pool_sentences": 210,
+      "corpus_sentences": 134
+    },
+    {
+      "pmcid": "PMC13208406",
+      "doi": "10.3390/ma19102151",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Analysis of Fatigue Property of the Aviation Gear Steel 15Cr14Co12Mo5Ni2 During High-Temperature Carburizing and Quenching.",
+      "pool_sentences": 253,
+      "corpus_sentences": 167
+    },
+    {
+      "pmcid": "PMC5666932",
+      "doi": "10.3390/ma10101126",
+      "year": "2017",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Simulation of Low and High Cycle Fatigue Failure Effects for Metal Matrix Composites Based on Innovative J\u2082-Flow Elastoplasticity Model.",
+      "pool_sentences": 157,
+      "corpus_sentences": 111
+    },
+    {
+      "pmcid": "PMC8780149",
+      "doi": "10.3390/ma15020445",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Influence of Strain Gradient on Fatigue Life of Carbon Steel for Pressure Vessels in Low-Cycle and High-Cycle Fatigue Regimes.",
+      "pool_sentences": 184,
+      "corpus_sentences": 117
+    },
+    {
+      "pmcid": "PMC11395758",
+      "doi": "10.1016/j.heliyon.2024.e36716",
+      "year": "2024",
+      "journal": "Heliyon",
+      "license": "cc by-nc-nd",
+      "title": "Residual fatigue life prediction based on a novel improved Manson-Halford model considering loading interaction effect.",
+      "pool_sentences": 127,
+      "corpus_sentences": 79
+    },
+    {
+      "pmcid": "PMC11065293",
+      "doi": "10.1371/journal.pone.0302551",
+      "year": "2024",
+      "journal": "PloS one",
+      "license": "cc by",
+      "title": "Surface roughness and cyclic fatigue resistance of a novel shaping system: An in-vitro study.",
+      "pool_sentences": 145,
+      "corpus_sentences": 92
+    },
+    {
+      "pmcid": "PMC11206098",
+      "doi": null,
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Titanium Alloy Materials with Very High Cycle Fatigue: A Review",
+      "pool_sentences": 401,
+      "corpus_sentences": 245
+    },
+    {
+      "pmcid": "PMC6982178",
+      "doi": "10.3390/ma13010076",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Low Cycle Fatigue Life Prediction Model of 800H Alloy Based on the Total Strain Energy Density Method.",
+      "pool_sentences": 87,
+      "corpus_sentences": 58
+    },
+    {
+      "pmcid": "PMC3918351",
+      "doi": "10.1155/2014/164378",
+      "year": "2014",
+      "journal": "TheScientificWorldJournal",
+      "license": "cc by",
+      "title": "A modified nonlinear damage accumulation model for fatigue life prediction considering load interaction effects.",
+      "pool_sentences": 75,
+      "corpus_sentences": 52
+    },
+    {
+      "pmcid": "PMC11312869",
+      "doi": "10.3390/ma17153825",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Mechanical and Fatigue Properties of Ti-6Al-4V Alloy Fabricated Using Binder Jetting Process and Subjected to Hot Isostatic Pressing.",
+      "pool_sentences": 183,
+      "corpus_sentences": 128
+    },
+    {
+      "pmcid": "PMC6384845",
+      "doi": "10.3390/ma12030377",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Experimental Study on Interfacial Bond Behavior between CFRP Sheets and Steel Plates under Fatigue Loading.",
+      "pool_sentences": 158,
+      "corpus_sentences": 101
+    },
+    {
+      "pmcid": "PMC6119857",
+      "doi": "10.3390/ma11081456",
+      "year": "2018",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effects of Loading Frequency and Loading Type on High-Cycle and Very-High-Cycle Fatigue of a High-Strength Steel.",
+      "pool_sentences": 159,
+      "corpus_sentences": 96
+    },
+    {
+      "pmcid": "PMC9658166",
+      "doi": "10.3390/ma15217555",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Experimental Study on Vibration Fatigue Behavior of Aircraft Aluminum Alloy 7050.",
+      "pool_sentences": 118,
+      "corpus_sentences": 82
+    },
+    {
+      "pmcid": "PMC10817671",
+      "doi": "10.3390/ma17020432",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Influence of Porosity on Fatigue Behaviour of 18Ni300 Steel SLM CT Specimens at Various Angles.",
+      "pool_sentences": 202,
+      "corpus_sentences": 131
+    },
+    {
+      "pmcid": "PMC10707352",
+      "doi": "10.3390/ma16237354",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Prediction of the Fatigue Strength of Steel Based on Interpretable Machine Learning.",
+      "pool_sentences": 202,
+      "corpus_sentences": 133
+    },
+    {
+      "pmcid": "PMC11426750",
+      "doi": "10.4103/jpbs.jpbs_107_24",
+      "year": "2024",
+      "journal": "Journal of pharmacy & bioallied sciences",
+      "license": "cc by-nc-sa",
+      "title": "In Vitro Comparison of Cyclic Fatigue Resistance of ProTaper Next and TruNatomy Endodontic Rotary Files.",
+      "pool_sentences": 46,
+      "corpus_sentences": 33
+    },
+    {
+      "pmcid": "PMC7503640",
+      "doi": "10.3390/ma13173858",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Oxygen Variation on High Cycle Fatigue Behavior of Ti-6Al-4V Titanium Alloy.",
+      "pool_sentences": 217,
+      "corpus_sentences": 154
+    },
+    {
+      "pmcid": "PMC5456493",
+      "doi": "10.3390/ma9020111",
+      "year": "2016",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "An Investigation on the Wear Resistance and Fatigue Behaviour of Ti-6Al-4V Notched Members Coated with Hydroxyapatite Coatings.",
+      "pool_sentences": 134,
+      "corpus_sentences": 90
+    },
+    {
+      "pmcid": "PMC6811988",
+      "doi": "10.1016/j.dib.2019.104374",
+      "year": "2019",
+      "journal": "Data in brief",
+      "license": "cc by",
+      "title": "Automatization and stress analysis data of CoCr laser weld fatigue tests.",
+      "pool_sentences": 19,
+      "corpus_sentences": 12
+    },
+    {
+      "pmcid": "PMC11313412",
+      "doi": "10.3390/ma17153785",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Temperature-Stress Coupling Fatigue Behavior of Film-Cooling Holes in Complex Temperature Fields.",
+      "pool_sentences": 306,
+      "corpus_sentences": 211
+    },
+    {
+      "pmcid": "PMC7956191",
+      "doi": "10.3390/ma14051082",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Laser Shock Peening of SiCp/2009Al Composites: Microstructural Evolution, Residual Stress and Fatigue Behavior.",
+      "pool_sentences": 145,
+      "corpus_sentences": 105
+    },
+    {
+      "pmcid": "PMC13257489",
+      "doi": "10.3390/ma19112301",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Failure Mechanism and Crack Growth Behavior of Ti-6Al-4V ELI Titanium Alloy Welded Joints.",
+      "pool_sentences": 129,
+      "corpus_sentences": 88
+    },
+    {
+      "pmcid": "PMC10559545",
+      "doi": "10.1016/j.heliyon.2023.e19959",
+      "year": "2023",
+      "journal": "Heliyon",
+      "license": "cc by",
+      "title": "Comparison of the Retention and Fit of Polyether Ether Ketone Clasps during Fatigue Circulation Tests.",
+      "pool_sentences": 127,
+      "corpus_sentences": 87
+    },
+    {
+      "pmcid": "PMC6111550",
+      "doi": "10.3390/s18082527",
+      "year": "2018",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Self-Sensing Nonlinear Ultrasonic Fatigue Crack Detection under Temperature Variation \u2020.",
+      "pool_sentences": 170,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC13027990",
+      "doi": "10.3390/ma19061228",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Tensile and Low-Cycle Fatigue Behavior, Fracture Mechanisms, and Life Predictions of 316H Stainless Steel at 600~800 \u00b0C.",
+      "pool_sentences": 174,
+      "corpus_sentences": 119
+    },
+    {
+      "pmcid": "PMC7961498",
+      "doi": "10.3390/ma14051245",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Cryogenic Grinding on Fatigue Life of Additively Manufactured Maraging Steel.",
+      "pool_sentences": 169,
+      "corpus_sentences": 120
+    },
+    {
+      "pmcid": "PMC11277804",
+      "doi": "10.3390/ma17143383",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Merging Data with Modeling: An Example from Fatigue.",
+      "pool_sentences": 301,
+      "corpus_sentences": 202
+    },
+    {
+      "pmcid": "PMC9182358",
+      "doi": "10.3390/ma15113984",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Stress-Controlled Creep-Fatigue of an Advanced Austenitic Stainless Steel at Elevated Temperatures.",
+      "pool_sentences": 132,
+      "corpus_sentences": 87
+    },
+    {
+      "pmcid": "PMC7464224",
+      "doi": "10.34172/joddd.2020.024",
+      "year": "2020",
+      "journal": "Journal of dental research, dental clinics, dental prospects",
+      "license": "cc by",
+      "title": "Cyclic fatigue resistance of reduced-taper nickel-titanium (NiTi) instruments in doubled-curved (S-shaped) canals at body temperature.",
+      "pool_sentences": 97,
+      "corpus_sentences": 63
+    },
+    {
+      "pmcid": "PMC8000609",
+      "doi": "10.3390/ma14061421",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Life Improvement of Cracked Aluminum 6061-T6 Plates Repaired by Composite Patches.",
+      "pool_sentences": 131,
+      "corpus_sentences": 90
+    },
+    {
+      "pmcid": "PMC10708752",
+      "doi": "10.3390/s23239507",
+      "year": "2023",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Flexible Eddy Current TMR Sensor for Monitoring Internal Fatigue Crack.",
+      "pool_sentences": 212,
+      "corpus_sentences": 144
+    },
+    {
+      "pmcid": "PMC11767049",
+      "doi": "10.3390/ma18020334",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Strain-Controlled Thermal-Mechanical Fatigue Behavior and Microstructural Evolution Mechanism of the Novel Cr-Mo-V Hot-Work Die Steel.",
+      "pool_sentences": 255,
+      "corpus_sentences": 166
+    },
+    {
+      "pmcid": "PMC5359604",
+      "doi": "10.1038/srep44922",
+      "year": "2017",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Unprecedented simultaneous enhancement in damage tolerance and fatigue resistance of zirconia/Ta composites.",
+      "pool_sentences": 202,
+      "corpus_sentences": 129
+    },
+    {
+      "pmcid": "PMC11961669",
+      "doi": "10.1038/s41598-024-79476-y",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Comparative analysis of ensemble learning techniques for enhanced fatigue life prediction.",
+      "pool_sentences": 286,
+      "corpus_sentences": 189
+    },
+    {
+      "pmcid": "PMC12155788",
+      "doi": "10.3390/ma18112604",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "High-Cycle Fatigue Life Prediction of Additive Manufacturing Inconel 718 Alloy via Machine Learning.",
+      "pool_sentences": 184,
+      "corpus_sentences": 116
+    },
+    {
+      "pmcid": "PMC11946405",
+      "doi": "10.3390/mi16030326",
+      "year": "2025",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Application Characteristics of Ultra-Fine 15 \u03bcm Stainless Steel Wires: Microstructures, Electrical Fatigue, and Ball Formation Mechanisms.",
+      "pool_sentences": 155,
+      "corpus_sentences": 108
+    },
+    {
+      "pmcid": "PMC7142502",
+      "doi": "10.3390/ma13061464",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Prediction of Strain Fatigue Life of HRB400 Steel Based on Meso-Deformation Inhomogeneity.",
+      "pool_sentences": 118,
+      "corpus_sentences": 85
+    },
+    {
+      "pmcid": "PMC12040099",
+      "doi": "10.1371/journal.pone.0317969",
+      "year": "2025",
+      "journal": "PloS one",
+      "license": "cc by",
+      "title": "Investigation into fatigue micro-crack identification of steel bridge decks based on acoustic emission detection technology.",
+      "pool_sentences": 254,
+      "corpus_sentences": 174
+    },
+    {
+      "pmcid": "PMC11643735",
+      "doi": "10.3390/ma17235928",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "An In Situ Study of Short Crack Initiation and Propagation During Fatigue Testing of a Hot Isostatically Pressed Al-7%Si-0.5%Mg (A357-T6) Alloy Specimen.",
+      "pool_sentences": 171,
+      "corpus_sentences": 114
+    },
+    {
+      "pmcid": "PMC9960847",
+      "doi": "10.3390/ma16041619",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue-Crack Detection in a Multi-Riveted Strap-Joint Aluminium Aircraft Panel Using Amplitude Characteristics of Diffuse Lamb Wave Field.",
+      "pool_sentences": 397,
+      "corpus_sentences": 263
+    },
+    {
+      "pmcid": "PMC6720445",
+      "doi": "10.3390/s19163618",
+      "year": "2019",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Analysis of Sensitivity, Linearity, Hysteresis, Responsiveness, and Fatigue of Textile Knit Stretch Sensors.",
+      "pool_sentences": 217,
+      "corpus_sentences": 149
+    },
+    {
+      "pmcid": "PMC9520645",
+      "doi": "10.4103/jcd.jcd_55_22",
+      "year": "2022",
+      "journal": "Journal of conservative dentistry : JCD",
+      "license": "cc by-nc-sa",
+      "title": "Effect of body temperature on the cyclic fatigue resistance of the nickel-titanium endodontic instruments: A systematic review and meta-analysis of in vitro studies.",
+      "pool_sentences": 131,
+      "corpus_sentences": 91
+    },
+    {
+      "pmcid": "PMC7321384",
+      "doi": "10.3390/ma13112451",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Study on the Elastic-Plastic Correlation of Low-Cycle Fatigue for Variable Asymmetric Loadings.",
+      "pool_sentences": 158,
+      "corpus_sentences": 107
+    },
+    {
+      "pmcid": "PMC10856700",
+      "doi": "10.3390/ma17030755",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Optimization of the Boundary Conditions of a Board Level Reliability Test Board to Maximize the Fatigue Life of Ball Grid Array Solder Joints under Thermal Cycling and Random Vibration.",
+      "pool_sentences": 145,
+      "corpus_sentences": 92
+    },
+    {
+      "pmcid": "PMC10338547",
+      "doi": "10.1038/s41597-023-02354-1",
+      "year": "2023",
+      "journal": "Scientific data",
+      "license": "cc by",
+      "title": "Fatigue database of complex metallic alloys.",
+      "pool_sentences": 238,
+      "corpus_sentences": 156
+    },
+    {
+      "pmcid": "PMC5052633",
+      "doi": "10.1038/ncomms12920",
+      "year": "2016",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Super-elastic and fatigue resistant carbon material with lamellar multi-arch microstructure.",
+      "pool_sentences": 141,
+      "corpus_sentences": 92
+    },
+    {
+      "pmcid": "PMC8305907",
+      "doi": "10.3390/ma14143968",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Loading Frequency Ratio on Multiaxial Asynchronous Fatigue Failure of 30CrMnSiA Steel.",
+      "pool_sentences": 186,
+      "corpus_sentences": 124
+    },
+    {
+      "pmcid": "PMC6163836",
+      "doi": "10.3390/ma11091700",
+      "year": "2018",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Influence of Multi-Holes on Fatigue Behaviors of Cast Magnesium Alloys Based on In-Situ Scanning Electron Microscope Technology.",
+      "pool_sentences": 147,
+      "corpus_sentences": 93
+    },
+    {
+      "pmcid": "PMC7475930",
+      "doi": "10.3390/ma13163444",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The Effect of Stress Ratios on the Very High Cycle Fatigue Behavior of 9%Cr Turbine Steel at 630 \u00b0C.",
+      "pool_sentences": 189,
+      "corpus_sentences": 122
+    },
+    {
+      "pmcid": "PMC9224531",
+      "doi": "10.3390/jcm11123308",
+      "year": "2022",
+      "journal": "Journal of clinical medicine",
+      "license": "cc by",
+      "title": "Mechanical Fatigue Performance of Patient-Specific Polymer Plates in Oncologic Mandible Reconstruction.",
+      "pool_sentences": 116,
+      "corpus_sentences": 86
+    },
+    {
+      "pmcid": "PMC8269699",
+      "doi": "10.3390/ma14133588",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Cyclic Plasticity and Low Cycle Fatigue of an AISI 316L Stainless Steel: Experimental Evaluation of Material Parameters for Durability Design.",
+      "pool_sentences": 258,
+      "corpus_sentences": 184
+    },
+    {
+      "pmcid": "PMC10838794",
+      "doi": "10.1016/j.heliyon.2024.e25071",
+      "year": "2024",
+      "journal": "Heliyon",
+      "license": "cc by-nc-nd",
+      "title": "Constraints-related microscopic fatigue crack propagation behaviour of polycrystalline alloys.",
+      "pool_sentences": 160,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC10745130",
+      "doi": "10.3390/ma16247682",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Numerical and Experimental Analysis of Strength Loss of 1.2709 Maraging Steel Produced by Selective Laser Melting (SLM) under Thermo-Mechanical Fatigue Conditions.",
+      "pool_sentences": 269,
+      "corpus_sentences": 190
+    },
+    {
+      "pmcid": "PMC12387624",
+      "doi": "10.3390/ma18163920",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Low Cycle Fatigue Life Prediction for Hydrogen-Charged HRB400 Steel Based on CPFEM.",
+      "pool_sentences": 225,
+      "corpus_sentences": 157
+    },
+    {
+      "pmcid": "PMC7287857",
+      "doi": "10.3390/ma13102368",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Behavior of PBO FRCM Composite Applied to Concrete Substrate.",
+      "pool_sentences": 175,
+      "corpus_sentences": 127
+    },
+    {
+      "pmcid": "PMC5578317",
+      "doi": "10.3390/ma10080951",
+      "year": "2017",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Continuum Damage Mechanics Model for the Static and Cyclic Fatigue of Cellular Composites.",
+      "pool_sentences": 318,
+      "corpus_sentences": 211
+    },
+    {
+      "pmcid": "PMC12735345",
+      "doi": "10.3390/ma18245655",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Metallurgical Process on Rotational Bending Fatigue Properties of H13 Hot Work Die Steel.",
+      "pool_sentences": 216,
+      "corpus_sentences": 152
+    },
+    {
+      "pmcid": "PMC11676718",
+      "doi": "10.3390/ma17246151",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Analysis of the Distribution of Non-Metallic Inclusions and Its Impact on the Fatigue Strength Parameters of Carbon Steel Melted in an Electric Furnace.",
+      "pool_sentences": 190,
+      "corpus_sentences": 135
+    },
+    {
+      "pmcid": "PMC6539816",
+      "doi": "10.3390/ma12091520",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Al\u207bZn Alloy Coating on Corrosion Fatigue Behavior of X80 Riser Steel.",
+      "pool_sentences": 118,
+      "corpus_sentences": 81
+    },
+    {
+      "pmcid": "PMC5682146",
+      "doi": "10.5395/rde.2017.42.4.301",
+      "year": "2017",
+      "journal": "Restorative dentistry & endodontics",
+      "license": "cc by-nc",
+      "title": "The effects of autoclave sterilization on the cyclic fatigue resistance of ProTaper Universal, ProTaper Next, and ProTaper Gold nickel-titanium instruments.",
+      "pool_sentences": 96,
+      "corpus_sentences": 58
+    },
+    {
+      "pmcid": "PMC5456715",
+      "doi": "10.3390/ma9030141",
+      "year": "2016",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Surface Characterizations of Fretting Fatigue Damage in Aluminum Alloy 7075-T6 Clamped Joints: The Beneficial Role of Ni-P Coatings.",
+      "pool_sentences": 144,
+      "corpus_sentences": 87
+    },
+    {
+      "pmcid": "PMC7579601",
+      "doi": "10.3390/ma13194247",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Loading Methods on the Fatigue Properties of Dissimilar Al/Steel Keyhole-Free FSSW Joints.",
+      "pool_sentences": 228,
+      "corpus_sentences": 152
+    },
+    {
+      "pmcid": "PMC11819845",
+      "doi": "10.3390/ma18030627",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Numerical Fatigue Analysis of Dissimilar Lap Joints Fabricated by Dimple Spot Welding for Automotive Application.",
+      "pool_sentences": 150,
+      "corpus_sentences": 94
+    },
+    {
+      "pmcid": "PMC7698544",
+      "doi": "10.3390/ma13225198",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "On the Microstructure of Laser Beam Powder Bed Fusion Alloy 718 and Its Influence on the Low Cycle Fatigue Behaviour.",
+      "pool_sentences": 203,
+      "corpus_sentences": 128
+    },
+    {
+      "pmcid": "PMC13517093",
+      "doi": "10.3390/polym18162032",
+      "year": "2026",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Pre-Damage Strengthening of Heavy-Duty Steel Crane Girders Using Bonded CFRP Plates for Fatigue Life Enhancement.",
+      "pool_sentences": 261,
+      "corpus_sentences": 185
+    },
+    {
+      "pmcid": "PMC8617610",
+      "doi": "10.3390/nano11113125",
+      "year": "2021",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Contribution to Improvement of Fatigue Properties of Zr-4 Alloy: Gradient Nanostructured Surface Layer versus Compressive Residual Stress.",
+      "pool_sentences": 127,
+      "corpus_sentences": 85
+    },
+    {
+      "pmcid": "PMC13009501",
+      "doi": "10.1038/s41598-025-97184-z",
+      "year": "2026",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Combining multimodal fatigue fracture surface images for analysis with a CNN.",
+      "pool_sentences": 242,
+      "corpus_sentences": 162
+    },
+    {
+      "pmcid": "PMC6514685",
+      "doi": "10.3390/ma12081242",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Influence of Adhesive in FSW: Investigation on Fatigue Behavior of Welded, Weld-Bonded, and Adhesive-Bonded Joints in Aluminum AA 6082 T6.",
+      "pool_sentences": 127,
+      "corpus_sentences": 82
+    },
+    {
+      "pmcid": "PMC6263393",
+      "doi": "10.3390/s18113867",
+      "year": "2018",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Wind-Induced Fatigue and Asymmetric Damage in a Timber Bridge.",
+      "pool_sentences": 157,
+      "corpus_sentences": 97
+    },
+    {
+      "pmcid": "PMC8469476",
+      "doi": "10.3390/ma14185365",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Characteristic Features of Ultrafine-Grained Ti-45 wt.% Nb Alloy under High Cycle Fatigue.",
+      "pool_sentences": 222,
+      "corpus_sentences": 145
+    },
+    {
+      "pmcid": "PMC8400577",
+      "doi": "10.3390/nano11081870",
+      "year": "2021",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Controllable Martensite Transformation and Strain-Controlled Fatigue Behavior of a Gradient Nanostructured Austenite Stainless Steel.",
+      "pool_sentences": 118,
+      "corpus_sentences": 79
+    },
+    {
+      "pmcid": "PMC6766307",
+      "doi": "10.3390/ma12183033",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Deformation and Fatigue Behaviour of A356-T7 Cast Aluminium Alloys Used in High Specific Power IC Engines.",
+      "pool_sentences": 259,
+      "corpus_sentences": 165
+    },
+    {
+      "pmcid": "PMC7014356",
+      "doi": "10.3390/ma13020330",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Study on Fatigue Crack Propagation for Friction Stir Welded Plate of 7N01 Al-Zn-Mg Alloy by EBSD.",
+      "pool_sentences": 143,
+      "corpus_sentences": 98
+    },
+    {
+      "pmcid": "PMC9925449",
+      "doi": "10.1038/s41598-023-29636-3",
+      "year": "2023",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Reliability modeling of the fatigue life of lead-free solder joints at different testing temperatures and load levels using the Arrhenius model.",
+      "pool_sentences": 190,
+      "corpus_sentences": 133
+    },
+    {
+      "pmcid": "PMC10744489",
+      "doi": "10.3390/ma16247540",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Pre-Rolling on Microstructure and Fatigue Crack Propagation Resistance of a Third-Generation Al-Li Alloy.",
+      "pool_sentences": 167,
+      "corpus_sentences": 111
+    },
+    {
+      "pmcid": "PMC9267679",
+      "doi": "10.3390/ma15134698",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Property and Small Crack Propagation Mechanism of MIG Welding Joint of 6005A-T6 Aluminum Alloy.",
+      "pool_sentences": 180,
+      "corpus_sentences": 118
+    },
+    {
+      "pmcid": "PMC9329911",
+      "doi": "10.3390/ma15155113",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Damage Behaviors of TRC-Strengthened RC Beams.",
+      "pool_sentences": 174,
+      "corpus_sentences": 129
+    },
+    {
+      "pmcid": "PMC5456646",
+      "doi": "10.3390/ma9100843",
+      "year": "2016",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Interior Fracture Mechanism Analysis and Fatigue Life Prediction of Surface-Hardened Gear Steel under Axial Loading.",
+      "pool_sentences": 146,
+      "corpus_sentences": 96
+    },
+    {
+      "pmcid": "PMC8621021",
+      "doi": "10.3390/ma14227023",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Limited Stress Surface Model for Bending and Torsion Fatigue Loading with the Mean Load Value.",
+      "pool_sentences": 133,
+      "corpus_sentences": 85
+    },
+    {
+      "pmcid": "PMC12771956",
+      "doi": "10.1186/s12903-025-07162-0",
+      "year": "2025",
+      "journal": "BMC oral health",
+      "license": "cc by-nc-nd",
+      "title": "Fatigue and FEA of zygomatic implant systems in bilateral maxillary defects.",
+      "pool_sentences": 111,
+      "corpus_sentences": 73
+    },
+    {
+      "pmcid": "PMC8585467",
+      "doi": "10.3390/ma14216621",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Crack Growth Behavior and Fracture Toughness of EH36 TMCP Steel.",
+      "pool_sentences": 191,
+      "corpus_sentences": 133
+    },
+    {
+      "pmcid": "PMC10419708",
+      "doi": "10.3390/ma16155217",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Study on Fatigue Cracking of Diaphragm's Arc Opening of OSD in Steel Bridges by Using Biaxial Stress Method.",
+      "pool_sentences": 402,
+      "corpus_sentences": 266
+    },
+    {
+      "pmcid": "PMC10145153",
+      "doi": "10.3390/polym15081949",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Fatigue Performance of a Step-Lap Joint under Tensile Load: A Numerical Study.",
+      "pool_sentences": 158,
+      "corpus_sentences": 115
+    },
+    {
+      "pmcid": "PMC11356193",
+      "doi": "10.3390/ma17164091",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Small Database with an Adaptive Data Selection Method for Solder Joint Fatigue Life Prediction in Advanced Packaging.",
+      "pool_sentences": 292,
+      "corpus_sentences": 206
+    },
+    {
+      "pmcid": "PMC12843264",
+      "doi": "10.3390/jfb17010029",
+      "year": "2026",
+      "journal": "Journal of functional biomaterials",
+      "license": "cc by",
+      "title": "Synergistic Effects of Simulated Energy Drink Exposure and Fatigue Loading on Bioactive and Conventional Resin Composites.",
+      "pool_sentences": 144,
+      "corpus_sentences": 96
+    },
+    {
+      "pmcid": "PMC5067664",
+      "doi": "10.1038/srep35557",
+      "year": "2016",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Notch fatigue behavior: Metallic glass versus ultra-high strength steel.",
+      "pool_sentences": 121,
+      "corpus_sentences": 85
+    },
+    {
+      "pmcid": "PMC13608371",
+      "doi": "10.3390/ma19183885",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Heat Input on Microstructure Evolution and High-Cycle Fatigue Behavior of Ti-6Al-4V Fabricated by Wire-Laser Directed Energy Deposition.",
+      "pool_sentences": 220,
+      "corpus_sentences": 143
+    },
+    {
+      "pmcid": "PMC9760146",
+      "doi": "10.1002/cre2.645",
+      "year": "2022",
+      "journal": "Clinical and experimental dental research",
+      "license": "cc by",
+      "title": "Fatigue behavior of removable partial denture cast and laser-sintered cobalt-chromium (CoCr) and polyetheretherketone (PEEK) clasp materials.",
+      "pool_sentences": 141,
+      "corpus_sentences": 101
+    },
+    {
+      "pmcid": "PMC8197548",
+      "doi": "10.3390/ma14112815",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Tension-Tension Fatigue Behavior of High-Toughness Zr61Ti2Cu25Al12 Bulk Metallic Glass.",
+      "pool_sentences": 97,
+      "corpus_sentences": 65
+    },
+    {
+      "pmcid": "PMC10051819",
+      "doi": "10.3390/ma16062494",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Life Modelling of Steel Suspension Coil Springs Based on Wavelet Vibration Features Using Neuro-Fuzzy Methods.",
+      "pool_sentences": 271,
+      "corpus_sentences": 173
+    },
+    {
+      "pmcid": "PMC11433330",
+      "doi": "10.3390/ma17184463",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The High-Cycle Tensile-Shear Fatigue Properties and Failure Mechanism of Resistance Spot-Welded Advanced High-Strength Steel with a Zn Coating.",
+      "pool_sentences": 146,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC8911663",
+      "doi": "10.3390/ma15051840",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Experimental and Numerical Investigation of Effect of Static and Fatigue Loading on Behavior of Different Double Strap Adhesive Joint Configurations in Fiber Metal Laminates.",
+      "pool_sentences": 149,
+      "corpus_sentences": 100
+    },
+    {
+      "pmcid": "PMC8537992",
+      "doi": "10.3390/jcm10204713",
+      "year": "2021",
+      "journal": "Journal of clinical medicine",
+      "license": "cc by",
+      "title": "Influence of the Geometrical Cross-Section Design on the Dynamic Cyclic Fatigue Resistance of NiTi Endodontic Rotary Files-An In Vitro Study.",
+      "pool_sentences": 72,
+      "corpus_sentences": 52
+    },
+    {
+      "pmcid": "PMC8998441",
+      "doi": "10.3390/ijerph19074414",
+      "year": "2022",
+      "journal": "International journal of environmental research and public health",
+      "license": "cc by",
+      "title": "Comparative Study of the SEM Evaluation, EDX Assessment, Morphometric Analysis, and Cyclic Fatigue Resistance of Three Novel Brands of NiTi Alloy Endodontic Files.",
+      "pool_sentences": 125,
+      "corpus_sentences": 85
+    },
+    {
+      "pmcid": "PMC10856014",
+      "doi": "10.3390/jcm13030882",
+      "year": "2024",
+      "journal": "Journal of clinical medicine",
+      "license": "cc by",
+      "title": "Cyclic Fatigue Resistance of Rotary versus Reciprocating Endodontic Files: A Systematic Review and Meta-Analysis.",
+      "pool_sentences": 153,
+      "corpus_sentences": 102
+    },
+    {
+      "pmcid": "PMC10161593",
+      "doi": "10.1016/j.heliyon.2023.e15196",
+      "year": "2023",
+      "journal": "Heliyon",
+      "license": "cc by-nc-nd",
+      "title": "Assessment of fatigue damage in welded aluminum joints subjected to multiaxial stress state.",
+      "pool_sentences": 112,
+      "corpus_sentences": 74
+    },
+    {
+      "pmcid": "PMC9324919",
+      "doi": "10.3390/ma15145077",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Life Prediction Method of Dissimilar Lightweight Materials Welded Joints with Precrack under Coupled Impact-Fatigue Loading.",
+      "pool_sentences": 99,
+      "corpus_sentences": 65
+    },
+    {
+      "pmcid": "PMC10532966",
+      "doi": "10.3390/ma16186083",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Low-Cycle Fatigue Behavior of Wire and Arc Additively Manufactured Ti-6Al-4V Material.",
+      "pool_sentences": 229,
+      "corpus_sentences": 139
+    },
+    {
+      "pmcid": "PMC13608771",
+      "doi": "10.3390/ma19183860",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Porous Ti-6Al-4V Architectures in Load-Bearing Orthopedic Reconstruction: A Critical Narrative Review of the Translational Gap Across Microstructure, Fatigue, Surface Function, and Clinical Failure Modes.",
+      "pool_sentences": 560,
+      "corpus_sentences": 375
+    },
+    {
+      "pmcid": "PMC13058293",
+      "doi": "10.6026/973206300220219",
+      "year": "2026",
+      "journal": "Bioinformation",
+      "license": "cc by",
+      "title": "Cyclic fatigue resistance in NiTi files by four different sterilization methods.",
+      "pool_sentences": 103,
+      "corpus_sentences": 63
+    },
+    {
+      "pmcid": "PMC6432088",
+      "doi": "10.3390/polym8120436",
+      "year": "2016",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Healing of Early Stage Fatigue Damage in Ionomer/Fe\u2083O\u2084 Nanoparticle Composites.",
+      "pool_sentences": 193,
+      "corpus_sentences": 137
+    },
+    {
+      "pmcid": "PMC11767210",
+      "doi": "10.3390/ma18020332",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Life Prediction of 2024-T3 Clad Al Alloy Based on an Improved SWT Equation and Machine Learning.",
+      "pool_sentences": 411,
+      "corpus_sentences": 277
+    },
+    {
+      "pmcid": "PMC11204398",
+      "doi": "10.3390/ma17122821",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Study of the Internal Deformation Fields and the Related Microstructure Evolution during Thermal Fatigue Tests of a Single-Crystal Ni-Base Superalloy.",
+      "pool_sentences": 153,
+      "corpus_sentences": 87
+    },
+    {
+      "pmcid": "PMC8842429",
+      "doi": "10.14744/eej.2021.93685",
+      "year": "2021",
+      "journal": "European endodontic journal",
+      "license": "cc by",
+      "title": "Stationary Fatigue Resistance of Various Rotary Instruments with Different Alloys after Preparing Three Root Canals.",
+      "pool_sentences": 159,
+      "corpus_sentences": 107
+    },
+    {
+      "pmcid": "PMC11767057",
+      "doi": "10.3390/ma18020365",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effects of Pre-Deformation in Corrosion Fatigue Crack Growth of Al-Mg-Zn Alloy.",
+      "pool_sentences": 200,
+      "corpus_sentences": 138
+    },
+    {
+      "pmcid": "PMC8123029",
+      "doi": "10.3390/ma14092171",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Modeling and Numerical Analysis of Re-Filling Probe Hole of Friction Stir Spot Welded Joints in Aluminum Alloys.",
+      "pool_sentences": 143,
+      "corpus_sentences": 92
+    },
+    {
+      "pmcid": "PMC9659309",
+      "doi": "10.3390/ma15217797",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Gaussian Process for Machine Learning-Based Fatigue Life Prediction Model under Multiaxial Stress-Strain Conditions.",
+      "pool_sentences": 265,
+      "corpus_sentences": 180
+    },
+    {
+      "pmcid": "PMC7435938",
+      "doi": "10.3390/ma13153293",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Very High Cycle Fatigue Behavior of Additively Manufactured 316L Stainless Steel.",
+      "pool_sentences": 99,
+      "corpus_sentences": 65
+    },
+    {
+      "pmcid": "PMC8346304",
+      "doi": "10.1155/2021/7402658",
+      "year": "2021",
+      "journal": "International journal of dentistry",
+      "license": "cc by",
+      "title": "Evaluation of Cyclic Fatigue of Hyflex EDM, Twisted Files, and ProTaper Gold Manufactured with Different Processes: An In Vitro Study.",
+      "pool_sentences": 100,
+      "corpus_sentences": 75
+    },
+    {
+      "pmcid": "PMC9607469",
+      "doi": "10.3390/ma15207113",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Optimization of Thermo-Mechanical Fatigue Life for Eutectic Al-Si Alloy by the Ultrasonic Melt Treatment.",
+      "pool_sentences": 156,
+      "corpus_sentences": 107
+    },
+    {
+      "pmcid": "PMC13259412",
+      "doi": "10.3390/s26113357",
+      "year": "2026",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Wireless Ultrasonic Sensing for Fatigue Crack Propagation and Life Prediction in Thin Plate Structures.",
+      "pool_sentences": 246,
+      "corpus_sentences": 172
+    },
+    {
+      "pmcid": "PMC8001697",
+      "doi": "10.3390/ma14061403",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Creep-Fatigue Experiment and Life Prediction Study of Piston 2A80 Aluminum Alloy.",
+      "pool_sentences": 227,
+      "corpus_sentences": 160
+    },
+    {
+      "pmcid": "PMC10489037",
+      "doi": "10.3390/ma16175744",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Investigation of Plasticity Effects on Growing Fatigue Cracks Using the CJP Model of Crack Tip Fields.",
+      "pool_sentences": 238,
+      "corpus_sentences": 159
+    },
+    {
+      "pmcid": "PMC6174015",
+      "doi": "10.4317/jced.55091",
+      "year": "2018",
+      "journal": "Journal of clinical and experimental dentistry",
+      "license": "cc by",
+      "title": "An in vitro cyclic fatigue resistance comparison of conventional and new generation nickel-titanium rotary files.",
+      "pool_sentences": 65,
+      "corpus_sentences": 45
+    },
+    {
+      "pmcid": "PMC7698005",
+      "doi": "10.3390/ma13225128",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Load Controlled Fatigue Behaviour of Microplasma Arc Welded Thin Titanium Grade 5 (6Al-4V) Sheets.",
+      "pool_sentences": 143,
+      "corpus_sentences": 99
+    },
+    {
+      "pmcid": "PMC11433727",
+      "doi": "10.3390/ma17184639",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Notches and Fatigue on Aircraft-Grade Aluminium Alloys.",
+      "pool_sentences": 456,
+      "corpus_sentences": 314
+    },
+    {
+      "pmcid": "PMC5502668",
+      "doi": "10.3390/ma9040217",
+      "year": "2016",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effects of Plasma ZrN Metallurgy and Shot Peening Duplex Treatment on Fretting Wear and Fretting Fatigue Behavior of Ti6Al4V Alloy.",
+      "pool_sentences": 255,
+      "corpus_sentences": 178
+    },
+    {
+      "pmcid": "PMC5793596",
+      "doi": "10.3390/ma11010098",
+      "year": "2018",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Very High Cycle Fatigue Behavior of a Directionally Solidified Ni-Base Superalloy DZ4.",
+      "pool_sentences": 115,
+      "corpus_sentences": 72
+    },
+    {
+      "pmcid": "PMC5978151",
+      "doi": "10.3390/ma11050774",
+      "year": "2018",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Investigative Method for Fatigue Crack Propagation Based on a Small Time Scale.",
+      "pool_sentences": 174,
+      "corpus_sentences": 117
+    },
+    {
+      "pmcid": "PMC5553426",
+      "doi": "10.3390/ma10060609",
+      "year": "2017",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Microarc Oxidation Coating Combined with Surface Pore-Sealing Treatment Enhances Corrosion Fatigue Performance of 7075-T7351 Al Alloy in Different Media.",
+      "pool_sentences": 120,
+      "corpus_sentences": 74
+    },
+    {
+      "pmcid": "PMC10488951",
+      "doi": "10.3390/ma16175964",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Corrosion-Fatigue Performance of 3D-Printed (L-PBF) AlSi10Mg.",
+      "pool_sentences": 163,
+      "corpus_sentences": 101
+    },
+    {
+      "pmcid": "PMC12113589",
+      "doi": "10.3390/ma18102365",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Impact of Microstructural Anisotropy on the Low-Cycle Fatigue of S420M Steel.",
+      "pool_sentences": 181,
+      "corpus_sentences": 118
+    },
+    {
+      "pmcid": "PMC7412035",
+      "doi": "10.3390/ma13143080",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Influence of Aluminum Surface Treatment on Tensile and Fatigue Behavior of Thermoplastic-Based Hybrid Laminates.",
+      "pool_sentences": 190,
+      "corpus_sentences": 125
+    },
+    {
+      "pmcid": "PMC7177987",
+      "doi": "10.3390/ma13071591",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "High Cycle Fatigue Performance of LPBF 304L Stainless Steel at Nominal and Optimized Parameters.",
+      "pool_sentences": 154,
+      "corpus_sentences": 97
+    },
+    {
+      "pmcid": "PMC13389541",
+      "doi": "10.1038/s41598-026-51451-9",
+      "year": "2026",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Experimental and numerical investigation of short carbon fiber reinforced PA66 spur gears for fatigue performance optimization.",
+      "pool_sentences": 226,
+      "corpus_sentences": 154
+    },
+    {
+      "pmcid": "PMC11078266",
+      "doi": "10.12688/f1000research.130249.2",
+      "year": "2023",
+      "journal": "F1000Research",
+      "license": "cc by",
+      "title": "The effect of canal curvature on cyclic fatigue resistance of rotary instruments using different irrigation materials ( in vitro study).",
+      "pool_sentences": 127,
+      "corpus_sentences": 80
+    },
+    {
+      "pmcid": "PMC6624312",
+      "doi": "10.1038/s41467-019-11089-w",
+      "year": "2019",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Non-conventional mechanism of ferroelectric fatigue via cation migration.",
+      "pool_sentences": 146,
+      "corpus_sentences": 110
+    },
+    {
+      "pmcid": "PMC5207581",
+      "doi": "10.1097/md.0000000000005744",
+      "year": "2016",
+      "journal": "Medicine",
+      "license": "cc by-nd",
+      "title": "Migration of titanium cable into spinal cord and spontaneous C2 and C3 fusion: Case report of possible causes of fatigue failure after posterior atlantoaxial fixation.",
+      "pool_sentences": 69,
+      "corpus_sentences": 45
+    },
+    {
+      "pmcid": "PMC7766619",
+      "doi": "10.3390/ma13245823",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Shaping and Centering Ability, Cyclic Fatigue Resistance and Fractographic Analysis of Three Thermally Treated NiTi Endodontic Instrument Systems.",
+      "pool_sentences": 134,
+      "corpus_sentences": 92
+    },
+    {
+      "pmcid": "PMC10383830",
+      "doi": "10.3390/s23146561",
+      "year": "2023",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Acoustic Emission Monitoring of Fatigue Crack Growth in Hadfield Steel.",
+      "pool_sentences": 161,
+      "corpus_sentences": 102
+    },
+    {
+      "pmcid": "PMC11943708",
+      "doi": "10.3390/ma18061214",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Life Analysis of Cyclone Separator Group Structure in a Reactor Device.",
+      "pool_sentences": 210,
+      "corpus_sentences": 145
+    },
+    {
+      "pmcid": "PMC5455940",
+      "doi": "10.3390/ma7064349",
+      "year": "2014",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Notch Corrosion Fatigue Behavior of Ti-6Al-4V.",
+      "pool_sentences": 168,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC12387781",
+      "doi": "10.3390/ma18163747",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Premature Fatigue Failure Analysis of Axle in Permanent Magnet Direct-Drive Electric Locomotive.",
+      "pool_sentences": 186,
+      "corpus_sentences": 131
+    },
+    {
+      "pmcid": "PMC12985716",
+      "doi": "10.3390/ma19050866",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "File-Specific Cyclic Fatigue Resistance of NiTi Instruments After Repeated Use in Simulated Canals: Patterns Compatible with Potential Stress-Induced Martensite Transformation Effects.",
+      "pool_sentences": 152,
+      "corpus_sentences": 97
+    },
+    {
+      "pmcid": "PMC9259632",
+      "doi": "10.1038/s41597-022-01368-5",
+      "year": "2022",
+      "journal": "Scientific data",
+      "license": "cc by",
+      "title": "Fatigue dataset of high-entropy alloys.",
+      "pool_sentences": 64,
+      "corpus_sentences": 47
+    },
+    {
+      "pmcid": "PMC10488808",
+      "doi": "10.3390/ma16175874",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Intrinsic Fatigue Limit and the Minimum Fatigue Crack Growth Threshold.",
+      "pool_sentences": 243,
+      "corpus_sentences": 160
+    },
+    {
+      "pmcid": "PMC9656421",
+      "doi": "10.3390/ma15217541",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue in an AZ31 Alloy Subjected to Rotary Swaging.",
+      "pool_sentences": 216,
+      "corpus_sentences": 146
+    },
+    {
+      "pmcid": "PMC6766011",
+      "doi": "10.3390/ma12182852",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Micromechanical Modelling of the Influence of Strain Ratio on Fatigue Crack Initiation in a Martensitic Steel-A Comparison of Different Fatigue Indicator Parameters.",
+      "pool_sentences": 314,
+      "corpus_sentences": 216
+    },
+    {
+      "pmcid": "PMC11106644",
+      "doi": "10.1002/cre2.893",
+      "year": "2024",
+      "journal": "Clinical and experimental dental research",
+      "license": "cc by",
+      "title": "The extended finite element method in endodontics: A scoping review and future directions for cyclic fatigue testing of nickel-titanium instruments.",
+      "pool_sentences": 77,
+      "corpus_sentences": 48
+    },
+    {
+      "pmcid": "PMC5456831",
+      "doi": "10.3390/ma9060471",
+      "year": "2016",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The Effect of Ultrasonic Peening Treatment on Fatigue Performance of Welded Joints.",
+      "pool_sentences": 118,
+      "corpus_sentences": 73
+    },
+    {
+      "pmcid": "PMC8538148",
+      "doi": "10.34172/joddd.2021.029",
+      "year": "2021",
+      "journal": "Journal of dental research, dental clinics, dental prospects",
+      "license": "cc by",
+      "title": "A comparative investigation between ProTaper Next, Hyflex CM, 2Shape, and TF-Adaptive file systems concerning cyclic fatigue resistance.",
+      "pool_sentences": 105,
+      "corpus_sentences": 80
+    },
+    {
+      "pmcid": "PMC8585301",
+      "doi": "10.3390/ma14216565",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Creep-Fatigue Crack Initiation Simulation of a Modified 12% Cr Steel Based on Grain Boundary Cavitation and Plastic Slip Accumulation.",
+      "pool_sentences": 160,
+      "corpus_sentences": 96
+    },
+    {
+      "pmcid": "PMC8401522",
+      "doi": "10.3390/ma14164516",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Performance of Metal-Composite Friction Spot Joints.",
+      "pool_sentences": 212,
+      "corpus_sentences": 132
+    },
+    {
+      "pmcid": "PMC11936523",
+      "doi": "10.1155/crid/4064452",
+      "year": "2025",
+      "journal": "Case reports in dentistry",
+      "license": "cc by",
+      "title": "Implant Body Fracture Due to Fatigue in a Maxillary Implant-Retained Overdenture Treatment.",
+      "pool_sentences": 114,
+      "corpus_sentences": 71
+    },
+    {
+      "pmcid": "PMC10420041",
+      "doi": "10.3390/ma16155215",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Characteristic Parameters of Magnetostrictive Guided Wave Testing for Fatigue Damage of Steel Strands.",
+      "pool_sentences": 135,
+      "corpus_sentences": 87
+    },
+    {
+      "pmcid": "PMC12986481",
+      "doi": "10.3390/ma19050967",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Residual Plastic Strain on the Fatigue Failure Mechanism and Service Life Prediction of Dented X80 Pipelines.",
+      "pool_sentences": 229,
+      "corpus_sentences": 135
+    },
+    {
+      "pmcid": "PMC8870709",
+      "doi": "10.3390/dj10020030",
+      "year": "2022",
+      "journal": "Dentistry journal",
+      "license": "cc by",
+      "title": "Multimethod Assessment of the Cyclic Fatigue Strength of ProGlider, Edge Glide Path and R-Pilot Endodontic Instruments.",
+      "pool_sentences": 112,
+      "corpus_sentences": 71
+    },
+    {
+      "pmcid": "PMC11123334",
+      "doi": "10.3390/ma17102248",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Tensile and High Cycle Fatigue Performance at Room and Elevated Temperatures of Laser Powder Bed Fusion Manufactured Hastelloy X.",
+      "pool_sentences": 154,
+      "corpus_sentences": 107
+    },
+    {
+      "pmcid": "PMC11051056",
+      "doi": "10.3390/ma17081724",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Behavior and Fracture Surface Analysis of Corroded High-Strength Bridge Cable Wires.",
+      "pool_sentences": 296,
+      "corpus_sentences": 201
+    },
+    {
+      "pmcid": "PMC8746278",
+      "doi": "10.3390/ma15010084",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "High Temperature Fatigue of Aged Heavy Section Austenitic Stainless Steels.",
+      "pool_sentences": 113,
+      "corpus_sentences": 69
+    },
+    {
+      "pmcid": "PMC10130168",
+      "doi": "10.1038/s41598-023-33354-1",
+      "year": "2023",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Prediction of 316 stainless steel low-cycle fatigue life based on machine learning.",
+      "pool_sentences": 97,
+      "corpus_sentences": 68
+    },
+    {
+      "pmcid": "PMC13354055",
+      "doi": "10.4317/jced.64022",
+      "year": "2026",
+      "journal": "Journal of clinical and experimental dentistry",
+      "license": "cc by",
+      "title": "Fatigue Survival and Biomechanical Behavior of Two-piece Titanium and Zirconia Dental Implants.",
+      "pool_sentences": 111,
+      "corpus_sentences": 67
+    },
+    {
+      "pmcid": "PMC12298813",
+      "doi": "10.3390/ma18143286",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effects of Aging on Mode I Fatigue Crack Growth Characterization of Double Cantilever Beam Specimens with Thick Adhesive Bondline for Marine Applications.",
+      "pool_sentences": 222,
+      "corpus_sentences": 139
+    }
+  ],
+  "leakage": {
+    "materiominer_sentences": 952,
+    "materiominer_ngrams": 9348,
+    "overlap_by_document": {
+      "10.1038_s41467-020-19071-7.conll": 11,
+      "10.3390_met10111458.conll": 3,
+      "10.1038_ncomms7164.conll": 1
+    },
+    "overlap_examples": [
+      {
+        "sentence": "Static mechanical properties such as Young\u2019s modulus, yield strength (YS), ultimate tensile strength (UTS), and elongation are identified by REs in the paragraphs of the \u2018Method\u2019 and subsequent sections.",
+        "ngram": ") , ultimate tensile strength ( uts )",
+        "docs": [
+          "10.1038_s41467-020-19071-7.conll"
+        ]
+      },
+      {
+        "sentence": "The cyclic deformation and transformation behavior were investigated under total strain-control in the low cycle fatigue (LCF) regime and under stress control in the high cycle fatigue (HCF) regime.",
+        "ngram": "in the low cycle fatigue ( lcf )",
+        "docs": [
+          "10.3390_met10111458.conll"
+        ]
+      },
+      {
+        "sentence": "However, for strain-controlled tests, the Coffin\u2013Manson relationship is used to describe the low-cycle fatigue (LCF) regime, while in the high-cycle fatigue (HCF) regime, the total strain\u2013life curve (\u03b5a,t-Nf) is separated into a plastic portion (\u03b5a,p), described via the Coffin\u2013Manson relationship, and an elastic portion (\u03b5a,e), related to Basquin\u2019s equation.",
+        "ngram": "the low - cycle fatigue ( lcf )",
+        "docs": [
+          "10.1038_s41467-020-19071-7.conll"
+        ]
+      },
+      {
+        "sentence": "This fundamental understanding is necessary to study persistent slip bands in Face-Centred Cubic (FCC) metals and alloys, including appropriate characterization, theory, and modelling.",
+        "ngram": "face - centred cubic ( fcc ) metals",
+        "docs": [
+          "10.1038_ncomms7164.conll"
+        ]
+      },
+      {
+        "sentence": "However, previous studies focused mainly on the fatigue life and crack growth, with only limited studies on the low-cycle fatigue (LCF) behavior of FSW joining in aluminum alloys.",
+        "ngram": "the low - cycle fatigue ( lcf )",
+        "docs": [
+          "10.1038_s41467-020-19071-7.conll"
+        ]
+      },
+      {
+        "sentence": "For example, W\u00f6hler et al. found a linear relationship between the fatigue strength and tensile strength of materials.",
+        "ngram": "between the fatigue strength and tensile strength of",
+        "docs": [
+          "10.1038_s41467-020-19071-7.conll"
+        ]
+      },
+      {
+        "sentence": "Jingyu Yang et al. systematically investigated the correlation between the low-cycle fatigue (LCF) strain amplitude and dislocation configuration evolution in 316H stainless steel at 650 \u00b0C.",
+        "ngram": "the low - cycle fatigue ( lcf )",
+        "docs": [
+          "10.1038_s41467-020-19071-7.conll"
+        ]
+      },
+      {
+        "sentence": "In high cycle fatigue (HCF), the mean stress can be simply calculated by the stress ratio.",
+        "ngram": "in high cycle fatigue ( hcf ) ,",
+        "docs": [
+          "10.1038_s41467-020-19071-7.conll"
+        ]
+      },
+      {
+        "sentence": "Particularly for the latter property, knowledge of the cyclic plasticity behaviour of the material is of great importance, especially in the Low-Cycle Fatigue (LCF) regime.",
+        "ngram": "the low - cycle fatigue ( lcf )",
+        "docs": [
+          "10.1038_s41467-020-19071-7.conll"
+        ]
+      },
+      {
+        "sentence": "During the experiment, a crack opening displacement (COD) gauge was installed on the specimen, and the crack length (a) was measured by the compliance method.",
+        "ngram": "a crack opening displacement ( cod ) gauge",
+        "docs": [
+          "10.1038_s41467-020-19071-7.conll"
+        ]
+      },
+      {
+        "sentence": "In addition to comprehending the high-cycle fatigue (HCF) behavior, it is equally crucial to delve into the low-cycle fatigue (LCF) behavior for quality assurance purposes.",
+        "ngram": "the low - cycle fatigue ( lcf )",
+        "docs": [
+          "10.1038_s41467-020-19071-7.conll"
+        ]
+      },
+      {
+        "sentence": "WaveMatrix3 Dynamic Testing Software (INSTRON, Norwood, MA, USA, 2023, version 3) was used for the low-cycle fatigue (LCF), and Bluehill Universal Software (INSTRON, Norwood, MA, USA, 2023, version 4.42) was used for axial static testing.",
+        "ngram": "the low - cycle fatigue ( lcf )",
+        "docs": [
+          "10.1038_s41467-020-19071-7.conll"
+        ]
+      },
+      {
+        "sentence": "Mean stress and mean strain effects become relevant and reduce fatigue life for elastic bulk material response as it is in the high cycle fatigue (HCF) regime.",
+        "ngram": "in the high cycle fatigue ( hcf )",
+        "docs": [
+          "10.3390_met10111458.conll"
+        ]
+      },
+      {
+        "sentence": "In contrast, in the low cycle fatigue (LCF) regime of strain-controlled fatigue experiments with elasto-plastic material response, increased mean strain levels cause mean stress relaxation in early life.",
+        "ngram": "in the low cycle fatigue ( lcf )",
+        "docs": [
+          "10.3390_met10111458.conll"
+        ]
+      },
+      {
+        "sentence": "One can also observe that the wear-out model exhibited a similar trend to the power law, except in the low-cycle fatigue (LCF) range.",
+        "ngram": "the low - cycle fatigue ( lcf )",
+        "docs": [
+          "10.1038_s41467-020-19071-7.conll"
+        ]
+      }
+    ],
+    "duplicate_examples": [
+      {
+        "sentence": "Even if the trend of the influence of the build direction is qualitatively verified, the quantitative values are influenced individually by each process.",
+        "duplicate_of": 96
+      },
+      {
+        "sentence": "It is absolutely necessary to consider process conditions, e.g., process machine, process parameters and build direction.",
+        "duplicate_of": 97
+      },
+      {
+        "sentence": "The effect of the accumulation of the rotational strain modes at the grain boundaries was discovered, which caused the local structure transformation at the boundary zones.",
+        "duplicate_of": 2338
+      },
+      {
+        "sentence": "This could be mutually compensated due to the small sizes of grains.",
+        "duplicate_of": 2340
+      },
+      {
+        "sentence": "In reality, this value may be lower.",
+        "duplicate_of": 2635
+      },
+      {
+        "sentence": "The main conclusions are as follows:",
+        "duplicate_of": 177
+      },
+      {
+        "sentence": "However, this difference was not significant statistically (p>0.05).",
+        "duplicate_of": 6571
+      },
+      {
+        "sentence": "However, this difference was not significant statistically (p>0.05).",
+        "duplicate_of": 6571
+      },
+      {
+        "sentence": "Three different specimens were tested at 28 days.",
+        "duplicate_of": 7542
+      },
+      {
+        "sentence": "However, it should be noted that since it is an energy parameter, it is specific to each geometry.",
+        "duplicate_of": 7644
+      },
+      {
+        "sentence": "The main conclusions are as follows:",
+        "duplicate_of": 177
+      },
+      {
+        "sentence": "Three measurements were performed for each series.",
+        "duplicate_of": 10591
+      },
+      {
+        "sentence": "The instantaneous fracture area was a rough dimple.",
+        "duplicate_of": 11488
+      },
+      {
+        "sentence": "Armonk, NY: IBM) with the level of significance chosen at 0.05.",
+        "duplicate_of": 12718
+      },
+      {
+        "sentence": "The main conclusions are as follows:",
+        "duplicate_of": 177
+      },
+      {
+        "sentence": "This layout helps to capture in detail the signal propagation and reflection caused by circular hole damage for further analysis and evaluation.",
+        "duplicate_of": 15638
+      },
+      {
+        "sentence": "Furthermore, manufacturing lines were distributed perpendicularly to the longitudinal axis of the endodontic rotary files and also parallel to each other due to the laser machining manufacturing process.",
+        "duplicate_of": 15841
+      },
+      {
+        "sentence": "The crack was created by removing three consecutive planes of atoms.",
+        "duplicate_of": 15996
+      },
+      {
+        "sentence": "Table 6 shows the difference between the temperature used and the surface hardness, as well as the depth of the nitration case.",
+        "duplicate_of": 16523
+      },
+      {
+        "sentence": "The implants were loaded with a sinusoidal function of fatigue at a frequency of 15 Hz and 10% stress variation.",
+        "duplicate_of": 14687
+      }
+    ]
+  },
+  "corpus": {
+    "path": "/home/user/AI_Research_Ontologies_GNN_GRL/data/processed/corpus/fatigue_sentences.txt",
+    "sentences": 40000,
+    "sha256": "7eaf1e79f7d43e52d7ef96c8afbeddede0c9b8ca71a3b1e9cf7a64d59eea3162"
+  },
+  "run": {
+    "search_retrieved": "2026-10-13T09:33:01Z",
+    "started": "2026-10-13T09:45:04Z",
+    "finished": "2026-10-13T09:48:09Z",
+    "seconds": 185.1,
+    "used_articles_downloaded_now": 81,
+    "http_requests": 85,
+    "cache_dir": "/home/user/AI_Research_Ontologies_GNN_GRL/data/processed/corpus/europepmc"
+  }
+}
