@@ -1,0 +1,676 @@
+"""Tests for report_results.py, the generator of the README/ROADMAP results sections.
+
+Standard library and pytest only. Synthetic tests build a small results directory and
+two stub documents in tmp_path; the regression test at the end regenerates the real
+blocks from the real results/ (into tmp_path) and compares them with the current docs.
+"""
+import ast
+import json
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+import pytest
+
+import report_results as rr
+
+REPO = Path(__file__).resolve().parents[1]
+MODULE = REPO / 'src' / 'graph' / 'report_results.py'
+
+README_STUB = "# Project\n\nintro\n\n<!-- RESULTS:START -->\nstale\n<!-- RESULTS:END -->\n\nafter\n"
+ROADMAP_STUB = "# Roadmap\n\n<!-- STANDING:START -->\nstale\n<!-- STANDING:END -->\n\nafter\n"
+
+# The smallest pipeline output the generator needs (the rest of results/ is optional).
+EVAL_OFF = {
+    'reference_majority_class': {'accuracy': 0.083},
+    'typing': {'accuracy': 0.384, 'accuracy_ci95': [0.33, 0.43], 'set_f1': 0.351,
+               'macro_f1': 0.457, 'acc@5': 0.502, 'h_f1': 0.522},
+    'clustering': {'ari': 0.035, 'bcubed_f1': 0.183, 'baseline_singletons': {'bcubed_f1': 0.475}},
+    'taxonomy': {'f1': 0.006, 'precision_closure': 0.027, 'random_precision_closure': 0.013},
+}
+
+FULL = {'random_split_vary': 5, 'leave_one_paper_out': 4, 'random_split_fixed': 5}
+OMIT = object()   # reference=OMIT: write an entry without a `reference` field (old files)
+
+BASELINE_HEADING = '#### NER training variants vs the baseline (paired by split and model seed)'
+WEEK2_HEADING = '#### NER week-2 variants vs the CRF head (paired by split and model seed)'
+COLUMNS = ("| Variant | Protocol | Granularity | Pairs | Variant micro F1 [95% CI] | "
+           "Δ micro [95% CI] | Δ macro [95% CI] | Δ strict micro |")
+
+
+def stat(mean, lo, hi):
+    return {'mean_diff': mean, 'ci95': [lo, hi], 'per_run': []}
+
+
+class Workspace:
+    """A results directory plus stub README/ROADMAP files in tmp_path."""
+
+    def __init__(self, root):
+        self.results = root / 'results'
+        self.results.mkdir()
+        (self.results / 'eval_pipeline_llm_off.json').write_text(json.dumps(EVAL_OFF))
+        self.readme = root / 'README.md'
+        self.roadmap = root / 'ROADMAP.md'
+        self.readme.write_text(README_STUB, encoding='utf-8')
+        self.roadmap.write_text(ROADMAP_STUB, encoding='utf-8')
+        self.comps = {}
+
+    def compare(self, variant, granularity, protocol, *, n_pairs=None, micro=(0.5, -0.5, 1.5),
+                strict=(0.4, -0.6, 1.4), macro=(0.3, -0.7, 1.3), reference='crf', own=None,
+                key=None):
+        """Add one ner_comparisons.json entry; `own` = (mean, lo, hi) writes the variant's file."""
+        key = key or f'ner_results_{granularity}_{protocol}_{variant}'
+        n = FULL[protocol] if n_pairs is None else n_pairs
+        entry = {'variant': variant, 'granularity': granularity, 'protocol': protocol,
+                 'n_pairs': n, 'run_ids': [f'r{i}' for i in range(n)],
+                 'micro': stat(*micro), 'micro_strict': stat(*strict),
+                 'macro': stat(*macro), 'weighted': stat(*micro)}
+        if reference is not OMIT:
+            entry['reference'] = reference
+        self.comps[key] = entry
+        if own:
+            mean, lo, hi = own
+            (self.results / f'{key}.json').write_text(json.dumps({
+                'paper_test_f1': 69.92,
+                'summary': {'n_runs': n, 'micro': {'mean': mean, 'ci95': [lo, hi]}}}))
+        self.save()
+        return key
+
+    def save(self):
+        (self.results / 'ner_comparisons.json').write_text(json.dumps(self.comps))
+
+    def run(self, *extra):
+        return rr.main(['--results', str(self.results), '--readme', str(self.readme),
+                        '--roadmap', str(self.roadmap), *extra])
+
+    def generate(self, *extra):
+        """Run the generator and return (README text, ROADMAP text)."""
+        assert self.run(*extra) == 0
+        return self.readme.read_text(encoding='utf-8'), self.roadmap.read_text(encoding='utf-8')
+
+
+def section(text, heading):
+    """Lines of the section whose '#### ' heading starts with `heading`."""
+    lines = text.split('\n')
+    start = next(i for i, line in enumerate(lines) if line.startswith(heading))
+    end = next((i for i in range(start + 1, len(lines))
+                if lines[i].startswith('#### ') or lines[i].startswith('**Reading the numbers**')),
+               len(lines))
+    return lines[start:end]
+
+
+def table_rows(text, heading):
+    return [line for line in section(text, heading)
+            if line.startswith('| ') and not line.startswith('| Variant |')]
+
+
+def headings(text):
+    return [line for line in text.split('\n') if line.startswith('#### ')]
+
+
+def bullets(text, start):
+    return [line for line in text.split('\n') if line.startswith(start)]
+
+
+def block(text, name):
+    begin, end = f'<!-- {name}:START -->', f'<!-- {name}:END -->'
+    return text[text.index(begin):text.index(end) + len(end)]
+
+
+# ---------------------------------------------------------------------------
+# Table rows and verdict wording
+# ---------------------------------------------------------------------------
+def test_week2_table_follows_the_baseline_table_with_the_same_columns(tmp_path):
+    ws = Workspace(tmp_path)
+    ws.compare('cw', 'fine', 'random_split_vary', reference='baseline', micro=(-0.24, -3.09, 2.61),
+               strict=(-0.64, -3.4, 2.1), macro=(0.02, -4.99, 5.02), own=(73.67, 69.77, 77.56))
+    # written out of order on purpose: the table sorts by variant, protocol, granularity
+    ws.compare('crf_ens3', 'coarse', 'leave_one_paper_out', micro=(2.4, 0.7, 4.1),
+               strict=(1.9, 0.3, 3.5), macro=(2.2, 0.5, 3.9), own=(62.22, 55.0, 69.4))
+    ws.compare('crf_dapt', 'fine', 'leave_one_paper_out', micro=(0.4, -1.1, 1.9),
+               strict=(0.35, -1.0, 1.7), macro=(0.2, -2.0, 2.4), own=(47.5, 41.0, 54.0))
+    ws.compare('crf_mt', 'coarse', 'random_split_vary', micro=(0.3, -0.8, 1.4),
+               strict=(0.25, -0.6, 1.1), macro=(0.6, -1.2, 2.4))        # no own results file
+    ws.compare('crf_mt', 'fine', 'random_split_vary', micro=(1.2, 0.35, 2.05),
+               strict=(0.9, 0.1, 1.7), macro=(1.5, -0.4, 3.4), own=(77.56, 72.4, 82.7))
+    readme, _ = ws.generate()
+
+    assert headings(readme)[-2:] == [BASELINE_HEADING, WEEK2_HEADING]
+    assert table_rows(readme, BASELINE_HEADING) == [
+        "| class-weighted loss | new random split per seed | fine | 5 | 73.67 [69.77, 77.56] "
+        "| -0.24 [-3.09, +2.61] | +0.02 [-4.99, +5.02] | -0.64 |"]
+    assert table_rows(readme, WEEK2_HEADING) == [
+        "| multi-task (fine + coarse heads) | new random split per seed | fine | 5 "
+        "| 77.56 [72.40, 82.70] | +1.20 [+0.35, +2.05] | +1.50 [-0.40, +3.40] | +0.90 |",
+        "| multi-task (fine + coarse heads) | new random split per seed | coarse | 5 "
+        "| – | +0.30 [-0.80, +1.40] | +0.60 [-1.20, +2.40] | +0.25 |",
+        "| domain-adaptive pre-training | leave one paper out | fine | 4 "
+        "| 47.50 [41.00, 54.00] | +0.40 [-1.10, +1.90] | +0.20 [-2.00, +2.40] | +0.35 |",
+        "| 3-model ensemble | leave one paper out | coarse | 4 "
+        "| 62.22 [55.00, 69.40] | +2.40 [+0.70, +4.10] | +2.20 [+0.50, +3.90] | +1.90 |"]
+    # same columns as the existing table
+    for heading in (BASELINE_HEADING, WEEK2_HEADING):
+        # heading, blank, intro, blank, then the column header and its separator
+        assert section(readme, heading)[4:6] == [COLUMNS, '|---|---|---|---|---|---|---|---|']
+    intro = section(readme, WEEK2_HEADING)[2]
+    assert intro.startswith("Δ = variant − CRF head on the same split and model seed, with the "
+                            "95% Student-t CI of the mean difference.")
+    assert "a variant improves on the CRF head only if the micro-F1 interval over the 5 random " \
+           "splits lies entirely above 0." in intro
+
+
+def test_week2_intro_notes_the_thread_count_and_its_measured_effect(tmp_path):
+    ws = Workspace(tmp_path)
+    ws.compare('crf_mt', 'fine', 'random_split_vary', own=(77.56, 72.4, 82.7))
+    ws.compare('crf_m0', 'fine', 'random_split_vary', n_pairs=3, micro=(-1.1, -2.9, 0.7))
+    readme, _ = ws.generate()
+    assert section(readme, WEEK2_HEADING)[2].endswith(f"lies entirely above 0. {rr.THREAD_NOTE}")
+
+    # complete crf_m0 comparisons add the measured effect, but never a row
+    ws.compare('crf_m0', 'fine', 'random_split_vary', micro=(-1.1, -2.9, 0.7))
+    ws.compare('crf_m0', 'coarse', 'random_split_vary', micro=(0.4, -1.0, 1.8))
+    readme, _ = ws.generate()
+    assert section(readme, WEEK2_HEADING)[2].endswith(
+        f"{rr.THREAD_NOTE} Re-running the CRF head with 2 threads (ensemble member `crf_m0`) "
+        "changes micro F1 by fine-grained -1.10 [-2.90, +0.70] and coarse-grained "
+        "+0.40 [-1.00, +1.80] over the 5 random splits.")
+    assert len(table_rows(readme, WEEK2_HEADING)) == 1
+
+
+def test_week2_verdict_lines(tmp_path):
+    ws = Workspace(tmp_path)
+    # multi-task: improves / no significant change over the splits, hurts leaving a paper out
+    ws.compare('crf_mt', 'fine', 'random_split_vary', micro=(1.2, 0.35, 2.05),
+               strict=(0.9, 0.1, 1.7))
+    ws.compare('crf_mt', 'coarse', 'random_split_vary', micro=(0.3, -0.8, 1.4),
+               strict=(0.25, -0.6, 1.1))
+    ws.compare('crf_mt', 'fine', 'leave_one_paper_out', micro=(-2.1, -3.5, -0.7),
+               strict=(-1.8, -3.1, -0.5))
+    # domain-adaptive pre-training: only the out-of-distribution comparison is complete
+    ws.compare('crf_dapt', 'coarse', 'leave_one_paper_out', micro=(2.0, 0.5, 3.5),
+               strict=(1.5, -0.2, 3.2))
+    readme, roadmap = ws.generate()
+
+    assert bullets(readme, '* NER, multi-task') == [
+        "* NER, multi-task (fine + coarse heads) vs the CRF head (paired micro-F1 difference): "
+        "fine-grained improves (+1.20, 95% CI [+0.35, +2.05]; strict IOB2 +0.90 [+0.10, +1.70]); "
+        "coarse-grained no significant change (+0.30, 95% CI [-0.80, +1.40]; strict IOB2 "
+        "+0.25 [-0.60, +1.10]) across the 5 random splits. Leaving one paper out: fine-grained "
+        "hurts (-2.10, 95% CI [-3.50, -0.70]; strict IOB2 -1.80 [-3.10, -0.50])."]
+    assert bullets(readme, '* NER, domain-adaptive') == [
+        "* NER, domain-adaptive pre-training vs the CRF head (paired micro-F1 difference): "
+        "leaving one paper out: coarse-grained improves (+2.00, 95% CI [+0.50, +3.50]; strict "
+        "IOB2 +1.50 [-0.20, +3.20])."]
+    assert bullets(readme, '* NER, 3-model') == []          # no complete comparison, no line
+    assert 'week-2' not in roadmap
+
+
+def test_ensemble_vs_its_members_bullet(tmp_path):
+    ws = Workspace(tmp_path)
+    ws.compare('crf_ens3', 'fine', 'random_split_vary', micro=(3.39, -1.36, 8.14))
+    start = '* NER, 3-model ensemble vs the mean'
+    readme, _ = ws.generate()
+    assert bullets(readme, start) == []                     # no ensemble results file yet
+
+    def ens_file(granularity, protocol, n_runs, gain):
+        (ws.results / rr.ner_file(granularity, protocol, 'crf_ens3')).write_text(json.dumps({
+            'paper_test_f1': 69.92,
+            'summary': {'n_runs': n_runs, 'micro': {'mean': 79.76, 'ci95': [76.14, 83.38]},
+                        'vs_member_mean': stat(*gain)}}))
+    ens_file('fine', 'random_split_vary', 5, (2.47, 1.19, 3.75))
+    ens_file('coarse', 'random_split_vary', 3, (1.0, -1.0, 3.0))    # incomplete: left out
+    ens_file('fine', 'leave_one_paper_out', 4, (1.5, -0.5, 3.5))
+    readme, roadmap = ws.generate()
+    assert bullets(readme, start) == [
+        "* NER, 3-model ensemble vs the mean of its own members on the same split (exploratory, "
+        "not pre-registered; no single reference run enters): fine-grained +2.47 [+1.19, +3.75] "
+        "across the 5 random splits; fine-grained +1.50 [-0.50, +3.50] leaving one paper out."]
+    assert start not in roadmap
+
+
+@pytest.mark.parametrize('micro, word', [
+    ((1.0, 0.01, 2.0), 'improves'),
+    ((1.0, 0.0, 2.0), 'no significant change'),      # the interval must lie entirely above 0
+    ((-1.0, -2.0, -0.01), 'hurts'),
+    ((-1.0, -2.0, 0.0), 'no significant change'),
+    ((0.0, -1.0, 1.0), 'no significant change'),
+])
+def test_paired_verdict_words(micro, word):
+    got, numbers = rr.paired_verdict({'micro': stat(*micro), 'micro_strict': stat(0.5, -0.5, 1.5)})
+    assert got == word
+    assert numbers.endswith("; strict IOB2 +0.50 [-0.50, +1.50]")
+
+
+def test_baseline_variants_keep_their_wording(tmp_path):
+    ws = Workspace(tmp_path)
+    ws.compare('crf', 'fine', 'random_split_vary', reference='baseline', micro=(2.46, 0.39, 4.52),
+               strict=(0.1, -2.08, 2.29), own=(76.36, 71.0, 81.73))
+    ws.compare('cw', 'fine', 'leave_one_paper_out', reference=OMIT, micro=(1.81, -4.28, 7.89),
+               strict=(1.75, -3.92, 7.43))
+    readme, _ = ws.generate()
+    assert bullets(readme, '* NER, CRF head') == [
+        "* NER, CRF head vs the baseline (paired micro-F1 difference): fine-grained improves "
+        "(+2.46, 95% CI [+0.39, +4.52]; strict IOB2 +0.10 [-2.08, +2.29]) across the 5 random "
+        "splits. Pre-registered SOTA check (a paired gain over the baseline and a 95% CI above "
+        "the published number): met for fine-grained 76.36 [71.00, 81.73] vs 69.92, if the "
+        "paper reports micro F1."]
+    assert bullets(readme, '* NER, class-weighted') == [
+        "* NER, class-weighted loss vs the baseline (paired micro-F1 difference): leaving one "
+        "paper out: fine-grained no significant change (+1.81, 95% CI [-4.28, +7.89]; strict "
+        "IOB2 +1.75 [-3.92, +7.43])."]
+
+
+# ---------------------------------------------------------------------------
+# Complete comparisons only, and never the ensemble members
+# ---------------------------------------------------------------------------
+@pytest.mark.parametrize('protocol, pairs, shown', [
+    ('random_split_vary', 4, False), ('random_split_vary', 5, True),
+    ('leave_one_paper_out', 3, False), ('leave_one_paper_out', 4, True),
+    ('random_split_fixed', 4, False), ('random_split_fixed', 5, True),
+])
+@pytest.mark.parametrize('variant, reference, heading', [
+    ('crf_mt', 'crf', WEEK2_HEADING),
+    ('cw', 'baseline', BASELINE_HEADING),          # the rule is the same for the old table
+])
+def test_only_complete_comparisons_are_shown(tmp_path, variant, reference, heading, protocol,
+                                             pairs, shown):
+    ws = Workspace(tmp_path)
+    ws.compare(variant, 'fine', protocol, n_pairs=pairs, reference=reference)
+    readme, _ = ws.generate()
+    assert (heading in readme) is shown
+    if shown:
+        assert len(table_rows(readme, heading)) == 1
+    if protocol != 'random_split_fixed':           # verdict lines cover the two main protocols
+        assert bool(bullets(readme, '* NER, ')) is shown
+
+
+def test_incomplete_and_member_entries_leave_the_output_unchanged(tmp_path):
+    """Until a complete week-2 comparison exists, the generated text does not change."""
+    ws = Workspace(tmp_path)
+    ws.compare('cw', 'fine', 'random_split_vary', reference='baseline')
+    before = ws.generate()
+
+    ws.compare('crf_mt', 'fine', 'random_split_vary', n_pairs=3)
+    ws.compare('crf_dapt', 'coarse', 'leave_one_paper_out', n_pairs=2)
+    ws.compare('crf_ens3', 'fine', 'random_split_vary', n_pairs=4)
+    for member in ('crf_m0', 'crf_m100', 'crf_m200'):
+        for granularity in rr.GRANULARITIES:
+            for protocol in ('random_split_vary', 'leave_one_paper_out'):
+                ws.compare(member, granularity, protocol, own=(70.0, 65.0, 75.0))
+    assert ws.generate() == before
+
+
+def test_ensemble_members_get_no_row_or_verdict(tmp_path):
+    ws = Workspace(tmp_path)
+    ws.compare('crf_ens3', 'fine', 'random_split_vary', micro=(2.0, 0.6, 3.4),
+               own=(78.36, 73.0, 83.7))
+    for member in ('crf_m0', 'crf_m100', 'crf_m200'):
+        for protocol in ('random_split_vary', 'leave_one_paper_out'):
+            ws.compare(member, 'fine', protocol, micro=(5.0, 4.0, 6.0), own=(88.88, 80.0, 90.0))
+            # even filed under the baseline (as a bare tag would be), they stay out
+            ws.compare(member, 'fine', protocol, reference='baseline', micro=(5.0, 4.0, 6.0),
+                       key=f'baseline_{member}_{protocol}')
+    readme, roadmap = ws.generate()
+    assert [row.split(' | ')[0] for row in table_rows(readme, WEEK2_HEADING)] == [
+        '| 3-model ensemble']
+    assert BASELINE_HEADING not in readme
+    # the one place a member appears: crf_m0 vs the CRF head as the thread-count effect
+    note = (f"{rr.THREAD_NOTE} Re-running the CRF head with 2 threads (ensemble member "
+            "`crf_m0`) changes micro F1 by fine-grained +5.00 [+4.00, +6.00] over the 5 random "
+            "splits.")
+    assert readme.count(note) == 1
+    for text in (readme.replace(note, ''), roadmap):
+        assert 'crf_m' not in text and '88.88' not in text and '+5.00' not in text
+    assert len(bullets(readme, '* NER, ')) == 1
+
+
+def test_entries_with_missing_or_unknown_fields_are_skipped(tmp_path):
+    ws = Workspace(tmp_path)
+    ws.compare('cw', 'fine', 'random_split_vary', reference='baseline')
+    before = ws.generate()
+    ws.comps.update({
+        'null_entry': None,
+        'list_entry': [1, 2],
+        'empty': {},
+        'only_variant': {'variant': 'crf_mt'},
+        'no_pairs': {'variant': 'crf_mt', 'granularity': 'fine', 'protocol': 'random_split_vary',
+                     'reference': 'crf'},
+        'null_pairs': {'variant': 'crf_mt', 'granularity': 'fine', 'n_pairs': None,
+                       'protocol': 'random_split_vary', 'reference': 'crf'},
+        'new_protocol': {'variant': 'crf_mt', 'granularity': 'fine', 'protocol': 'cross_domain',
+                         'reference': 'crf', 'n_pairs': 99},
+        'new_granularity': {'variant': 'crf_mt', 'granularity': 'medium', 'reference': 'crf',
+                            'protocol': 'random_split_vary', 'n_pairs': 5},
+        'new_variant': {'variant': 'crf_foo', 'granularity': 'fine', 'reference': 'crf',
+                        'protocol': 'random_split_vary', 'n_pairs': 5},
+    })
+    ws.save()
+    assert ws.generate() == before
+
+
+# ---------------------------------------------------------------------------
+# The `reference` field
+# ---------------------------------------------------------------------------
+@pytest.mark.parametrize('reference', [OMIT, None, 'baseline'])
+def test_no_reference_means_baseline(tmp_path, reference):
+    ws = Workspace(tmp_path)
+    ws.compare('cw', 'fine', 'random_split_vary', reference=reference)
+    ws.compare('crf', 'coarse', 'leave_one_paper_out', reference=reference, micro=(5.0, 1.0, 9.0))
+    readme, _ = ws.generate()
+    assert [r.split(' | ')[0] for r in table_rows(readme, BASELINE_HEADING)] == [
+        '| class-weighted loss', '| CRF head']
+    assert WEEK2_HEADING not in readme
+    assert len(bullets(readme, '* NER, class-weighted loss vs the baseline')) == 1
+    assert len(bullets(readme, '* NER, CRF head vs the baseline')) == 1
+    # an older entry (no field) and an explicit 'baseline' generate the same text
+    (tmp_path / 'explicit').mkdir()
+    other = Workspace(tmp_path / 'explicit')
+    other.compare('cw', 'fine', 'random_split_vary', reference='baseline')
+    other.compare('crf', 'coarse', 'leave_one_paper_out', reference='baseline',
+                  micro=(5.0, 1.0, 9.0))
+    assert other.generate()[0] == readme
+
+
+def test_crf_reference_goes_to_the_week2_table_only(tmp_path):
+    ws = Workspace(tmp_path)
+    ws.compare('crf', 'fine', 'random_split_vary', reference='baseline')
+    ws.compare('crf_mt', 'fine', 'random_split_vary', reference='crf')
+    readme, roadmap = ws.generate()
+    assert [r.split(' | ')[0] for r in table_rows(readme, BASELINE_HEADING)] == ['| CRF head']
+    assert [r.split(' | ')[0] for r in table_rows(readme, WEEK2_HEADING)] == [
+        '| multi-task (fine + coarse heads)']
+    assert len(bullets(readme, '* NER, CRF head vs the baseline')) == 1
+    assert len(bullets(readme, '* NER, multi-task (fine + coarse heads) vs the CRF head')) == 1
+
+
+@pytest.mark.parametrize('variant, reference', [
+    ('crf_mt', 'baseline'), ('crf_mt', OMIT), ('crf_mt', None),   # week-2 variant, wrong reference
+    ('cw', 'crf'), ('crf', 'crf'),                                 # week-1 variant, wrong reference
+    ('crf_mt', 'cw'), ('cw', 'cw'),                                # some other reference
+])
+def test_wrong_reference_is_shown_nowhere(tmp_path, variant, reference):
+    ws = Workspace(tmp_path)
+    ws.compare('cw', 'coarse', 'random_split_vary', reference='baseline')
+    before = ws.generate()
+    ws.compare(variant, 'fine', 'random_split_vary', reference=reference, key='extra_entry')
+    assert ws.generate() == before
+
+
+def test_standing_row_for_the_crf_head(tmp_path):
+    ws = Workspace(tmp_path)
+
+    def write(name, summary_micro=None, n_runs=5):
+        data = {'runs': []} if summary_micro is None else {
+            'paper_test_f1': 69.92,
+            'summary': {'n_runs': n_runs, 'micro': dict(zip(('mean', 'ci95'), summary_micro))}}
+        (ws.results / name).write_text(json.dumps(data))
+
+    row = "| NER with the CRF head (`--crf`) | "
+    tail = (" | same; the in-distribution fine-grained gain over the baseline disappears under "
+            "strict IOB2 scoring |")
+
+    def crf_rows():
+        return [line for line in ws.generate()[1].split('\n') if line.startswith(row)]
+
+    assert crf_rows() == []                          # no CRF file: no row
+    write('ner_results_fine_random_split_vary_crf.json', (76.36, [71.0, 81.73]))
+    write('ner_results_coarse_random_split_vary_crf.json', (78.15, [76.61, 79.69]), n_runs=4)
+    write('ner_results_fine_leave_one_paper_out_crf.json')            # no summary yet
+    assert crf_rows() == [row + "fine: micro 76.36 [71.00, 81.73] over 5 new splits" + tail]
+    write('ner_results_fine_leave_one_paper_out_crf.json', (49.44, [41.0, 57.89]), n_runs=4)
+    write('ner_results_coarse_random_split_vary_crf.json', (78.15, [76.61, 79.69]))
+    assert crf_rows() == [
+        row + "fine: micro 76.36 [71.00, 81.73] over 5 new splits, 49.44 leaving one paper out; "
+        "coarse: micro 78.15 [76.61, 79.69] over 5 new splits" + tail]
+
+
+def test_week2_variants_do_not_reach_the_glance_or_standing_tables(tmp_path):
+    ws = Workspace(tmp_path)
+    ws.compare('crf', 'fine', 'random_split_vary', reference='baseline', own=(76.36, 71.0, 81.73),
+               micro=(2.46, 0.39, 4.52))
+    readme_before, roadmap_before = ws.generate()
+    glance_before = readme_before[readme_before.index('**At a glance**'):
+                                  readme_before.index('#### ')]
+    assert 'paired gain over the baseline' in glance_before
+
+    for variant in rr.WEEK2_VARIANTS:
+        for granularity in rr.GRANULARITIES:
+            ws.compare(variant, granularity, 'random_split_vary', micro=(3.0, 1.0, 5.0),
+                       own=(99.0, 98.0, 99.5))
+            ws.compare(variant, granularity, 'leave_one_paper_out', micro=(3.0, 1.0, 5.0))
+    readme, roadmap = ws.generate()
+    assert WEEK2_HEADING in readme and len(table_rows(readme, WEEK2_HEADING)) == 12
+    assert roadmap == roadmap_before
+    assert readme[readme.index('**At a glance**'):readme.index('#### ')] == glance_before
+
+
+# ---------------------------------------------------------------------------
+# Command line
+# ---------------------------------------------------------------------------
+def test_check_exit_codes_and_diff(tmp_path, capsys):
+    ws = Workspace(tmp_path)
+    stale = (ws.readme.read_bytes(), ws.roadmap.read_bytes())
+
+    assert ws.run('--check') == 1                   # the stub blocks are stale
+    out = capsys.readouterr().out
+    assert f'--- {ws.readme} (current)' in out and f'+++ {ws.readme} (generated)' in out
+    assert f'--- {ws.roadmap} (current)' in out
+    assert '\n-stale' in out and '\n+All numbers are leakage-free' in out
+    assert (ws.readme.read_bytes(), ws.roadmap.read_bytes()) == stale    # --check never writes
+
+    assert ws.run() == 0                            # rewrite in place
+    assert ws.readme.read_bytes() != stale[0] and ws.roadmap.read_bytes() != stale[1]
+    capsys.readouterr()
+    assert ws.run('--check') == 0
+    assert capsys.readouterr().out.startswith('up to date')
+
+    # a complete week-2 comparison appears in results/: only the README block changes
+    ws.compare('crf_mt', 'fine', 'random_split_vary')
+    assert ws.run('--check') == 1
+    out = capsys.readouterr().out
+    assert f'+++ {ws.readme} (generated)' in out and f'--- {ws.roadmap}' not in out
+    assert '\n+#### NER week-2 variants vs the CRF head' in out
+    assert ws.run() == 0 and ws.run('--check') == 0
+
+
+def test_check_notices_edits_inside_the_block_but_not_outside(tmp_path, capsys):
+    ws = Workspace(tmp_path)
+    assert ws.run() == 0
+    generated = ws.readme.read_text(encoding='utf-8')
+
+    ws.readme.write_text(generated + "\nsomething written by hand below the block\n",
+                         encoding='utf-8')
+    assert ws.run('--check') == 0                  # outside the markers: not our business
+
+    edited = generated.replace('**Reading the numbers**', '**Reading the NUMBERS**')
+    assert edited != generated
+    ws.readme.write_text(edited, encoding='utf-8')
+    assert ws.run('--check') == 1
+    assert '-**Reading the NUMBERS**' in capsys.readouterr().out
+    assert ws.run() == 0 and ws.readme.read_text(encoding='utf-8') == generated
+
+
+def test_a_second_run_changes_nothing(tmp_path, capsys):
+    ws = Workspace(tmp_path)
+    assert ws.run() == 0
+    assert capsys.readouterr().out.count('updated ') == 2
+    first = (ws.readme.read_bytes(), ws.roadmap.read_bytes())
+    assert ws.run() == 0
+    assert capsys.readouterr().out.count('unchanged ') == 2
+    assert (ws.readme.read_bytes(), ws.roadmap.read_bytes()) == first
+
+
+def test_pending_note(tmp_path):
+    ws = Workspace(tmp_path)
+    note = ("> **Still running when this snapshot was taken:** NER coarse CRF, ensemble. "
+            "These rows will be added when the runs finish.")
+    readme, roadmap = ws.generate('--pending', 'NER coarse CRF', 'ensemble')
+    assert readme.count(note) == 1 and roadmap.count(note) == 1
+    assert readme.index(note) < readme.index('**Reading the numbers**')
+    assert roadmap.index(note) < roadmap.index('Full tables:')
+    readme, roadmap = ws.generate()
+    assert 'Still running' not in readme and 'Still running' not in roadmap
+
+
+def test_check_takes_pending_into_account(tmp_path):
+    ws = Workspace(tmp_path)
+    assert ws.run('--pending', 'a') == 0
+    assert ws.run('--check', '--pending', 'a') == 0
+    assert ws.run('--check') == 1
+    assert ws.run('--check', '--pending', 'b') == 1
+
+
+def test_bad_input_exits_2_and_writes_nothing(tmp_path, capsys):
+    ws = Workspace(tmp_path)
+    original = (ws.readme.read_bytes(), ws.roadmap.read_bytes())
+
+    ws.roadmap.write_text("# Roadmap\n\nno markers here\n", encoding='utf-8')   # nothing to replace
+    broken = ws.roadmap.read_bytes()
+    for extra in ((), ('--check',)):
+        assert ws.run(*extra) == 2
+        assert 'STANDING:START' in capsys.readouterr().err
+    assert (ws.readme.read_bytes(), ws.roadmap.read_bytes()) == (original[0], broken)
+
+    ws.roadmap.write_text(ROADMAP_STUB + ROADMAP_STUB, encoding='utf-8')         # two blocks
+    assert ws.run() == 2 and 'more than one' in capsys.readouterr().err
+
+    ws.roadmap.write_text(ROADMAP_STUB.replace('<!-- STANDING:END -->', ''), encoding='utf-8')
+    assert ws.run() == 2                                                         # no END marker
+
+    ws.roadmap.write_text(ROADMAP_STUB, encoding='utf-8')
+    (ws.results / 'ner_comparisons.json').write_text('{not json')
+    assert ws.run() == 2 and 'ner_comparisons.json' in capsys.readouterr().err
+
+    (ws.results / 'ner_comparisons.json').unlink()
+    (ws.results / 'eval_pipeline_llm_off.json').unlink()
+    assert ws.run() == 2 and 'eval_pipeline_llm_off.json' in capsys.readouterr().err
+
+    ws.readme.unlink()
+    assert ws.run() == 2 and 'README.md' in capsys.readouterr().err
+
+
+def test_unusable_inputs_are_reported_not_raised(tmp_path, capsys, monkeypatch):
+    ws = Workspace(tmp_path)
+
+    (ws.results / 'ner_comparisons.json').write_text('[1, 2]')        # not an object
+    assert ws.run() == 2 and 'ner_comparisons.json' in capsys.readouterr().err
+    (ws.results / 'ner_comparisons.json').unlink()
+
+    ws.roadmap.write_bytes(b'\xff\xfe not utf-8 \x80')
+    assert ws.run() == 2 and 'ROADMAP.md' in capsys.readouterr().err
+    ws.roadmap.write_text(ROADMAP_STUB, encoding='utf-8')
+
+    args = ['--results', str(tmp_path / 'no_such_dir'), '--readme', str(ws.readme),
+            '--roadmap', str(ws.roadmap)]
+    assert rr.main(args) == 2
+    assert 'results directory not found' in capsys.readouterr().err
+
+    def refuse(self, *args, **kwargs):
+        raise PermissionError(13, 'Permission denied')
+
+    monkeypatch.setattr(Path, 'write_text', refuse)
+    assert ws.run() == 2 and 'cannot write' in capsys.readouterr().err
+    assert ws.run('--check') == 1                   # checking needs no write access
+
+
+def test_a_bare_placeholder_is_replaced_on_first_use(tmp_path):
+    ws = Workspace(tmp_path)
+    ws.readme.write_text("# P\n\n<!-- RESULTS -->\n\nend\n", encoding='utf-8')
+    ws.roadmap.write_text("# R\n\n<!-- STANDING -->\n\nend\n", encoding='utf-8')
+    readme, roadmap = ws.generate()
+    assert block(readme, 'RESULTS').startswith('<!-- RESULTS:START -->\nAll numbers')
+    assert block(roadmap, 'STANDING').endswith('<!-- STANDING:END -->')
+    assert readme.startswith('# P\n\n') and readme.endswith('\n\nend\n')
+    assert ws.run('--check') == 0
+
+
+def test_script_runs_standalone_with_the_path_overrides(tmp_path):
+    ws = Workspace(tmp_path)
+    cmd = [sys.executable, str(MODULE), '--results', str(ws.results),
+           '--readme', str(ws.readme), '--roadmap', str(ws.roadmap)]
+    env = {**os.environ, 'PYTHONIOENCODING': 'utf-8'}
+
+    def run(*extra):
+        return subprocess.run(cmd + list(extra), capture_output=True, text=True,
+                              encoding='utf-8', cwd=tmp_path, env=env)
+
+    stale = run('--check')
+    assert stale.returncode == 1
+    assert stale.stdout.startswith('---') and '+++' in stale.stdout and '@@' in stale.stdout
+    assert run().returncode == 0
+    assert run('--check').returncode == 0
+    ws.compare('crf_ens3', 'coarse', 'leave_one_paper_out')
+    assert run('--check').returncode == 1
+    assert subprocess.run([sys.executable, str(MODULE), '--bogus'], capture_output=True,
+                          cwd=tmp_path).returncode == 2
+    helped = subprocess.run([sys.executable, str(MODULE), '--help'], capture_output=True,
+                            text=True, encoding='utf-8', cwd=tmp_path, env=env)
+    assert helped.returncode == 0
+    for option in ('--check', '--pending', '--results', '--readme', '--roadmap'):
+        assert option in helped.stdout
+
+
+# ---------------------------------------------------------------------------
+# Module hygiene
+# ---------------------------------------------------------------------------
+def test_module_uses_only_the_standard_library_and_no_absolute_paths():
+    tree = ast.parse(MODULE.read_text(encoding='utf-8'))
+    imported = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            imported |= {alias.name.split('.')[0] for alias in node.names}
+        elif isinstance(node, ast.ImportFrom):
+            assert node.level == 0 and node.module
+            imported.add(node.module.split('.')[0])
+    assert imported and imported <= set(sys.stdlib_module_names), \
+        imported - set(sys.stdlib_module_names)
+    literals = [n.value for n in ast.walk(tree) if isinstance(n, ast.Constant)
+                and isinstance(n.value, str)]
+    assert [s for s in literals if re.fullmatch(r'(/[\w.-]+)+/?|[A-Za-z]:\\\S*', s)] == []
+
+
+def test_defaults_come_from_the_file_location():
+    assert rr.REPO_ROOT == Path(rr.__file__).resolve().parents[2] == REPO
+    args = rr.parse_args([])
+    assert args.results == REPO / 'results'
+    assert args.readme == REPO / 'README.md'
+    assert args.roadmap == REPO / 'docs' / 'ROADMAP.md'
+    assert args.pending == [] and args.check is False
+    assert rr.parse_args(['--pending', 'a b', 'c']).pending == ['a b', 'c']
+
+
+# ---------------------------------------------------------------------------
+# Regression: the real results/ regenerate the blocks in the current docs
+# ---------------------------------------------------------------------------
+def test_real_results_regenerate_the_current_blocks(tmp_path):
+    """README.md and docs/ROADMAP.md must be what the generator makes from results/.
+
+    If this fails after changing results/ or the generator, run
+    `python src/graph/report_results.py` and commit the two files.
+    """
+    current = {'RESULTS': (REPO / 'README.md').read_text(encoding='utf-8'),
+               'STANDING': (REPO / 'docs' / 'ROADMAP.md').read_text(encoding='utf-8')}
+    # start from copies whose generated blocks are wiped, so that a generator which does
+    # nothing cannot pass
+    copies = {}
+    for name, text in current.items():
+        stale = f'<!-- {name}:START -->\nSTALE\n<!-- {name}:END -->'
+        copies[name] = tmp_path / f'{name}.md'
+        copies[name].write_text(text.replace(block(text, name), stale), encoding='utf-8')
+        assert 'STALE' in copies[name].read_text(encoding='utf-8')
+
+    assert rr.main(['--results', str(REPO / 'results'), '--readme', str(copies['RESULTS']),
+                    '--roadmap', str(copies['STANDING'])]) == 0
+
+    for name, text in current.items():
+        generated = copies[name].read_text(encoding='utf-8')
+        want, got = block(text, name), block(generated, name)
+        assert len(want) > 500 and 'STALE' not in generated
+        if got != want:
+            diff = rr.unified_diff(f'{name} block', want, got)
+            pytest.fail(f"the {name} block of the docs is out of date; run "
+                        f"`python src/graph/report_results.py`\n{diff[:3000]}")
+        # everything outside the block is carried over untouched
+        assert generated == text

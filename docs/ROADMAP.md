@@ -62,7 +62,42 @@ pre-registered check across 5 random splits, if the paper reports micro F1:
 - fine-grained: 76.36 [71.00, 81.73] vs 69.92;
 - coarse-grained: 78.15 [76.61, 79.69] vs 72.32.
 
+Week 2 tested three changes against the CRF head: multi-task training
+(item 2), domain-adaptive pre-training on the PubMed sentences (item 5) and
+a 3-model ensemble (item 8). None passes the pre-registered rule. The
+ensemble scores highest (79.76 fine-grained, 79.45 coarse-grained), beats
+the mean of its own members on every split, and is the only change that
+improves on unseen papers (coarse-grained, +1.60 [+0.52, +2.69]). But one
+reference model varies by several F1 points from run to run, which hides
+gains of 1–3 points in a comparison against a single run per split.
+
 The largest remaining gap is out of distribution (item 9).
+
+Next, after week 2, in this order:
+1. **A comparison that can detect 1–3 points.** Compare the mean of 3 model
+   seeds per split for the variant against the same for the reference,
+   instead of single runs. The ensemble members `crf_m0`, `crf_m100` and
+   `crf_m200` already give such a CRF reference on the 5 random splits and
+   the 4 papers. Fix the design (seeds, splits, rule) before the runs, as
+   in weeks 1 and 2.
+2. **Ensembles for the reported system.** A seed ensemble only costs
+   training and inference time, and it gained on every split against its
+   members. Next, mix backbones (SciBERT, PubMedBERT, DeBERTa-v3), whose
+   errors should differ more than those of seeds.
+3. **Out of distribution.** Leaving one paper out costs 18–27 points. Of
+   the week-2 changes only the ensemble narrows it, by 1.6 points
+   coarse-grained. Label semantics (item 6) and semi-supervised data
+   (item 7) target it directly.
+4. **Multi-task again, under the new design.** Its fine-grained difference
+   was positive on all five splits (+2.46 on average) but not significant.
+5. **Domain-adaptive pre-training only on in-domain text.** PubMed did not
+   help; the open-access fatigue papers of item 5 are untested. Low
+   priority for its cost.
+6. **A GPU.** A run takes 13–27 minutes on 2 CPU threads; on one GPU it
+   takes about a minute, which makes more seeds and larger backbones
+   (DeBERTa-v3-large) practical.
+
+The P1 items, with what has been measured so far:
 
 1. **Check that the reproduction holds across splits before claiming SOTA.**
    Result with a new random split per seed (`--vary-split`, 5 splits, micro
@@ -96,6 +131,21 @@ The largest remaining gap is out of distribution (item 9).
    propagated up the MMO taxonomy, so a joint fine + coarse head (or a loss
    over the label hierarchy) shares signal with the 85 fine classes that have
    ≤ 3 examples. *(est. +1–3 F1 fine-grained)*
+
+   Measured with `--crf --multi-task`: one MatSciBERT encoder with a CRF head
+   per granularity, against the CRF head on the same splits and model seeds.
+   No significant change in any of the four paired comparisons, so it is not
+   adopted.
+
+   | Micro F1 Δ [95% CI] | Fine-grained | Coarse-grained |
+   |---|---|---|
+   | 5 random splits | +2.46 [−0.91, +5.84] | +0.24 [−2.54, +3.02] |
+   | Leaving one paper out | +0.11 [−8.56, +8.79] | −1.30 [−4.80, +2.20] |
+
+   All five fine-grained differences across random splits are positive
+   (+0.25 to +7.17), but one split (+7.17) gives most of the mean and the
+   interval includes 0. On unseen papers the fine-grained differences range
+   from −6.21 to +4.89.
 3. **Class-balanced or focal loss** for the minority classes the paper names
    as the main weakness. *(est. +0.5–2)*
 
@@ -140,6 +190,24 @@ The largest remaining gap is out of distribution (item 9).
 5. **Domain-adaptive pre-training.** Continue MLM on the 19k PubMed sentences
    already in the repo, plus open-access fatigue papers, before fine-tuning.
    *(est. +1–3)*
+
+   Pre-training is done (`dapt_mlm.py`, PubMed sentences only): 3 epochs on
+   18,353 sentences, after dropping 1 duplicate and 13 sentences that share a
+   word 8-gram with MaterioMiner. Held-out MLM perplexity fell from 12.17 to
+   5.51 (`results/dapt_mlm.json`).
+
+   Fine-tuned with `--crf` from this checkpoint, against the CRF head on the
+   same splits and model seeds: no significant change in any of the four
+   paired comparisons, so it is not adopted.
+
+   | Micro F1 Δ [95% CI] | Fine-grained | Coarse-grained |
+   |---|---|---|
+   | 5 random splits | +0.68 [−2.55, +3.90] | −0.07 [−3.01, +2.86] |
+   | Leaving one paper out | −0.91 [−3.13, +1.31] | −1.06 [−3.25, +1.12] |
+
+   The lower perplexity on PubMed text did not carry over to MaterioMiner;
+   on unseen papers 6 of the 8 differences are negative. The second corpus
+   named above, open-access fatigue papers, was not used.
 6. **Label semantics.** Bi-encoder span–type matching (BINDER, GLiNER-style)
    with the 420 MMO `skos:definition`s as type descriptions. This helps rare
    and unseen classes, and it supports the full 177-class setting, not just
@@ -149,11 +217,36 @@ The largest remaining gap is out of distribution (item 9).
    agreement with the teacher model, and add them as weak supervision.
 8. **Ensembles.** Average across seeds and backbones (MatSciBERT, SciBERT,
    PubMedBERT, DeBERTa-v3-large); this usually gives a reliable +1–2.
+
+   Measured with `ner_ensemble.py`: an entity-level majority vote of three
+   CRF models (model seeds K, K + 100, K + 200), against the CRF head on the
+   same splits. No significant change across the 5 random splits, so under
+   the pre-registered rule it does not improve on the CRF head.
+
+   | Micro F1 Δ [95% CI] | Fine-grained | Coarse-grained |
+   |---|---|---|
+   | 5 random splits | +3.39 [−1.35, +8.14] | +1.30 [−1.01, +3.62] |
+   | Leaving one paper out | +0.11 [−1.99, +2.20] | +1.60 [+0.52, +2.69] |
+
+   The ensemble has the highest scores so far: 79.76 [76.14, 83.38]
+   fine-grained and 79.45 [77.82, 81.09] coarse-grained. The CRF head it is
+   compared with is one model per split, and one model is noisy: re-running
+   it with 2 threads moves single fine-grained splits by −3.28 to +6.35.
+   Against the mean of its own three members on the same split, which no
+   single run dominates, the vote gains +2.47 [+1.17, +3.77] fine-grained
+   and +1.80 [+0.91, +2.69] coarse-grained, on every split (exploratory,
+   not pre-registered).
+
+   On unseen papers the ensemble reaches 49.55 fine-grained and 61.42
+   coarse-grained. Coarse-grained, it is the only week-2 change that
+   improves on the CRF head there, and it beats its own members on all
+   four papers (+2.39 [+1.56, +3.21]). Fine-grained it gains +2.04
+   [−0.23, +4.32] over its members, also positive on every paper.
 9. **Track out-of-distribution results** with `--leave-one-paper-out` for
    every change. It is cheap and closer to real use than random sentence
    splits. The baseline drops from about 74 to 44 (fine-grained) and 54
    (coarse-grained) on an unseen paper; the CRF head lifts these to 49 and
-   60. That gap is larger than any in-distribution gain on this list, so
+   60, and the 3-model ensemble to 50 and 61. That gap is larger than any in-distribution gain on this list, so
    items 5–7 should be judged on this protocol as well.
 
 ### P2: Term typing (LLMs4OL Task B style)
@@ -243,6 +336,48 @@ chance at class level. For a Task C-style result:
 | Week | Work | Exit criterion |
 |---|---|---|
 | 1 | Done: class weights (no significant change) and CRF (significant gain in all four comparisons), P1 items 3–4 | Met by the CRF head |
-| 2 | Domain-adaptive pre-training + hierarchy-aware multi-task NER, ensembles, all with `--crf` | A paired gain over the CRF results on the varied splits (95% CI above 0), also measured leaving one paper out |
+| 2 | Done: multi-task NER (fine + coarse heads), domain-adaptive pre-training and a 3-model ensemble, all with `--crf` (P1 items 2, 5 and 8; protocol below) | Not met: no 95% CI lies above 0 against the CRF head on the random splits; the ensemble comes closest (+3.39 fine-grained, +1.30 coarse-grained) and is the only change that improves on unseen papers (coarse-grained) |
 | 3 | Context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | Typing accuracy above the hybrid + LLM baseline (§1) |
 | 4 | Class-level taxonomy (LLM or cross-encoder + arborescence); relation annotation pilot | First class-level taxonomy F1 above chance; relation guidelines |
+
+### Week 2 protocol (fixed before any run)
+
+The reference is the CRF head (`--crf`) on the same splits and model seeds:
+the 5 random splits (`--vary-split`) and the 4 held-out papers. Each variant
+changes one thing; every other setting is that of the CRF runs.
+
+1. **Multi-task training** (`--crf --multi-task`, P1 item 2).
+   - One MatSciBERT encoder with a CRF head per granularity. The loss is the
+     fine NLL plus the coarse NLL, weighted equally.
+   - Each head trains on exactly the sentences and tags of its single-task
+     run. The fine and coarse files tokenise 15 of the 476 sentences
+     differently; those enter as two examples, each labelled for one head.
+   - Each granularity's test score uses the epoch with its best validation
+     F1, as in the single-task runs. One run gives both granularities.
+2. **Domain-adaptive pre-training** (`dapt_mlm.py`, then
+   `--crf --model <checkpoint>`, P1 item 5).
+   - Continued masked-LM training of MatSciBERT on
+     `data/raw/dataset/pubmed_sentences.txt`. Duplicates and every sentence
+     that shares a word 8-gram with MaterioMiner text are dropped first, so
+     no evaluation text is seen.
+   - 15% masking (80/10/10), lr 5e-5, batch 32, at most 128 tokens,
+     3 epochs; the last checkpoint is used. 5% of the sentences are held out
+     to report MLM perplexity.
+3. **Ensembles** (`ner_ensemble.py`, P1 item 8).
+   - Three CRF models per split: model seeds K, K + 100 and K + 200 on
+     split K, and seeds 0, 100 and 200 for each held-out paper.
+   - Entity-level majority vote: an entity is kept if at least 2 of the 3
+     models predict the same span and type.
+
+Decision rule, as in week 1: a variant improves on the CRF head for a
+granularity only if the 95% CI of the mean paired micro-F1 difference over
+the 5 random splits lies above 0. The same comparison over the 4 held-out
+papers is reported as out-of-distribution robustness, and strict IOB2 and
+macro F1 are reported alongside. Results are reported in the order above;
+runs may overlap when CPU is free.
+
+Deviation, noted after the first runs: two jobs share the 4 CPUs, so the
+week-2 runs use 2 threads where the CRF results used 3. The thread count
+alone changes a run with the same seeds (fine-grained split 0: 78.76 with 3
+threads, 76.37 with 2), which adds noise to every difference. The `crf_m0`
+ensemble members re-run the CRF head with 2 threads and measure the effect.
