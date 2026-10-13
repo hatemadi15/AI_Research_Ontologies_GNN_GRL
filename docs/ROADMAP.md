@@ -185,19 +185,22 @@ The largest remaining gap is out of distribution (item 9).
 
    Measured with `ner_ensemble.py`: an entity-level majority vote of three
    CRF models (model seeds K, K + 100, K + 200), against the CRF head on the
-   same splits.
+   same splits. No significant change across the 5 random splits, so under
+   the pre-registered rule it does not improve on the CRF head.
 
    | Micro F1 Δ [95% CI] | Fine-grained | Coarse-grained |
    |---|---|---|
-   | 5 random splits | +3.39 [−1.35, +8.14] | running |
+   | 5 random splits | +3.39 [−1.35, +8.14] | +1.30 [−1.01, +3.62] |
    | Leaving one paper out | running | running |
 
-   Fine-grained, the ensemble reaches 79.76 [76.14, 83.38], but the gain
-   over the CRF head is not significant. The CRF head is one model per
-   split, and one model is noisy: its own re-run with 2 threads moves single
-   splits by −3.28 to +6.35. Against the mean of its own three members on
-   the same split, which no single run dominates, the vote gains +2.47
-   [+1.17, +3.77] on all five splits (exploratory, not pre-registered).
+   The ensemble has the highest scores so far: 79.76 [76.14, 83.38]
+   fine-grained and 79.45 [77.82, 81.09] coarse-grained. The CRF head it is
+   compared with is one model per split, and one model is noisy: re-running
+   it with 2 threads moves single fine-grained splits by −3.28 to +6.35.
+   Against the mean of its own three members on the same split, which no
+   single run dominates, the vote gains +2.47 [+1.17, +3.77] fine-grained
+   and +1.80 [+0.91, +2.69] coarse-grained, on every split (exploratory,
+   not pre-registered).
 9. **Track out-of-distribution results** with `--leave-one-paper-out` for
    every change. It is cheap and closer to real use than random sentence
    splits. The baseline drops from about 74 to 44 (fine-grained) and 54
