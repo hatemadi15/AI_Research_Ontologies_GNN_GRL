@@ -227,6 +227,21 @@ The P1 items, with what has been measured so far:
    with the 420 MMO `skos:definition`s as type descriptions. This helps rare
    and unseen classes, and it supports the full 177-class setting, not just
    the top 27.
+
+   Week 3 scores each tag against an embedding of its MMO description
+   (`--label-semantics`: the dot product of the token state with a learned
+   map of the description embedding; protocol in §4). There are 3 seeds per
+   split, compared with the 3-seed mean of the CRF head, and the decision
+   is taken on unseen papers.
+
+   | Micro F1 Δ [95% CI], 3-seed means | Fine-grained | Coarse-grained |
+   |---|---|---|
+   | Leaving one paper out (the decision) | −0.16 [−2.13, +1.80] | running |
+   | 5 random splits (reported) | queued | queued |
+
+   Fine-grained, label semantics does not help on unseen papers: it scores
+   47.35 against 47.51 for the CRF head. The per-paper differences range
+   from −1.70 to +1.27, and macro F1 changes by −1.17 [−4.73, +2.38].
 7. **Semi-supervised data.** Self-train on PubMed with a confidence threshold.
    Generate LLM silver labels with ontology-definition prompts, filter them by
    agreement with the teacher model, and add them as weak supervision.
