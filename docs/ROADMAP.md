@@ -236,12 +236,23 @@ The P1 items, with what has been measured so far:
 
    | Micro F1 Δ [95% CI], 3-seed means | Fine-grained | Coarse-grained |
    |---|---|---|
-   | Leaving one paper out (the decision) | −0.16 [−2.13, +1.80] | running |
+   | Leaving one paper out (the decision) | −0.16 [−2.13, +1.80] | +1.17 [+0.94, +1.41] |
    | 5 random splits (reported) | queued | queued |
 
-   Fine-grained, label semantics does not help on unseen papers: it scores
-   47.35 against 47.51 for the CRF head. The per-paper differences range
-   from −1.70 to +1.27, and macro F1 changes by −1.17 [−4.73, +2.38].
+   Coarse-grained, label semantics improves on unseen papers under the
+   pre-registered rule. It scores 60.21 against 59.03 for the CRF head, and
+   the gain is between +1.05 and +1.38 on each of the four papers. Macro F1
+   gains +1.20 [−1.38, +3.78], which is not significant. Coarse types have
+   no MMO definitions, so their descriptions are the names of their
+   fine-grained classes (§4).
+
+   Fine-grained, it does not help: 47.35 against 47.51 for the CRF head.
+   The per-paper differences range from −1.70 to +1.27, and macro F1
+   changes by −1.17 [−4.73, +2.38].
+
+   One label-semantics model (60.21) stays below the reported seed ensemble
+   `crf_ens3` on unseen papers (61.42, coarse-grained). An ensemble of
+   label-semantics models was not part of the protocol.
 7. **Semi-supervised data.** Self-train on PubMed with a confidence threshold.
    Generate LLM silver labels with ontology-definition prompts, filter them by
    agreement with the teacher model, and add them as weak supervision.
