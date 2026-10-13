@@ -117,6 +117,9 @@ def test_reference_variant():
     assert [nb.reference_variant(v) for v in ('cw', 'crf', 'm100', 'baseline')] == ['baseline'] * 4
     # only the underscore after crf / cw makes a tagged variant, not a shared prefix
     assert nb.reference_variant('crf2') == nb.reference_variant('cwx') == 'baseline'
+    # the seeds of the week-3 families
+    for variant in ('crf_dapt2_m100', 'crf_ls_m0', 'crf_st_m200', 'crf_mt_m100', 'crf_scibert'):
+        assert nb.reference_variant(variant) == 'crf'
 
 
 def test_result_file_names_parse_to_protocol_and_variant():
@@ -143,9 +146,26 @@ def test_result_file_names_parse_to_protocol_and_variant():
         assert parse(fn) is None
     # every name a run can write reads back
     for protocol in ('random_split_fixed', 'random_split_vary', 'leave_one_paper_out'):
-        for variant in ('baseline', 'cw', 'crf', 'm100', 'cw_m100', 'crf_m100'):
+        for variant in ('baseline', 'cw', 'crf', 'm100', 'cw_m100', 'crf_m100', 'crf_dapt2_m100',
+                        'crf_mt_m200', 'crf_ls_m0', 'crf_mix3', 'crf_pubmedbert'):
             fn = f'ner_results_coarse{nb.result_suffix(protocol, variant)}.json'
             assert parse(fn) == ('coarse', protocol, variant)
+
+
+def test_every_results_file_parses_to_the_variant_it_holds():
+    """The names of the files in results/ give the granularity, protocol and variant they store."""
+    results = os.path.join(os.path.dirname(__file__), '..', 'results')
+    names = sorted(fn for fn in os.listdir(results) if fn.startswith('ner_results_'))
+    assert {'ner_results_fine.json', 'ner_results_coarse_leave_one_paper_out.json',
+            'ner_results_fine_random_split_vary_crf.json',
+            'ner_results_coarse_random_split_vary_crf_m100.json',
+            'ner_results_fine_leave_one_paper_out_crf_ens3.json'} <= set(names)
+    for fn in names:
+        with open(os.path.join(results, fn)) as f:
+            stored = json.load(f)
+        # files written before variants existed hold baseline runs
+        assert nb.parse_result_name(fn) == (stored['granularity'], stored['protocol'],
+                                            stored.get('variant', 'baseline')), fn
 
 
 def test_resume_isolation_for_seed_offset_and_predictions(tmp_path):
@@ -274,6 +294,35 @@ def test_seed_offset_needs_a_tag_and_tags_are_checked(capsys):
     assert 'must not be negative' in capsys.readouterr().err
     args = nb.parse_args(['--tag', 'x', '--seeds', '5', '6', '--seed-offset', '-5'])
     assert args.seed_offset == -5
+
+
+def test_seed_family_tags(capsys):
+    """<name>_m<N> tags name one seed of a week-3 family, e.g. in-domain pre-training."""
+    args = nb.parse_args(['--crf', '--model', 'ckpt', '--tag', 'dapt2_m100', '--seed-offset', '100',
+                          '--vary-split'])
+    assert (nb.variant_name(args), args.seed_offset, args.model) == ('crf_dapt2_m100', 100, 'ckpt')
+    assert nb.results_path('out', 'fine', args) == os.path.join(
+        'out', 'ner_results_fine_random_split_vary_crf_dapt2_m100.json')
+    assert nb.parse_args(['--crf', '--tag', 'xyz_m0']).tag == 'xyz_m0'
+    assert nb.variant_name(nb.parse_args(['--tag', 'x2_m5'])) == 'x2_m5'        # baseline: the tag
+    assert nb.variant_name(nb.parse_args(['--class-weights', '--tag', 'x2_m5'])) == 'cw_x2_m5'
+    for tag in ('dapt2_m', 'dapt2_100', 'dapt2_n100', 'dapt2__m100', '_m100', 'dapt2_m100_m200',
+                'dapt_2_m100', 'Dapt2_m100', 'dapt2-m100'):
+        with pytest.raises(SystemExit):
+            nb.parse_args(['--crf', '--tag', tag])
+        assert 'invalid tag' in capsys.readouterr().err
+    # the guards stay: a tag, or the name in a seed tag, must not give a plain variant
+    for argv in (['--crf', '--tag', 'mt'], ['--crf', '--tag', 'mt_m100'], ['--tag', 'crf_m100'],
+                 ['--tag', 'cw_m0'], ['--tag', 'baseline_m100'], ['--tag', 'crf'],
+                 ['--crf', '--tag', 'ls_m0']):    # crf_ls_m0: a label-semantics seed
+        with pytest.raises(SystemExit):
+            nb.parse_args(argv)
+        assert 'would overwrite' in capsys.readouterr().err
+    # ... and the multi-task family keeps its own names
+    args = nb.parse_args(['--crf', '--multi-task', '--tag', 'm100', '--seed-offset', '100'])
+    assert nb.variant_name(args) == 'crf_mt_m100'
+    assert nb.variant_name(nb.parse_args(['--crf', '--multi-task', '--tag', 'x_m100'])) == \
+        'crf_mt_x_m100'
 
 
 def test_compare_to_baseline_pairs_runs_by_id():

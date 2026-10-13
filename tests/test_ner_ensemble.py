@@ -1,5 +1,6 @@
 """NER majority-vote ensemble. Voting and validation are pure Python (no torch, seqeval or
 scipy); the tests that score or summarise skip when seqeval or scipy is missing."""
+import argparse
 import itertools
 import json
 import random
@@ -227,6 +228,16 @@ def test_variant_naming():
             ne.ensemble_variant(bad)
 
 
+def test_variant_option_names():
+    for name in ('crf_mix3', 'mix3', 'crf_mix3_v2', 'crf_ens3'):
+        assert ne.variant_option(name) == name
+    # not a plain variant of ner_baseline.py, not a seed's name, and usable in a file name
+    for bad in ('crf', 'crf_mt', 'cw', 'baseline', 'crf_m100', 'm0', 'crf_mix3_m5', 'CRF_mix3',
+                'crf-mix3', '_mix3', 'mix3_', 'crf__mix3', 'crf mix3', ''):
+        with pytest.raises(argparse.ArgumentTypeError, match='invalid --variant'):
+            ne.variant_option(bad)
+
+
 def test_results_file_names_follow_ner_baseline():
     assert ne.results_name('fine', 'random_split_vary', 'crf_ens3') == \
         'ner_results_fine_random_split_vary_crf_ens3.json'
@@ -399,6 +410,55 @@ def test_run_order_may_differ_between_members():
     ne.check_runs(by_id, NAMES)   # no error
 
 
+MIXED = [('crf_m0', 'm3rg-iitd/matscibert'), ('crf_scibert', 'allenai/scibert_scivocab_uncased'),
+         ('crf_pubmedbert', 'microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext')]
+MIXED_NAMES = [f'ner_results_fine_random_split_vary_{variant}.json' for variant, _ in MIXED]
+
+
+def _mixed(scored=False):
+    """The trio's predictions as three backbones: the variants and models differ."""
+    members = _trio(scored)
+    for member, (variant, model) in zip(members, MIXED):
+        member['variant'], member['model'] = variant, model
+    return members
+
+
+def test_mixed_members_need_a_variant_name():
+    with pytest.raises(ne.EnsembleError, match='differ in model'):
+        ne.combine(_mixed(), MIXED_NAMES)
+    members = _mixed()
+    for member in members:
+        member['model'] = 'toy/model'
+    with pytest.raises(ne.EnsembleError, match='variant'):     # not the seeds of one variant
+        ne.combine(members, MIXED_NAMES)
+
+
+def test_a_named_ensemble_keeps_every_other_check():
+    """--variant lifts the model and variant checks only."""
+    def fails(members, match):
+        with pytest.raises(ne.EnsembleError, match=match):
+            ne.combine(members, MIXED_NAMES, 'crf_mix3')
+
+    for key, value in (('granularity', 'coarse'), ('protocol', 'leave_one_paper_out'),
+                       ('labels', ['A', 'C'])):
+        members = _mixed()
+        members[2][key] = value
+        fails(members, f'differ in {key}')
+    members = _mixed()
+    members[1]['runs'][1]['run_id'] = 'seed7'
+    fails(members, 'run_ids')
+    members = _mixed()
+    members[2]['runs'][0]['test_index'] = [4, 0, 8]
+    fails(members, 'test_index')
+    members = _mixed()
+    members[1]['runs'][1]['test_gold'][0] = 'O O O O'
+    fails(members, 'test_gold')
+    members = _mixed()
+    del members[0]['runs'][0]['test_pred']
+    fails(members, 'test_pred')
+    fails(_mixed()[:1], 'at least 2')
+
+
 def test_identical_members_are_reported():
     trio = _trio()
     trio[1]['runs'] = [dict(r) for r in trio[0]['runs']]
@@ -517,6 +577,33 @@ def test_other_protocols_and_two_members(tmp_path):
     assert res['runs'][0]['recall'] == 25.0
 
 
+def test_mixed_backbone_ensemble(tmp_path, capsys):
+    pytest.importorskip('seqeval')
+    pytest.importorskip('scipy')
+    paths = _write(tmp_path, _mixed(scored=True), MIXED_NAMES)
+    ne.main(['--members', *paths, '--variant', 'crf_mix3'])
+    out = tmp_path / 'ner_results_fine_random_split_vary_crf_mix3.json'   # named by --variant
+    assert nb.parse_result_name(out.name) == ('fine', 'random_split_vary', 'crf_mix3')
+    res = json.loads(out.read_text())
+    assert (res['variant'], res['model']) == ('crf_mix3', 'mixed')
+    assert res['config'] == {'members': MIXED_NAMES, 'voting': 'entity_strict_majority', 'k': 3,
+                             'models': [model for _, model in MIXED]}
+    # the vote and its scores do not depend on the names: those of the seed ensemble
+    seeds = ne.combine(_trio(scored=True), NAMES)
+    assert res['runs'] == seeds['runs'] and res['summary'] == seeds['summary']
+    assert 'models: m3rg-iitd/matscibert, allenai/scibert_scivocab_uncased, microsoft/' in \
+        capsys.readouterr().out
+
+
+def test_a_named_ensemble_of_one_model_keeps_its_name():
+    pytest.importorskip('seqeval')
+    pytest.importorskip('scipy')
+    res = ne.combine(_trio(scored=True), NAMES, 'crf_seeds3')
+    assert (res['variant'], res['model']) == ('crf_seeds3', 'toy/model')
+    assert res['config']['models'] == ['toy/model'] * 3
+    assert 'models' not in ne.combine(_trio(scored=True), NAMES)['config']   # without --variant
+
+
 def test_command_line_errors(tmp_path, capsys):
     members = _trio()
     members[1]['runs'][0]['test_index'] = [9, 9, 9]
@@ -529,6 +616,11 @@ def test_command_line_errors(tmp_path, capsys):
     with pytest.raises(SystemExit) as excinfo:   # k >= 2
         ne.main(['--members', paths[0]])
     assert excinfo.value.code == 2 and 'at least 2' in capsys.readouterr().err
+
+    with pytest.raises(SystemExit) as excinfo:   # an ensemble must not take a single model's name
+        ne.main(['--members', *paths, '--variant', 'crf'])
+    assert excinfo.value.code == 2 and 'invalid --variant' in capsys.readouterr().err
+    assert sorted(p.name for p in tmp_path.iterdir()) == sorted(NAMES)
 
     with pytest.raises(SystemExit, match='cannot read'):
         ne.main(['--members', paths[0], str(tmp_path / 'missing.json')])

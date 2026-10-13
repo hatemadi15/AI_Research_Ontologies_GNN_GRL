@@ -1273,9 +1273,14 @@ def run_multitask(args, out_dir):
 
 
 def tag_name(value):
-    """argparse type of --tag: lowercase letters and digits (the tag goes into file names)."""
-    if not re.fullmatch(r'[a-z0-9]+', value):
-        raise argparse.ArgumentTypeError(f"invalid tag {value!r}: use lowercase letters and digits")
+    """argparse type of --tag: lowercase letters and digits, optionally then _m<N>.
+
+    The tag goes into file names; <name>_m<N> names one seed of a family of runs
+    (--crf --tag dapt2_m100: crf_dapt2_m100).
+    """
+    if not re.fullmatch(r'[a-z0-9]+(?:_m[0-9]+)?', value):
+        raise argparse.ArgumentTypeError(f"invalid tag {value!r}: use lowercase letters and "
+                                         f"digits, optionally followed by _m<N> (dapt2_m100)")
     return value
 
 
@@ -1312,7 +1317,8 @@ def parse_args(argv=None):
                              'tagged _crf_ls)')
     parser.add_argument('--tag', type=tag_name, default=None, metavar='NAME',
                         help='appended to the variant name and the results file (crf + m100: '
-                             'crf_m100; baseline + m100: m100); lowercase letters and digits')
+                             'crf_m100; baseline + m100: m100); lowercase letters and digits, '
+                             'optionally followed by _m<N> (crf + dapt2_m100: crf_dapt2_m100)')
     parser.add_argument('--seed-offset', type=int, default=0,
                         help='added to every model seed; the data split and the run ids do '
                              'not change, so runs still pair with the default ones (needs --tag)')
@@ -1348,7 +1354,10 @@ def parse_args(argv=None):
         if args.granularity != 'both':
             parser.error('--multi-task trains the fine and the coarse head together: '
                          '--granularity must be both (the default)')
-    if args.tag and variant_name(args) in PLAIN_VARIANTS:
+    # neither the tag nor the name in a seed tag (mt of mt_m100) may give a plain variant:
+    # --crf --tag mt would write over crf_mt, --crf --tag mt_m100 over the multi-task crf_mt_m100
+    stem = SimpleNamespace(**{**vars(args), 'tag': args.tag.split('_')[0]}) if args.tag else None
+    if stem and variant_name(stem) in PLAIN_VARIANTS:
         parser.error(f'--tag {args.tag} would overwrite the results of the '
                      f'{variant_name(args)} variant')
     if min(args.seeds) + args.seed_offset < 0:
