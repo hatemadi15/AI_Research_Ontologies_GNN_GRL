@@ -73,7 +73,7 @@ gains of 1–3 points in a comparison against a single run per split.
 
 The largest remaining gap is out of distribution (item 9).
 
-Next, after week 2, in this order:
+Next, after week 2, in this order (week 3 runs items 1–5; protocol in §4):
 1. **A comparison that can detect 1–3 points.** Compare the mean of 3 model
    seeds per split for the variant against the same for the reference,
    instead of single runs. The ensemble members `crf_m0`, `crf_m100` and
@@ -331,14 +331,15 @@ chance at class level. For a Task C-style result:
   instead of hand-written upper-level class lists, with a gold mapping through
   PMDco where it exists.
 
-## 4. Suggested order (4 weeks)
+## 4. Suggested order (5 weeks)
 
 | Week | Work | Exit criterion |
 |---|---|---|
 | 1 | Done: class weights (no significant change) and CRF (significant gain in all four comparisons), P1 items 3–4 | Met by the CRF head |
 | 2 | Done: multi-task NER (fine + coarse heads), domain-adaptive pre-training and a 3-model ensemble, all with `--crf` (P1 items 2, 5 and 8; protocol below) | Not met: no 95% CI lies above 0 against the CRF head on the random splits; the ensemble comes closest (+3.39 fine-grained, +1.30 coarse-grained) and is the only change that improves on unseen papers (coarse-grained) |
-| 3 | Context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | Typing accuracy above the hybrid + LLM baseline (§1) |
-| 4 | Class-level taxonomy (LLM or cross-encoder + arborescence); relation annotation pilot | First class-level taxonomy F1 above chance; relation guidelines |
+| 3 | NER, P1 "Next, after week 2" items 1–5: comparisons of 3-seed means, a mixed-backbone ensemble, label semantics and self-training for unseen papers, multi-task again, in-domain pre-training (protocol below) | Per variant, as in the protocol below |
+| 4 | Context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | Typing accuracy above the hybrid + LLM baseline (§1) |
+| 5 | Class-level taxonomy (LLM or cross-encoder + arborescence); relation annotation pilot | First class-level taxonomy F1 above chance; relation guidelines |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -381,3 +382,91 @@ week-2 runs use 2 threads where the CRF results used 3. The thread count
 alone changes a run with the same seeds (fine-grained split 0: 78.76 with 3
 threads, 76.37 with 2), which adds noise to every difference. The `crf_m0`
 ensemble members re-run the CRF head with 2 threads and measure the effect.
+
+### Week 3 protocol (fixed before any run)
+
+Week 3 runs items 1–5 of P1 "Next, after week 2". Every run uses `--crf`
+and 2 CPU threads, and the week-2 code paths stay unchanged: new options only
+add code.
+
+**Design (item 1).**
+- Every model is trained three times per split: model seeds K, K + 100 and
+  K + 200 on random split K, and seeds 0, 100 and 200 on each held-out
+  paper. A single model scores the mean micro F1 of its three runs on that
+  split; an ensemble scores once.
+- The reference is the CRF head scored the same way: the mean of the week-2
+  runs `crf_m0`, `crf_m100` and `crf_m200`.
+- Decision rule: a variant improves on its comparison if the 95% Student-t
+  CI of the mean paired difference over the 5 random splits lies above 0.
+  The same statistic over the 4 held-out papers is reported as
+  out-of-distribution robustness. For the out-of-distribution methods
+  (variants 2 and 3 below) the decision is taken on the 4 held-out papers
+  instead, and the random splits are reported alongside.
+- Strict IOB2 and macro F1 are reported with every comparison.
+- With the week-2 spread between seeds (about 1.6 F1 per run,
+  fine-grained), this design should detect gains of about 2 F1 points; one
+  run per split could not detect gains below about 5.
+
+**Variants**, reported in this order:
+
+1. **Mixed-backbone ensemble** (P1 item 8).
+   - CRF models from SciBERT (`allenai/scibert_scivocab_uncased`, results
+     `crf_scibert`) and PubMedBERT
+     (`microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext`,
+     `crf_pubmedbert`), with the MatSciBERT settings and one model seed per
+     split (K on split K, 0 on each paper).
+   - `crf_mix3`: the entity-level majority vote of MatSciBERT (`crf_m0`),
+     SciBERT and PubMedBERT.
+   - Primary comparison: `crf_mix3` against the MatSciBERT seed ensemble
+     `crf_ens3` on the same splits, i.e. does mixing backbones add to mixing
+     seeds? Both are also reported against the CRF reference.
+   - The reported NER system (README, §1) is `crf_ens3`, unless `crf_mix3`
+     improves on it under the rule above.
+2. **Label semantics** (P1 item 6), `crf_ls_m0`, `crf_ls_m100`,
+   `crf_ls_m200`.
+   - The emission score of tags B-X and I-X is the dot product of the
+     token's encoder state with a learned linear map (one for B, one for I)
+     of the description embedding of X; O has its own learned vector. The
+     CRF and all settings are unchanged.
+   - Descriptions: for fine-grained labels, the class name split into words
+     and its MMO `skos:definition`; for coarse-grained types, which have no
+     definitions, the names of the MMO classes annotated with that type in
+     the fine-grained files.
+   - Each description is embedded once before training, as the mean
+     last-layer state of the pre-trained encoder over its tokens; the linear
+     maps are trained.
+   - 3 seeds per split and per paper; decision on the held-out papers.
+3. **Self-training** (P1 item 7), `crf_st_m0`, `crf_st_m100`, `crf_st_m200`.
+   - Teacher: the CRF head trained on the run's training data.
+   - It tags a fixed random sample (seed 0) of 2,000 sentences from the
+     in-domain corpus of variant 5. MaterioMiner text is never used.
+   - Silver data: the tagged sentences that contain at least one entity and
+     in which every word's tag has a CRF marginal probability of at least
+     0.9.
+   - Student: same initialisation and seed, trained on gold + silver with
+     the silver loss weighted 0.5; its epoch is chosen on the gold
+     validation set.
+   - Leaving one paper out only (3 seeds × 4 papers × 2 granularities), to
+     bound CPU time; decision on the held-out papers.
+4. **Multi-task again** (P1 item 2): `--crf --multi-task` with seed offsets
+   100 and 200 (`crf_mt_m100`, `crf_mt_m200`), added to the week-2 runs
+   (`crf_mt`, offset 0); compared with the CRF reference.
+5. **In-domain pre-training** (P1 item 5), `crf_dapt2_m0`, `crf_dapt2_m100`,
+   `crf_dapt2_m200`.
+   - Corpus: open-access full texts from Europe PMC whose title mentions
+     fatigue and whose title or abstract names a metallic material; the four
+     MaterioMiner papers are excluded by DOI. The query and filters are
+     fixed in code before any download, and the corpus report records the
+     article IDs and the corpus SHA-256.
+   - Sentences are deduplicated, and every sentence sharing a word 8-gram
+     with MaterioMiner text is dropped, as in week 2. At most 40,000
+     sentences are kept (a fixed random sample, seed 0).
+   - MLM settings as in week 2 (`dapt_mlm.py`), then the CRF head from the
+     new checkpoint, 3 seeds per split and paper; compared with the CRF
+     reference.
+
+Execution: multi-task (4) and the SciBERT and PubMedBERT runs (1) start
+first, since they need no new code; label semantics (2), the corpus and
+pre-training (5), and self-training (3) follow as their code is ready. Each
+item is reported when its runs finish. The whole plan takes about 75 CPU
+hours, about 2 days on two job slots.
