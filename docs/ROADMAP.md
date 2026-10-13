@@ -133,10 +133,10 @@ The P1 items, with what has been measured so far:
    over the label hierarchy) shares signal with the 85 fine classes that have
    ≤ 3 examples. *(est. +1–3 F1 fine-grained)*
 
-   Measured with `--crf --multi-task`: one MatSciBERT encoder with a CRF head
-   per granularity, against the CRF head on the same splits and model seeds.
-   No significant change in any of the four paired comparisons, so it is not
-   adopted.
+   Week 2, measured with `--crf --multi-task`: one MatSciBERT encoder with a
+   CRF head per granularity, against the CRF head on the same splits and
+   model seeds, one run each. No significant change in any of the four
+   paired comparisons, so it was not adopted.
 
    | Micro F1 Δ [95% CI] | Fine-grained | Coarse-grained |
    |---|---|---|
@@ -147,6 +147,18 @@ The P1 items, with what has been measured so far:
    (+0.25 to +7.17), but one split (+7.17) gives most of the mean and the
    interval includes 0. On unseen papers the fine-grained differences range
    from −6.21 to +4.89.
+
+   Week 3, with 3 seeds per split (the week-2 runs plus seed offsets 100
+   and 200) against the 3-seed mean of the CRF head: coarse-grained improves
+   under the pre-registered rule, fine-grained does not.
+
+   | Micro F1 Δ [95% CI], 3-seed means | Fine-grained | Coarse-grained |
+   |---|---|---|
+   | 5 random splits (the decision) | +1.87 [−2.25, +6.00] | +0.75 [+0.10, +1.39] |
+   | Leaving one paper out | running | running |
+
+   The coarse-grained gain is small but positive on all five splits; macro
+   F1 does not move (−0.50 [−2.63, +1.64]).
 3. **Class-balanced or focal loss** for the minority classes the paper names
    as the main weakness. *(est. +0.5–2)*
 
