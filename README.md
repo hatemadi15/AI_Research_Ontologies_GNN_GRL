@@ -187,6 +187,8 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
 | domain-adaptive pre-training | leave one paper out | coarse | 4 | 58.75 [51.91, 65.60] | -1.06 [-3.25, +1.12] | -0.25 [-2.46, +1.95] | -1.06 |
 | 3-model ensemble | new random split per seed | fine | 5 | 79.76 [76.14, 83.38] | +3.39 [-1.35, +8.14] | +2.91 [-3.70, +9.53] | +3.39 |
 | 3-model ensemble | new random split per seed | coarse | 5 | 79.45 [77.82, 81.09] | +1.30 [-1.01, +3.62] | +2.60 [-0.51, +5.71] | +1.30 |
+| 3-model ensemble | leave one paper out | fine | 4 | 49.55 [40.11, 58.99] | +0.11 [-1.99, +2.20] | +0.16 [-3.64, +3.96] | +0.11 |
+| 3-model ensemble | leave one paper out | coarse | 4 | 61.42 [55.81, 67.03] | +1.60 [+0.52, +2.69] | +2.03 [-2.08, +6.14] | +1.60 |
 
 **Reading the numbers**
 * The old "Term F1 0.91" corresponds to *0.12* pairwise alignment F1. The
@@ -208,8 +210,8 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
 * Why the CRF helps (exploratory, not pre-registered): it never predicts an invalid I- tag, while seqeval's default (conlleval) scoring counts the baseline's stray I- tags as extra, mostly wrong entities; strict IOB2 scoring ignores them. Fine-grained: precision 71.0 → 76.7, recall 77.1 → 76.1; under strict IOB2 scoring the two are level (+0.10 [-2.08, +2.29]), so the gain is span validity alone. Dropping invalid tags from the baseline's output gives the same benefit for free: its strict F1 is 76.26 [72.52, 80.01] against the published 69.92. Coarse-grained: precision 71.4 → 77.5, recall 78.1 → 78.9; under strict IOB2 scoring the CRF still gains +1.91 [+1.17, +2.65], so part of the gain is better recognition.
 * NER, multi-task (fine + coarse heads) vs the CRF head (paired micro-F1 difference): fine-grained no significant change (+2.46, 95% CI [-0.91, +5.84]; strict IOB2 +2.46 [-0.91, +5.84]); coarse-grained no significant change (+0.24, 95% CI [-2.54, +3.02]; strict IOB2 +0.24 [-2.54, +3.02]) across the 5 random splits. Leaving one paper out: fine-grained no significant change (+0.11, 95% CI [-8.56, +8.79]; strict IOB2 +0.11 [-8.56, +8.79]); coarse-grained no significant change (-1.30, 95% CI [-4.80, +2.20]; strict IOB2 -1.30 [-4.80, +2.20]).
 * NER, domain-adaptive pre-training vs the CRF head (paired micro-F1 difference): fine-grained no significant change (+0.68, 95% CI [-2.55, +3.90]; strict IOB2 +0.68 [-2.55, +3.90]); coarse-grained no significant change (-0.07, 95% CI [-3.01, +2.86]; strict IOB2 -0.07 [-3.01, +2.86]) across the 5 random splits. Leaving one paper out: fine-grained no significant change (-0.91, 95% CI [-3.13, +1.31]; strict IOB2 -0.91 [-3.13, +1.31]); coarse-grained no significant change (-1.06, 95% CI [-3.25, +1.12]; strict IOB2 -1.06 [-3.25, +1.12]).
-* NER, 3-model ensemble vs the CRF head (paired micro-F1 difference): fine-grained no significant change (+3.39, 95% CI [-1.35, +8.14]; strict IOB2 +3.39 [-1.35, +8.14]); coarse-grained no significant change (+1.30, 95% CI [-1.01, +3.62]; strict IOB2 +1.30 [-1.01, +3.62]) across the 5 random splits.
-* NER, 3-model ensemble vs the mean of its own members on the same split (exploratory, not pre-registered; no single reference run enters): fine-grained +2.47 [+1.17, +3.77]; coarse-grained +1.80 [+0.91, +2.69] across the 5 random splits.
+* NER, 3-model ensemble vs the CRF head (paired micro-F1 difference): fine-grained no significant change (+3.39, 95% CI [-1.35, +8.14]; strict IOB2 +3.39 [-1.35, +8.14]); coarse-grained no significant change (+1.30, 95% CI [-1.01, +3.62]; strict IOB2 +1.30 [-1.01, +3.62]) across the 5 random splits. Leaving one paper out: fine-grained no significant change (+0.11, 95% CI [-1.99, +2.20]; strict IOB2 +0.11 [-1.99, +2.20]); coarse-grained improves (+1.60, 95% CI [+0.52, +2.69]; strict IOB2 +1.60 [+0.52, +2.69]).
+* NER, 3-model ensemble vs the mean of its own members on the same split (exploratory, not pre-registered; no single reference run enters): fine-grained +2.47 [+1.17, +3.77]; coarse-grained +1.80 [+0.91, +2.69] across the 5 random splits; fine-grained +2.04 [-0.23, +4.32]; coarse-grained +2.39 [+1.56, +3.21] leaving one paper out.
 <!-- RESULTS:END -->
 
 ## Evaluation
@@ -333,7 +335,8 @@ head (`--crf`) beats the plain baseline in all four paired comparisons, so new
 NER experiments should use it and be compared against its results. None of
 the week-2 changes (multi-task training, domain-adaptive pre-training, a
 3-model ensemble) beats it under the pre-registered rule, although the
-ensemble scores highest. The ROADMAP's P1 section says what to try next.
+ensemble scores highest and is the only one that improves on unseen papers
+(coarse-grained). The ROADMAP's P1 section says what to try next.
 
 ## License
 

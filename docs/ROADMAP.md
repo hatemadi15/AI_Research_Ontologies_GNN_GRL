@@ -65,10 +65,11 @@ pre-registered check across 5 random splits, if the paper reports micro F1:
 Week 2 tested three changes against the CRF head: multi-task training
 (item 2), domain-adaptive pre-training on the PubMed sentences (item 5) and
 a 3-model ensemble (item 8). None passes the pre-registered rule. The
-ensemble scores highest (79.76 fine-grained, 79.45 coarse-grained) and
-beats the mean of its own members on every split. But one reference model
-varies by several F1 points from run to run, which hides gains of 1–3
-points in a comparison against a single run per split.
+ensemble scores highest (79.76 fine-grained, 79.45 coarse-grained), beats
+the mean of its own members on every split, and is the only change that
+improves on unseen papers (coarse-grained, +1.60 [+0.52, +2.69]). But one
+reference model varies by several F1 points from run to run, which hides
+gains of 1–3 points in a comparison against a single run per split.
 
 The largest remaining gap is out of distribution (item 9).
 
@@ -76,16 +77,17 @@ Next, after week 2, in this order:
 1. **A comparison that can detect 1–3 points.** Compare the mean of 3 model
    seeds per split for the variant against the same for the reference,
    instead of single runs. The ensemble members `crf_m0`, `crf_m100` and
-   `crf_m200` already give such a CRF reference on the 5 random splits (and
-   on the 4 papers once their runs finish). Fix the design (seeds, splits,
-   rule) before the runs, as in weeks 1 and 2.
+   `crf_m200` already give such a CRF reference on the 5 random splits and
+   the 4 papers. Fix the design (seeds, splits, rule) before the runs, as
+   in weeks 1 and 2.
 2. **Ensembles for the reported system.** A seed ensemble only costs
    training and inference time, and it gained on every split against its
    members. Next, mix backbones (SciBERT, PubMedBERT, DeBERTa-v3), whose
    errors should differ more than those of seeds.
-3. **Out of distribution.** Leaving one paper out costs 18–27 points, and
-   no week-2 change reduced that. Label semantics (item 6) and
-   semi-supervised data (item 7) target it directly.
+3. **Out of distribution.** Leaving one paper out costs 18–27 points. Of
+   the week-2 changes only the ensemble narrows it, by 1.6 points
+   coarse-grained. Label semantics (item 6) and semi-supervised data
+   (item 7) target it directly.
 4. **Multi-task again, under the new design.** Its fine-grained difference
    was positive on all five splits (+2.46 on average) but not significant.
 5. **Domain-adaptive pre-training only on in-domain text.** PubMed did not
@@ -224,7 +226,7 @@ The P1 items, with what has been measured so far:
    | Micro F1 Δ [95% CI] | Fine-grained | Coarse-grained |
    |---|---|---|
    | 5 random splits | +3.39 [−1.35, +8.14] | +1.30 [−1.01, +3.62] |
-   | Leaving one paper out | running | running |
+   | Leaving one paper out | +0.11 [−1.99, +2.20] | +1.60 [+0.52, +2.69] |
 
    The ensemble has the highest scores so far: 79.76 [76.14, 83.38]
    fine-grained and 79.45 [77.82, 81.09] coarse-grained. The CRF head it is
@@ -234,11 +236,17 @@ The P1 items, with what has been measured so far:
    single run dominates, the vote gains +2.47 [+1.17, +3.77] fine-grained
    and +1.80 [+0.91, +2.69] coarse-grained, on every split (exploratory,
    not pre-registered).
+
+   On unseen papers the ensemble reaches 49.55 fine-grained and 61.42
+   coarse-grained. Coarse-grained, it is the only week-2 change that
+   improves on the CRF head there, and it beats its own members on all
+   four papers (+2.39 [+1.56, +3.21]). Fine-grained it gains +2.04
+   [−0.23, +4.32] over its members, also positive on every paper.
 9. **Track out-of-distribution results** with `--leave-one-paper-out` for
    every change. It is cheap and closer to real use than random sentence
    splits. The baseline drops from about 74 to 44 (fine-grained) and 54
    (coarse-grained) on an unseen paper; the CRF head lifts these to 49 and
-   60. That gap is larger than any in-distribution gain on this list, so
+   60, and the 3-model ensemble to 50 and 61. That gap is larger than any in-distribution gain on this list, so
    items 5–7 should be judged on this protocol as well.
 
 ### P2: Term typing (LLMs4OL Task B style)
@@ -328,7 +336,7 @@ chance at class level. For a Task C-style result:
 | Week | Work | Exit criterion |
 |---|---|---|
 | 1 | Done: class weights (no significant change) and CRF (significant gain in all four comparisons), P1 items 3–4 | Met by the CRF head |
-| 2 | Done: multi-task NER (fine + coarse heads), domain-adaptive pre-training and a 3-model ensemble, all with `--crf` (P1 items 2, 5 and 8; protocol below) | Not met: no 95% CI lies above 0 against the CRF head; the ensemble comes closest (+3.39 fine-grained, +1.30 coarse-grained) |
+| 2 | Done: multi-task NER (fine + coarse heads), domain-adaptive pre-training and a 3-model ensemble, all with `--crf` (P1 items 2, 5 and 8; protocol below) | Not met: no 95% CI lies above 0 against the CRF head on the random splits; the ensemble comes closest (+3.39 fine-grained, +1.30 coarse-grained) and is the only change that improves on unseen papers (coarse-grained) |
 | 3 | Context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | Typing accuracy above the hybrid + LLM baseline (§1) |
 | 4 | Class-level taxonomy (LLM or cross-encoder + arborescence); relation annotation pilot | First class-level taxonomy F1 above chance; relation guidelines |
 
