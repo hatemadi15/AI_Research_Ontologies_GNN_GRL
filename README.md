@@ -212,6 +212,8 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
 | PubMedBERT backbone vs CRF head | new random split per seed | coarse | 5 | 74.66 [72.25, 77.06] | -2.99 [-4.67, -1.32] | -7.42 [-13.86, -0.98] | -2.99 |
 | multi-task (fine + coarse heads) vs CRF head | new random split per seed | fine | 5 | 79.16 [75.39, 82.94] | +1.87 [-2.25, +6.00] | +1.99 [-1.29, +5.27] | +1.87 |
 | multi-task (fine + coarse heads) vs CRF head | new random split per seed | coarse | 5 | 78.40 [76.15, 80.64] | +0.75 [+0.10, +1.39] | -0.50 [-2.63, +1.64] | +0.75 |
+| multi-task (fine + coarse heads) vs CRF head | leave one paper out | fine | 4 | 50.90 [42.78, 59.03] | +3.39 [+0.45, +6.34] | +2.26 [-4.24, +8.76] | +3.39 |
+| multi-task (fine + coarse heads) vs CRF head | leave one paper out | coarse | 4 | 58.43 [52.05, 64.81] | -0.60 [-4.55, +3.34] | -2.30 [-9.74, +5.14] | -0.60 |
 
 **Reading the numbers**
 * The old "Term F1 0.91" corresponds to *0.12* pairwise alignment F1. The
@@ -240,7 +242,7 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
 * NER week 3, 3-model seed ensemble vs the CRF head (3-seed means, paired micro-F1 difference): fine-grained improves (+2.47, 95% CI [+1.17, +3.77]; strict IOB2 +2.47 [+1.17, +3.77]); coarse-grained improves (+1.80, 95% CI [+0.91, +2.69]; strict IOB2 +1.80 [+0.91, +2.69]) across the 5 random splits (reported, no decision). Leaving one paper out (reported, no decision): fine-grained no significant change (+2.04, 95% CI [-0.23, +4.32]; strict IOB2 +2.04 [-0.23, +4.32]); coarse-grained improves (+2.39, 95% CI [+1.56, +3.21]; strict IOB2 +2.39 [+1.56, +3.21]).
 * NER week 3, SciBERT backbone vs the CRF head (3-seed means, paired micro-F1 difference): fine-grained no significant change (-0.38, 95% CI [-2.63, +1.87]; strict IOB2 -0.38 [-2.63, +1.87]); coarse-grained hurts (-0.99, 95% CI [-1.71, -0.26]; strict IOB2 -0.99 [-1.71, -0.26]) across the 5 random splits (reported, no decision).
 * NER week 3, PubMedBERT backbone vs the CRF head (3-seed means, paired micro-F1 difference): fine-grained no significant change (-1.42, 95% CI [-5.21, +2.37]; strict IOB2 -1.42 [-5.21, +2.37]); coarse-grained hurts (-2.99, 95% CI [-4.67, -1.32]; strict IOB2 -2.99 [-4.67, -1.32]) across the 5 random splits (reported, no decision).
-* NER week 3, multi-task (fine + coarse heads) vs the CRF head (3-seed means, paired micro-F1 difference): fine-grained no significant change (+1.87, 95% CI [-2.25, +6.00]; strict IOB2 +1.87 [-2.25, +6.00]); coarse-grained improves (+0.75, 95% CI [+0.10, +1.39]; strict IOB2 +0.75 [+0.10, +1.39]) across the 5 random splits (the pre-registered decision).
+* NER week 3, multi-task (fine + coarse heads) vs the CRF head (3-seed means, paired micro-F1 difference): fine-grained no significant change (+1.87, 95% CI [-2.25, +6.00]; strict IOB2 +1.87 [-2.25, +6.00]); coarse-grained improves (+0.75, 95% CI [+0.10, +1.39]; strict IOB2 +0.75 [+0.10, +1.39]) across the 5 random splits (the pre-registered decision). Leaving one paper out (reported, no decision): fine-grained improves (+3.39, 95% CI [+0.45, +6.34]; strict IOB2 +3.39 [+0.45, +6.34]); coarse-grained no significant change (-0.60, 95% CI [-4.55, +3.34]; strict IOB2 -0.60 [-4.55, +3.34]).
 <!-- RESULTS:END -->
 
 ## Evaluation

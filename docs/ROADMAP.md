@@ -155,10 +155,12 @@ The P1 items, with what has been measured so far:
    | Micro F1 Δ [95% CI], 3-seed means | Fine-grained | Coarse-grained |
    |---|---|---|
    | 5 random splits (the decision) | +1.87 [−2.25, +6.00] | +0.75 [+0.10, +1.39] |
-   | Leaving one paper out | running | running |
+   | Leaving one paper out (reported) | +3.39 [+0.45, +6.34] | −0.60 [−4.55, +3.34] |
 
    The coarse-grained gain is small but positive on all five splits; macro
-   F1 does not move (−0.50 [−2.63, +1.64]).
+   F1 does not move (−0.50 [−2.63, +1.64]). On unseen papers the picture
+   flips: fine-grained gains on all four papers (50.90 against 47.51 for
+   the CRF head), coarse-grained does not change.
 3. **Class-balanced or focal loss** for the minority classes the paper names
    as the main weakness. *(est. +0.5–2)*
 
