@@ -62,7 +62,40 @@ pre-registered check across 5 random splits, if the paper reports micro F1:
 - fine-grained: 76.36 [71.00, 81.73] vs 69.92;
 - coarse-grained: 78.15 [76.61, 79.69] vs 72.32.
 
+Week 2 tested three changes against the CRF head: multi-task training
+(item 2), domain-adaptive pre-training on the PubMed sentences (item 5) and
+a 3-model ensemble (item 8). None passes the pre-registered rule. The
+ensemble scores highest (79.76 fine-grained, 79.45 coarse-grained) and
+beats the mean of its own members on every split. But one reference model
+varies by several F1 points from run to run, which hides gains of 1–3
+points in a comparison against a single run per split.
+
 The largest remaining gap is out of distribution (item 9).
+
+Next, after week 2, in this order:
+1. **A comparison that can detect 1–3 points.** Compare the mean of 3 model
+   seeds per split for the variant against the same for the reference,
+   instead of single runs. The ensemble members `crf_m0`, `crf_m100` and
+   `crf_m200` already give such a CRF reference on the 5 random splits (and
+   on the 4 papers once their runs finish). Fix the design (seeds, splits,
+   rule) before the runs, as in weeks 1 and 2.
+2. **Ensembles for the reported system.** A seed ensemble only costs
+   training and inference time, and it gained on every split against its
+   members. Next, mix backbones (SciBERT, PubMedBERT, DeBERTa-v3), whose
+   errors should differ more than those of seeds.
+3. **Out of distribution.** Leaving one paper out costs 18–27 points, and
+   no week-2 change reduced that. Label semantics (item 6) and
+   semi-supervised data (item 7) target it directly.
+4. **Multi-task again, under the new design.** Its fine-grained difference
+   was positive on all five splits (+2.46 on average) but not significant.
+5. **Domain-adaptive pre-training only on in-domain text.** PubMed did not
+   help; the open-access fatigue papers of item 5 are untested. Low
+   priority for its cost.
+6. **A GPU.** A run takes 13–27 minutes on 2 CPU threads; on one GPU it
+   takes about a minute, which makes more seeds and larger backbones
+   (DeBERTa-v3-large) practical.
+
+The P1 items, with what has been measured so far:
 
 1. **Check that the reproduction holds across splits before claiming SOTA.**
    Result with a new random split per seed (`--vary-split`, 5 splits, micro
@@ -295,7 +328,7 @@ chance at class level. For a Task C-style result:
 | Week | Work | Exit criterion |
 |---|---|---|
 | 1 | Done: class weights (no significant change) and CRF (significant gain in all four comparisons), P1 items 3–4 | Met by the CRF head |
-| 2 | Multi-task NER (fine + coarse heads), domain-adaptive pre-training and ensembles, in that order, all with `--crf` (protocol below) | A paired gain over the CRF results on the varied splits (95% CI above 0), also measured leaving one paper out |
+| 2 | Done: multi-task NER (fine + coarse heads), domain-adaptive pre-training and a 3-model ensemble, all with `--crf` (P1 items 2, 5 and 8; protocol below) | Not met: no 95% CI lies above 0 against the CRF head; the ensemble comes closest (+3.39 fine-grained, +1.30 coarse-grained) |
 | 3 | Context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | Typing accuracy above the hybrid + LLM baseline (§1) |
 | 4 | Class-level taxonomy (LLM or cross-encoder + arborescence); relation annotation pilot | First class-level taxonomy F1 above chance; relation guidelines |
 

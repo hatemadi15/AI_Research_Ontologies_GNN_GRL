@@ -330,7 +330,10 @@ suite fails while they are out of date; `--check` prints the difference.
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the prioritised plan to raise the
 metrics and to compete with the published state of the art. For NER, the CRF
 head (`--crf`) beats the plain baseline in all four paired comparisons, so new
-NER experiments should use it and be compared against its results.
+NER experiments should use it and be compared against its results. None of
+the week-2 changes (multi-task training, domain-adaptive pre-training, a
+3-model ensemble) beats it under the pre-registered rule, although the
+ensemble scores highest. The ROADMAP's P1 section says what to try next.
 
 ## License
 
