@@ -68,6 +68,21 @@ classes, the MMO classes annotated with each coarse-grained type) are embedded
 in every run by the pre-trained encoder, before fine-tuning. Files `_crf_ls`,
 compared with `crf`; the config stores the SHA-256 of the descriptions.
 
+`--self-train CORPUS` (with `--crf`; ROADMAP §4, week-3 protocol, variant 3) trains
+twice per run. The teacher is the plain CRF run. It tags a fixed sample of 2,000
+sentences of CORPUS, one raw sentence per line: random.Random(0) shuffles the
+sentence numbers and the first 2,000 are the sample, the same for every split and
+seed. Each is split into words like the MaterioMiner files (corpus_words). A sentence
+longer than the encoder's positions is skipped, not cut or replaced. Silver data are
+the tagged sentences with an entity in which every word's Viterbi tag has a CRF
+marginal of at least 0.9 (WordCRF.marginals). The student starts from the pre-trained
+checkpoint with the teacher's seed and trains on gold + silver, each silver
+sentence's NLL weighted 0.5; its epoch is chosen on the gold validation set and its
+test scores are the run's. Files `_crf_st`, compared with `crf`; each run stores
+`self_training` (sampled, skipped and silver sentences, the threshold, the teacher's
+validation and test F1), the config the corpus path, SHA-256, sample size and silver
+weight. Runs made from another corpus (SHA-256) are not resumed.
+
 `--compare` pairs every variant file with a reference file of the same
 granularity and protocol, run by run (run_id), and writes ner_comparisons.json:
 `crf_mt` and `crf_<tag>` with the `crf` file, `cw_<tag>` with `cw`, anything
@@ -80,6 +95,8 @@ Usage:
   python ner_baseline.py --vary-split --crf --tag m100 --seed-offset 100 --save-predictions
   python ner_baseline.py --vary-split --crf --multi-task                  # fine + coarse heads
   python ner_baseline.py --vary-split --crf --label-semantics             # description head
+  python ner_baseline.py --leave-one-paper-out --crf --tag m0 \\
+      --self-train data/processed/corpus/fatigue_sentences.txt            # self-training
   python ner_baseline.py --compare                                        # paired comparison
 """
 
@@ -91,10 +108,12 @@ import re
 import statistics
 import sys
 import time
+import unicodedata
 from collections import Counter
 from types import SimpleNamespace
 
 import conll
+import dapt_mlm
 import metrics
 import ner_label_text
 from config import PROCESSED_DIR, RAW_DIR
@@ -321,11 +340,13 @@ def _define_crf():
             return (self.transitions + self.trans_penalty,
                     self.start + self.start_penalty, self.end)
 
-        def nll(self, emissions, tags, mask):
+        def nll(self, emissions, tags, mask, weights=None):
             """Mean negative log-likelihood of the gold tag sequences.
 
             emissions (B, W, L), tags (B, W), mask (B, W): True on words,
-            left-aligned, at least one word per sequence.
+            left-aligned, at least one word per sequence. weights (B,), optional:
+            the loss is then sum_i weights[i] * NLL_i / B (--self-train: silver
+            sentences 0.5, gold ones 1, which keep their share of the mean).
             """
             trans, start, end = self.scores()
             gold = start[tags[:, 0]] + emissions[:, 0].gather(1, tags[:, :1]).squeeze(1)
@@ -341,7 +362,32 @@ def _define_crf():
             last = tags.gather(1, (mask.sum(1) - 1).unsqueeze(1)).squeeze(1)
             gold = gold + end[last]
             log_z = torch.logsumexp(alpha + end, dim=1)
-            return (log_z - gold).mean()
+            nlls = log_z - gold
+            return nlls.mean() if weights is None else (nlls * weights).mean()
+
+        def log_partition(self, emissions, mask):
+            """log Z per sequence (B,): the forward algorithm of nll.
+
+            nll keeps its own copy of the recursion, so that training is unchanged.
+            """
+            trans, start, end = self.scores()
+            alpha = start + emissions[:, 0]
+            for t in range(1, emissions.size(1)):
+                nxt = torch.logsumexp(alpha.unsqueeze(2) + trans + emissions[:, t].unsqueeze(1),
+                                      dim=1)
+                alpha = torch.where(mask[:, t].unsqueeze(1), nxt, alpha)
+            return torch.logsumexp(alpha + end, dim=1)
+
+        def marginals(self, emissions, mask):
+            """(B, W, L): the probability of each tag at each word under the CRF, 0 on padding.
+
+            The gradient of log Z with respect to the emissions (forward-backward by
+            autograd). Tags that the IOB2 penalties forbid get a probability of about 0.
+            """
+            with torch.enable_grad():
+                emissions = emissions.detach().requires_grad_()
+                log_z = self.log_partition(emissions, mask)
+                return torch.autograd.grad(log_z.sum(), emissions)[0]
 
         def decode(self, emissions, mask):
             """Viterbi label-id paths, one list per sequence."""
@@ -470,13 +516,119 @@ def _define_label_head():
     return LabelSemanticHead
 
 
-def train_one(seed, train, val, test, labels, args, device, test_index=None, descriptions=None):
+# Self-training (--self-train), fixed by the week-3 protocol
+SELF_TRAIN_SAMPLE = 2000      # corpus sentences that the teacher tags
+SELF_TRAIN_SEED = 0           # random.Random seed of the sample: the same for every run
+SILVER_THRESHOLD = 0.9        # least CRF marginal of every word's tag in a silver sentence
+SILVER_WEIGHT = 0.5           # NLL weight of a silver sentence (gold: 1)
+
+# Words as in the MaterioMiner files: a run of letters and digits in which '-' or an
+# apostrophe may join two letters (displacement-controlled, Young's), '.' two letters or
+# two digits (i.e, 0.6) and ',' two digits (5,6), then '%' after a digit (4.1%). Any
+# other non-space character is a word of its own: brackets, sentence punctuation, '/',
+# '°', and a '-' next to a digit or a bracket (10 - kN, - 35, ( Ni ) - base).
+WORD_RE = re.compile(r"[^\W_]+(?:(?:(?<=[^\W\d_])[-'.](?=[^\W\d_])|(?<=\d)[.,](?=\d))[^\W_]+)*"
+                     r"(?:(?<=\d)%)?|\S")
+QUOTES = {'\u2018': "'", '\u2019': "'"}
+
+
+def corpus_words(text):
+    """A raw corpus sentence split into words like the MaterioMiner files (WORD_RE).
+
+    The text is normalised first, as in dapt_mlm.normalise but not lowercased: Unicode
+    NFKC; every dash (category Pd) and the minus sign U+2212 written '-', and the quotes
+    U+2018 and U+2019 "'" (the only dash and apostrophe of the MaterioMiner text); and
+    the characters that the BERT tokenizer drops (category C*, e.g. a soft hyphen)
+    removed, so that they split no word.
+    """
+    chars = []
+    for ch in unicodedata.normalize('NFKC', text):
+        category = unicodedata.category(ch)
+        if category[0] == 'C' and not ch.isspace():
+            continue
+        chars.append('-' if category == 'Pd' or ch == '\u2212' else QUOTES.get(ch, ch))
+    return WORD_RE.findall(''.join(chars))
+
+
+def self_training_corpus(path, size=SELF_TRAIN_SAMPLE, seed=SELF_TRAIN_SEED):
+    """The fixed sample of a --self-train corpus as word lists, and its config entries.
+
+    One raw sentence per line, blank lines skipped (dapt_mlm.read_sentences).
+    random.Random(seed) shuffles the sentence numbers and the first `size` make the
+    sample, in corpus order: independent of the split and the model seed, and drawn
+    before any sentence is skipped (fit_sample). The config entries are the corpus path
+    (relative to the project root when inside it), its SHA-256, the sample size and the
+    silver weight.
+    """
+    sentences, _ = dapt_mlm.read_sentences(path)
+    if not sentences:
+        raise SystemExit(f'{path}: no sentences to self-train on')
+    order = list(range(len(sentences)))
+    random.Random(seed).shuffle(order)
+    sample = [corpus_words(sentences[i]) for i in sorted(order[:size])]
+    return sample, {'self_train': dapt_mlm.display_path(path),
+                    'self_train_sha256': dapt_mlm.file_sha256(path),
+                    'self_train_sample_size': size, 'self_train_silver_weight': SILVER_WEIGHT}
+
+
+def fit_sample(tokenizer, sample, max_length):
+    """The sample sentences that the encoder can tag whole, and how many were skipped.
+
+    A sentence of more than max_length subwords ([CLS] and [SEP] included) is skipped,
+    not cut, and not replaced by another. A word without subwords (a lone combining
+    mark, say) is left out of its sentence, since it cannot carry a tag; a sentence left
+    without words is skipped as well.
+    """
+    kept = []
+    for words in sample:
+        enc = tokenizer(words, is_split_into_words=True, truncation=False)
+        present = sorted({i for i in enc.word_ids() if i is not None})
+        if present and len(enc['input_ids']) <= max_length:
+            kept.append([words[i] for i in present])
+    return kept, len(sample) - len(kept)
+
+
+def teacher_tags(tagger, sentences, batch_size, device):
+    """Viterbi tags of word lists by a trained CRF tagger, with their CRF marginals.
+
+    tagger: model, crf, tokenizer, label2id and id2label (train_one with keep_tagger).
+    Returns [(tags, marginals)] in the order of `sentences`; marginals[t] is the
+    probability of tags[t] at word t.
+    """
+    import torch
+    model, crf = tagger.model, tagger.crf
+    features = encode(tagger.tokenizer, [(words, ['O'] * len(words)) for words in sentences],
+                      tagger.label2id, model.config.max_position_embeddings)
+    model.eval()
+    out = [None] * len(features)
+    with torch.no_grad():
+        for ids, mask, labels, idx in batches(features, batch_size, tagger.tokenizer.pad_token_id):
+            logits = model(input_ids=ids.to(device), attention_mask=mask.to(device)).logits
+            emissions, _, word_mask = word_view(logits, labels)
+            marginals = crf.marginals(emissions, word_mask)
+            for row, (i, path) in enumerate(zip(idx, crf.decode(emissions, word_mask))):
+                out[i] = ([tagger.id2label[p] for p in path],
+                          [float(marginals[row, t, p]) for t, p in enumerate(path)])
+    return out
+
+
+def is_silver(tags, marginals):
+    """Silver sentence: an entity, and every word's tag with a marginal >= SILVER_THRESHOLD."""
+    return any(tag.startswith('B-') for tag in tags) and min(marginals) >= SILVER_THRESHOLD
+
+
+def train_one(seed, train, val, test, labels, args, device, test_index=None, descriptions=None,
+              silver=None, keep_tagger=False):
     """Fine-tune and test once; `seed` is the model seed (--seed-offset included).
 
     test_index (positions of `test` in the corpus) is stored with the
     predictions when --save-predictions is set. descriptions (--label-semantics):
     a text per label of `labels`; the token classifier is then a label-semantic
     head over their embeddings by the pre-trained encoder (make_label_head).
+    silver (--self-train, with the CRF): (words, tags) sentences trained on with the
+    gold ones, each sentence's NLL weighted SILVER_WEIGHT. keep_tagger: return
+    (result, tagger), the tagger holding the model with its best weights, the CRF,
+    tokenizer, label2id and id2label (teacher_tags).
     """
     import torch
     from transformers import (AutoModelForTokenClassification, AutoTokenizer,
@@ -501,6 +653,11 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
     crf = make_crf(label_list).to(device) if getattr(args, 'crf', False) else None
 
     f_train = encode(tokenizer, [(t, g) for t, g, _ in train], label2id)
+    if silver:
+        assert crf is not None, 'silver sentences are weighted in the CRF loss'
+        # the gold sentences, then the silver ones; batches() shuffles them together
+        weight = [1.0] * len(f_train) + [SILVER_WEIGHT] * len(silver)
+        f_train += encode(tokenizer, silver, label2id, model.config.max_position_embeddings)
     f_val = encode(tokenizer, [(t, g) for t, g, _ in val], label2id)
     f_test = encode(tokenizer, [(t, g) for t, g, _ in test], label2id)
 
@@ -526,11 +683,14 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
     for epoch in range(args.epochs):
         model.train()
         total = 0.0
-        for ids, mask, lab, _ in batches(f_train, args.batch_size, pad_id,
-                                         shuffle_seed=seed * 1000 + epoch):
+        for ids, mask, lab, idx in batches(f_train, args.batch_size, pad_id,
+                                           shuffle_seed=seed * 1000 + epoch):
             logits = model(input_ids=ids.to(device), attention_mask=mask.to(device)).logits
             if crf is None:
                 loss = loss_fn(logits.view(-1, logits.size(-1)), lab.to(device).view(-1))
+            elif silver:
+                loss = crf.nll(*word_view(logits, lab),
+                               weights=torch.tensor([weight[i] for i in idx], device=device))
             else:
                 loss = crf.nll(*word_view(logits, lab))
             loss.backward()
@@ -558,7 +718,41 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
                    'history': history})
     if getattr(args, 'save_predictions', False):
         result.update(prediction_fields(test_index, test, test_pred))
+    if keep_tagger:
+        return result, SimpleNamespace(model=model, crf=crf, tokenizer=tokenizer,
+                                       label2id=label2id, id2label=id2label)
     return result
+
+
+def train_self_training(seed, train, val, test, labels, args, device, sample, test_index=None):
+    """One --self-train run: teacher, silver data and student; returns the student's record.
+
+    The teacher is train_one on the run's data, the plain --crf run. It tags the sample
+    (word lists; fit_sample, teacher_tags) and is_silver picks the silver sentences. The
+    student is train_one with the same seed, hence the same initialisation, on the gold
+    data plus the silver sentences. The record is the student's, plus `self_training`:
+    n_sampled, n_skipped (fit_sample), n_silver, marginal_threshold, teacher_val_f1 and
+    teacher_test_f1 (micro F1).
+    """
+    teacher_args = SimpleNamespace(**{**vars(args), 'save_predictions': False})
+    teacher, tagger = train_one(seed, train, val, test, labels, teacher_args, device,
+                                keep_tagger=True)
+    sentences, n_skipped = fit_sample(tagger.tokenizer, sample,
+                                      tagger.model.config.max_position_embeddings)
+    tagged = teacher_tags(tagger, sentences, args.batch_size, device)
+    del tagger                     # the teacher is not needed any more
+    silver = [(words, tags) for words, (tags, marginals) in zip(sentences, tagged)
+              if is_silver(tags, marginals)]
+    print(f"    teacher: val F1 {teacher['val_f1']:.2f}, test F1 {teacher['f1']:.2f}; "
+          f"{len(silver)} silver of {len(sentences)} tagged sentences ({n_skipped} of "
+          f"{len(sample)} sampled skipped); student:", flush=True)
+    student = train_one(seed, train, val, test, labels, args, device, test_index=test_index,
+                        silver=silver)
+    student['self_training'] = {
+        'n_sampled': len(sample), 'n_skipped': n_skipped, 'n_silver': len(silver),
+        'marginal_threshold': SILVER_THRESHOLD, 'teacher_val_f1': teacher['val_f1'],
+        'teacher_test_f1': teacher['f1']}
+    return student
 
 
 # Multi-task training (--multi-task): one encoder, a linear head and a CRF per granularity
@@ -832,20 +1026,22 @@ F1_AVERAGES = {
 RESULT_FILE = re.compile(r'ner_results_(fine|coarse)(?:_(random_split_vary|leave_one_paper_out))?'
                          r'(?:_([a-z0-9_]+))?\.json')
 # untagged variants: a tagged variant must not take the name of one (--crf --tag mt: crf_mt)
-PLAIN_VARIANTS = ('baseline', 'cw', 'crf', 'crf_mt', 'crf_ls')
+PLAIN_VARIANTS = ('baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_st')
 
 
 def variant_name(args):
-    """Training variant of a run: 'baseline', 'cw', 'crf', 'crf_mt' or 'crf_ls', then the tag.
+    """Variant of a run: 'baseline', 'cw', 'crf', 'crf_mt', 'crf_ls' or 'crf_st', then the tag.
 
-    'cw' is --class-weights, 'crf_mt' is --crf --multi-task and 'crf_ls' is --crf
-    --label-semantics. A tag is appended with an underscore (crf_m100); the baseline
-    is named by it alone.
+    'cw' is --class-weights, 'crf_mt' is --crf --multi-task, 'crf_ls' is --crf
+    --label-semantics and 'crf_st' is --crf --self-train. A tag is appended with an
+    underscore (crf_m100); the baseline is named by it alone.
     """
     if getattr(args, 'crf', False):
         name = 'crf_mt' if getattr(args, 'multi_task', False) else 'crf'
         if getattr(args, 'label_semantics', False):
             name = 'crf_ls'
+        if getattr(args, 'self_train', None) is not None:
+            name = 'crf_st'
     else:
         name = 'cw' if args.class_weights else 'baseline'
     tag = getattr(args, 'tag', None)
@@ -857,8 +1053,8 @@ def variant_name(args):
 def reference_variant(variant):
     """Variant that a variant is compared with ('baseline': the baseline file).
 
-    crf_mt[_<tag>], crf_ls[_<tag>] and crf_<tag> are compared with crf and cw_<tag>
-    with cw; cw, crf and a bare tag with the baseline.
+    crf_mt[_<tag>], crf_ls[_<tag>], crf_st[_<tag>] and crf_<tag> are compared with crf
+    and cw_<tag> with cw; cw, crf and a bare tag with the baseline.
     """
     for base in ('crf', 'cw'):
         if variant.startswith(f'{base}_'):
@@ -887,27 +1083,31 @@ def parse_result_name(fn):
 def stored_settings(results):
     """Settings of a results file that its runs must share with a run that resumes them.
 
-    Files written before variants existed hold baseline runs, and files without
-    a stored offset have offset 0.
+    Files written before variants existed hold baseline runs, files without
+    a stored offset have offset 0, and only --self-train files store a corpus
+    SHA-256 (None otherwise).
     """
     return {'labels': results.get('labels'), 'model': results.get('model'),
             'variant': results.get('variant', 'baseline'),
-            'seed_offset': results.get('config', {}).get('seed_offset', 0)}
+            'seed_offset': results.get('config', {}).get('seed_offset', 0),
+            'self_train_sha256': results.get('config', {}).get('self_train_sha256')}
 
 
-def resumable_runs(path, labels, model, variant, seed_offset=0, save_predictions=False):
+def resumable_runs(path, labels, model, variant, seed_offset=0, save_predictions=False,
+                   self_train_sha256=None):
     """Runs of an earlier invocation that this one may reuse.
 
-    Only runs with the same labels, model, training variant and seed offset
-    count (see stored_settings). With `save_predictions`, runs that did not
-    store their predictions are not reused.
+    Only runs with the same labels, model, training variant, seed offset and
+    self-training corpus count (see stored_settings). With `save_predictions`,
+    runs that did not store their predictions are not reused.
     """
     if not os.path.exists(path):
         return []
     with open(path) as f:
         previous = json.load(f)
     same = stored_settings(previous) == {'labels': labels, 'model': model, 'variant': variant,
-                                         'seed_offset': seed_offset}
+                                         'seed_offset': seed_offset,
+                                         'self_train_sha256': self_train_sha256}
     runs = previous.get('runs', []) if same else []
     return [r for r in runs if 'test_pred' in r] if save_predictions else runs
 
@@ -926,23 +1126,26 @@ def setting_change(name, stored, now):
     return f'{name}: {stored!r} in the file, {now!r} now'
 
 
-def check_overwrite(path, labels, model, variant, seed_offset=0, save_predictions=False):
+def check_overwrite(path, labels, model, variant, seed_offset=0, save_predictions=False,
+                    self_train_sha256=None):
     """Raise OverwriteError if `path` holds runs that resumable_runs would not reuse.
 
     A run writes its results file anew, so those runs would be lost: runs made
-    with other labels, model, variant or seed offset, and, with
-    `save_predictions`, runs that did not store their predictions.
+    with other labels, model, variant, seed offset or self-training corpus, and,
+    with `save_predictions`, runs that did not store their predictions.
     """
     if not os.path.exists(path):
         return
     with open(path) as f:
         previous = json.load(f)
     held = previous.get('runs', [])
-    kept = resumable_runs(path, labels, model, variant, seed_offset, save_predictions)
+    kept = resumable_runs(path, labels, model, variant, seed_offset, save_predictions,
+                          self_train_sha256)
     if len(kept) >= len(held):
         return
     stored = stored_settings(previous)
-    now = {'labels': labels, 'model': model, 'variant': variant, 'seed_offset': seed_offset}
+    now = {'labels': labels, 'model': model, 'variant': variant, 'seed_offset': seed_offset,
+           'self_train_sha256': self_train_sha256}
     reasons = [setting_change(k, stored[k], now[k]) for k in stored if stored[k] != now[k]]
     if not reasons:
         missing = [r.get('run_id') for r in held if 'test_pred' not in r]
@@ -953,7 +1156,7 @@ def check_overwrite(path, labels, model, variant, seed_offset=0, save_prediction
         f"the new runs to a file of their own, or --overwrite to replace the old runs on purpose")
 
 
-def check_results_files(args, files):
+def check_results_files(args, files, self_train_sha256=None):
     """check_overwrite for every (path, labels) that a run will write.
 
     Nothing is checked with --overwrite, or for smoke-test files (--max-train),
@@ -963,7 +1166,7 @@ def check_results_files(args, files):
         return
     for path, labels in files:
         check_overwrite(path, labels, args.model, variant_name(args), args.seed_offset,
-                        args.save_predictions)
+                        args.save_predictions, self_train_sha256)
 
 
 def summarize(results):
@@ -1059,8 +1262,10 @@ def make_folds(data, args, indices=False):
     `indices` is set (the test positions go with the stored predictions).
     """
     if args.leave_one_paper_out:
+        docs = sorted({d for _, _, d in data})
+        keep = held_out_papers(docs, getattr(args, 'papers', None))
         folds = []
-        for doc in sorted({d for _, _, d in data}):
+        for doc in docs:
             rest = [i for i, x in enumerate(data) if x[2] != doc]
             order = list(range(len(rest)))
             random.Random(args.split_seed).shuffle(order)
@@ -1070,9 +1275,26 @@ def make_folds(data, args, indices=False):
             test = [i for i, x in enumerate(data) if x[2] == doc]
             if not indices:
                 train, val, test = ([data[i] for i in part] for part in (train, val, test))
-            folds.append((doc, train, val, test))
+            if doc in keep:
+                folds.append((doc, train, val, test))
         return folds
     return None
+
+
+def held_out_papers(docs, papers):
+    """The folds to run (--papers): all of `docs`, or those named, with or without .conll.
+
+    Every fold is built as before and only the others are left out, so a fold run on its
+    own is the same as within the full protocol.
+    """
+    if not papers:
+        return set(docs)
+    stems = {doc.removesuffix('.conll'): doc for doc in docs}
+    unknown = [p for p in papers if p.removesuffix('.conll') not in stems]
+    if unknown:
+        raise SystemExit(f"--papers: no held-out paper {', '.join(unknown)}; "
+                         f"the papers are {', '.join(sorted(stems))}")
+    return {stems[p.removesuffix('.conll')] for p in papers}
 
 
 def granularity_data(granularity, args):
@@ -1102,7 +1324,7 @@ def results_path(out_dir, granularity, args):
 def stored_config(args):
     """The arguments saved as `config` (the granularity is a field of its own)."""
     return {k: v for k, v in vars(args).items()
-            if k not in ('granularity', 'compare', 'overwrite')}
+            if k not in ('granularity', 'compare', 'overwrite', 'papers')}
 
 
 def torch_device(args):
@@ -1122,9 +1344,12 @@ def run(args):
     semantics = getattr(args, 'label_semantics', False)
     descriptions = {g: label_descriptions(g, tasks[g][1]) if semantics else None
                     for g in granularities}
+    self_train = getattr(args, 'self_train', None) is not None
+    # --self-train: the sample, and the corpus path, SHA-256, sample size and silver weight
+    sample, corpus = self_training_corpus(args.self_train) if self_train else (None, {})
     # every results file is checked before any training, so a run never stops halfway
     check_results_files(args, [(results_path(out_dir, g, args), tasks[g][1])
-                               for g in granularities])
+                               for g in granularities], corpus.get('self_train_sha256'))
     device = torch_device(args)
     os.makedirs(out_dir, exist_ok=True)
 
@@ -1137,10 +1362,13 @@ def run(args):
                    'model': args.model, 'labels': labels, 'label_tie': tie_info,
                    'paper_test_f1': PAPER_F1[granularity], 'config': stored_config(args),
                    'runs': resumable_runs(out_path, labels, args.model, variant,
-                                          args.seed_offset, args.save_predictions)}
+                                          args.seed_offset, args.save_predictions,
+                                          corpus.get('self_train_sha256'))}
         if semantics:
             results['config']['label_descriptions_sha256'] = ner_label_text.descriptions_sha256(
                 labels, descriptions[granularity])
+        if self_train:
+            results['config'].update(corpus)
         done = {r.get('run_id') for r in results['runs']}
 
         offset = f", seed offset {args.seed_offset}" if args.seed_offset else ''
@@ -1151,6 +1379,9 @@ def run(args):
         if semantics:
             print(f"  label descriptions: sha256 "
                   f"{results['config']['label_descriptions_sha256'][:12]}")
+        if self_train:
+            print(f"  self-training: {len(sample)} sentences sampled from {corpus['self_train']} "
+                  f"(sha256 {corpus['self_train_sha256'][:12]})")
 
         folds = make_folds(data, args, indices=True)     # parts as positions in `data`
         if folds is None:
@@ -1168,8 +1399,12 @@ def run(args):
             seed = int(run_id[4:]) if run_id.startswith('seed') else args.seeds[0]
             seed += args.seed_offset      # the model seed moves, the split and run_id do not
             start = time.time()
-            res = train_one(seed, train, val, test, labels, args, device, test_index=te,
-                            descriptions=descriptions[granularity])
+            if self_train:
+                res = train_self_training(seed, train, val, test, labels, args, device, sample,
+                                          test_index=te)
+            else:
+                res = train_one(seed, train, val, test, labels, args, device, test_index=te,
+                                descriptions=descriptions[granularity])
             res['run_id'] = run_id
             res['runtime_sec'] = round(time.time() - start, 1)
             results['runs'].append(res)
@@ -1292,6 +1527,11 @@ def parse_args(argv=None):
     parser.add_argument('--vary-split', action='store_true',
                         help='new random split per seed')
     parser.add_argument('--leave-one-paper-out', action='store_true')
+    parser.add_argument('--papers', nargs='+', default=argparse.SUPPRESS, metavar='PAPER',
+                        help='with --leave-one-paper-out: run only the folds that hold out these '
+                             'papers (file names, .conll optional). The results file keeps '
+                             'collecting folds, so the protocol can be run in parts; not stored '
+                             'in the config')
     parser.add_argument('--model', default=DEFAULT_MODEL)
     parser.add_argument('--top-k', type=int, default=27,
                         help='fine-grained classes kept (MaterioMiner: 27)')
@@ -1315,6 +1555,12 @@ def parse_args(argv=None):
                              'description (fine: MMO definition; coarse: the MMO classes '
                              'annotated with the type) instead of a linear classifier (files '
                              'tagged _crf_ls)')
+    parser.add_argument('--self-train', default=argparse.SUPPRESS, metavar='CORPUS',
+                        help='with --crf: self-training. The CRF run is the teacher; it tags a '
+                             'fixed sample of 2,000 sentences of CORPUS (one raw sentence per '
+                             'line), and a student with the same seed trains on the gold data '
+                             'plus the confident tagged sentences, their loss weighted 0.5 (files '
+                             'tagged _crf_st)')
     parser.add_argument('--tag', type=tag_name, default=None, metavar='NAME',
                         help='appended to the variant name and the results file (crf + m100: '
                              'crf_m100; baseline + m100: m100); lowercase letters and digits, '
@@ -1343,11 +1589,21 @@ def parse_args(argv=None):
     args = parser.parse_args(argv)
     if args.seed_offset and not args.tag:
         parser.error('--seed-offset needs --tag, so that offset runs get their own results file')
+    if getattr(args, 'papers', None) and not args.leave_one_paper_out:
+        parser.error('--papers needs --leave-one-paper-out (it picks held-out papers)')
     if getattr(args, 'label_semantics', False):
         if not args.crf:
             parser.error('--label-semantics needs --crf (its scores are the CRF emissions)')
         if getattr(args, 'multi_task', False):
             parser.error('--label-semantics is not available with --multi-task')
+    if getattr(args, 'self_train', None) is not None:
+        if not args.crf:
+            parser.error('--self-train needs --crf (silver sentences are chosen by CRF marginals)')
+        for option in ('multi_task', 'label_semantics'):
+            if getattr(args, option, False):
+                parser.error(f"--self-train is not available with --{option.replace('_', '-')}")
+        if not os.path.isfile(args.self_train):
+            parser.error(f'--self-train: no such file: {args.self_train}')
     if getattr(args, 'multi_task', False):
         if not args.crf:
             parser.error('--multi-task needs --crf (a CRF head per granularity)')

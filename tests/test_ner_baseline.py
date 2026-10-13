@@ -74,6 +74,22 @@ def test_leave_one_paper_out_folds_as_corpus_positions():
     assert nb.make_folds(data, SimpleNamespace(leave_one_paper_out=False), indices=True) is None
 
 
+def test_papers_runs_only_the_named_folds_unchanged():
+    data = _corpus()
+    every = nb.make_folds(data, SimpleNamespace(leave_one_paper_out=True, split_seed=0))
+    some = nb.make_folds(data, SimpleNamespace(leave_one_paper_out=True, split_seed=0,
+                                               papers=['c', 'a.conll']))
+    assert some == [every[0], every[2]]          # the same folds, in the usual order
+    with pytest.raises(SystemExit, match='no held-out paper e'):
+        nb.make_folds(data, SimpleNamespace(leave_one_paper_out=True, split_seed=0,
+                                            papers=['e']))
+    args = nb.parse_args(['--leave-one-paper-out', '--papers', 'a', 'b'])
+    assert args.papers == ['a', 'b'] and 'papers' not in nb.stored_config(args)
+    assert 'papers' not in vars(nb.parse_args(['--leave-one-paper-out']))
+    with pytest.raises(SystemExit):
+        nb.parse_args(['--vary-split', '--papers', 'a'])
+
+
 def test_prediction_fields_join_the_tags_of_each_sentence():
     test = [(['a', 'b'], ['B-X', 'O'], 'p.conll'), (['c'], ['O'], 'p.conll')]
     got = nb.prediction_fields((7, 3), test, [['B-X', 'I-X'], ['O']])
