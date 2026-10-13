@@ -1,4 +1,394 @@
 {
+  "ner_results_fine_random_split_vary_crf_mix3_vs_crf_ens3": {
+    "variant": "crf_mix3",
+    "reference": "crf_ens3",
+    "granularity": "fine",
+    "protocol": "random_split_vary",
+    "role": "decision",
+    "variant_files": [
+      "ner_results_fine_random_split_vary_crf_mix3.json"
+    ],
+    "reference_files": [
+      "ner_results_fine_random_split_vary_crf_ens3.json"
+    ],
+    "n_pairs": 5,
+    "run_ids": [
+      "seed0",
+      "seed1",
+      "seed2",
+      "seed3",
+      "seed4"
+    ],
+    "complete": true,
+    "variant_scores": {
+      "micro": {
+        "mean": 79.79,
+        "ci95": [
+          77.67,
+          81.9
+        ],
+        "per_run": [
+          78.75,
+          81.52,
+          81.46,
+          77.62,
+          79.58
+        ]
+      },
+      "micro_strict": {
+        "mean": 79.79,
+        "ci95": [
+          77.67,
+          81.9
+        ],
+        "per_run": [
+          78.75,
+          81.52,
+          81.46,
+          77.62,
+          79.58
+        ]
+      },
+      "macro": {
+        "mean": 77.12,
+        "ci95": [
+          72.84,
+          81.41
+        ],
+        "per_run": [
+          74.16,
+          77.28,
+          82.78,
+          76.87,
+          74.52
+        ]
+      },
+      "weighted": {
+        "mean": 79.16,
+        "ci95": [
+          77.16,
+          81.16
+        ],
+        "per_run": [
+          77.65,
+          81.09,
+          80.67,
+          77.85,
+          78.53
+        ]
+      }
+    },
+    "reference_scores": {
+      "micro": {
+        "mean": 79.76,
+        "ci95": [
+          76.14,
+          83.38
+        ],
+        "per_run": [
+          79.0,
+          82.55,
+          81.48,
+          75.09,
+          80.67
+        ]
+      },
+      "micro_strict": {
+        "mean": 79.76,
+        "ci95": [
+          76.14,
+          83.38
+        ],
+        "per_run": [
+          79.0,
+          82.55,
+          81.48,
+          75.09,
+          80.67
+        ]
+      },
+      "macro": {
+        "mean": 77.15,
+        "ci95": [
+          74.05,
+          80.25
+        ],
+        "per_run": [
+          76.02,
+          77.22,
+          81.24,
+          74.55,
+          76.74
+        ]
+      },
+      "weighted": {
+        "mean": 79.23,
+        "ci95": [
+          76.32,
+          82.13
+        ],
+        "per_run": [
+          78.23,
+          81.39,
+          80.91,
+          75.64,
+          79.96
+        ]
+      }
+    },
+    "micro": {
+      "mean_diff": 0.03,
+      "ci95": [
+        -1.8,
+        1.86
+      ],
+      "per_run": [
+        -0.25,
+        -1.03,
+        -0.02,
+        2.53,
+        -1.09
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": 0.03,
+      "ci95": [
+        -1.8,
+        1.86
+      ],
+      "per_run": [
+        -0.25,
+        -1.03,
+        -0.02,
+        2.53,
+        -1.09
+      ]
+    },
+    "macro": {
+      "mean_diff": -0.03,
+      "ci95": [
+        -2.53,
+        2.46
+      ],
+      "per_run": [
+        -1.86,
+        0.06,
+        1.54,
+        2.32,
+        -2.22
+      ]
+    },
+    "weighted": {
+      "mean_diff": -0.07,
+      "ci95": [
+        -1.76,
+        1.62
+      ],
+      "per_run": [
+        -0.58,
+        -0.3,
+        -0.24,
+        2.21,
+        -1.43
+      ]
+    }
+  },
+  "ner_results_fine_random_split_vary_crf_mix3": {
+    "variant": "crf_mix3",
+    "reference": "crf",
+    "granularity": "fine",
+    "protocol": "random_split_vary",
+    "role": "reported",
+    "variant_files": [
+      "ner_results_fine_random_split_vary_crf_mix3.json"
+    ],
+    "reference_files": [
+      "ner_results_fine_random_split_vary_crf_m0.json",
+      "ner_results_fine_random_split_vary_crf_m100.json",
+      "ner_results_fine_random_split_vary_crf_m200.json"
+    ],
+    "n_pairs": 5,
+    "run_ids": [
+      "seed0",
+      "seed1",
+      "seed2",
+      "seed3",
+      "seed4"
+    ],
+    "complete": true,
+    "variant_scores": {
+      "micro": {
+        "mean": 79.79,
+        "ci95": [
+          77.67,
+          81.9
+        ],
+        "per_run": [
+          78.75,
+          81.52,
+          81.46,
+          77.62,
+          79.58
+        ]
+      },
+      "micro_strict": {
+        "mean": 79.79,
+        "ci95": [
+          77.67,
+          81.9
+        ],
+        "per_run": [
+          78.75,
+          81.52,
+          81.46,
+          77.62,
+          79.58
+        ]
+      },
+      "macro": {
+        "mean": 77.12,
+        "ci95": [
+          72.84,
+          81.41
+        ],
+        "per_run": [
+          74.16,
+          77.28,
+          82.78,
+          76.87,
+          74.52
+        ]
+      },
+      "weighted": {
+        "mean": 79.16,
+        "ci95": [
+          77.16,
+          81.16
+        ],
+        "per_run": [
+          77.65,
+          81.09,
+          80.67,
+          77.85,
+          78.53
+        ]
+      }
+    },
+    "reference_scores": {
+      "micro": {
+        "mean": 77.29,
+        "ci95": [
+          73.62,
+          80.96
+        ],
+        "per_run": [
+          77.41,
+          78.61,
+          78.95,
+          72.17,
+          79.32
+        ]
+      },
+      "micro_strict": {
+        "mean": 77.29,
+        "ci95": [
+          73.62,
+          80.96
+        ],
+        "per_run": [
+          77.41,
+          78.61,
+          78.95,
+          72.17,
+          79.32
+        ]
+      },
+      "macro": {
+        "mean": 74.66,
+        "ci95": [
+          71.64,
+          77.68
+        ],
+        "per_run": [
+          74.34,
+          74.44,
+          78.07,
+          71.25,
+          75.19
+        ]
+      },
+      "weighted": {
+        "mean": 76.87,
+        "ci95": [
+          73.65,
+          80.1
+        ],
+        "per_run": [
+          76.74,
+          77.77,
+          78.57,
+          72.46,
+          78.83
+        ]
+      }
+    },
+    "micro": {
+      "mean_diff": 2.5,
+      "ci95": [
+        0.07,
+        4.92
+      ],
+      "per_run": [
+        1.34,
+        2.91,
+        2.51,
+        5.45,
+        0.26
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": 2.5,
+      "ci95": [
+        0.07,
+        4.92
+      ],
+      "per_run": [
+        1.34,
+        2.91,
+        2.51,
+        5.45,
+        0.26
+      ]
+    },
+    "macro": {
+      "mean_diff": 2.46,
+      "ci95": [
+        -1.05,
+        5.97
+      ],
+      "per_run": [
+        -0.18,
+        2.84,
+        4.71,
+        5.62,
+        -0.67
+      ]
+    },
+    "weighted": {
+      "mean_diff": 2.29,
+      "ci95": [
+        -0.44,
+        5.01
+      ],
+      "per_run": [
+        0.91,
+        3.32,
+        2.1,
+        5.39,
+        -0.3
+      ]
+    }
+  },
   "ner_results_fine_random_split_vary_crf_ens3": {
     "variant": "crf_ens3",
     "reference": "crf",
@@ -754,6 +1144,594 @@
         2.13,
         1.64,
         2.62
+      ]
+    }
+  },
+  "ner_results_fine_random_split_vary_crf_scibert": {
+    "variant": "crf_scibert",
+    "reference": "crf",
+    "granularity": "fine",
+    "protocol": "random_split_vary",
+    "role": "reported",
+    "variant_files": [
+      "ner_results_fine_random_split_vary_crf_scibert.json"
+    ],
+    "reference_files": [
+      "ner_results_fine_random_split_vary_crf_m0.json",
+      "ner_results_fine_random_split_vary_crf_m100.json",
+      "ner_results_fine_random_split_vary_crf_m200.json"
+    ],
+    "n_pairs": 5,
+    "run_ids": [
+      "seed0",
+      "seed1",
+      "seed2",
+      "seed3",
+      "seed4"
+    ],
+    "complete": true,
+    "variant_scores": {
+      "micro": {
+        "mean": 76.91,
+        "ci95": [
+          73.61,
+          80.21
+        ],
+        "per_run": [
+          77.63,
+          79.39,
+          78.9,
+          72.88,
+          75.75
+        ]
+      },
+      "micro_strict": {
+        "mean": 76.91,
+        "ci95": [
+          73.61,
+          80.21
+        ],
+        "per_run": [
+          77.63,
+          79.39,
+          78.9,
+          72.88,
+          75.75
+        ]
+      },
+      "macro": {
+        "mean": 74.66,
+        "ci95": [
+          70.62,
+          78.7
+        ],
+        "per_run": [
+          73.29,
+          71.55,
+          79.94,
+          73.12,
+          75.39
+        ]
+      },
+      "weighted": {
+        "mean": 76.52,
+        "ci95": [
+          74.07,
+          78.97
+        ],
+        "per_run": [
+          76.72,
+          78.39,
+          78.12,
+          73.52,
+          75.84
+        ]
+      }
+    },
+    "reference_scores": {
+      "micro": {
+        "mean": 77.29,
+        "ci95": [
+          73.62,
+          80.96
+        ],
+        "per_run": [
+          77.41,
+          78.61,
+          78.95,
+          72.17,
+          79.32
+        ]
+      },
+      "micro_strict": {
+        "mean": 77.29,
+        "ci95": [
+          73.62,
+          80.96
+        ],
+        "per_run": [
+          77.41,
+          78.61,
+          78.95,
+          72.17,
+          79.32
+        ]
+      },
+      "macro": {
+        "mean": 74.66,
+        "ci95": [
+          71.64,
+          77.68
+        ],
+        "per_run": [
+          74.34,
+          74.44,
+          78.07,
+          71.25,
+          75.19
+        ]
+      },
+      "weighted": {
+        "mean": 76.87,
+        "ci95": [
+          73.65,
+          80.1
+        ],
+        "per_run": [
+          76.74,
+          77.77,
+          78.57,
+          72.46,
+          78.83
+        ]
+      }
+    },
+    "micro": {
+      "mean_diff": -0.38,
+      "ci95": [
+        -2.63,
+        1.87
+      ],
+      "per_run": [
+        0.22,
+        0.78,
+        -0.05,
+        0.71,
+        -3.57
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": -0.38,
+      "ci95": [
+        -2.63,
+        1.87
+      ],
+      "per_run": [
+        0.22,
+        0.78,
+        -0.05,
+        0.71,
+        -3.57
+      ]
+    },
+    "macro": {
+      "mean_diff": -0.0,
+      "ci95": [
+        -2.52,
+        2.52
+      ],
+      "per_run": [
+        -1.05,
+        -2.89,
+        1.87,
+        1.87,
+        0.2
+      ]
+    },
+    "weighted": {
+      "mean_diff": -0.35,
+      "ci95": [
+        -2.32,
+        1.61
+      ],
+      "per_run": [
+        -0.02,
+        0.62,
+        -0.45,
+        1.06,
+        -2.99
+      ]
+    }
+  },
+  "ner_results_coarse_random_split_vary_crf_scibert": {
+    "variant": "crf_scibert",
+    "reference": "crf",
+    "granularity": "coarse",
+    "protocol": "random_split_vary",
+    "role": "reported",
+    "variant_files": [
+      "ner_results_coarse_random_split_vary_crf_scibert.json"
+    ],
+    "reference_files": [
+      "ner_results_coarse_random_split_vary_crf_m0.json",
+      "ner_results_coarse_random_split_vary_crf_m100.json",
+      "ner_results_coarse_random_split_vary_crf_m200.json"
+    ],
+    "n_pairs": 5,
+    "run_ids": [
+      "seed0",
+      "seed1",
+      "seed2",
+      "seed3",
+      "seed4"
+    ],
+    "complete": true,
+    "variant_scores": {
+      "micro": {
+        "mean": 76.67,
+        "ci95": [
+          75.01,
+          78.32
+        ],
+        "per_run": [
+          76.96,
+          76.72,
+          77.0,
+          74.5,
+          78.15
+        ]
+      },
+      "micro_strict": {
+        "mean": 76.67,
+        "ci95": [
+          75.01,
+          78.32
+        ],
+        "per_run": [
+          76.96,
+          76.72,
+          77.0,
+          74.5,
+          78.15
+        ]
+      },
+      "macro": {
+        "mean": 67.23,
+        "ci95": [
+          62.93,
+          71.53
+        ],
+        "per_run": [
+          67.46,
+          64.89,
+          69.04,
+          62.95,
+          71.8
+        ]
+      },
+      "weighted": {
+        "mean": 76.3,
+        "ci95": [
+          74.55,
+          78.04
+        ],
+        "per_run": [
+          76.65,
+          76.37,
+          77.09,
+          73.9,
+          77.47
+        ]
+      }
+    },
+    "reference_scores": {
+      "micro": {
+        "mean": 77.65,
+        "ci95": [
+          75.85,
+          79.45
+        ],
+        "per_run": [
+          78.52,
+          78.28,
+          77.2,
+          75.33,
+          78.92
+        ]
+      },
+      "micro_strict": {
+        "mean": 77.65,
+        "ci95": [
+          75.85,
+          79.45
+        ],
+        "per_run": [
+          78.52,
+          78.28,
+          77.2,
+          75.33,
+          78.92
+        ]
+      },
+      "macro": {
+        "mean": 70.63,
+        "ci95": [
+          65.74,
+          75.53
+        ],
+        "per_run": [
+          69.97,
+          72.64,
+          72.44,
+          64.08,
+          74.04
+        ]
+      },
+      "weighted": {
+        "mean": 77.13,
+        "ci95": [
+          75.01,
+          79.25
+        ],
+        "per_run": [
+          78.61,
+          77.94,
+          76.83,
+          74.3,
+          77.99
+        ]
+      }
+    },
+    "micro": {
+      "mean_diff": -0.99,
+      "ci95": [
+        -1.71,
+        -0.26
+      ],
+      "per_run": [
+        -1.56,
+        -1.56,
+        -0.2,
+        -0.83,
+        -0.77
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": -0.99,
+      "ci95": [
+        -1.71,
+        -0.26
+      ],
+      "per_run": [
+        -1.56,
+        -1.56,
+        -0.2,
+        -0.83,
+        -0.77
+      ]
+    },
+    "macro": {
+      "mean_diff": -3.41,
+      "ci95": [
+        -6.58,
+        -0.23
+      ],
+      "per_run": [
+        -2.51,
+        -7.75,
+        -3.4,
+        -1.13,
+        -2.24
+      ]
+    },
+    "weighted": {
+      "mean_diff": -0.84,
+      "ci95": [
+        -1.96,
+        0.29
+      ],
+      "per_run": [
+        -1.96,
+        -1.57,
+        0.26,
+        -0.4,
+        -0.52
+      ]
+    }
+  },
+  "ner_results_fine_random_split_vary_crf_pubmedbert": {
+    "variant": "crf_pubmedbert",
+    "reference": "crf",
+    "granularity": "fine",
+    "protocol": "random_split_vary",
+    "role": "reported",
+    "variant_files": [
+      "ner_results_fine_random_split_vary_crf_pubmedbert.json"
+    ],
+    "reference_files": [
+      "ner_results_fine_random_split_vary_crf_m0.json",
+      "ner_results_fine_random_split_vary_crf_m100.json",
+      "ner_results_fine_random_split_vary_crf_m200.json"
+    ],
+    "n_pairs": 5,
+    "run_ids": [
+      "seed0",
+      "seed1",
+      "seed2",
+      "seed3",
+      "seed4"
+    ],
+    "complete": true,
+    "variant_scores": {
+      "micro": {
+        "mean": 75.87,
+        "ci95": [
+          73.38,
+          78.37
+        ],
+        "per_run": [
+          72.55,
+          76.4,
+          77.74,
+          75.65,
+          77.02
+        ]
+      },
+      "micro_strict": {
+        "mean": 75.87,
+        "ci95": [
+          73.38,
+          78.37
+        ],
+        "per_run": [
+          72.55,
+          76.4,
+          77.74,
+          75.65,
+          77.02
+        ]
+      },
+      "macro": {
+        "mean": 72.68,
+        "ci95": [
+          68.1,
+          77.26
+        ],
+        "per_run": [
+          68.07,
+          73.71,
+          77.8,
+          73.43,
+          70.37
+        ]
+      },
+      "weighted": {
+        "mean": 75.53,
+        "ci95": [
+          72.17,
+          78.88
+        ],
+        "per_run": [
+          70.77,
+          76.3,
+          77.25,
+          76.16,
+          77.15
+        ]
+      }
+    },
+    "reference_scores": {
+      "micro": {
+        "mean": 77.29,
+        "ci95": [
+          73.62,
+          80.96
+        ],
+        "per_run": [
+          77.41,
+          78.61,
+          78.95,
+          72.17,
+          79.32
+        ]
+      },
+      "micro_strict": {
+        "mean": 77.29,
+        "ci95": [
+          73.62,
+          80.96
+        ],
+        "per_run": [
+          77.41,
+          78.61,
+          78.95,
+          72.17,
+          79.32
+        ]
+      },
+      "macro": {
+        "mean": 74.66,
+        "ci95": [
+          71.64,
+          77.68
+        ],
+        "per_run": [
+          74.34,
+          74.44,
+          78.07,
+          71.25,
+          75.19
+        ]
+      },
+      "weighted": {
+        "mean": 76.87,
+        "ci95": [
+          73.65,
+          80.1
+        ],
+        "per_run": [
+          76.74,
+          77.77,
+          78.57,
+          72.46,
+          78.83
+        ]
+      }
+    },
+    "micro": {
+      "mean_diff": -1.42,
+      "ci95": [
+        -5.21,
+        2.37
+      ],
+      "per_run": [
+        -4.86,
+        -2.21,
+        -1.21,
+        3.48,
+        -2.3
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": -1.42,
+      "ci95": [
+        -5.21,
+        2.37
+      ],
+      "per_run": [
+        -4.86,
+        -2.21,
+        -1.21,
+        3.48,
+        -2.3
+      ]
+    },
+    "macro": {
+      "mean_diff": -1.98,
+      "ci95": [
+        -6.29,
+        2.33
+      ],
+      "per_run": [
+        -6.27,
+        -0.73,
+        -0.27,
+        2.18,
+        -4.82
+      ]
+    },
+    "weighted": {
+      "mean_diff": -1.35,
+      "ci95": [
+        -5.6,
+        2.91
+      ],
+      "per_run": [
+        -5.97,
+        -1.47,
+        -1.32,
+        3.7,
+        -1.68
       ]
     }
   },

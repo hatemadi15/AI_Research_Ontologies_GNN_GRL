@@ -255,6 +255,23 @@ The P1 items, with what has been measured so far:
    improves on the CRF head there, and it beats its own members on all
    four papers (+2.39 [+1.56, +3.21]). Fine-grained it gains +2.04
    [−0.23, +4.32] over its members, also positive on every paper.
+
+   Week 3 mixes backbones: one SciBERT and one PubMedBERT CRF model per
+   split vote with the MatSciBERT member `crf_m0` (`crf_mix3`). The
+   pre-registered comparison is against the seed ensemble `crf_ens3`.
+
+   | Micro F1 Δ [95% CI], mixed vs seed ensemble | Fine-grained | Coarse-grained |
+   |---|---|---|
+   | 5 random splits (the decision) | +0.03 [−1.80, +1.86] | running |
+   | Leaving one paper out | running | running |
+
+   Fine-grained, mixing backbones adds nothing to mixing seeds. Both votes
+   score 79.8 and gain about 2.5 points on the 3-seed CRF reference
+   (`crf_ens3` +2.47 [+1.17, +3.77], `crf_mix3` +2.50 [+0.07, +4.92]), so
+   `crf_ens3` stays the reported system. Neither new backbone beats
+   MatSciBERT on its own (one run per split against the 3-seed mean):
+   SciBERT −0.38 [−2.63, +1.87] fine-grained and −0.99 [−1.71, −0.26]
+   coarse-grained, PubMedBERT −1.42 [−5.21, +2.37] fine-grained.
 9. **Track out-of-distribution results** with `--leave-one-paper-out` for
    every change. It is cheap and closer to real use than random sentence
    splits. The baseline drops from about 74 to 44 (fine-grained) and 54
