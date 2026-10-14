@@ -791,6 +791,72 @@
       ]
     }
   },
+  "ner_results_coarse_leave_one_paper_out_crf_scibert": {
+    "variant": "crf_scibert",
+    "granularity": "coarse",
+    "protocol": "leave_one_paper_out",
+    "reference": "crf",
+    "reference_file": "ner_results_coarse_leave_one_paper_out_crf.json",
+    "n_pairs": 4,
+    "run_ids": [
+      "10.1007_s11340-021-00758-x.conll",
+      "10.1038_ncomms7164.conll",
+      "10.1038_s41467-020-19071-7.conll",
+      "10.3390_met10111458.conll"
+    ],
+    "micro": {
+      "mean_diff": -5.3,
+      "ci95": [
+        -9.14,
+        -1.46
+      ],
+      "per_run": [
+        -7.43,
+        -2.97,
+        -7.34,
+        -3.46
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": -5.3,
+      "ci95": [
+        -9.14,
+        -1.46
+      ],
+      "per_run": [
+        -7.43,
+        -2.97,
+        -7.34,
+        -3.46
+      ]
+    },
+    "macro": {
+      "mean_diff": -6.58,
+      "ci95": [
+        -11.94,
+        -1.22
+      ],
+      "per_run": [
+        -11.03,
+        -5.39,
+        -6.89,
+        -3.01
+      ]
+    },
+    "weighted": {
+      "mean_diff": -5.0,
+      "ci95": [
+        -9.07,
+        -0.93
+      ],
+      "per_run": [
+        -6.07,
+        -3.02,
+        -8.11,
+        -2.79
+      ]
+    }
+  },
   "ner_results_coarse_leave_one_paper_out_crf_st_m0": {
     "variant": "crf_st_m0",
     "granularity": "coarse",
@@ -2323,6 +2389,204 @@
       ]
     }
   },
+  "ner_results_fine_leave_one_paper_out_crf_dapt2_m0": {
+    "variant": "crf_dapt2_m0",
+    "granularity": "fine",
+    "protocol": "leave_one_paper_out",
+    "reference": "crf",
+    "reference_file": "ner_results_fine_leave_one_paper_out_crf.json",
+    "n_pairs": 4,
+    "run_ids": [
+      "10.1007_s11340-021-00758-x.conll",
+      "10.1038_ncomms7164.conll",
+      "10.1038_s41467-020-19071-7.conll",
+      "10.3390_met10111458.conll"
+    ],
+    "micro": {
+      "mean_diff": -0.03,
+      "ci95": [
+        -6.33,
+        6.28
+      ],
+      "per_run": [
+        1.97,
+        4.06,
+        -5.06,
+        -1.08
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": -0.03,
+      "ci95": [
+        -6.33,
+        6.28
+      ],
+      "per_run": [
+        1.97,
+        4.06,
+        -5.06,
+        -1.08
+      ]
+    },
+    "macro": {
+      "mean_diff": -1.04,
+      "ci95": [
+        -4.7,
+        2.63
+      ],
+      "per_run": [
+        0.7,
+        0.21,
+        -4.38,
+        -0.67
+      ]
+    },
+    "weighted": {
+      "mean_diff": 0.73,
+      "ci95": [
+        -6.38,
+        7.84
+      ],
+      "per_run": [
+        3.97,
+        4.99,
+        -4.28,
+        -1.75
+      ]
+    }
+  },
+  "ner_results_fine_leave_one_paper_out_crf_dapt2_m100": {
+    "variant": "crf_dapt2_m100",
+    "granularity": "fine",
+    "protocol": "leave_one_paper_out",
+    "reference": "crf",
+    "reference_file": "ner_results_fine_leave_one_paper_out_crf.json",
+    "n_pairs": 4,
+    "run_ids": [
+      "10.1007_s11340-021-00758-x.conll",
+      "10.1038_ncomms7164.conll",
+      "10.1038_s41467-020-19071-7.conll",
+      "10.3390_met10111458.conll"
+    ],
+    "micro": {
+      "mean_diff": -3.49,
+      "ci95": [
+        -6.71,
+        -0.27
+      ],
+      "per_run": [
+        -1.47,
+        -2.14,
+        -4.59,
+        -5.76
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": -3.49,
+      "ci95": [
+        -6.71,
+        -0.27
+      ],
+      "per_run": [
+        -1.47,
+        -2.14,
+        -4.59,
+        -5.76
+      ]
+    },
+    "macro": {
+      "mean_diff": -1.93,
+      "ci95": [
+        -6.05,
+        2.2
+      ],
+      "per_run": [
+        -0.36,
+        -3.98,
+        0.9,
+        -4.27
+      ]
+    },
+    "weighted": {
+      "mean_diff": -3.74,
+      "ci95": [
+        -9.83,
+        2.34
+      ],
+      "per_run": [
+        0.43,
+        -1.87,
+        -5.23,
+        -8.3
+      ]
+    }
+  },
+  "ner_results_fine_leave_one_paper_out_crf_dapt2_m200": {
+    "variant": "crf_dapt2_m200",
+    "granularity": "fine",
+    "protocol": "leave_one_paper_out",
+    "reference": "crf",
+    "reference_file": "ner_results_fine_leave_one_paper_out_crf.json",
+    "n_pairs": 4,
+    "run_ids": [
+      "10.1007_s11340-021-00758-x.conll",
+      "10.1038_ncomms7164.conll",
+      "10.1038_s41467-020-19071-7.conll",
+      "10.3390_met10111458.conll"
+    ],
+    "micro": {
+      "mean_diff": -1.88,
+      "ci95": [
+        -6.5,
+        2.74
+      ],
+      "per_run": [
+        1.04,
+        0.17,
+        -4.05,
+        -4.68
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": -1.88,
+      "ci95": [
+        -6.5,
+        2.74
+      ],
+      "per_run": [
+        1.04,
+        0.17,
+        -4.05,
+        -4.68
+      ]
+    },
+    "macro": {
+      "mean_diff": -1.55,
+      "ci95": [
+        -6.57,
+        3.47
+      ],
+      "per_run": [
+        -4.87,
+        2.64,
+        -2.66,
+        -1.32
+      ]
+    },
+    "weighted": {
+      "mean_diff": -1.4,
+      "ci95": [
+        -7.97,
+        5.16
+      ],
+      "per_run": [
+        3.07,
+        0.75,
+        -3.24,
+        -6.2
+      ]
+    }
+  },
   "ner_results_fine_leave_one_paper_out_crf_ens3": {
     "variant": "crf_ens3",
     "granularity": "fine",
@@ -2980,6 +3244,72 @@
         2.71,
         -1.19,
         -0.92
+      ]
+    }
+  },
+  "ner_results_fine_leave_one_paper_out_crf_scibert": {
+    "variant": "crf_scibert",
+    "granularity": "fine",
+    "protocol": "leave_one_paper_out",
+    "reference": "crf",
+    "reference_file": "ner_results_fine_leave_one_paper_out_crf.json",
+    "n_pairs": 4,
+    "run_ids": [
+      "10.1007_s11340-021-00758-x.conll",
+      "10.1038_ncomms7164.conll",
+      "10.1038_s41467-020-19071-7.conll",
+      "10.3390_met10111458.conll"
+    ],
+    "micro": {
+      "mean_diff": -6.77,
+      "ci95": [
+        -7.84,
+        -5.7
+      ],
+      "per_run": [
+        -7.29,
+        -5.79,
+        -7.12,
+        -6.88
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": -6.77,
+      "ci95": [
+        -7.84,
+        -5.7
+      ],
+      "per_run": [
+        -7.29,
+        -5.79,
+        -7.12,
+        -6.88
+      ]
+    },
+    "macro": {
+      "mean_diff": -4.56,
+      "ci95": [
+        -7.56,
+        -1.56
+      ],
+      "per_run": [
+        -4.92,
+        -2.7,
+        -7.03,
+        -3.59
+      ]
+    },
+    "weighted": {
+      "mean_diff": -5.66,
+      "ci95": [
+        -8.7,
+        -2.61
+      ],
+      "per_run": [
+        -3.3,
+        -4.9,
+        -7.21,
+        -7.22
       ]
     }
   },

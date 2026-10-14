@@ -303,7 +303,7 @@ The P1 items, with what has been measured so far:
    | Micro F1 Δ [95% CI], 3-seed means | Fine-grained | Coarse-grained |
    |---|---|---|
    | 5 random splits (the decision) | +0.11 [−2.74, +2.97] | −0.15 [−1.06, +0.76] |
-   | Leaving one paper out (reported) | running | queued |
+   | Leaving one paper out (reported) | +0.14 [−2.60, +2.88] | running |
 
    In-domain pre-training does not help either granularity, so it is not
    adopted:
