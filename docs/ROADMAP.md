@@ -221,8 +221,16 @@ The P1 items, with what has been measured so far:
    | Leaving one paper out | −0.91 [−3.13, +1.31] | −1.06 [−3.25, +1.12] |
 
    The lower perplexity on PubMed text did not carry over to MaterioMiner;
-   on unseen papers 6 of the 8 differences are negative. The second corpus
-   named above, open-access fatigue papers, was not used.
+   on unseen papers 6 of the 8 differences are negative. Week 2 did not use
+   the second corpus named above, open-access fatigue papers.
+
+   Week 3 builds that corpus (`build_fatigue_corpus.py`: 40,000 sentences
+   from open-access fatigue papers in Europe PMC, `results/fatigue_corpus.json`)
+   and repeats the pre-training on it: 3 epochs on 38,000 sentences, with
+   2,000 held out. No sentence is a duplicate or shares a word 8-gram with
+   MaterioMiner. Held-out MLM perplexity fell from 10.75 to 4.43
+   (`results/dapt_mlm_fatigue.json`). The fine-tuning runs (3 seeds per
+   split; decision on the random splits) are in progress.
 6. **Label semantics.** Bi-encoder span–type matching (BINDER, GLiNER-style)
    with the 420 MMO `skos:definition`s as type descriptions. This helps rare
    and unseen classes, and it supports the full 177-class setting, not just
