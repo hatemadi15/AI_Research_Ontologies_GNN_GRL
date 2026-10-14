@@ -415,18 +415,29 @@ The P1 items, with what has been measured so far:
    | Micro F1 Δ [95% CI], mixed vs seed ensemble | Fine-grained | Coarse-grained |
    |---|---|---|
    | 5 random splits (the decision) | +0.03 [−1.80, +1.86] | −0.87 [−2.09, +0.35] |
-   | Leaving one paper out | running | running |
+   | Leaving one paper out (reported) | −1.34 [−4.76, +2.09] | −1.45 [−5.74, +2.84] |
 
    Mixing backbones adds nothing to mixing seeds, so `crf_ens3` stays the
-   reported system. Fine-grained, both votes score 79.8 and gain about 2.5
-   points on the 3-seed CRF reference (`crf_ens3` +2.47 [+1.17, +3.77],
-   `crf_mix3` +2.50 [+0.07, +4.92]). Coarse-grained, the mixed vote is lower
-   on four of the five splits and loses macro F1 (−4.11 [−7.87, −0.36]):
-   the weaker backbones outvote MatSciBERT on rare classes. Neither new
-   backbone beats MatSciBERT on its own (one run per split against the
-   3-seed mean): SciBERT −0.38 [−2.63, +1.87] fine-grained and −0.99
-   [−1.71, −0.26] coarse-grained, PubMedBERT −1.42 [−5.21, +2.37] and
-   −2.99 [−4.67, −1.32].
+   reported system.
+   - Fine-grained, both votes score 79.8 and gain about 2.5 points on the
+     3-seed CRF reference: `crf_ens3` +2.47 [+1.17, +3.77], `crf_mix3`
+     +2.50 [+0.07, +4.92].
+   - Coarse-grained, the mixed vote is lower on four of the five splits and
+     loses macro F1 (−4.11 [−7.87, −0.36]): the weaker backbones outvote
+     MatSciBERT on rare classes.
+   - On unseen papers the mixed vote is also below the seed ensemble:
+     48.21 against 49.55 fine-grained, 59.97 against 61.42 coarse-grained.
+
+   Neither new backbone beats MatSciBERT on its own (one run per split or
+   paper, against the 3-seed mean), and both fall further behind on unseen
+   papers:
+
+   | Micro F1 Δ [95% CI] vs the CRF head | Fine-grained | Coarse-grained |
+   |---|---|---|
+   | SciBERT, 5 random splits | −0.38 [−2.63, +1.87] | −0.99 [−1.71, −0.26] |
+   | SciBERT, leaving one paper out | −4.83 [−6.66, −3.00] | −4.52 [−8.17, −0.87] |
+   | PubMedBERT, 5 random splits | −1.42 [−5.21, +2.37] | −2.99 [−4.67, −1.32] |
+   | PubMedBERT, leaving one paper out | −4.94 [−13.22, +3.34] | −3.75 [−8.41, +0.90] |
 9. **Track out-of-distribution results** with `--leave-one-paper-out` for
    every change. It is cheap and closer to real use than random sentence
    splits. The baseline drops from about 74 to 44 (fine-grained) and 54

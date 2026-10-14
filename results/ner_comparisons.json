@@ -791,6 +791,72 @@
       ]
     }
   },
+  "ner_results_coarse_leave_one_paper_out_crf_mix3": {
+    "variant": "crf_mix3",
+    "granularity": "coarse",
+    "protocol": "leave_one_paper_out",
+    "reference": "crf",
+    "reference_file": "ner_results_coarse_leave_one_paper_out_crf.json",
+    "n_pairs": 4,
+    "run_ids": [
+      "10.1007_s11340-021-00758-x.conll",
+      "10.1038_ncomms7164.conll",
+      "10.1038_s41467-020-19071-7.conll",
+      "10.3390_met10111458.conll"
+    ],
+    "micro": {
+      "mean_diff": 0.15,
+      "ci95": [
+        -4.15,
+        4.46
+      ],
+      "per_run": [
+        -2.08,
+        3.1,
+        -2.21,
+        1.8
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": 0.15,
+      "ci95": [
+        -4.15,
+        4.46
+      ],
+      "per_run": [
+        -2.08,
+        3.1,
+        -2.21,
+        1.8
+      ]
+    },
+    "macro": {
+      "mean_diff": -1.92,
+      "ci95": [
+        -7.9,
+        4.05
+      ],
+      "per_run": [
+        -6.83,
+        1.1,
+        -2.89,
+        0.93
+      ]
+    },
+    "weighted": {
+      "mean_diff": -0.58,
+      "ci95": [
+        -5.09,
+        3.93
+      ],
+      "per_run": [
+        -2.83,
+        1.82,
+        -3.23,
+        1.92
+      ]
+    }
+  },
   "ner_results_coarse_leave_one_paper_out_crf_mt": {
     "variant": "crf_mt",
     "granularity": "coarse",
@@ -986,6 +1052,72 @@
         1.31,
         0.67,
         -0.75
+      ]
+    }
+  },
+  "ner_results_coarse_leave_one_paper_out_crf_pubmedbert": {
+    "variant": "crf_pubmedbert",
+    "granularity": "coarse",
+    "protocol": "leave_one_paper_out",
+    "reference": "crf",
+    "reference_file": "ner_results_coarse_leave_one_paper_out_crf.json",
+    "n_pairs": 4,
+    "run_ids": [
+      "10.1007_s11340-021-00758-x.conll",
+      "10.1038_ncomms7164.conll",
+      "10.1038_s41467-020-19071-7.conll",
+      "10.3390_met10111458.conll"
+    ],
+    "micro": {
+      "mean_diff": -4.54,
+      "ci95": [
+        -9.36,
+        0.29
+      ],
+      "per_run": [
+        -8.32,
+        -2.58,
+        -5.6,
+        -1.65
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": -4.54,
+      "ci95": [
+        -9.36,
+        0.29
+      ],
+      "per_run": [
+        -8.32,
+        -2.58,
+        -5.6,
+        -1.65
+      ]
+    },
+    "macro": {
+      "mean_diff": -7.37,
+      "ci95": [
+        -16.15,
+        1.41
+      ],
+      "per_run": [
+        -14.11,
+        -3.04,
+        -9.65,
+        -2.68
+      ]
+    },
+    "weighted": {
+      "mean_diff": -4.91,
+      "ci95": [
+        -11.57,
+        1.75
+      ],
+      "per_run": [
+        -10.25,
+        -2.53,
+        -6.07,
+        -0.78
       ]
     }
   },
@@ -3247,6 +3379,72 @@
       ]
     }
   },
+  "ner_results_fine_leave_one_paper_out_crf_mix3": {
+    "variant": "crf_mix3",
+    "granularity": "fine",
+    "protocol": "leave_one_paper_out",
+    "reference": "crf",
+    "reference_file": "ner_results_fine_leave_one_paper_out_crf.json",
+    "n_pairs": 4,
+    "run_ids": [
+      "10.1007_s11340-021-00758-x.conll",
+      "10.1038_ncomms7164.conll",
+      "10.1038_s41467-020-19071-7.conll",
+      "10.3390_met10111458.conll"
+    ],
+    "micro": {
+      "mean_diff": -1.23,
+      "ci95": [
+        -6.61,
+        4.14
+      ],
+      "per_run": [
+        1.44,
+        0.8,
+        -1.15,
+        -6.02
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": -1.23,
+      "ci95": [
+        -6.61,
+        4.14
+      ],
+      "per_run": [
+        1.44,
+        0.8,
+        -1.15,
+        -6.02
+      ]
+    },
+    "macro": {
+      "mean_diff": 1.28,
+      "ci95": [
+        -5.0,
+        7.57
+      ],
+      "per_run": [
+        4.29,
+        4.12,
+        0.87,
+        -4.15
+      ]
+    },
+    "weighted": {
+      "mean_diff": -1.49,
+      "ci95": [
+        -8.76,
+        5.77
+      ],
+      "per_run": [
+        2.88,
+        1.21,
+        -2.68,
+        -7.39
+      ]
+    }
+  },
   "ner_results_fine_leave_one_paper_out_crf_mt": {
     "variant": "crf_mt",
     "granularity": "fine",
@@ -3442,6 +3640,72 @@
         2.71,
         -1.19,
         -0.92
+      ]
+    }
+  },
+  "ner_results_fine_leave_one_paper_out_crf_pubmedbert": {
+    "variant": "crf_pubmedbert",
+    "granularity": "fine",
+    "protocol": "leave_one_paper_out",
+    "reference": "crf",
+    "reference_file": "ner_results_fine_leave_one_paper_out_crf.json",
+    "n_pairs": 4,
+    "run_ids": [
+      "10.1007_s11340-021-00758-x.conll",
+      "10.1038_ncomms7164.conll",
+      "10.1038_s41467-020-19071-7.conll",
+      "10.3390_met10111458.conll"
+    ],
+    "micro": {
+      "mean_diff": -6.88,
+      "ci95": [
+        -17.36,
+        3.61
+      ],
+      "per_run": [
+        -8.3,
+        1.9,
+        -7.08,
+        -14.03
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": -6.88,
+      "ci95": [
+        -17.36,
+        3.61
+      ],
+      "per_run": [
+        -8.3,
+        1.9,
+        -7.08,
+        -14.03
+      ]
+    },
+    "macro": {
+      "mean_diff": -6.69,
+      "ci95": [
+        -18.94,
+        5.56
+      ],
+      "per_run": [
+        -12.97,
+        4.42,
+        -7.8,
+        -10.41
+      ]
+    },
+    "weighted": {
+      "mean_diff": -5.72,
+      "ci95": [
+        -17.31,
+        5.88
+      ],
+      "per_run": [
+        -6.06,
+        4.07,
+        -7.38,
+        -13.5
       ]
     }
   },
