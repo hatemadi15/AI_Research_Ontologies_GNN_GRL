@@ -235,12 +235,18 @@ The P1 items, with what has been measured so far:
 
    | Micro F1 Δ [95% CI], 3-seed means | Fine-grained | Coarse-grained |
    |---|---|---|
-   | 5 random splits (the decision) | +0.11 [−2.74, +2.97] | running |
-   | Leaving one paper out (reported) | queued | queued |
+   | 5 random splits (the decision) | +0.11 [−2.74, +2.97] | −0.15 [−1.06, +0.76] |
+   | Leaving one paper out (reported) | running | queued |
 
-   Fine-grained, in-domain pre-training does not help: 77.40 against 77.29
-   for the CRF head. The per-split differences range from −2.22 to +3.53,
-   and macro F1 changes by −0.16 [−3.69, +3.37].
+   In-domain pre-training does not help either granularity, so it is not
+   adopted:
+   - fine-grained, 77.40 against 77.29 for the CRF head, with per-split
+     differences from −2.22 to +3.53 and macro F1 −0.16 [−3.69, +3.37];
+   - coarse-grained, 77.50 against 77.65, with macro F1 −0.63 [−3.29,
+     +2.04].
+
+   As with PubMed in week 2, a lower held-out perplexity does not carry
+   over to MaterioMiner NER.
 6. **Label semantics.** Bi-encoder span–type matching (BINDER, GLiNER-style)
    with the 420 MMO `skos:definition`s as type descriptions. This helps rare
    and unseen classes, and it supports the full 177-class setting, not just
