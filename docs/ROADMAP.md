@@ -330,7 +330,7 @@ The P1 items, with what has been measured so far:
    | Micro F1 Δ [95% CI], 3-seed means | Fine-grained | Coarse-grained |
    |---|---|---|
    | Leaving one paper out (the decision) | −0.16 [−2.13, +1.80] | +1.17 [+0.94, +1.41] |
-   | 5 random splits (reported) | queued | queued |
+   | 5 random splits (reported) | running | −0.77 [−1.74, +0.21] |
 
    Coarse-grained, label semantics improves on unseen papers under the
    pre-registered rule. It scores 60.21 against 59.03 for the CRF head, and

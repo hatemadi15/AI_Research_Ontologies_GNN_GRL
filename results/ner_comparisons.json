@@ -1877,6 +1877,219 @@
       ]
     }
   },
+  "ner_results_coarse_random_split_vary_crf_ls_m0": {
+    "variant": "crf_ls_m0",
+    "granularity": "coarse",
+    "protocol": "random_split_vary",
+    "reference": "crf",
+    "reference_file": "ner_results_coarse_random_split_vary_crf.json",
+    "n_pairs": 5,
+    "run_ids": [
+      "seed0",
+      "seed1",
+      "seed2",
+      "seed3",
+      "seed4"
+    ],
+    "micro": {
+      "mean_diff": -1.01,
+      "ci95": [
+        -2.62,
+        0.6
+      ],
+      "per_run": [
+        0.55,
+        -1.33,
+        -0.33,
+        -2.95,
+        -0.99
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": -1.01,
+      "ci95": [
+        -2.62,
+        0.6
+      ],
+      "per_run": [
+        0.55,
+        -1.33,
+        -0.33,
+        -2.95,
+        -0.99
+      ]
+    },
+    "macro": {
+      "mean_diff": -0.5,
+      "ci95": [
+        -4.91,
+        3.9
+      ],
+      "per_run": [
+        3.72,
+        -3.97,
+        2.6,
+        -3.74,
+        -1.12
+      ]
+    },
+    "weighted": {
+      "mean_diff": -1.35,
+      "ci95": [
+        -3.36,
+        0.67
+      ],
+      "per_run": [
+        0.47,
+        -2.48,
+        -0.35,
+        -3.51,
+        -0.86
+      ]
+    }
+  },
+  "ner_results_coarse_random_split_vary_crf_ls_m100": {
+    "variant": "crf_ls_m100",
+    "granularity": "coarse",
+    "protocol": "random_split_vary",
+    "reference": "crf",
+    "reference_file": "ner_results_coarse_random_split_vary_crf.json",
+    "n_pairs": 5,
+    "run_ids": [
+      "seed0",
+      "seed1",
+      "seed2",
+      "seed3",
+      "seed4"
+    ],
+    "micro": {
+      "mean_diff": -1.17,
+      "ci95": [
+        -4.47,
+        2.12
+      ],
+      "per_run": [
+        2.86,
+        -2.55,
+        -3.12,
+        -3.25,
+        0.2
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": -1.17,
+      "ci95": [
+        -4.47,
+        2.12
+      ],
+      "per_run": [
+        2.86,
+        -2.55,
+        -3.12,
+        -3.25,
+        0.2
+      ]
+    },
+    "macro": {
+      "mean_diff": -2.91,
+      "ci95": [
+        -9.6,
+        3.79
+      ],
+      "per_run": [
+        3.87,
+        -6.26,
+        -1.51,
+        -10.09,
+        -0.54
+      ]
+    },
+    "weighted": {
+      "mean_diff": -1.57,
+      "ci95": [
+        -5.13,
+        1.98
+      ],
+      "per_run": [
+        2.6,
+        -2.81,
+        -3.68,
+        -4.11,
+        0.14
+      ]
+    }
+  },
+  "ner_results_coarse_random_split_vary_crf_ls_m200": {
+    "variant": "crf_ls_m200",
+    "granularity": "coarse",
+    "protocol": "random_split_vary",
+    "reference": "crf",
+    "reference_file": "ner_results_coarse_random_split_vary_crf.json",
+    "n_pairs": 5,
+    "run_ids": [
+      "seed0",
+      "seed1",
+      "seed2",
+      "seed3",
+      "seed4"
+    ],
+    "micro": {
+      "mean_diff": -1.61,
+      "ci95": [
+        -5.07,
+        1.86
+      ],
+      "per_run": [
+        3.25,
+        -2.09,
+        -2.29,
+        -3.42,
+        -3.49
+      ]
+    },
+    "micro_strict": {
+      "mean_diff": -1.61,
+      "ci95": [
+        -5.07,
+        1.86
+      ],
+      "per_run": [
+        3.25,
+        -2.09,
+        -2.29,
+        -3.42,
+        -3.49
+      ]
+    },
+    "macro": {
+      "mean_diff": -1.86,
+      "ci95": [
+        -8.88,
+        5.16
+      ],
+      "per_run": [
+        5.87,
+        -3.72,
+        1.23,
+        -9.06,
+        -3.62
+      ]
+    },
+    "weighted": {
+      "mean_diff": -1.51,
+      "ci95": [
+        -4.91,
+        1.89
+      ],
+      "per_run": [
+        3.19,
+        -1.61,
+        -2.38,
+        -3.66,
+        -3.08
+      ]
+    }
+  },
   "ner_results_coarse_random_split_vary_crf_m0": {
     "variant": "crf_m0",
     "granularity": "coarse",
