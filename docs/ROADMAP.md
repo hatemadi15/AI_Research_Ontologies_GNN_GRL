@@ -229,8 +229,18 @@ The P1 items, with what has been measured so far:
    and repeats the pre-training on it: 3 epochs on 38,000 sentences, with
    2,000 held out. No sentence is a duplicate or shares a word 8-gram with
    MaterioMiner. Held-out MLM perplexity fell from 10.75 to 4.43
-   (`results/dapt_mlm_fatigue.json`). The fine-tuning runs (3 seeds per
-   split; decision on the random splits) are in progress.
+   (`results/dapt_mlm_fatigue.json`). The CRF head is then fine-tuned from
+   the new checkpoint with 3 seeds per split, and the decision is taken on
+   the random splits.
+
+   | Micro F1 Δ [95% CI], 3-seed means | Fine-grained | Coarse-grained |
+   |---|---|---|
+   | 5 random splits (the decision) | +0.11 [−2.74, +2.97] | running |
+   | Leaving one paper out (reported) | queued | queued |
+
+   Fine-grained, in-domain pre-training does not help: 77.40 against 77.29
+   for the CRF head. The per-split differences range from −2.22 to +3.53,
+   and macro F1 changes by −0.16 [−3.69, +3.37].
 6. **Label semantics.** Bi-encoder span–type matching (BINDER, GLiNER-style)
    with the 420 MMO `skos:definition`s as type descriptions. This helps rare
    and unseen classes, and it supports the full 177-class setting, not just
