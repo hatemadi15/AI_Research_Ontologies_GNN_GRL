@@ -11,6 +11,11 @@ against a single model, run by run (same run_id, same test sentences).
     must agree on granularity, protocol, model, labels and run_ids and, per
     run_id, on the test sentences (test_index) and their gold tags, and each
     run needs its test_pred. Otherwise the script stops with an error.
+  - Mixed ensembles: `--variant NAME` (e.g. crf_mix3) names the ensemble, which
+    lets the members differ in model and variant (crf_m0, crf_scibert and
+    crf_pubmedbert: MatSciBERT, SciBERT and PubMedBERT); every other check
+    stands. config['models'] lists the members' models, and `model` is 'mixed'
+    if they differ.
   - Voting (fixed in advance): the entities (start, end, type) of every member
     are read from its predicted IOB2 tags; an entity is kept if strictly more
     than k/2 members predict exactly the same span and type (2 of 3, 3 of 5;
@@ -21,17 +26,18 @@ against a single model, run by run (same run_id, same test sentences).
     produces one; the number of them in the members' predictions is saved per
     run as `invalid_i_tags`.
   - Output: ner_results_<granularity>[_<protocol>]_<variant>.json in the
-    directory of the first member (--out overrides it). variant is the
-    members' variant without its m<N> tag plus ens<k>: crf_m0, crf_m100,
-    crf_m200 give crf_ens3. Every run adds n_members, member_f1,
+    directory of the first member (--out overrides it). variant is NAME with
+    --variant, else the members' variant without its m<N> tag plus ens<k>:
+    crf_m0, crf_m100, crf_m200 give crf_ens3. Every run adds n_members, member_f1,
     member_f1_strict and invalid_i_tags to the seqeval metrics; the summary is
     that of ner_baseline.summarize plus `vs_member_mean`: the vote's micro F1
     minus the mean of its members', per run, with its mean and 95% CI
     (exploratory: what the vote adds over one model of the same kind).
 
 Usage:
-  python ner_ensemble.py --members FILE FILE FILE [--out PATH]
+  python ner_ensemble.py --members FILE FILE FILE [--out PATH] [--variant NAME]
   python ner_ensemble.py --members ner_results_fine_random_split_vary_crf_m{0,100,200}.json
+  python ner_ensemble.py --variant crf_mix3 --members CRF_M0 CRF_SCIBERT CRF_PUBMEDBERT
 """
 
 import argparse
@@ -43,11 +49,12 @@ import sys
 from collections import Counter
 
 import metrics
-from ner_baseline import score, summarize
+from ner_baseline import PLAIN_VARIANTS, score, summarize
 
 VOTING = 'entity_strict_majority'
 # `ner_baseline.py --tag m<N>` appends m<N> to the variant (crf_m100; just m100 for the baseline)
 MEMBER_TAG = re.compile(r'(?:^|_)m\d+$')
+VARIANT_NAME = re.compile(r'[a-z0-9]+(?:_[a-z0-9]+)*')   # --variant: crf_mix3
 IOB2_TAG = re.compile(r'O|[BI]-.+')   # O, B-<type> or I-<type>
 # top-level keys of a member file that are copied to the ensemble file
 COPIED_KEYS = ('granularity', 'protocol', 'model', 'labels', 'label_tie', 'paper_test_f1')
@@ -146,6 +153,19 @@ def ensemble_variant(variants):
     return f'{stems[0]}_{ens}' if stems[0] else ens
 
 
+def variant_option(value):
+    """argparse type of --variant: a variant name that no single-model run writes.
+
+    Lowercase letters and digits joined by single underscores; neither a plain variant of
+    ner_baseline.py (crf, ...) nor a name that ends in an m<N> tag (a seed's results).
+    """
+    if not VARIANT_NAME.fullmatch(value) or value in PLAIN_VARIANTS or MEMBER_TAG.search(value):
+        raise argparse.ArgumentTypeError(
+            f"invalid --variant {value!r}: use lowercase letters, digits and underscores, not "
+            f"one of {', '.join(PLAIN_VARIANTS)} and no trailing m<N> tag (crf_mix3)")
+    return value
+
+
 def results_name(granularity, protocol, variant):
     """File name used by ner_baseline.py: the fixed split has no protocol part."""
     part = '' if protocol == 'random_split_fixed' else f'_{protocol}'
@@ -164,8 +184,11 @@ def index_runs(member, name):
     return dict(zip(ids, runs))
 
 
-def check_members(members, names):
-    """Raise EnsembleError unless the top-level fields of the members agree."""
+def check_members(members, names, same_model=True):
+    """Raise EnsembleError unless the top-level fields of the members agree.
+
+    The model is checked only with `same_model` (not for a mixed ensemble, --variant).
+    """
     if len(members) < 2:
         raise EnsembleError(f'an ensemble needs at least 2 members, got {len(members)}')
     for m, name in zip(members, names):
@@ -173,7 +196,9 @@ def check_members(members, names):
         if missing:
             raise EnsembleError(f'{name}: missing {missing} (not a ner_baseline.py results file?)')
     first = members[0]
-    for key in ('granularity', 'protocol', 'model', 'labels'):
+    keys = ('granularity', 'protocol', 'model', 'labels') if same_model else (
+        'granularity', 'protocol', 'labels')
+    for key in keys:
         for m, name in zip(members[1:], names[1:]):
             if m[key] == first[key]:
                 continue
@@ -272,17 +297,27 @@ def member_gain(runs):
             'per_run': [round(d, 2) for d in diffs]}
 
 
-def combine(members, names):
-    """Results (ner_baseline schema) of the majority-vote ensemble of the parsed member files."""
-    check_members(members, names)
-    variant = ensemble_variant([m['variant'] for m in members])
+def combine(members, names, variant=None):
+    """Results (ner_baseline schema) of the majority-vote ensemble of the parsed member files.
+
+    `variant` (--variant) names a mixed ensemble: the members may differ in model and
+    variant, config['models'] lists their models, and `model` is 'mixed' if they differ.
+    """
+    named = variant is not None
+    check_members(members, names, same_model=not named)
+    if not named:
+        variant = ensemble_variant([m['variant'] for m in members])
     by_id = [index_runs(m, name) for m, name in zip(members, names)]
     check_runs(by_id, names)
     first = members[0]
+    models = [m['model'] for m in members]
+    config = {'members': list(names), 'voting': VOTING, 'k': len(members)}
+    if named:
+        config['models'] = models
     results = {'granularity': first['granularity'], 'protocol': first['protocol'],
-               'variant': variant, 'model': first['model'], 'labels': first['labels'],
-               'label_tie': first['label_tie'], 'paper_test_f1': first['paper_test_f1'],
-               'config': {'members': list(names), 'voting': VOTING, 'k': len(members)},
+               'variant': variant, 'model': models[0] if len(set(models)) == 1 else 'mixed',
+               'labels': first['labels'], 'label_tie': first['label_tie'],
+               'paper_test_f1': first['paper_test_f1'], 'config': config,
                'runs': [ensemble_run(run_id, [b[run_id] for b in by_id]) for run_id in by_id[0]]}
     summarize(results)
     if results['runs']:
@@ -290,11 +325,11 @@ def combine(members, names):
     return results
 
 
-def run(paths, out=None):
+def run(paths, out=None, variant=None):
     """Read the member files, write the ensemble results file and print a summary."""
     members = [load_member(p) for p in paths]
     names = [os.path.basename(p) for p in paths]
-    results = combine(members, names)
+    results = combine(members, names, variant)
     out = out or os.path.join(os.path.dirname(paths[0]), results_name(
         results['granularity'], results['protocol'], results['variant']))
     if os.path.realpath(out) in {os.path.realpath(p) for p in paths}:
@@ -308,6 +343,8 @@ def run(paths, out=None):
     cfg = results['config']
     print(f"\n=== NER ensemble {results['granularity']}: {cfg['k']} members, protocol "
           f"{results['protocol']}, variant {results['variant']} ===")
+    if 'models' in cfg:
+        print(f"  models: {', '.join(cfg['models'])}")
     for r in results['runs']:
         invalid = f", {r['invalid_i_tags']} invalid I- tags" if r['invalid_i_tags'] else ''
         print(f"  {r['run_id']}: ensemble F1 {r['f1']:.2f} (strict {r['f1_strict']:.2f}); "
@@ -336,11 +373,14 @@ def main(argv=None):
     parser.add_argument('--out', default=None, metavar='PATH',
                         help='output file (default: ner_results_<granularity>[_<protocol>]_'
                              '<variant>.json next to the first member)')
+    parser.add_argument('--variant', type=variant_option, default=None, metavar='NAME',
+                        help='variant of the ensemble and its results file (e.g. crf_mix3); the '
+                             'members may then differ in model and variant (mixed backbones)')
     args = parser.parse_args(argv)
     if len(args.members) < 2:
         parser.error('--members needs at least 2 files')
     try:
-        run(args.members, args.out)
+        run(args.members, args.out, args.variant)
     except EnsembleError as e:
         sys.exit(f'error: {e}')
 

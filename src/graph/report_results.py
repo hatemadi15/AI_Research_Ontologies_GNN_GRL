@@ -32,7 +32,7 @@ seed. Its `reference` field says which run: `baseline` (plain MatSciBERT) or
     Its intro notes that these runs use 2 CPU threads and the CRF head 3; once the
     `crf_m0` comparisons are complete it also gives their difference to the CRF head,
     the effect of the thread count alone.
-    Nothing from this table goes into "At a glance" or the standing table yet.
+    Nothing from this table goes into "At a glance" or the standing table.
 
 Which entries get a row or a verdict is decided by an allow-list of variants plus the
 reference, so anything else in the file never gets one: ensemble members (`crf_m0`,
@@ -41,6 +41,23 @@ bare-tag variants, comparisons against another reference.
 A row or verdict needs a complete comparison: 5 pairs for random splits (5 splits or
 5 model seeds), 4 for leave one paper out. Until the first complete week-2 comparison
 exists the generated text is identical to what it was before they were supported.
+
+NER week 3 (results/ner_week3_comparisons.json, written by `ner_seedmeans.py`)
+-------------------------------------------------------------------------------
+Entries pair 3-seed means split by split (week-3 protocol, ROADMAP §4): reference `crf`
+is the mean of `crf_m0`, `crf_m100` and `crf_m200`, `role` says whether the protocol
+decides on that comparison or only reports it, and `variant_scores` holds the variant's
+per-split scores.
+
+  * "NER week-3 comparisons (3-seed means)": the complete comparisons of the allow-list
+    WEEK3_COMPARISONS, in its order (the protocol's), each with a verdict bullet.
+  * The reported NER system, a row in "At a glance" and in the standing table per the
+    week-3 protocol: the 3-model seed ensemble `crf_ens3` (its own results files), or for
+    a granularity the mixed-backbone ensemble `crf_mix3` once its complete comparison
+    with `crf_ens3` over the 5 random splits has a micro-F1 CI above 0. The paper does
+    not state its averaging, so both rows say under which averaging (micro, macro,
+    weighted F1, as far as the summary has them) the CI over the 5 random splits lies
+    above the published number.
 """
 import argparse
 import difflib
@@ -61,6 +78,22 @@ WEEK2_VARIANTS = {'crf_mt': 'multi-task (fine + coarse heads)',
                   'crf_dapt': 'domain-adaptive pre-training',
                   'crf_ens3': '3-model ensemble'}
 
+# Week 3 (see the module docstring): the comparisons (variant, reference) in the protocol's
+# reporting order, as in ner_seedmeans.COMPARISONS, and the display names of their sides
+WEEK3_FILE = 'ner_week3_comparisons.json'
+WEEK3_COMPARISONS = (('crf_mix3', 'crf_ens3'), ('crf_mix3', 'crf'), ('crf_ens3', 'crf'),
+                     ('crf_scibert', 'crf'), ('crf_pubmedbert', 'crf'), ('crf_ls', 'crf'),
+                     ('crf_st', 'crf'), ('crf_mt', 'crf'), ('crf_dapt2', 'crf'))
+WEEK3_NAMES = {'crf': 'CRF head', 'crf_ens3': '3-model seed ensemble',
+               'crf_mix3': 'mixed-backbone ensemble', 'crf_scibert': 'SciBERT backbone',
+               'crf_pubmedbert': 'PubMedBERT backbone', 'crf_ls': 'label semantics',
+               'crf_st': 'self-training', 'crf_mt': 'multi-task (fine + coarse heads)',
+               'crf_dapt2': 'in-domain pre-training'}
+# `role` of a week-3 comparison, as the verdict bullets word it
+ROLE_WORDS = {'decision': 'the pre-registered decision', 'reported': 'reported, no decision'}
+# averages the reported system is checked under against the published F1
+AVERAGES = ('micro', 'macro', 'weighted')
+
 PROTOCOL_NAMES = {'random_split_vary': 'new random split per seed',
                   'leave_one_paper_out': 'leave one paper out',
                   'random_split_fixed': 'fixed split'}
@@ -76,6 +109,8 @@ NER_PROTOCOLS = [('', 'fixed split (seed 0), 5 model seeds'),
 
 COMPARISON_COLUMNS = ("| Variant | Protocol | Granularity | Pairs | Variant micro F1 [95% CI] | "
                       "Δ micro [95% CI] | Δ macro [95% CI] | Δ strict micro |")
+WEEK3_COLUMNS = ("| Comparison | Protocol | Granularity | Pairs | Variant micro F1 [95% CI] | "
+                 "Δ micro [95% CI] | Δ macro [95% CI] | Δ strict micro |")
 
 
 class ReportError(Exception):
@@ -108,11 +143,11 @@ class Results:
             raise ReportError(f"missing results file {self.directory / name}")
         return data
 
-    def comparisons(self):
-        """results/ner_comparisons.json ({} when absent)."""
-        comps = self.get('ner_comparisons.json') or {}
+    def comparisons(self, name='ner_comparisons.json'):
+        """Entries of a comparisons file (default results/ner_comparisons.json; {} if absent)."""
+        comps = self.get(name) or {}
         if not isinstance(comps, dict):
-            raise ReportError(f"{self.directory / 'ner_comparisons.json'} must hold an object "
+            raise ReportError(f"{self.directory / name} must hold an object "
                               "with one entry per results file")
         return {key: c for key, c in comps.items() if isinstance(c, dict)}
 
@@ -419,10 +454,51 @@ def ner_week2_table(res):
         f"{thread_note(res)}\n")
 
 
+WEEK3_INTRO = (
+    "Δ = variant − reference on the same split, where a model trained with 3 model seeds (K, "
+    "K + 100 and K + 200 on split K; 0, 100 and 200 on a held-out paper) scores their mean, the "
+    "ensembles and the one-seed SciBERT and PubMedBERT runs score once, and the CRF head is the "
+    "mean of `crf_m0`, `crf_m100` and `crf_m200`; "
+    "pre-registered rule (week-3 protocol): a variant improves on its reference only if the 95% "
+    "Student-t CI of the mean micro-F1 difference lies entirely above 0, over the 5 random splits "
+    "for the mixed-backbone ensemble (against the 3-model seed ensemble), multi-task and "
+    "in-domain pre-training, and over the 4 held-out papers for label semantics and "
+    "self-training; every other row is reported without a decision.\n")
+
+
+def week3_rows(comps):
+    """The complete week-3 comparisons: by WEEK3_COMPARISONS, then protocol, then granularity."""
+    rows = []
+    for variant, reference in WEEK3_COMPARISONS:
+        for protocol in ('random_split_vary', 'leave_one_paper_out'):
+            for g in GRANULARITIES:
+                c = find_comparison(comps, g, protocol, variant, reference)
+                if c:
+                    rows.append(c)
+    return rows
+
+
+def ner_week3_table(res):
+    """Week-3 comparisons of 3-seed means ([] if none is complete)."""
+    rows = week3_rows(res.comparisons(WEEK3_FILE))
+    if not rows:
+        return []
+    out = ["\n#### NER week-3 comparisons (3-seed means)\n", WEEK3_INTRO, WEEK3_COLUMNS,
+           "|---|---|---|---|---|---|---|---|"]
+    for c in rows:
+        v = dig(c, 'variant_scores', 'micro')
+        out.append(f"| {WEEK3_NAMES[c['variant']]} vs {WEEK3_NAMES[c['reference']]} | "
+                   f"{PROTOCOL_NAMES[c['protocol']]} | {c['granularity']} | {c['n_pairs']} | "
+                   f"{interval(v) if v else '–'} | {delta_cell(c['micro'])} | "
+                   f"{delta_cell(c['macro'])} | {c['micro_strict']['mean_diff']:+.2f} |")
+    return out
+
+
 def build_tables(res):
     """All tables between the "At a glance" table and "Reading the numbers"."""
     out = (term_typing_tables(res) + other_levels_table(res) + ablation_table(res)
-           + ner_protocol_table(res) + ner_variants_table(res) + ner_week2_table(res))
+           + ner_protocol_table(res) + ner_variants_table(res) + ner_week2_table(res)
+           + ner_week3_table(res))
     return '\n'.join(out).strip()
 
 
@@ -582,6 +658,9 @@ def ner_notes(res):
     for var, name in WEEK2_VARIANTS.items():
         note += verdict_line(res, comps, var, name, 'crf', 'the CRF head')
     note += ensemble_member_note(res)
+    week3 = res.comparisons(WEEK3_FILE)
+    for variant, reference in WEEK3_COMPARISONS:
+        note += week3_verdict_line(week3, variant, reference)
     return note
 
 
@@ -609,9 +688,73 @@ def ensemble_member_note(res):
             + '; '.join(parts) + ".\n")
 
 
+def week3_verdicts(comps, variant, reference, protocol):
+    """(role words, verdicts) of a week-3 comparison for one protocol; None if none is complete."""
+    verdicts, role = [], 'reported'
+    for g in GRANULARITIES:
+        c = find_comparison(comps, g, protocol, variant, reference)
+        if c:
+            word, num = paired_verdict(c)
+            verdicts.append(f"{g}-grained {word} ({num})")
+            role = c.get('role', role)
+    if not verdicts:
+        return None
+    return ROLE_WORDS.get(role, ROLE_WORDS['reported']), '; '.join(verdicts)
+
+
+def week3_verdict_line(comps, variant, reference):
+    """One "Reading the numbers" bullet for a week-3 comparison ('' if none is complete).
+
+    The verdicts of verdict_line over the 3-seed means, each protocol marked with its role:
+    the one the week-3 rule decides on, or reported without a decision.
+    """
+    split = week3_verdicts(comps, variant, reference, 'random_split_vary')
+    ood = week3_verdicts(comps, variant, reference, 'leave_one_paper_out')
+    if not (split or ood):
+        return ''
+    line = (f"* NER week 3, {WEEK3_NAMES[variant]} vs the {WEEK3_NAMES[reference]} "
+            "(3-seed means, paired micro-F1 difference): ")
+    if split:
+        line += f"{split[1]} across the 5 random splits ({split[0]})"
+    if ood:
+        line += (f". Leaving one paper out ({ood[0]}): " if split
+                 else f"leaving one paper out ({ood[0]}): ") + ood[1]
+    return line + '.\n'
+
+
 # --------------------------------------------------------------------------------
 # "At a glance" table and the generated blocks
 # --------------------------------------------------------------------------------
+def reported_system(res, g):
+    """(variant, random-split results, held-out-paper results) of the reported NER system.
+
+    Per the week-3 protocol: the 3-model seed ensemble crf_ens3, unless the mixed-backbone
+    ensemble improves on it for the granularity (a complete comparison over the 5 random
+    splits with a micro-F1 CI above 0). The results are None for files that do not exist.
+    """
+    c = find_comparison(res.comparisons(WEEK3_FILE), g, 'random_split_vary', 'crf_mix3',
+                        'crf_ens3')
+    var = 'crf_mix3' if c and c['micro']['ci95'][0] > 0 else 'crf_ens3'
+    return (var, res.get(ner_file(g, 'random_split_vary', var)),
+            res.get(ner_file(g, 'leave_one_paper_out', var)))
+
+
+def published_check(summary, paper):
+    """The reported system against the published F1, whose averaging the paper does not state.
+
+    Returns ('beaten under <averages> averaging' or 'not significantly better', the other
+    averages as 'name mean [lo, hi]'): an average is beaten when its 95% CI lies above the
+    published number. Averages missing from the summary are left out.
+    """
+    present = [m for m in AVERAGES if m in summary]
+    above = [m for m in present if summary[m]['ci95'][0] > paper]
+    rest = [f"{m} {interval(summary[m])}" for m in present if m not in above]
+    if not above:
+        return 'not significantly better', rest
+    names = ' and '.join(above) if len(above) < 3 else f"{', '.join(above[:-1])} and {above[-1]}"
+    return f"beaten under {names} averaging", rest
+
+
 def crf_gain_note(comps, g):
     """Short reading of a CRF gain for the at-a-glance table."""
     c = find_comparison(comps, g, 'random_split_vary', 'crf', 'baseline')
@@ -626,7 +769,8 @@ def crf_gain_note(comps, g):
 def glance_table(res):
     """The "At a glance" table with its trailing blank line ('' if it has no row).
 
-    Only the baseline variants (cw, crf) appear here; the week-2 variants do not yet.
+    The baseline variants (cw, crf) and the reported system (week-3 protocol) appear here;
+    the week-2 and week-3 comparisons do not.
     """
     _, vary, lopo = baseline_ner(res)
     comps = res.comparisons()
@@ -669,6 +813,21 @@ def glance_table(res):
                               f"{interval(v['summary']['micro'])} | published "
                               f"{v['paper_test_f1']:.2f}: **beaten** if the paper used micro F1"
                               f"{crf_gain_note(comps, g) if var == 'crf' else ''} |")
+    for g in GRANULARITIES:
+        var, v, ood = reported_system(res, g)
+        if has_runs(v, 5):
+            cell = f"micro F1 {interval(v['summary']['micro'])} over 5 random splits"
+            if has_runs(ood, 4):
+                cell += f", {ood['summary']['micro']['mean']:.2f} on an unseen paper"
+            verdict, rest = published_check(v['summary'], v['paper_test_f1'])
+            if verdict.startswith('beaten'):
+                verdict = '**beaten**' + verdict[len('beaten'):]
+                if rest:
+                    verdict += (f"; {', '.join(rest)} {'is' if len(rest) == 1 else 'are'} "
+                                "not significantly above")
+            glance.append(f"| NER, {g}-grained, reported system (week-3 protocol): "
+                          f"{WEEK3_NAMES[var]} `{var}` | {cell} | published "
+                          f"{v['paper_test_f1']:.2f} (none for an unseen paper): {verdict} |")
     if off:
         glance.append(f"| Term typing, 315 terms, pipeline (zero-shot) | accuracy "
                       f"{off['typing']['accuracy']:.3f}"
@@ -740,6 +899,18 @@ def standing_block(res, note=''):
                          "leaving one paper out")
             crf_cells.append(cell)
 
+    reported_cells, reported_refs = [], []
+    for g in GRANULARITIES:
+        var, v, ood = reported_system(res, g)
+        if has_runs(v, 5):
+            cell = (f"{g}: {WEEK3_NAMES[var]} `{var}`, micro {interval(v['summary']['micro'])} "
+                    "over 5 new splits")
+            if has_runs(ood, 4):
+                cell += f", {ood['summary']['micro']['mean']:.2f} leaving one paper out"
+            reported_cells.append(cell)
+            reported_refs.append(f"{g}-grained "
+                                 f"{published_check(v['summary'], v['paper_test_f1'])[0]}")
+
     hyb = tt['methods']['hybrid']['mean_over_folds'] if tt else {}
     llm = tt['methods'].get('hybrid+llm', {}).get('mean_over_folds', {}) if tt else {}
     lines = [
@@ -753,6 +924,9 @@ def standing_block(res, note=''):
         lines.append(f"| NER with the CRF head (`--crf`) | {'; '.join(crf_cells)} | same; the "
                      "in-distribution fine-grained gain over the baseline disappears under strict "
                      "IOB2 scoring |")
+    if reported_cells:
+        lines.append(f"| NER, reported system (week-3 protocol) | {'; '.join(reported_cells)} | "
+                     f"same; {', '.join(reported_refs)} |")
     lines += [
         f"| Term typing, 315 terms, pipeline (zero-shot) | accuracy {off['typing']['accuracy']:.3f}"
         + (f" (LLM on: {on['typing']['accuracy']:.3f})" if on else '')
