@@ -278,14 +278,23 @@ The P1 items, with what has been measured so far:
 
    | Micro F1 Δ [95% CI], 3-seed means | Fine-grained | Coarse-grained |
    |---|---|---|
-   | Leaving one paper out (the decision) | running | −0.12 [−1.97, +1.73] |
+   | Leaving one paper out (the decision) | +2.91 [−0.73, +6.56] | −0.12 [−1.97, +1.73] |
 
-   Coarse-grained, self-training does not help: it scores 58.92 against
-   59.03 for the CRF head, and macro F1 changes by −0.21 [−2.37, +1.96].
-   The confidence filter keeps few sentences (29 to 345 of 2,000 per run).
-   Against its own teacher, a student changes by −4.89 to +2.12 points.
-   Every teacher reproduces the CRF member with the same seed exactly, so
-   these differences are paired.
+   Neither granularity improves under the pre-registered rule. Every teacher
+   reproduces the CRF member with the same seed exactly, so each student is
+   paired with its own teacher.
+
+   Fine-grained, the gain is not significant but points one way: 50.42
+   against 47.51 for the CRF head, positive on all four papers (+1.00 to
+   +6.10), and 9 of the 12 students beat their teachers. Macro F1 changes
+   by +2.17 [−3.18, +7.53]. With 4 papers, the 95% interval is wide.
+
+   Coarse-grained, self-training does not help: 58.92 against 59.03, and
+   macro F1 changes by −0.21 [−2.37, +1.96]. Against their teachers,
+   students change by −4.89 to +2.12 points.
+
+   The confidence filter keeps few sentences: 60 to 240 of 2,000 per run
+   fine-grained, 29 to 345 coarse-grained.
 8. **Ensembles.** Average across seeds and backbones (MatSciBERT, SciBERT,
    PubMedBERT, DeBERTa-v3-large); this usually gives a reliable +1–2.
 
