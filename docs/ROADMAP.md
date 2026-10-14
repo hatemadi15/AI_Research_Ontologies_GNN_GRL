@@ -303,7 +303,7 @@ The P1 items, with what has been measured so far:
    | Micro F1 Δ [95% CI], 3-seed means | Fine-grained | Coarse-grained |
    |---|---|---|
    | 5 random splits (the decision) | +0.11 [−2.74, +2.97] | −0.15 [−1.06, +0.76] |
-   | Leaving one paper out (reported) | +0.14 [−2.60, +2.88] | running |
+   | Leaving one paper out (reported) | +0.14 [−2.60, +2.88] | −1.54 [−4.34, +1.26] |
 
    In-domain pre-training does not help either granularity, so it is not
    adopted:
@@ -312,8 +312,10 @@ The P1 items, with what has been measured so far:
    - coarse-grained, 77.50 against 77.65, with macro F1 −0.63 [−3.29,
      +2.04].
 
-   As with PubMed in week 2, a lower held-out perplexity does not carry
-   over to MaterioMiner NER.
+   It does not help on unseen papers either: +0.14 fine-grained, and −1.54
+   coarse-grained, where all four papers are negative. As with PubMed in
+   week 2, a lower held-out perplexity does not carry over to MaterioMiner
+   NER.
 6. **Label semantics.** Bi-encoder span–type matching (BINDER, GLiNER-style)
    with the 420 MMO `skos:definition`s as type descriptions. This helps rare
    and unseen classes, and it supports the full 177-class setting, not just
