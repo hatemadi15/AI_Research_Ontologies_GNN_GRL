@@ -330,7 +330,7 @@ The P1 items, with what has been measured so far:
    | Micro F1 Δ [95% CI], 3-seed means | Fine-grained | Coarse-grained |
    |---|---|---|
    | Leaving one paper out (the decision) | −0.16 [−2.13, +1.80] | +1.17 [+0.94, +1.41] |
-   | 5 random splits (reported) | running | −0.77 [−1.74, +0.21] |
+   | 5 random splits (reported) | −0.58 [−3.41, +2.24] | −0.77 [−1.74, +0.21] |
 
    Coarse-grained, label semantics improves on unseen papers under the
    pre-registered rule. It scores 60.21 against 59.03 for the CRF head, and
@@ -342,6 +342,11 @@ The P1 items, with what has been measured so far:
    Fine-grained, it does not help: 47.35 against 47.51 for the CRF head.
    The per-paper differences range from −1.70 to +1.27, and macro F1
    changes by −1.17 [−4.73, +2.38].
+
+   On the random splits it helps neither granularity (reported): 76.71
+   against 77.29 fine-grained, and 76.89 against 77.65 coarse-grained,
+   where four of the five splits are lower. The coarse-grained gain is
+   specific to unseen papers.
 
    One label-semantics model (60.21) stays below the reported seed ensemble
    `crf_ens3` on unseen papers (61.42, coarse-grained). An ensemble of
