@@ -256,6 +256,28 @@ The P1 items, with what has been measured so far:
 7. **Semi-supervised data.** Self-train on PubMed with a confidence threshold.
    Generate LLM silver labels with ontology-definition prompts, filter them by
    agreement with the teacher model, and add them as weak supervision.
+
+   Week 3 self-trains on the open-access fatigue corpus (`--self-train`;
+   protocol in §4):
+   - The teacher, the CRF head, tags 2,000 in-domain sentences.
+   - A sentence becomes silver data when every tag has a CRF marginal of at
+     least 0.9.
+   - A student trains on gold + silver data, with the silver loss weighted
+     0.5.
+   - The runs cover unseen papers only, with 3 seeds per paper, compared
+     with the 3-seed mean of the CRF head. The decision is taken on the 4
+     papers.
+
+   | Micro F1 Δ [95% CI], 3-seed means | Fine-grained | Coarse-grained |
+   |---|---|---|
+   | Leaving one paper out (the decision) | running | −0.12 [−1.97, +1.73] |
+
+   Coarse-grained, self-training does not help: it scores 58.92 against
+   59.03 for the CRF head, and macro F1 changes by −0.21 [−2.37, +1.96].
+   The confidence filter keeps few sentences (29 to 345 of 2,000 per run).
+   Against its own teacher, a student changes by −4.89 to +2.12 points.
+   Every teacher reproduces the CRF member with the same seed exactly, so
+   these differences are paired.
 8. **Ensembles.** Average across seeds and backbones (MatSciBERT, SciBERT,
    PubMedBERT, DeBERTa-v3-large); this usually gives a reliable +1–2.
 
