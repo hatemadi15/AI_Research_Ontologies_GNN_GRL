@@ -54,7 +54,10 @@ per-split scores.
   * The reported NER system, a row in "At a glance" and in the standing table per the
     week-3 protocol: the 3-model seed ensemble `crf_ens3` (its own results files), or for
     a granularity the mixed-backbone ensemble `crf_mix3` once its complete comparison
-    with `crf_ens3` over the 5 random splits has a micro-F1 CI above 0.
+    with `crf_ens3` over the 5 random splits has a micro-F1 CI above 0. The paper does
+    not state its averaging, so both rows say under which averaging (micro, macro,
+    weighted F1, as far as the summary has them) the CI over the 5 random splits lies
+    above the published number.
 """
 import argparse
 import difflib
@@ -88,6 +91,8 @@ WEEK3_NAMES = {'crf': 'CRF head', 'crf_ens3': '3-model seed ensemble',
                'crf_dapt2': 'in-domain pre-training'}
 # `role` of a week-3 comparison, as the verdict bullets word it
 ROLE_WORDS = {'decision': 'the pre-registered decision', 'reported': 'reported, no decision'}
+# averages the reported system is checked under against the published F1
+AVERAGES = ('micro', 'macro', 'weighted')
 
 PROTOCOL_NAMES = {'random_split_vary': 'new random split per seed',
                   'leave_one_paper_out': 'leave one paper out',
@@ -734,6 +739,22 @@ def reported_system(res, g):
             res.get(ner_file(g, 'leave_one_paper_out', var)))
 
 
+def published_check(summary, paper):
+    """The reported system against the published F1, whose averaging the paper does not state.
+
+    Returns ('beaten under <averages> averaging' or 'not significantly better', the other
+    averages as 'name mean [lo, hi]'): an average is beaten when its 95% CI lies above the
+    published number. Averages missing from the summary are left out.
+    """
+    present = [m for m in AVERAGES if m in summary]
+    above = [m for m in present if summary[m]['ci95'][0] > paper]
+    rest = [f"{m} {interval(summary[m])}" for m in present if m not in above]
+    if not above:
+        return 'not significantly better', rest
+    names = ' and '.join(above) if len(above) < 3 else f"{', '.join(above[:-1])} and {above[-1]}"
+    return f"beaten under {names} averaging", rest
+
+
 def crf_gain_note(comps, g):
     """Short reading of a CRF gain for the at-a-glance table."""
     c = find_comparison(comps, g, 'random_split_vary', 'crf', 'baseline')
@@ -798,9 +819,15 @@ def glance_table(res):
             cell = f"micro F1 {interval(v['summary']['micro'])} over 5 random splits"
             if has_runs(ood, 4):
                 cell += f", {ood['summary']['micro']['mean']:.2f} on an unseen paper"
+            verdict, rest = published_check(v['summary'], v['paper_test_f1'])
+            if verdict.startswith('beaten'):
+                verdict = '**beaten**' + verdict[len('beaten'):]
+                if rest:
+                    verdict += (f"; {', '.join(rest)} {'is' if len(rest) == 1 else 'are'} "
+                                "not significantly above")
             glance.append(f"| NER, {g}-grained, reported system (week-3 protocol): "
                           f"{WEEK3_NAMES[var]} `{var}` | {cell} | published "
-                          f"{v['paper_test_f1']:.2f}; none for an unseen paper |")
+                          f"{v['paper_test_f1']:.2f} (none for an unseen paper): {verdict} |")
     if off:
         glance.append(f"| Term typing, 315 terms, pipeline (zero-shot) | accuracy "
                       f"{off['typing']['accuracy']:.3f}"
@@ -872,7 +899,7 @@ def standing_block(res, note=''):
                          "leaving one paper out")
             crf_cells.append(cell)
 
-    reported_cells = []
+    reported_cells, reported_refs = [], []
     for g in GRANULARITIES:
         var, v, ood = reported_system(res, g)
         if has_runs(v, 5):
@@ -881,6 +908,8 @@ def standing_block(res, note=''):
             if has_runs(ood, 4):
                 cell += f", {ood['summary']['micro']['mean']:.2f} leaving one paper out"
             reported_cells.append(cell)
+            reported_refs.append(f"{g}-grained "
+                                 f"{published_check(v['summary'], v['paper_test_f1'])[0]}")
 
     hyb = tt['methods']['hybrid']['mean_over_folds'] if tt else {}
     llm = tt['methods'].get('hybrid+llm', {}).get('mean_over_folds', {}) if tt else {}
@@ -897,7 +926,7 @@ def standing_block(res, note=''):
                      "IOB2 scoring |")
     if reported_cells:
         lines.append(f"| NER, reported system (week-3 protocol) | {'; '.join(reported_cells)} | "
-                     "same |")
+                     f"same; {', '.join(reported_refs)} |")
     lines += [
         f"| Term typing, 315 terms, pipeline (zero-shot) | accuracy {off['typing']['accuracy']:.3f}"
         + (f" (LLM on: {on['typing']['accuracy']:.3f})" if on else '')

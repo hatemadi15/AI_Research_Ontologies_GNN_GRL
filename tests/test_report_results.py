@@ -102,11 +102,14 @@ class Workspace:
         (self.results / rr.WEEK3_FILE).write_text(json.dumps(self.week3_comps))
         return key
 
-    def summary(self, granularity, protocol, variant, n_runs, micro, paper=69.92):
-        """Write a variant's results file with only its summary: micro = (mean, lo, hi)."""
+    def summary(self, granularity, protocol, variant, n_runs, micro, paper=69.92, **averages):
+        """Write a variant's results file with only its summary: micro = (mean, lo, hi), and
+        the same for any other average given by name (macro=..., weighted=...)."""
+        summary = {'n_runs': n_runs}
+        for name, (mean, lo, hi) in {'micro': micro, **averages}.items():
+            summary[name] = {'mean': mean, 'ci95': [lo, hi]}
         (self.results / rr.ner_file(granularity, protocol, variant)).write_text(json.dumps({
-            'paper_test_f1': paper,
-            'summary': {'n_runs': n_runs, 'micro': {'mean': micro[0], 'ci95': list(micro[1:])}}}))
+            'paper_test_f1': paper, 'summary': summary}))
 
     def run(self, *extra):
         return rr.main(['--results', str(self.results), '--readme', str(self.readme),
@@ -485,12 +488,13 @@ def test_week2_comparisons_do_not_reach_the_glance_or_standing_tables(tmp_path):
     # the crf_ens3 files written above (5 runs) are the reported system's; nothing else changes
     assert added_lines(glance_before, glance(readme)) == [
         f"| NER, {g}-grained, reported system (week-3 protocol): 3-model seed ensemble `crf_ens3` "
-        "| micro F1 99.00 [98.00, 99.50] over 5 random splits | published 69.92; none for an "
-        "unseen paper |" for g in rr.GRANULARITIES]
+        "| micro F1 99.00 [98.00, 99.50] over 5 random splits | published 69.92 (none for an "
+        "unseen paper): **beaten** under micro averaging |" for g in rr.GRANULARITIES]
     assert added_lines(roadmap_before, roadmap) == [
         "| NER, reported system (week-3 protocol) | fine: 3-model seed ensemble `crf_ens3`, micro "
         "99.00 [98.00, 99.50] over 5 new splits; coarse: 3-model seed ensemble `crf_ens3`, micro "
-        "99.00 [98.00, 99.50] over 5 new splits | same |"]
+        "99.00 [98.00, 99.50] over 5 new splits | same; fine-grained beaten under micro "
+        "averaging, coarse-grained beaten under micro averaging |"]
 
 
 # ---------------------------------------------------------------------------
@@ -605,9 +609,10 @@ def test_reported_system_is_the_seed_ensemble_unless_the_mixed_one_improves_on_i
     assert reported() == (
         ["| NER, fine-grained, reported system (week-3 protocol): 3-model seed ensemble `crf_ens3` "
          "| micro F1 79.76 [76.14, 83.38] over 5 random splits, 49.55 on an unseen paper "
-         "| published 69.92; none for an unseen paper |"],
+         "| published 69.92 (none for an unseen paper): **beaten** under micro averaging |"],
         ["| NER, reported system (week-3 protocol) | fine: 3-model seed ensemble `crf_ens3`, micro "
-         "79.76 [76.14, 83.38] over 5 new splits, 49.55 leaving one paper out | same |"])
+         "79.76 [76.14, 83.38] over 5 new splits, 49.55 leaving one paper out | same; "
+         "fine-grained beaten under micro averaging |"])
 
     ws.summary('coarse', 'random_split_vary', 'crf_ens3', 5, (79.45, 77.82, 81.09), paper=72.32)
     for g, protocol, n, micro in (('fine', 'random_split_vary', 5, (81.2, 78.0, 84.4)),
@@ -622,20 +627,56 @@ def test_reported_system_is_the_seed_ensemble_unless_the_mixed_one_improves_on_i
     ws.week3('crf_mix3', 'crf_ens3', 'coarse', 'leave_one_paper_out', micro=(2.0, 1.0, 3.0))
     assert reported() == (
         ["| NER, fine-grained, reported system (week-3 protocol): mixed-backbone ensemble "
-         "`crf_mix3` | micro F1 81.20 [78.00, 84.40] over 5 random splits | published 69.92; none "
-         "for an unseen paper |",                                   # its 3 held-out papers: no mean
+         "`crf_mix3` | micro F1 81.20 [78.00, 84.40] over 5 random splits | published 69.92 (none "
+         "for an unseen paper): **beaten** under micro averaging |",  # 3 held-out papers: no mean
          "| NER, coarse-grained, reported system (week-3 protocol): 3-model seed ensemble "
          "`crf_ens3` | micro F1 79.45 [77.82, 81.09] over 5 random splits, 61.42 on an unseen "
-         "paper | published 72.32; none for an unseen paper |"],
+         "paper | published 72.32 (none for an unseen paper): **beaten** under micro averaging |"],
         ["| NER, reported system (week-3 protocol) | fine: mixed-backbone ensemble `crf_mix3`, "
          "micro 81.20 [78.00, 84.40] over 5 new splits; coarse: 3-model seed ensemble `crf_ens3`, "
-         "micro 79.45 [77.82, 81.09] over 5 new splits, 61.42 leaving one paper out | same |"])
+         "micro 79.45 [77.82, 81.09] over 5 new splits, 61.42 leaving one paper out | same; "
+         "fine-grained beaten under micro averaging, coarse-grained beaten under micro "
+         "averaging |"])
     ws.week3('crf_mix3', 'crf_ens3', 'fine', 'random_split_vary', role='decision', n_pairs=4,
              micro=(1.4, 0.2, 2.6))                                  # incomplete: back to crf_ens3
     glance_rows, standing_rows = reported()
     assert 'crf_mix3' not in ''.join(glance_rows + standing_rows)
     assert glance_rows[0].startswith("| NER, fine-grained, reported system (week-3 protocol): "
                                      "3-model seed ensemble `crf_ens3` | micro F1 79.76")
+
+
+def test_reported_system_is_checked_under_each_averaging(tmp_path):
+    """The paper does not state its averaging: micro, macro and weighted F1 are each checked."""
+    ws = Workspace(tmp_path)
+
+    def references():
+        readme, roadmap = ws.generate()
+        rows = [line for line in glance(readme).split('\n') if 'reported system' in line]
+        standing = [line for line in roadmap.split('\n') if 'reported system' in line]
+        return [row.rsplit(' | ', 1)[1] for row in rows], standing[0].rsplit(' | ', 1)[1]
+
+    ws.summary('fine', 'random_split_vary', 'crf_ens3', 5, (79.76, 76.14, 83.38),
+               macro=(77.15, 74.05, 80.25), weighted=(79.23, 76.32, 82.13))
+    ws.summary('coarse', 'random_split_vary', 'crf_ens3', 5, (79.45, 77.82, 81.09), paper=72.32,
+               macro=(73.03, 67.79, 78.27), weighted=(78.75, 76.78, 80.72))
+    assert references() == (
+        ["published 69.92 (none for an unseen paper): **beaten** under micro, macro and weighted "
+         "averaging |",
+         "published 72.32 (none for an unseen paper): **beaten** under micro and weighted "
+         "averaging; macro 73.03 [67.79, 78.27] is not significantly above |"],
+        "same; fine-grained beaten under micro, macro and weighted averaging, coarse-grained "
+        "beaten under micro and weighted averaging |")
+
+    ws.summary('fine', 'random_split_vary', 'crf_ens3', 5, (73.0, 70.5, 75.5),
+               macro=(69.0, 65.0, 73.0), weighted=(71.0, 69.0, 73.0))
+    ws.summary('coarse', 'random_split_vary', 'crf_ens3', 5, (73.91, 69.36, 78.45), paper=72.32,
+               macro=(71.19, 65.0, 77.0))
+    assert references() == (
+        ["published 69.92 (none for an unseen paper): **beaten** under micro averaging; macro "
+         "69.00 [65.00, 73.00], weighted 71.00 [69.00, 73.00] are not significantly above |",
+         "published 72.32 (none for an unseen paper): not significantly better |"],
+        "same; fine-grained beaten under micro averaging, coarse-grained not significantly "
+        "better |")
 
 
 def test_a_week3_file_that_is_not_an_object_is_reported(tmp_path, capsys):

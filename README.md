@@ -90,8 +90,8 @@ reported only to show the size of the leak.
 | NER with a CRF head: paired gain over the baseline | fine +2.46 [+0.39, +4.52]; coarse +3.58 [+2.43, +4.74] | counts only if the CI lies above 0 |
 | NER, fine-grained with the CRF head, 5 random splits (micro F1) | 76.36 [71.00, 81.73] | published 69.92: **beaten** if the paper used micro F1; the gain comes from valid spans only (see below) |
 | NER, coarse-grained with the CRF head, 5 random splits (micro F1) | 78.15 [76.61, 79.69] | published 72.32: **beaten** if the paper used micro F1; +1.91 of the gain survives strict IOB2 scoring |
-| NER, fine-grained, reported system (week-3 protocol): 3-model seed ensemble `crf_ens3` | micro F1 79.76 [76.14, 83.38] over 5 random splits, 49.55 on an unseen paper | published 69.92; none for an unseen paper |
-| NER, coarse-grained, reported system (week-3 protocol): 3-model seed ensemble `crf_ens3` | micro F1 79.45 [77.82, 81.09] over 5 random splits, 61.42 on an unseen paper | published 72.32; none for an unseen paper |
+| NER, fine-grained, reported system (week-3 protocol): 3-model seed ensemble `crf_ens3` | micro F1 79.76 [76.14, 83.38] over 5 random splits, 49.55 on an unseen paper | published 69.92 (none for an unseen paper): **beaten** under micro, macro and weighted averaging |
+| NER, coarse-grained, reported system (week-3 protocol): 3-model seed ensemble `crf_ens3` | micro F1 79.45 [77.82, 81.09] over 5 random splits, 61.42 on an unseen paper | published 72.32 (none for an unseen paper): **beaten** under micro and weighted averaging; macro 73.03 [67.79, 78.27] is not significantly above |
 | Term typing, 315 terms, pipeline (zero-shot) | accuracy 0.384 (0.429 with LLM re-ranking) | supervised + LLM baseline 0.654; majority class 0.083 |
 | Clustering / taxonomy / relations, class level | ARI 0.035 / edge F1 0.006 / F1 0.000 | near chance; see the roadmap |
 
