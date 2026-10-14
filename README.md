@@ -372,13 +372,23 @@ week-3 comparisons of 3-seed means (`results/ner_week3_comparisons.json`).
 ## Next steps
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the prioritised plan to raise the
-metrics and to compete with the published state of the art. For NER, the CRF
-head (`--crf`) beats the plain baseline in all four paired comparisons, so new
-NER experiments should use it and be compared against its results. None of
-the week-2 changes (multi-task training, domain-adaptive pre-training, a
-3-model ensemble) beats it under the pre-registered rule, although the
-ensemble scores highest and is the only one that improves on unseen papers
-(coarse-grained). The ROADMAP's P1 section says what to try next.
+metrics and to compete with the published state of the art.
+
+For NER, the reported system is the 3-model seed ensemble of the CRF head
+(`crf_ens3`). Over 5 random splits it beats the published fine-grained number
+under micro, macro and weighted F1. It beats the coarse-grained number under
+micro and weighted F1, but not under macro F1.
+
+Week 3 compared 3-seed means. It found two smaller gains for single models,
+both coarse-grained: multi-task training in distribution, and label semantics
+on unseen papers. Mixing backbones, self-training and in-domain pre-training
+did not pass the pre-registered rule. New NER experiments should use the CRF
+head (`--crf`) and be compared with the 3-seed mean of its runs.
+
+ROADMAP P1, "Next, after week 3", lists what to try next:
+- votes over the changes that help;
+- label semantics on the multi-task model;
+- self-training at scale on a GPU.
 
 ## License
 

@@ -72,31 +72,98 @@ improves on unseen papers (coarse-grained, +1.60 [+0.52, +2.69]). But one
 reference model varies by several F1 points from run to run, which hides
 gains of 1–3 points in a comparison against a single run per split.
 
-The largest remaining gap is out of distribution (item 9).
+Week 3 compared 3-seed means split by split (protocol in §4). The protocol
+expected this to detect gains of about 2 points; in practice it detected two
+gains of about 1 point, both coarse-grained:
+- multi-task training on the random splits: +0.75 [+0.10, +1.39] (item 2);
+- label semantics on unseen papers: +1.17 [+0.94, +1.41] (item 6).
 
-Next, after week 2, in this order (week 3 runs items 1–5; protocol in §4):
+Mixing backbones adds nothing to the seed ensemble (item 8). Self-training
+(item 7) and in-domain pre-training (item 5) do not pass. The reported
+system therefore stays the seed ensemble `crf_ens3`.
+
+The paper does not state its averaging, so the comparison is made under
+each:
+- fine-grained, the 95% CI over the random splits lies above 69.92 under
+  micro, macro and weighted F1;
+- coarse-grained, it lies above 72.32 under micro and weighted F1, but not
+  under macro F1 (73.03 [67.79, 78.27]).
+
+The largest remaining gap is out of distribution (item 9). On an unseen
+paper `crf_ens3` scores 49.55 fine-grained and 61.42 coarse-grained, 18–30
+points below its scores on the random splits. The largest single-model
+gains there are fine-grained:
+- multi-task, reported: +3.39 [+0.45, +6.34];
+- self-training, the decision: +2.91 [−0.73, +6.56], positive on every
+  paper.
+
+Next, after week 3, in this order:
+1. **Vote over the changes that help.** A seed ensemble gains about 2
+   points over the mean of its members, and each week-3 gain is about 1
+   point over a single CRF model. Vote over the 3 seeds of each, and
+   compare the vote with `crf_ens3` under the week-3 rule:
+   - label semantics, coarse-grained;
+   - multi-task;
+   - self-training, fine-grained, on unseen papers (the near-miss).
+
+   The label-semantics and self-training runs saved their test
+   predictions, so their votes need no training. The 27 multi-task runs
+   must be repeated with `--save-predictions`. The reported system changes
+   only for a vote that improves on `crf_ens3`.
+2. **Combine the two changes that use the label hierarchy.** Multi-task
+   training shares one encoder between the fine and coarse heads. Coarse
+   label semantics describes each type by its fine-grained classes. Today
+   `--label-semantics` is not available with `--multi-task`; the code
+   change is a label-semantic head on each head of the multi-task model.
+3. **Self-training at scale, fine-grained.** The near-miss used 60–240
+   silver sentences per run, out of 2,000 tagged. Two changes would give
+   about 20 times more silver data:
+   - tag all 40,000 corpus sentences;
+   - use the ensemble as the teacher.
+
+   The student would then take hours per run on CPU, so this needs a GPU
+   (item 5).
+4. **Pin down the comparison with the paper.** Ask the authors for their
+   split and averaging. The fine-grained claim holds under any averaging.
+   The coarse-grained claim fails under macro F1, where rare types count as
+   much as frequent ones. Rare types are also where the mixed-backbone vote
+   lost (macro −4.11).
+5. **A GPU.** A run takes 13–27 minutes on 2 CPU threads and about a
+   minute on one GPU. That makes more seeds, larger backbones
+   (DeBERTa-v3-large) and item 3 practical.
+
+Domain-adaptive pre-training is closed: neither PubMed (week 2) nor
+in-domain text (week 3) helps, although both lower the held-out perplexity.
+
+After week 2 the list was, in this order (week 3 ran items 1–5; protocol in
+§4):
 1. **A comparison that can detect 1–3 points.** Compare the mean of 3 model
    seeds per split for the variant against the same for the reference,
    instead of single runs. The ensemble members `crf_m0`, `crf_m100` and
    `crf_m200` already give such a CRF reference on the 5 random splits and
    the 4 papers. Fix the design (seeds, splits, rule) before the runs, as
-   in weeks 1 and 2.
+   in weeks 1 and 2. *Week 3: done; it detected gains of about 1 point.*
 2. **Ensembles for the reported system.** A seed ensemble only costs
    training and inference time, and it gained on every split against its
    members. Next, mix backbones (SciBERT, PubMedBERT, DeBERTa-v3), whose
-   errors should differ more than those of seeds.
+   errors should differ more than those of seeds. *Week 3: mixing
+   backbones adds nothing to mixing seeds (item 8).*
 3. **Out of distribution.** Leaving one paper out costs 18–27 points. Of
    the week-2 changes only the ensemble narrows it, by 1.6 points
    coarse-grained. Label semantics (item 6) and semi-supervised data
-   (item 7) target it directly.
+   (item 7) target it directly. *Week 3: label semantics improves
+   coarse-grained; self-training does not pass, though fine-grained comes
+   close.*
 4. **Multi-task again, under the new design.** Its fine-grained difference
    was positive on all five splits (+2.46 on average) but not significant.
+   *Week 3: coarse-grained improves on the random splits; fine-grained does
+   not.*
 5. **Domain-adaptive pre-training only on in-domain text.** PubMed did not
    help; the open-access fatigue papers of item 5 are untested. Low
-   priority for its cost.
+   priority for its cost. *Week 3: no change at either granularity.*
 6. **A GPU.** A run takes 13–27 minutes on 2 CPU threads; on one GPU it
    takes about a minute, which makes more seeds and larger backbones
-   (DeBERTa-v3-large) practical.
+   (DeBERTa-v3-large) practical. *Still open: item 5 of the list above.*
 
 The P1 items, with what has been measured so far:
 
@@ -453,8 +520,8 @@ chance at class level. For a Task C-style result:
 |---|---|---|
 | 1 | Done: class weights (no significant change) and CRF (significant gain in all four comparisons), P1 items 3–4 | Met by the CRF head |
 | 2 | Done: multi-task NER (fine + coarse heads), domain-adaptive pre-training and a 3-model ensemble, all with `--crf` (P1 items 2, 5 and 8; protocol below) | Not met: no 95% CI lies above 0 against the CRF head on the random splits; the ensemble comes closest (+3.39 fine-grained, +1.30 coarse-grained) and is the only change that improves on unseen papers (coarse-grained) |
-| 3 | NER, P1 "Next, after week 2" items 1–5: comparisons of 3-seed means, a mixed-backbone ensemble, label semantics and self-training for unseen papers, multi-task again, in-domain pre-training (protocol below) | Per variant, as in the protocol below |
-| 4 | Context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | Typing accuracy above the hybrid + LLM baseline (§1) |
+| 3 | Done: NER, P1 "Next, after week 2" items 1–5: comparisons of 3-seed means, a mixed-backbone ensemble, label semantics and self-training for unseen papers, multi-task again, in-domain pre-training (protocol below) | Met for two changes, both coarse-grained: multi-task on the random splits (+0.75 [+0.10, +1.39]) and label semantics on unseen papers (+1.17 [+0.94, +1.41]). The mixed-backbone vote, self-training and in-domain pre-training do not pass; the reported system stays `crf_ens3` |
+| 4 | Context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN; NER votes over the week-3 changes that help (P1 "Next, after week 3" item 1) | Typing accuracy above the hybrid + LLM baseline (§1); for NER, a vote that improves on `crf_ens3` under the week-3 rule |
 | 5 | Class-level taxonomy (LLM or cross-encoder + arborescence); relation annotation pilot | First class-level taxonomy F1 above chance; relation guidelines |
 
 ### Week 2 protocol (fixed before any run)
