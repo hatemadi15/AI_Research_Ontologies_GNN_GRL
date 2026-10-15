@@ -32,6 +32,8 @@ writes its own results files, so the lanes never write the same file:
           multi-task run and a label-semantics run
   smoke2  the smoke tests of the new options (label semantics on the multi-task model,
           self-training with 3 teachers), and the CRF run once more
+  smoke3  the label-semantics smoke tests again once rdflib is installed (multi-task, and
+          fine-grained alone)
   item1   the CRF reference crf_m0/m100/m200 and multi-task crf_mt/_m100/_m200
   item2   label semantics crf_ls_m* and label semantics on the multi-task model crf_mt_ls_m*
   item3   week-3 self-training crf_st_m* and self-training with 3 teachers crf_st3_m*,
@@ -74,7 +76,7 @@ GPU = 'Tesla T4'
 LANES = 2
 # the versions of the CPU runs; torch is the one of the Kaggle image
 PIP = ('transformers==5.18.0', 'tokenizers==0.23.2', 'huggingface_hub==1.33.0',
-       'safetensors==0.8.0')
+       'safetensors==0.8.0', 'rdflib==7.6.0')     # rdflib: the MMO definitions (label semantics)
 # source-only on PyPI: built here into pure-Python wheels that go into the bundle
 WHEELS = ('seqeval==1.2.2',)
 WHEEL_FILES = ('seqeval-1.2.2-py3-none-any.whl',)
@@ -160,6 +162,12 @@ def batch_lanes(name):
                   '10.3390_met10111458', '--crf', *st, '--teachers', '3',
                   '--self-train-sample', '200', *tiny, '--save-predictions', '--threads',
                   str(THREADS)]]]
+    if name == 'smoke3':
+        tiny = ('--max-train', '32', '--epochs', '2')
+        return [[['--vary-split', '--seeds', '0', '--crf', '--multi-task', '--label-semantics',
+                  *tiny, '--save-predictions', '--threads', str(THREADS)]],
+                [['--granularity', 'fine', '--vary-split', '--seeds', '0', '--crf',
+                  '--label-semantics', *tiny, '--save-predictions', '--threads', str(THREADS)]]]
     if name == 'item1':
         return balance(family('crf', ()) +
                        family('mt', ('--multi-task',), granularities=('both',),
@@ -177,7 +185,7 @@ def batch_lanes(name):
     raise ValueError(f'unknown batch {name!r}')
 
 
-BATCHES = ('smoke1', 'smoke2', 'item1', 'item2', 'item3', 'item3r')
+BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item3', 'item3r')
 
 
 def batch_spec(name):
