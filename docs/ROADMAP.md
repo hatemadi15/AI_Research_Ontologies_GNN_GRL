@@ -539,7 +539,7 @@ chance at class level. For a Task C-style result:
 | 1 | Done: class weights (no significant change) and CRF (significant gain in all four comparisons), P1 items 3–4 | Met by the CRF head |
 | 2 | Done: multi-task NER (fine + coarse heads), domain-adaptive pre-training and a 3-model ensemble, all with `--crf` (P1 items 2, 5 and 8; protocol below) | Not met: no 95% CI lies above 0 against the CRF head on the random splits; the ensemble comes closest (+3.39 fine-grained, +1.30 coarse-grained) and is the only change that improves on unseen papers (coarse-grained) |
 | 3 | Done: NER, P1 "Next, after week 2" items 1–5: comparisons of 3-seed means, a mixed-backbone ensemble, label semantics and self-training for unseen papers, multi-task again, in-domain pre-training (protocol below) | Met for two changes, both coarse-grained: multi-task on the random splits (+0.75 [+0.10, +1.39]) and label semantics on unseen papers (+1.17 [+0.94, +1.41]). The mixed-backbone vote, self-training and in-domain pre-training do not pass; the reported system stays `crf_ens3` |
-| 4 | Context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN; NER votes over the week-3 changes that help (P1 "Next, after week 3" item 1) | Typing accuracy above the hybrid + LLM baseline (§1); for NER, a vote that improves on `crf_ens3` under the week-3 rule |
+| 4 | In progress: NER, P1 "Next, after week 3" items 1, 2, 3 and 5: votes over the week-3 changes that help, label semantics on the multi-task model, self-training at scale, on a Kaggle GPU (protocol below). Not started: context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | For NER, a change that passes a week-4 decision (protocol below); typing accuracy above the hybrid + LLM baseline (§1) |
 | 5 | Class-level taxonomy (LLM or cross-encoder + arborescence); relation annotation pilot | First class-level taxonomy F1 above chance; relation guidelines |
 
 ### Week 2 protocol (fixed before any run)
@@ -671,3 +671,97 @@ first, since they need no new code; label semantics (2), the corpus and
 pre-training (5), and self-training (3) follow as their code is ready. Each
 item is reported when its runs finish. The whole plan takes about 75 CPU
 hours, about 2 days on two job slots.
+
+### Week 4 protocol (fixed before any run)
+
+Week 4 runs items 1, 2, 3 and 5 of P1 "Next, after week 3". The week-3
+design and rule stand:
+- 3 model seeds per split: K, K + 100 and K + 200 on random split K; 0, 100
+  and 200 on each held-out paper. A model scores the mean of its 3 runs on a
+  split; an ensemble scores once.
+- A change improves on its comparison, for a granularity, if the 95%
+  Student-t CI of the mean paired micro-F1 difference lies above 0 over the
+  protocol named for it: the 5 random splits or the 4 held-out papers. The
+  other protocol, strict IOB2 and macro F1 are reported alongside.
+- Every run uses `--crf`. New options only add code; the code paths of
+  weeks 1–3 stay unchanged.
+
+**Votes over the CPU runs (item 1, no training).**
+- `crf_ls_ens3`: the entity-level majority vote (2 of 3) of `crf_ls_m0`,
+  `crf_ls_m100` and `crf_ls_m200`.
+- `crf_st_ens3`: the same over `crf_st_m0`, `crf_st_m100` and
+  `crf_st_m200`, on the held-out papers only, like their runs.
+- Each vote is compared with `crf_ens3`, the reported system. The decision
+  is on the 4 held-out papers, the target of both methods; the
+  label-semantics vote on the random splits is reported.
+
+**GPU runs (items 1, 2, 3 and 5).** Everything else trains on Kaggle:
+- `NvidiaTeslaT4` sessions (2 T4 GPUs): one run per GPU, two at a time.
+  `src/graph/kaggle_jobs.py` uploads the code and the corpus, starts the
+  jobs and downloads the results.
+- One frozen commit and one Kaggle image for all runs. `transformers` and
+  the MatSciBERT checkpoint are pinned to those of the CPU runs.
+- Deterministic CUDA: PyTorch deterministic algorithms, deterministic
+  cuDNN and a fixed cuBLAS workspace. The first job trains one CRF run
+  twice; GPU runs count as repeatable only if both give identical scores.
+  Every GPU run records its environment (GPU, CUDA, torch, transformers).
+- GPU runs are never compared with CPU runs. The hardware changes a run
+  with the same seeds, as the thread count did in week 2. Every GPU
+  comparison is between GPU runs, and the GPU results go to `results/gpu/`
+  under the CPU file names.
+
+GPU families, each with 3 seeds on the 5 random splits and the 4 held-out
+papers, with `--save-predictions`:
+1. The CRF reference `crf_m0`, `crf_m100`, `crf_m200` (both
+   granularities) and its vote `crf_ens3`.
+2. Multi-task: `crf_mt`, `crf_mt_m100`, `crf_mt_m200` (one run gives both
+   granularities) and its vote `crf_mt_ens3` (item 1).
+3. Label semantics: `crf_ls_m0`, `crf_ls_m100`, `crf_ls_m200` (both
+   granularities).
+4. Label semantics on the multi-task model (item 2): `crf_mt_ls_m0`,
+   `crf_mt_ls_m100`, `crf_mt_ls_m200`. Each head of the multi-task model is
+   the week-3 label-semantic head over its own granularity's descriptions,
+   embedded by the pre-trained encoder before fine-tuning. Everything else
+   is multi-task training.
+5. Self-training at scale (item 3): `crf_st3_m0`, `crf_st3_m100`,
+   `crf_st3_m200`. One run per split and granularity:
+   - it trains the split's 3 CRF models as teachers, whose test scores must
+     equal those of the GPU `crf_m*` runs;
+   - each teacher tags all 40,000 sentences of the week-3 fatigue corpus
+     (SHA-256 `7eaf1e79…`; no MaterioMiner text);
+   - silver data: the sentences with an entity on which the 3 teachers give
+     every word the same tag, each with a CRF marginal of at least 0.9 under
+     every teacher;
+   - 3 students, one per teacher seed, trained as in week 3: the teacher's
+     initialisation and seed, gold + silver with the silver NLL weighted
+     0.5, the epoch chosen on the gold validation set.
+
+   Held-out papers first; the random splits if the quota allows.
+
+Decisions, GPU runs only:
+- item 1: `crf_mt_ens3` vs `crf_ens3` over the 5 random splits, where
+  multi-task helped;
+- item 2: `crf_mt_ls` vs `crf` over the 5 random splits and, separately,
+  over the 4 held-out papers, since each parent helped on one of them;
+- item 3: `crf_st3` vs `crf` over the 4 held-out papers.
+
+Reported alongside:
+- `crf_mt` and `crf_ls` vs `crf`: do the week-3 gains repeat on other
+  hardware?
+- `crf_mt_ls` vs `crf_mt` (random splits) and vs `crf_ls` (held-out
+  papers);
+- `crf_st3` vs `crf_ens3`;
+- the GPU `crf` runs next to the CPU ones, descriptive only.
+
+**Reported system.** For each granularity, `crf_ens3` stays unless a vote
+passes:
+- in distribution, only `crf_mt_ens3` can replace it, and it would be
+  reported with its GPU scores;
+- on unseen papers, `crf_ls_ens3` or `crf_st_ens3` can; if both pass, the
+  one with the larger mean difference.
+
+Execution, in this order: the CPU votes; the GPU smoke job; the GPU
+reference and multi-task (item 1); label semantics and the combination
+(item 2); self-training (item 3). Each item is reported when its runs
+finish. A CRF run should take 1–2 minutes on a T4 (13–27 on 2 CPU threads),
+so the plan needs about 15 GPU-hours, half of Kaggle's weekly quota of 30.
