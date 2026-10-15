@@ -60,8 +60,9 @@ def test_self_train_parser_checks(tmp_path, capsys):
     assert 'self_train' not in vars(nb.parse_args(['--crf']))
     for argv, error in ((['--self-train', corpus], '--self-train needs --crf'),
                         (['--class-weights', '--self-train', corpus], '--self-train needs --crf'),
+                        # with --multi-task only as multi-task self-training (--teachers)
                         (['--crf', '--multi-task', '--self-train', corpus],
-                         '--self-train is not available with --multi-task'),
+                         '--self-train with --multi-task needs --teachers'),
                         (['--crf', '--label-semantics', '--self-train', corpus],
                          '--self-train is not available with --label-semantics'),
                         (['--crf', '--self-train', str(tmp_path / 'missing.txt')],

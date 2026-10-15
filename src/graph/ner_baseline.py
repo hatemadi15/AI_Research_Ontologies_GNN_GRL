@@ -116,6 +116,8 @@ Usage:
   python ner_baseline.py --leave-one-paper-out --crf --teachers 3 --self-train-sample 0 \\
       --self-train data/processed/corpus/fatigue_sentences.txt            # 3 teachers
   python ner_baseline.py --leave-one-paper-out --crf --context 64 --tag m0   # document context
+  python ner_baseline.py --leave-one-paper-out --crf --multi-task --teachers 3 --students 10 \\
+      --self-train data/processed/corpus/fatigue_sentences.txt --self-train-sample 0
   python ner_baseline.py --compare                                        # paired comparison
 """
 
@@ -991,7 +993,7 @@ def multitask_examples(fine, coarse):
     return examples
 
 
-def encode_multitask(tokenizer, examples, label2id):
+def encode_multitask(tokenizer, examples, label2id, max_length=512):
     """encode() for every head: {head: features}, in the order of `examples`.
 
     An example without tags for a head has only -100 labels for it, so that
@@ -1001,7 +1003,7 @@ def encode_multitask(tokenizer, examples, label2id):
     for head in MT_HEADS:
         sentences = [(tokens, ['O'] * len(tokens) if tags[head] is None else tags[head])
                      for tokens, tags in examples]
-        features[head] = encode(tokenizer, sentences, label2id[head])
+        features[head] = encode(tokenizer, sentences, label2id[head], max_length)
         for feature, (_, tags) in zip(features[head], examples):
             if tags[head] is None:
                 feature['labels'] = [-100] * len(feature['labels'])
@@ -1020,19 +1022,25 @@ def multitask_batches(features, batch_size, pad_id, shuffle_seed=None):
         yield ids, mask, {head: part[2] for head, part in zip(MT_HEADS, parts)}, idx
 
 
-def multitask_loss(logits, labels, crfs):
+def multitask_loss(logits, labels, crfs, weights=None):
     """{head: mean CRF NLL over the rows of the batch that are labelled for the head}.
 
     logits {head: (B, T, L)} and labels {head: (B, T)} as from multitask_batches.
     Rows without labels for a head are dropped before its CRF, and a head with no
     labelled row in the batch is left out: it contributes nothing to the loss.
+    weights (B,), optional: each row's NLL is weighted (silver rows SILVER_WEIGHT), as
+    in the CRF's nll.
     """
     losses = {}
     for head, lab in labels.items():
         rows = (lab != -100).any(1)
         if rows.any():
             emissions = logits[head][rows.to(logits[head].device)]
-            losses[head] = crfs[head].nll(*word_view(emissions, lab[rows]))
+            if weights is None:
+                losses[head] = crfs[head].nll(*word_view(emissions, lab[rows]))
+            else:
+                losses[head] = crfs[head].nll(*word_view(emissions, lab[rows]),
+                                              weights=weights[rows.to(weights.device)])
     return losses
 
 
@@ -1041,6 +1049,7 @@ class HeadView:
 
     def __init__(self, tagger, head):
         self.tagger, self.head = tagger, head
+        self.config = tagger.encoder.config         # teacher_tags reads max_position_embeddings
 
     def eval(self):
         self.tagger.eval()
@@ -1113,7 +1122,8 @@ def multitask_history(log, head):
             for epoch, losses, f1 in log]
 
 
-def train_multitask(seed, parts, labels, args, device, test_index=None, descriptions=None):
+def train_multitask(seed, parts, labels, args, device, test_index=None, descriptions=None,
+                    silver=None, keep_tagger=False):
     """Fine-tune one encoder with a fine and a coarse CRF head together; test each head.
 
     parts: {head: (train, val, test)}, lists of (tokens, tags, doc) for the same
@@ -1129,7 +1139,11 @@ def train_multitask(seed, parts, labels, args, device, test_index=None, descript
     other_best_epoch (the best epoch of the other head). descriptions (--label-semantics):
     {head: a text per label of labels[head]}; each head's linear layer is then replaced
     by a label-semantic head over their embeddings by the pre-trained encoder, as in
-    train_one.
+    train_one. silver (multi-task self-training): [(words, {head: tags or None})] trained
+    on with the gold examples, each row's NLL weighted SILVER_WEIGHT (a head without silver
+    tags for a sentence does not see it). keep_tagger: return (records, tagger), the
+    tagger holding the model, the tokenizer, label2id and id2label per head, and the
+    snapshot of each head's best epoch (`snapshots`; mt_teacher_tags).
     """
     import torch
     from transformers import AutoTokenizer, get_linear_schedule_with_warmup, set_seed
@@ -1153,6 +1167,14 @@ def train_multitask(seed, parts, labels, args, device, test_index=None, descript
 
     examples = multitask_examples(parts['fine'][0], parts['coarse'][0])
     f_train = encode_multitask(tokenizer, examples, label2id)
+    weight = None
+    if silver:
+        # the gold examples, then the silver ones; multitask_batches shuffles them together
+        extra = encode_multitask(tokenizer, silver, label2id,
+                                 model.encoder.config.max_position_embeddings)
+        for h in MT_HEADS:
+            f_train[h] += extra[h]
+        weight = [1.0] * len(examples) + [SILVER_WEIGHT] * len(silver)
     f_val, f_test = ({h: encode(tokenizer, [(t, g) for t, g, _ in parts[h][k]], label2id[h])
                       for h in MT_HEADS} for k in (1, 2))
 
@@ -1161,7 +1183,7 @@ def train_multitask(seed, parts, labels, args, device, test_index=None, descript
          {'params': model.crfs.parameters(), 'lr': CRF_LR, 'weight_decay': 0.0}],
         lr=args.lr, weight_decay=0.01)
     params = list(model.parameters())
-    steps = args.epochs * ((len(examples) + args.batch_size - 1) // args.batch_size)
+    steps = args.epochs * ((len(f_train['fine']) + args.batch_size - 1) // args.batch_size)
     scheduler = get_linear_schedule_with_warmup(optimizer, int(0.1 * steps), steps)
 
     def val_scores():
@@ -1177,10 +1199,11 @@ def train_multitask(seed, parts, labels, args, device, test_index=None, descript
     for epoch in range(args.epochs):
         model.train()
         totals = dict.fromkeys(MT_HEADS, 0.0)
-        for ids, mask, lab, _ in multitask_batches(f_train, args.batch_size, pad_id,
-                                                    shuffle_seed=seed * 1000 + epoch):
+        for ids, mask, lab, idx in multitask_batches(f_train, args.batch_size, pad_id,
+                                                      shuffle_seed=seed * 1000 + epoch):
             logits = model(input_ids=ids.to(device), attention_mask=mask.to(device))
-            losses = multitask_loss(logits, lab, model.crfs)
+            losses = multitask_loss(logits, lab, model.crfs, weights=None if weight is None else
+                                    torch.tensor([weight[i] for i in idx], device=device))
             loss = sum(losses.values())
             loss.backward()
             torch.nn.utils.clip_grad_norm_(params, 1.0)
@@ -1219,7 +1242,131 @@ def train_multitask(seed, parts, labels, args, device, test_index=None, descript
         if getattr(args, 'save_predictions', False):
             result.update(prediction_fields(test_index, test, test_pred))
         records[h] = result
+    if keep_tagger:
+        return records, SimpleNamespace(model=model, tokenizer=tokenizer, label2id=label2id,
+                                        id2label=id2label,
+                                        snapshots={h: best[h][1] for h in MT_HEADS})
     return records
+
+
+# Multi-task self-training (--multi-task --self-train --teachers N; P1 "Next, after week 4"
+# item 2): silver filters (teachers that agree, least marginal), the strictest first; the
+# first is the week-4 rule (unanimous, 0.9)
+SILVER_FILTERS = ((3, 0.9), (3, 0.8), (3, 0.7), (2, 0.9), (2, 0.8))
+
+
+def filtered_tags(votes, agree, threshold):
+    """A sentence's silver tags under a filter, or None.
+
+    votes: [(tags, least marginal)] of the teachers. The tags must be given alike by at
+    least `agree` teachers, each of them with every marginal at least `threshold`, and
+    have an entity (with 3 teachers, (3, SILVER_THRESHOLD) is unanimous_silver).
+    """
+    tags, n = Counter(t for t, _ in votes).most_common(1)[0]
+    if n < agree or not any(t.startswith('B-') for t in tags):
+        return None
+    if min(least for t, least in votes if t == tags) < threshold:
+        return None
+    return list(tags)
+
+
+def choose_filter(val_votes, gold):
+    """((agree, threshold), table): the silver filter of a head, chosen on the validation
+    sentences.
+
+    val_votes: the teachers' votes on each validation sentence; gold: its tags. The table
+    has, per filter of SILVER_FILTERS, the sentences it selects (n) and how many of them
+    have the gold tags (right). The chosen filter selects the most sentences among those
+    right at least as often as the strictest; the strictest if that selects none.
+    """
+    table = []
+    for agree, threshold in SILVER_FILTERS:
+        chosen = [(filtered_tags(v, agree, threshold), list(g)) for v, g in zip(val_votes, gold)]
+        chosen = [(t, g) for t, g in chosen if t is not None]
+        table.append({'agree': agree, 'threshold': threshold, 'n': len(chosen),
+                      'right': sum(t == g for t, g in chosen)})
+    if not table[0]['n']:
+        return SILVER_FILTERS[0], table
+    precision = table[0]['right'] / table[0]['n']
+    ok = [row for row in table if row['n'] and row['right'] / row['n'] >= precision]
+    best = max(ok, key=lambda row: row['n'])        # ties: the stricter, which comes first
+    return (best['agree'], best['threshold']), table
+
+
+def mt_teacher_tags(tagger, sentences, batch_size, device):
+    """{head: teacher_tags of sentences[head]} by a multi-task tagger (train_multitask with
+    keep_tagger), each head with the snapshot of its best epoch."""
+    out = {}
+    for h in MT_HEADS:
+        tagger.model.load_state_dict(tagger.snapshots[h])
+        view = SimpleNamespace(model=HeadView(tagger.model, h), crf=tagger.model.crfs[h],
+                               tokenizer=tagger.tokenizer, label2id=tagger.label2id[h],
+                               id2label=tagger.id2label[h])
+        out[h] = teacher_tags(view, sentences[h], batch_size, device)
+    return out
+
+
+def train_mt_with_teachers(seed, offsets, parts, labels, args, device, sample, test_index=None,
+                           student_offsets=None):
+    """One multi-task self-training run: {offset: {head: the record of that student}}.
+
+    The teachers are train_multitask on the run's data with the model seeds seed + offset.
+    Each tags the sample with both heads, and the validation sentences of each head. A
+    head's silver filter is chosen on its validation sentences (choose_filter), and a
+    sentence is silver for a head if the filter keeps it (filtered_tags). Each seed of
+    `student_offsets` (default: the teachers') then trains a multi-task student on the gold
+    data plus the silver sentences, each labelled for the heads it is silver for. Every
+    record adds `self_training`: n_sampled, n_skipped, n_silver per head, n_silver_sentences,
+    the filters (with their validation tables) and the teachers' scores per head.
+    """
+    teacher_args = SimpleNamespace(**{**vars(args), 'save_predictions': False})
+    val_words = {h: [t for t, _, _ in parts[h][1]] for h in MT_HEADS}
+    teachers, tagged, val_tagged, sentences, n_skipped = [], [], [], None, 0
+    for offset in offsets:
+        records, tagger = train_multitask(seed + offset, parts, labels, teacher_args, device,
+                                          keep_tagger=True)
+        if sentences is None:      # one tokenizer for all teachers
+            sentences, n_skipped = fit_sample(tagger.tokenizer, sample,
+                                              tagger.model.encoder.config.max_position_embeddings)
+        for store, words in ((tagged, {h: sentences for h in MT_HEADS}), (val_tagged, val_words)):
+            out = mt_teacher_tags(tagger, words, args.batch_size, device)
+            store.append({h: [(tuple(t), min(m)) for t, m in out[h]] for h in MT_HEADS})
+        del tagger
+        if str(device).startswith('cuda'):
+            import torch
+            torch.cuda.empty_cache()
+        teachers.append({'seed': seed + offset, **{h: {
+            'val_f1': records[h]['val_f1'], 'test_f1': records[h]['f1'],
+            'test_f1_strict': records[h]['f1_strict'],
+            'test_macro_f1': round(F1_AVERAGES['macro'](records[h]), 2),
+            'best_epoch': records[h]['best_epoch']} for h in MT_HEADS}})
+        print(f"    teacher seed {seed + offset}: test F1 fine {records['fine']['f1']:.2f}, "
+              f"coarse {records['coarse']['f1']:.2f}", flush=True)
+    filters, silver_tags = {}, {}
+    for h in MT_HEADS:
+        votes = list(zip(*(t[h] for t in val_tagged)))
+        filters[h] = choose_filter(votes, [g for _, g, _ in parts[h][1]])
+        silver_tags[h] = [filtered_tags(v, *filters[h][0])
+                          for v in zip(*(t[h] for t in tagged))]
+    silver = [(words, {h: silver_tags[h][i] for h in MT_HEADS})
+              for i, words in enumerate(sentences)
+              if any(silver_tags[h][i] is not None for h in MT_HEADS)]
+    info = {'n_sampled': len(sample), 'n_skipped': n_skipped,
+            'n_silver': {h: sum(t is not None for t in silver_tags[h]) for h in MT_HEADS},
+            'n_silver_sentences': len(silver),
+            'filters': {h: {'agree': filters[h][0][0], 'threshold': filters[h][0][1],
+                            'validation': filters[h][1]} for h in MT_HEADS},
+            'teachers': teachers}
+    print(f"    silver: {info['n_silver']} of {len(sentences)} tagged sentences (filters "
+          f"{ {h: filters[h][0] for h in MT_HEADS} }); students:", flush=True)
+    students = {}
+    for offset in offsets if student_offsets is None else student_offsets:
+        records = train_multitask(seed + offset, parts, labels, args, device,
+                                  test_index=test_index, silver=silver)
+        for h in MT_HEADS:
+            records[h]['self_training'] = info
+        students[offset] = records
+    return students
 
 
 # F1 averages reported for every run (seqeval, in %): micro is the primary one
@@ -1239,16 +1386,16 @@ RESULT_FILE = re.compile(r'ner_results_(fine|coarse)'
                          r'(?:_([a-z0-9_]+))?\.json')
 # untagged variants: a tagged variant must not take the name of one (--crf --tag mt: crf_mt)
 PLAIN_VARIANTS = ('baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_st', 'crf_mt_ls', 'crf_st3',
-                  'crf_ctx')
+                  'crf_ctx', 'crf_mt_st3')
 
 
 def variant_name(args):
     """Variant of a run: 'baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_mt_ls', 'crf_st' or
-    'crf_st<N>' or 'crf_ctx', then the tag.
+    'crf_st<N>', 'crf_mt_st<N>' or 'crf_ctx', then the tag.
 
     'cw' is --class-weights, 'crf_mt' is --crf --multi-task, 'crf_ls' is --crf
     --label-semantics, 'crf_mt_ls' both, 'crf_st' is --crf --self-train and 'crf_st<N>' that
-    with --teachers N. A tag is appended with an underscore (crf_m100); the baseline is
+    with --teachers N ('crf_mt_st<N>' with --multi-task too). A tag is appended with an underscore (crf_m100); the baseline is
     named by it alone.
     """
     if getattr(args, 'crf', False):
@@ -1259,6 +1406,8 @@ def variant_name(args):
         if getattr(args, 'self_train', None) is not None:
             teachers = getattr(args, 'teachers', 1)
             name = 'crf_st' if teachers == 1 else f'crf_st{teachers}'
+            if multi_task:
+                name = f'crf_mt_st{teachers}'
         if getattr(args, 'context', 0):
             name = 'crf_ctx'
     else:
@@ -1610,7 +1759,10 @@ def run_environment(device):
 def run(args):
     out_dir = os.path.join(PROCESSED_DIR, 'ner')
     if getattr(args, 'multi_task', False):
-        run_multitask(args, out_dir)
+        if getattr(args, 'self_train', None) is not None:
+            run_mt_teachers(args, out_dir)
+        else:
+            run_multitask(args, out_dir)
         return
     if hasattr(args, 'teachers'):
         run_teachers(args, out_dir)
@@ -1904,6 +2056,98 @@ def run_teachers(args, out_dir):
             print(f"{'Saved' if off in changed else 'Unchanged'} {paths[off]}")
 
 
+def run_mt_teachers(args, out_dir):
+    """run() for --multi-task --self-train --teachers N: one run per run_id, a fine and a
+    coarse results file per student seed (variant crf_mt_st<N>_m<offset>).
+
+    As run_teachers, with multi-task teachers and students (train_mt_with_teachers): a
+    student counts as done only if both of its files hold the run, and a run trains the
+    teachers and the students that its run_id lacks.
+    """
+    data, labels, ties = {}, {}, {}
+    for head in MT_HEADS:
+        data[head], labels[head], ties[head] = granularity_data(head, args)
+    check_aligned(data['fine'], data['coarse'])
+    sample, corpus = self_training_corpus(args.self_train, getattr(args, 'self_train_sample',
+                                                                   SELF_TRAIN_SAMPLE))
+    offsets = teacher_offsets(args.teachers)
+    student_offsets = teacher_offsets(getattr(args, 'students', args.teachers))
+    views = {off: SimpleNamespace(**{**vars(args), 'tag': f'm{off}', 'seed_offset': off})
+             for off in student_offsets}
+    paths = {(h, off): results_path(out_dir, h, view) for off, view in views.items()
+             for h in MT_HEADS}
+    for off, view in views.items():
+        check_results_files(view, [(paths[h, off], labels[h]) for h in MT_HEADS],
+                            corpus['self_train_sha256'])
+    device = torch_device(args)
+    environment = run_environment(device)
+    os.makedirs(out_dir, exist_ok=True)
+    protocol = protocol_name(args)
+    results = {}
+    for off, view in views.items():
+        variant = variant_name(view)
+        for h in MT_HEADS:
+            results[h, off] = {
+                'granularity': h, 'protocol': protocol, 'variant': variant, 'model': args.model,
+                'labels': labels[h], 'label_tie': ties[h], 'paper_test_f1': PAPER_F1[h],
+                'config': {**stored_config(view), **corpus},
+                'runs': resumable_runs(paths[h, off], labels[h], args.model, variant, off,
+                                       args.save_predictions, corpus['self_train_sha256'])}
+    done_by = {off: set.intersection(*({r.get('run_id') for r in results[h, off]['runs']}
+                                       for h in MT_HEADS)) for off in student_offsets}
+    done = set.intersection(*done_by.values())
+    changed = set()
+
+    def save(keys):
+        for key in keys:
+            summarize(results[key])
+            with open(paths[key], 'w') as f:
+                json.dump(results[key], f, indent=2)
+
+    print(f"\n=== NER multi-task self-training: {len(data['fine'])} sentences, protocol "
+          f"{protocol}, {args.teachers} teachers (seed offsets {offsets}), "
+          f"{len(student_offsets)} students, device {device} ===")
+    print(f"  self-training: {len(sample)} sentences sampled from {corpus['self_train']} "
+          f"(sha256 {corpus['self_train_sha256'][:12]})")
+    folds = make_folds(data['fine'], args, indices=True)
+    if folds is None:
+        folds = []
+        for seed in args.seeds:
+            split_seed = seed if args.vary_split else args.split_seed
+            folds.append((f'seed{seed}', *random_split(len(data['fine']), split_seed)))
+    for run_id, tr, va, te in folds:
+        if run_id in done:
+            print(f"  {run_id}: already done, skipping")
+            continue
+        if args.max_train:
+            tr = tr[:args.max_train]
+        parts = {h: tuple([data[h][i] for i in part] for part in (tr, va, te)) for h in MT_HEADS}
+        seed = int(run_id[4:]) if run_id.startswith('seed') else args.seeds[0]
+        missing = [off for off in student_offsets if run_id not in done_by[off]]
+        start = time.time()
+        records = train_mt_with_teachers(seed, offsets, parts, labels, args, device, sample,
+                                         test_index=te, student_offsets=missing)
+        runtime = round(time.time() - start, 1)
+        for off, by_head in records.items():
+            for h, res in by_head.items():
+                res['run_id'] = run_id
+                res['runtime_sec'] = runtime      # teachers and these students together
+                if environment:
+                    res['environment'] = environment
+                # a run found in one file only is redone: its old record is replaced
+                results[h, off]['runs'] = [r for r in results[h, off]['runs']
+                                           if r.get('run_id') != run_id] + [res]
+            done_by[off].add(run_id)
+            changed.update((h, off) for h in MT_HEADS)
+        save([(h, off) for off in records for h in MT_HEADS])
+        print(f"  {run_id}, {runtime:.0f}s: students " + ', '.join(
+            f"seed {records[off]['fine']['seed']} fine {records[off]['fine']['f1']:.2f} "
+            f"coarse {records[off]['coarse']['f1']:.2f}" for off in missing), flush=True)
+    save(sorted(changed))
+    for key in sorted(results):
+        print(f"{'Saved' if key in changed else 'Unchanged'} {paths[key]}")
+
+
 def tag_name(value):
     """argparse type of --tag: lowercase letters and digits, optionally then _m<N>.
 
@@ -2029,9 +2273,11 @@ def parse_args(argv=None):
     if getattr(args, 'self_train', None) is not None:
         if not args.crf:
             parser.error('--self-train needs --crf (silver sentences are chosen by CRF marginals)')
-        for option in ('multi_task', 'label_semantics'):
-            if getattr(args, option, False):
-                parser.error(f"--self-train is not available with --{option.replace('_', '-')}")
+        if getattr(args, 'label_semantics', False):
+            parser.error('--self-train is not available with --label-semantics')
+        if getattr(args, 'multi_task', False) and not hasattr(args, 'teachers'):
+            parser.error('--self-train with --multi-task needs --teachers (multi-task '
+                         'self-training)')
         if not os.path.isfile(args.self_train):
             parser.error(f'--self-train: no such file: {args.self_train}')
     for option in ('teachers', 'self_train_sample'):
