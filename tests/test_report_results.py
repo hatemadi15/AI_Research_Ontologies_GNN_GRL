@@ -817,7 +817,9 @@ def test_week5_table_and_verdicts(tmp_path):
 
 def test_week5_reported_system_replaces_the_earlier_rows(tmp_path):
     """With week-5 comparisons, the reported system is decided on them: crf_ens3 (its scores:
-    the 10-seed vote family's) unless a vote passes; on unseen papers a passing vote is named."""
+    the 10-seed vote family's) unless a vote passes. A vote that replaces crf_ens3 is named,
+    with the score of crf_ens3 in parentheses, and so is the system on unseen papers if it
+    differs."""
     ws = Workspace(tmp_path)
     for g, paper in (('fine', 69.92), ('coarse', 72.32)):
         ws.summary(g, 'random_split_vary', 'crf_ens3', 5, (79.5, 77.8, 81.1), paper=paper)
@@ -836,18 +838,36 @@ def test_week5_reported_system_replaces_the_earlier_rows(tmp_path):
     readme, roadmap = ws.generate()
     rows = [line for line in glance(readme).split('\n') if 'reported system' in line]
     assert len(rows) == 2
-    assert rows[0].startswith('| NER, fine-grained, reported system (week-5 protocol): 3-model '
-                              'seed ensemble `crf_ens3`, 10 seeds (GPU runs) | micro F1 80.50 '
+    assert rows[0].startswith('| NER, fine-grained, reported system (week-5 protocol; 10 seeds, '
+                              'GPU runs): 3-model seed ensemble `crf_ens3` | micro F1 80.50 '
                               '[78.00, 83.00] over 5 random splits, 50.00 on an unseen paper | '
                               'published 69.92 (none for an unseen paper): **beaten**')
-    assert ('reported system (week-5 protocol): 3-model seed ensemble `crf_ens3`, 10 seeds (GPU '
-            'runs); on unseen papers the vote of self-training with 3 teachers `crf_st3_ens3` | '
-            'micro F1 80.50 [78.00, 83.00] over 5 random splits; 62.00 on an unseen paper '
-            '(`crf_st3_ens3`) | published 72.32') in rows[1]
+    assert rows[1].startswith('| NER, coarse-grained, reported system (week-5 protocol; 10 seeds, '
+                              'GPU runs): 3-model seed ensemble `crf_ens3`; on unseen papers the '
+                              'vote of self-training with 3 teachers `crf_st3_ens3` | micro F1 '
+                              '80.50 [78.00, 83.00] over 5 random splits; 62.00 on an unseen paper '
+                              '(`crf_ens3` 50.00) | published 72.32')
     standing = next(line for line in roadmap.split('\n') if 'reported system' in line)
-    assert standing.startswith('| NER, reported system (week-5 protocol) | fine: 3-model seed '
-                               'ensemble `crf_ens3`, 10 seeds (GPU runs), micro F1 80.50 '
-                               '[78.00, 83.00] over 5 new splits, 50.00 leaving one paper out')
+    assert standing.startswith(
+        '| NER, reported system (week-5 protocol; 10 seeds, GPU runs) | fine: 3-model seed '
+        'ensemble `crf_ens3`, micro F1 80.50 [78.00, 83.00] over 5 new splits, 50.00 leaving one '
+        'paper out; coarse: 3-model seed ensemble `crf_ens3`, micro F1 80.50 [78.00, 83.00] over '
+        '5 new splits; on unseen papers the vote of self-training with 3 teachers '
+        '`crf_st3_ens3`, 62.00 leaving one paper out (`crf_ens3` 50.00) | same; ')
+
+    # fine, random splits: the multi-task vote passes; its scores decide against the paper
+    ws.week4('crf_mt_ens3', 'crf_ens3', 'fine', 'random_split_vary', gpu=True,
+             role='decision', micro=(1.0, 0.2, 1.8), score=(81.5, 79.0, 84.0), name=rr.WEEK5_FILE)
+    readme, roadmap = ws.generate()
+    row = next(line for line in glance(readme).split('\n') if 'fine-grained, reported' in line)
+    assert row.startswith('| NER, fine-grained, reported system (week-5 protocol; 10 seeds, GPU '
+                          'runs): multi-task vote `crf_mt_ens3`; on unseen papers the 3-model '
+                          'seed ensemble `crf_ens3` | micro F1 81.50 [79.00, 84.00] over 5 random '
+                          'splits (`crf_ens3` 80.50); 50.00 on an unseen paper | published 69.92')
+    standing = next(line for line in roadmap.split('\n') if 'reported system' in line)
+    assert ('fine: multi-task vote `crf_mt_ens3`, micro F1 81.50 [79.00, 84.00] over 5 new '
+            'splits (`crf_ens3` 80.50); on unseen papers the 3-model seed ensemble `crf_ens3`, '
+            '50.00 leaving one paper out; coarse:') in standing
 
 
 def test_published_split_row(tmp_path):

@@ -157,6 +157,8 @@ WEEK5_COMPARISONS = (('crf_mt', 'crf'), ('crf_ls', 'crf'), ('crf_st3', 'crf'),
 WEEK5_NAMES = {**WEEK4_NAMES, 'crf_st3_ens3': 'vote of self-training with 3 teachers'}
 # the votes that may replace crf_ens3 as the reported system (week-5 protocol, decision 2)
 WEEK5_VOTES = ('crf_mt_ens3', 'crf_ls_ens3', 'crf_st3_ens3')
+# how the reported-system rows name the week-5 design
+WEEK5_PROTOCOL = 'week-5 protocol; 10 seeds, GPU runs'
 # the published F1 of each granularity (Durmaz et al. 2024), for the rows made from comparisons
 PUBLISHED_F1 = {'fine': 69.92, 'coarse': 72.32}
 # `role` of a week-3 to week-5 comparison, as the verdict bullets word it
@@ -974,48 +976,51 @@ def unseen_system(res, g):
 
 
 def week5_system(res, g, protocol):
-    """(variant, scores) of the week-5 reported system on one protocol; None without the
-    week-5 comparisons.
+    """(variant, scores, crf_ens3 scores) of the week-5 reported system on one protocol; None
+    without the week-5 comparisons.
 
     crf_ens3, unless a vote of WEEK5_VOTES improves on it (the one with the largest mean
     difference). scores: the vote family's per-average mean, CI and per-split scores (the mean
-    of its 3 votes), from the week-5 comparison that has it.
+    of its 3 votes), from the week-5 comparison that has it. crf_ens3 scores: those of the vote
+    it replaced when another vote is the system (None if unknown), else None.
     """
     comps = res.comparisons(GPU_PREFIX + WEEK5_FILE)
+    base = find_comparison(comps, g, protocol, 'crf_ens3', 'crf')
+    base = base['variant_scores'] if base else next(
+        (c['reference_scores'] for vote in WEEK5_VOTES
+         for c in [find_comparison(comps, g, protocol, vote, 'crf_ens3')]
+         if c and c.get('reference_scores')), None)
     passed = [c for vote in WEEK5_VOTES
               for c in [improves(comps, g, protocol, vote, 'crf_ens3')] if c]
     if passed:
         c = max(passed, key=lambda c: c['micro']['mean_diff'])
-        return c['variant'], c['variant_scores']
-    base = find_comparison(comps, g, protocol, 'crf_ens3', 'crf')
-    if base:
-        return 'crf_ens3', base['variant_scores']
-    for vote in WEEK5_VOTES:
-        c = find_comparison(comps, g, protocol, vote, 'crf_ens3')
-        if c and c.get('reference_scores'):
-            return 'crf_ens3', c['reference_scores']
-    return None
+        return c['variant'], c['variant_scores'], c.get('reference_scores') or base
+    return ('crf_ens3', base, None) if base else None
 
 
 def week5_cells(res, g, phrase):
-    """(name, cell, verdict) of the week-5 reported system of a granularity; None without
-    its random-split comparisons. The cell gives the 5 random splits and, if complete, the
-    held-out papers (`phrase`), naming the system there if it differs."""
+    """The week-5 reported system of a granularity; None without its random-split comparisons.
+
+    Returns (in distribution, on unseen papers, verdict). A slot is (name, cell): the system
+    and its micro F1, over the 5 random splits or on the held-out papers (`phrase`), followed
+    by the score of `crf_ens3` in parentheses when a vote replaced it. The unseen-paper slot is
+    None without its comparisons; the verdict is that of the random splits against the
+    published number.
+    """
+    def slot(found, score):
+        var, scores, base = found
+        cell = score(scores['micro'])
+        if base:
+            cell += f" (`crf_ens3` {base['micro']['mean']:.2f})"
+        return f"{WEEK5_NAMES[var]} `{var}`", cell
+
     found = week5_system(res, g, 'random_split_vary')
     if not found:
         return None
-    var, scores = found
-    name = f"{WEEK5_NAMES[var]} `{var}`, 10 seeds (GPU runs)"
-    cell = f"micro F1 {interval(scores['micro'])} over 5 random splits"
     unseen = week5_system(res, g, 'leave_one_paper_out')
-    if unseen:
-        uvar, uscores = unseen
-        if uvar == var:
-            cell += f", {uscores['micro']['mean']:.2f} {phrase}"
-        else:
-            name += f"; on unseen papers the {WEEK5_NAMES[uvar]} `{uvar}`"
-            cell += f"; {uscores['micro']['mean']:.2f} {phrase} (`{uvar}`)"
-    return name, cell, published_check(scores, PUBLISHED_F1[g])
+    inside = slot(found, lambda m: f"micro F1 {interval(m)} over 5 random splits")
+    outside = slot(unseen, lambda m: f"{m['mean']:.2f} {phrase}") if unseen else None
+    return inside, outside, published_check(found[1], PUBLISHED_F1[g])
 
 
 def published_split_row(res, g):
@@ -1065,7 +1070,7 @@ def system_protocol(res):
     """The protocol whose rules chose the reported system: week 5, 4 or 3, the latest whose
     comparisons exist."""
     if res.comparisons(GPU_PREFIX + WEEK5_FILE):
-        return 'week-5 protocol'
+        return WEEK5_PROTOCOL
     week4 = res.comparisons(WEEK4_FILE) or res.comparisons(GPU_PREFIX + WEEK4_FILE)
     return 'week-4 protocol' if week4 else 'week-3 protocol'
 
@@ -1151,13 +1156,17 @@ def glance_table(res):
     for g in GRANULARITIES:
         week5 = week5_cells(res, g, 'on an unseen paper')
         if week5:
-            name, cell, (verdict, rest) = week5
+            (name, cell), unseen, (verdict, rest) = week5
+            if unseen:
+                same = unseen[0] == name
+                name += '' if same else f"; on unseen papers the {unseen[0]}"
+                cell += f"{', ' if same else '; '}{unseen[1]}"
             if verdict.startswith('beaten'):
                 verdict = '**beaten**' + verdict[len('beaten'):]
                 if rest:
                     verdict += (f"; {', '.join(rest)} {'is' if len(rest) == 1 else 'are'} "
                                 "not significantly above")
-            glance.append(f"| NER, {g}-grained, reported system (week-5 protocol): {name} | "
+            glance.append(f"| NER, {g}-grained, reported system ({WEEK5_PROTOCOL}): {name} | "
                           f"{cell} | published {PUBLISHED_F1[g]:.2f} (none for an unseen "
                           f"paper): {verdict} |")
             continue
@@ -1251,9 +1260,12 @@ def standing_block(res, note=''):
     for g in GRANULARITIES:
         week5 = week5_cells(res, g, 'leaving one paper out')
         if week5:
-            name, cell, (verdict, _) = week5
-            cell = cell.replace('over 5 random splits', 'over 5 new splits')
-            reported_cells.append(f"{g}: {name}, {cell}")
+            (name, cell), unseen, (verdict, _) = week5
+            cell = f"{g}: {name}, {cell.replace('over 5 random splits', 'over 5 new splits')}"
+            if unseen:
+                cell += (f", {unseen[1]}" if unseen[0] == name
+                         else f"; on unseen papers the {unseen[0]}, {unseen[1]}")
+            reported_cells.append(cell)
             reported_refs.append(f"{g}-grained {verdict}")
             continue
         var, v, ood, prefix = reported_system(res, g)
