@@ -760,8 +760,21 @@ passes:
 - on unseen papers, `crf_ls_ens3` or `crf_st_ens3` can; if both pass, the
   one with the larger mean difference.
 
+**Amendment, before any GPU run (the owner's request).** All remaining
+week-4 work runs on the GPU; nothing trains on the CPU.
+- The GPU families add week-3 self-training: `crf_st_m0`, `crf_st_m100`,
+  `crf_st_m200` on the held-out papers, as on the CPU.
+- The GPU votes `crf_ls_ens3` (both protocols) and `crf_st_ens3` (held-out
+  papers) are compared with the GPU `crf_ens3`, repeating the CPU votes.
+  The CPU decisions stand, since they were taken before this amendment; the
+  GPU repeats are reported next to them.
+- The new options (label semantics on the multi-task model, self-training
+  with 3 teachers) get their smoke tests on the GPU, before their runs.
+  Only the unit tests, with tiny models, run on the CPU.
+
 Execution, in this order: the CPU votes; the GPU smoke job; the GPU
 reference and multi-task (item 1); label semantics and the combination
-(item 2); self-training (item 3). Each item is reported when its runs
-finish. A CRF run should take 1–2 minutes on a T4 (13–27 on 2 CPU threads),
-so the plan needs about 15 GPU-hours, half of Kaggle's weekly quota of 30.
+(item 2); self-training, the week-3 design and then at scale (item 3). Each
+item is reported when its runs finish. A CRF run should take 1–2 minutes on
+a T4 (13–27 on 2 CPU threads), so the plan needs about 17 GPU-hours, about
+half of Kaggle's weekly quota of 30.
