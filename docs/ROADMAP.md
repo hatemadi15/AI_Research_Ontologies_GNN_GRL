@@ -97,8 +97,9 @@ gains there are fine-grained:
 - self-training, the decision: +2.91 [−0.73, +6.56], positive on every
   paper.
 
-Week 4 is in progress (protocol in §4). It runs items 1, 2, 3 and 5 of the
-list below, and all of its new training runs on Kaggle T4 GPUs. Done so far:
+Week 4 (protocol in §4) ran items 1, 2, 3 and 5 of the list below. Apart
+from the votes over saved CPU predictions, all of its training ran on Kaggle
+T4 GPUs, and GPU runs are compared only with GPU runs.
 - **The votes over the saved CPU predictions** (item 1, no training).
   - Label semantics, coarse-grained, on unseen papers: the vote improves on
     `crf_ens3` by +1.63 [+0.11, +3.16], positive on every paper. It
@@ -109,16 +110,112 @@ list below, and all of its new training runs on Kaggle T4 GPUs. Done so far:
     `crf_ens3` stays the system in distribution.
   - Self-training, fine-grained, misses again: +3.68 [−1.15, +8.52],
     positive on every paper. Coarse-grained: −0.09.
+- **The multi-task vote** (item 1, GPU) does not improve on the GPU
+  `crf_ens3` over the random splits: +1.26 [−1.08, +3.59] fine-grained,
+  −0.07 [−2.02, +1.87] coarse-grained. `crf_ens3` stays the system in
+  distribution.
+- **Label semantics on the multi-task model** (item 2, GPU) passes neither
+  protocol against the CRF head:
+  - random splits: +0.76 [−0.57, +2.10] fine-grained, +0.65 [−0.63, +1.93]
+    coarse-grained;
+  - unseen papers: +4.08 [−1.99, +10.14] fine-grained, −0.01 [−2.64, +2.63]
+    coarse-grained.
+- **Self-training with 3 teachers** (item 3, GPU) improves fine-grained on
+  unseen papers: +1.07 [+0.33, +1.80] over the CRF head, positive on every
+  paper. Coarse-grained: +0.85 [−0.58, +2.29].
+  - Tagging all 40,000 corpus sentences gives 607–1,256 silver sentences
+    per paper fine-grained, against 60–240 per run in week 3 (out of 2,000
+    tagged). That is about 6 times more on average, not the 20 times item 3
+    expected: few sentences get the same tags from all 3 teachers with
+    every marginal at 0.9 or more.
+  - The students stay below their teachers' vote: −1.01 [−1.63, −0.39]
+    against the GPU `crf_ens3`, negative on every paper. Only a vote can
+    change the reported system, so it is unchanged.
 - **The GPU runner** (item 5): `kaggle_jobs.py` uploads a frozen commit
   and runs the jobs on two T4 GPUs. A CRF run takes 1.2 minutes (13–27 on
-  2 CPU threads). A run repeats exactly, on either GPU and across code
-  commits.
+  2 CPU threads).
+  - A run repeats exactly, on either GPU, across code commits and across
+    sessions: the 24 teachers trained inside the self-training runs score
+    exactly as the GPU `crf_m*` runs of the other session.
+  - All GPU runs share one environment (Tesla T4, CUDA 12.8, torch 2.11.0,
+    transformers 5.18.0).
 
-Running next: the GPU reference and multi-task (item 1), label semantics
-and its combination with multi-task (item 2), then self-training at scale
-(item 3).
+The GPU runs do not confirm the coarse-grained gains of week 3 or the CPU
+label-semantics vote. These are the GPU repeats, which are reported without
+a decision:
 
-Next, after week 3, in this order:
+| Change, coarse-grained | CPU | GPU |
+|---|---|---|
+| multi-task, random splits | +0.75 [+0.10, +1.39] | −0.08 [−1.71, +1.55] |
+| label semantics, unseen papers | +1.17 [+0.94, +1.41] | +0.07 [−2.47, +2.61] |
+| label-semantics vote vs `crf_ens3`, unseen papers | +1.63 [+0.11, +3.16] | +0.40 [−1.36, +2.16] |
+
+Each GPU interval still contains the CPU estimate, so the GPU runs do not
+refute these gains either. The gains are about 1 point. The hardware alone
+moves the 3-seed mean of the CRF head by 1.2 points per split on average
+(up to 2.7, with the same seeds and splits). Three seeds per split cannot
+settle effects of this size. The CPU decisions stand, as the protocol fixed.
+`crf_ls_ens3` therefore remains the coarse-grained system on unseen papers,
+with this caveat.
+
+The changes that repeat on both machines are fine-grained, on unseen
+papers:
+- multi-task: +3.39 [+0.45, +6.34] on the CPU (week 3) and +3.87
+  [−2.25, +9.99] on the GPU. Its GPU vote is +4.09 [−0.89, +9.07] against
+  the GPU `crf_ens3`.
+- self-training: +2.91 [−0.73, +6.56] on the CPU (week 3) and +2.14
+  [−1.02, +5.29] on the GPU. With 3 teachers it is +1.07 [+0.33, +1.80].
+
+Still running: self-training with 3 teachers on the random splits
+(reported, no decision).
+
+Next, after week 4, in this order:
+1. **Ten seeds per split before the next claim.** Two week-3 gains and the
+   CPU label-semantics vote did not repeat on the GPU, so 3 seeds per split
+   cannot settle gains of about 1 point. A GPU run takes about a minute.
+   Ten seeds on the 5 random splits and the 4 papers, both granularities,
+   therefore take about 2 hours of a 2-GPU Kaggle session per family
+   (self-training takes longer).
+   - Re-run four families this way under the week-4 rule: the CRF
+     reference, multi-task, label semantics, and self-training with 3
+     teachers.
+   - Decide the reported system on these 10-seed results.
+2. **Multi-task and self-training together, fine-grained, on unseen
+   papers.** These are the two changes whose fine-grained gains repeat on
+   both machines:
+   - multi-task: +3.39 on the CPU and +3.87 on the GPU;
+   - self-training: +2.91 on the CPU and +2.14 on the GPU.
+
+   They work differently, so their gains may add up. The design:
+   - 3 multi-task teachers tag the corpus. This gives silver data for both
+     granularities at once.
+   - 3 multi-task students are trained, and their vote is compared with
+     `crf_ens3`. Single students stay below the teachers' vote.
+   - The silver filter is looser: 2 of 3 teachers, or a lower marginal,
+     chosen on the validation sets. The unanimous filter keeps few
+     sentences.
+3. **A larger encoder.** Every encoder tried so far is base-sized:
+   MatSciBERT, SciBERT and PubMedBERT. DeBERTa-v3-large (435M parameters)
+   is the obvious candidate on a 16 GB T4. Screen it with 3 seeds, then
+   use the 10-seed design if it helps.
+4. **Document context.** Each sentence is tagged on its own, although the
+   CoNLL files keep each paper's sentences in reading order. Give the
+   encoder the neighbouring sentences as context and tag only the middle
+   one (FLERT; Schweter and Akbik, 2020). This targets unseen papers, where
+   a term is often introduced once and then reused.
+5. **Rare coarse-grained types.** The coarse-grained claim fails only
+   under macro F1 (73.03 [67.79, 78.27] vs 72.32), where rare types count
+   as much as frequent ones. The results files keep per-class F1. Find the
+   types that pull macro F1 down and target them, for example with silver
+   sentences selected for those types.
+6. **Pin down the comparison with the paper** (item 4 below, still open):
+   ask the authors for their split and averaging.
+
+Week 4 closes label semantics on the multi-task model, and the multi-task
+vote in distribution.
+
+After week 3 the list was, in this order (week 4 ran items 1, 2, 3 and 5;
+protocol in §4):
 1. **Vote over the changes that help.** A seed ensemble gains about 2
    points over the mean of its members, and each week-3 gain is about 1
    point over a single CRF model. Vote over the 3 seeds of each, and
@@ -132,13 +229,15 @@ Next, after week 3, in this order:
    must be repeated with `--save-predictions`. The reported system changes
    only for a vote that improves on `crf_ens3`. *Week 4: the
    label-semantics vote improves on `crf_ens3` coarse-grained on unseen
-   papers; the self-training vote misses again; the multi-task vote runs on
-   the GPU.*
+   papers on the CPU, which the GPU repeat does not confirm; the
+   self-training vote misses again; the multi-task vote does not pass.*
 2. **Combine the two changes that use the label hierarchy.** Multi-task
    training shares one encoder between the fine and coarse heads. Coarse
    label semantics describes each type by its fine-grained classes. Today
    `--label-semantics` is not available with `--multi-task`; the code
    change is a label-semantic head on each head of the multi-task model.
+   *Week 4: done (`--multi-task --label-semantics`); no significant change
+   on either protocol.*
 3. **Self-training at scale, fine-grained.** The near-miss used 60–240
    silver sentences per run, out of 2,000 tagged. Two changes would give
    about 20 times more silver data:
@@ -146,7 +245,9 @@ Next, after week 3, in this order:
    - use the ensemble as the teacher.
 
    The student would then take hours per run on CPU, so this needs a GPU
-   (item 5).
+   (item 5). *Week 4: with 3 teachers, unanimous, fine-grained improves on
+   unseen papers (+1.07 [+0.33, +1.80]). The silver data grew only about 6
+   times, and the students stay below the teachers' vote.*
 4. **Pin down the comparison with the paper.** Ask the authors for their
    split and averaging. The fine-grained claim holds under any averaging.
    The coarse-grained claim fails under macro F1, where rare types count as
@@ -564,7 +665,7 @@ chance at class level. For a Task C-style result:
 | 1 | Done: class weights (no significant change) and CRF (significant gain in all four comparisons), P1 items 3–4 | Met by the CRF head |
 | 2 | Done: multi-task NER (fine + coarse heads), domain-adaptive pre-training and a 3-model ensemble, all with `--crf` (P1 items 2, 5 and 8; protocol below) | Not met: no 95% CI lies above 0 against the CRF head on the random splits; the ensemble comes closest (+3.39 fine-grained, +1.30 coarse-grained) and is the only change that improves on unseen papers (coarse-grained) |
 | 3 | Done: NER, P1 "Next, after week 2" items 1–5: comparisons of 3-seed means, a mixed-backbone ensemble, label semantics and self-training for unseen papers, multi-task again, in-domain pre-training (protocol below) | Met for two changes, both coarse-grained: multi-task on the random splits (+0.75 [+0.10, +1.39]) and label semantics on unseen papers (+1.17 [+0.94, +1.41]). The mixed-backbone vote, self-training and in-domain pre-training do not pass; the reported system stays `crf_ens3` |
-| 4 | In progress: NER, P1 "Next, after week 3" items 1, 2, 3 and 5: votes over the week-3 changes that help, label semantics on the multi-task model, self-training at scale, on a Kaggle GPU (protocol below). Not started: context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | For NER, a change that passes a week-4 decision (protocol below); typing accuracy above the hybrid + LLM baseline (§1) |
+| 4 | Done for NER, except the random-split self-training runs (reported, still running): P1 "Next, after week 3" items 1, 2, 3 and 5, i.e. votes over the week-3 changes that help, label semantics on the multi-task model, self-training at scale, on Kaggle T4 GPUs (protocol below). Not started: context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | Met for NER by two changes, both on unseen papers. Coarse-grained, the label-semantics vote improves on `crf_ens3` on the CPU (+1.63 [+0.11, +3.16]); the GPU repeat does not confirm it (+0.40 [−1.36, +2.16]). Fine-grained, self-training with 3 teachers improves on the CRF head (GPU, +1.07 [+0.33, +1.80]). The multi-task vote and label semantics on the multi-task model do not pass. Typing: not started |
 | 5 | Class-level taxonomy (LLM or cross-encoder + arborescence); relation annotation pilot | First class-level taxonomy F1 above chance; relation guidelines |
 
 ### Week 2 protocol (fixed before any run)

@@ -121,14 +121,18 @@ WEEK4_NAMES = {**WEEK3_NAMES, 'crf_ls_ens3': 'label-semantics vote',
                'crf_st_ens3': 'self-training vote', 'crf_mt_ens3': 'multi-task vote',
                'crf_mt_ls': 'label semantics on the multi-task model',
                'crf_st3': 'self-training with 3 teachers'}
-# the week-4 decisions that get a verdict bullet: (comparisons file, variant, reference, runs)
+# the week-4 comparisons that get a verdict bullet: the decisions, then the GPU repeats of
+# the CPU votes and of the week-3 changes (comparisons file, variant, reference, runs)
 WEEK4_VERDICTS = ((WEEK4_FILE, 'crf_ls_ens3', 'crf_ens3', 'CPU'),
                   (WEEK4_FILE, 'crf_st_ens3', 'crf_ens3', 'CPU'),
                   (GPU_PREFIX + WEEK4_FILE, 'crf_mt_ens3', 'crf_ens3', 'GPU'),
                   (GPU_PREFIX + WEEK4_FILE, 'crf_mt_ls', 'crf', 'GPU'),
                   (GPU_PREFIX + WEEK4_FILE, 'crf_st3', 'crf', 'GPU'),
                   (GPU_PREFIX + WEEK4_FILE, 'crf_ls_ens3', 'crf_ens3', 'GPU'),
-                  (GPU_PREFIX + WEEK4_FILE, 'crf_st_ens3', 'crf_ens3', 'GPU'))
+                  (GPU_PREFIX + WEEK4_FILE, 'crf_st_ens3', 'crf_ens3', 'GPU'),
+                  (GPU_PREFIX + WEEK4_FILE, 'crf_mt', 'crf', 'GPU'),
+                  (GPU_PREFIX + WEEK4_FILE, 'crf_ls', 'crf', 'GPU'),
+                  (GPU_PREFIX + WEEK4_FILE, 'crf_st', 'crf', 'GPU'))
 # `role` of a week-3 or week-4 comparison, as the verdict bullets word it
 ROLE_WORDS = {'decision': 'the pre-registered decision', 'reported': 'reported, no decision'}
 # averages the reported system is checked under against the published F1
@@ -1034,7 +1038,8 @@ def readme_block(res, note=''):
     """The generated block of README.md, markers included."""
     return f"""<!-- RESULTS:START -->
 All numbers are leakage-free and come from the JSON files in [`results/`](results/)
-(CPU, `SEED=0`; LLM = `openai/gpt-4o-mini` via OpenRouter). Gold term spans
+(CPU, `SEED=0`, except the week-4 runs on Kaggle T4 GPUs in [`results/gpu/`](results/gpu/),
+marked GPU; LLM = `openai/gpt-4o-mini` via OpenRouter). Gold term spans
 are given to the pipeline and the typing baselines. "Gold types used" marks
 outputs whose predictions had access to the gold labels: those rows are
 reported only to show the size of the leak.

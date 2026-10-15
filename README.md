@@ -74,7 +74,8 @@ Stand-alone baselines:
 
 <!-- RESULTS:START -->
 All numbers are leakage-free and come from the JSON files in [`results/`](results/)
-(CPU, `SEED=0`; LLM = `openai/gpt-4o-mini` via OpenRouter). Gold term spans
+(CPU, `SEED=0`, except the week-4 runs on Kaggle T4 GPUs in [`results/gpu/`](results/gpu/),
+marked GPU; LLM = `openai/gpt-4o-mini` via OpenRouter). Gold term spans
 are given to the pipeline and the typing baselines. "Gold types used" marks
 outputs whose predictions had access to the gold labels: those rows are
 reported only to show the size of the leak.
@@ -251,6 +252,52 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
 | label-semantics vote vs CRF head | CPU | leave one paper out | coarse | 4 | 63.05 [57.09, 69.02] | +4.02 [+3.18, +4.86] | +4.36 [+2.20, +6.53] | reported |
 | self-training vote vs CRF head | CPU | leave one paper out | fine | 4 | 53.23 [45.05, 61.41] | +5.72 [+2.33, +9.12] | +5.14 [-0.37, +10.66] | reported |
 | self-training vote vs CRF head | CPU | leave one paper out | coarse | 4 | 61.33 [55.29, 67.37] | +2.30 [-0.62, +5.21] | +2.71 [+1.64, +3.79] | reported |
+| multi-task vote vs 3-model seed ensemble | GPU | new random split per seed | fine | 5 | 81.16 [79.03, 83.29] | +1.26 [-1.08, +3.59] | +1.09 [-1.80, +3.98] | decision |
+| multi-task vote vs 3-model seed ensemble | GPU | new random split per seed | coarse | 5 | 79.12 [77.37, 80.87] | -0.07 [-2.02, +1.87] | -2.20 [-9.67, +5.26] | decision |
+| multi-task vote vs 3-model seed ensemble | GPU | leave one paper out | fine | 4 | 52.55 [46.03, 59.08] | +4.09 [-0.89, +9.07] | +4.85 [-9.15, +18.85] | reported |
+| multi-task vote vs 3-model seed ensemble | GPU | leave one paper out | coarse | 4 | 61.20 [54.53, 67.86] | -0.10 [-5.04, +4.85] | -0.49 [-11.76, +10.78] | reported |
+| label semantics on the multi-task model vs CRF head | GPU | new random split per seed | fine | 5 | 78.36 [75.89, 80.83] | +0.76 [-0.57, +2.10] | +2.09 [+1.00, +3.18] | decision |
+| label semantics on the multi-task model vs CRF head | GPU | new random split per seed | coarse | 5 | 78.24 [75.78, 80.70] | +0.65 [-0.63, +1.93] | -0.73 [-3.29, +1.84] | decision |
+| label semantics on the multi-task model vs CRF head | GPU | leave one paper out | fine | 4 | 50.45 [40.91, 60.00] | +4.08 [-1.99, +10.14] | +2.64 [-5.89, +11.17] | decision |
+| label semantics on the multi-task model vs CRF head | GPU | leave one paper out | coarse | 4 | 59.27 [52.19, 66.34] | -0.01 [-2.64, +2.63] | -0.03 [-4.57, +4.51] | decision |
+| self-training with 3 teachers vs CRF head | GPU | leave one paper out | fine | 4 | 47.44 [40.17, 54.72] | +1.07 [+0.33, +1.80] | -0.54 [-1.96, +0.88] | decision |
+| self-training with 3 teachers vs CRF head | GPU | leave one paper out | coarse | 4 | 60.12 [53.23, 67.02] | +0.85 [-0.58, +2.29] | +0.51 [-2.48, +3.50] | decision |
+| label-semantics vote vs 3-model seed ensemble | GPU | new random split per seed | fine | 5 | 78.16 [74.24, 82.07] | -1.74 [-3.84, +0.35] | -0.99 [-4.71, +2.73] | reported |
+| label-semantics vote vs 3-model seed ensemble | GPU | new random split per seed | coarse | 5 | 78.59 [75.69, 81.49] | -0.60 [-2.98, +1.78] | -0.75 [-3.08, +1.58] | reported |
+| label-semantics vote vs 3-model seed ensemble | GPU | leave one paper out | fine | 4 | 48.97 [42.10, 55.84] | +0.51 [-1.56, +2.59] | -0.20 [-5.51, +5.11] | reported |
+| label-semantics vote vs 3-model seed ensemble | GPU | leave one paper out | coarse | 4 | 61.70 [56.04, 67.35] | +0.40 [-1.36, +2.16] | +1.64 [-2.95, +6.24] | reported |
+| self-training vote vs 3-model seed ensemble | GPU | leave one paper out | fine | 4 | 50.86 [44.43, 57.28] | +2.40 [-2.53, +7.33] | +2.79 [-2.02, +7.60] | reported |
+| self-training vote vs 3-model seed ensemble | GPU | leave one paper out | coarse | 4 | 61.20 [55.67, 66.74] | -0.09 [-2.85, +2.67] | -0.50 [-8.21, +7.21] | reported |
+| 3-model seed ensemble vs CRF head | GPU | new random split per seed | fine | 5 | 79.90 [76.68, 83.12] | +2.30 [+1.75, +2.85] | +2.86 [+1.80, +3.92] | reported |
+| 3-model seed ensemble vs CRF head | GPU | new random split per seed | coarse | 5 | 79.19 [77.86, 80.53] | +1.61 [+0.65, +2.57] | +0.88 [-1.04, +2.81] | reported |
+| 3-model seed ensemble vs CRF head | GPU | leave one paper out | fine | 4 | 48.46 [40.81, 56.10] | +2.08 [+0.97, +3.19] | +0.81 [-1.99, +3.61] | reported |
+| 3-model seed ensemble vs CRF head | GPU | leave one paper out | coarse | 4 | 61.30 [55.74, 66.85] | +2.02 [-0.03, +4.08] | +1.79 [-1.32, +4.91] | reported |
+| multi-task vote vs CRF head | GPU | new random split per seed | fine | 5 | 81.16 [79.03, 83.29] | +3.56 [+1.39, +5.72] | +3.95 [+1.11, +6.79] | reported |
+| multi-task vote vs CRF head | GPU | new random split per seed | coarse | 5 | 79.12 [77.37, 80.87] | +1.54 [-0.57, +3.64] | -1.32 [-7.66, +5.02] | reported |
+| multi-task vote vs CRF head | GPU | leave one paper out | fine | 4 | 52.55 [46.03, 59.08] | +6.18 [+1.51, +10.84] | +5.66 [-5.76, +17.07] | reported |
+| multi-task vote vs CRF head | GPU | leave one paper out | coarse | 4 | 61.20 [54.53, 67.86] | +1.93 [-1.68, +5.53] | +1.30 [-7.02, +9.62] | reported |
+| multi-task (fine + coarse heads) vs CRF head | GPU | new random split per seed | fine | 5 | 79.34 [76.62, 82.07] | +1.74 [-0.36, +3.84] | +2.17 [+0.28, +4.05] | reported |
+| multi-task (fine + coarse heads) vs CRF head | GPU | new random split per seed | coarse | 5 | 77.50 [75.66, 79.35] | -0.08 [-1.71, +1.55] | -2.48 [-9.28, +4.32] | reported |
+| multi-task (fine + coarse heads) vs CRF head | GPU | leave one paper out | fine | 4 | 50.24 [41.49, 59.00] | +3.87 [-2.25, +9.99] | +3.99 [-6.38, +14.36] | reported |
+| multi-task (fine + coarse heads) vs CRF head | GPU | leave one paper out | coarse | 4 | 58.59 [51.42, 65.77] | -0.68 [-4.51, +3.15] | -0.84 [-7.87, +6.19] | reported |
+| label semantics vs CRF head | GPU | new random split per seed | fine | 5 | 76.84 [73.57, 80.12] | -0.76 [-3.61, +2.09] | +0.24 [-3.93, +4.42] | reported |
+| label semantics vs CRF head | GPU | new random split per seed | coarse | 5 | 77.44 [74.55, 80.32] | -0.15 [-1.68, +1.38] | -1.49 [-3.73, +0.74] | reported |
+| label semantics vs CRF head | GPU | leave one paper out | fine | 4 | 47.70 [41.02, 54.37] | +1.32 [-0.43, +3.06] | +0.42 [-3.75, +4.60] | reported |
+| label semantics vs CRF head | GPU | leave one paper out | coarse | 4 | 59.34 [54.28, 64.39] | +0.07 [-2.47, +2.61] | +0.65 [-4.24, +5.54] | reported |
+| self-training vs CRF head | GPU | leave one paper out | fine | 4 | 48.51 [42.66, 54.36] | +2.14 [-1.02, +5.29] | +0.38 [-1.99, +2.75] | reported |
+| self-training vs CRF head | GPU | leave one paper out | coarse | 4 | 58.18 [51.57, 64.80] | -1.09 [-4.31, +2.14] | -1.57 [-7.91, +4.78] | reported |
+| label semantics on the multi-task model vs multi-task (fine + coarse heads) | GPU | new random split per seed | fine | 5 | 78.36 [75.89, 80.83] | -0.98 [-2.24, +0.28] | -0.08 [-1.68, +1.52] | reported |
+| label semantics on the multi-task model vs multi-task (fine + coarse heads) | GPU | new random split per seed | coarse | 5 | 78.24 [75.78, 80.70] | +0.73 [-0.22, +1.68] | +1.76 [-2.78, +6.29] | reported |
+| label semantics on the multi-task model vs multi-task (fine + coarse heads) | GPU | leave one paper out | fine | 4 | 50.45 [40.91, 60.00] | +0.21 [-5.83, +6.24] | -1.36 [-5.60, +2.89] | reported |
+| label semantics on the multi-task model vs multi-task (fine + coarse heads) | GPU | leave one paper out | coarse | 4 | 59.27 [52.19, 66.34] | +0.67 [-0.60, +1.95] | +0.81 [-1.81, +3.43] | reported |
+| label semantics on the multi-task model vs label semantics | GPU | new random split per seed | fine | 5 | 78.36 [75.89, 80.83] | +1.52 [-1.34, +4.38] | +1.85 [-1.55, +5.24] | reported |
+| label semantics on the multi-task model vs label semantics | GPU | new random split per seed | coarse | 5 | 78.24 [75.78, 80.70] | +0.80 [-0.74, +2.34] | +0.76 [-1.39, +2.92] | reported |
+| label semantics on the multi-task model vs label semantics | GPU | leave one paper out | fine | 4 | 50.45 [40.91, 60.00] | +2.76 [-1.63, +7.14] | +2.22 [-4.21, +8.65] | reported |
+| label semantics on the multi-task model vs label semantics | GPU | leave one paper out | coarse | 4 | 59.27 [52.19, 66.34] | -0.07 [-3.50, +3.35] | -0.68 [-4.00, +2.64] | reported |
+| self-training with 3 teachers vs self-training | GPU | leave one paper out | fine | 4 | 47.44 [40.17, 54.72] | -1.07 [-4.74, +2.60] | -0.92 [-4.26, +2.42] | reported |
+| self-training with 3 teachers vs self-training | GPU | leave one paper out | coarse | 4 | 60.12 [53.23, 67.02] | +1.94 [-2.68, +6.56] | +2.08 [-3.27, +7.42] | reported |
+| self-training with 3 teachers vs 3-model seed ensemble | GPU | leave one paper out | fine | 4 | 47.44 [40.17, 54.72] | -1.01 [-1.63, -0.39] | -1.35 [-2.89, +0.19] | reported |
+| self-training with 3 teachers vs 3-model seed ensemble | GPU | leave one paper out | coarse | 4 | 60.12 [53.23, 67.02] | -1.17 [-2.61, +0.27] | -1.29 [-6.21, +3.64] | reported |
 
 **Reading the numbers**
 * The old "Term F1 0.91" corresponds to *0.12* pairwise alignment F1. The
@@ -285,6 +332,15 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
 * NER week 3, in-domain pre-training vs the CRF head (3-seed means, paired micro-F1 difference): fine-grained no significant change (+0.11, 95% CI [-2.74, +2.97]; strict IOB2 +0.11 [-2.74, +2.97]); coarse-grained no significant change (-0.15, 95% CI [-1.06, +0.76]; strict IOB2 -0.15 [-1.06, +0.76]) across the 5 random splits (the pre-registered decision). Leaving one paper out (reported, no decision): fine-grained no significant change (+0.14, 95% CI [-2.60, +2.88]; strict IOB2 +0.14 [-2.60, +2.88]); coarse-grained no significant change (-1.54, 95% CI [-4.34, +1.26]; strict IOB2 -1.54 [-4.34, +1.26]).
 * NER week 4 (CPU runs), label-semantics vote vs the 3-model seed ensemble (paired micro-F1 difference): fine-grained hurts (-1.16, 95% CI [-2.31, -0.01]; strict IOB2 -1.16 [-2.31, -0.01]); coarse-grained hurts (-0.95, 95% CI [-1.88, -0.02]; strict IOB2 -0.95 [-1.88, -0.02]) across the 5 random splits (reported, no decision). Leaving one paper out (the pre-registered decision): fine-grained no significant change (+0.36, 95% CI [-2.53, +3.24]; strict IOB2 +0.36 [-2.53, +3.24]); coarse-grained improves (+1.63, 95% CI [+0.11, +3.16]; strict IOB2 +1.63 [+0.11, +3.16]).
 * NER week 4 (CPU runs), self-training vote vs the 3-model seed ensemble (paired micro-F1 difference): leaving one paper out (the pre-registered decision): fine-grained no significant change (+3.68, 95% CI [-1.15, +8.52]; strict IOB2 +3.68 [-1.15, +8.52]); coarse-grained no significant change (-0.09, 95% CI [-3.52, +3.35]; strict IOB2 -0.09 [-3.52, +3.35]).
+* NER week 4 (GPU runs), multi-task vote vs the 3-model seed ensemble (paired micro-F1 difference): fine-grained no significant change (+1.26, 95% CI [-1.08, +3.59]; strict IOB2 +1.26 [-1.08, +3.59]); coarse-grained no significant change (-0.07, 95% CI [-2.02, +1.87]; strict IOB2 -0.07 [-2.02, +1.87]) across the 5 random splits (the pre-registered decision). Leaving one paper out (reported, no decision): fine-grained no significant change (+4.09, 95% CI [-0.89, +9.07]; strict IOB2 +4.09 [-0.89, +9.07]); coarse-grained no significant change (-0.10, 95% CI [-5.04, +4.85]; strict IOB2 -0.10 [-5.04, +4.85]).
+* NER week 4 (GPU runs), label semantics on the multi-task model vs the CRF head (paired micro-F1 difference): fine-grained no significant change (+0.76, 95% CI [-0.57, +2.10]; strict IOB2 +0.76 [-0.57, +2.10]); coarse-grained no significant change (+0.65, 95% CI [-0.63, +1.93]; strict IOB2 +0.65 [-0.63, +1.93]) across the 5 random splits (the pre-registered decision). Leaving one paper out (the pre-registered decision): fine-grained no significant change (+4.08, 95% CI [-1.99, +10.14]; strict IOB2 +4.08 [-1.99, +10.14]); coarse-grained no significant change (-0.01, 95% CI [-2.64, +2.63]; strict IOB2 -0.01 [-2.64, +2.63]).
+* NER week 4 (GPU runs), self-training with 3 teachers vs the CRF head (paired micro-F1 difference): leaving one paper out (the pre-registered decision): fine-grained improves (+1.07, 95% CI [+0.33, +1.80]; strict IOB2 +1.07 [+0.33, +1.80]); coarse-grained no significant change (+0.85, 95% CI [-0.58, +2.29]; strict IOB2 +0.85 [-0.58, +2.29]).
+* NER week 4 (GPU runs), label-semantics vote vs the 3-model seed ensemble (paired micro-F1 difference): fine-grained no significant change (-1.74, 95% CI [-3.84, +0.35]; strict IOB2 -1.74 [-3.84, +0.35]); coarse-grained no significant change (-0.60, 95% CI [-2.98, +1.78]; strict IOB2 -0.60 [-2.98, +1.78]) across the 5 random splits (reported, no decision). Leaving one paper out (reported, no decision): fine-grained no significant change (+0.51, 95% CI [-1.56, +2.59]; strict IOB2 +0.51 [-1.56, +2.59]); coarse-grained no significant change (+0.40, 95% CI [-1.36, +2.16]; strict IOB2 +0.40 [-1.36, +2.16]).
+* NER week 4 (GPU runs), self-training vote vs the 3-model seed ensemble (paired micro-F1 difference): leaving one paper out (reported, no decision): fine-grained no significant change (+2.40, 95% CI [-2.53, +7.33]; strict IOB2 +2.40 [-2.53, +7.33]); coarse-grained no significant change (-0.09, 95% CI [-2.85, +2.67]; strict IOB2 -0.09 [-2.85, +2.67]).
+* NER week 4 (GPU runs), multi-task (fine + coarse heads) vs the CRF head (paired micro-F1 difference): fine-grained no significant change (+1.74, 95% CI [-0.36, +3.84]; strict IOB2 +1.74 [-0.36, +3.84]); coarse-grained no significant change (-0.08, 95% CI [-1.71, +1.55]; strict IOB2 -0.08 [-1.71, +1.55]) across the 5 random splits (reported, no decision). Leaving one paper out (reported, no decision): fine-grained no significant change (+3.87, 95% CI [-2.25, +9.99]; strict IOB2 +3.87 [-2.25, +9.99]); coarse-grained no significant change (-0.68, 95% CI [-4.51, +3.15]; strict IOB2 -0.68 [-4.51, +3.15]).
+* NER week 4 (GPU runs), label semantics vs the CRF head (paired micro-F1 difference): fine-grained no significant change (-0.76, 95% CI [-3.61, +2.09]; strict IOB2 -0.76 [-3.61, +2.09]); coarse-grained no significant change (-0.15, 95% CI [-1.68, +1.38]; strict IOB2 -0.15 [-1.68, +1.38]) across the 5 random splits (reported, no decision). Leaving one paper out (reported, no decision): fine-grained no significant change (+1.32, 95% CI [-0.43, +3.06]; strict IOB2 +1.32 [-0.43, +3.06]); coarse-grained no significant change (+0.07, 95% CI [-2.47, +2.61]; strict IOB2 +0.07 [-2.47, +2.61]).
+* NER week 4 (GPU runs), self-training vs the CRF head (paired micro-F1 difference): leaving one paper out (reported, no decision): fine-grained no significant change (+2.14, 95% CI [-1.02, +5.29]; strict IOB2 +2.14 [-1.02, +5.29]); coarse-grained no significant change (-1.09, 95% CI [-4.31, +2.14]; strict IOB2 -1.09 [-4.31, +2.14]).
+* NER, GPU minus CPU (descriptive, not a comparison of methods): the CRF head with the same seeds and splits, 3-seed means, fine-grained +0.31 [-2.38, +3.00]; coarse-grained -0.07 [-1.19, +1.05] over the 5 random splits; fine-grained -1.13 [-3.07, +0.81]; coarse-grained +0.24 [-1.52, +1.99] over the 4 held-out papers. This is why GPU runs are compared only with GPU runs.
 <!-- RESULTS:END -->
 
 ## Evaluation
@@ -412,7 +468,8 @@ For NER, the reported system is the 3-model seed ensemble of the CRF head
 under micro, macro and weighted F1. It beats the coarse-grained number under
 micro and weighted F1, but not under macro F1. On unseen papers,
 coarse-grained, the label-semantics vote (`crf_ls_ens3`) replaces it since
-week 4.
+week 4. That decision was taken on the CPU; the GPU repeat does not confirm
+the gain.
 
 Week 3 compared 3-seed means. It found two smaller gains for single models,
 both coarse-grained: multi-task training in distribution, and label semantics
@@ -420,14 +477,27 @@ on unseen papers. Mixing backbones, self-training and in-domain pre-training
 did not pass the pre-registered rule. New NER experiments should use the CRF
 head (`--crf`) and be compared with the 3-seed mean of its runs.
 
-Week 4 is in progress (ROADMAP §4); its new training runs on Kaggle's free
-T4 GPUs (`src/graph/kaggle_jobs.py`), where a run takes about a minute and
-repeats exactly. GPU runs are compared only with GPU runs. It covers ROADMAP
-P1, "Next, after week 3", items 1, 2, 3 and 5:
-- votes over the changes that help (the label-semantics and self-training
-  votes are done);
-- label semantics on the multi-task model;
-- self-training at scale.
+Week 4 (ROADMAP §4) ran its new training on Kaggle's free T4 GPUs
+(`src/graph/kaggle_jobs.py`). A run takes about a minute there and repeats
+exactly. GPU runs are compared only with GPU runs.
+- The multi-task vote does not pass, and neither does label semantics on
+  the multi-task model.
+- Self-training with 3 teachers tags the whole 40,000-sentence corpus. It
+  improves fine-grained on unseen papers: +1.07 [+0.33, +1.80] over the CRF
+  head. Its students stay below the seed ensemble.
+- The GPU runs do not confirm the coarse-grained gains of week 3 or the CPU
+  label-semantics vote, which gives +0.40 [−1.36, +2.16] on the GPU. These
+  gains are about 1 point, about as much as the hardware alone moves a
+  3-seed mean.
+
+The next steps are in ROADMAP P1, "Next, after week 4":
+1. 10 seeds per split;
+2. multi-task self-training with a vote over the students;
+3. a larger encoder;
+4. document context.
+
+The random-split runs of 3-teacher self-training (reported) are still
+running.
 
 ## License
 

@@ -52,4 +52,18 @@ threads where the `_crf` runs used 3, so a run with the same seeds is not
 bit-identical. In week 3 a trailing `_m<N>` marks one seed of a family
 (`_crf_mt_m100`, `_crf_ls_m0`, `_crf_dapt2_m200`), `_crf_scibert` and
 `_crf_pubmedbert` change the encoder, and `_crf_mix3` is the vote of the
-three encoders.
+three encoders. Week 4 adds `_crf_ls_ens3` and `_crf_st_ens3`, the votes over
+the three label-semantics and self-training seeds.
+
+`gpu/` holds the week-4 runs on Kaggle T4 GPUs (ROADMAP §4, week-4
+protocol), under the same file names. Each run records its `environment`
+(GPU, CUDA, cuDNN, torch, transformers, deterministic algorithms); all runs
+share one environment and one frozen commit, and a run repeats exactly.
+GPU runs are compared only with GPU runs: `gpu/ner_week4_comparisons.json`
+(`ner_seedmeans.py --week 4 --gpu --results results/gpu`) holds those
+comparisons, plus descriptive GPU-minus-CPU entries (`role` `descriptive`)
+for the systems run on both machines. New in `gpu/`: `_crf_mt_ls_m<N>`
+(label semantics on the multi-task model) and `_crf_st3_m<N>` (self-training
+with 3 teachers, whose runs record each teacher's scores), and the vote
+`_crf_mt_ens3`. `kaggle_jobs.py collect` copies the files of a GPU session
+here after checking that every run is a GPU run with the shared environment.
