@@ -226,13 +226,21 @@ def corpus_sha256(report=CORPUS_REPORT):
     return json.loads(Path(report).read_text())['corpus']['sha256']
 
 
+def is_gpu_runs_file(path):
+    """A results file of GPU runs: it has runs, and every run has an environment."""
+    runs = json.loads(Path(path).read_text()).get('runs', [])
+    return bool(runs) and all('environment' in r for r in runs)
+
+
 def build_bundle(commit, out_dir, root=ROOT, results_dir=GPU_RESULTS, corpus=None,
                  expected_sha256=None, wheels=()):
     """Write the bundle files to out_dir (emptied first); returns BUNDLE.json's content.
 
     code.tar.gz is `git archive` of `commit` (the frozen code, tracked files only); the
-    corpus must have the recorded SHA-256; the GPU results files go in as
-    gpu__<name>.json, and the `wheels` (paths) as they are.
+    corpus must have the recorded SHA-256; the results files of GPU runs go in as
+    gpu__<name>.json, those whose every run has an environment (the votes made from GPU
+    runs have none and are not needed to resume runs), and the `wheels` (paths) as they
+    are.
     """
     out_dir = Path(out_dir)
     if out_dir.exists():
@@ -248,8 +256,8 @@ def build_bundle(commit, out_dir, root=ROOT, results_dir=GPU_RESULTS, corpus=Non
     if digest != expected:
         raise SystemExit(f'{corpus}: SHA-256 {digest}, not the recorded {expected}')
     shutil.copy2(corpus, out_dir / 'fatigue_sentences.txt')
-    results = sorted(p.name for p in Path(results_dir).glob('ner_results_*.json')) \
-        if Path(results_dir).is_dir() else []
+    results = sorted(p.name for p in Path(results_dir).glob('ner_results_*.json')
+                     if is_gpu_runs_file(p)) if Path(results_dir).is_dir() else []
     for name in results:
         shutil.copy2(Path(results_dir) / name, out_dir / f'{RESULTS_PREFIX}{name}')
     for wheel in wheels:

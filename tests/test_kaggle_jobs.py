@@ -120,7 +120,11 @@ def test_build_bundle(tmp_path):
     corpus.write_text('One sentence.\nAnother one.\n')
     results = tmp_path / 'gpu'
     results.mkdir()
-    (results / 'ner_results_fine_random_split_vary_crf_m0.json').write_text('{"runs": []}')
+    (results / 'ner_results_fine_random_split_vary_crf_m0.json').write_text(
+        json.dumps(_gpu_file('seed0')))
+    # a vote made from GPU runs has no environment: not needed to resume runs, left out
+    (results / 'ner_results_fine_random_split_vary_crf_ens3.json').write_text(
+        json.dumps(_gpu_file('seed0', env=None)))
     (results / 'notes.txt').write_text('not a results file')
     wheel = tmp_path / 'seqeval-1.2.2-py3-none-any.whl'
     wheel.write_bytes(b'PK')
