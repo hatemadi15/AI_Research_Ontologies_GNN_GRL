@@ -778,9 +778,11 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
 
     tokenizer = AutoTokenizer.from_pretrained(args.model)
     assert tokenizer.is_fast, 'a fast tokenizer is required for word_ids()'
+    # float32 whatever the checkpoint holds: transformers 5 loads a model in the dtype of its
+    # weights, and DeBERTa-v3's are float16, where training gives a NaN loss
     model = AutoModelForTokenClassification.from_pretrained(
-        args.model, num_labels=len(label_list), id2label=id2label, label2id=label2id
-    ).to(device)
+        args.model, num_labels=len(label_list), id2label=id2label, label2id=label2id,
+        dtype=torch.float32).to(device)
     if descriptions is not None:
         # embedded before any fine-tuning; the head replaces the linear classifier
         assert len(descriptions) == len(labels), 'one description per label'
@@ -1100,7 +1102,8 @@ def _define_tagger():
 
         def __init__(self, model_name, label_lists):
             super().__init__()
-            self.encoder = AutoModel.from_pretrained(model_name, add_pooling_layer=False)
+            self.encoder = AutoModel.from_pretrained(model_name, add_pooling_layer=False,
+                                                     dtype=torch.float32)   # as in train_one
             config = self.encoder.config
             p = getattr(config, 'classifier_dropout', None)
             self.dropout = torch.nn.Dropout(config.hidden_dropout_prob if p is None else p)
