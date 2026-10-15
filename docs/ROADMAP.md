@@ -97,6 +97,27 @@ gains there are fine-grained:
 - self-training, the decision: +2.91 [−0.73, +6.56], positive on every
   paper.
 
+Week 4 is in progress (protocol in §4). It runs items 1, 2, 3 and 5 of the
+list below, and all of its new training runs on Kaggle T4 GPUs. Done so far:
+- **The votes over the saved CPU predictions** (item 1, no training).
+  - Label semantics, coarse-grained, on unseen papers: the vote improves on
+    `crf_ens3` by +1.63 [+0.11, +3.16], positive on every paper. It
+    therefore replaces `crf_ens3` there (63.05 against 61.42).
+  - Label semantics, fine-grained: no significant change (+0.36
+    [−2.53, +3.24]). On the random splits (reported) the vote is below
+    `crf_ens3` at both granularities (−1.16 fine, −0.95 coarse), so
+    `crf_ens3` stays the system in distribution.
+  - Self-training, fine-grained, misses again: +3.68 [−1.15, +8.52],
+    positive on every paper. Coarse-grained: −0.09.
+- **The GPU runner** (item 5): `kaggle_jobs.py` uploads a frozen commit
+  and runs the jobs on two T4 GPUs. A CRF run takes 1.2 minutes (13–27 on
+  2 CPU threads). A run repeats exactly, on either GPU and across code
+  commits.
+
+Running next: the GPU reference and multi-task (item 1), label semantics
+and its combination with multi-task (item 2), then self-training at scale
+(item 3).
+
 Next, after week 3, in this order:
 1. **Vote over the changes that help.** A seed ensemble gains about 2
    points over the mean of its members, and each week-3 gain is about 1
@@ -109,7 +130,10 @@ Next, after week 3, in this order:
    The label-semantics and self-training runs saved their test
    predictions, so their votes need no training. The 27 multi-task runs
    must be repeated with `--save-predictions`. The reported system changes
-   only for a vote that improves on `crf_ens3`.
+   only for a vote that improves on `crf_ens3`. *Week 4: the
+   label-semantics vote improves on `crf_ens3` coarse-grained on unseen
+   papers; the self-training vote misses again; the multi-task vote runs on
+   the GPU.*
 2. **Combine the two changes that use the label hierarchy.** Multi-task
    training shares one encoder between the fine and coarse heads. Coarse
    label semantics describes each type by its fine-grained classes. Today
@@ -130,7 +154,8 @@ Next, after week 3, in this order:
    lost (macro −4.11).
 5. **A GPU.** A run takes 13–27 minutes on 2 CPU threads and about a
    minute on one GPU. That makes more seeds, larger backbones
-   (DeBERTa-v3-large) and item 3 practical.
+   (DeBERTa-v3-large) and item 3 practical. *Week 4: done, on Kaggle's
+   free T4 GPUs (§4).*
 
 Domain-adaptive pre-training is closed: neither PubMed (week 2) nor
 in-domain text (week 3) helps, although both lower the held-out perplexity.

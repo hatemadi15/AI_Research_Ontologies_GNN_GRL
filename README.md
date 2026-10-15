@@ -410,7 +410,9 @@ metrics and to compete with the published state of the art.
 For NER, the reported system is the 3-model seed ensemble of the CRF head
 (`crf_ens3`). Over 5 random splits it beats the published fine-grained number
 under micro, macro and weighted F1. It beats the coarse-grained number under
-micro and weighted F1, but not under macro F1.
+micro and weighted F1, but not under macro F1. On unseen papers,
+coarse-grained, the label-semantics vote (`crf_ls_ens3`) replaces it since
+week 4.
 
 Week 3 compared 3-seed means. It found two smaller gains for single models,
 both coarse-grained: multi-task training in distribution, and label semantics
@@ -418,10 +420,14 @@ on unseen papers. Mixing backbones, self-training and in-domain pre-training
 did not pass the pre-registered rule. New NER experiments should use the CRF
 head (`--crf`) and be compared with the 3-seed mean of its runs.
 
-ROADMAP P1, "Next, after week 3", lists what to try next:
-- votes over the changes that help;
+Week 4 is in progress (ROADMAP §4); its new training runs on Kaggle's free
+T4 GPUs (`src/graph/kaggle_jobs.py`), where a run takes about a minute and
+repeats exactly. GPU runs are compared only with GPU runs. It covers ROADMAP
+P1, "Next, after week 3", items 1, 2, 3 and 5:
+- votes over the changes that help (the label-semantics and self-training
+  votes are done);
 - label semantics on the multi-task model;
-- self-training at scale on a GPU.
+- self-training at scale.
 
 ## License
 
