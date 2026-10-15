@@ -58,6 +58,22 @@ per-split scores.
     not state its averaging, so both rows say under which averaging (micro, macro,
     weighted F1, as far as the summary has them) the CI over the 5 random splits lies
     above the published number.
+
+NER week 4 (results/ner_week4_comparisons.json and results/gpu/ner_week4_comparisons.json,
+written by `ner_seedmeans.py --week 4` and `--week 4 --gpu`)
+-------------------------------------------------------------------------------------------
+  * "NER week-4 comparisons": the complete comparisons of WEEK4_CPU_COMPARISONS (votes over
+    the saved CPU predictions), then of WEEK4_GPU_COMPARISONS (GPU runs, compared only with
+    GPU runs), in their order, with the machine in a Runs column. Each WEEK4_VERDICTS entry
+    gets a verdict bullet, and the descriptive GPU-minus-CPU entries of the CRF head one
+    bullet; they never get a row.
+  * The reported system then has two slots per granularity (week-4 protocol). In
+    distribution: the week-3 system, unless the GPU multi-task vote `crf_mt_ens3` improves
+    on the GPU `crf_ens3` over the 5 random splits; it is then reported with its GPU
+    results. On unseen papers: the week-3 system, unless a CPU vote (`crf_ls_ens3`,
+    `crf_st_ens3`) improves on `crf_ens3` over the 4 held-out papers (if both do, the larger
+    mean difference). Both rows name each slot's system, say "(week-4 protocol)" once a
+    week-4 comparisons file exists, and the published check uses the in-distribution one.
 """
 import argparse
 import difflib
@@ -89,7 +105,31 @@ WEEK3_NAMES = {'crf': 'CRF head', 'crf_ens3': '3-model seed ensemble',
                'crf_pubmedbert': 'PubMedBERT backbone', 'crf_ls': 'label semantics',
                'crf_st': 'self-training', 'crf_mt': 'multi-task (fine + coarse heads)',
                'crf_dapt2': 'in-domain pre-training'}
-# `role` of a week-3 comparison, as the verdict bullets word it
+# Week 4 (week-4 protocol, ROADMAP §4): the CPU votes in results/ and the GPU runs in
+# results/gpu/, each file's comparisons in the protocol's reporting order, as in
+# ner_seedmeans.WEEK4_CPU_COMPARISONS and WEEK4_GPU_COMPARISONS
+WEEK4_FILE = 'ner_week4_comparisons.json'
+GPU_PREFIX = 'gpu/'
+WEEK4_CPU_COMPARISONS = (('crf_ls_ens3', 'crf_ens3'), ('crf_st_ens3', 'crf_ens3'),
+                         ('crf_ls_ens3', 'crf'), ('crf_st_ens3', 'crf'))
+WEEK4_GPU_COMPARISONS = (('crf_mt_ens3', 'crf_ens3'), ('crf_mt_ls', 'crf'), ('crf_st3', 'crf'),
+                         ('crf_ls_ens3', 'crf_ens3'), ('crf_st_ens3', 'crf_ens3'),
+                         ('crf_ens3', 'crf'), ('crf_mt_ens3', 'crf'), ('crf_mt', 'crf'),
+                         ('crf_ls', 'crf'), ('crf_st', 'crf'), ('crf_mt_ls', 'crf_mt'),
+                         ('crf_mt_ls', 'crf_ls'), ('crf_st3', 'crf_st'), ('crf_st3', 'crf_ens3'))
+WEEK4_NAMES = {**WEEK3_NAMES, 'crf_ls_ens3': 'label-semantics vote',
+               'crf_st_ens3': 'self-training vote', 'crf_mt_ens3': 'multi-task vote',
+               'crf_mt_ls': 'label semantics on the multi-task model',
+               'crf_st3': 'self-training with 3 teachers'}
+# the week-4 decisions that get a verdict bullet: (comparisons file, variant, reference, runs)
+WEEK4_VERDICTS = ((WEEK4_FILE, 'crf_ls_ens3', 'crf_ens3', 'CPU'),
+                  (WEEK4_FILE, 'crf_st_ens3', 'crf_ens3', 'CPU'),
+                  (GPU_PREFIX + WEEK4_FILE, 'crf_mt_ens3', 'crf_ens3', 'GPU'),
+                  (GPU_PREFIX + WEEK4_FILE, 'crf_mt_ls', 'crf', 'GPU'),
+                  (GPU_PREFIX + WEEK4_FILE, 'crf_st3', 'crf', 'GPU'),
+                  (GPU_PREFIX + WEEK4_FILE, 'crf_ls_ens3', 'crf_ens3', 'GPU'),
+                  (GPU_PREFIX + WEEK4_FILE, 'crf_st_ens3', 'crf_ens3', 'GPU'))
+# `role` of a week-3 or week-4 comparison, as the verdict bullets word it
 ROLE_WORDS = {'decision': 'the pre-registered decision', 'reported': 'reported, no decision'}
 # averages the reported system is checked under against the published F1
 AVERAGES = ('micro', 'macro', 'weighted')
@@ -111,6 +151,8 @@ COMPARISON_COLUMNS = ("| Variant | Protocol | Granularity | Pairs | Variant micr
                       "Δ micro [95% CI] | Δ macro [95% CI] | Δ strict micro |")
 WEEK3_COLUMNS = ("| Comparison | Protocol | Granularity | Pairs | Variant micro F1 [95% CI] | "
                  "Δ micro [95% CI] | Δ macro [95% CI] | Δ strict micro |")
+WEEK4_COLUMNS = ("| Comparison | Runs | Protocol | Granularity | Pairs | Variant micro F1 [95% CI] | "
+                 "Δ micro [95% CI] | Δ macro [95% CI] | Role |")
 
 
 class ReportError(Exception):
@@ -494,11 +536,56 @@ def ner_week3_table(res):
     return out
 
 
+WEEK4_INTRO = (
+    "Δ = variant − reference on the same split, scored as in week 3: a model trained with 3 model "
+    "seeds scores their mean, a vote over them scores once. Pre-registered rule (week-4 protocol): "
+    "a change improves on its reference only if the 95% Student-t CI of the mean micro-F1 "
+    "difference lies entirely above 0. The CPU rows are votes over the saved predictions of the "
+    "week-3 runs, decided over the 4 held-out papers against the 3-model seed ensemble. The GPU "
+    "rows are runs on Kaggle T4 GPUs, compared only with GPU runs: the multi-task vote against "
+    "the GPU seed ensemble over the 5 random splits, label semantics on the multi-task model "
+    "against the GPU CRF head over the 5 random splits and over the 4 held-out papers, and "
+    "self-training with 3 teachers against the GPU CRF head over the 4 held-out papers; the "
+    "other GPU rows repeat week-3 comparisons and the CPU votes, without a decision.\n")
+
+
+def week4_rows(res):
+    """(runs, entry) of the complete week-4 comparisons: the CPU file's, then the GPU file's,
+    each by its comparison list, then protocol, then granularity (descriptive entries apart)."""
+    rows = []
+    for runs, name, comparisons in (('CPU', WEEK4_FILE, WEEK4_CPU_COMPARISONS),
+                                    ('GPU', GPU_PREFIX + WEEK4_FILE, WEEK4_GPU_COMPARISONS)):
+        comps = {k: c for k, c in res.comparisons(name).items() if c.get('role') != 'descriptive'}
+        for variant, reference in comparisons:
+            for protocol in ('random_split_vary', 'leave_one_paper_out'):
+                for g in GRANULARITIES:
+                    c = find_comparison(comps, g, protocol, variant, reference)
+                    if c:
+                        rows.append((runs, c))
+    return rows
+
+
+def ner_week4_table(res):
+    """Week-4 comparisons ([] if none is complete)."""
+    rows = week4_rows(res)
+    if not rows:
+        return []
+    out = ["\n#### NER week-4 comparisons (3-seed means; CPU votes, GPU runs)\n", WEEK4_INTRO,
+           WEEK4_COLUMNS, "|---|---|---|---|---|---|---|---|---|"]
+    for runs, c in rows:
+        v = dig(c, 'variant_scores', 'micro')
+        out.append(f"| {WEEK4_NAMES[c['variant']]} vs {WEEK4_NAMES[c['reference']]} | {runs} | "
+                   f"{PROTOCOL_NAMES[c['protocol']]} | {c['granularity']} | {c['n_pairs']} | "
+                   f"{interval(v) if v else '–'} | {delta_cell(c['micro'])} | "
+                   f"{delta_cell(c['macro'])} | {c.get('role', 'reported')} |")
+    return out
+
+
 def build_tables(res):
     """All tables between the "At a glance" table and "Reading the numbers"."""
     out = (term_typing_tables(res) + other_levels_table(res) + ablation_table(res)
            + ner_protocol_table(res) + ner_variants_table(res) + ner_week2_table(res)
-           + ner_week3_table(res))
+           + ner_week3_table(res) + ner_week4_table(res))
     return '\n'.join(out).strip()
 
 
@@ -661,6 +748,9 @@ def ner_notes(res):
     week3 = res.comparisons(WEEK3_FILE)
     for variant, reference in WEEK3_COMPARISONS:
         note += week3_verdict_line(week3, variant, reference)
+    for name, variant, reference, runs in WEEK4_VERDICTS:
+        note += week4_verdict_line(res.comparisons(name), variant, reference, runs)
+    note += hardware_note(res)
     return note
 
 
@@ -722,21 +812,121 @@ def week3_verdict_line(comps, variant, reference):
     return line + '.\n'
 
 
+def week4_verdict_line(comps, variant, reference, runs):
+    """One "Reading the numbers" bullet for a week-4 comparison ('' if none is complete).
+
+    As week3_verdict_line, naming the machine of both sides (CPU votes, GPU runs).
+    """
+    comps = {k: c for k, c in comps.items() if c.get('role') != 'descriptive'}
+    split = week3_verdicts(comps, variant, reference, 'random_split_vary')
+    ood = week3_verdicts(comps, variant, reference, 'leave_one_paper_out')
+    if not (split or ood):
+        return ''
+    line = (f"* NER week 4 ({runs} runs), {WEEK4_NAMES[variant]} vs the "
+            f"{WEEK4_NAMES[reference]} (paired micro-F1 difference): ")
+    if split:
+        line += f"{split[1]} across the 5 random splits ({split[0]})"
+    if ood:
+        line += (f". Leaving one paper out ({ood[0]}): " if split
+                 else f"leaving one paper out ({ood[0]}): ") + ood[1]
+    return line + '.\n'
+
+
+def hardware_note(res):
+    """Descriptive bullet: the GPU CRF reference minus the CPU one, same seeds and splits."""
+    comps = res.comparisons(GPU_PREFIX + WEEK4_FILE)
+    parts = []
+    for protocol, phrase in (('random_split_vary', 'over the 5 random splits'),
+                             ('leave_one_paper_out', 'over the 4 held-out papers')):
+        found = [f"{g}-grained {delta_cell(c['micro'])}" for g in GRANULARITIES
+                 for c in [find_comparison(comps, g, protocol, 'crf', 'crf')]
+                 if c and c.get('role') == 'descriptive']
+        if found:
+            parts.append(f"{'; '.join(found)} {phrase}")
+    if not parts:
+        return ''
+    return ("* NER, GPU minus CPU (descriptive, not a comparison of methods): the CRF head with "
+            "the same seeds and splits, 3-seed means, " + '; '.join(parts) + ". This is why GPU "
+            "runs are compared only with GPU runs.\n")
+
+
 # --------------------------------------------------------------------------------
 # "At a glance" table and the generated blocks
 # --------------------------------------------------------------------------------
-def reported_system(res, g):
-    """(variant, random-split results, held-out-paper results) of the reported NER system.
+def improves(comps, g, protocol, variant, reference):
+    """The complete comparison if its micro-F1 CI lies above 0, else None."""
+    c = find_comparison({k: c for k, c in comps.items() if c.get('role') != 'descriptive'},
+                        g, protocol, variant, reference)
+    return c if c and c['micro']['ci95'][0] > 0 else None
 
-    Per the week-3 protocol: the 3-model seed ensemble crf_ens3, unless the mixed-backbone
-    ensemble improves on it for the granularity (a complete comparison over the 5 random
-    splits with a micro-F1 CI above 0). The results are None for files that do not exist.
+
+def reported_system(res, g):
+    """(variant, random-split results, held-out-paper results, prefix) of the reported NER
+    system in distribution.
+
+    Week 3: the 3-model seed ensemble crf_ens3, unless the mixed-backbone ensemble improves on
+    it for the granularity (a complete comparison over the 5 random splits with a micro-F1 CI
+    above 0). Week 4: the GPU multi-task vote crf_mt_ens3 replaces it if it improves on the GPU
+    crf_ens3 over the 5 random splits; its results are then those of results/gpu/ (prefix
+    'gpu/', else ''). The results are None for files that do not exist.
     """
-    c = find_comparison(res.comparisons(WEEK3_FILE), g, 'random_split_vary', 'crf_mix3',
-                        'crf_ens3')
-    var = 'crf_mix3' if c and c['micro']['ci95'][0] > 0 else 'crf_ens3'
-    return (var, res.get(ner_file(g, 'random_split_vary', var)),
-            res.get(ner_file(g, 'leave_one_paper_out', var)))
+    var = 'crf_mix3' if improves(res.comparisons(WEEK3_FILE), g, 'random_split_vary',
+                                 'crf_mix3', 'crf_ens3') else 'crf_ens3'
+    prefix = ''
+    if improves(res.comparisons(GPU_PREFIX + WEEK4_FILE), g, 'random_split_vary', 'crf_mt_ens3',
+                'crf_ens3'):
+        var, prefix = 'crf_mt_ens3', GPU_PREFIX
+    return (var, res.get(prefix + ner_file(g, 'random_split_vary', var)),
+            res.get(prefix + ner_file(g, 'leave_one_paper_out', var)), prefix)
+
+
+def unseen_system(res, g):
+    """(variant, held-out-paper results) of the reported NER system on unseen papers.
+
+    The week-3 reported system (crf_ens3, or crf_mix3), unless a week-4 CPU vote
+    (crf_ls_ens3, crf_st_ens3) improves on crf_ens3 over the 4 held-out papers; if both do,
+    the one with the larger mean difference.
+    """
+    var = 'crf_mix3' if improves(res.comparisons(WEEK3_FILE), g, 'random_split_vary',
+                                 'crf_mix3', 'crf_ens3') else 'crf_ens3'
+    passed = [c for vote in ('crf_ls_ens3', 'crf_st_ens3')
+              for c in [improves(res.comparisons(WEEK4_FILE), g, 'leave_one_paper_out', vote,
+                                 'crf_ens3')] if c]
+    if passed:
+        var = max(passed, key=lambda c: c['micro']['mean_diff'])['variant']
+    return var, res.get(ner_file(g, 'leave_one_paper_out', var))
+
+
+def system_name(var, prefix, uvar):
+    """The reported system's name: `var` in distribution, then `uvar` on unseen papers if other."""
+    name = f"{WEEK4_NAMES[var]} `{var}`" + (' (GPU runs)' if prefix else '')
+    if uvar != var:
+        name += f"; on unseen papers the {WEEK4_NAMES[uvar]} `{uvar}`"
+    return name
+
+
+def unseen_cell(res, g, var, ood, uvar, uood, phrase, named=False):
+    """', <score> <phrase>' of the system on unseen papers ('' without complete results).
+
+    If another system than `var` holds that slot, `named` names it first, and when a week-4
+    vote replaced crf_ens3 there, crf_ens3's score follows in parentheses.
+    """
+    if uvar == var:
+        return f", {ood['summary']['micro']['mean']:.2f} {phrase}" if has_runs(ood, 4) else ''
+    if not has_runs(uood, 4):
+        return ''
+    lead = f"; on unseen papers the {WEEK4_NAMES[uvar]} `{uvar}`, " if named else ', '
+    cell = f"{lead}{uood['summary']['micro']['mean']:.2f} {phrase}"
+    base = res.get(ner_file(g, 'leave_one_paper_out', 'crf_ens3'))
+    if uvar != 'crf_ens3' and has_runs(base, 4):
+        cell += f" (`crf_ens3` {base['summary']['micro']['mean']:.2f})"
+    return cell
+
+
+def system_protocol(res):
+    """The protocol whose rules chose the reported system: week 4 once its comparisons exist."""
+    week4 = res.comparisons(WEEK4_FILE) or res.comparisons(GPU_PREFIX + WEEK4_FILE)
+    return 'week-4 protocol' if week4 else 'week-3 protocol'
 
 
 def published_check(summary, paper):
@@ -814,19 +1004,19 @@ def glance_table(res):
                               f"{v['paper_test_f1']:.2f}: **beaten** if the paper used micro F1"
                               f"{crf_gain_note(comps, g) if var == 'crf' else ''} |")
     for g in GRANULARITIES:
-        var, v, ood = reported_system(res, g)
+        var, v, ood, prefix = reported_system(res, g)
+        uvar, uood = unseen_system(res, g)
         if has_runs(v, 5):
-            cell = f"micro F1 {interval(v['summary']['micro'])} over 5 random splits"
-            if has_runs(ood, 4):
-                cell += f", {ood['summary']['micro']['mean']:.2f} on an unseen paper"
+            cell = (f"micro F1 {interval(v['summary']['micro'])} over 5 random splits"
+                    + unseen_cell(res, g, var, ood, uvar, uood, 'on an unseen paper'))
             verdict, rest = published_check(v['summary'], v['paper_test_f1'])
             if verdict.startswith('beaten'):
                 verdict = '**beaten**' + verdict[len('beaten'):]
                 if rest:
                     verdict += (f"; {', '.join(rest)} {'is' if len(rest) == 1 else 'are'} "
                                 "not significantly above")
-            glance.append(f"| NER, {g}-grained, reported system (week-3 protocol): "
-                          f"{WEEK3_NAMES[var]} `{var}` | {cell} | published "
+            glance.append(f"| NER, {g}-grained, reported system ({system_protocol(res)}): "
+                          f"{system_name(var, prefix, uvar)} | {cell} | published "
                           f"{v['paper_test_f1']:.2f} (none for an unseen paper): {verdict} |")
     if off:
         glance.append(f"| Term typing, 315 terms, pipeline (zero-shot) | accuracy "
@@ -901,12 +1091,13 @@ def standing_block(res, note=''):
 
     reported_cells, reported_refs = [], []
     for g in GRANULARITIES:
-        var, v, ood = reported_system(res, g)
+        var, v, ood, prefix = reported_system(res, g)
+        uvar, uood = unseen_system(res, g)
         if has_runs(v, 5):
-            cell = (f"{g}: {WEEK3_NAMES[var]} `{var}`, micro {interval(v['summary']['micro'])} "
-                    "over 5 new splits")
-            if has_runs(ood, 4):
-                cell += f", {ood['summary']['micro']['mean']:.2f} leaving one paper out"
+            cell = (f"{g}: {system_name(var, prefix, var)}, micro "
+                    f"{interval(v['summary']['micro'])} over 5 new splits"
+                    + unseen_cell(res, g, var, ood, uvar, uood, 'leaving one paper out',
+                                  named=True))
             reported_cells.append(cell)
             reported_refs.append(f"{g}-grained "
                                  f"{published_check(v['summary'], v['paper_test_f1'])[0]}")
@@ -925,8 +1116,8 @@ def standing_block(res, note=''):
                      "in-distribution fine-grained gain over the baseline disappears under strict "
                      "IOB2 scoring |")
     if reported_cells:
-        lines.append(f"| NER, reported system (week-3 protocol) | {'; '.join(reported_cells)} | "
-                     f"same; {', '.join(reported_refs)} |")
+        lines.append(f"| NER, reported system ({system_protocol(res)}) | "
+                     f"{'; '.join(reported_cells)} | same; {', '.join(reported_refs)} |")
     lines += [
         f"| Term typing, 315 terms, pipeline (zero-shot) | accuracy {off['typing']['accuracy']:.3f}"
         + (f" (LLM on: {on['typing']['accuracy']:.3f})" if on else '')
