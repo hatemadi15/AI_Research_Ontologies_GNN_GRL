@@ -514,39 +514,38 @@ week-3 comparisons of 3-seed means (`results/ner_week3_comparisons.json`).
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the prioritised plan to raise the
 metrics and to compete with the published state of the art.
 
-For NER, the reported system is the 3-model seed ensemble of the CRF head
-(`crf_ens3`). Over 5 random splits it beats the published fine-grained number
-under micro, macro and weighted F1. It beats the coarse-grained number under
-micro and weighted F1, but not under macro F1. On unseen papers,
-coarse-grained, the label-semantics vote (`crf_ls_ens3`) replaces it since
-week 4. That decision was taken on the CPU; the GPU repeat does not confirm
-the gain.
+For NER, the reported system is decided on 10 model seeds per split (week 5,
+on Kaggle's free T4 GPUs; `src/graph/kaggle_jobs.py`). Fine-grained it is the
+3-model seed ensemble of the CRF head (`crf_ens3`) on random splits and the
+multi-task vote (`crf_mt_ens3`) on unseen papers; coarse-grained it is the
+other way round. Over 5 random splits it beats the published fine-grained
+number under micro, macro and weighted F1, and the coarse-grained number
+under micro and weighted F1 but not macro F1.
 
-Week 3 compared 3-seed means. It found two smaller gains for single models,
-both coarse-grained: multi-task training in distribution, and label semantics
-on unseen papers. Mixing backbones, self-training and in-domain pre-training
-did not pass the pre-registered rule. New NER experiments should use the CRF
-head (`--crf`) and be compared with the 3-seed mean of its runs.
+On the split that the MaterioMiner release ships, scored like its code,
+plain MatSciBERT reproduces the published 69.92 and 72.32 within its 10-seed
+intervals, and the CRF head beats both by about 3 points.
 
-Week 4 (ROADMAP §4) ran its new training on Kaggle's free T4 GPUs
-(`src/graph/kaggle_jobs.py`), 7.5 GPU-hours in all. A run takes about a
-minute there and repeats exactly. GPU runs are compared only with GPU runs.
-- The multi-task vote does not pass, and neither does label semantics on
-  the multi-task model.
-- Self-training with 3 teachers tags the whole 40,000-sentence corpus. It
-  improves fine-grained on unseen papers: +1.07 [+0.33, +1.80] over the CRF
-  head. On the random splits (reported) it gains +1.22 [+0.60, +1.84].
-  Its students stay below the seed ensemble.
-- The GPU runs do not confirm the coarse-grained gains of week 3 or the CPU
-  label-semantics vote, which gives +0.40 [−1.36, +2.16] on the GPU. These
-  gains are about 1 point, about as much as the hardware alone moves a
-  3-seed mean.
+Ten seeds per split also re-tested the gains of weeks 3 and 4, which used 3:
+- fine-grained multi-task training improves on the CRF head over the random
+  splits (+1.83 [+0.32, +3.34]);
+- the coarse-grained gains of week 3 (multi-task in distribution, label
+  semantics on unseen papers) and the fine-grained self-training gain of
+  week 4 on unseen papers do not stand;
+- on the same runs, a 3-seed comparison passes for the 1.8-point multi-task
+  gain in only 41% of the 120 seed triples, and up to 37% of the triples
+  give the opposite sign to the 10-seed difference.
 
-The next steps are in ROADMAP P1, "Next, after week 4":
-1. 10 seeds per split;
-2. multi-task self-training with a vote over the students;
-3. a larger encoder;
-4. document context.
+New NER experiments should use the CRF head (`--crf`) and 10 seeds per split
+before a claim. GPU runs are compared only with GPU runs.
+
+The next steps are in ROADMAP P1, "Next, after week 5":
+1. the main comparisons on a second dataset, SOFC-Exp, converted and checked
+   against its published MatSciBERT-CRF scores;
+2. methods for unseen papers, screened with 3 seeds and decided with 10:
+   DeBERTa-v3-large, document context and multi-task self-training;
+3. the rare coarse-grained types that keep macro F1 down;
+4. an evaluation paper ([docs/PAPER.md](docs/PAPER.md)).
 
 ## License
 
