@@ -157,6 +157,25 @@ def test_w5c_runs_the_published_split_with_10_model_seeds():
     assert 'w5c' in kj.BATCHES
 
 
+def test_smoke5_tries_the_week6_options_with_their_pins(monkeypatch):
+    monkeypatch.setattr(nb.os.path, 'isfile', lambda path: True)    # the corpus is not here
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda: 'x' * 64)
+    lanes = kj.batch_lanes('smoke5')
+    args = [nb.parse_args(j) for lane in lanes for j in lane]
+    assert all(a.max_train == 32 and a.epochs == 2 for a in args)
+    deberta = [a for a in args if a.model == kj.DEBERTA]
+    assert [a.tag for a in deberta] == ['smokeh', 'smokei']
+    assert {nb.variant_name(a) for a in args} >= {'crf_ctx_smokej', 'crf_mt_st3', 'crf_smokek'}
+    assert any(a.granularity == 'sofc' for a in args)
+    for a in args:                                  # never collected
+        assert 'smoke' in nb.results_path('', 'fine', a)
+    spec = kj.batch_spec('smoke5')
+    assert spec['models'][kj.DEBERTA] == '64a8c8eab3e352a784c658aef62be1662607476f'
+    assert 'sentencepiece==0.2.2' in spec['pip'] and set(kj.PIP) <= set(spec['pip'])
+    other = kj.batch_spec('w5c')                    # other batches keep their pins
+    assert other['models'] == kj.MODELS and other['pip'] == list(kj.PIP)
+
+
 def test_a_refused_push_stops(monkeypatch, capsys):
     """The Kaggle CLI exits 0 when it refuses a push; push must not report the batch."""
     monkeypatch.setattr(kj, 'corpus_sha256', lambda: 'x' * 64)

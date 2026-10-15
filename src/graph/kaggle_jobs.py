@@ -55,6 +55,8 @@ Week 5 makes 10 seeds per split (offsets 0 to 900):
   w5c     the published split (week-5 amendment): the CRF run of smoke4 again (smokeg),
           then plain MatSciBERT and the CRF head, model seeds 0 to 900, a lane per
           granularity
+  smoke5  the week-6 options, tiny: DeBERTa-v3-large twice (with its pins, BATCH_EXTRAS),
+          document context, multi-task self-training and SOFC-Exp
 
 Usage:
   python src/graph/kaggle_jobs.py quota
@@ -98,6 +100,11 @@ PIP = ('transformers==5.18.0', 'tokenizers==0.23.2', 'huggingface_hub==1.33.0',
 WHEELS = ('seqeval==1.2.2',)
 WHEEL_FILES = ('seqeval-1.2.2-py3-none-any.whl',)
 MODELS = {'m3rg-iitd/matscibert': 'ced9d8f5f208712c4a90f98a246fe32155b29995'}
+# a batch's extra pins (week-6 smoke tests): DeBERTa-v3-large, and sentencepiece, which its
+# tokenizer needs (its snapshot has no tokenizer.json)
+DEBERTA = 'microsoft/deberta-v3-large'
+BATCH_EXTRAS = {'smoke5': {'pip': ('sentencepiece==0.2.2',),
+                           'models': {DEBERTA: '64a8c8eab3e352a784c658aef62be1662607476f'}}}
 THREADS = 2
 DEADLINE_HOURS = 10                 # no job starts later; a Kaggle session lasts 12 hours
 RESULTS_PREFIX = 'gpu__'            # as in run_jobs.py
@@ -231,6 +238,21 @@ def batch_lanes(name):
                         family('mt', ('--multi-task',), granularities=('both',),
                                offsets=OFFSETS_W5))
         return [[repeat + ['--tag', 'smokef']] + lanes[0], lanes[1]]
+    if name == 'smoke5':
+        # the week-6 options (prepared in week 5): DeBERTa-v3-large twice (memory and
+        # repeatability), document context, multi-task self-training and SOFC-Exp, all tiny
+        tiny = ('--max-train', '32', '--epochs', '2', '--save-predictions', '--threads',
+                str(THREADS))
+        deberta = ['--granularity', 'fine', '--vary-split', '--seeds', '0', '--crf', '--model',
+                   DEBERTA, *tiny]
+        paper = ('--leave-one-paper-out', '--papers', '10.3390_met10111458')
+        return [[deberta + ['--tag', 'smokeh'], deberta + ['--tag', 'smokei']],
+                [['--granularity', 'coarse', *paper, '--crf', '--context', '64', '--tag',
+                  'smokej', *tiny],
+                 [*paper, '--crf', '--multi-task', '--self-train', CORPUS, '--teachers', '3',
+                  '--students', '4', '--self-train-sample', '200', *tiny],
+                 ['--granularity', 'sofc', '--leave-one-paper-out', '--papers', 'PMC3564701',
+                  '--crf', '--tag', 'smokek', *tiny]]]
     if name == 'w5c':
         # the published split (week-5 amendment): plain MatSciBERT and the CRF head, 10 seeds
         seeds = ['--seeds', *(str(s) for s in OFFSETS_PUBLISHED)]
@@ -244,13 +266,14 @@ def batch_lanes(name):
 
 
 BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'item3r',
-           'smoke4', 'w5a', 'w5b', 'w5c')
+           'smoke4', 'w5a', 'w5b', 'w5c', 'smoke5')
 
 
 def batch_spec(name):
-    """The job spec that run_jobs.py runs (see its docstring)."""
-    return {'batch': name, 'gpu': GPU, 'pip': list(PIP), 'wheels': list(WHEEL_FILES),
-            'models': dict(MODELS),
+    """The job spec that run_jobs.py runs (see its docstring), with the batch's extra pins."""
+    extra = BATCH_EXTRAS.get(name, {})
+    return {'batch': name, 'gpu': GPU, 'pip': list(PIP) + list(extra.get('pip', ())),
+            'wheels': list(WHEEL_FILES), 'models': {**MODELS, **extra.get('models', {})},
             'corpus_sha256': corpus_sha256(), 'deadline_hours': DEADLINE_HOURS,
             'lanes': batch_lanes(name)}
 
