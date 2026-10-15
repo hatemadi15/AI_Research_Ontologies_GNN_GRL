@@ -112,6 +112,8 @@ def test_kernel_metadata_is_a_private_t4_gpu_kernel_with_the_bundle():
     assert meta['machine_shape'] == 'NvidiaTeslaT4'
     assert meta['dataset_sources'] == ['someone/ner-gpu-bundle']
     assert meta['docker_image_pinning_type'] == 'original'
+    assert meta['docker_image'] == kj.DOCKER_IMAGE and '@sha256:2757e0c7' in kj.DOCKER_IMAGE
+    assert kj.kernel_metadata('someone', 'ner-gpu-jobs-b')['id'] == 'someone/ner-gpu-jobs-b'
     assert meta['code_file'] == 'run_jobs.py' and meta['kernel_type'] == 'script'
     assert kj.dataset_metadata('someone')['id'] == 'someone/ner-gpu-bundle'
 

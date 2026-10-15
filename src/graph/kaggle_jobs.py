@@ -74,6 +74,9 @@ CORPUS_REPORT = ROOT / 'results' / 'fatigue_corpus.json'
 DATASET = 'ner-gpu-bundle'
 KERNEL = 'ner-gpu-jobs'
 MACHINE = 'NvidiaTeslaT4'           # Kaggle's "GPU T4 x2"
+# the Kaggle image of the first job (smoke1), pinned for every kernel: one environment
+DOCKER_IMAGE = ('gcr.io/kaggle-gpu-images/python@sha256:'
+                '2757e0c7d1e0a9cb43da657b97e223c321a98f5014bdf64f44f2f6b083ad2b2f')
 GPU = 'Tesla T4'
 LANES = 2
 # the versions of the CPU runs; torch is the one of the Kaggle image
@@ -210,13 +213,14 @@ def render_script(spec, template=None):
 
 
 def kernel_metadata(user, kernel=KERNEL, dataset=DATASET):
-    """kernel-metadata.json of the job kernel: private, GPU (T4 x2), internet, the bundle."""
+    """kernel-metadata.json of a job kernel: private, GPU (T4 x2), internet, the bundle, and
+    the pinned Kaggle image."""
     return {'id': f'{user}/{kernel}', 'title': kernel, 'code_file': 'run_jobs.py',
             'language': 'python', 'kernel_type': 'script', 'is_private': True,
             'enable_gpu': True, 'enable_tpu': False, 'enable_internet': True,
             'dataset_sources': [f'{user}/{dataset}'], 'competition_sources': [],
             'kernel_sources': [], 'model_sources': [], 'machine_shape': MACHINE,
-            'docker_image_pinning_type': 'original'}
+            'docker_image': DOCKER_IMAGE, 'docker_image_pinning_type': 'original'}
 
 
 def dataset_metadata(user, dataset=DATASET):
@@ -403,7 +407,7 @@ def cmd_push(args):
     with tempfile.TemporaryDirectory() as folder:
         Path(folder, 'run_jobs.py').write_text(render_script(spec))
         Path(folder, 'kernel-metadata.json').write_text(
-            json.dumps(kernel_metadata(user), indent=2))
+            json.dumps(kernel_metadata(user, args.kernel), indent=2))
         timeout = str(int(3600 * (DEADLINE_HOURS + 1.5)))
         print(kaggle('kernels', 'push', '-p', folder, '-t', timeout))
     print(f"batch {args.batch}: " + '; '.join(f'lane {i}: {len(jobs)} jobs'
@@ -411,13 +415,13 @@ def cmd_push(args):
 
 
 def cmd_status(args):
-    print(kaggle('kernels', 'status', f'{username(args)}/{KERNEL}'))
+    print(kaggle('kernels', 'status', f'{username(args)}/{args.kernel}'))
 
 
 def cmd_pull(args):
-    out = WORK_DIR / KERNEL / time.strftime('%Y%m%dT%H%M%S')
+    out = WORK_DIR / args.kernel / time.strftime('%Y%m%dT%H%M%S')
     out.mkdir(parents=True)
-    print(kaggle('kernels', 'output', f'{username(args)}/{KERNEL}', '-p', str(out)))
+    print(kaggle('kernels', 'output', f'{username(args)}/{args.kernel}', '-p', str(out)))
     manifest = out / 'manifest.json'
     if not manifest.exists():
         print(f'{out}: no manifest.json')
@@ -450,6 +454,9 @@ def cmd_quota(args):
 def main(argv=None):
     parser = argparse.ArgumentParser(description='NER runs on Kaggle GPUs (week-4 protocol)')
     parser.add_argument('--user', default=None, help='Kaggle account (default: KAGGLE_USERNAME)')
+    parser.add_argument('--kernel', default=KERNEL,
+                        help=f'the job kernel (default: {KERNEL}); another one runs a second '
+                             'session at the same time')
     sub = parser.add_subparsers(dest='command', required=True)
     p = sub.add_parser('bundle', help='build and upload the bundle dataset')
     p.add_argument('--commit', default='HEAD', help='the frozen commit (default: HEAD)')
