@@ -36,6 +36,8 @@ writes its own results files, so the lanes never write the same file:
           fine-grained alone)
   item1   the CRF reference crf_m0/m100/m200 and multi-task crf_mt/_m100/_m200
   item2   label semantics crf_ls_m* and label semantics on the multi-task model crf_mt_ls_m*
+  item12  item1 then item2 in one session (a Kaggle GPU session takes 10-15 minutes to
+          start): each lane runs its item1 jobs before its item2 jobs
   item3   week-3 self-training crf_st_m* and self-training with 3 teachers crf_st3_m*,
           held-out papers
   item3r  self-training with 3 teachers on the random splits (if the quota allows)
@@ -176,6 +178,9 @@ def batch_lanes(name):
         return balance(family('ls', ('--label-semantics',)) +
                        family('mt_ls', ('--multi-task', '--label-semantics'),
                               granularities=('both',)))
+    if name == 'item12':
+        return [first + second for first, second in zip(batch_lanes('item1'),
+                                                         batch_lanes('item2'))]
     if name == 'item3':
         # one lane per granularity: the 3-teacher job of a granularity writes three files
         return [[args for _, args in family('st', st, protocols=lopo, granularities=(g,))] +
@@ -185,7 +190,7 @@ def batch_lanes(name):
     raise ValueError(f'unknown batch {name!r}')
 
 
-BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item3', 'item3r')
+BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'item3r')
 
 
 def batch_spec(name):

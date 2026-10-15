@@ -54,6 +54,19 @@ def test_item1_is_the_crf_reference_and_multitask_on_both_protocols():
     assert max(len(lane) for lane in lanes) - min(len(lane) for lane in lanes) <= 4
 
 
+def test_item2_and_item12():
+    lanes = kj.batch_lanes('item2')
+    files = [f for lane in lanes for j in lane for f in _written_files(j)]
+    assert len(files) == len(set(files)) == 24
+    assert {v for _, _, v in files} == {'crf_ls_m0', 'crf_ls_m100', 'crf_ls_m200',
+                                        'crf_mt_ls_m0', 'crf_mt_ls_m100', 'crf_mt_ls_m200'}
+    # item12: every lane runs its item1 jobs first, then its item2 jobs
+    both = kj.batch_lanes('item12')
+    assert both == [a + b for a, b in zip(kj.batch_lanes('item1'), lanes)]
+    files = [f for lane in both for j in lane for f in _written_files(j)]
+    assert len(files) == len(set(files)) == 48
+
+
 def test_smoke1_repeats_one_crf_run_on_both_gpus():
     lanes = kj.batch_lanes('smoke1')
     crf = [j for lane in lanes for j in lane if '--multi-task' not in j
