@@ -24,12 +24,20 @@ def test_label_semantics_parser_checks(capsys):
     # without the flag there is no label_semantics field: the config other runs store is unchanged
     assert 'label_semantics' not in vars(nb.parse_args(['--crf']))
     for argv, error in ((['--label-semantics'], '--label-semantics needs --crf'),
-                        (['--label-semantics', '--class-weights'], '--label-semantics needs --crf'),
-                        (['--crf', '--multi-task', '--label-semantics'],
-                         '--label-semantics is not available with --multi-task')):
+                        (['--label-semantics', '--class-weights'], '--label-semantics needs --crf')):
         with pytest.raises(SystemExit):
             nb.parse_args(argv)
         assert error in capsys.readouterr().err
+    # on the multi-task model (week 4): a variant of its own, compared with crf
+    args = nb.parse_args(['--crf', '--multi-task', '--label-semantics', '--tag', 'm100',
+                          '--seed-offset', '100'])
+    assert nb.variant_name(args) == 'crf_mt_ls_m100' and nb.reference_variant('crf_mt_ls') == 'crf'
+    assert nb.variant_name(nb.parse_args(['--crf', '--multi-task', '--label-semantics'])) == \
+        'crf_mt_ls'
+    # a multi-task run tagged ls would write to its files
+    with pytest.raises(SystemExit):
+        nb.parse_args(['--crf', '--multi-task', '--tag', 'ls'])
+    assert 'would overwrite the results of the crf_mt_ls variant' in capsys.readouterr().err
     # a CRF run tagged ls would write to the files of the label-semantics runs
     with pytest.raises(SystemExit):
         nb.parse_args(['--crf', '--tag', 'ls'])
@@ -235,6 +243,47 @@ def test_label_semantics_run(tiny_run, tiny_model, tmp_path):
     tiny_run('--crf', '--granularity', 'fine', '--vary-split', '--seeds', '0')
     assert len(heads) == 2
     config = _load(tmp_path, 'ner_results_fine_random_split_vary_crf.json')['config']
+    assert 'label_semantics' not in config and 'label_descriptions_sha256' not in config
+
+
+def test_label_semantics_on_the_multitask_model(tiny_run, tiny_model, tmp_path):
+    """--multi-task --label-semantics: one encoder, a label-semantic head per granularity."""
+    import torch
+    import transformers
+    flags = ('--crf', '--multi-task', '--label-semantics', '--vary-split', '--seeds', '0',
+             '--tag', 'm100', '--seed-offset', '100', '--save-predictions')
+    heads = tiny_run(*flags)
+    assert len(heads) == 2                            # one model, a head per granularity
+    tokenizer = transformers.AutoTokenizer.from_pretrained(tiny_model)
+    encoder = transformers.AutoModel.from_pretrained(tiny_model).eval()
+    sha = {}
+    for g, (embeddings, head, initial) in zip(('fine', 'coarse'), heads):
+        res = _load(tmp_path, f'ner_results_{g}_random_split_vary_crf_mt_ls_m100.json')
+        labels = res['labels']
+        texts = nb.label_descriptions(g, labels)
+        assert res['variant'] == 'crf_mt_ls_m100'
+        assert res['config']['multi_task'] and res['config']['label_semantics']
+        sha[g] = res['config']['label_descriptions_sha256']
+        assert sha[g] == lt.descriptions_sha256(labels, texts)
+        run = res['runs'][0]
+        assert (run['run_id'], run['seed']) == ('seed0', 100) and 'multi_task' in run
+        assert set(' '.join(run['test_pred']).split()) <= {
+            'O', *(f'{b}-{t}' for t in labels for b in 'BI')}
+        # the descriptions of this granularity, embedded by the pre-trained encoder; frozen,
+        # while the maps were trained
+        assert embeddings.shape == (len(labels), 16)
+        for text, row in zip(texts, embeddings):
+            with torch.no_grad():
+                states = encoder(**tokenizer(text, return_tensors='pt')).last_hidden_state
+            assert torch.allclose(row, states[0, 1:-1].mean(0), atol=1e-5)
+        assert torch.equal(head.descriptions, initial['descriptions'])
+        assert not torch.equal(head.w_b, initial['w_b'])
+    assert sha['fine'] != sha['coarse']
+    # finished runs are skipped; a multi-task run without the flag makes no label head
+    assert len(tiny_run(*flags)) == 2
+    tiny_run('--crf', '--multi-task', '--vary-split', '--seeds', '0')
+    assert len(heads) == 2
+    config = _load(tmp_path, 'ner_results_coarse_random_split_vary_crf_mt.json')['config']
     assert 'label_semantics' not in config and 'label_descriptions_sha256' not in config
 
 
