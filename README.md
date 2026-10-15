@@ -236,7 +236,7 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
 
 #### NER week-4 comparisons (3-seed means; CPU votes, GPU runs)
 
-Δ = variant − reference on the same split, scored as in week 3: a model trained with 3 model seeds scores their mean, a vote over them scores once. Pre-registered rule (week-4 protocol): a change improves on its reference only if the 95% Student-t CI of the mean micro-F1 difference lies entirely above 0. The CPU rows are votes over the saved predictions of the week-3 runs, decided over the 4 held-out papers against the 3-model seed ensemble. The GPU rows are runs on Kaggle T4 GPUs, compared only with GPU runs: the multi-task vote against the GPU seed ensemble over the 5 random splits, label semantics on the multi-task model against the GPU CRF head over the 5 random splits and over the 4 held-out papers, and self-training with 3 teachers against the GPU CRF head over the 4 held-out papers; the other GPU rows repeat week-3 comparisons and the CPU votes, without a decision.
+Δ = variant − reference on the same split, scored as in week 3: a model trained with 3 model seeds scores their mean, a vote over them scores once. Pre-registered rule (week-4 protocol): a change improves on its reference only if the 95% Student-t CI of the mean micro-F1 difference lies entirely above 0. The CPU rows are votes over the saved predictions of the week-3 runs, decided over the 4 held-out papers against the 3-model seed ensemble. The GPU rows are runs on Kaggle T4 GPUs, compared only with GPU runs: the multi-task vote against the GPU seed ensemble over the 5 random splits, label semantics on the multi-task model against the GPU CRF head over the 5 random splits and over the 4 held-out papers, and self-training with 3 teachers against the GPU CRF head over the 4 held-out papers. The other GPU rows are reported without a decision: the other protocol, comparisons with each change's parent and with the GPU seed ensemble, and repeats of the week-3 comparisons and of the CPU votes.
 
 | Comparison | Runs | Protocol | Granularity | Pairs | Variant micro F1 [95% CI] | Δ micro [95% CI] | Δ macro [95% CI] | Role |
 |---|---|---|---|---|---|---|---|---|
@@ -260,6 +260,8 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
 | label semantics on the multi-task model vs CRF head | GPU | new random split per seed | coarse | 5 | 78.24 [75.78, 80.70] | +0.65 [-0.63, +1.93] | -0.73 [-3.29, +1.84] | decision |
 | label semantics on the multi-task model vs CRF head | GPU | leave one paper out | fine | 4 | 50.45 [40.91, 60.00] | +4.08 [-1.99, +10.14] | +2.64 [-5.89, +11.17] | decision |
 | label semantics on the multi-task model vs CRF head | GPU | leave one paper out | coarse | 4 | 59.27 [52.19, 66.34] | -0.01 [-2.64, +2.63] | -0.03 [-4.57, +4.51] | decision |
+| self-training with 3 teachers vs CRF head | GPU | new random split per seed | fine | 5 | 78.82 [75.28, 82.36] | +1.22 [+0.60, +1.84] | +1.60 [-0.10, +3.29] | reported |
+| self-training with 3 teachers vs CRF head | GPU | new random split per seed | coarse | 5 | 78.29 [75.40, 81.19] | +0.71 [-0.96, +2.38] | -0.99 [-5.58, +3.59] | reported |
 | self-training with 3 teachers vs CRF head | GPU | leave one paper out | fine | 4 | 47.44 [40.17, 54.72] | +1.07 [+0.33, +1.80] | -0.54 [-1.96, +0.88] | decision |
 | self-training with 3 teachers vs CRF head | GPU | leave one paper out | coarse | 4 | 60.12 [53.23, 67.02] | +0.85 [-0.58, +2.29] | +0.51 [-2.48, +3.50] | decision |
 | label-semantics vote vs 3-model seed ensemble | GPU | new random split per seed | fine | 5 | 78.16 [74.24, 82.07] | -1.74 [-3.84, +0.35] | -0.99 [-4.71, +2.73] | reported |
@@ -296,6 +298,8 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
 | label semantics on the multi-task model vs label semantics | GPU | leave one paper out | coarse | 4 | 59.27 [52.19, 66.34] | -0.07 [-3.50, +3.35] | -0.68 [-4.00, +2.64] | reported |
 | self-training with 3 teachers vs self-training | GPU | leave one paper out | fine | 4 | 47.44 [40.17, 54.72] | -1.07 [-4.74, +2.60] | -0.92 [-4.26, +2.42] | reported |
 | self-training with 3 teachers vs self-training | GPU | leave one paper out | coarse | 4 | 60.12 [53.23, 67.02] | +1.94 [-2.68, +6.56] | +2.08 [-3.27, +7.42] | reported |
+| self-training with 3 teachers vs 3-model seed ensemble | GPU | new random split per seed | fine | 5 | 78.82 [75.28, 82.36] | -1.08 [-2.14, -0.03] | -1.26 [-3.22, +0.69] | reported |
+| self-training with 3 teachers vs 3-model seed ensemble | GPU | new random split per seed | coarse | 5 | 78.29 [75.40, 81.19] | -0.90 [-3.20, +1.39] | -1.88 [-7.25, +3.49] | reported |
 | self-training with 3 teachers vs 3-model seed ensemble | GPU | leave one paper out | fine | 4 | 47.44 [40.17, 54.72] | -1.01 [-1.63, -0.39] | -1.35 [-2.89, +0.19] | reported |
 | self-training with 3 teachers vs 3-model seed ensemble | GPU | leave one paper out | coarse | 4 | 60.12 [53.23, 67.02] | -1.17 [-2.61, +0.27] | -1.29 [-6.21, +3.64] | reported |
 
@@ -334,7 +338,7 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
 * NER week 4 (CPU runs), self-training vote vs the 3-model seed ensemble (paired micro-F1 difference): leaving one paper out (the pre-registered decision): fine-grained no significant change (+3.68, 95% CI [-1.15, +8.52]; strict IOB2 +3.68 [-1.15, +8.52]); coarse-grained no significant change (-0.09, 95% CI [-3.52, +3.35]; strict IOB2 -0.09 [-3.52, +3.35]).
 * NER week 4 (GPU runs), multi-task vote vs the 3-model seed ensemble (paired micro-F1 difference): fine-grained no significant change (+1.26, 95% CI [-1.08, +3.59]; strict IOB2 +1.26 [-1.08, +3.59]); coarse-grained no significant change (-0.07, 95% CI [-2.02, +1.87]; strict IOB2 -0.07 [-2.02, +1.87]) across the 5 random splits (the pre-registered decision). Leaving one paper out (reported, no decision): fine-grained no significant change (+4.09, 95% CI [-0.89, +9.07]; strict IOB2 +4.09 [-0.89, +9.07]); coarse-grained no significant change (-0.10, 95% CI [-5.04, +4.85]; strict IOB2 -0.10 [-5.04, +4.85]).
 * NER week 4 (GPU runs), label semantics on the multi-task model vs the CRF head (paired micro-F1 difference): fine-grained no significant change (+0.76, 95% CI [-0.57, +2.10]; strict IOB2 +0.76 [-0.57, +2.10]); coarse-grained no significant change (+0.65, 95% CI [-0.63, +1.93]; strict IOB2 +0.65 [-0.63, +1.93]) across the 5 random splits (the pre-registered decision). Leaving one paper out (the pre-registered decision): fine-grained no significant change (+4.08, 95% CI [-1.99, +10.14]; strict IOB2 +4.08 [-1.99, +10.14]); coarse-grained no significant change (-0.01, 95% CI [-2.64, +2.63]; strict IOB2 -0.01 [-2.64, +2.63]).
-* NER week 4 (GPU runs), self-training with 3 teachers vs the CRF head (paired micro-F1 difference): leaving one paper out (the pre-registered decision): fine-grained improves (+1.07, 95% CI [+0.33, +1.80]; strict IOB2 +1.07 [+0.33, +1.80]); coarse-grained no significant change (+0.85, 95% CI [-0.58, +2.29]; strict IOB2 +0.85 [-0.58, +2.29]).
+* NER week 4 (GPU runs), self-training with 3 teachers vs the CRF head (paired micro-F1 difference): fine-grained improves (+1.22, 95% CI [+0.60, +1.84]; strict IOB2 +1.22 [+0.60, +1.84]); coarse-grained no significant change (+0.71, 95% CI [-0.96, +2.38]; strict IOB2 +0.71 [-0.96, +2.38]) across the 5 random splits (reported, no decision). Leaving one paper out (the pre-registered decision): fine-grained improves (+1.07, 95% CI [+0.33, +1.80]; strict IOB2 +1.07 [+0.33, +1.80]); coarse-grained no significant change (+0.85, 95% CI [-0.58, +2.29]; strict IOB2 +0.85 [-0.58, +2.29]).
 * NER week 4 (GPU runs), label-semantics vote vs the 3-model seed ensemble (paired micro-F1 difference): fine-grained no significant change (-1.74, 95% CI [-3.84, +0.35]; strict IOB2 -1.74 [-3.84, +0.35]); coarse-grained no significant change (-0.60, 95% CI [-2.98, +1.78]; strict IOB2 -0.60 [-2.98, +1.78]) across the 5 random splits (reported, no decision). Leaving one paper out (reported, no decision): fine-grained no significant change (+0.51, 95% CI [-1.56, +2.59]; strict IOB2 +0.51 [-1.56, +2.59]); coarse-grained no significant change (+0.40, 95% CI [-1.36, +2.16]; strict IOB2 +0.40 [-1.36, +2.16]).
 * NER week 4 (GPU runs), self-training vote vs the 3-model seed ensemble (paired micro-F1 difference): leaving one paper out (reported, no decision): fine-grained no significant change (+2.40, 95% CI [-2.53, +7.33]; strict IOB2 +2.40 [-2.53, +7.33]); coarse-grained no significant change (-0.09, 95% CI [-2.85, +2.67]; strict IOB2 -0.09 [-2.85, +2.67]).
 * NER week 4 (GPU runs), multi-task (fine + coarse heads) vs the CRF head (paired micro-F1 difference): fine-grained no significant change (+1.74, 95% CI [-0.36, +3.84]; strict IOB2 +1.74 [-0.36, +3.84]); coarse-grained no significant change (-0.08, 95% CI [-1.71, +1.55]; strict IOB2 -0.08 [-1.71, +1.55]) across the 5 random splits (reported, no decision). Leaving one paper out (reported, no decision): fine-grained no significant change (+3.87, 95% CI [-2.25, +9.99]; strict IOB2 +3.87 [-2.25, +9.99]); coarse-grained no significant change (-0.68, 95% CI [-4.51, +3.15]; strict IOB2 -0.68 [-4.51, +3.15]).
@@ -478,13 +482,14 @@ did not pass the pre-registered rule. New NER experiments should use the CRF
 head (`--crf`) and be compared with the 3-seed mean of its runs.
 
 Week 4 (ROADMAP §4) ran its new training on Kaggle's free T4 GPUs
-(`src/graph/kaggle_jobs.py`). A run takes about a minute there and repeats
-exactly. GPU runs are compared only with GPU runs.
+(`src/graph/kaggle_jobs.py`), 7.5 GPU-hours in all. A run takes about a
+minute there and repeats exactly. GPU runs are compared only with GPU runs.
 - The multi-task vote does not pass, and neither does label semantics on
   the multi-task model.
 - Self-training with 3 teachers tags the whole 40,000-sentence corpus. It
   improves fine-grained on unseen papers: +1.07 [+0.33, +1.80] over the CRF
-  head. Its students stay below the seed ensemble.
+  head. On the random splits (reported) it gains +1.22 [+0.60, +1.84].
+  Its students stay below the seed ensemble.
 - The GPU runs do not confirm the coarse-grained gains of week 3 or the CPU
   label-semantics vote, which gives +0.40 [−1.36, +2.16] on the GPU. These
   gains are about 1 point, about as much as the hardware alone moves a
@@ -495,9 +500,6 @@ The next steps are in ROADMAP P1, "Next, after week 4":
 2. multi-task self-training with a vote over the students;
 3. a larger encoder;
 4. document context.
-
-The random-split runs of 3-teacher self-training (reported) are still
-running.
 
 ## License
 

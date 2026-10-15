@@ -123,22 +123,29 @@ T4 GPUs, and GPU runs are compared only with GPU runs.
 - **Self-training with 3 teachers** (item 3, GPU) improves fine-grained on
   unseen papers: +1.07 [+0.33, +1.80] over the CRF head, positive on every
   paper. Coarse-grained: +0.85 [−0.58, +2.29].
+  - On the random splits (reported) it also improves fine-grained:
+    +1.22 [+0.60, +1.84], positive on every split. Coarse-grained: +0.71
+    [−0.96, +2.38].
   - Tagging all 40,000 corpus sentences gives 607–1,256 silver sentences
-    per paper fine-grained, against 60–240 per run in week 3 (out of 2,000
-    tagged). That is about 6 times more on average, not the 20 times item 3
-    expected: few sentences get the same tags from all 3 teachers with
-    every marginal at 0.9 or more.
+    per paper fine-grained (395–1,305 per random split), against 60–240 per
+    run in week 3 (out of 2,000 tagged). That is about 6 times more on
+    average, not the 20 times item 3 expected: few sentences get the same
+    tags from all 3 teachers with every marginal at 0.9 or more.
   - The students stay below their teachers' vote: −1.01 [−1.63, −0.39]
-    against the GPU `crf_ens3`, negative on every paper. Only a vote can
-    change the reported system, so it is unchanged.
+    against the GPU `crf_ens3`, negative on every paper, and −1.08
+    [−2.14, −0.03] on the random splits. Only a vote can change the
+    reported system, so it is unchanged.
 - **The GPU runner** (item 5): `kaggle_jobs.py` uploads a frozen commit
   and runs the jobs on two T4 GPUs. A CRF run takes 1.2 minutes (13–27 on
   2 CPU threads).
   - A run repeats exactly, on either GPU, across code commits and across
-    sessions: the 24 teachers trained inside the self-training runs score
-    exactly as the GPU `crf_m*` runs of the other session.
-  - All GPU runs share one environment (Tesla T4, CUDA 12.8, torch 2.11.0,
-    transformers 5.18.0).
+    sessions: the 54 teachers trained inside the self-training runs (24 on
+    the papers, 30 on the random splits) score exactly as the GPU `crf_m*`
+    runs of another session.
+  - All 294 GPU runs share one environment (Tesla T4, CUDA 12.8, torch
+    2.11.0, transformers 5.18.0).
+  - Week 4 used 7.5 GPU-hours, smoke jobs included, a quarter of Kaggle's
+    weekly 30.
 
 The GPU runs do not confirm the coarse-grained gains of week 3 or the CPU
 label-semantics vote. These are the GPU repeats, which are reported without
@@ -165,9 +172,6 @@ papers:
   the GPU `crf_ens3`.
 - self-training: +2.91 [−0.73, +6.56] on the CPU (week 3) and +2.14
   [−1.02, +5.29] on the GPU. With 3 teachers it is +1.07 [+0.33, +1.80].
-
-Still running: self-training with 3 teachers on the random splits
-(reported, no decision).
 
 Next, after week 4, in this order:
 1. **Ten seeds per split before the next claim.** Two week-3 gains and the
@@ -665,7 +669,7 @@ chance at class level. For a Task C-style result:
 | 1 | Done: class weights (no significant change) and CRF (significant gain in all four comparisons), P1 items 3–4 | Met by the CRF head |
 | 2 | Done: multi-task NER (fine + coarse heads), domain-adaptive pre-training and a 3-model ensemble, all with `--crf` (P1 items 2, 5 and 8; protocol below) | Not met: no 95% CI lies above 0 against the CRF head on the random splits; the ensemble comes closest (+3.39 fine-grained, +1.30 coarse-grained) and is the only change that improves on unseen papers (coarse-grained) |
 | 3 | Done: NER, P1 "Next, after week 2" items 1–5: comparisons of 3-seed means, a mixed-backbone ensemble, label semantics and self-training for unseen papers, multi-task again, in-domain pre-training (protocol below) | Met for two changes, both coarse-grained: multi-task on the random splits (+0.75 [+0.10, +1.39]) and label semantics on unseen papers (+1.17 [+0.94, +1.41]). The mixed-backbone vote, self-training and in-domain pre-training do not pass; the reported system stays `crf_ens3` |
-| 4 | Done for NER, except the random-split self-training runs (reported, still running): P1 "Next, after week 3" items 1, 2, 3 and 5, i.e. votes over the week-3 changes that help, label semantics on the multi-task model, self-training at scale, on Kaggle T4 GPUs (protocol below). Not started: context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | Met for NER by two changes, both on unseen papers. Coarse-grained, the label-semantics vote improves on `crf_ens3` on the CPU (+1.63 [+0.11, +3.16]); the GPU repeat does not confirm it (+0.40 [−1.36, +2.16]). Fine-grained, self-training with 3 teachers improves on the CRF head (GPU, +1.07 [+0.33, +1.80]). The multi-task vote and label semantics on the multi-task model do not pass. Typing: not started |
+| 4 | Done for NER: P1 "Next, after week 3" items 1, 2, 3 and 5, i.e. votes over the week-3 changes that help, label semantics on the multi-task model, self-training at scale, on Kaggle T4 GPUs (protocol below). Not started: context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | Met for NER by two changes, both on unseen papers. Coarse-grained, the label-semantics vote improves on `crf_ens3` on the CPU (+1.63 [+0.11, +3.16]); the GPU repeat does not confirm it (+0.40 [−1.36, +2.16]). Fine-grained, self-training with 3 teachers improves on the CRF head (GPU, +1.07 [+0.33, +1.80]; +1.22 [+0.60, +1.84] on the random splits, reported). The multi-task vote and label semantics on the multi-task model do not pass. Typing: not started |
 | 5 | Class-level taxonomy (LLM or cross-encoder + arborescence); relation annotation pilot | First class-level taxonomy F1 above chance; relation guidelines |
 
 ### Week 2 protocol (fixed before any run)
@@ -912,3 +916,6 @@ two packages missing on Kaggle (seqeval, rdflib); both are now installed
 there, pinned to the CPU versions. A CRF run should take 1–2 minutes on
 a T4 (13–27 on 2 CPU threads), so the plan needs about 17 GPU-hours, about
 half of Kaggle's weekly quota of 30.
+
+Outcome: every planned run finished, the random splits of item 3 included,
+in 7.5 GPU-hours (smoke jobs included).

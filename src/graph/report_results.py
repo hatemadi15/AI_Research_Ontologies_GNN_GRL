@@ -549,8 +549,10 @@ WEEK4_INTRO = (
     "rows are runs on Kaggle T4 GPUs, compared only with GPU runs: the multi-task vote against "
     "the GPU seed ensemble over the 5 random splits, label semantics on the multi-task model "
     "against the GPU CRF head over the 5 random splits and over the 4 held-out papers, and "
-    "self-training with 3 teachers against the GPU CRF head over the 4 held-out papers; the "
-    "other GPU rows repeat week-3 comparisons and the CPU votes, without a decision.\n")
+    "self-training with 3 teachers against the GPU CRF head over the 4 held-out papers. The "
+    "other GPU rows are reported without a decision: the other protocol, comparisons with each "
+    "change's parent and with the GPU seed ensemble, and repeats of the week-3 comparisons and "
+    "of the CPU votes.\n")
 
 
 def week4_rows(res):
