@@ -88,3 +88,31 @@ def test_analyse_uses_the_systems_with_all_their_files(tmp_path, capsys):
     assert set(out['spread']) == set(out['triples']) == set(out['types']) == {key}
     assert json.loads((tmp_path / sa.OUT_NAME).read_text()) == json.loads(json.dumps(out))
     assert 'crf_mt vs crf: 10 seeds +1.00' in capsys.readouterr().out
+
+
+def test_published_split_analysis(tmp_path):
+    """Plain MatSciBERT and the CRF head over 10 seeds on the published split: the CI against
+    the published number, the paired difference, and the CRF votes over 3 seed triples."""
+    pytest.importorskip('scipy')
+    pytest.importorskip('seqeval')
+    gold = ['B-X O', 'O B-X']
+
+    def runs(shift):
+        out = []
+        for j in range(10):
+            run = _run(f'seed{100 * j}', 70 + shift + j / 10)
+            run.update({'test_index': [0, 1], 'test_gold': gold, 'test_pred': gold})
+            out.append(run)
+        return {'runs': out}
+    (tmp_path / 'ner_results_fine_published_split.json').write_text(json.dumps(runs(0)))
+    (tmp_path / 'ner_results_fine_published_split_crf.json').write_text(json.dumps(runs(2)))
+    out = sa.published_split(tmp_path)
+    assert list(out) == ['fine']                         # coarse has no files
+    entry = out['fine']
+    assert entry['published'] == 69.92
+    assert entry['baseline']['micro']['mean'] == 70.45
+    assert entry['baseline']['published_lies'] == 'below'     # 69.92 below the CI over seeds
+    assert entry['crf']['micro']['mean'] == 72.45 and entry['crf']['published_lies'] == 'below'
+    assert entry['crf_minus_baseline']['micro']['mean_diff'] == 2.0
+    assert entry['crf_votes']['micro']['mean'] == 100.0       # every member predicts the gold
+    assert sa.analyse(str(tmp_path))['published_split'] == out

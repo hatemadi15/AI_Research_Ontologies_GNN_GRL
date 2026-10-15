@@ -15,6 +15,10 @@ votes (ner_seedmeans.WEEK5_SYSTEMS) and writes ner_week5_seed_analysis.json next
   - types: per entity type, the F1 of a vote family (default the CRF head's, crf_ens3) over its
     3 votes and the splits whose test set or predictions have the type, its mean test support
     per split, and the macro F1 without the type: the types that pull macro F1 down.
+  - published_split (week-5 amendment): per granularity, plain MatSciBERT and the CRF head on
+    the published split, 10 model seeds each: the mean and 95% CI over the seeds of every F1
+    average and where the published number lies; the CRF head minus plain MatSciBERT, paired
+    by seed; and the CRF votes over the seed triples 0-200, 300-500 and 600-800.
 
 A family or vote family is used only if all its files exist. Usage:
   python src/graph/ner_seed_analysis.py [--results results/gpu] [--system crf_ens3] [--out PATH]
@@ -28,13 +32,16 @@ import statistics
 from pathlib import Path
 
 import metrics
+import ner_ensemble
+from ner_baseline import F1_AVERAGES
 from ner_seedmeans import (GRANULARITIES, PROTOCOLS, WEEK5_OFFSETS, WEEK5_SYSTEMS,
-                           file_names, system_scores)
+                           WEEK5_TRIPLES, file_names, spread, system_scores)
 
 RESULTS_DIR = Path(__file__).resolve().parents[2] / 'results' / 'gpu'
 OUT_NAME = 'ner_week5_seed_analysis.json'
 FAMILIES = ('crf', 'crf_mt', 'crf_ls', 'crf_st3')
 AVERAGES = ('micro avg', 'macro avg', 'weighted avg')
+PUBLISHED_F1 = {'fine': 69.92, 'coarse': 72.32}       # Durmaz et al. 2024
 
 
 def load_files(directory, names):
@@ -114,6 +121,39 @@ def type_scores(vote_files):
     return out
 
 
+def published_split(directory):
+    """The published-split analysis per granularity (see the module docstring); granularities
+    without both files are left out."""
+    out = {}
+    for g in GRANULARITIES:
+        files = load_files(directory, [f'ner_results_{g}_published_split.json',
+                                       f'ner_results_{g}_published_split_crf.json'])
+        if not files:
+            continue
+        runs = {name: {r['run_id']: r for r in f['runs']}
+                for name, f in zip(('baseline', 'crf'), files)}
+        paper = PUBLISHED_F1[g]
+        entry = {'published': paper}
+        for name, by_id in runs.items():
+            entry[name] = {avg: spread([get(r) for r in by_id.values()])
+                           for avg, get in F1_AVERAGES.items()}
+            lo, hi = entry[name]['micro']['ci95']
+            entry[name]['published_lies'] = ('within' if lo <= paper <= hi else
+                                             'below' if paper < lo else 'above')
+        ids = [i for i in runs['crf'] if i in runs['baseline']]
+        entry['crf_minus_baseline'] = {
+            avg: spread([get(runs['crf'][i]) - get(runs['baseline'][i]) for i in ids],
+                        'mean_diff') for avg, get in F1_AVERAGES.items()}
+        triples = [[f'seed{first + 100 * j}' for j in range(3)] for first in WEEK5_TRIPLES]
+        if all(i in runs['crf'] for t in triples for i in t):
+            votes = [ner_ensemble.ensemble_run(f'seed{t[0][4:]}_triple',
+                                               [runs['crf'][i] for i in t]) for t in triples]
+            entry['crf_votes'] = {avg: spread([get(v) for v in votes])
+                                  for avg, get in F1_AVERAGES.items()}
+        out[g] = entry
+    return out
+
+
 def analyse(directory, system='crf_ens3'):
     """The three analyses for every protocol and granularity that has the files."""
     out = {'spread': {}, 'triples': {}, 'types': {}, 'system': system}
@@ -131,6 +171,7 @@ def analyse(directory, system='crf_ens3'):
             votes = load_files(directory, file_names(g, protocol, system, WEEK5_SYSTEMS))
             if votes:
                 out['types'][key] = type_scores(votes)
+    out['published_split'] = published_split(directory)
     return out
 
 
@@ -151,6 +192,11 @@ def main(argv=None):
                   f"{t['n_triples']} 3-seed triples {100 * t['share_above_0']:.0f}% pass, "
                   f"{100 * t['share_below_0']:.0f}% below 0, "
                   f"{100 * t['share_opposite_sign']:.0f}% opposite sign")
+    for g, entry in result['published_split'].items():
+        base, crf = entry['baseline']['micro'], entry['crf']['micro']
+        print(f"  published split, {g}: plain MatSciBERT {base['mean']:.2f} {base['ci95']} "
+              f"(published {entry['published']:.2f}, {entry['baseline']['published_lies']}), "
+              f"CRF head {crf['mean']:.2f} {crf['ci95']}")
     out = args.out or os.path.join(args.results, OUT_NAME)
     with open(out, 'w') as f:
         json.dump(result, f, indent=2)
