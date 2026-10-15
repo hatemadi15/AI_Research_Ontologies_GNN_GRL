@@ -12,16 +12,17 @@ votes (ner_seedmeans.WEEK5_SYSTEMS) and writes ner_week5_seed_analysis.json next
     on both sides): the share of triples whose 95% CI lies above 0 (the change would pass the
     rule), below 0, and whose mean difference has the opposite sign to the 10-seed one. How
     far a 3-seed design can mislead.
-  - types: per entity type, the F1 of a vote family (default the CRF head's, crf_ens3) over its
-    3 votes and the splits whose test set or predictions have the type, its mean test support
-    per split, and the macro F1 without the type: the types that pull macro F1 down.
+  - types: for each vote family (crf_ens3, crf_mt_ens3, crf_ls_ens3, crf_st3_ens3) and entity
+    type, the F1 over the family's 3 votes and the splits whose test set or predictions have
+    the type, its mean test support per split, and the macro F1 without the type: the types
+    that pull macro F1 down, for whichever vote is the reported system.
   - published_split (week-5 amendment): per granularity, plain MatSciBERT and the CRF head on
     the published split, 10 model seeds each: the mean and 95% CI over the seeds of every F1
     average and where the published number lies; the CRF head minus plain MatSciBERT, paired
     by seed; and the CRF votes over the seed triples 0-200, 300-500 and 600-800.
 
 A family or vote family is used only if all its files exist. Usage:
-  python src/graph/ner_seed_analysis.py [--results results/gpu] [--system crf_ens3] [--out PATH]
+  python src/graph/ner_seed_analysis.py [--results results/gpu] [--out PATH]
 """
 
 import argparse
@@ -40,6 +41,7 @@ from ner_seedmeans import (GRANULARITIES, PROTOCOLS, WEEK5_OFFSETS, WEEK5_SYSTEM
 RESULTS_DIR = Path(__file__).resolve().parents[2] / 'results' / 'gpu'
 OUT_NAME = 'ner_week5_seed_analysis.json'
 FAMILIES = ('crf', 'crf_mt', 'crf_ls', 'crf_st3')
+VOTES = tuple(f'{f}_ens3' for f in FAMILIES)
 AVERAGES = ('micro avg', 'macro avg', 'weighted avg')
 PUBLISHED_F1 = {'fine': 69.92, 'coarse': 72.32}       # Durmaz et al. 2024
 
@@ -154,9 +156,9 @@ def published_split(directory):
     return out
 
 
-def analyse(directory, system='crf_ens3'):
-    """The three analyses for every protocol and granularity that has the files."""
-    out = {'spread': {}, 'triples': {}, 'types': {}, 'system': system}
+def analyse(directory):
+    """The analyses for every protocol and granularity that has the files."""
+    out = {'spread': {}, 'triples': {}, 'types': {}}
     for protocol in PROTOCOLS:
         for g in GRANULARITIES:
             key = f'{g}_{protocol}'
@@ -168,9 +170,10 @@ def analyse(directory, system='crf_ens3'):
                 if fs and fam != 'crf' and files['crf']:
                     out['triples'].setdefault(key, {})[fam] = triple_comparisons(
                         fs, files['crf'])
-            votes = load_files(directory, file_names(g, protocol, system, WEEK5_SYSTEMS))
-            if votes:
-                out['types'][key] = type_scores(votes)
+            for system in VOTES:
+                votes = load_files(directory, file_names(g, protocol, system, WEEK5_SYSTEMS))
+                if votes:
+                    out['types'].setdefault(key, {})[system] = type_scores(votes)
     out['published_split'] = published_split(directory)
     return out
 
@@ -179,12 +182,9 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description='Exploratory analyses of the 10-seed runs '
                                                  '(no training, no decision)')
     parser.add_argument('--results', default=str(RESULTS_DIR), metavar='DIR')
-    parser.add_argument('--system', default='crf_ens3', choices=sorted(
-        s for s in WEEK5_SYSTEMS if s.endswith('_ens3')),
-                        help='the vote family whose per-type scores are analysed')
     parser.add_argument('--out', default=None, metavar='PATH')
     args = parser.parse_args(argv)
-    result = analyse(args.results, args.system)
+    result = analyse(args.results)
     for key, fams in result['triples'].items():
         for fam, t in fams.items():
             ten = t['ten_seed']

@@ -79,12 +79,14 @@ def test_analyse_uses_the_systems_with_all_their_files(tmp_path, capsys):
     _family(tmp_path, 'crf_ls', lambda j, k: 71 + k)
     (tmp_path / ns.file_names('fine', 'random_split_vary', 'crf_ls', ns.WEEK5_SYSTEMS)[9]).unlink()
     _family(tmp_path, 'crf_ens3', lambda j, k: 80 + k)
+    _family(tmp_path, 'crf_mt_ens3', lambda j, k: 81 + k)
     out = sa.main(['--results', str(tmp_path)])
     key = 'fine_random_split_vary'
     assert set(out['spread'][key]) == {'crf', 'crf_mt'}       # crf_ls lacks a seed
     assert set(out['triples'][key]) == {'crf_mt'}
     assert out['triples'][key]['crf_mt']['share_above_0'] == 1.0
-    assert list(out['types'][key]) == ['PRO', 'MAT'] and out['system'] == 'crf_ens3'
+    assert list(out['types'][key]) == ['crf_ens3', 'crf_mt_ens3']   # one per complete vote
+    assert all(list(t) == ['PRO', 'MAT'] for t in out['types'][key].values())
     assert set(out['spread']) == set(out['triples']) == set(out['types']) == {key}
     assert json.loads((tmp_path / sa.OUT_NAME).read_text()) == json.loads(json.dumps(out))
     assert 'crf_mt vs crf: 10 seeds +1.00' in capsys.readouterr().out
