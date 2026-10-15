@@ -81,6 +81,14 @@ NER week 5 (results/gpu/ner_week5_comparisons.json, written by `ner_seedmeans.py
   * "NER week-5 comparisons": the complete comparisons of WEEK5_COMPARISONS (10-seed means
     of GPU runs; a vote family scores the mean of its 3 votes), in their order, and a
     verdict bullet for each.
+  * Once that file exists, the reported system of both tables is decided on it, per
+    protocol (week5_system): crf_ens3, unless a vote of WEEK5_VOTES improves on it (the
+    largest mean difference). Its scores are the vote family's, and a vote that holds only
+    the unseen-paper slot is named. The published check is made against PUBLISHED_F1.
+  * The published split (week-5 amendment) gets an "At a glance" row once
+    results/gpu/ner_results_<granularity>_published_split[_crf].json hold 10 runs: plain
+    MatSciBERT and the CRF head, and where the published number lies against plain
+    MatSciBERT's CI over the seeds.
 """
 import argparse
 import difflib
@@ -147,6 +155,10 @@ WEEK5_COMPARISONS = (('crf_mt', 'crf'), ('crf_ls', 'crf'), ('crf_st3', 'crf'),
                      ('crf_mt_ens3', 'crf_ens3'), ('crf_ls_ens3', 'crf_ens3'),
                      ('crf_st3_ens3', 'crf_ens3'), ('crf_ens3', 'crf'))
 WEEK5_NAMES = {**WEEK4_NAMES, 'crf_st3_ens3': 'vote of self-training with 3 teachers'}
+# the votes that may replace crf_ens3 as the reported system (week-5 protocol, decision 2)
+WEEK5_VOTES = ('crf_mt_ens3', 'crf_ls_ens3', 'crf_st3_ens3')
+# the published F1 of each granularity (Durmaz et al. 2024), for the rows made from comparisons
+PUBLISHED_F1 = {'fine': 69.92, 'coarse': 72.32}
 # `role` of a week-3 to week-5 comparison, as the verdict bullets word it
 ROLE_WORDS = {'decision': 'the pre-registered decision', 'reported': 'reported, no decision'}
 # averages the reported system is checked under against the published F1
@@ -154,12 +166,14 @@ AVERAGES = ('micro', 'macro', 'weighted')
 
 PROTOCOL_NAMES = {'random_split_vary': 'new random split per seed',
                   'leave_one_paper_out': 'leave one paper out',
-                  'random_split_fixed': 'fixed split'}
+                  'random_split_fixed': 'fixed split',
+                  'published_split': 'the published split'}
 # Pairs a comparison needs before it is shown: the 5 splits (or model seeds) and the
 # 4 held-out papers.
 REQUIRED_PAIRS = {'random_split_vary': 5, 'random_split_fixed': 5, 'leave_one_paper_out': 4}
 PROTOCOL_FILE_PART = {'random_split_fixed': '', 'random_split_vary': '_random_split_vary',
-                      'leave_one_paper_out': '_leave_one_paper_out'}
+                      'leave_one_paper_out': '_leave_one_paper_out',
+                      'published_split': '_published_split'}
 
 NER_PROTOCOLS = [('', 'fixed split (seed 0), 5 model seeds'),
                  ('_random_split_vary', 'new random split per seed'),
@@ -959,6 +973,68 @@ def unseen_system(res, g):
     return var, res.get(ner_file(g, 'leave_one_paper_out', var))
 
 
+def week5_system(res, g, protocol):
+    """(variant, scores) of the week-5 reported system on one protocol; None without the
+    week-5 comparisons.
+
+    crf_ens3, unless a vote of WEEK5_VOTES improves on it (the one with the largest mean
+    difference). scores: the vote family's per-average mean, CI and per-split scores (the mean
+    of its 3 votes), from the week-5 comparison that has it.
+    """
+    comps = res.comparisons(GPU_PREFIX + WEEK5_FILE)
+    passed = [c for vote in WEEK5_VOTES
+              for c in [improves(comps, g, protocol, vote, 'crf_ens3')] if c]
+    if passed:
+        c = max(passed, key=lambda c: c['micro']['mean_diff'])
+        return c['variant'], c['variant_scores']
+    base = find_comparison(comps, g, protocol, 'crf_ens3', 'crf')
+    if base:
+        return 'crf_ens3', base['variant_scores']
+    for vote in WEEK5_VOTES:
+        c = find_comparison(comps, g, protocol, vote, 'crf_ens3')
+        if c and c.get('reference_scores'):
+            return 'crf_ens3', c['reference_scores']
+    return None
+
+
+def week5_cells(res, g, phrase):
+    """(name, cell, verdict) of the week-5 reported system of a granularity; None without
+    its random-split comparisons. The cell gives the 5 random splits and, if complete, the
+    held-out papers (`phrase`), naming the system there if it differs."""
+    found = week5_system(res, g, 'random_split_vary')
+    if not found:
+        return None
+    var, scores = found
+    name = f"{WEEK5_NAMES[var]} `{var}`, 10 seeds (GPU runs)"
+    cell = f"micro F1 {interval(scores['micro'])} over 5 random splits"
+    unseen = week5_system(res, g, 'leave_one_paper_out')
+    if unseen:
+        uvar, uscores = unseen
+        if uvar == var:
+            cell += f", {uscores['micro']['mean']:.2f} {phrase}"
+        else:
+            name += f"; on unseen papers the {WEEK5_NAMES[uvar]} `{uvar}`"
+            cell += f"; {uscores['micro']['mean']:.2f} {phrase} (`{uvar}`)"
+    return name, cell, published_check(scores, PUBLISHED_F1[g])
+
+
+def published_split_row(res, g):
+    """The "At a glance" row of the published split (week-5 amendment); '' until both its
+    files in results/gpu/ hold 10 runs."""
+    base = res.get(GPU_PREFIX + ner_file(g, 'published_split'))
+    crf = res.get(GPU_PREFIX + ner_file(g, 'published_split', 'crf'))
+    if not (has_runs(base, 10) and has_runs(crf, 10)):
+        return ''
+    paper = PUBLISHED_F1[g]
+    lo, hi = base['summary']['micro']['ci95']
+    where = ('within its 95% CI' if lo <= paper <= hi else
+             'below its 95% CI' if paper < lo else 'above its 95% CI')
+    return (f"| NER, {g}-grained, the published split, 10 seeds (GPU runs) | plain MatSciBERT "
+            f"{interval(base['summary']['micro'])}; CRF head "
+            f"{interval(crf['summary']['micro'])} | published {paper:.2f}, "
+            f"{where} for plain MatSciBERT (the CI is over seeds only) |")
+
+
 def system_name(var, prefix, uvar):
     """The reported system's name: `var` in distribution, then `uvar` on unseen papers if other."""
     name = f"{WEEK4_NAMES[var]} `{var}`" + (' (GPU runs)' if prefix else '')
@@ -986,7 +1062,10 @@ def unseen_cell(res, g, var, ood, uvar, uood, phrase, named=False):
 
 
 def system_protocol(res):
-    """The protocol whose rules chose the reported system: week 4 once its comparisons exist."""
+    """The protocol whose rules chose the reported system: week 5, 4 or 3, the latest whose
+    comparisons exist."""
+    if res.comparisons(GPU_PREFIX + WEEK5_FILE):
+        return 'week-5 protocol'
     week4 = res.comparisons(WEEK4_FILE) or res.comparisons(GPU_PREFIX + WEEK4_FILE)
     return 'week-4 protocol' if week4 else 'week-3 protocol'
 
@@ -1066,6 +1145,22 @@ def glance_table(res):
                               f"{v['paper_test_f1']:.2f}: **beaten** if the paper used micro F1"
                               f"{crf_gain_note(comps, g) if var == 'crf' else ''} |")
     for g in GRANULARITIES:
+        row = published_split_row(res, g)
+        if row:
+            glance.append(row)
+    for g in GRANULARITIES:
+        week5 = week5_cells(res, g, 'on an unseen paper')
+        if week5:
+            name, cell, (verdict, rest) = week5
+            if verdict.startswith('beaten'):
+                verdict = '**beaten**' + verdict[len('beaten'):]
+                if rest:
+                    verdict += (f"; {', '.join(rest)} {'is' if len(rest) == 1 else 'are'} "
+                                "not significantly above")
+            glance.append(f"| NER, {g}-grained, reported system (week-5 protocol): {name} | "
+                          f"{cell} | published {PUBLISHED_F1[g]:.2f} (none for an unseen "
+                          f"paper): {verdict} |")
+            continue
         var, v, ood, prefix = reported_system(res, g)
         uvar, uood = unseen_system(res, g)
         if has_runs(v, 5):
@@ -1154,6 +1249,13 @@ def standing_block(res, note=''):
 
     reported_cells, reported_refs = [], []
     for g in GRANULARITIES:
+        week5 = week5_cells(res, g, 'leaving one paper out')
+        if week5:
+            name, cell, (verdict, _) = week5
+            cell = cell.replace('over 5 random splits', 'over 5 new splits')
+            reported_cells.append(f"{g}: {name}, {cell}")
+            reported_refs.append(f"{g}-grained {verdict}")
+            continue
         var, v, ood, prefix = reported_system(res, g)
         uvar, uood = unseen_system(res, g)
         if has_runs(v, 5):

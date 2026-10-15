@@ -815,6 +815,61 @@ def test_week5_table_and_verdicts(tmp_path):
     assert '#### NER week-4 comparisons' not in readme
 
 
+def test_week5_reported_system_replaces_the_earlier_rows(tmp_path):
+    """With week-5 comparisons, the reported system is decided on them: crf_ens3 (its scores:
+    the 10-seed vote family's) unless a vote passes; on unseen papers a passing vote is named."""
+    ws = Workspace(tmp_path)
+    for g, paper in (('fine', 69.92), ('coarse', 72.32)):
+        ws.summary(g, 'random_split_vary', 'crf_ens3', 5, (79.5, 77.8, 81.1), paper=paper)
+        ws.summary(g, 'leave_one_paper_out', 'crf_ens3', 4, (61.42, 55.8, 67.0), paper=paper)
+    for g in ('fine', 'coarse'):
+        ws.week4('crf_ens3', 'crf', g, 'random_split_vary', gpu=True, micro=(2.0, 1.0, 3.0),
+                 score=(80.5, 78.0, 83.0), name=rr.WEEK5_FILE)
+        ws.week4('crf_ens3', 'crf', g, 'leave_one_paper_out', gpu=True, micro=(2.0, 1.0, 3.0),
+                 score=(50.0, 44.0, 56.0), name=rr.WEEK5_FILE)
+    # coarse, unseen papers: the vote of self-training passes, the label-semantics vote too
+    # but by less
+    ws.week4('crf_st3_ens3', 'crf_ens3', 'coarse', 'leave_one_paper_out', gpu=True,
+             role='decision', micro=(1.5, 0.5, 2.5), score=(62.0, 56.0, 68.0), name=rr.WEEK5_FILE)
+    ws.week4('crf_ls_ens3', 'crf_ens3', 'coarse', 'leave_one_paper_out', gpu=True,
+             role='decision', micro=(1.0, 0.2, 1.8), score=(61.5, 56.0, 67.0), name=rr.WEEK5_FILE)
+    readme, roadmap = ws.generate()
+    rows = [line for line in glance(readme).split('\n') if 'reported system' in line]
+    assert len(rows) == 2
+    assert rows[0].startswith('| NER, fine-grained, reported system (week-5 protocol): 3-model '
+                              'seed ensemble `crf_ens3`, 10 seeds (GPU runs) | micro F1 80.50 '
+                              '[78.00, 83.00] over 5 random splits, 50.00 on an unseen paper | '
+                              'published 69.92 (none for an unseen paper): **beaten**')
+    assert ('reported system (week-5 protocol): 3-model seed ensemble `crf_ens3`, 10 seeds (GPU '
+            'runs); on unseen papers the vote of self-training with 3 teachers `crf_st3_ens3` | '
+            'micro F1 80.50 [78.00, 83.00] over 5 random splits; 62.00 on an unseen paper '
+            '(`crf_st3_ens3`) | published 72.32') in rows[1]
+    standing = next(line for line in roadmap.split('\n') if 'reported system' in line)
+    assert standing.startswith('| NER, reported system (week-5 protocol) | fine: 3-model seed '
+                               'ensemble `crf_ens3`, 10 seeds (GPU runs), micro F1 80.50 '
+                               '[78.00, 83.00] over 5 new splits, 50.00 leaving one paper out')
+
+
+def test_published_split_row(tmp_path):
+    ws = Workspace(tmp_path)
+    (ws.results / 'gpu').mkdir()
+    for g, base, crf in (('fine', (70.5, 69.0, 72.0), (73.0, 72.0, 74.0)),
+                         ('coarse', (75.0, 74.0, 76.0), (77.0, 76.0, 78.0))):
+        for variant, micro in ((None, base), ('crf', crf)):
+            (ws.results / 'gpu' / rr.ner_file(g, 'published_split', variant)).write_text(
+                json.dumps({'summary': {'n_runs': 10, 'micro': {
+                    'mean': micro[0], 'ci95': list(micro[1:])}}}))
+    readme, _ = ws.generate()
+    rows = [line for line in glance(readme).split('\n') if 'published split' in line]
+    assert rows == [
+        '| NER, fine-grained, the published split, 10 seeds (GPU runs) | plain MatSciBERT 70.50 '
+        '[69.00, 72.00]; CRF head 73.00 [72.00, 74.00] | published 69.92, within its 95% CI for '
+        'plain MatSciBERT (the CI is over seeds only) |',
+        '| NER, coarse-grained, the published split, 10 seeds (GPU runs) | plain MatSciBERT 75.00 '
+        '[74.00, 76.00]; CRF head 77.00 [76.00, 78.00] | published 72.32, below its 95% CI for '
+        'plain MatSciBERT (the CI is over seeds only) |']
+
+
 def test_a_week3_file_that_is_not_an_object_is_reported(tmp_path, capsys):
     ws = Workspace(tmp_path)
     (ws.results / rr.WEEK3_FILE).write_text('[1, 2]')
