@@ -85,9 +85,10 @@ def test_week4_systems_and_comparisons_follow_the_week4_protocol():
         ('crf_mt_ens3', 'crf_ens3', 'random_split_vary'),
         ('crf_mt_ls', 'crf', ('random_split_vary', 'leave_one_paper_out')),
         ('crf_st3', 'crf', 'leave_one_paper_out'),
+        ('crf_ls_ens3', 'crf_ens3', None), ('crf_st_ens3', 'crf_ens3', None),
         ('crf_ens3', 'crf', None), ('crf_mt_ens3', 'crf', None), ('crf_mt', 'crf', None),
-        ('crf_ls', 'crf', None), ('crf_mt_ls', 'crf_mt', None), ('crf_mt_ls', 'crf_ls', None),
-        ('crf_st3', 'crf_ens3', None))
+        ('crf_ls', 'crf', None), ('crf_st', 'crf', None), ('crf_mt_ls', 'crf_mt', None),
+        ('crf_mt_ls', 'crf_ls', None), ('crf_st3', 'crf_st', None), ('crf_st3', 'crf_ens3', None))
     with pytest.raises(ValueError):
         ns.comparison_list(3, gpu=True)
     assert ns.OUT_NAMES == {3: 'ner_week3_comparisons.json', 4: 'ner_week4_comparisons.json'}
@@ -258,6 +259,24 @@ def test_week4_gpu_comparisons_decide_on_both_protocols(tmp_path, capsys):
     with pytest.raises(SystemExit) as excinfo:
         ns.main(['--results', str(tmp_path), '--gpu'])
     assert excinfo.value.code == 2 and '--gpu needs --week 4' in capsys.readouterr().err
+
+
+def test_gpu_minus_cpu_is_descriptive(tmp_path):
+    """--gpu adds, for systems in both directories, the GPU minus the CPU scores per split."""
+    pytest.importorskip('scipy')
+    gpu = tmp_path / 'gpu'
+    gpu.mkdir()
+    for n in (0, 100, 200):
+        _write(tmp_path, 'fine', 'leave_one_paper_out', f'crf_m{n}', [50, 51, 52, 53])
+        _write(gpu, 'fine', 'leave_one_paper_out', f'crf_m{n}', [51, 52, 53, 54])
+    comps = ns.main(['--results', str(gpu), '--week', '4', '--gpu'])
+    assert list(comps) == ['ner_results_fine_leave_one_paper_out_crf_gpu_vs_cpu']
+    c = comps['ner_results_fine_leave_one_paper_out_crf_gpu_vs_cpu']
+    assert (c['role'], c['hardware'], c['complete']) == (
+        'descriptive', {'variant': 'gpu', 'reference': 'cpu'}, True)
+    assert c['micro']['mean_diff'] == 1.0 and c['variant_files'] == c['reference_files']
+    # another CPU directory, or none with these files: no descriptive entry
+    assert ns.main(['--results', str(gpu), '--week', '4', '--gpu', '--cpu', str(gpu / 'x')]) == {}
 
 
 def test_script_runs_standalone(tmp_path):

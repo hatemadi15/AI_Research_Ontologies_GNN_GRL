@@ -46,8 +46,12 @@ entries, written to ner_week4_comparisons.json:
   - The GPU runs (--gpu, results/gpu/): crf_mt_ens3 vs crf_ens3 (decided over the random
     splits), crf_mt_ls vs crf (decided over the random splits and, separately, over the
     held-out papers) and crf_st3 vs crf (decided over the held-out papers); then, reported,
-    crf_ens3, crf_mt_ens3, crf_mt and crf_ls vs crf, crf_mt_ls vs crf_mt and crf_ls, and
-    crf_st3 vs crf_ens3. GPU runs are only compared with GPU runs.
+    the GPU repeats of the CPU votes (crf_ls_ens3 and crf_st_ens3 vs crf_ens3), crf_ens3,
+    crf_mt_ens3, crf_mt, crf_ls and crf_st vs crf, crf_mt_ls vs crf_mt and crf_ls, and
+    crf_st3 vs crf_st and crf_ens3. GPU runs are only compared with GPU runs, except in
+    the descriptive entries `<key>_gpu_vs_cpu` (role 'descriptive'): a system's GPU scores
+    minus its CPU scores (--cpu DIR, default the parent of the GPU directory), per split,
+    for the systems run on both (HARDWARE_SYSTEMS): what the hardware alone changes.
 
 Usage:
   python src/graph/ner_seedmeans.py [--results results] [--out results/ner_week3_comparisons.json]
@@ -116,14 +120,24 @@ WEEK4_GPU_COMPARISONS = (
     ('crf_mt_ens3', 'crf_ens3', 'random_split_vary'),
     ('crf_mt_ls', 'crf', ('random_split_vary', 'leave_one_paper_out')),
     ('crf_st3', 'crf', 'leave_one_paper_out'),
+    # the GPU repeats of the CPU votes (protocol amendment), reported
+    ('crf_ls_ens3', 'crf_ens3', None),
+    ('crf_st_ens3', 'crf_ens3', None),
     ('crf_ens3', 'crf', None),
     ('crf_mt_ens3', 'crf', None),
     ('crf_mt', 'crf', None),
     ('crf_ls', 'crf', None),
+    ('crf_st', 'crf', None),
     ('crf_mt_ls', 'crf_mt', None),
     ('crf_mt_ls', 'crf_ls', None),
+    ('crf_st3', 'crf_st', None),
     ('crf_st3', 'crf_ens3', None),
 )
+
+
+# systems run on the CPU and again on the GPU: their GPU minus CPU scores are described
+HARDWARE_SYSTEMS = ('crf', 'crf_ens3', 'crf_mt', 'crf_ls', 'crf_st', 'crf_ls_ens3',
+                    'crf_st_ens3')
 
 
 def comparison_list(week, gpu=False):
@@ -235,6 +249,37 @@ def week3_comparisons(directory, comparisons_list=COMPARISONS):
     return comparisons
 
 
+def hardware_comparisons(gpu_dir, cpu_dir):
+    """The GPU scores of each HARDWARE_SYSTEMS system minus its CPU scores, per split.
+
+    Descriptive only (role 'descriptive'): the two sides differ in hardware, not in method.
+    Keyed <key of the system>_gpu_vs_cpu; skipped while a file is missing on either side.
+    """
+    out = {}
+    for system in HARDWARE_SYSTEMS:
+        for protocol, need in PROTOCOLS.items():
+            for granularity in GRANULARITIES:
+                names = file_names(granularity, protocol, system)
+                if not all(os.path.exists(os.path.join(d, fn))
+                           for d in (gpu_dir, cpu_dir) for fn in names):
+                    continue
+                gpu, cpu = load_scores(gpu_dir, names), load_scores(cpu_dir, names)
+                if not any(i in cpu for i in gpu):
+                    continue
+                comp = compare(gpu, cpu)
+                key = f'ner_results_{granularity}{result_suffix(protocol, system)}_gpu_vs_cpu'
+                out[key] = {'variant': system, 'reference': system, 'granularity': granularity,
+                            'protocol': protocol, 'role': 'descriptive',
+                            'hardware': {'variant': 'gpu', 'reference': 'cpu'},
+                            'variant_files': names, 'reference_files': names,
+                            'n_pairs': len(comp['run_ids']), 'run_ids': comp['run_ids'],
+                            'complete': len(comp['run_ids']) >= need, **comp}
+                d = out[key]['micro']
+                print(f"  {key}: GPU minus CPU micro F1 {d['mean_diff']:+.2f}, 95% CI "
+                      f"{d['ci95']} over {out[key]['n_pairs']} splits (descriptive)")
+    return out
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
         description='NER comparisons of 3-seed means (no training): reads the results files '
@@ -245,6 +290,9 @@ def main(argv=None):
                         help='the protocol whose comparisons are made (default: 3)')
     parser.add_argument('--gpu', action='store_true',
                         help='with --week 4: the comparisons of the GPU runs (results/gpu)')
+    parser.add_argument('--cpu', default=None, metavar='DIR',
+                        help='with --gpu: the CPU results for the descriptive GPU-minus-CPU '
+                             'entries (default: the parent of --results)')
     parser.add_argument('--out', default=None, metavar='PATH',
                         help='output file (default: DIR/ner_week<N>_comparisons.json)')
     args = parser.parse_args(argv)
@@ -253,6 +301,9 @@ def main(argv=None):
     if args.gpu and args.week != 4:
         parser.error('--gpu needs --week 4: GPU runs started in week 4')
     comparisons = week3_comparisons(args.results, comparison_list(args.week, args.gpu))
+    if args.gpu:
+        cpu = args.cpu or os.path.dirname(os.path.abspath(args.results))
+        comparisons.update(hardware_comparisons(args.results, cpu))
     out = args.out or os.path.join(args.results, OUT_NAMES[args.week])
     with open(out, 'w') as f:
         json.dump(comparisons, f, indent=2)
