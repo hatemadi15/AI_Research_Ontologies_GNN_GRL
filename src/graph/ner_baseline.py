@@ -1328,10 +1328,52 @@ def stored_config(args):
 
 
 def torch_device(args):
-    """Set the number of torch threads and return the device to train on."""
+    """Set the number of torch threads and return the device to train on.
+
+    A CUDA device is made deterministic first (cuda_determinism).
+    """
     import torch
     torch.set_num_threads(args.threads or os.cpu_count())
-    return args.device or ('cuda' if torch.cuda.is_available() else 'cpu')
+    device = args.device or ('cuda' if torch.cuda.is_available() else 'cpu')
+    if device.startswith('cuda'):
+        cuda_determinism()
+    return device
+
+
+def cuda_determinism():
+    """Deterministic CUDA training (ROADMAP §4, week-4 protocol).
+
+    PyTorch's deterministic algorithms (an operation without one raises an error),
+    deterministic cuDNN without autotuning, the fixed cuBLAS workspace that deterministic
+    cuBLAS needs (read when the first CUDA handle is made, so set before any CUDA work),
+    and attention by the math kernel of scaled_dot_product_attention: the fused kernels
+    do not have a deterministic backward on every GPU. Only CUDA runs call it, so CPU
+    runs are unchanged.
+    """
+    import torch
+    os.environ.setdefault('CUBLAS_WORKSPACE_CONFIG', ':4096:8')
+    torch.use_deterministic_algorithms(True)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    for fused in ('enable_flash_sdp', 'enable_mem_efficient_sdp', 'enable_cudnn_sdp'):
+        if hasattr(torch.backends.cuda, fused):
+            getattr(torch.backends.cuda, fused)(False)
+
+
+def run_environment(device):
+    """Where a CUDA run trained, stored with every GPU run as `environment`; None on a CPU.
+
+    The GPU, the CUDA, cuDNN, torch and transformers versions, and the determinism settings.
+    """
+    if not device.startswith('cuda'):
+        return None
+    import torch
+    import transformers
+    return {'device': torch.cuda.get_device_name(torch.device(device)),
+            'cuda': torch.version.cuda, 'cudnn': torch.backends.cudnn.version(),
+            'torch': torch.__version__, 'transformers': transformers.__version__,
+            'deterministic': torch.are_deterministic_algorithms_enabled(),
+            'cublas_workspace_config': os.environ.get('CUBLAS_WORKSPACE_CONFIG')}
 
 
 def run(args):
@@ -1351,6 +1393,7 @@ def run(args):
     check_results_files(args, [(results_path(out_dir, g, args), tasks[g][1])
                                for g in granularities], corpus.get('self_train_sha256'))
     device = torch_device(args)
+    environment = run_environment(device)
     os.makedirs(out_dir, exist_ok=True)
 
     for granularity in granularities:
@@ -1407,6 +1450,8 @@ def run(args):
                                 descriptions=descriptions[granularity])
             res['run_id'] = run_id
             res['runtime_sec'] = round(time.time() - start, 1)
+            if environment:
+                res['environment'] = environment
             results['runs'].append(res)
             summarize(results)
             with open(out_path, 'w') as f:
@@ -1443,6 +1488,7 @@ def run_multitask(args, out_dir):
     paths = {head: results_path(out_dir, head, args) for head in MT_HEADS}
     check_results_files(args, [(paths[head], labels[head]) for head in MT_HEADS])
     device = torch_device(args)
+    environment = run_environment(device)
     os.makedirs(out_dir, exist_ok=True)
     protocol, variant, config = protocol_name(args), variant_name(args), stored_config(args)
     results = {head: {'granularity': head, 'protocol': protocol, 'variant': variant,
@@ -1490,6 +1536,8 @@ def run_multitask(args, out_dir):
         for head, res in records.items():
             res['run_id'] = run_id
             res['runtime_sec'] = runtime      # the shared training time
+            if environment:
+                res['environment'] = environment
             # a run found in one file only is redone: its old record is replaced
             results[head]['runs'] = [r for r in results[head]['runs']
                                      if r.get('run_id') != run_id] + [res]

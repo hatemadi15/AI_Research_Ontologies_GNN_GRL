@@ -1,0 +1,429 @@
+"""
+kaggle_jobs.py - NER runs on Kaggle GPUs (ROADMAP §4, week-4 protocol)
+
+Drives the Kaggle command-line tool (`kaggle` on the PATH, or the path in KAGGLE_CLI),
+which signs in with the token in KAGGLE_API_TOKEN; the account name is KAGGLE_USERNAME
+or --user. Every run of week 4 trains on Kaggle:
+
+  bundle   build the bundle dataset in data/processed/kaggle/bundle/: code.tar.gz (git
+           archive of a frozen commit), fatigue_sentences.txt (its SHA-256 checked against
+           results/fatigue_corpus.json), the GPU results so far (results/gpu/ner_results_*
+           as gpu__ner_results_*.json, so that finished runs are skipped) and BUNDLE.json
+           (the commit, the corpus SHA-256, the results files); then create the private
+           dataset, or add a version, and wait until Kaggle has processed it
+  push     write a batch's job spec (batch_spec) into src/kaggle/run_jobs.py and push it
+           as a private GPU kernel: NvidiaTeslaT4 (two T4 GPUs, one lane each), internet on
+           (pinned packages and model snapshot), the bundle attached, and the Kaggle image
+           pinned to the kernel's first version
+  status   the kernel's status
+  pull     download the kernel's outputs to data/processed/kaggle/<kernel>/<time>/ and
+           print the manifest: setup errors, and per job its status and minutes
+  collect  copy the results files of a pulled output to results/gpu/ (smoke-test files
+           excepted). Every run must be a GPU run with one environment (GPU, CUDA, torch,
+           transformers) shared by every run in results/gpu/, and a file there is only
+           replaced by one that holds all its runs unchanged
+  quota    the weekly GPU hours used and left
+
+Batches (`push --batch NAME`), each a list of ner_baseline.py jobs on two lanes; a job
+writes its own results files, so the lanes never write the same file:
+  smoke1  the GPU check: one CRF run three times (GPU 0, GPU 1, GPU 1 again), a
+          multi-task run and a label-semantics run
+  smoke2  the smoke tests of the new options (label semantics on the multi-task model,
+          self-training with 3 teachers), and the CRF run once more
+  item1   the CRF reference crf_m0/m100/m200 and multi-task crf_mt/_m100/_m200
+  item2   label semantics crf_ls_m* and label semantics on the multi-task model crf_mt_ls_m*
+  item3   week-3 self-training crf_st_m* and self-training with 3 teachers crf_st3_m*,
+          held-out papers
+  item3r  self-training with 3 teachers on the random splits (if the quota allows)
+Every job has --crf, --save-predictions and --threads 2; the families have 3 seeds per
+split (seed offsets 0, 100 and 200) on the 5 random splits and the 4 held-out papers.
+
+Usage:
+  python src/graph/kaggle_jobs.py quota
+  python src/graph/kaggle_jobs.py bundle --commit HEAD
+  python src/graph/kaggle_jobs.py push --batch smoke1
+  python src/graph/kaggle_jobs.py status
+  python src/graph/kaggle_jobs.py pull
+  python src/graph/kaggle_jobs.py collect data/processed/kaggle/ner-gpu-jobs/<time>
+"""
+
+import argparse
+import hashlib
+import json
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+RUN_JOBS = ROOT / 'src' / 'kaggle' / 'run_jobs.py'
+WORK_DIR = ROOT / 'data' / 'processed' / 'kaggle'
+GPU_RESULTS = ROOT / 'results' / 'gpu'
+CORPUS = 'data/processed/corpus/fatigue_sentences.txt'
+CORPUS_REPORT = ROOT / 'results' / 'fatigue_corpus.json'
+
+DATASET = 'ner-gpu-bundle'
+KERNEL = 'ner-gpu-jobs'
+MACHINE = 'NvidiaTeslaT4'           # Kaggle's "GPU T4 x2"
+GPU = 'Tesla T4'
+LANES = 2
+# the versions of the CPU runs; torch is the one of the Kaggle image
+PIP = ('transformers==5.18.0', 'tokenizers==0.23.2', 'huggingface_hub==1.33.0',
+       'safetensors==0.8.0', 'seqeval==1.2.2')
+MODELS = {'m3rg-iitd/matscibert': 'ced9d8f5f208712c4a90f98a246fe32155b29995'}
+THREADS = 2
+DEADLINE_HOURS = 10                 # no job starts later; a Kaggle session lasts 12 hours
+RESULTS_PREFIX = 'gpu__'            # as in run_jobs.py
+PLACEHOLDER = 'JOBS = None   # the job spec; kaggle_jobs.py push replaces this line'
+
+PROTOCOL_FLAGS = {'random_split_vary': ('--vary-split',),
+                  'leave_one_paper_out': ('--leave-one-paper-out',)}
+RUNS = {'random_split_vary': 5, 'leave_one_paper_out': 4}
+GRANULARITIES = ('fine', 'coarse')
+OFFSETS = (0, 100, 200)
+# relative GPU time of one run of each kind (a CRF run is 1), for balancing the lanes
+COST = {'crf': 1.0, 'mt': 1.7, 'ls': 1.1, 'mt_ls': 1.8, 'st': 2.5, 'st3': 22.0}
+
+
+# ---------------------------------------------------------------------------
+# Jobs and batches
+# ---------------------------------------------------------------------------
+def job(granularity, protocol, *flags, offset=None, tag=None):
+    """ner_baseline.py arguments of one job: --crf, the options, the seed tag and offset."""
+    args = ['--granularity', granularity, *PROTOCOL_FLAGS[protocol], '--crf', *flags]
+    if tag is not None:
+        args += ['--tag', tag]
+    if offset:
+        args += ['--seed-offset', str(offset)]
+    return args + ['--save-predictions', '--threads', str(THREADS)]
+
+
+def family(kind, flags, protocols=tuple(PROTOCOL_FLAGS), granularities=GRANULARITIES,
+           untagged_zero=False):
+    """(cost, job) per protocol, granularity and seed offset of a 3-seed family.
+
+    Seed tags are m0, m100 and m200; with untagged_zero the offset-0 member has no tag
+    (multi-task: crf_mt, crf_mt_m100, crf_mt_m200, as on the CPU).
+    """
+    out = []
+    for protocol in protocols:
+        for granularity in granularities:
+            for offset in OFFSETS:
+                tag = None if untagged_zero and offset == 0 else f'm{offset}'
+                out.append((COST[kind] * RUNS[protocol],
+                            job(granularity, protocol, *flags, offset=offset, tag=tag)))
+    return out
+
+
+def balance(costed, lanes=LANES):
+    """Jobs over `lanes`: longest first, each to the least loaded lane (ties: lowest)."""
+    loads = [0.0] * lanes
+    out = [[] for _ in range(lanes)]
+    for cost, args in sorted(costed, key=lambda c: -c[0]):
+        lane = loads.index(min(loads))
+        out[lane].append(args)
+        loads[lane] += cost
+    return out
+
+
+def batch_lanes(name):
+    """The jobs of a batch, per lane (see the module docstring)."""
+    st = ('--self-train', CORPUS)
+    st3 = (*st, '--teachers', '3', '--self-train-sample', '0')
+    lopo = ('leave_one_paper_out',)
+    if name == 'smoke1':
+        crf = ['--granularity', 'fine', '--vary-split', '--seeds', '0', '--crf',
+               '--save-predictions', '--threads', str(THREADS)]
+        return [[crf + ['--tag', 'smokea'],
+                 ['--vary-split', '--seeds', '0', '--crf', '--multi-task', '--tag', 'smoke',
+                  '--save-predictions', '--threads', str(THREADS)]],
+                [crf + ['--tag', 'smokeb'],
+                 ['--granularity', 'coarse', '--leave-one-paper-out', '--papers',
+                  '10.3390_met10111458', '--crf', '--label-semantics', '--tag', 'smoke',
+                  '--save-predictions', '--threads', str(THREADS)],
+                 crf + ['--tag', 'smokec']]]
+    if name == 'smoke2':
+        tiny = ('--max-train', '32', '--epochs', '2')
+        return [[['--vary-split', '--seeds', '0', '--crf', '--multi-task', '--label-semantics',
+                  *tiny, '--save-predictions', '--threads', str(THREADS)],
+                 ['--granularity', 'fine', '--vary-split', '--seeds', '0', '--crf',
+                  '--tag', 'smoked', '--save-predictions', '--threads', str(THREADS)]],
+                [['--granularity', 'coarse', '--leave-one-paper-out', '--papers',
+                  '10.3390_met10111458', '--crf', *st, '--teachers', '3',
+                  '--self-train-sample', '200', *tiny, '--save-predictions', '--threads',
+                  str(THREADS)]]]
+    if name == 'item1':
+        return balance(family('crf', ()) +
+                       family('mt', ('--multi-task',), granularities=('both',),
+                              untagged_zero=True))
+    if name == 'item2':
+        return balance(family('ls', ('--label-semantics',)) +
+                       family('mt_ls', ('--multi-task', '--label-semantics'),
+                              granularities=('both',)))
+    if name == 'item3':
+        # one lane per granularity: the 3-teacher job of a granularity writes three files
+        return [[args for _, args in family('st', st, protocols=lopo, granularities=(g,))] +
+                [job(g, 'leave_one_paper_out', *st3)] for g in GRANULARITIES]
+    if name == 'item3r':
+        return [[job(g, 'random_split_vary', *st3)] for g in GRANULARITIES]
+    raise ValueError(f'unknown batch {name!r}')
+
+
+BATCHES = ('smoke1', 'smoke2', 'item1', 'item2', 'item3', 'item3r')
+
+
+def batch_spec(name):
+    """The job spec that run_jobs.py runs (see its docstring)."""
+    return {'batch': name, 'gpu': GPU, 'pip': list(PIP), 'models': dict(MODELS),
+            'corpus_sha256': corpus_sha256(), 'deadline_hours': DEADLINE_HOURS,
+            'lanes': batch_lanes(name)}
+
+
+def render_script(spec, template=None):
+    """run_jobs.py with JOBS set to `spec` (a JSON string literal, parsed on Kaggle)."""
+    text = RUN_JOBS.read_text() if template is None else template
+    if text.count(PLACEHOLDER) != 1:
+        raise ValueError(f'{RUN_JOBS}: the JOBS placeholder line is missing or repeated')
+    return text.replace(PLACEHOLDER, f'JOBS = json.loads({json.dumps(json.dumps(spec))})')
+
+
+def kernel_metadata(user, kernel=KERNEL, dataset=DATASET):
+    """kernel-metadata.json of the job kernel: private, GPU (T4 x2), internet, the bundle."""
+    return {'id': f'{user}/{kernel}', 'title': kernel, 'code_file': 'run_jobs.py',
+            'language': 'python', 'kernel_type': 'script', 'is_private': True,
+            'enable_gpu': True, 'enable_tpu': False, 'enable_internet': True,
+            'dataset_sources': [f'{user}/{dataset}'], 'competition_sources': [],
+            'kernel_sources': [], 'model_sources': [], 'machine_shape': MACHINE,
+            'docker_image_pinning_type': 'original'}
+
+
+def dataset_metadata(user, dataset=DATASET):
+    return {'title': dataset, 'id': f'{user}/{dataset}', 'licenses': [{'name': 'CC0-1.0'}]}
+
+
+# ---------------------------------------------------------------------------
+# The bundle
+# ---------------------------------------------------------------------------
+def file_sha256(path):
+    digest = hashlib.sha256()
+    with open(path, 'rb') as f:
+        for block in iter(lambda: f.read(1 << 20), b''):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def corpus_sha256(report=CORPUS_REPORT):
+    """The SHA-256 of the fatigue corpus recorded when it was built (week 3)."""
+    return json.loads(Path(report).read_text())['corpus']['sha256']
+
+
+def build_bundle(commit, out_dir, root=ROOT, results_dir=GPU_RESULTS, corpus=None,
+                 expected_sha256=None):
+    """Write the bundle files to out_dir (emptied first); returns BUNDLE.json's content.
+
+    code.tar.gz is `git archive` of `commit` (the frozen code, tracked files only); the
+    corpus must have the recorded SHA-256; the GPU results files go in as
+    gpu__<name>.json.
+    """
+    out_dir = Path(out_dir)
+    if out_dir.exists():
+        shutil.rmtree(out_dir)
+    out_dir.mkdir(parents=True)
+    full = subprocess.run(['git', '-C', str(root), 'rev-parse', '--verify', f'{commit}^{{commit}}'],
+                          capture_output=True, text=True, check=True).stdout.strip()
+    subprocess.run(['git', '-C', str(root), 'archive', '--format=tar.gz', '-o',
+                    str(out_dir / 'code.tar.gz'), full], check=True)
+    corpus = Path(corpus) if corpus is not None else Path(root) / CORPUS
+    expected = expected_sha256 or corpus_sha256()
+    digest = file_sha256(corpus)
+    if digest != expected:
+        raise SystemExit(f'{corpus}: SHA-256 {digest}, not the recorded {expected}')
+    shutil.copy2(corpus, out_dir / 'fatigue_sentences.txt')
+    results = sorted(p.name for p in Path(results_dir).glob('ner_results_*.json')) \
+        if Path(results_dir).is_dir() else []
+    for name in results:
+        shutil.copy2(Path(results_dir) / name, out_dir / f'{RESULTS_PREFIX}{name}')
+    info = {'commit': full, 'corpus_sha256': digest, 'results': results,
+            'created': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}
+    (out_dir / 'BUNDLE.json').write_text(json.dumps(info, indent=2))
+    return info
+
+
+# ---------------------------------------------------------------------------
+# Collecting results
+# ---------------------------------------------------------------------------
+ENV_KEYS = ('device', 'cuda', 'torch', 'transformers', 'deterministic')
+
+
+def environment_key(run):
+    env = run.get('environment')
+    return None if env is None else tuple(env.get(k) for k in ENV_KEYS)
+
+
+def check_collect(new, old=None, environments=()):
+    """Problems with copying a pulled results file (`new`) over `old` in results/gpu/.
+
+    Every run needs an environment, all the same and the same as `environments` (those
+    of results/gpu/), and `old`'s runs must all be in `new`, unchanged.
+    """
+    problems = []
+    runs = new.get('runs', [])
+    keys = {environment_key(r) for r in runs}
+    if None in keys:
+        problems.append('runs without an environment (not GPU runs)')
+    keys.discard(None)
+    known = set(environments)
+    if len(keys | known) > 1:
+        problems.append(f'more than one environment: {sorted(map(str, keys | known))}')
+    if old is not None:
+        mine = {r.get('run_id'): r for r in runs}
+        for r in old.get('runs', []):
+            if mine.get(r.get('run_id')) != r:
+                problems.append(f"run {r.get('run_id')} of the file in results/gpu is missing "
+                                f"or changed")
+    return problems
+
+
+def collect(pulled, dest=GPU_RESULTS):
+    """Copy the non-smoke results files of a pulled output to `dest`; returns the names."""
+    sys.path.insert(0, str(ROOT / 'src' / 'graph'))
+    from ner_baseline import parse_result_name
+    dest = Path(dest)
+    dest.mkdir(parents=True, exist_ok=True)
+    existing = [json.loads(p.read_text()) for p in dest.glob('ner_results_*.json')]
+    environments = {environment_key(r) for f in existing for r in f.get('runs', [])} - {None}
+    copied, problems = [], {}
+    for path in sorted(Path(pulled).rglob('ner_results_*.json')):
+        parsed = parse_result_name(path.name)
+        if parsed is None or 'smoke' in parsed[2]:
+            continue
+        new = json.loads(path.read_text())
+        target = dest / path.name
+        old = json.loads(target.read_text()) if target.exists() else None
+        found = check_collect(new, old, environments)
+        if found:
+            problems[path.name] = found
+            continue
+        shutil.copy2(path, target)
+        copied.append(path.name)
+    return copied, problems
+
+
+# ---------------------------------------------------------------------------
+# The Kaggle command-line tool
+# ---------------------------------------------------------------------------
+def kaggle(*args, check=True):
+    """Run the kaggle CLI (KAGGLE_CLI or `kaggle`); returns its output."""
+    cli = os.environ.get('KAGGLE_CLI', 'kaggle')
+    proc = subprocess.run([cli, *args], capture_output=True, text=True)
+    out = (proc.stdout + proc.stderr).strip()
+    if check and proc.returncode:
+        raise SystemExit(f'kaggle {" ".join(args)} failed ({proc.returncode}): {out}')
+    return out
+
+
+def username(args):
+    user = args.user or os.environ.get('KAGGLE_USERNAME')
+    if not user:
+        raise SystemExit('the Kaggle account name is needed: --user NAME or KAGGLE_USERNAME')
+    return user
+
+
+def cmd_bundle(args):
+    user = username(args)
+    folder = WORK_DIR / 'bundle'
+    info = build_bundle(args.commit, folder)
+    (folder / 'dataset-metadata.json').write_text(json.dumps(dataset_metadata(user), indent=2))
+    print(f"bundle: commit {info['commit'][:12]}, corpus {info['corpus_sha256'][:12]}, "
+          f"{len(info['results'])} GPU results files")
+    ref = f'{user}/{DATASET}'
+    exists = 'ready' in kaggle('datasets', 'status', ref, check=False).lower()
+    if exists:
+        print(kaggle('datasets', 'version', '-p', str(folder), '-m',
+                     f"commit {info['commit'][:12]}, {len(info['results'])} results files"))
+    else:
+        print(kaggle('datasets', 'create', '-p', str(folder)))
+    for _ in range(60):              # Kaggle processes a new version before kernels see it
+        time.sleep(10)
+        status = kaggle('datasets', 'status', ref, check=False)
+        if 'ready' in status.lower():
+            print(f'{ref}: ready')
+            return
+    raise SystemExit(f'{ref} is not ready after 10 minutes: {status}')
+
+
+def cmd_push(args):
+    user = username(args)
+    spec = batch_spec(args.batch)
+    with tempfile.TemporaryDirectory() as folder:
+        Path(folder, 'run_jobs.py').write_text(render_script(spec))
+        Path(folder, 'kernel-metadata.json').write_text(
+            json.dumps(kernel_metadata(user), indent=2))
+        timeout = str(int(3600 * (DEADLINE_HOURS + 1.5)))
+        print(kaggle('kernels', 'push', '-p', folder, '-t', timeout))
+    print(f"batch {args.batch}: " + '; '.join(f'lane {i}: {len(jobs)} jobs'
+                                              for i, jobs in enumerate(spec['lanes'])))
+
+
+def cmd_status(args):
+    print(kaggle('kernels', 'status', f'{username(args)}/{KERNEL}'))
+
+
+def cmd_pull(args):
+    out = WORK_DIR / KERNEL / time.strftime('%Y%m%dT%H%M%S')
+    out.mkdir(parents=True)
+    print(kaggle('kernels', 'output', f'{username(args)}/{KERNEL}', '-p', str(out)))
+    manifest = out / 'manifest.json'
+    if not manifest.exists():
+        print(f'{out}: no manifest.json')
+        return
+    data = json.loads(manifest.read_text())
+    setup = data.get('setup', {})
+    if setup.get('error'):
+        print('setup error:\n' + setup['error'])
+    print(f"bundle {setup.get('bundle', {}).get('commit', '?')[:12]}, GPUs {setup.get('gpus')}, "
+          f"setup {setup.get('setup_minutes')} min, total {data.get('total_minutes')} min")
+    for j in data.get('jobs', []):
+        print(f"  lane {j['lane']} job {j['index']}: {j['status']} "
+              f"{j.get('minutes', '')} min  {' '.join(j['args'])}")
+    print(f'pulled to {out}')
+
+
+def cmd_collect(args):
+    copied, problems = collect(args.pulled)
+    for name in copied:
+        print(f'  copied {name}')
+    for name, found in problems.items():
+        print(f"  NOT copied {name}: {'; '.join(found)}")
+    print(f'{len(copied)} files copied to {GPU_RESULTS}, {len(problems)} refused')
+
+
+def cmd_quota(args):
+    print(kaggle('quota'))
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description='NER runs on Kaggle GPUs (week-4 protocol)')
+    parser.add_argument('--user', default=None, help='Kaggle account (default: KAGGLE_USERNAME)')
+    sub = parser.add_subparsers(dest='command', required=True)
+    p = sub.add_parser('bundle', help='build and upload the bundle dataset')
+    p.add_argument('--commit', default='HEAD', help='the frozen commit (default: HEAD)')
+    p.set_defaults(func=cmd_bundle)
+    p = sub.add_parser('push', help="push a batch's jobs as a GPU kernel")
+    p.add_argument('--batch', choices=BATCHES, required=True)
+    p.set_defaults(func=cmd_push)
+    sub.add_parser('status', help="the kernel's status").set_defaults(func=cmd_status)
+    sub.add_parser('pull', help="download the kernel's outputs").set_defaults(func=cmd_pull)
+    p = sub.add_parser('collect', help='copy pulled results files to results/gpu/')
+    p.add_argument('pulled', help='a directory made by pull')
+    p.set_defaults(func=cmd_collect)
+    sub.add_parser('quota', help='weekly GPU quota').set_defaults(func=cmd_quota)
+    args = parser.parse_args(argv)
+    args.func(args)
+
+
+if __name__ == '__main__':
+    main()
