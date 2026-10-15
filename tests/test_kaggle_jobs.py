@@ -162,6 +162,10 @@ def test_smoke5_tries_the_week6_options_with_their_pins(monkeypatch):
     monkeypatch.setattr(kj, 'corpus_sha256', lambda: 'x' * 64)
     lanes = kj.batch_lanes('smoke5')
     args = [nb.parse_args(j) for lane in lanes for j in lane]
+    repeat, *args = args                            # first the week-4 run again
+    assert (repeat.tag, repeat.granularity, repeat.seeds, repeat.crf) == ('smokel', 'fine', [0],
+                                                                         True)
+    assert repeat.vary_split and repeat.max_train == 0 and repeat.model == nb.DEFAULT_MODEL
     assert all(a.max_train == 32 and a.epochs == 2 for a in args)
     deberta = [a for a in args if a.model == kj.DEBERTA]
     assert [a.tag for a in deberta] == ['smokeh', 'smokei']

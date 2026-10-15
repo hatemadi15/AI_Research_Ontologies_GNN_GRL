@@ -55,8 +55,9 @@ Week 5 makes 10 seeds per split (offsets 0 to 900):
   w5c     the published split (week-5 amendment): the CRF run of smoke4 again (smokeg),
           then plain MatSciBERT and the CRF head, model seeds 0 to 900, a lane per
           granularity
-  smoke5  the week-6 options, tiny: DeBERTa-v3-large twice (with its pins, BATCH_EXTRAS),
-          document context, multi-task self-training and SOFC-Exp
+  smoke5  the CRF run of smoke4 again (smokel), then the week-6 options, tiny: DeBERTa-v3-large
+          twice (with its pins, BATCH_EXTRAS), document context, multi-task self-training and
+          SOFC-Exp
 
 Usage:
   python src/graph/kaggle_jobs.py quota
@@ -240,13 +241,15 @@ def batch_lanes(name):
         return [[repeat + ['--tag', 'smokef']] + lanes[0], lanes[1]]
     if name == 'smoke5':
         # the week-6 options (prepared in week 5): DeBERTa-v3-large twice (memory and
-        # repeatability), document context, multi-task self-training and SOFC-Exp, all tiny
+        # repeatability), document context, multi-task self-training and SOFC-Exp, all tiny;
+        # first the week-4 run again, with the new code and the extra pins
         tiny = ('--max-train', '32', '--epochs', '2', '--save-predictions', '--threads',
                 str(THREADS))
         deberta = ['--granularity', 'fine', '--vary-split', '--seeds', '0', '--crf', '--model',
                    DEBERTA, *tiny]
         paper = ('--leave-one-paper-out', '--papers', '10.3390_met10111458')
-        return [[deberta + ['--tag', 'smokeh'], deberta + ['--tag', 'smokei']],
+        return [[repeat + ['--tag', 'smokel'], deberta + ['--tag', 'smokeh'],
+                 deberta + ['--tag', 'smokei']],
                 [['--granularity', 'coarse', *paper, '--crf', '--context', '64', '--tag',
                   'smokej', *tiny],
                  [*paper, '--crf', '--multi-task', '--self-train', CORPUS, '--teachers', '3',
