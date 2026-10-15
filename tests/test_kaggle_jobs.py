@@ -105,6 +105,9 @@ def test_kernel_metadata_is_a_private_t4_gpu_kernel_with_the_bundle():
 
 def test_pins_match_the_cpu_runs():
     assert 'transformers==5.18.0' in kj.PIP
+    # seqeval is source-only on PyPI: it goes into the bundle as a wheel, not through pip
+    assert kj.WHEELS == ('seqeval==1.2.2',) and not any('seqeval' in p for p in kj.PIP)
+    assert kj.batch_spec('smoke1')['wheels'] == ['seqeval-1.2.2-py3-none-any.whl']
     assert kj.MODELS == {'m3rg-iitd/matscibert': 'ced9d8f5f208712c4a90f98a246fe32155b29995'}
     assert kj.corpus_sha256() == ('7eaf1e79f7d43e52d7ef96c8afbeddede0c9b8ca71a3b1e9cf7a64d59eea3162')
 
@@ -119,12 +122,15 @@ def test_build_bundle(tmp_path):
     results.mkdir()
     (results / 'ner_results_fine_random_split_vary_crf_m0.json').write_text('{"runs": []}')
     (results / 'notes.txt').write_text('not a results file')
+    wheel = tmp_path / 'seqeval-1.2.2-py3-none-any.whl'
+    wheel.write_bytes(b'PK')
     out = tmp_path / 'bundle'
     info = kj.build_bundle('HEAD', out, results_dir=results, corpus=corpus,
-                           expected_sha256=kj.file_sha256(corpus))
+                           expected_sha256=kj.file_sha256(corpus), wheels=[wheel])
     assert sorted(p.name for p in out.iterdir()) == [
         'BUNDLE.json', 'code.tar.gz', 'fatigue_sentences.txt',
-        'gpu__ner_results_fine_random_split_vary_crf_m0.json']
+        'gpu__ner_results_fine_random_split_vary_crf_m0.json', 'seqeval-1.2.2-py3-none-any.whl']
+    assert info['wheels'] == ['seqeval-1.2.2-py3-none-any.whl']
     assert json.loads((out / 'BUNDLE.json').read_text()) == info
     assert len(info['commit']) == 40
     assert info['results'] == ['ner_results_fine_random_split_vary_crf_m0.json']

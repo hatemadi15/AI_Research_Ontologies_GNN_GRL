@@ -8,9 +8,11 @@ or --user. Every run of week 4 trains on Kaggle:
   bundle   build the bundle dataset in data/processed/kaggle/bundle/: code.tar.gz (git
            archive of a frozen commit), fatigue_sentences.txt (its SHA-256 checked against
            results/fatigue_corpus.json), the GPU results so far (results/gpu/ner_results_*
-           as gpu__ner_results_*.json, so that finished runs are skipped) and BUNDLE.json
-           (the commit, the corpus SHA-256, the results files); then create the private
-           dataset, or add a version, and wait until Kaggle has processed it
+           as gpu__ner_results_*.json, so that finished runs are skipped), wheels of the
+           packages that PyPI has as source only (WHEELS, built here: Kaggle's Python
+           cannot build them) and BUNDLE.json (the commit, the corpus SHA-256, the results
+           files); then create the private dataset, or add a version, and wait until
+           Kaggle has processed it
   push     write a batch's job spec (batch_spec) into src/kaggle/run_jobs.py and push it
            as a private GPU kernel: NvidiaTeslaT4 (two T4 GPUs, one lane each), internet on
            (pinned packages and model snapshot), the bundle attached, and the Kaggle image
@@ -72,7 +74,10 @@ GPU = 'Tesla T4'
 LANES = 2
 # the versions of the CPU runs; torch is the one of the Kaggle image
 PIP = ('transformers==5.18.0', 'tokenizers==0.23.2', 'huggingface_hub==1.33.0',
-       'safetensors==0.8.0', 'seqeval==1.2.2')
+       'safetensors==0.8.0')
+# source-only on PyPI: built here into pure-Python wheels that go into the bundle
+WHEELS = ('seqeval==1.2.2',)
+WHEEL_FILES = ('seqeval-1.2.2-py3-none-any.whl',)
 MODELS = {'m3rg-iitd/matscibert': 'ced9d8f5f208712c4a90f98a246fe32155b29995'}
 THREADS = 2
 DEADLINE_HOURS = 10                 # no job starts later; a Kaggle session lasts 12 hours
@@ -177,7 +182,8 @@ BATCHES = ('smoke1', 'smoke2', 'item1', 'item2', 'item3', 'item3r')
 
 def batch_spec(name):
     """The job spec that run_jobs.py runs (see its docstring)."""
-    return {'batch': name, 'gpu': GPU, 'pip': list(PIP), 'models': dict(MODELS),
+    return {'batch': name, 'gpu': GPU, 'pip': list(PIP), 'wheels': list(WHEEL_FILES),
+            'models': dict(MODELS),
             'corpus_sha256': corpus_sha256(), 'deadline_hours': DEADLINE_HOURS,
             'lanes': batch_lanes(name)}
 
@@ -221,12 +227,12 @@ def corpus_sha256(report=CORPUS_REPORT):
 
 
 def build_bundle(commit, out_dir, root=ROOT, results_dir=GPU_RESULTS, corpus=None,
-                 expected_sha256=None):
+                 expected_sha256=None, wheels=()):
     """Write the bundle files to out_dir (emptied first); returns BUNDLE.json's content.
 
     code.tar.gz is `git archive` of `commit` (the frozen code, tracked files only); the
     corpus must have the recorded SHA-256; the GPU results files go in as
-    gpu__<name>.json.
+    gpu__<name>.json, and the `wheels` (paths) as they are.
     """
     out_dir = Path(out_dir)
     if out_dir.exists():
@@ -246,7 +252,10 @@ def build_bundle(commit, out_dir, root=ROOT, results_dir=GPU_RESULTS, corpus=Non
         if Path(results_dir).is_dir() else []
     for name in results:
         shutil.copy2(Path(results_dir) / name, out_dir / f'{RESULTS_PREFIX}{name}')
+    for wheel in wheels:
+        shutil.copy2(wheel, out_dir / Path(wheel).name)
     info = {'commit': full, 'corpus_sha256': digest, 'results': results,
+            'wheels': sorted(Path(w).name for w in wheels),
             'created': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}
     (out_dir / 'BUNDLE.json').write_text(json.dumps(info, indent=2))
     return info
@@ -332,10 +341,22 @@ def username(args):
     return user
 
 
+def build_wheels(out_dir=WORK_DIR / 'wheels'):
+    """Pure-Python wheels of WHEELS (pip wheel --no-deps); returns their paths."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    subprocess.run([sys.executable, '-m', 'pip', 'wheel', '-q', '--no-deps', '-w', str(out_dir),
+                    *WHEELS], check=True)
+    paths = [out_dir / name for name in WHEEL_FILES]
+    missing = [p.name for p in paths if not p.is_file()]
+    if missing:
+        raise SystemExit(f'pip wheel did not make {missing}')
+    return paths
+
+
 def cmd_bundle(args):
     user = username(args)
     folder = WORK_DIR / 'bundle'
-    info = build_bundle(args.commit, folder)
+    info = build_bundle(args.commit, folder, wheels=build_wheels())
     (folder / 'dataset-metadata.json').write_text(json.dumps(dataset_metadata(user), indent=2))
     print(f"bundle: commit {info['commit'][:12]}, corpus {info['corpus_sha256'][:12]}, "
           f"{len(info['results'])} GPU results files")

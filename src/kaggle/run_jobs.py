@@ -6,7 +6,8 @@ private Kaggle kernel with the bundle dataset attached (kaggle_jobs.py bundle: t
 of a frozen commit, the fatigue corpus and the GPU results so far). On Kaggle it:
 
   1. checks the GPUs: one per lane, each of the spec's type (`gpu`, e.g. Tesla T4);
-  2. installs the spec's pinned packages (`pip`); torch is the one of the Kaggle image;
+  2. installs the spec's pinned packages (`pip`, from PyPI) and the bundle's wheels
+     (`wheels`, packages that PyPI has as source only); torch is the Kaggle image's;
   3. unpacks the code, the corpus (its SHA-256 must be `corpus_sha256`) and the GPU
      results so far (bundle files gpu__ner_results_*.json; every run must be a GPU run,
      i.e. have an `environment`), so that finished runs are skipped;
@@ -205,11 +206,13 @@ def main(spec):
         error = check_gpus(names, len(spec['lanes']), spec.get('gpu'))
         if error:
             raise RuntimeError(error)
-        pip = subprocess.run([sys.executable, '-m', 'pip', 'install', '-q', *spec['pip']],
-                             capture_output=True, text=True)
+        wheels = [find(INPUT, name) for name in spec.get('wheels', [])]
+        if None in wheels:
+            raise FileNotFoundError(f"wheels {spec.get('wheels')} not all under {INPUT}")
+        pip = subprocess.run([sys.executable, '-m', 'pip', 'install', '-q', *spec['pip'],
+                              *map(str, wheels)], capture_output=True, text=True)
         manifest.update(lambda d: d['setup'].update({'pip': pip.returncode,
-                                                     'pip_output': pip.stdout[-4000:] +
-                                                     pip.stderr[-4000:]}))
+                                                     'pip_output': (pip.stdout + pip.stderr)[-12000:]}))
         if pip.returncode:
             raise RuntimeError('pip install failed')
         how = unpack(INPUT, 'code.tar.gz', 'src/graph/ner_baseline.py', REPO)
