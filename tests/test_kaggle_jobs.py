@@ -141,6 +141,21 @@ def test_week5_batches_add_seeds_300_to_900(monkeypatch):
     assert {'smoke4', 'w5a', 'w5b'} <= set(kj.BATCHES)
 
 
+def test_w5c_runs_the_published_split_with_10_model_seeds():
+    lanes = kj.batch_lanes('w5c')
+    assert lanes[0][0][-2:] == ['--tag', 'smokeg']               # the repeat of a week-4 run
+    jobs = [j for lane in lanes for j in lane][1:]
+    args = [nb.parse_args(j) for j in jobs]
+    assert all(a.published_split and a.seeds == list(range(0, 1000, 100)) and a.save_predictions
+               for a in args)
+    assert [(a.granularity, nb.variant_name(a)) for a in args] == [
+        ('fine', 'baseline'), ('fine', 'crf'), ('coarse', 'baseline'), ('coarse', 'crf')]
+    files = [f for j in jobs for f in _written_files(j)]
+    assert len(files) == len(set(files)) == 4
+    assert {p for _, p, _ in files} == {'published_split'}
+    assert 'w5c' in kj.BATCHES
+
+
 def test_balance_takes_the_longest_job_first_to_the_least_loaded_lane():
     # b (5) -> lane 0; c (3) -> lane 1; d (2) -> lane 1 (5 each); a (1) -> lane 0 (tie: lowest)
     lanes = kj.balance([(1, ['a']), (5, ['b']), (3, ['c']), (2, ['d'])])

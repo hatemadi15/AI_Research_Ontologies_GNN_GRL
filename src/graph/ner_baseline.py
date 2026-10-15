@@ -1,7 +1,7 @@
 """
 ner_baseline.py - MatSciBERT NER baseline (MaterioMiner protocol)
 
-The only published results on MaterioMiner are NER results (Kumar et al.,
+The only published results on MaterioMiner are NER results (Durmaz et al.,
 Sci Data 2024): MatSciBERT fine-tuned on a random 65/15/20 sentence split,
 five random initialisations, entity-level seqeval F1 (exact span and type):
 
@@ -10,8 +10,8 @@ five random initialisations, entity-level seqeval F1 (exact span and type):
 
 This script reproduces that protocol so the project has a number that is
 comparable with the literature (the pipeline itself starts from gold spans).
-The paper's exact split is not published; compare mean +/- std, not single
-runs.
+The release ships the paper's split (--published-split); compare mean +/- std
+over seeds there, and over several splits otherwise, not single runs.
 
   - Labels: fine = top-k classes by entity count (ties: token count, then
     name; the 27th/28th classes tie at 24 entities), other tags -> O;
@@ -150,6 +150,57 @@ def load_split_corpus(granularity):
         for tokens, tags in conll.read_conll_sentences(os.path.join(datadir, fn)):
             data.append((tokens, tags, fn))
     return data
+
+
+# The published split (ROADMAP §4, week-5 amendment): the partitions of the MaterioMiner
+# release, data/raw/dataset/published_split/ (see its README), checked by SHA-256
+PUBLISHED_SPLIT = 'published_split'
+PUBLISHED_PARTS = ('train', 'val', 'test')
+PUBLISHED_SPLIT_SHA256 = {
+    ('fine', 'train'): '6736fdb501a43317e4f2e6101bee5c911816f6dda813ae0807bd64c9f6cf8ae9',
+    ('fine', 'val'): 'e874dcb5232bde370f2f659767254266ec98d48dcab86ade5de4271b324727ee',
+    ('fine', 'test'): '043962bb9b022c42a474d5bc2b1fe3f7df799b90da0c6356dc1b73ecafad858a',
+    ('coarse', 'train'): 'b0a3ba3146bebdbbc7c9937d474aded18cc2f81da950bc72879fa8ed9f22598b',
+    ('coarse', 'val'): '7bf6965e2bfde17290f70dca5323d0f17674ede4c7fa17c05ab9d213495579db',
+    ('coarse', 'test'): '3ecc82bc6e740a82866ae51b8f4271fead4e7b9bee9824692254fd5fbe6cb0a2',
+}
+
+
+def published_split(data, granularity):
+    """([train, val, test positions in `data`], data with the release's tags) of the
+    published split of a granularity (--published-split).
+
+    The release files must have their recorded SHA-256, and each of their sentences must be
+    a sentence of `data` (the same words), each used once, so that the three parts cover
+    the corpus. Every sentence then takes the release's tags; the parts keep the order of
+    the files.
+    """
+    import hashlib
+    folder = os.path.join(RAW_DIR, PUBLISHED_SPLIT, f'{granularity}_grained_training')
+    position = {}
+    for i, (tokens, _, _) in enumerate(data):
+        position.setdefault(tuple(tokens), []).append(i)
+    data, parts, used = list(data), [], set()
+    for part in PUBLISHED_PARTS:
+        path = os.path.join(folder, f'{part}.txt')
+        with open(path, 'rb') as f:
+            digest = hashlib.sha256(f.read()).hexdigest()
+        if digest != PUBLISHED_SPLIT_SHA256[granularity, part]:
+            raise SystemExit(f'{path}: SHA-256 {digest}, not the recorded '
+                             f'{PUBLISHED_SPLIT_SHA256[granularity, part]}')
+        positions = []
+        for tokens, tags in conll.read_conll_sentences(path):
+            free = [i for i in position.get(tuple(tokens), []) if i not in used]
+            if not free:
+                raise SystemExit(f"{path}: a sentence that is not in the corpus, or used "
+                                 f"twice: {' '.join(tokens)[:80]}")
+            used.add(free[0])
+            positions.append(free[0])
+            data[free[0]] = (data[free[0]][0], list(tags), data[free[0]][2])
+        parts.append(positions)
+    if len(used) != len(data):
+        raise SystemExit(f'the published split covers {len(used)} of {len(data)} sentences')
+    return parts, data
 
 
 def select_labels(data, top_k=None):
@@ -1183,7 +1234,8 @@ F1_AVERAGES = {
 # part is absent for the fixed split, the variant part for the baseline. The protocol
 # is tried first, so the baseline file of a protocol never reads as a variant named
 # like the protocol.
-RESULT_FILE = re.compile(r'ner_results_(fine|coarse)(?:_(random_split_vary|leave_one_paper_out))?'
+RESULT_FILE = re.compile(r'ner_results_(fine|coarse)'
+                         r'(?:_(random_split_vary|leave_one_paper_out|published_split))?'
                          r'(?:_([a-z0-9_]+))?\.json')
 # untagged variants: a tagged variant must not take the name of one (--crf --tag mt: crf_mt)
 PLAIN_VARIANTS = ('baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_st', 'crf_mt_ls', 'crf_st3',
@@ -1422,12 +1474,19 @@ def compare_all(directory):
     return comparisons
 
 
-def make_folds(data, args, indices=False):
-    """[(name, train, val, test)] for leave-one-paper-out; None for random splits.
+def make_folds(data, args, indices=False, granularity=None):
+    """[(name, train, val, test)] for leave-one-paper-out and the published split (one fold
+    per model seed, named seed<K>, all with the partition of `granularity`); None for
+    random splits.
 
     The parts are lists of data tuples, or of their positions in `data` when
     `indices` is set (the test positions go with the stored predictions).
     """
+    if getattr(args, 'published_split', False):
+        parts, _ = published_split(data, granularity)
+        if not indices:
+            parts = [[data[i] for i in part] for part in parts]
+        return [(f'seed{seed}', *parts) for seed in args.seeds]
     if args.leave_one_paper_out:
         docs = sorted({d for _, _, d in data})
         keep = held_out_papers(docs, getattr(args, 'papers', None))
@@ -1472,10 +1531,15 @@ def granularity_data(granularity, args):
     data = load_split_corpus(granularity)
     labels, tie_info = select_labels(data, args.top_k if granularity == 'fine' else None)
     keep = set(labels)
-    return [(t, restrict_tags(g, keep), d) for t, g, d in data], labels, tie_info
+    data = [(t, restrict_tags(g, keep), d) for t, g, d in data]
+    if getattr(args, 'published_split', False):
+        _, data = published_split(data, granularity)      # the release's tags
+    return data, labels, tie_info
 
 
 def protocol_name(args):
+    if getattr(args, 'published_split', False):
+        return PUBLISHED_SPLIT
     return 'leave_one_paper_out' if args.leave_one_paper_out else (
         'random_split_vary' if args.vary_split else 'random_split_fixed')
 
@@ -1598,7 +1662,8 @@ def run(args):
             print(f"  self-training: {len(sample)} sentences sampled from {corpus['self_train']} "
                   f"(sha256 {corpus['self_train_sha256'][:12]})")
 
-        folds = make_folds(data, args, indices=True)     # parts as positions in `data`
+        folds = make_folds(data, args, indices=True,     # parts as positions in `data`
+                           granularity=granularity)
         if folds is None:
             folds = []
             for seed in args.seeds:
@@ -1798,7 +1863,7 @@ def run_teachers(args, out_dir):
               f"{students}, device {device} ===")
         print(f"  self-training: {len(sample)} sentences sampled from {corpus['self_train']} "
               f"(sha256 {corpus['self_train_sha256'][:12]})")
-        folds = make_folds(data, args, indices=True)
+        folds = make_folds(data, args, indices=True, granularity=granularity)
         if folds is None:
             folds = []
             for seed in args.seeds:
@@ -1859,6 +1924,11 @@ def parse_args(argv=None):
     parser.add_argument('--vary-split', action='store_true',
                         help='new random split per seed')
     parser.add_argument('--leave-one-paper-out', action='store_true')
+    parser.add_argument('--published-split', action='store_true', default=argparse.SUPPRESS,
+                        help="the train, validation and test sentences, and the tags, of the "
+                             "MaterioMiner release (data/raw/dataset/published_split); every "
+                             "--seeds value is a run on it with that model seed (ROADMAP §4, "
+                             "week-5 amendment)")
     parser.add_argument('--papers', nargs='+', default=argparse.SUPPRESS, metavar='PAPER',
                         help='with --leave-one-paper-out: run only the folds that hold out these '
                              'papers (file names, .conll optional). The results file keeps '
@@ -1942,6 +2012,15 @@ def parse_args(argv=None):
     args = parser.parse_args(argv)
     if args.seed_offset and not args.tag:
         parser.error('--seed-offset needs --tag, so that offset runs get their own results file')
+    if getattr(args, 'published_split', False):
+        for option in ('vary_split', 'leave_one_paper_out', 'multi_task'):
+            if getattr(args, option, False):
+                parser.error(f"--published-split is not available with "
+                             f"--{option.replace('_', '-')} (its fine-grained and "
+                             f"coarse-grained partitions differ)"
+                             if option == 'multi_task' else
+                             f"--published-split is a protocol of its own: no "
+                             f"--{option.replace('_', '-')}")
     if getattr(args, 'papers', None) and not args.leave_one_paper_out:
         parser.error('--papers needs --leave-one-paper-out (it picks held-out papers)')
     if getattr(args, 'label_semantics', False):

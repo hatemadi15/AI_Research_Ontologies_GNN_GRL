@@ -52,6 +52,9 @@ Week 5 makes 10 seeds per split (offsets 0 to 900):
           papers first
   w5b     the CRF run of smoke4 again (smokef), then crf_m*, crf_ls_m* and crf_mt_m* at
           seed offsets 300 to 900
+  w5c     the published split (week-5 amendment): the CRF run of smoke4 again (smokeg),
+          then plain MatSciBERT and the CRF head, model seeds 0 to 900, a lane per
+          granularity
 
 Usage:
   python src/graph/kaggle_jobs.py quota
@@ -106,6 +109,7 @@ RUNS = {'random_split_vary': 5, 'leave_one_paper_out': 4}
 GRANULARITIES = ('fine', 'coarse')
 OFFSETS = (0, 100, 200)
 OFFSETS_W5 = tuple(range(300, 1000, 100))   # week 5: the seeds added to make 10 per split
+OFFSETS_PUBLISHED = tuple(range(0, 1000, 100))   # the model seeds on the published split
 PAPERS =('10.1007_s11340-021-00758-x', '10.1038_ncomms7164', '10.1038_s41467-020-19071-7',
           '10.3390_met10111458')      # the held-out papers (the MaterioMiner files)
 # relative GPU time of one run of each kind (a CRF run is 1), for balancing the lanes
@@ -227,11 +231,20 @@ def batch_lanes(name):
                         family('mt', ('--multi-task',), granularities=('both',),
                                offsets=OFFSETS_W5))
         return [[repeat + ['--tag', 'smokef']] + lanes[0], lanes[1]]
+    if name == 'w5c':
+        # the published split (week-5 amendment): plain MatSciBERT and the CRF head, 10 seeds
+        seeds = ['--seeds', *(str(s) for s in OFFSETS_PUBLISHED)]
+
+        def published(g, *flags):
+            return ['--granularity', g, '--published-split', *seeds, *flags,
+                    '--save-predictions', '--threads', str(THREADS)]
+        return [[repeat + ['--tag', 'smokeg'], published('fine'), published('fine', '--crf')],
+                [published('coarse'), published('coarse', '--crf')]]
     raise ValueError(f'unknown batch {name!r}')
 
 
 BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'item3r',
-           'smoke4', 'w5a', 'w5b')
+           'smoke4', 'w5a', 'w5b', 'w5c')
 
 
 def batch_spec(name):
