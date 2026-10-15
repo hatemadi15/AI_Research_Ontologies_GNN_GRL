@@ -184,6 +184,8 @@ Next, after week 4, in this order:
      reference, multi-task, label semantics, and self-training with 3
      teachers.
    - Decide the reported system on these 10-seed results.
+
+   *Week 5 runs this item (protocol in §4) and prepares items 2–7.*
 2. **Multi-task and self-training together, fine-grained, on unseen
    papers.** These are the two changes whose fine-grained gains repeat on
    both machines:
@@ -214,6 +216,12 @@ Next, after week 4, in this order:
    sentences selected for those types.
 6. **Pin down the comparison with the paper** (item 4 below, still open):
    ask the authors for their split and averaging.
+7. **A second materials NER dataset.** Every NER result so far rests on
+   the 4 MaterioMiner papers. Repeating the main comparisons on another
+   corpus would show which findings hold beyond them: the CRF head and its
+   vote, the 10-seed design, and the gap between random splits and unseen
+   documents. Candidates: SOFC-Exp (Friedrich et al., 2020) and MatScholar
+   (Weston et al., 2019). Check availability, licence and format first.
 
 Week 4 closes label semantics on the multi-task model, and the multi-task
 vote in distribution.
@@ -662,7 +670,7 @@ chance at class level. For a Task C-style result:
   instead of hand-written upper-level class lists, with a gold mapping through
   PMDco where it exists.
 
-## 4. Suggested order (5 weeks)
+## 4. Suggested order
 
 | Week | Work | Exit criterion |
 |---|---|---|
@@ -670,7 +678,9 @@ chance at class level. For a Task C-style result:
 | 2 | Done: multi-task NER (fine + coarse heads), domain-adaptive pre-training and a 3-model ensemble, all with `--crf` (P1 items 2, 5 and 8; protocol below) | Not met: no 95% CI lies above 0 against the CRF head on the random splits; the ensemble comes closest (+3.39 fine-grained, +1.30 coarse-grained) and is the only change that improves on unseen papers (coarse-grained) |
 | 3 | Done: NER, P1 "Next, after week 2" items 1–5: comparisons of 3-seed means, a mixed-backbone ensemble, label semantics and self-training for unseen papers, multi-task again, in-domain pre-training (protocol below) | Met for two changes, both coarse-grained: multi-task on the random splits (+0.75 [+0.10, +1.39]) and label semantics on unseen papers (+1.17 [+0.94, +1.41]). The mixed-backbone vote, self-training and in-domain pre-training do not pass; the reported system stays `crf_ens3` |
 | 4 | Done for NER: P1 "Next, after week 3" items 1, 2, 3 and 5, i.e. votes over the week-3 changes that help, label semantics on the multi-task model, self-training at scale, on Kaggle T4 GPUs (protocol below). Not started: context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | Met for NER by two changes, both on unseen papers. Coarse-grained, the label-semantics vote improves on `crf_ens3` on the CPU (+1.63 [+0.11, +3.16]); the GPU repeat does not confirm it (+0.40 [−1.36, +2.16]). Fine-grained, self-training with 3 teachers improves on the CRF head (GPU, +1.07 [+0.33, +1.80]; +1.22 [+0.60, +1.84] on the random splits, reported). The multi-task vote and label semantics on the multi-task model do not pass. Typing: not started |
-| 5 | Class-level taxonomy (LLM or cross-encoder + arborescence); relation annotation pilot | First class-level taxonomy F1 above chance; relation guidelines |
+| 5 | In progress: NER, P1 "Next, after week 4" item 1, i.e. 10 seeds per split for the CRF reference, multi-task, label semantics and self-training with 3 teachers, on Kaggle T4 GPUs; items 2–7 and a paper outline prepared without training (protocol below). The original week-5 work moves to week 7 | The three claims so far re-tested with 10 seeds; the reported system decided on 10-seed votes |
+| 6 | NER methods for unseen papers (P1 "Next, after week 4" items 2–5: multi-task self-training with a student vote, a larger encoder, document context, rare coarse-grained types) and a second materials NER dataset (item 7); protocol fixed before its runs | A change that improves on the seed vote on unseen papers under the 10-seed design |
+| 7 | Class-level taxonomy (LLM or cross-encoder + arborescence); relation annotation pilot | First class-level taxonomy F1 above chance; relation guidelines |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -919,3 +929,109 @@ half of Kaggle's weekly quota of 30.
 
 Outcome: every planned run finished, the random splits of item 3 included,
 in 7.5 GPU-hours (smoke jobs included).
+
+### Week 5 protocol (fixed before any run)
+
+Week 5 runs item 1 of P1 "Next, after week 4" on the GPU: 10 model seeds per
+split, so that gains of about 1 point can be settled. It also prepares
+items 2–7 and a paper without training (below). The NER results are the
+closest to a paper, so this week replaces the original week-5 plan
+(class-level taxonomy, relation pilot), which moves to week 7.
+
+**Design.**
+- 10 model seeds per split: K + 100j for j = 0, …, 9 on random split K, and
+  100j on each held-out paper. Seed tags are m0 to m900; the multi-task run
+  of offset 0 keeps its name, `crf_mt`.
+- Families, each with 10 runs per split, at both granularities, on the 5
+  random splits and the 4 held-out papers:
+  1. the CRF reference `crf_m*`;
+  2. multi-task `crf_mt*`;
+  3. label semantics `crf_ls_m*`;
+  4. self-training with 3 teachers `crf_st3_m*`. The teachers and the
+     silver data stay those of week 4: the CRF runs of seed offsets 0, 100
+     and 200, the whole corpus, tags that all teachers give alike with every
+     marginal at least 0.9. Each of the 10 seeds trains a student on that
+     silver data, as the week-4 students did (new option `--students 10`).
+     The teachers are retrained in every run, and their scores must equal
+     those of the GPU `crf_m*` runs.
+- The week-4 GPU runs (offsets 0, 100 and 200) are kept; week 5 adds
+  offsets 300 to 900. Every run is a GPU run in the week-4 environment
+  (Kaggle T4, the pinned image, `transformers` and the MatSciBERT snapshot),
+  from one new frozen commit, with `--crf` and `--save-predictions`. New
+  options only add code. The first job checks that the new commit repeats a
+  week-4 run exactly.
+- Votes: the entity-level majority vote of 3, as before, over each of 3
+  disjoint seed triples: m0–m200, m300–m500 and m600–m800
+  (`<family>_ens3`, `<family>_ens3_m300` and `<family>_ens3_m600`). m900 is
+  in no vote.
+- Scores: on a split, a family scores the mean of its 10 runs, and a vote
+  the mean of its 3 triples.
+
+**Rule**, as in weeks 3 and 4: a change improves on its comparison, for a
+granularity, if the 95% Student-t CI of the mean paired micro-F1 difference
+lies above 0 over the protocol named for it (the 5 random splits or the 4
+held-out papers). The other protocol, strict IOB2, macro and weighted F1 are
+reported alongside. GPU runs are compared only with GPU runs.
+
+**Decisions.**
+1. The three claims so far, each re-tested on the protocol of its earlier
+   decision, at both granularities:
+   - multi-task vs `crf` over the 5 random splits (week 3: +0.75
+     coarse-grained on the CPU; the GPU repeat gave −0.08);
+   - label semantics vs `crf` over the 4 held-out papers (week 3: +1.17
+     coarse-grained on the CPU; the GPU repeat gave +0.07);
+   - self-training with 3 teachers vs `crf` over the 4 held-out papers
+     (week 4: +1.07 fine-grained).
+
+   A claim stands only if its 10-seed comparison passes. The 3-seed results
+   stay in the record.
+2. The reported system, for each protocol and granularity: the vote of the
+   CRF head, `crf_ens3`, unless `crf_mt_ens3`, `crf_ls_ens3` or
+   `crf_st3_ens3` improves on it; if several do, the one with the largest
+   mean difference. This replaces the week-4 slots, including the CPU
+   decision for `crf_ls_ens3`. With 12 comparisons at the 95% level, about
+   0.3 false passes are expected if no vote helps; the write-up states the
+   number of comparisons.
+
+**Reported alongside (no decision):**
+- each family vs `crf` on the other protocol, and `crf_ens3` vs `crf`;
+- the reported system against the published numbers (69.92 and 72.32)
+  under micro, macro and weighted F1, as in week 3;
+- exploratory, for the paper:
+  - the spread of each family over its 10 seeds, per split;
+  - for each family against `crf`, the share of the 120 seed triples (the
+    same triple on both sides) whose 3-seed comparison passes the rule, and
+    the share whose difference has the opposite sign to the 10-seed one:
+    how far a 3-seed design can mislead;
+  - per coarse-grained type, the F1 and support of the reported system: the
+    types that keep macro F1 below 72.32 (item 5).
+
+**Order and budget.**
+- Session b, existing options only: the check that a week-4 run repeats,
+  then `crf`, `crf_ls` and `crf_mt` at offsets 300 to 900 (315 runs; a
+  multi-task run gives both granularities), about 4 hours on its 2 GPUs.
+- Session a: first a smoke session (a tiny `--teachers 3 --students 4` run:
+  32 training sentences, 2 epochs, 200 corpus sentences). Then the
+  3-teacher runs, one lane per granularity: per split the teachers again,
+  the tagging and 7 new students, about 7 hours.
+- In all about 12 of the 22.5 GPU-hours left in Kaggle's weekly quota (until
+  17 October).
+
+**Prepared without training** (run in week 6, under a protocol fixed before
+its runs; the plan is to screen each new method with 3 seeds and confirm it
+with 10):
+- item 2, multi-task self-training: multi-task teachers tag the corpus once
+  for both granularities, multi-task students train on it, the silver
+  filter is chosen on the validation sets, and the students' vote is
+  compared with `crf_ens3`;
+- item 3, a larger encoder (DeBERTa-v3-large): its tokenizer and its memory
+  on a T4;
+- item 4, document context: the neighbouring sentences in the encoder
+  input, only the middle one tagged (FLERT);
+- item 5, rare coarse-grained types, from the per-type analysis above;
+- item 6, the split and averaging of the paper: an email to the
+  MaterioMiner authors, which the owner sends;
+- item 7, a second materials NER dataset: availability, licence and format
+  of the candidates, then a loader;
+- the paper: an outline in `docs/PAPER.md`, with each claim and the result
+  that supports it.
