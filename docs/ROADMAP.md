@@ -204,6 +204,16 @@ Next, after week 4, in this order:
    MatSciBERT, SciBERT and PubMedBERT. DeBERTa-v3-large (435M parameters)
    is the obvious candidate on a 16 GB T4. Screen it with 3 seeds, then
    use the 10-seed design if it helps.
+
+   *Week 5 check (no training):*
+   - *Snapshot.* `microsoft/deberta-v3-large` at 64a8c8e has no
+     `tokenizer.json`, so the fast tokenizer is built from `spm.model`.
+     That needs `sentencepiece` (0.2.2) and `protobuf`, which the Kaggle
+     batch must pin.
+   - *Tokenizer.* With them it splits pre-tokenised words as our encoder
+     expects: one word ID per word, `▁` on a word's first piece.
+   - *Still open.* The weights come as `pytorch_model.bin`. Memory and
+     deterministic training on a T4 still need a GPU smoke test.
 4. **Document context.** Each sentence is tagged on its own, although the
    CoNLL files keep each paper's sentences in reading order. Give the
    encoder the neighbouring sentences as context and tag only the middle
