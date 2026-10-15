@@ -180,6 +180,21 @@ def test_smoke5_tries_the_week6_options_with_their_pins(monkeypatch):
     assert other['models'] == kj.MODELS and other['pip'] == list(kj.PIP)
 
 
+def test_smoke6_runs_the_week6_options_at_full_size_outside_the_decision_splits(monkeypatch):
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda: 'x' * 64)
+    repeat, *args = [nb.parse_args(j) for lane in kj.batch_lanes('smoke6') for j in lane]
+    assert (repeat.tag, repeat.seeds, repeat.vary_split) == ('smokem', [0], True)
+    assert [(a.granularity, a.tag) for a in args] == [('fine', 'smoken'), ('fine', 'smokeo'),
+                                                      ('sofc', 'smokep')]
+    assert all(a.published_split and a.seeds == [0] and a.crf and a.max_train == 0
+               for a in args)
+    assert [a.model for a in args] == [kj.DEBERTA, nb.DEFAULT_MODEL, nb.DEFAULT_MODEL]
+    assert args[1].context == 64
+    for a in args:                                  # never collected
+        assert 'smoke' in nb.results_path('', a.granularity, a)
+    assert kj.batch_spec('smoke6')['models'] == kj.batch_spec('smoke5')['models']
+
+
 def test_a_refused_push_stops(monkeypatch, capsys):
     """The Kaggle CLI exits 0 when it refuses a push; push must not report the batch."""
     monkeypatch.setattr(kj, 'corpus_sha256', lambda: 'x' * 64)

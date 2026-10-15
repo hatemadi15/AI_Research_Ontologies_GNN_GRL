@@ -58,6 +58,9 @@ Week 5 makes 10 seeds per split (offsets 0 to 900):
   smoke5  the CRF run of smoke4 again (smokel), then the week-6 options, tiny: DeBERTa-v3-large
           twice (with its pins, BATCH_EXTRAS), document context, multi-task self-training and
           SOFC-Exp
+  smoke6  the CRF run of smoke4 again (smokem), then one full-size run of DeBERTa-v3-large and
+          of document context on the published split, and of SOFC-Exp on its official split:
+          splits that no week-6 decision uses
 
 Usage:
   python src/graph/kaggle_jobs.py quota
@@ -104,8 +107,9 @@ MODELS = {'m3rg-iitd/matscibert': 'ced9d8f5f208712c4a90f98a246fe32155b29995'}
 # a batch's extra pins (week-6 smoke tests): DeBERTa-v3-large, and sentencepiece, which its
 # tokenizer needs (its snapshot has no tokenizer.json)
 DEBERTA = 'microsoft/deberta-v3-large'
-BATCH_EXTRAS = {'smoke5': {'pip': ('sentencepiece==0.2.2',),
-                           'models': {DEBERTA: '64a8c8eab3e352a784c658aef62be1662607476f'}}}
+DEBERTA_PINS = {'pip': ('sentencepiece==0.2.2',),
+                'models': {DEBERTA: '64a8c8eab3e352a784c658aef62be1662607476f'}}
+BATCH_EXTRAS = {'smoke5': DEBERTA_PINS, 'smoke6': DEBERTA_PINS}
 THREADS = 2
 DEADLINE_HOURS = 10                 # no job starts later; a Kaggle session lasts 12 hours
 RESULTS_PREFIX = 'gpu__'            # as in run_jobs.py
@@ -256,6 +260,15 @@ def batch_lanes(name):
                   '--students', '4', '--self-train-sample', '200', *tiny],
                  ['--granularity', 'sofc', '--leave-one-paper-out', '--papers', 'PMC3564701',
                   '--crf', '--tag', 'smokek', *tiny]]]
+    if name == 'smoke6':
+        # the tiny runs of smoke5 learn nothing (F1 0 for every option), so one run of each
+        # option at full size, seed 0, on splits that no week-6 decision uses
+        published = ('--published-split', '--seeds', '0', '--crf', '--save-predictions',
+                     '--threads', str(THREADS))
+        return [[repeat + ['--tag', 'smokem'],
+                 ['--granularity', 'fine', *published, '--model', DEBERTA, '--tag', 'smoken']],
+                [['--granularity', 'fine', *published, '--context', '64', '--tag', 'smokeo'],
+                 ['--granularity', 'sofc', *published, '--tag', 'smokep']]]
     if name == 'w5c':
         # the published split (week-5 amendment): plain MatSciBERT and the CRF head, 10 seeds
         seeds = ['--seeds', *(str(s) for s in OFFSETS_PUBLISHED)]
@@ -269,7 +282,7 @@ def batch_lanes(name):
 
 
 BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'item3r',
-           'smoke4', 'w5a', 'w5b', 'w5c', 'smoke5')
+           'smoke4', 'w5a', 'w5b', 'w5c', 'smoke5', 'smoke6')
 
 
 def batch_spec(name):
