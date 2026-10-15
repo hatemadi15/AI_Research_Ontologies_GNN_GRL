@@ -4,6 +4,7 @@ import importlib.util
 import io
 import json
 import tarfile
+from types import SimpleNamespace
 from pathlib import Path
 
 import pytest
@@ -154,6 +155,17 @@ def test_w5c_runs_the_published_split_with_10_model_seeds():
     assert len(files) == len(set(files)) == 4
     assert {p for _, p, _ in files} == {'published_split'}
     assert 'w5c' in kj.BATCHES
+
+
+def test_a_refused_push_stops(monkeypatch, capsys):
+    """The Kaggle CLI exits 0 when it refuses a push; push must not report the batch."""
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda: 'x' * 64)
+    monkeypatch.setattr(kj, 'kaggle', lambda *a, **k: 'Kernel push error: Maximum batch GPU '
+                                                       'session count of 2 reached.')
+    args = SimpleNamespace(batch='w5c', kernel=kj.KERNEL, user='someone')
+    with pytest.raises(SystemExit, match='not pushed'):
+        kj.cmd_push(args)
+    assert 'lane 0' not in capsys.readouterr().out
 
 
 def test_balance_takes_the_longest_job_first_to_the_least_loaded_lane():

@@ -460,7 +460,10 @@ def cmd_push(args):
         Path(folder, 'kernel-metadata.json').write_text(
             json.dumps(kernel_metadata(user, args.kernel), indent=2))
         timeout = str(int(3600 * (DEADLINE_HOURS + 1.5)))
-        print(kaggle('kernels', 'push', '-p', folder, '-t', timeout))
+        out = kaggle('kernels', 'push', '-p', folder, '-t', timeout)
+        print(out)
+    if 'error' in out.lower():       # the CLI exits 0 on a refused push (e.g. 2 GPU sessions)
+        raise SystemExit(f'batch {args.batch} not pushed')
     print(f"batch {args.batch}: " + '; '.join(f'lane {i}: {len(jobs)} jobs'
                                               for i, jobs in enumerate(spec['lanes'])))
 
