@@ -347,6 +347,22 @@ def test_run_jobs_restores_gpu_results_only(tmp_path):
         rj.restore_results(tmp_path / 'input', tmp_path / 'other')
 
 
+def test_run_jobs_drops_the_restored_files_that_no_job_changed(tmp_path):
+    rj = _run_jobs()
+    inp = tmp_path / 'input' / 'datasets' / 'someone' / 'ner-gpu-bundle'
+    inp.mkdir(parents=True)
+    names = [f'ner_results_fine_random_split_vary_crf_m{k}.json' for k in (0, 100)]
+    for name in names:
+        (inp / f'gpu__{name}').write_text(json.dumps(_gpu_file('seed0')))
+    dest = tmp_path / 'processed' / 'ner'
+    assert rj.restore_results(tmp_path / 'input', dest) == names
+    (dest / names[1]).write_text(json.dumps(_gpu_file('seed1')))      # a job extended it
+    (dest / 'ner_results_fine_random_split_vary_crf_m200.json').write_text('{}')   # new
+    assert rj.drop_unchanged(tmp_path / 'input', dest, names) == [names[0]]
+    assert sorted(p.name for p in dest.iterdir()) == [
+        names[1], 'ner_results_fine_random_split_vary_crf_m200.json']
+
+
 def test_run_jobs_unpacks_an_extracted_tree_or_the_archive(tmp_path):
     rj = _run_jobs()
     tree = tmp_path / 'in1' / 'code' / 'src' / 'graph'

@@ -16,9 +16,10 @@ of a frozen commit, the fatigue corpus and the GPU results so far). On Kaggle it
   5. runs the lanes at the same time, one per GPU (CUDA_VISIBLE_DEVICES=<lane>), and the
      jobs of a lane one after the other: `python src/graph/ner_baseline.py <job>`, with
      PROCESSED_DIR=/kaggle/working/processed. No job starts after `deadline_hours`;
-  6. leaves in /kaggle/working: processed/ner/ (the results files), logs/ (one log per
-     job) and manifest.json (the bundle, the environment, and per job its command, exit
-     code and times), rewritten after every job.
+  6. leaves in /kaggle/working: processed/ner/ (the results files that the jobs wrote or
+     changed; the restored ones that no job changed are deleted at the end, so that a pull
+     downloads only new files), logs/ (one log per job) and manifest.json (the bundle, the
+     environment, and per job its command, exit code and times), rewritten after every job.
 
 It never exits with an error, so that Kaggle keeps the outputs of the jobs that ran.
 Standard library only.
@@ -98,6 +99,19 @@ def restore_results(root, dest):
         shutil.copy2(path, dest / name)
         names.append(name)
     return names
+
+
+def drop_unchanged(root, dest, names):
+    """Delete the restored results files (`names`, in dest) that are still byte-identical to
+    their bundle copy in root; returns the names deleted."""
+    dropped = []
+    for name in names:
+        src = next(Path(root).rglob(RESULTS_PREFIX + name), None)
+        out = Path(dest) / name
+        if src is not None and out.is_file() and file_sha256(out) == file_sha256(src):
+            out.unlink()
+            dropped.append(name)
+    return dropped
 
 
 def gpu_names():
@@ -237,6 +251,8 @@ def main(spec):
             t.start()
         for t in threads:
             t.join()
+        dropped = drop_unchanged(INPUT, processed / 'ner', restored)
+        manifest.update(lambda d: d['setup'].update({'unchanged_dropped': dropped}))
     except Exception:
         message = traceback.format_exc()
         print(message, flush=True)
