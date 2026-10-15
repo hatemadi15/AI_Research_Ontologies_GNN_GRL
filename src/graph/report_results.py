@@ -74,6 +74,13 @@ written by `ner_seedmeans.py --week 4` and `--week 4 --gpu`)
     `crf_st_ens3`) improves on `crf_ens3` over the 4 held-out papers (if both do, the larger
     mean difference). Both rows name each slot's system, say "(week-4 protocol)" once a
     week-4 comparisons file exists, and the published check uses the in-distribution one.
+
+NER week 5 (results/gpu/ner_week5_comparisons.json, written by `ner_seedmeans.py --week 5
+--gpu`)
+-------------------------------------------------------------------------------------------
+  * "NER week-5 comparisons": the complete comparisons of WEEK5_COMPARISONS (10-seed means
+    of GPU runs; a vote family scores the mean of its 3 votes), in their order, and a
+    verdict bullet for each.
 """
 import argparse
 import difflib
@@ -133,7 +140,14 @@ WEEK4_VERDICTS = ((WEEK4_FILE, 'crf_ls_ens3', 'crf_ens3', 'CPU'),
                   (GPU_PREFIX + WEEK4_FILE, 'crf_mt', 'crf', 'GPU'),
                   (GPU_PREFIX + WEEK4_FILE, 'crf_ls', 'crf', 'GPU'),
                   (GPU_PREFIX + WEEK4_FILE, 'crf_st', 'crf', 'GPU'))
-# `role` of a week-3 or week-4 comparison, as the verdict bullets word it
+# Week 5 (week-5 protocol, ROADMAP §4): 10-seed means of the GPU runs in results/gpu/, in the
+# protocol's reporting order, as in ner_seedmeans.WEEK5_COMPARISONS
+WEEK5_FILE = 'ner_week5_comparisons.json'
+WEEK5_COMPARISONS = (('crf_mt', 'crf'), ('crf_ls', 'crf'), ('crf_st3', 'crf'),
+                     ('crf_mt_ens3', 'crf_ens3'), ('crf_ls_ens3', 'crf_ens3'),
+                     ('crf_st3_ens3', 'crf_ens3'), ('crf_ens3', 'crf'))
+WEEK5_NAMES = {**WEEK4_NAMES, 'crf_st3_ens3': 'vote of self-training with 3 teachers'}
+# `role` of a week-3 to week-5 comparison, as the verdict bullets word it
 ROLE_WORDS = {'decision': 'the pre-registered decision', 'reported': 'reported, no decision'}
 # averages the reported system is checked under against the published F1
 AVERAGES = ('micro', 'macro', 'weighted')
@@ -587,11 +601,47 @@ def ner_week4_table(res):
     return out
 
 
+WEEK5_INTRO = (
+    "Δ = variant − reference on the same split, GPU runs only, with 10 model seeds per split: a "
+    "model scores the mean of its 10 runs, a vote the mean of its votes over 3 disjoint seed "
+    "triples (seeds 0–200, 300–500 and 600–800). Pre-registered rule (week-5 protocol): a change "
+    "improves on its reference only if the 95% Student-t CI of the mean micro-F1 difference lies "
+    "entirely above 0. Decisions: the claims of weeks 3 and 4 re-tested (multi-task over the 5 "
+    "random splits; label semantics and self-training with 3 teachers over the 4 held-out "
+    "papers), and each vote against the 3-model seed ensemble on both protocols (the reported "
+    "system). The other rows are reported without a decision.\n")
+
+
+def week5_rows(res):
+    """The complete week-5 comparisons, by the protocol's order, then protocol, then
+    granularity."""
+    comps = res.comparisons(GPU_PREFIX + WEEK5_FILE)
+    return [c for variant, reference in WEEK5_COMPARISONS
+            for protocol in ('random_split_vary', 'leave_one_paper_out') for g in GRANULARITIES
+            for c in [find_comparison(comps, g, protocol, variant, reference)] if c]
+
+
+def ner_week5_table(res):
+    """Week-5 comparisons ([] if none is complete)."""
+    rows = week5_rows(res)
+    if not rows:
+        return []
+    out = ["\n#### NER week-5 comparisons (10-seed means, GPU runs)\n", WEEK5_INTRO,
+           WEEK3_COLUMNS.replace('Δ strict micro', 'Role'), "|---|---|---|---|---|---|---|---|"]
+    for c in rows:
+        v = dig(c, 'variant_scores', 'micro')
+        out.append(f"| {WEEK5_NAMES[c['variant']]} vs {WEEK5_NAMES[c['reference']]} | "
+                   f"{PROTOCOL_NAMES[c['protocol']]} | {c['granularity']} | {c['n_pairs']} | "
+                   f"{interval(v) if v else '–'} | {delta_cell(c['micro'])} | "
+                   f"{delta_cell(c['macro'])} | {c.get('role', 'reported')} |")
+    return out
+
+
 def build_tables(res):
     """All tables between the "At a glance" table and "Reading the numbers"."""
     out = (term_typing_tables(res) + other_levels_table(res) + ablation_table(res)
            + ner_protocol_table(res) + ner_variants_table(res) + ner_week2_table(res)
-           + ner_week3_table(res) + ner_week4_table(res))
+           + ner_week3_table(res) + ner_week4_table(res) + ner_week5_table(res))
     return '\n'.join(out).strip()
 
 
@@ -757,6 +807,9 @@ def ner_notes(res):
     for name, variant, reference, runs in WEEK4_VERDICTS:
         note += week4_verdict_line(res.comparisons(name), variant, reference, runs)
     note += hardware_note(res)
+    week5 = res.comparisons(GPU_PREFIX + WEEK5_FILE)
+    for variant, reference in WEEK5_COMPARISONS:
+        note += week4_verdict_line(week5, variant, reference, 'GPU', week=5)
     return note
 
 
@@ -818,18 +871,21 @@ def week3_verdict_line(comps, variant, reference):
     return line + '.\n'
 
 
-def week4_verdict_line(comps, variant, reference, runs):
+def week4_verdict_line(comps, variant, reference, runs, week=4):
     """One "Reading the numbers" bullet for a week-4 comparison ('' if none is complete).
 
-    As week3_verdict_line, naming the machine of both sides (CPU votes, GPU runs).
+    As week3_verdict_line, naming the machine of both sides (CPU votes, GPU runs). With
+    week=5, a week-5 comparison (10-seed means of GPU runs).
     """
     comps = {k: c for k, c in comps.items() if c.get('role') != 'descriptive'}
     split = week3_verdicts(comps, variant, reference, 'random_split_vary')
     ood = week3_verdicts(comps, variant, reference, 'leave_one_paper_out')
     if not (split or ood):
         return ''
-    line = (f"* NER week 4 ({runs} runs), {WEEK4_NAMES[variant]} vs the "
-            f"{WEEK4_NAMES[reference]} (paired micro-F1 difference): ")
+    names = WEEK5_NAMES if week == 5 else WEEK4_NAMES
+    design = f"{runs} runs, 10 seeds" if week == 5 else f"{runs} runs"
+    line = (f"* NER week {week} ({design}), {names[variant]} vs the "
+            f"{names[reference]} (paired micro-F1 difference): ")
     if split:
         line += f"{split[1]} across the 5 random splits ({split[0]})"
     if ood:

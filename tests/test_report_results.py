@@ -103,11 +103,12 @@ class Workspace:
         return key
 
     def week4(self, variant, reference, granularity, protocol, *, gpu=False, role='reported',
-              micro=(0.5, -0.5, 1.5), score=(80.0, 78.0, 82.0)):
+              micro=(0.5, -0.5, 1.5), score=(80.0, 78.0, 82.0), name=rr.WEEK4_FILE):
         """Add one week-4 comparison: results/ner_week4_comparisons.json (CPU) or
-        results/gpu/ner_week4_comparisons.json (gpu=True)."""
+        results/gpu/ner_week4_comparisons.json (gpu=True); with name=rr.WEEK5_FILE and
+        gpu=True, a week-5 comparison."""
         n = FULL[protocol]
-        path = self.results / ('gpu' if gpu else '') / rr.WEEK4_FILE
+        path = self.results / ('gpu' if gpu else '') / name
         path.parent.mkdir(exist_ok=True)
         comps = json.loads(path.read_text()) if path.exists() else {}
         key = f'ner_results_{granularity}_{protocol}_{variant}'
@@ -782,6 +783,36 @@ def test_week4_gpu_multitask_vote_takes_the_in_distribution_slot(tmp_path):
     assert ('* NER, GPU minus CPU (descriptive, not a comparison of methods): the CRF head with '
             'the same seeds and splits, 3-seed means, fine-grained +0.90 [-0.50, +2.30] over the 5 '
             'random splits.') in readme
+
+
+def test_week5_lists_follow_ner_seedmeans():
+    ns = pytest.importorskip('ner_seedmeans')
+    assert rr.WEEK5_FILE == ns.OUT_NAMES[5]
+    assert list(rr.WEEK5_COMPARISONS) == [(v, r) for v, r, _ in ns.comparison_list(5, True)]
+    assert set(rr.WEEK5_NAMES) >= set(ns.WEEK5_SYSTEMS)
+
+
+def test_week5_table_and_verdicts(tmp_path):
+    """The week-5 comparisons (10-seed means of GPU runs) get their own table, in the
+    protocol's order, and a verdict bullet per comparison."""
+    ws = Workspace(tmp_path)
+    ws.week4('crf_st3_ens3', 'crf_ens3', 'fine', 'random_split_vary', gpu=True, role='decision',
+             micro=(0.4, -0.2, 1.0), name=rr.WEEK5_FILE)
+    for g, micro in (('fine', (1.1, 0.5, 1.7)), ('coarse', (0.8, -0.6, 2.2))):
+        ws.week4('crf_st3', 'crf', g, 'leave_one_paper_out', gpu=True, role='decision',
+                 micro=micro, score=(47.4, 40.2, 54.7), name=rr.WEEK5_FILE)
+    readme, _ = ws.generate()
+    rows = table_rows(readme, '#### NER week-5 comparisons')
+    assert [r.split(' | ')[:4] for r in rows] == [
+        ['| self-training with 3 teachers vs CRF head', 'leave one paper out', 'fine', '4'],
+        ['| self-training with 3 teachers vs CRF head', 'leave one paper out', 'coarse', '4'],
+        ['| vote of self-training with 3 teachers vs 3-model seed ensemble',
+         'new random split per seed', 'fine', '5']]
+    assert all(r.endswith('| decision |') for r in rows)
+    assert ('* NER week 5 (GPU runs, 10 seeds), self-training with 3 teachers vs the CRF head '
+            '(paired micro-F1 difference): leaving one paper out (the pre-registered decision): '
+            'fine-grained improves') in readme
+    assert '#### NER week-4 comparisons' not in readme
 
 
 def test_a_week3_file_that_is_not_an_object_is_reported(tmp_path, capsys):
