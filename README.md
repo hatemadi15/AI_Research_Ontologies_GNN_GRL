@@ -74,8 +74,8 @@ Stand-alone baselines:
 
 <!-- RESULTS:START -->
 All numbers are leakage-free and come from the JSON files in [`results/`](results/)
-(CPU, `SEED=0`, except the week-4 runs on Kaggle T4 GPUs in [`results/gpu/`](results/gpu/),
-marked GPU; LLM = `openai/gpt-4o-mini` via OpenRouter). Gold term spans
+(CPU, `SEED=0`, except the week-4 and week-5 runs on Kaggle T4 GPUs in
+[`results/gpu/`](results/gpu/), marked GPU; LLM = `openai/gpt-4o-mini` via OpenRouter). Gold term spans
 are given to the pipeline and the typing baselines. "Gold types used" marks
 outputs whose predictions had access to the gold labels: those rows are
 reported only to show the size of the leak.

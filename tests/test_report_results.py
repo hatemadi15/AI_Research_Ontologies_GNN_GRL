@@ -892,6 +892,79 @@ def test_published_split_row(tmp_path):
         "CRF head; the CIs are over seeds only |"]
 
 
+def _spread(mean, lo, hi, diff=False):
+    return {'mean_diff' if diff else 'mean': mean, 'ci95': [lo, hi]}
+
+
+def test_week5_analysis_bullets(tmp_path):
+    """The exploratory week-5 analyses (ner_seed_analysis.py) give three bullets: the
+    published split, how far a 3-seed design misleads, and the rare coarse-grained types of
+    the reported system."""
+    ws = Workspace(tmp_path)
+    (ws.results / 'gpu').mkdir()
+    readme, _ = ws.generate()
+    assert 'published split (week-5' not in readme and 'how far a 3-seed' not in readme
+    published = {}
+    for g, paper, base, crf in (('fine', 69.92, 70.2, 73.3), ('coarse', 72.32, 72.5, 75.5)):
+        published[g] = {
+            'published': paper,
+            'baseline': {'micro': _spread(base, base - 1, base + 1),
+                         'macro': _spread(base - 3, base - 4, base - 2),
+                         'published_lies': 'within'},
+            'crf': {'micro': _spread(crf, crf - 1, crf + 1),
+                    'macro': _spread(crf - 2, crf - 3, crf - 1), 'published_lies': 'below'},
+            'crf_minus_baseline': {'micro': _spread(3.1, 1.6, 4.6, diff=True),
+                                   'micro_strict': _spread(1.7, 0.2, 3.2, diff=True)},
+            'crf_votes': {'micro': _spread(crf + 1, crf, crf + 2)}}
+    triple = {'n_triples': 120, 'share_above_0': 0.41, 'share_below_0': 0.0,
+              'share_opposite_sign': 0.083,
+              'ten_seed': {'mean_diff': 1.83, 'ci95': [0.32, 3.34], 'passes': True}}
+    types = {'SDE': {'f1': 17.7, 'support_per_split': 3.0, 'n': 12, 'macro_without': 73.11,
+                     'macro_with': 71.02},
+             'MIP': {'f1': 17.71, 'support_per_split': 5.2, 'n': 15, 'macro_without': 72.0,
+                     'macro_with': 71.0},
+             'MAT': {'f1': 92.2, 'support_per_split': 17.6, 'n': 15, 'macro_without': 70.6,
+                     'macro_with': 71.0}}
+    analysis = {'published_split': published,
+                'triples': {'fine_random_split_vary': {'crf_mt': triple}},
+                'spread': {f'{g}_{p}': {'crf': {'mean_sd': sd}} for g, p, sd in (
+                    ('fine', 'random_split_vary', 1.69), ('coarse', 'random_split_vary', 1.46),
+                    ('fine', 'leave_one_paper_out', 2.48),
+                    ('coarse', 'leave_one_paper_out', 2.23))},
+                'types': {'coarse_random_split_vary': {'crf_ens3': types}}}
+    (ws.results / 'gpu' / rr.WEEK5_ANALYSIS).write_text(json.dumps(analysis))
+    readme, _ = ws.generate()
+    assert ("* NER, the published split (week-5 amendment: the release's partition and tags, "
+            "micro F1 as its code scores it; 10 model seeds, GPU runs; the 95% CIs are over the "
+            "seeds of one split): plain MatSciBERT, the paper's model, scores 70.20 [69.20, "
+            "71.20] fine-grained and 72.50 [71.50, 73.50] coarse-grained. Both published "
+            "numbers lie within these intervals. The CRF head adds +3.10 [+1.60, +4.60] "
+            "fine-grained and +3.10 [+1.60, +4.60] coarse-grained, paired by seed (strict IOB2 "
+            "+1.70 [+0.20, +3.20] and +1.70 [+0.20, +3.20]), and its votes over the 3 seed "
+            "triples score 74.30 and 76.50. Macro F1 is lower: 67.20 and 69.50 for plain "
+            "MatSciBERT, 71.30 and 73.50 for the CRF head.\n") in readme
+    assert ("* NER, how far a 3-seed design misleads (week 5, exploratory): for each family "
+            "against the CRF head on the protocol of its decision, the share of the 120 triples "
+            "of the 10 seeds (the same triple on both sides) whose 3-seed comparison passes the "
+            "rule, and whose mean difference has the opposite sign to the 10-seed one. "
+            "Multi-task (fine + coarse heads) over the 5 random splits: fine-grained (+1.83 "
+            "[+0.32, +3.34] with 10 seeds) 41% pass, 8% opposite sign. The SD of a split's "
+            "micro F1 over the 10 seeds of the CRF head averages 1.69 fine-grained and 1.46 "
+            "coarse-grained over the 5 random splits, and 2.48 fine and 2.23 coarse over the 4 "
+            "held-out papers.\n") in readme
+    # without week-5 comparisons the reported system is crf_ens3
+    assert ("* NER, the coarse-grained types that keep macro F1 down (week 5, exploratory; the "
+            "3 votes of the reported system `crf_ens3` over the 5 random splits, F1 and test "
+            "entities per split): SDE 17.7 (3.0), MIP 17.7 (5.2), MAT 92.2 (17.6). Macro F1 "
+            "counts each type alike: without SDE alone it would be 73.11 instead of 71.02 on "
+            "the splits that have it.\n") in readme
+    published['coarse']['baseline']['published_lies'] = 'below'
+    (ws.results / 'gpu' / rr.WEEK5_ANALYSIS).write_text(json.dumps(analysis))
+    readme, _ = ws.generate()
+    assert ('The published 69.92 lies within the fine-grained interval, 72.32 below the '
+            'coarse-grained one.') in readme
+
+
 def test_a_week3_file_that_is_not_an_object_is_reported(tmp_path, capsys):
     ws = Workspace(tmp_path)
     (ws.results / rr.WEEK3_FILE).write_text('[1, 2]')
