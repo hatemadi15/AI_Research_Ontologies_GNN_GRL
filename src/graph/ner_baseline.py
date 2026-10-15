@@ -791,17 +791,18 @@ def unanimous_silver(tagged):
 
 
 def train_with_teachers(seed, offsets, train, val, test, labels, args, device, sample,
-                        test_index=None):
+                        test_index=None, student_offsets=None):
     """One --self-train --teachers run: {offset: the record of the student of that seed}.
 
     The teachers are train_one on the run's data with the model seeds seed + offset, the
     plain --crf runs of those seeds. Each tags the sample (fit_sample, teacher_tags); a
-    sentence is silver if unanimous_silver. Then each seed trains a student, train_one with
-    that seed on the gold data plus the silver sentences, as in train_self_training. Each
-    record adds `self_training`: n_sampled, n_skipped, n_agreed (sentences that all
-    teachers tag alike), n_silver, marginal_threshold, and per teacher (in offset order)
-    its seed, val_f1, test_f1, test_f1_strict, test_macro_f1, best_epoch and n_silver_alone
-    (its silver sentences as a single teacher).
+    sentence is silver if unanimous_silver. Then each seed of `student_offsets` (default:
+    the teachers' offsets; --students) trains a student, train_one with that seed on the
+    gold data plus the silver sentences, as in train_self_training. Each record adds
+    `self_training`: n_sampled, n_skipped, n_agreed (sentences that all teachers tag
+    alike), n_silver, marginal_threshold, and per teacher (in offset order) its seed,
+    val_f1, test_f1, test_f1_strict, test_macro_f1, best_epoch and n_silver_alone (its
+    silver sentences as a single teacher).
     """
     teacher_args = SimpleNamespace(**{**vars(args), 'save_predictions': False})
     teachers, tagged, sentences, n_skipped = [], [], None, 0
@@ -833,7 +834,7 @@ def train_with_teachers(seed, offsets, train, val, test, labels, args, device, s
     print(f"    {len(silver)} silver of {len(sentences)} tagged sentences ({n_agreed} tagged "
           f"alike; {n_skipped} of {len(sample)} sampled skipped); students:", flush=True)
     students = {}
-    for offset in offsets:
+    for offset in offsets if student_offsets is None else student_offsets:
         student = train_one(seed + offset, train, val, test, labels, args, device,
                             test_index=test_index, silver=silver)
         student['self_training'] = {
@@ -1674,20 +1675,23 @@ def run_multitask(args, out_dir):
 
 
 def run_teachers(args, out_dir):
-    """run() for --self-train --teachers N: one run per run_id, a results file per teacher seed.
+    """run() for --self-train --teachers N: one run per run_id, a results file per student seed.
 
-    The files are those of N runs with --tag m<offset> --seed-offset <offset> (offsets
-    0, 100, ...; variant crf_st<N>_m<offset>), each holding the students of its seed
-    (train_with_teachers). All are checked (check_results_files) before training and
-    written after every run; a run_id counts as done only if every file holds it.
+    The files are those of runs with --tag m<offset> --seed-offset <offset> (offsets 0,
+    100, ...; variant crf_st<N>_m<offset>), one per student seed: N, or --students M (the
+    teachers keep the first N offsets). Each holds the students of its seed
+    (train_with_teachers). All are checked (check_results_files) before training. A run
+    trains the teachers and the students that its run_id lacks; only the files that got
+    a new student are written, after every run.
     """
     granularities = ['fine', 'coarse'] if args.granularity == 'both' else [args.granularity]
     tasks = {g: granularity_data(g, args) for g in granularities}
     sample, corpus = self_training_corpus(args.self_train, getattr(args, 'self_train_sample',
                                                                    SELF_TRAIN_SAMPLE))
     offsets = teacher_offsets(args.teachers)
+    student_offsets = teacher_offsets(getattr(args, 'students', args.teachers))
     views = {off: SimpleNamespace(**{**vars(args), 'tag': f'm{off}', 'seed_offset': off})
-             for off in offsets}
+             for off in student_offsets}
     for view in views.values():
         check_results_files(view, [(results_path(out_dir, g, view), tasks[g][1])
                                    for g in granularities], corpus['self_train_sha256'])
@@ -1709,18 +1713,22 @@ def run_teachers(args, out_dir):
                             'runs': resumable_runs(paths[off], labels, args.model, variant, off,
                                                    args.save_predictions,
                                                    corpus['self_train_sha256'])}
-        done = set.intersection(*({r.get('run_id') for r in results[off]['runs']}
-                                  for off in offsets))
+        done_by = {off: {r.get('run_id') for r in results[off]['runs']}
+                   for off in student_offsets}
+        done = set.intersection(*done_by.values())
+        changed = set()            # the files that get a new student
 
-        def save():
-            for off in offsets:
+        def save(offs):
+            for off in offs:
                 summarize(results[off])
                 with open(paths[off], 'w') as f:
                     json.dump(results[off], f, indent=2)
 
+        students = (f', {len(student_offsets)} students'
+                    if len(student_offsets) != len(offsets) else '')
         print(f"\n=== NER {granularity}: {len(data)} sentences, {len(labels)} classes, "
-              f"protocol {protocol}, {args.teachers} teachers (seed offsets {offsets}), "
-              f"device {device} ===")
+              f"protocol {protocol}, {args.teachers} teachers (seed offsets {offsets})"
+              f"{students}, device {device} ===")
         print(f"  self-training: {len(sample)} sentences sampled from {corpus['self_train']} "
               f"(sha256 {corpus['self_train_sha256'][:12]})")
         folds = make_folds(data, args, indices=True)
@@ -1737,30 +1745,31 @@ def run_teachers(args, out_dir):
             if args.max_train:
                 train = train[:args.max_train]
             seed = int(run_id[4:]) if run_id.startswith('seed') else args.seeds[0]
+            # the students that this run_id lacks; the teachers are always trained again
+            missing = [off for off in student_offsets if run_id not in done_by[off]]
             start = time.time()
             records = train_with_teachers(seed, offsets, train, val, test, labels, args, device,
-                                          sample, test_index=te)
+                                          sample, test_index=te, student_offsets=missing)
             runtime = round(time.time() - start, 1)
             for off, res in records.items():
                 res['run_id'] = run_id
-                res['runtime_sec'] = runtime      # teachers and students together
+                res['runtime_sec'] = runtime      # teachers and these students together
                 if environment:
                     res['environment'] = environment
-                # a run found in some files only is redone: its old records are replaced
-                results[off]['runs'] = [r for r in results[off]['runs']
-                                        if r.get('run_id') != run_id] + [res]
-            save()
+                results[off]['runs'].append(res)
+                done_by[off].add(run_id)
+            changed.update(records)
+            save(records)
             print(f"  {run_id}, {runtime:.0f}s: students " + ', '.join(
                 f"seed {records[off]['seed']} test F1 {records[off]['f1']:.2f}"
-                for off in offsets), flush=True)
-        if any(results[off]['runs'] for off in offsets):
-            save()
-            for off in offsets:
-                summary = results[off]['summary']
+                for off in missing), flush=True)
+        save(sorted(changed))
+        for off in student_offsets:
+            if results[off]['runs']:
+                summary = summarize(results[off])['summary']
                 print(f"  {results[off]['variant']}: micro F1 {summary['micro']['mean']:.2f} "
                       f"95% CI {summary['micro']['ci95']} over {summary['n_runs']} runs")
-        for off in offsets:
-            print(f"Saved {paths[off]}")
+            print(f"{'Saved' if off in changed else 'Unchanged'} {paths[off]}")
 
 
 def tag_name(value):
@@ -1825,6 +1834,11 @@ def parse_args(argv=None):
                              'least 0.9 under every teacher, and every teacher seed trains a '
                              'student. One run writes N files, tagged m0, m100, ... (files '
                              'tagged _crf_st<N>_m<offset>); no --tag or --seed-offset')
+    parser.add_argument('--students', type=int, default=argparse.SUPPRESS, metavar='N',
+                        help='with --teachers: N students, one per seed offset 0, 100, ..., '
+                             '100 (N - 1), at least as many as the teachers, which keep the '
+                             'first offsets and so the silver data. Students already in their '
+                             'results files are not trained again (ROADMAP §4, week 5)')
     parser.add_argument('--self-train-sample', type=int, default=argparse.SUPPRESS, metavar='N',
                         help='with --self-train: the number of corpus sentences tagged (default '
                              '2,000; 0: the whole corpus)')
@@ -1877,6 +1891,12 @@ def parse_args(argv=None):
     if hasattr(args, 'teachers') and (args.tag or args.seed_offset):
         parser.error('--teachers writes its own seed tags (m0, m100, ...): no --tag or '
                      '--seed-offset')
+    if hasattr(args, 'students'):
+        if not hasattr(args, 'teachers'):
+            parser.error('--students needs --teachers')
+        if args.students < args.teachers:
+            parser.error('--students: at least as many as --teachers (every teacher seed '
+                         'trains a student)')
     if getattr(args, 'self_train_sample', 0) < 0:
         parser.error('--self-train-sample: 0 (the whole corpus) or more sentences')
     if getattr(args, 'multi_task', False):

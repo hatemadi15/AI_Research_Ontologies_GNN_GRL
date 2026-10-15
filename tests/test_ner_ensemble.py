@@ -222,10 +222,32 @@ def test_variant_naming():
     assert ne.ensemble_variant(['cw_m0', 'cw_m100']) == 'cw_ens2'
     assert ne.ensemble_variant(['crf', 'crf_m100']) == 'crf_ens2'      # untagged member
     assert ne.ensemble_variant(['m0', 'm100', 'm200']) == 'ens3'       # tagged baseline runs
-    assert ne.ensemble_variant(['crf_m0_m5', 'crf_m0_m6']) == 'crf_m0_ens2'   # trailing tag only
+    # only the trailing tag is a seed; members with later seeds name the first one
+    assert ne.ensemble_variant(['crf_m0_m0', 'crf_m0_m6']) == 'crf_m0_ens2'
+    assert ne.ensemble_variant(['crf_m0_m5', 'crf_m0_m6']) == 'crf_m0_ens2_m5'
     for bad in (['crf_m0', 'cw_m100'], ['crf_m0', 'm100'], ['crf_m0', 'crf_x1']):
         with pytest.raises(ne.EnsembleError, match='variant'):
             ne.ensemble_variant(bad)
+
+
+def test_votes_over_later_seed_triples_get_files_of_their_own():
+    """Week 5: the votes over m300-m500 and m600-m800 are <family>_ens3_m300 and _m600."""
+    assert ne.ensemble_variant(['crf_m300', 'crf_m400', 'crf_m500']) == 'crf_ens3_m300'
+    assert ne.ensemble_variant(['crf_m600', 'crf_m700', 'crf_m800']) == 'crf_ens3_m600'
+    assert ne.ensemble_variant(['crf_mt_m300', 'crf_mt_m400', 'crf_mt_m500']) == \
+        'crf_mt_ens3_m300'
+    assert ne.ensemble_variant(['crf_mt', 'crf_mt_m100', 'crf_mt_m200']) == 'crf_mt_ens3'
+    assert ne.ensemble_variant(['crf_st3_m300', 'crf_st3_m400', 'crf_st3_m500']) == \
+        'crf_st3_ens3_m300'
+    assert ne.ensemble_variant(['m300', 'm400', 'm500']) == 'ens3_m300'
+    assert [ne.member_offset(v) for v in ('crf_mt', 'crf_m0', 'crf_ls_m900', 'm300', 'crf')] == \
+        [0, 0, 900, 300, 0]
+    # ner_seedmeans names the vote families with the same files
+    import ner_seedmeans as ns
+    for stem in ('crf', 'crf_mt', 'crf_ls', 'crf_st3'):
+        members = ns.WEEK5_SYSTEMS[stem]
+        votes = [ne.ensemble_variant(members[k:k + 3]) for k in (0, 3, 6)]
+        assert tuple(votes) == ns.WEEK5_SYSTEMS[f'{stem}_ens3']
 
 
 def test_variant_option_names():

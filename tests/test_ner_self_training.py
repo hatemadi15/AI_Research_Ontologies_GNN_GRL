@@ -104,6 +104,23 @@ def test_teachers_parser_checks(tmp_path, capsys):
     assert 'would overwrite the results of the crf_st3' in capsys.readouterr().err
 
 
+def test_students_parser_checks(tmp_path, capsys):
+    """--students N (week 5): a student per seed offset 0 to 100 (N - 1), N >= --teachers."""
+    corpus = str(_corpus(tmp_path))
+    st3 = ['--crf', '--self-train', corpus, '--teachers', '3']
+    args = nb.parse_args(st3 + ['--students', '10'])
+    assert (args.teachers, args.students, nb.variant_name(args)) == (3, 10, 'crf_st3')
+    assert nb.teacher_offsets(args.students) == list(range(0, 1000, 100))
+    # absent unless given: the config of the week-4 runs is unchanged
+    assert 'students' not in vars(nb.parse_args(st3))
+    for argv, error in ((['--crf', '--self-train', corpus, '--students', '4'],
+                         '--students needs --teachers'),
+                        (st3 + ['--students', '2'], 'at least as many as --teachers')):
+        with pytest.raises(SystemExit):
+            nb.parse_args(argv)
+        assert error in capsys.readouterr().err
+
+
 def test_unanimous_silver_and_teacher_seeds():
     sure = (('B-MAT', 'O'), 0.95)
     assert nb.unanimous_silver([sure, sure, sure])
@@ -578,3 +595,51 @@ def test_self_training_with_three_teachers(tiny_run, tmp_path, monkeypatch):
     # finished runs are skipped
     n = len(record)
     assert len(tiny_run(*st3)) == n
+
+
+def test_more_students_than_teachers(tiny_run, tmp_path, monkeypatch):
+    """--students 4 with 3 teachers (week 5): the teachers and silver data of the 3-teacher
+    run, a student for every seed offset 0 to 300, and the files of the students that a
+    run already has left as they are."""
+    corpus = _corpus(tmp_path)
+    monkeypatch.setattr(nb, 'unanimous_silver', lambda votes: True)   # every tagged sentence
+    flags = ('--vary-split', '--seeds', '0')
+    st3 = ('--crf', '--self-train', str(corpus), '--teachers', '3', '--self-train-sample', '0',
+           *flags, '--save-predictions')
+    name = 'ner_results_fine_random_split_vary_crf_st3_m{}.json'
+    record = tiny_run(*st3)                      # the week-4 run: 3 teachers, 3 students
+    first = list(record)
+    assert len(first) == 6
+    stored = {off: (tmp_path / 'ner' / name.format(off)).read_bytes() for off in (0, 100, 200)}
+    # 4 students: the teachers again, and only the student that the files lack
+    tiny_run(*st3, '--students', '4')
+    calls = record[6:]
+    assert [(c['seed'], c['teacher']) for c in calls] == [
+        (0, True), (100, True), (200, True), (300, False)]
+    for again, before in zip(calls[:3], first[:3]):      # the teachers repeat exactly
+        assert {k: again['result'][k] for k in RESULT_KEYS} == \
+            {k: before['result'][k] for k in RESULT_KEYS}
+    assert calls[3]['silver'] == first[3]['silver']       # the same silver data
+    for off, data in stored.items():                     # the week-4 files are untouched
+        assert (tmp_path / 'ner' / name.format(off)).read_bytes() == data
+    res = _load(tmp_path, name.format(300))
+    assert res['variant'] == 'crf_st3_m300'
+    assert (res['config']['seed_offset'], res['config']['teachers'],
+            res['config']['students']) == (300, 3, 4)
+    run = res['runs'][0]
+    assert run['seed'] == 300 and run['run_id'] == 'seed0' and 'test_pred' in run
+    assert {k: run[k] for k in RESULT_KEYS} == {k: calls[3]['result'][k] for k in RESULT_KEYS}
+    info = run['self_training']
+    assert [t['seed'] for t in info['teachers']] == [0, 100, 200]
+    assert info['teachers'] == _load(tmp_path, name.format(0))['runs'][0]['self_training'][
+        'teachers']
+    # a student of seed 300 trained with 4 students from the start is the same student
+    fresh = tmp_path / 'fresh'
+    monkeypatch.setattr(nb, 'PROCESSED_DIR', str(fresh))
+    tiny_run(*st3, '--students', '4')
+    again = json.loads((fresh / 'ner' / name.format(300)).read_text())['runs'][0]
+    assert {k: again[k] for k in RESULT_KEYS} == {k: run[k] for k in RESULT_KEYS}
+    assert len(record) == 6 + 4 + 7
+    # finished runs are skipped
+    n = len(record)
+    assert len(tiny_run(*st3, '--students', '4')) == n

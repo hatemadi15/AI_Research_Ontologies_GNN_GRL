@@ -1,5 +1,5 @@
 """
-ner_seedmeans.py - NER comparisons of 3-seed means (ROADMAP §4, week-3 and week-4 protocols)
+ner_seedmeans.py - NER comparisons of seed means (ROADMAP §4, week-3 to week-5 protocols)
 
 Week 3 scores a model trained with three seeds on a split by the mean of its three runs
 (model seeds K, K + 100 and K + 200 on random split K; 0, 100 and 200 on a held-out
@@ -53,10 +53,22 @@ entries, written to ner_week4_comparisons.json:
     minus its CPU scores (--cpu DIR, default the parent of the GPU directory), per split,
     for the systems run on both (HARDWARE_SYSTEMS): what the hardware alone changes.
 
+Week 5 (--week 5 --gpu, results/gpu/) has 10 model seeds per split, with the same scores
+and entries, written to ner_week5_comparisons.json:
+  - Families of 10 seeds (seed offsets 0 to 900): crf, crf_mt (crf_mt, then
+    crf_mt_m100 to _m900), crf_ls and crf_st3. A family scores the mean of its 10 runs.
+  - Vote families: <family>_ens3 = the votes over the seed triples m0-m200, m300-m500
+    and m600-m800 (<family>_ens3, <family>_ens3_m300, <family>_ens3_m600), scored by
+    the mean of the 3 votes.
+  - Decisions: crf_mt vs crf (random splits), crf_ls and crf_st3 vs crf (held-out
+    papers), and the votes crf_mt_ens3, crf_ls_ens3 and crf_st3_ens3 vs crf_ens3 (both
+    protocols: the reported system); reported: crf_ens3 vs crf.
+
 Usage:
   python src/graph/ner_seedmeans.py [--results results] [--out results/ner_week3_comparisons.json]
   python src/graph/ner_seedmeans.py --week 4                            # CPU votes
   python src/graph/ner_seedmeans.py --week 4 --gpu --results results/gpu
+  python src/graph/ner_seedmeans.py --week 5 --gpu --results results/gpu
 """
 
 import argparse
@@ -70,7 +82,7 @@ from ner_baseline import F1_AVERAGES, result_suffix
 
 RESULTS_DIR = Path(__file__).resolve().parents[2] / 'results'
 OUT_NAME = 'ner_week3_comparisons.json'
-OUT_NAMES = {3: OUT_NAME, 4: 'ner_week4_comparisons.json'}
+OUT_NAMES = {3: OUT_NAME, 4: 'ner_week4_comparisons.json', 5: 'ner_week5_comparisons.json'}
 
 GRANULARITIES = ('fine', 'coarse')
 # pairs of a complete comparison: the 5 random splits and the 4 held-out papers
@@ -139,14 +151,61 @@ WEEK4_GPU_COMPARISONS = (
 HARDWARE_SYSTEMS = ('crf', 'crf_ens3', 'crf_mt', 'crf_ls', 'crf_st', 'crf_ls_ens3',
                     'crf_st_ens3')
 
+# week 5: 10 model seeds per split, and votes over 3 disjoint seed triples
+WEEK5_OFFSETS = tuple(range(0, 1000, 100))
+WEEK5_TRIPLES = (0, 300, 600)        # the first seed offset of each voting triple
+
+
+def seed_family(stem, untagged_zero=False):
+    """The variants of a 10-seed family: <stem>_m0 to <stem>_m900 (crf_mt has no m0 tag)."""
+    return tuple(stem if untagged_zero and off == 0 else f'{stem}_m{off}'
+                 for off in WEEK5_OFFSETS)
+
+
+def vote_family(stem):
+    """The votes over the triples of a family: <stem>_ens3, _ens3_m300, _ens3_m600."""
+    return tuple(f'{stem}_ens3' + (f'_m{off}' if off else '') for off in WEEK5_TRIPLES)
+
+
+WEEK5_SYSTEMS = {
+    'crf': seed_family('crf'),
+    'crf_mt': seed_family('crf_mt', untagged_zero=True),
+    'crf_ls': seed_family('crf_ls'),
+    'crf_st3': seed_family('crf_st3'),
+    **{f'{stem}_ens3': vote_family(stem) for stem in ('crf', 'crf_mt', 'crf_ls', 'crf_st3')},
+}
+BOTH_PROTOCOLS = tuple(PROTOCOLS)
+WEEK5_COMPARISONS = (
+    # the claims so far, each on the protocol of its earlier decision
+    ('crf_mt', 'crf', 'random_split_vary'),
+    ('crf_ls', 'crf', 'leave_one_paper_out'),
+    ('crf_st3', 'crf', 'leave_one_paper_out'),
+    # the reported system, per protocol and granularity
+    ('crf_mt_ens3', 'crf_ens3', BOTH_PROTOCOLS),
+    ('crf_ls_ens3', 'crf_ens3', BOTH_PROTOCOLS),
+    ('crf_st3_ens3', 'crf_ens3', BOTH_PROTOCOLS),
+    # reported: what the vote adds to single models
+    ('crf_ens3', 'crf', None),
+)
+
 
 def comparison_list(week, gpu=False):
-    """The comparisons of a week's protocol: week 3, or week 4 on the CPU or the GPU runs."""
+    """The comparisons of a week's protocol: week 3, week 4 on the CPU or the GPU runs, or
+    week 5 (GPU runs only)."""
     if week == 3:
         if gpu:
             raise ValueError('the week-3 comparisons are made on the CPU runs only')
         return COMPARISONS
+    if week == 5:
+        if not gpu:
+            raise ValueError('the week-5 comparisons are made on the GPU runs only')
+        return WEEK5_COMPARISONS
     return WEEK4_GPU_COMPARISONS if gpu else WEEK4_CPU_COMPARISONS
+
+
+def system_list(week):
+    """The systems (name: the variants of its results files) of a week's protocol."""
+    return WEEK5_SYSTEMS if week == 5 else SYSTEMS
 
 
 def decides_on(decides, protocol):
@@ -157,9 +216,10 @@ def decides_on(decides, protocol):
     return protocol in ((decides,) if isinstance(decides, str) else decides)
 
 
-def file_names(granularity, protocol, system):
-    """Results files of a system (a family's three seeds, or one file) for one protocol."""
-    return [f'ner_results_{granularity}{result_suffix(protocol, v)}.json' for v in SYSTEMS[system]]
+def file_names(granularity, protocol, system, systems=None):
+    """Results files of a system (a family's seeds, or one file) for one protocol."""
+    systems = SYSTEMS if systems is None else systems
+    return [f'ner_results_{granularity}{result_suffix(protocol, v)}.json' for v in systems[system]]
 
 
 def comparison_key(granularity, protocol, variant, reference):
@@ -211,9 +271,9 @@ def load_scores(directory, names):
     return system_scores(files)
 
 
-def week3_comparisons(directory, comparisons_list=COMPARISONS):
+def week3_comparisons(directory, comparisons_list=COMPARISONS, systems=None):
     """Every comparison of `comparisons_list` (default: week 3) that the results files in
-    `directory` allow, keyed as above.
+    `directory` allow, keyed as above; `systems` (default: SYSTEMS) names their files.
 
     Prints one line per comparison: its micro-F1 difference, or why it was skipped (a
     missing results file, or no run_id with scores on both sides).
@@ -223,7 +283,7 @@ def week3_comparisons(directory, comparisons_list=COMPARISONS):
         for protocol, need in PROTOCOLS.items():
             for granularity in GRANULARITIES:
                 key = comparison_key(granularity, protocol, variant, reference)
-                files = {side: file_names(granularity, protocol, side)
+                files = {side: file_names(granularity, protocol, side, systems)
                          for side in (variant, reference)}
                 missing = [fn for names in files.values() for fn in names
                            if not os.path.exists(os.path.join(directory, fn))]
@@ -289,7 +349,7 @@ def main(argv=None):
     parser.add_argument('--week', type=int, choices=sorted(OUT_NAMES), default=3,
                         help='the protocol whose comparisons are made (default: 3)')
     parser.add_argument('--gpu', action='store_true',
-                        help='with --week 4: the comparisons of the GPU runs (results/gpu)')
+                        help='with --week 4 or 5: the comparisons of the GPU runs (results/gpu)')
     parser.add_argument('--cpu', default=None, metavar='DIR',
                         help='with --gpu: the CPU results for the descriptive GPU-minus-CPU '
                              'entries (default: the parent of --results)')
@@ -298,10 +358,13 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if not os.path.isdir(args.results):
         parser.error(f'results directory not found: {args.results}')
-    if args.gpu and args.week != 4:
-        parser.error('--gpu needs --week 4: GPU runs started in week 4')
-    comparisons = week3_comparisons(args.results, comparison_list(args.week, args.gpu))
-    if args.gpu:
+    if args.gpu and args.week == 3:
+        parser.error('--gpu needs --week 4 or 5: GPU runs started in week 4')
+    if args.week == 5 and not args.gpu:
+        parser.error('--week 5 needs --gpu: week 5 runs on the GPU only')
+    comparisons = week3_comparisons(args.results, comparison_list(args.week, args.gpu),
+                                    system_list(args.week))
+    if args.gpu and args.week == 4:
         cpu = args.cpu or os.path.dirname(os.path.abspath(args.results))
         comparisons.update(hardware_comparisons(args.results, cpu))
     out = args.out or os.path.join(args.results, OUT_NAMES[args.week])

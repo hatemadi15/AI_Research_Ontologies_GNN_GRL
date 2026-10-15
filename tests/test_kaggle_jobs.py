@@ -100,6 +100,47 @@ def test_smoke1_repeats_one_crf_run_on_both_gpus():
         assert 'smoke' in nb.variant_name(nb.parse_args(j))   # never collected
 
 
+def test_week5_batches_add_seeds_300_to_900(monkeypatch):
+    """Week 5: smoke4, then w5a (self-training, 10 students) and w5b (crf, crf_ls and
+    crf_mt at seed offsets 300 to 900), each opened by a repeat of a week-4 CRF run."""
+    monkeypatch.setattr(nb.os.path, 'isfile', lambda path: True)    # the corpus is not here
+    assert kj.OFFSETS_W5 == (300, 400, 500, 600, 700, 800, 900)
+    repeat = ['--granularity', 'fine', '--vary-split', '--seeds', '0', '--crf',
+              '--save-predictions', '--threads', '2']
+    # smoke4: the CRF run of split 0 (the stored crf_m0 run, if the commit repeats it) and a
+    # tiny 3-teacher run with 4 students; neither is ever collected
+    crf_lane, st_lane = kj.batch_lanes('smoke4')
+    assert crf_lane == [repeat + ['--tag', 'smokee']]
+    (tiny,) = [nb.parse_args(j) for j in st_lane]
+    assert (tiny.teachers, tiny.students, tiny.self_train_sample, tiny.max_train) == (3, 4, 200, 32)
+    for job in crf_lane + st_lane:
+        args = nb.parse_args(job)
+        assert 'smoke' in nb.results_path('', args.granularity, args)
+    # w5a: a lane per granularity, the held-out papers first, every student seed 0 to 900
+    lanes = kj.batch_lanes('w5a')
+    for g, lane in zip(('fine', 'coarse'), lanes):
+        args = [nb.parse_args(j) for j in lane]
+        assert [nb.protocol_name(a) for a in args] == ['leave_one_paper_out', 'random_split_vary']
+        assert all(a.granularity == g and a.teachers == 3 and a.students == 10 and
+                   a.self_train_sample == 0 and a.self_train == kj.CORPUS and a.save_predictions
+                   for a in args)
+        assert all(nb.variant_name(a) == 'crf_st3' for a in args)
+    # w5b: the repeat first, then every new seed of the three families, one file per job
+    lanes = kj.batch_lanes('w5b')
+    assert lanes[0][0] == repeat + ['--tag', 'smokef']
+    jobs = [j for lane in lanes for j in lane][1:]
+    assert len(jobs) == 7 * 2 * 2 * 2 + 7 * 2          # crf and crf_ls; crf_mt (both heads)
+    files = [f for j in jobs for f in _written_files(j)]
+    assert len(files) == len(set(files)) == 7 * 2 * 2 * 3
+    assert {v for _, _, v in files} == {f'{s}_m{n}' for s in ('crf', 'crf_ls', 'crf_mt')
+                                        for n in kj.OFFSETS_W5}
+    for j in jobs:
+        args = nb.parse_args(j)
+        assert args.seed_offset == int(args.tag[1:]) >= 300 and args.save_predictions
+    assert abs(len(lanes[0]) - len(lanes[1])) <= 4
+    assert {'smoke4', 'w5a', 'w5b'} <= set(kj.BATCHES)
+
+
 def test_balance_takes_the_longest_job_first_to_the_least_loaded_lane():
     # b (5) -> lane 0; c (3) -> lane 1; d (2) -> lane 1 (5 each); a (1) -> lane 0 (tie: lowest)
     lanes = kj.balance([(1, ['a']), (5, ['b']), (3, ['c']), (2, ['d'])])

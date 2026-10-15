@@ -44,6 +44,14 @@ writes its own results files, so the lanes never write the same file:
           saves its files after every split
 Every job has --crf, --save-predictions and --threads 2; the families have 3 seeds per
 split (seed offsets 0, 100 and 200) on the 5 random splits and the 4 held-out papers.
+Week 5 makes 10 seeds per split (offsets 0 to 900):
+  smoke4  a tiny 3-teacher run with 4 students (--students), and the CRF run of split 0
+          (fine-grained, seed 0) as smokee, which must equal the stored crf_m0 run
+  w5a     self-training with 3 teachers and 10 students: the teachers and the 7 students
+          that the week-4 files lack, per split; one lane per granularity, the held-out
+          papers first
+  w5b     the CRF run of smoke4 again (smokef), then crf_m*, crf_ls_m* and crf_mt_m* at
+          seed offsets 300 to 900
 
 Usage:
   python src/graph/kaggle_jobs.py quota
@@ -97,7 +105,8 @@ PROTOCOL_FLAGS = {'random_split_vary': ('--vary-split',),
 RUNS = {'random_split_vary': 5, 'leave_one_paper_out': 4}
 GRANULARITIES = ('fine', 'coarse')
 OFFSETS = (0, 100, 200)
-PAPERS = ('10.1007_s11340-021-00758-x', '10.1038_ncomms7164', '10.1038_s41467-020-19071-7',
+OFFSETS_W5 = tuple(range(300, 1000, 100))   # week 5: the seeds added to make 10 per split
+PAPERS =('10.1007_s11340-021-00758-x', '10.1038_ncomms7164', '10.1038_s41467-020-19071-7',
           '10.3390_met10111458')      # the held-out papers (the MaterioMiner files)
 # relative GPU time of one run of each kind (a CRF run is 1), for balancing the lanes
 COST = {'crf': 1.0, 'mt': 1.7, 'ls': 1.1, 'mt_ls': 1.8, 'st': 2.5, 'st3': 22.0}
@@ -117,16 +126,17 @@ def job(granularity, protocol, *flags, offset=None, tag=None):
 
 
 def family(kind, flags, protocols=tuple(PROTOCOL_FLAGS), granularities=GRANULARITIES,
-           untagged_zero=False):
-    """(cost, job) per protocol, granularity and seed offset of a 3-seed family.
+           untagged_zero=False, offsets=OFFSETS):
+    """(cost, job) per protocol, granularity and seed offset of a family of seeds.
 
-    Seed tags are m0, m100 and m200; with untagged_zero the offset-0 member has no tag
-    (multi-task: crf_mt, crf_mt_m100, crf_mt_m200, as on the CPU).
+    Seed tags are m<offset> (m0, m100 and m200 by default; week 5 adds m300 to m900);
+    with untagged_zero the offset-0 member has no tag (multi-task: crf_mt, crf_mt_m100,
+    crf_mt_m200, as on the CPU).
     """
     out = []
     for protocol in protocols:
         for granularity in granularities:
-            for offset in OFFSETS:
+            for offset in offsets:
                 tag = None if untagged_zero and offset == 0 else f'm{offset}'
                 out.append((COST[kind] * RUNS[protocol],
                             job(granularity, protocol, *flags, offset=offset, tag=tag)))
@@ -196,10 +206,32 @@ def batch_lanes(name):
     if name == 'item3r':
         # one job per granularity: --seeds K jobs would leave the last K as the stored seeds
         return [[job(g, 'random_split_vary', *st3)] for g in GRANULARITIES]
+    # week 5 (ROADMAP §4): 10 seeds per split
+    repeat = ['--granularity', 'fine', '--vary-split', '--seeds', '0', '--crf',
+              '--save-predictions', '--threads', str(THREADS)]
+    if name == 'smoke4':
+        tiny = ('--max-train', '32', '--epochs', '2')
+        return [[repeat + ['--tag', 'smokee']],
+                [['--granularity', 'coarse', '--leave-one-paper-out', '--papers',
+                  '10.3390_met10111458', '--crf', *st, '--teachers', '3', '--students', '4',
+                  '--self-train-sample', '200', *tiny, '--save-predictions', '--threads',
+                  str(THREADS)]]]
+    if name == 'w5a':
+        # one lane per granularity (its jobs write its files); the held-out papers first
+        return [[job(g, protocol, *st3, '--students', '10')
+                 for protocol in ('leave_one_paper_out', 'random_split_vary')]
+                for g in GRANULARITIES]
+    if name == 'w5b':
+        lanes = balance(family('crf', (), offsets=OFFSETS_W5) +
+                        family('ls', ('--label-semantics',), offsets=OFFSETS_W5) +
+                        family('mt', ('--multi-task',), granularities=('both',),
+                               offsets=OFFSETS_W5))
+        return [[repeat + ['--tag', 'smokef']] + lanes[0], lanes[1]]
     raise ValueError(f'unknown batch {name!r}')
 
 
-BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'item3r')
+BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'item3r',
+           'smoke4', 'w5a', 'w5b')
 
 
 def batch_spec(name):

@@ -28,7 +28,9 @@ against a single model, run by run (same run_id, same test sentences).
   - Output: ner_results_<granularity>[_<protocol>]_<variant>.json in the
     directory of the first member (--out overrides it). variant is NAME with
     --variant, else the members' variant without its m<N> tag plus ens<k>:
-    crf_m0, crf_m100, crf_m200 give crf_ens3. Every run adds n_members, member_f1,
+    crf_m0, crf_m100, crf_m200 give crf_ens3, and members with later seeds only
+    add the first one's tag (crf_m300, crf_m400, crf_m500 give crf_ens3_m300).
+    Every run adds n_members, member_f1,
     member_f1_strict and invalid_i_tags to the seqeval metrics; the summary is
     that of ner_baseline.summarize plus `vs_member_mean`: the vote's micro F1
     minus the mean of its members', per run, with its mean and 95% CI
@@ -139,18 +141,28 @@ def load_member(path):
     return data
 
 
+def member_offset(variant):
+    """Seed offset of a member: N of its m<N> tag, 0 without one (crf_mt is offset 0)."""
+    m = MEMBER_TAG.search(variant)
+    return int(m.group(0).lstrip('_m')) if m else 0
+
+
 def ensemble_variant(variants):
     """Variant of the ensemble: the members' variant without its m<N> tag, plus ens<k>.
 
     crf_m0, crf_m100, crf_m200 give crf_ens3 (a bare tag, m0, m100, gives ens3).
-    What is left of the members' variants must be the same.
+    What is left of the members' variants must be the same. A vote whose members all
+    have later seeds is named after the first of them (week 5: crf_m300, crf_m400,
+    crf_m500 give crf_ens3_m300), so that votes over other seeds get files of their own.
     """
     stems = [MEMBER_TAG.sub('', v) for v in variants]
     if len(set(stems)) != 1:
         raise EnsembleError(f'the members differ in variant once the m<N> tag is removed: '
                             f'{list(variants)}')
     ens = f'ens{len(variants)}'
-    return f'{stems[0]}_{ens}' if stems[0] else ens
+    name = f'{stems[0]}_{ens}' if stems[0] else ens
+    first = min(member_offset(v) for v in variants)
+    return f'{name}_m{first}' if first else name
 
 
 def variant_option(value):
