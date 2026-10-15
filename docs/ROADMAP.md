@@ -10,7 +10,7 @@ expectations from the literature, not results.
 <!-- STANDING:START -->
 | Task | Best leakage-free result in this repo | Reference |
 |---|---|---|
-| NER, fine / coarse (MatSciBERT, MaterioMiner protocol) | fine: micro 72.99 [70.86, 75.12] (macro 67.99) on the fixed split, 73.91 [69.36, 78.45] over 5 new splits, 43.51 leaving one paper out; coarse: micro 75.57 [74.14, 77.01] (macro 67.14) on the fixed split, 74.57 [73.15, 75.98] over 5 new splits, 54.34 leaving one paper out | 69.92 / 72.32 (Kumar et al. 2024; averaging not stated) |
+| NER, fine / coarse (MatSciBERT, MaterioMiner protocol) | fine: micro 72.99 [70.86, 75.12] (macro 67.99) on the fixed split, 73.91 [69.36, 78.45] over 5 new splits, 43.51 leaving one paper out; coarse: micro 75.57 [74.14, 77.01] (macro 67.14) on the fixed split, 74.57 [73.15, 75.98] over 5 new splits, 54.34 leaving one paper out | 69.92 / 72.32 (Durmaz et al. 2024; micro F1 in the release code) |
 | NER with the CRF head (`--crf`) | fine: micro 76.36 [71.00, 81.73] over 5 new splits, 49.44 leaving one paper out; coarse: micro 78.15 [76.61, 79.69] over 5 new splits, 59.82 leaving one paper out | same; the in-distribution fine-grained gain over the baseline disappears under strict IOB2 scoring |
 | NER, reported system (week-4 protocol) | fine: 3-model seed ensemble `crf_ens3`, micro 79.76 [76.14, 83.38] over 5 new splits, 49.55 leaving one paper out; coarse: 3-model seed ensemble `crf_ens3`, micro 79.45 [77.82, 81.09] over 5 new splits; on unseen papers the label-semantics vote `crf_ls_ens3`, 63.05 leaving one paper out (`crf_ens3` 61.42) | same; fine-grained beaten under micro, macro and weighted averaging, coarse-grained beaten under micro and weighted averaging |
 | Term typing, 315 terms, pipeline (zero-shot) | accuracy 0.384 (LLM on: 0.429) | majority class 0.083 |
@@ -26,7 +26,7 @@ Full tables: [README](../README.md#results).
 
 | Task | Published reference | Comparable today? |
 |---|---|---|
-| **NER on MaterioMiner** (span + class, seqeval entity F1) | MatSciBERT 69.92 fine-grained (top-27 classes) / 72.32 coarse-grained, random 65/15/20 split, 5 seeds, averaging not stated ([Kumar et al., Sci Data 2024](https://www.nature.com/articles/s41597-024-03926-5)). Out-of-distribution (different protocol): roughly 60 micro F1 for MatSciBERT (read from a figure), 36% above GPT-4 in-context learning ([Sci Rep 2025](https://www.nature.com/articles/s41598-025-03619-y)) | **Yes**, via `ner_baseline.py`. The paper's split is not published, so compare means with 95% CIs over several splits (§1). |
+| **NER on MaterioMiner** (span + class, seqeval entity F1) | MatSciBERT 69.92 fine-grained (top-27 classes) / 72.32 coarse-grained, random 65/15/20 split, 5 seeds. The paper does not state its averaging; its released code uses micro F1 in seqeval's default mode ([Durmaz et al., Sci Data 2024](https://www.nature.com/articles/s41597-024-03926-5)). Out-of-distribution (different protocol): roughly 60 micro F1 for MatSciBERT (read from a figure), 36% above GPT-4 in-context learning ([Sci Rep 2025](https://www.nature.com/articles/s41598-025-03619-y)) | **Yes**, via `ner_baseline.py`. The release ships the split of the paper's experiments, run in week 5 (`--published-split`); over other splits, compare means with 95% CIs (§1). |
 | **Term typing**, gold spans given (MaterioMiner → MMO) | No published number. Closest public task: LLMs4OL 2025 Task B on MatOnto, best F1 0.667 (IRIS) ([overview](https://www.tib-op.org/ojs/index.php/ocp/article/view/2913)) | Our baselines establish the first numbers. MatOnto is a different dataset. |
 | **Taxonomy discovery** | LLMs4OL 2025 Task C on MatOnto, best F1 0.662 (SBU-NLP) | Not yet: the pipeline builds term-level is-a edges, which is a different task. |
 | **Relation extraction** | No text-level gold in MaterioMiner | No. Only class-level checks against 70 ontology restrictions are possible. |
@@ -82,8 +82,8 @@ Mixing backbones adds nothing to the seed ensemble (item 8). Self-training
 (item 7) and in-domain pre-training (item 5) do not pass. The reported
 system therefore stays the seed ensemble `crf_ens3`.
 
-The paper does not state its averaging, so the comparison is made under
-each:
+The paper does not state its averaging (its released code uses micro F1),
+so the comparison is made under each:
 - fine-grained, the 95% CI over the random splits lies above 69.92 under
   micro, macro and weighted F1;
 - coarse-grained, it lies above 72.32 under micro and weighted F1, but not
@@ -1035,3 +1035,27 @@ with 10):
   of the candidates, then a loader;
 - the paper: an outline in `docs/PAPER.md`, with each claim and the result
   that supports it.
+
+**Amendment, before any run of it: the published split.** The MaterioMiner
+release (Durmaz et al., 2024; Fordatis, release v1.0.1, CC BY 4.0) ships the
+train, validation and test sentences of its experiments
+(`examples/data/*_grained_training`: 323, 57 and 96 sentences, a different
+partition per granularity). Each of them is one of the 476 corpus sentences,
+and the release code scores with seqeval's defaults: micro F1 in the default
+mode, our `f1`. Week 5 therefore also runs the published split, so that the
+comparison with 69.92 and 72.32 is like for like:
+- the release's partition and tags, copied to
+  `data/raw/dataset/published_split/` with their SHA-256. The tags differ
+  from the corpus files in 7 tokens of 6 fine-grained sentences, where the
+  release starts an entity with B-;
+- plain MatSciBERT (the paper's model) and the CRF head, 10 model seeds each
+  (0, 100, …, 900), at both granularities (new option `--published-split`);
+- reported, no decision:
+  - the mean over the 10 seeds, with its 95% CI, against 69.92 and 72.32,
+    under micro, macro and weighted F1 and strict IOB2. On one split, this
+    CI measures the seed variance only;
+  - the CRF head minus plain MatSciBERT, paired by seed;
+  - the CRF votes over the 3 seed triples.
+
+These runs use a later frozen commit than the other week-5 runs; their
+session again first repeats a week-4 run exactly. About 1 GPU-hour.

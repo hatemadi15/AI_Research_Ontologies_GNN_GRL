@@ -16,7 +16,7 @@ scoring and seeds on MaterioMiner".
 
 | # | Claim | Evidence | Status |
 |---|---|---|---|
-| C1 | The published numbers (69.92 fine, 72.32 coarse) come from one random split that is not published. Over 5 new random splits, plain MatSciBERT scores 73.91 [69.36, 78.45] fine-grained and 74.57 [73.15, 75.98] coarse-grained. | README, "NER across splits"; `results/ner_results_*_random_split_vary.json` | Done (CPU). The authors' split and averaging are asked for (item 6) |
+| C1 | The published numbers (69.92 fine, 72.32 coarse) come from one random split, which the release ships (323 / 57 / 96 sentences) without saying so in the paper. Over 5 new random splits, plain MatSciBERT scores 73.91 [69.36, 78.45] fine-grained and 74.57 [73.15, 75.98] coarse-grained. | README, "NER across splits"; `results/ner_results_*_random_split_vary.json` | Done (CPU). Week 5 runs the published split itself, with the release's scoring (micro F1, seqeval's default mode); the authors are asked to confirm it (item 6) |
 | C2 | Random splits hide a large gap: on a paper the model has never seen, the seed vote `crf_ens3` scores 18–30 points lower than on random splits (49.55 fine, 61.42 coarse, against 79.76 and 79.45). | README, "NER out of distribution"; the `leave_one_paper_out` files | Done (CPU, 3 seeds); week 5 re-estimates it with 10 seeds |
 | C3 | A CRF head with IOB2 constraints and a vote over 3 seeds beats the published numbers over 5 random splits: fine-grained under micro, macro and weighted F1; coarse-grained under micro and weighted F1, not macro (73.03 [67.79, 78.27]). | README, the reported-system rows | Done (CPU); week 5 decides the reported system on 10-seed votes (GPU) |
 | C4 | The CRF head's fine-grained gain is span validity, not recognition: under strict IOB2 scoring it vanishes (+0.10 [−2.08, +2.29]), and dropping invalid tags from the baseline's output gives the same (strict F1 76.26). Coarse-grained, part of the gain is recognition (strict +1.91 [+1.17, +2.65]). | README, "Why the CRF helps" | Done (CPU) |
@@ -59,7 +59,7 @@ scoring and seeds on MaterioMiner".
 3. A second materials NER dataset (item 7, week 6), so the findings do not
    rest on 4 papers.
 4. Related work:
-   - MatSciBERT (Gupta et al., 2022) and MaterioMiner (Kumar et al., 2024);
+   - MatSciBERT (Gupta et al., 2022) and MaterioMiner (Durmaz et al., 2024);
    - out-of-distribution materials NER (Sci Rep 2025);
    - seed variance and reporting score distributions (Reimers and Gurevych,
      2017; Dodge et al., 2020);

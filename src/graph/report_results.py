@@ -1172,7 +1172,7 @@ def standing_block(res, note=''):
         "|---|---|---|",
         "| NER, fine / coarse (MatSciBERT, MaterioMiner protocol) | "
         + ('; '.join(ner_cells) if ner_cells else 'run pending (`ner_baseline.py`)')
-        + " | 69.92 / 72.32 (Kumar et al. 2024; averaging not stated) |",
+        + " | 69.92 / 72.32 (Durmaz et al. 2024; micro F1 in the release code) |",
     ]
     if crf_cells:
         lines.append(f"| NER with the CRF head (`--crf`) | {'; '.join(crf_cells)} | same; the "
