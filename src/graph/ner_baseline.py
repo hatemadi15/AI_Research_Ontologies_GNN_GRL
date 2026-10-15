@@ -115,6 +115,7 @@ Usage:
   python ner_baseline.py --vary-split --crf --multi-task --label-semantics --tag m0
   python ner_baseline.py --leave-one-paper-out --crf --teachers 3 --self-train-sample 0 \\
       --self-train data/processed/corpus/fatigue_sentences.txt            # 3 teachers
+  python ner_baseline.py --leave-one-paper-out --crf --context 64 --tag m0   # document context
   python ner_baseline.py --compare                                        # paired comparison
 """
 
@@ -194,21 +195,72 @@ def random_split(n, seed, ratios=(0.65, 0.15, 0.20)):
     return idx[:n_train], idx[n_train:n_train + n_val], idx[n_train + n_val:]
 
 
-def encode(tokenizer, sentences, label2id, max_length=512):
-    """Tokenise pre-split words; label the first subword of each word."""
+def part_contexts(data, part):
+    """Context sentences for --context: a (left, right) per position of `part`, in its order.
+
+    The context of a sentence is the other sentences of the same paper within the same part
+    (train, validation or test), as word lists, nearest first: left those before it, right
+    those after it in corpus order. Other parts never serve as context, so no test sentence
+    is seen in training.
+    """
+    by_doc = {}
+    for i in sorted(part):
+        by_doc.setdefault(data[i][2], []).append(i)
+    where = {i: (doc, k) for doc, idx in by_doc.items() for k, i in enumerate(idx)}
+    out = []
+    for i in part:
+        doc, k = where[i]
+        idx = by_doc[doc]
+        out.append(([data[j][0] for j in reversed(idx[:k])], [data[j][0] for j in idx[k + 1:]]))
+    return out
+
+
+def context_words(tokenizer, left, right, budget):
+    """(left words, right words) of a sentence's context (FLERT; Schweter and Akbik, 2020).
+
+    Whole words of the context sentences (part_contexts), the nearest first, up to `budget`
+    subwords on each side; the left words are returned in reading order.
+    """
+    def take(sentences, from_end):
+        words, used = [], 0
+        for sentence in sentences:
+            for word in (reversed(sentence) if from_end else sentence):
+                n = max(1, len(tokenizer([word], is_split_into_words=True,
+                                         add_special_tokens=False)['input_ids']))
+                if used + n > budget:
+                    return words
+                words.append(word)
+                used += n
+        return words
+    return take(left, True)[::-1], take(right, False)
+
+
+def encode(tokenizer, sentences, label2id, max_length=512, contexts=None, budget=0):
+    """Tokenise pre-split words; label the first subword of each word.
+
+    contexts (--context): a (left, right) per sentence from part_contexts. The words of up
+    to `budget` subwords of each side (context_words; fewer if the sentence needs the room)
+    surround the sentence unlabelled, so that only the sentence's words are scored.
+    """
     features = []
-    for tokens, tags in sentences:
-        enc = tokenizer(tokens, is_split_into_words=True, truncation=False)
+    for k, (tokens, tags) in enumerate(sentences):
+        left = right = []
+        if contexts is not None:
+            own = len(tokenizer(tokens, is_split_into_words=True, truncation=False)['input_ids'])
+            left, right = context_words(tokenizer, *contexts[k],
+                                        min(budget, max(0, (max_length - own) // 2)))
+        first, last = len(left), len(left) + len(tokens)
+        enc = tokenizer(left + list(tokens) + right, is_split_into_words=True, truncation=False)
         if len(enc['input_ids']) > max_length:
             raise ValueError(f"Sentence of {len(tokens)} words needs "
                              f"{len(enc['input_ids'])} subwords (> {max_length})")
         labels = []
         prev_word = None
         for word_id in enc.word_ids():
-            if word_id is None or word_id == prev_word:
+            if word_id is None or word_id == prev_word or not first <= word_id < last:
                 labels.append(-100)
             else:
-                labels.append(label2id[tags[word_id]])
+                labels.append(label2id[tags[word_id - first]])
             prev_word = word_id
         features.append({'input_ids': enc['input_ids'],
                          'attention_mask': enc['attention_mask'],
@@ -637,7 +689,7 @@ def is_silver(tags, marginals):
 
 
 def train_one(seed, train, val, test, labels, args, device, test_index=None, descriptions=None,
-              silver=None, keep_tagger=False):
+              silver=None, keep_tagger=False, contexts=None):
     """Fine-tune and test once; `seed` is the model seed (--seed-offset included).
 
     test_index (positions of `test` in the corpus) is stored with the
@@ -647,7 +699,9 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
     silver (--self-train, with the CRF): (words, tags) sentences trained on with the
     gold ones, each sentence's NLL weighted SILVER_WEIGHT. keep_tagger: return
     (result, tagger), the tagger holding the model with its best weights, the CRF,
-    tokenizer, label2id and id2label (teacher_tags).
+    tokenizer, label2id and id2label (teacher_tags). contexts (--context): the
+    part_contexts of train, val and test ({'train': ..., 'val': ..., 'test': ...}),
+    encoded around each sentence with up to args.context subwords per side.
     """
     import torch
     from transformers import (AutoModelForTokenClassification, AutoTokenizer,
@@ -671,14 +725,21 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
     pad_id = tokenizer.pad_token_id
     crf = make_crf(label_list).to(device) if getattr(args, 'crf', False) else None
 
-    f_train = encode(tokenizer, [(t, g) for t, g, _ in train], label2id)
+    def encode_part(name, part):
+        sentences = [(t, g) for t, g, _ in part]
+        if contexts is None:
+            return encode(tokenizer, sentences, label2id)
+        return encode(tokenizer, sentences, label2id, model.config.max_position_embeddings,
+                      contexts[name], args.context)
+
+    f_train = encode_part('train', train)
     if silver:
         assert crf is not None, 'silver sentences are weighted in the CRF loss'
         # the gold sentences, then the silver ones; batches() shuffles them together
         weight = [1.0] * len(f_train) + [SILVER_WEIGHT] * len(silver)
         f_train += encode(tokenizer, silver, label2id, model.config.max_position_embeddings)
-    f_val = encode(tokenizer, [(t, g) for t, g, _ in val], label2id)
-    f_test = encode(tokenizer, [(t, g) for t, g, _ in test], label2id)
+    f_val = encode_part('val', val)
+    f_test = encode_part('test', test)
 
     loss_fn = torch.nn.CrossEntropyLoss(
         weight=class_weights(f_train, len(label_list)).to(device) if args.class_weights else None,
@@ -1125,12 +1186,13 @@ F1_AVERAGES = {
 RESULT_FILE = re.compile(r'ner_results_(fine|coarse)(?:_(random_split_vary|leave_one_paper_out))?'
                          r'(?:_([a-z0-9_]+))?\.json')
 # untagged variants: a tagged variant must not take the name of one (--crf --tag mt: crf_mt)
-PLAIN_VARIANTS = ('baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_st', 'crf_mt_ls', 'crf_st3')
+PLAIN_VARIANTS = ('baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_st', 'crf_mt_ls', 'crf_st3',
+                  'crf_ctx')
 
 
 def variant_name(args):
     """Variant of a run: 'baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_mt_ls', 'crf_st' or
-    'crf_st<N>', then the tag.
+    'crf_st<N>' or 'crf_ctx', then the tag.
 
     'cw' is --class-weights, 'crf_mt' is --crf --multi-task, 'crf_ls' is --crf
     --label-semantics, 'crf_mt_ls' both, 'crf_st' is --crf --self-train and 'crf_st<N>' that
@@ -1145,6 +1207,8 @@ def variant_name(args):
         if getattr(args, 'self_train', None) is not None:
             teachers = getattr(args, 'teachers', 1)
             name = 'crf_st' if teachers == 1 else f'crf_st{teachers}'
+        if getattr(args, 'context', 0):
+            name = 'crf_ctx'
     else:
         name = 'cw' if args.class_weights else 'baseline'
     tag = getattr(args, 'tag', None)
@@ -1544,9 +1608,9 @@ def run(args):
             if run_id in done:
                 print(f"  {run_id}: already done, skipping")
                 continue
-            train, val, test = ([data[i] for i in part] for part in (tr, va, te))
             if args.max_train:
-                train = train[:args.max_train]
+                tr = tr[:args.max_train]
+            train, val, test = ([data[i] for i in part] for part in (tr, va, te))
             seed = int(run_id[4:]) if run_id.startswith('seed') else args.seeds[0]
             seed += args.seed_offset      # the model seed moves, the split and run_id do not
             start = time.time()
@@ -1554,8 +1618,11 @@ def run(args):
                 res = train_self_training(seed, train, val, test, labels, args, device, sample,
                                           test_index=te)
             else:
+                contexts = ({name: part_contexts(data, part)
+                             for name, part in (('train', tr), ('val', va), ('test', te))}
+                            if getattr(args, 'context', 0) else None)
                 res = train_one(seed, train, val, test, labels, args, device, test_index=te,
-                                descriptions=descriptions[granularity])
+                                descriptions=descriptions[granularity], contexts=contexts)
             res['run_id'] = run_id
             res['runtime_sec'] = round(time.time() - start, 1)
             if environment:
@@ -1834,6 +1901,11 @@ def parse_args(argv=None):
                              'least 0.9 under every teacher, and every teacher seed trains a '
                              'student. One run writes N files, tagged m0, m100, ... (files '
                              'tagged _crf_st<N>_m<offset>); no --tag or --seed-offset')
+    parser.add_argument('--context', type=int, default=argparse.SUPPRESS, metavar='N',
+                        help='with --crf: document context (FLERT). Up to N subwords of the '
+                             'neighbouring sentences of the same paper, and of the same part '
+                             '(train, validation or test), on each side of a sentence in the '
+                             'encoder input; only the sentence is tagged (files tagged _crf_ctx)')
     parser.add_argument('--students', type=int, default=argparse.SUPPRESS, metavar='N',
                         help='with --teachers: N students, one per seed offset 0, 100, ..., '
                              '100 (N - 1), at least as many as the teachers, which keep the '
@@ -1891,6 +1963,14 @@ def parse_args(argv=None):
     if hasattr(args, 'teachers') and (args.tag or args.seed_offset):
         parser.error('--teachers writes its own seed tags (m0, m100, ...): no --tag or '
                      '--seed-offset')
+    if hasattr(args, 'context'):
+        if not args.crf:
+            parser.error('--context needs --crf')
+        if args.context < 1:
+            parser.error('--context: at least 1 subword on each side')
+        for option in ('multi_task', 'label_semantics', 'self_train'):
+            if getattr(args, option, None) not in (None, False):
+                parser.error(f"--context is not available with --{option.replace('_', '-')}")
     if hasattr(args, 'students'):
         if not hasattr(args, 'teachers'):
             parser.error('--students needs --teachers')
