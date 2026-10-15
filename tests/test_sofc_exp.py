@@ -72,3 +72,29 @@ def test_the_committed_files_have_the_counts_of_the_paper():
     split = json.loads((DATA / 'split.json').read_text())
     assert sorted(split) == [f.stem for f in files]
     assert Counter(split.values()) == {'train': 26, 'dev': 8, 'test': 11}
+
+
+def test_ner_baseline_reads_sofc_exp_as_granularity_sofc(capsys):
+    """--granularity sofc: the converted files, their four types, the official split as the
+    published split, and one held-out-paper fold per article."""
+    from types import SimpleNamespace
+
+    import ner_baseline as nb
+    data, labels, tie = nb.granularity_data('sofc', SimpleNamespace(top_k=27))
+    assert len(data) == 876 and len({d for _, _, d in data}) == 45
+    assert labels == ['DEVICE', 'EXPERIMENT', 'MATERIAL', 'VALUE'] and tie == {}
+    split = json.loads((DATA / 'split.json').read_text())
+    parts, same = nb.published_split(data, 'sofc')
+    assert same == data
+    assert sorted(i for p in parts for i in p) == list(range(876))
+    for part, name in zip(parts, ('train', 'dev', 'test')):
+        assert {split[data[i][2].removesuffix('.conll')] for i in part} == {name}
+    args = nb.parse_args(['--granularity', 'sofc', '--crf', '--leave-one-paper-out'])
+    path = nb.results_path('out', 'sofc', args)
+    assert path.endswith('ner_results_sofc_leave_one_paper_out_crf.json')
+    assert nb.parse_result_name(path.rsplit('/', 1)[1]) == ('sofc', 'leave_one_paper_out', 'crf')
+    assert len(nb.make_folds(data, args, indices=True)) == 45
+    assert nb.PAPER_F1['sofc'] is None
+    with pytest.raises(SystemExit):
+        nb.parse_args(['--granularity', 'sofc', '--crf', '--multi-task'])
+    assert '--granularity must be both' in capsys.readouterr().err

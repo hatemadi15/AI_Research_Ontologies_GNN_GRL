@@ -139,13 +139,16 @@ import metrics
 import ner_label_text
 from config import PROCESSED_DIR, RAW_DIR
 
-PAPER_F1 = {'fine': 69.92, 'coarse': 72.32}
+PAPER_F1 = {'fine': 69.92, 'coarse': 72.32,
+            'sofc': None}       # SOFC-Exp (--granularity sofc): no published number of this kind
 DEFAULT_MODEL = 'm3rg-iitd/matscibert'
 
 
 def load_split_corpus(granularity):
-    """[(tokens, tags, doc_id)] for one granularity (files read separately)."""
-    folder = 'fine_grained_ner' if granularity == 'fine' else 'coarse_grained_ner'
+    """[(tokens, tags, doc_id)] for one granularity (files read separately); 'sofc' is the
+    SOFC-Exp corpus (data/raw/dataset/sofc_exp, sofc_exp.py), one CoNLL file per article."""
+    folder = {'fine': 'fine_grained_ner', 'coarse': 'coarse_grained_ner',
+              'sofc': 'sofc_exp'}[granularity]
     datadir = os.path.join(RAW_DIR, folder)
     data = []
     for fn in sorted(f for f in os.listdir(datadir) if f.endswith('.conll')):
@@ -170,13 +173,21 @@ PUBLISHED_SPLIT_SHA256 = {
 
 def published_split(data, granularity):
     """([train, val, test positions in `data`], data with the release's tags) of the
-    published split of a granularity (--published-split).
+    published split of a granularity (--published-split). For SOFC-Exp ('sofc') it is the
+    official split by article, with the corpus's own tags.
 
     The release files must have their recorded SHA-256, and each of their sentences must be
     a sentence of `data` (the same words), each used once, so that the three parts cover
     the corpus. Every sentence then takes the release's tags; the parts keep the order of
     the files.
     """
+    if granularity == 'sofc':
+        # SOFC-Exp: the official split by article (split.json; train, dev and test)
+        with open(os.path.join(RAW_DIR, 'sofc_exp', 'split.json')) as f:
+            split = json.load(f)
+        parts = [[i for i, (_, _, doc) in enumerate(data)
+                  if split[doc.removesuffix('.conll')] == part] for part in ('train', 'dev', 'test')]
+        return parts, list(data)
     import hashlib
     folder = os.path.join(RAW_DIR, PUBLISHED_SPLIT, f'{granularity}_grained_training')
     position = {}
@@ -1381,7 +1392,7 @@ F1_AVERAGES = {
 # part is absent for the fixed split, the variant part for the baseline. The protocol
 # is tried first, so the baseline file of a protocol never reads as a variant named
 # like the protocol.
-RESULT_FILE = re.compile(r'ner_results_(fine|coarse)'
+RESULT_FILE = re.compile(r'ner_results_(fine|coarse|sofc)'
                          r'(?:_(random_split_vary|leave_one_paper_out|published_split))?'
                          r'(?:_([a-z0-9_]+))?\.json')
 # untagged variants: a tagged variant must not take the name of one (--crf --tag mt: crf_mt)
@@ -1849,7 +1860,7 @@ def run(args):
             with open(out_path, 'w') as f:
                 json.dump(results, f, indent=2)
             # the published numbers are in-distribution; no reference for held-out papers
-            ref = ('' if args.leave_one_paper_out
+            ref = ('' if args.leave_one_paper_out or PAPER_F1[granularity] is None
                    else f" (paper {PAPER_F1[granularity]})")
             print(f"  {run_id}: test F1 {res['f1']:.2f} (strict {res['f1_strict']:.2f}), "
                   f"best epoch {res['best_epoch']}, {res['runtime_sec']:.0f}s; "
@@ -2162,7 +2173,10 @@ def tag_name(value):
 
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(description='MatSciBERT NER baseline')
-    parser.add_argument('--granularity', choices=['fine', 'coarse', 'both'], default='both')
+    parser.add_argument('--granularity', choices=['fine', 'coarse', 'both', 'sofc'],
+                        default='both',
+                        help="MaterioMiner's fine or coarse labels, or both; sofc: the SOFC-Exp "
+                             "corpus (sofc_exp.py), its four entity types")
     parser.add_argument('--seeds', type=int, nargs='+', default=[0, 1, 2, 3, 4])
     parser.add_argument('--split-seed', type=int, default=0)
     parser.add_argument('--vary-split', action='store_true',
