@@ -17,7 +17,7 @@ scoring and seeds on MaterioMiner".
 | # | Claim | Evidence | Status |
 |---|---|---|---|
 | C1 | The published numbers (69.92 fine, 72.32 coarse) come from one random split, which the release ships (323 / 57 / 96 sentences) without saying so in the paper. Over 5 new random splits, plain MatSciBERT scores 73.91 [69.36, 78.45] fine-grained and 74.57 [73.15, 75.98] coarse-grained. | README, "NER across splits"; `results/ner_results_*_random_split_vary.json` | Done (CPU). Week 5 runs the published split itself, with the release's scoring (micro F1, seqeval's default mode); the authors are asked to confirm it (item 6) |
-| C2 | Random splits hide a large gap: on a paper the model has never seen, the seed vote `crf_ens3` scores 18–30 points lower than on random splits (49.55 fine, 61.42 coarse, against 79.76 and 79.45). | README, "NER out of distribution"; the `leave_one_paper_out` files | Done (CPU, 3 seeds); week 5 re-estimates it with 10 seeds |
+| C2 | Random splits hide a large gap (the paper says the out-of-distribution generalisation "can not be estimated" from four publications; leaving one paper out estimates it): on a paper the model has never seen, the seed vote `crf_ens3` scores 18–30 points lower than on random splits (49.55 fine, 61.42 coarse, against 79.76 and 79.45). | README, "NER out of distribution"; the `leave_one_paper_out` files | Done (CPU, 3 seeds); week 5 re-estimates it with 10 seeds |
 | C3 | A CRF head with IOB2 constraints and a vote over 3 seeds beats the published numbers over 5 random splits: fine-grained under micro, macro and weighted F1; coarse-grained under micro and weighted F1, not macro (73.03 [67.79, 78.27]). | README, the reported-system rows | Done (CPU); week 5 decides the reported system on 10-seed votes (GPU) |
 | C4 | The CRF head's fine-grained gain is span validity, not recognition: under strict IOB2 scoring it vanishes (+0.10 [−2.08, +2.29]), and dropping invalid tags from the baseline's output gives the same (strict F1 76.26). Coarse-grained, part of the gain is recognition (strict +1.91 [+1.17, +2.65]). | README, "Why the CRF helps" | Done (CPU) |
 | C5 | Popular additions do not pass a pre-registered paired test: class weights, domain-adaptive and in-domain pre-training, other backbones, a mixed-backbone vote, label semantics, multi-task training and their combination. The 1-point coarse-grained gains of week 3 did not repeat on a GPU, and the hardware alone moves a 3-seed mean by 1.2 points per split (up to 2.7). | ROADMAP P1 weeks 1–4; README week-3 and week-4 tables | Done; week 5 re-tests the three claims with 10 seeds |
@@ -57,7 +57,8 @@ scoring and seeds on MaterioMiner".
 2. The authors' split and averaging (item 6). Without them, the comparison
    with 69.92 / 72.32 is stated as one over 5 random splits.
 3. A second materials NER dataset (item 7, week 6), so the findings do not
-   rest on 4 papers.
+   rest on 4 papers. The week-5 survey chose SOFC-Exp: CC BY 4.0, 45 full
+   papers with document IDs, and a published MatSciBERT-CRF baseline.
 4. Related work:
    - MatSciBERT (Gupta et al., 2022) and MaterioMiner (Durmaz et al., 2024);
    - out-of-distribution materials NER (Sci Rep 2025);

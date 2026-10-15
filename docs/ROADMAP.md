@@ -216,12 +216,33 @@ Next, after week 4, in this order:
    sentences selected for those types.
 6. **Pin down the comparison with the paper** (item 4 below, still open):
    ask the authors for their split and averaging.
+
+   *Week 5: the release ships the split of the paper's experiments, and its
+   code scores micro F1 in seqeval's default mode. The published-split runs
+   (week-5 amendment) make the comparison like for like. An email asking
+   the authors to confirm the split, the scoring and the training settings
+   is drafted for the owner to send.*
 7. **A second materials NER dataset.** Every NER result so far rests on
    the 4 MaterioMiner papers. Repeating the main comparisons on another
    corpus would show which findings hold beyond them: the CRF head and its
    vote, the 10-seed design, and the gap between random splits and unseen
    documents. Candidates: SOFC-Exp (Friedrich et al., 2020) and MatScholar
    (Weston et al., 2019). Check availability, licence and format first.
+
+   *Week 5 survey: SOFC-Exp is the choice.*
+   - *Licence and texts.* Its annotations are CC BY 4.0, and the texts of its
+     45 CC-BY articles ship with them.
+   - *Splits.* Every document has an ID, so the leave-one-document-out
+     protocol carries over. There is an official split by document (26
+     train, 8 dev, 11 test).
+   - *Published baselines.* MatSciBERT with a CRF reaches micro 84.77 and
+     macro 82.39 (Gupta et al., 2022).
+   - *Caveats.* It has 4 entity types (material, value, device, experiment),
+     annotated only in the sentences that describe experiments, and a
+     stand-off format, so the tokens must be rebuilt from character offsets.
+   - *MatScholar.* It is larger (800 abstracts, 7 types, CC BY 4.0), but its
+     released files lose the abstract boundaries, so no document-level
+     protocol is possible.
 
 Week 4 closes label semantics on the multi-task model, and the multi-task
 vote in distribution.
