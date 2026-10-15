@@ -882,12 +882,14 @@ def test_published_split_row(tmp_path):
     readme, _ = ws.generate()
     rows = [line for line in glance(readme).split('\n') if 'published split' in line]
     assert rows == [
-        '| NER, fine-grained, the published split, 10 seeds (GPU runs) | plain MatSciBERT 70.50 '
-        '[69.00, 72.00]; CRF head 73.00 [72.00, 74.00] | published 69.92, within its 95% CI for '
-        'plain MatSciBERT (the CI is over seeds only) |',
-        '| NER, coarse-grained, the published split, 10 seeds (GPU runs) | plain MatSciBERT 75.00 '
-        '[74.00, 76.00]; CRF head 77.00 [76.00, 78.00] | published 72.32, below its 95% CI for '
-        'plain MatSciBERT (the CI is over seeds only) |']
+        "| NER, fine-grained, the published split (the release's partition, micro F1), 10 seeds "
+        "(GPU runs) | plain MatSciBERT 70.50 [69.00, 72.00]; CRF head 73.00 [72.00, 74.00] | "
+        "published 69.92: within the 95% CI of plain MatSciBERT (reproduced), below (**beaten**) "
+        "that of the CRF head; the CIs are over seeds only |",
+        "| NER, coarse-grained, the published split (the release's partition, micro F1), 10 seeds "
+        "(GPU runs) | plain MatSciBERT 75.00 [74.00, 76.00]; CRF head 77.00 [76.00, 78.00] | "
+        "published 72.32: below the 95% CI of plain MatSciBERT, below (**beaten**) that of the "
+        "CRF head; the CIs are over seeds only |"]
 
 
 def test_a_week3_file_that_is_not_an_object_is_reported(tmp_path, capsys):

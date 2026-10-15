@@ -1031,13 +1031,16 @@ def published_split_row(res, g):
     if not (has_runs(base, 10) and has_runs(crf, 10)):
         return ''
     paper = PUBLISHED_F1[g]
-    lo, hi = base['summary']['micro']['ci95']
-    where = ('within its 95% CI' if lo <= paper <= hi else
-             'below its 95% CI' if paper < lo else 'above its 95% CI')
-    return (f"| NER, {g}-grained, the published split, 10 seeds (GPU runs) | plain MatSciBERT "
-            f"{interval(base['summary']['micro'])}; CRF head "
-            f"{interval(crf['summary']['micro'])} | published {paper:.2f}, "
-            f"{where} for plain MatSciBERT (the CI is over seeds only) |")
+
+    def where(res):
+        lo, hi = res['summary']['micro']['ci95']
+        return 'within' if lo <= paper <= hi else 'below' if paper < lo else 'above'
+    crf_where = where(crf) + (' (**beaten**)' if where(crf) == 'below' else '')
+    return (f"| NER, {g}-grained, the published split (the release's partition, micro F1), 10 "
+            f"seeds (GPU runs) | plain MatSciBERT {interval(base['summary']['micro'])}; CRF head "
+            f"{interval(crf['summary']['micro'])} | published {paper:.2f}: {where(base)} the 95% "
+            f"CI of plain MatSciBERT{' (reproduced)' if where(base) == 'within' else ''}, "
+            f"{crf_where} that of the CRF head; the CIs are over seeds only |")
 
 
 def system_name(var, prefix, uvar):
