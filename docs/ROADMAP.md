@@ -800,6 +800,14 @@ week-4 work runs on the GPU; nothing trains on the CPU.
 Execution, in this order: the CPU votes; the GPU smoke job; the GPU
 reference and multi-task (item 1); label semantics and the combination
 (item 2); self-training, the week-3 design and then at scale (item 3). Each
-item is reported when its runs finish. A CRF run should take 1–2 minutes on
+item is reported when its runs finish.
+
+Scheduling note, before the runs: Kaggle took 15–50 minutes to start each
+smoke session, so items 1 and 2 share one GPU session (each GPU runs its
+item-1 jobs first), and item 3 runs in a second session at the same time,
+with the same pinned image and commit. Nothing else changes; the order
+above is the order in which the items are reported. The smoke jobs found
+two packages missing on Kaggle (seqeval, rdflib); both are now installed
+there, pinned to the CPU versions. A CRF run should take 1–2 minutes on
 a T4 (13–27 on 2 CPU threads), so the plan needs about 17 GPU-hours, about
 half of Kaggle's weekly quota of 30.
