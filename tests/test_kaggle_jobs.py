@@ -67,6 +67,26 @@ def test_item2_and_item12():
     assert len(files) == len(set(files)) == 48
 
 
+def test_item3_runs_self_training_by_granularity_lane(monkeypatch):
+    """Week-3 self-training (3 seeds) and the 3-teacher runs paper by paper, a lane per
+    granularity, so that the jobs that write a file share a lane."""
+    monkeypatch.setattr(nb.os.path, 'isfile', lambda path: True)    # the corpus is not here
+    lanes = kj.batch_lanes('item3')
+    for g, lane in zip(('fine', 'coarse'), lanes):
+        args = [nb.parse_args(j) for j in lane]
+        assert {a.granularity for a in args} == {g}
+        assert all(a.leave_one_paper_out and a.self_train == kj.CORPUS for a in args)
+        assert [nb.variant_name(a) for a in args[:3]] == ['crf_st_m0', 'crf_st_m100', 'crf_st_m200']
+        three = args[3:]
+        assert [a.papers for a in three] == [[p] for p in kj.PAPERS]
+        assert all(a.teachers == 3 and a.self_train_sample == 0 for a in three)
+    lanes = kj.batch_lanes('item3r')
+    for g, lane in zip(('fine', 'coarse'), lanes):
+        (args,) = [nb.parse_args(j) for j in lane]
+        assert args.vary_split and args.teachers == 3 and args.seeds == [0, 1, 2, 3, 4]
+        assert args.granularity == g
+
+
 def test_smoke1_repeats_one_crf_run_on_both_gpus():
     lanes = kj.batch_lanes('smoke1')
     crf = [j for lane in lanes for j in lane if '--multi-task' not in j

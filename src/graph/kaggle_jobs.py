@@ -39,8 +39,9 @@ writes its own results files, so the lanes never write the same file:
   item12  item1 then item2 in one session (a Kaggle GPU session takes 10-15 minutes to
           start): each lane runs its item1 jobs before its item2 jobs
   item3   week-3 self-training crf_st_m* and self-training with 3 teachers crf_st3_m*,
-          held-out papers
-  item3r  self-training with 3 teachers on the random splits (if the quota allows)
+          held-out papers; the 3-teacher runs one job per paper (--papers)
+  item3r  self-training with 3 teachers on the random splits (if the quota allows); a run
+          saves its files after every split
 Every job has --crf, --save-predictions and --threads 2; the families have 3 seeds per
 split (seed offsets 0, 100 and 200) on the 5 random splits and the 4 held-out papers.
 
@@ -96,6 +97,8 @@ PROTOCOL_FLAGS = {'random_split_vary': ('--vary-split',),
 RUNS = {'random_split_vary': 5, 'leave_one_paper_out': 4}
 GRANULARITIES = ('fine', 'coarse')
 OFFSETS = (0, 100, 200)
+PAPERS = ('10.1007_s11340-021-00758-x', '10.1038_ncomms7164', '10.1038_s41467-020-19071-7',
+          '10.3390_met10111458')      # the held-out papers (the MaterioMiner files)
 # relative GPU time of one run of each kind (a CRF run is 1), for balancing the lanes
 COST = {'crf': 1.0, 'mt': 1.7, 'ls': 1.1, 'mt_ls': 1.8, 'st': 2.5, 'st3': 22.0}
 
@@ -185,10 +188,13 @@ def batch_lanes(name):
         return [first + second for first, second in zip(batch_lanes('item1'),
                                                          batch_lanes('item2'))]
     if name == 'item3':
-        # one lane per granularity: the 3-teacher job of a granularity writes three files
+        # one lane per granularity, so that the jobs that write a file share a lane; the
+        # 3-teacher runs go paper by paper (each job adds one held-out paper to its files)
         return [[args for _, args in family('st', st, protocols=lopo, granularities=(g,))] +
-                [job(g, 'leave_one_paper_out', *st3)] for g in GRANULARITIES]
+                [job(g, 'leave_one_paper_out', '--papers', paper, *st3) for paper in PAPERS]
+                for g in GRANULARITIES]
     if name == 'item3r':
+        # one job per granularity: --seeds K jobs would leave the last K as the stored seeds
         return [[job(g, 'random_split_vary', *st3)] for g in GRANULARITIES]
     raise ValueError(f'unknown batch {name!r}')
 
