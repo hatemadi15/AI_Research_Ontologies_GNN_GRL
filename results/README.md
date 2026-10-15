@@ -34,6 +34,8 @@ reviewers check the reported numbers.
 | `fatigue_corpus.json` | `build_fatigue_corpus.py` | the in-domain pre-training corpus of the week-3 protocol (variant 5): the Europe PMC query and filters, the counts at every stage, the article IDs (PMCID, DOI) and the SHA-256 of the 40,000 sentences (`data/processed/corpus/fatigue_sentences.txt`, not versioned; `--offline` rebuilds it from the cached XML) |
 | `ner_comparisons.json` | `ner_baseline.py --compare <results dir>` | each variant minus its reference (`reference`: the baseline for `cw` and `crf`, the CRF for `crf_*` variants), paired by split and model seed: per-run differences, their mean and 95% CI for micro, strict micro, macro and weighted F1 |
 | `ner_week3_comparisons.json` | `ner_seedmeans.py` | week-3 comparisons of 3-seed means (ROADMAP §4): per split, a variant minus its reference, where a family of three seeds scores their mean (`crf` = `crf_m0`, `crf_m100`, `crf_m200`) and an ensemble scores once; each entry gives its `role` (`decision` or `reported`), whether all 5 splits or 4 papers are paired (`complete`), the per-split scores of both sides, and the per-run differences with their mean and 95% CI for micro, strict micro, macro and weighted F1. Self-training has no random-split runs (unseen papers only, by the protocol), so its two random-split comparisons are absent |
+| `ner_results_{fine,coarse}_{random_split_vary,leave_one_paper_out}_crf_ls_ens3.json`, `ner_results_{fine,coarse}_leave_one_paper_out_crf_st_ens3.json` | `ner_ensemble.py --members <the three member files>` | week-4 votes (ROADMAP §4, week-4 protocol) over the three seeds of label semantics (`crf_ls_m*`) and self-training (`crf_st_m*`, unseen papers only), made from their saved CPU predictions without training |
+| `ner_week4_comparisons.json` | `ner_seedmeans.py --week 4` | week-4 comparisons of the CPU votes, as in `ner_week3_comparisons.json`: `crf_ls_ens3` and `crf_st_ens3` against `crf_ens3` (decided on the 4 unseen papers) and against the 3-seed CRF reference (reported) |
 
 `ner_results_fine.json` and `ner_results_coarse.json` hold all 5 model seeds
 per granularity (see `runs`), trained on one fixed random split (`--split-seed
@@ -50,4 +52,18 @@ threads where the `_crf` runs used 3, so a run with the same seeds is not
 bit-identical. In week 3 a trailing `_m<N>` marks one seed of a family
 (`_crf_mt_m100`, `_crf_ls_m0`, `_crf_dapt2_m200`), `_crf_scibert` and
 `_crf_pubmedbert` change the encoder, and `_crf_mix3` is the vote of the
-three encoders.
+three encoders. Week 4 adds `_crf_ls_ens3` and `_crf_st_ens3`, the votes over
+the three label-semantics and self-training seeds.
+
+`gpu/` holds the week-4 runs on Kaggle T4 GPUs (ROADMAP §4, week-4
+protocol), under the same file names. Each run records its `environment`
+(GPU, CUDA, cuDNN, torch, transformers, deterministic algorithms); all runs
+share one environment and one frozen commit, and a run repeats exactly.
+GPU runs are compared only with GPU runs: `gpu/ner_week4_comparisons.json`
+(`ner_seedmeans.py --week 4 --gpu --results results/gpu`) holds those
+comparisons, plus descriptive GPU-minus-CPU entries (`role` `descriptive`)
+for the systems run on both machines. New in `gpu/`: `_crf_mt_ls_m<N>`
+(label semantics on the multi-task model) and `_crf_st3_m<N>` (self-training
+with 3 teachers, whose runs record each teacher's scores), and the vote
+`_crf_mt_ens3`. `kaggle_jobs.py collect` copies the files of a GPU session
+here after checking that every run is a GPU run with the shared environment.

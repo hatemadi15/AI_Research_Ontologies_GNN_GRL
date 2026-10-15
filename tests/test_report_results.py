@@ -102,6 +102,26 @@ class Workspace:
         (self.results / rr.WEEK3_FILE).write_text(json.dumps(self.week3_comps))
         return key
 
+    def week4(self, variant, reference, granularity, protocol, *, gpu=False, role='reported',
+              micro=(0.5, -0.5, 1.5), score=(80.0, 78.0, 82.0)):
+        """Add one week-4 comparison: results/ner_week4_comparisons.json (CPU) or
+        results/gpu/ner_week4_comparisons.json (gpu=True)."""
+        n = FULL[protocol]
+        path = self.results / ('gpu' if gpu else '') / rr.WEEK4_FILE
+        path.parent.mkdir(exist_ok=True)
+        comps = json.loads(path.read_text()) if path.exists() else {}
+        key = f'ner_results_{granularity}_{protocol}_{variant}'
+        key += '' if reference == 'crf' else f'_vs_{reference}'
+        comps[key] = {
+            'variant': variant, 'reference': reference, 'granularity': granularity,
+            'protocol': protocol, 'role': role, 'n_pairs': n,
+            'run_ids': [f'r{i}' for i in range(n)], 'complete': True,
+            'variant_scores': {'micro': {'mean': score[0], 'ci95': list(score[1:]), 'per_run': []}},
+            'micro': stat(*micro), 'micro_strict': stat(*micro), 'macro': stat(*micro),
+            'weighted': stat(*micro)}
+        path.write_text(json.dumps(comps))
+        return key
+
     def summary(self, granularity, protocol, variant, n_runs, micro, paper=69.92, **averages):
         """Write a variant's results file with only its summary: micro = (mean, lo, hi), and
         the same for any other average given by name (macro=..., weighted=...)."""
@@ -677,6 +697,91 @@ def test_reported_system_is_checked_under_each_averaging(tmp_path):
          "published 72.32 (none for an unseen paper): not significantly better |"],
         "same; fine-grained beaten under micro averaging, coarse-grained not significantly "
         "better |")
+
+
+def test_week4_lists_follow_ner_seedmeans():
+    ns = pytest.importorskip('ner_seedmeans')
+    assert rr.WEEK4_FILE == ns.OUT_NAMES[4]
+    assert list(rr.WEEK4_CPU_COMPARISONS) == [(v, r) for v, r, _ in ns.comparison_list(4)]
+    assert list(rr.WEEK4_GPU_COMPARISONS) == [(v, r) for v, r, _ in ns.comparison_list(4, True)]
+    assert set(rr.WEEK4_NAMES) >= set(ns.SYSTEMS)
+    # a verdict bullet for every decision, and for the GPU repeats of the CPU votes
+    decisions = {(v, r) for v, r, d in ns.comparison_list(4) + ns.comparison_list(4, True) if d}
+    assert decisions <= {(v, r) for _, v, r, _ in rr.WEEK4_VERDICTS}
+
+
+def test_week4_unseen_paper_slot_takes_a_vote_that_passes(tmp_path):
+    """A CPU vote that improves on crf_ens3 over the held-out papers holds the unseen-paper
+    slot; the in-distribution system and its published check do not change."""
+    ws = Workspace(tmp_path)
+    for g, paper in (('fine', 69.92), ('coarse', 72.32)):
+        ws.summary(g, 'random_split_vary', 'crf_ens3', 5, (79.5, 77.8, 81.1), paper=paper)
+        ws.summary(g, 'leave_one_paper_out', 'crf_ens3', 4, (61.42, 55.8, 67.0), paper=paper)
+        ws.summary(g, 'leave_one_paper_out', 'crf_ls_ens3', 4, (63.05, 57.1, 69.0), paper=paper)
+        ws.summary(g, 'leave_one_paper_out', 'crf_st_ens3', 4, (62.0, 57.0, 67.0), paper=paper)
+    # fine: neither vote passes; coarse: both pass, the label-semantics vote by more
+    ws.week4('crf_ls_ens3', 'crf_ens3', 'fine', 'leave_one_paper_out', role='decision',
+             micro=(0.36, -2.53, 3.24))
+    ws.week4('crf_ls_ens3', 'crf_ens3', 'coarse', 'leave_one_paper_out', role='decision',
+             micro=(1.63, 0.11, 3.16), score=(63.05, 57.1, 69.0))
+    ws.week4('crf_st_ens3', 'crf_ens3', 'coarse', 'leave_one_paper_out', role='decision',
+             micro=(0.6, 0.1, 1.1))
+    readme, roadmap = ws.generate()
+    rows = [line for line in glance(readme).split('\n') if 'reported system' in line]
+    assert rows[0].startswith('| NER, fine-grained, reported system (week-4 protocol): 3-model '
+                              'seed ensemble `crf_ens3` | micro F1 79.50 [77.80, 81.10] over 5 '
+                              'random splits, 61.42 on an unseen paper |')
+    assert rows[1].startswith('| NER, coarse-grained, reported system (week-4 protocol): 3-model '
+                              'seed ensemble `crf_ens3`; on unseen papers the label-semantics vote '
+                              '`crf_ls_ens3` | micro F1 79.50 [77.80, 81.10] over 5 random '
+                              'splits, 63.05 on an unseen paper (`crf_ens3` 61.42) | published '
+                              '72.32')
+    standing = next(line for line in roadmap.split('\n') if 'reported system' in line)
+    assert ('coarse: 3-model seed ensemble `crf_ens3`, micro 79.50 [77.80, 81.10] over 5 new '
+            'splits; on unseen papers the label-semantics vote `crf_ls_ens3`, 63.05 leaving one '
+            'paper out (`crf_ens3` 61.42)') in standing
+    assert standing.startswith('| NER, reported system (week-4 protocol) |')
+    # the week-4 table lists the CPU rows, and each decision gets a verdict bullet
+    rows = table_rows(readme, '#### NER week-4 comparisons')
+    assert [r.split(' | ')[:4] for r in rows] == [
+        ['| label-semantics vote vs 3-model seed ensemble', 'CPU', 'leave one paper out', 'fine'],
+        ['| label-semantics vote vs 3-model seed ensemble', 'CPU', 'leave one paper out', 'coarse'],
+        ['| self-training vote vs 3-model seed ensemble', 'CPU', 'leave one paper out', 'coarse']]
+    assert ('* NER week 4 (CPU runs), label-semantics vote vs the 3-model seed ensemble (paired '
+            'micro-F1 difference): leaving one paper out (the pre-registered decision): '
+            'fine-grained no significant change') in readme
+
+
+def test_week4_gpu_multitask_vote_takes_the_in_distribution_slot(tmp_path):
+    """The GPU multi-task vote that improves on the GPU crf_ens3 over the random splits is
+    reported with its GPU results; descriptive GPU-minus-CPU entries stay out of the table."""
+    ws = Workspace(tmp_path)
+    (ws.results / 'gpu').mkdir()
+    for g, paper in (('fine', 69.92), ('coarse', 72.32)):
+        ws.summary(g, 'random_split_vary', 'crf_ens3', 5, (79.5, 77.8, 81.1), paper=paper)
+        ws.summary(g, 'leave_one_paper_out', 'crf_ens3', 4, (61.42, 55.8, 67.0), paper=paper)
+    (ws.results / 'gpu' / rr.ner_file('fine', 'random_split_vary', 'crf_mt_ens3')).write_text(
+        json.dumps({'paper_test_f1': 69.92, 'summary': {'n_runs': 5, 'micro': {
+            'mean': 81.0, 'ci95': [79.0, 83.0]}}}))
+    ws.week4('crf_mt_ens3', 'crf_ens3', 'fine', 'random_split_vary', gpu=True, role='decision',
+             micro=(1.2, 0.4, 2.0), score=(81.0, 79.0, 83.0))
+    ws.week4('crf', 'crf', 'fine', 'random_split_vary', gpu=True, role='descriptive',
+             micro=(0.9, -0.5, 2.3))
+    readme, roadmap = ws.generate()
+    rows = [line for line in glance(readme).split('\n') if 'reported system' in line]
+    # the unseen-paper slot stays with the CPU crf_ens3: only the CPU votes may take it
+    assert rows[0].startswith('| NER, fine-grained, reported system (week-4 protocol): '
+                              'multi-task vote `crf_mt_ens3` (GPU runs); on unseen papers the '
+                              '3-model seed ensemble `crf_ens3` | micro F1 81.00 [79.00, 83.00] '
+                              'over 5 random splits, 61.42 on an unseen paper | published 69.92')
+    assert '3-model seed ensemble `crf_ens3`' in rows[1]
+    rows = table_rows(readme, '#### NER week-4 comparisons')
+    assert [r.split(' | ')[:5] for r in rows] == [
+        ['| multi-task vote vs 3-model seed ensemble', 'GPU', 'new random split per seed', 'fine',
+         '5']]
+    assert ('* NER, GPU minus CPU (descriptive, not a comparison of methods): the CRF head with '
+            'the same seeds and splits, 3-seed means, fine-grained +0.90 [-0.50, +2.30] over the 5 '
+            'random splits.') in readme
 
 
 def test_a_week3_file_that_is_not_an_object_is_reported(tmp_path, capsys):

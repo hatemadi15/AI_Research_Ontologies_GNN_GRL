@@ -83,6 +83,21 @@ test scores are the run's. Files `_crf_st`, compared with `crf`; each run stores
 validation and test F1), the config the corpus path, SHA-256, sample size and silver
 weight. Runs made from another corpus (SHA-256) are not resumed.
 
+`--multi-task --label-semantics` (ROADMAP §4, week-4 protocol, item 2) gives each head of
+the multi-task model the label-semantic head over its own granularity's descriptions,
+embedded by the pre-trained encoder before fine-tuning. Files `_crf_mt_ls`; each stores the
+SHA-256 of its head's descriptions.
+
+`--self-train CORPUS --teachers N` (week-4 protocol, item 3) trains N CRF teachers per run,
+with the model seeds of the seed offsets 0, 100, ..., 100 (N - 1), and each tags the sample
+(`--self-train-sample 0`: the whole corpus). A sentence is silver if every teacher gives it
+the same tags and it is silver for each teacher alone. Then every teacher seed trains a
+student as above. One run writes N files, `_crf_st<N>_m<offset>` (the files of --tag
+m<offset> --seed-offset <offset>), and each record stores the teachers' scores.
+
+On a CUDA device a run is deterministic (cuda_determinism) and every run stores its
+`environment` (week-4 protocol: GPU runs are only compared with GPU runs).
+
 `--compare` pairs every variant file with a reference file of the same
 granularity and protocol, run by run (run_id), and writes ner_comparisons.json:
 `crf_mt` and `crf_<tag>` with the `crf` file, `cw_<tag>` with `cw`, anything
@@ -97,6 +112,9 @@ Usage:
   python ner_baseline.py --vary-split --crf --label-semantics             # description head
   python ner_baseline.py --leave-one-paper-out --crf --tag m0 \\
       --self-train data/processed/corpus/fatigue_sentences.txt            # self-training
+  python ner_baseline.py --vary-split --crf --multi-task --label-semantics --tag m0
+  python ner_baseline.py --leave-one-paper-out --crf --teachers 3 --self-train-sample 0 \\
+      --self-train data/processed/corpus/fatigue_sentences.txt            # 3 teachers
   python ner_baseline.py --compare                                        # paired comparison
 """
 
@@ -556,15 +574,16 @@ def self_training_corpus(path, size=SELF_TRAIN_SAMPLE, seed=SELF_TRAIN_SEED):
     One raw sentence per line, blank lines skipped (dapt_mlm.read_sentences).
     random.Random(seed) shuffles the sentence numbers and the first `size` make the
     sample, in corpus order: independent of the split and the model seed, and drawn
-    before any sentence is skipped (fit_sample). The config entries are the corpus path
-    (relative to the project root when inside it), its SHA-256, the sample size and the
-    silver weight.
+    before any sentence is skipped (fit_sample). Size 0 takes the whole corpus. The
+    config entries are the corpus path (relative to the project root when inside it), its
+    SHA-256, the sample size and the silver weight.
     """
     sentences, _ = dapt_mlm.read_sentences(path)
     if not sentences:
         raise SystemExit(f'{path}: no sentences to self-train on')
     order = list(range(len(sentences)))
     random.Random(seed).shuffle(order)
+    size = size or len(sentences)          # 0: the whole corpus (--self-train-sample 0)
     sample = [corpus_words(sentences[i]) for i in sorted(order[:size])]
     return sample, {'self_train': dapt_mlm.display_path(path),
                     'self_train_sha256': dapt_mlm.file_sha256(path),
@@ -755,6 +774,76 @@ def train_self_training(seed, train, val, test, labels, args, device, sample, te
     return student
 
 
+def teacher_offsets(n):
+    """Seed offsets of --teachers n: 0, 100, ..., 100 (n - 1), as the seed families."""
+    return [100 * k for k in range(n)]
+
+
+def unanimous_silver(tagged):
+    """Silver with several teachers: [(tags, least marginal)] of one sentence, per teacher.
+
+    Every teacher gives the same tags, and the sentence is silver for each of them alone
+    (an entity, every tag with a marginal of at least SILVER_THRESHOLD; is_silver).
+    """
+    first = tagged[0][0]
+    return (all(tags == first for tags, _ in tagged)
+            and all(is_silver(tags, [least]) for tags, least in tagged))
+
+
+def train_with_teachers(seed, offsets, train, val, test, labels, args, device, sample,
+                        test_index=None):
+    """One --self-train --teachers run: {offset: the record of the student of that seed}.
+
+    The teachers are train_one on the run's data with the model seeds seed + offset, the
+    plain --crf runs of those seeds. Each tags the sample (fit_sample, teacher_tags); a
+    sentence is silver if unanimous_silver. Then each seed trains a student, train_one with
+    that seed on the gold data plus the silver sentences, as in train_self_training. Each
+    record adds `self_training`: n_sampled, n_skipped, n_agreed (sentences that all
+    teachers tag alike), n_silver, marginal_threshold, and per teacher (in offset order)
+    its seed, val_f1, test_f1, test_f1_strict, test_macro_f1, best_epoch and n_silver_alone
+    (its silver sentences as a single teacher).
+    """
+    teacher_args = SimpleNamespace(**{**vars(args), 'save_predictions': False})
+    teachers, tagged, sentences, n_skipped = [], [], None, 0
+    for offset in offsets:
+        record, tagger = train_one(seed + offset, train, val, test, labels, teacher_args,
+                                   device, keep_tagger=True)
+        if sentences is None:      # one tokenizer for all teachers
+            sentences, n_skipped = fit_sample(tagger.tokenizer, sample,
+                                              tagger.model.config.max_position_embeddings)
+        out = [(tuple(tags), min(marginals))
+               for tags, marginals in teacher_tags(tagger, sentences, args.batch_size, device)]
+        del tagger
+        if str(device).startswith('cuda'):
+            import torch
+            torch.cuda.empty_cache()
+        tagged.append(out)
+        teachers.append({'seed': seed + offset, 'val_f1': record['val_f1'],
+                         'test_f1': record['f1'], 'test_f1_strict': record['f1_strict'],
+                         'test_macro_f1': round(F1_AVERAGES['macro'](record), 2),
+                         'best_epoch': record['best_epoch'],
+                         'n_silver_alone': sum(is_silver(t, [m]) for t, m in out)})
+        print(f"    teacher seed {seed + offset}: val F1 {record['val_f1']:.2f}, test F1 "
+              f"{record['f1']:.2f}; {teachers[-1]['n_silver_alone']} silver alone of "
+              f"{len(sentences)} tagged", flush=True)
+    per_sentence = list(zip(*tagged))
+    silver = [(words, list(votes[0][0])) for words, votes in zip(sentences, per_sentence)
+              if unanimous_silver(votes)]
+    n_agreed = sum(all(t == votes[0][0] for t, _ in votes) for votes in per_sentence)
+    print(f"    {len(silver)} silver of {len(sentences)} tagged sentences ({n_agreed} tagged "
+          f"alike; {n_skipped} of {len(sample)} sampled skipped); students:", flush=True)
+    students = {}
+    for offset in offsets:
+        student = train_one(seed + offset, train, val, test, labels, args, device,
+                            test_index=test_index, silver=silver)
+        student['self_training'] = {
+            'n_sampled': len(sample), 'n_skipped': n_skipped, 'n_agreed': n_agreed,
+            'n_silver': len(silver), 'marginal_threshold': SILVER_THRESHOLD,
+            'teachers': teachers}
+        students[offset] = student
+    return students
+
+
 # Multi-task training (--multi-task): one encoder, a linear head and a CRF per granularity
 MT_HEADS = ('fine', 'coarse')
 
@@ -911,7 +1000,7 @@ def multitask_history(log, head):
             for epoch, losses, f1 in log]
 
 
-def train_multitask(seed, parts, labels, args, device, test_index=None):
+def train_multitask(seed, parts, labels, args, device, test_index=None, descriptions=None):
     """Fine-tune one encoder with a fine and a coarse CRF head together; test each head.
 
     parts: {head: (train, val, test)}, lists of (tokens, tags, doc) for the same
@@ -924,7 +1013,10 @@ def train_multitask(seed, parts, labels, args, device, test_index=None):
     each with the fields of train_one (history: see multitask_history) plus
     `multi_task`: n_examples (training examples), n_split_examples (those
     labelled for one head only, two per sentence tokenised differently) and
-    other_best_epoch (the best epoch of the other head).
+    other_best_epoch (the best epoch of the other head). descriptions (--label-semantics):
+    {head: a text per label of labels[head]}; each head's linear layer is then replaced
+    by a label-semantic head over their embeddings by the pre-trained encoder, as in
+    train_one.
     """
     import torch
     from transformers import AutoTokenizer, get_linear_schedule_with_warmup, set_seed
@@ -938,6 +1030,12 @@ def train_multitask(seed, parts, labels, args, device, test_index=None):
     tokenizer = AutoTokenizer.from_pretrained(args.model)
     assert tokenizer.is_fast, 'a fast tokenizer is required for word_ids()'
     model = make_multitask_tagger(args.model, label_lists).to(device)
+    if descriptions is not None:
+        # embedded before any fine-tuning, head by head; each replaces its linear layer
+        for h in MT_HEADS:
+            assert len(descriptions[h]) == len(labels[h]), 'one description per label'
+            embeddings = embed_descriptions(model.encoder, tokenizer, descriptions[h], device)
+            model.heads[h] = make_label_head(embeddings, model.encoder.config).to(device)
     pad_id = tokenizer.pad_token_id
 
     examples = multitask_examples(parts['fine'][0], parts['coarse'][0])
@@ -1026,22 +1124,26 @@ F1_AVERAGES = {
 RESULT_FILE = re.compile(r'ner_results_(fine|coarse)(?:_(random_split_vary|leave_one_paper_out))?'
                          r'(?:_([a-z0-9_]+))?\.json')
 # untagged variants: a tagged variant must not take the name of one (--crf --tag mt: crf_mt)
-PLAIN_VARIANTS = ('baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_st')
+PLAIN_VARIANTS = ('baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_st', 'crf_mt_ls', 'crf_st3')
 
 
 def variant_name(args):
-    """Variant of a run: 'baseline', 'cw', 'crf', 'crf_mt', 'crf_ls' or 'crf_st', then the tag.
+    """Variant of a run: 'baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_mt_ls', 'crf_st' or
+    'crf_st<N>', then the tag.
 
     'cw' is --class-weights, 'crf_mt' is --crf --multi-task, 'crf_ls' is --crf
-    --label-semantics and 'crf_st' is --crf --self-train. A tag is appended with an
-    underscore (crf_m100); the baseline is named by it alone.
+    --label-semantics, 'crf_mt_ls' both, 'crf_st' is --crf --self-train and 'crf_st<N>' that
+    with --teachers N. A tag is appended with an underscore (crf_m100); the baseline is
+    named by it alone.
     """
     if getattr(args, 'crf', False):
-        name = 'crf_mt' if getattr(args, 'multi_task', False) else 'crf'
+        multi_task = getattr(args, 'multi_task', False)
+        name = 'crf_mt' if multi_task else 'crf'
         if getattr(args, 'label_semantics', False):
-            name = 'crf_ls'
+            name = 'crf_mt_ls' if multi_task else 'crf_ls'
         if getattr(args, 'self_train', None) is not None:
-            name = 'crf_st'
+            teachers = getattr(args, 'teachers', 1)
+            name = 'crf_st' if teachers == 1 else f'crf_st{teachers}'
     else:
         name = 'cw' if args.class_weights else 'baseline'
     tag = getattr(args, 'tag', None)
@@ -1053,8 +1155,8 @@ def variant_name(args):
 def reference_variant(variant):
     """Variant that a variant is compared with ('baseline': the baseline file).
 
-    crf_mt[_<tag>], crf_ls[_<tag>], crf_st[_<tag>] and crf_<tag> are compared with crf
-    and cw_<tag> with cw; cw, crf and a bare tag with the baseline.
+    crf_mt[_<tag>], crf_ls[_<tag>], crf_mt_ls[_<tag>], crf_st[N][_<tag>] and crf_<tag> are
+    compared with crf and cw_<tag> with cw; cw, crf and a bare tag with the baseline.
     """
     for base in ('crf', 'cw'):
         if variant.startswith(f'{base}_'):
@@ -1328,16 +1430,61 @@ def stored_config(args):
 
 
 def torch_device(args):
-    """Set the number of torch threads and return the device to train on."""
+    """Set the number of torch threads and return the device to train on.
+
+    A CUDA device is made deterministic first (cuda_determinism).
+    """
     import torch
     torch.set_num_threads(args.threads or os.cpu_count())
-    return args.device or ('cuda' if torch.cuda.is_available() else 'cpu')
+    device = args.device or ('cuda' if torch.cuda.is_available() else 'cpu')
+    if device.startswith('cuda'):
+        cuda_determinism()
+    return device
+
+
+def cuda_determinism():
+    """Deterministic CUDA training (ROADMAP §4, week-4 protocol).
+
+    PyTorch's deterministic algorithms (an operation without one raises an error),
+    deterministic cuDNN without autotuning, the fixed cuBLAS workspace that deterministic
+    cuBLAS needs (read when the first CUDA handle is made, so set before any CUDA work),
+    and attention by the math kernel of scaled_dot_product_attention: the fused kernels
+    do not have a deterministic backward on every GPU. Only CUDA runs call it, so CPU
+    runs are unchanged.
+    """
+    import torch
+    os.environ.setdefault('CUBLAS_WORKSPACE_CONFIG', ':4096:8')
+    torch.use_deterministic_algorithms(True)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    for fused in ('enable_flash_sdp', 'enable_mem_efficient_sdp', 'enable_cudnn_sdp'):
+        if hasattr(torch.backends.cuda, fused):
+            getattr(torch.backends.cuda, fused)(False)
+
+
+def run_environment(device):
+    """Where a CUDA run trained, stored with every GPU run as `environment`; None on a CPU.
+
+    The GPU, the CUDA, cuDNN, torch and transformers versions, and the determinism settings.
+    """
+    if not device.startswith('cuda'):
+        return None
+    import torch
+    import transformers
+    return {'device': torch.cuda.get_device_name(torch.device(device)),
+            'cuda': torch.version.cuda, 'cudnn': torch.backends.cudnn.version(),
+            'torch': torch.__version__, 'transformers': transformers.__version__,
+            'deterministic': torch.are_deterministic_algorithms_enabled(),
+            'cublas_workspace_config': os.environ.get('CUBLAS_WORKSPACE_CONFIG')}
 
 
 def run(args):
     out_dir = os.path.join(PROCESSED_DIR, 'ner')
     if getattr(args, 'multi_task', False):
         run_multitask(args, out_dir)
+        return
+    if hasattr(args, 'teachers'):
+        run_teachers(args, out_dir)
         return
     granularities = ['fine', 'coarse'] if args.granularity == 'both' else [args.granularity]
     tasks = {g: granularity_data(g, args) for g in granularities}
@@ -1346,11 +1493,14 @@ def run(args):
                     for g in granularities}
     self_train = getattr(args, 'self_train', None) is not None
     # --self-train: the sample, and the corpus path, SHA-256, sample size and silver weight
-    sample, corpus = self_training_corpus(args.self_train) if self_train else (None, {})
+    sample, corpus = (self_training_corpus(args.self_train, getattr(args, 'self_train_sample',
+                                                                    SELF_TRAIN_SAMPLE))
+                      if self_train else (None, {}))
     # every results file is checked before any training, so a run never stops halfway
     check_results_files(args, [(results_path(out_dir, g, args), tasks[g][1])
                                for g in granularities], corpus.get('self_train_sha256'))
     device = torch_device(args)
+    environment = run_environment(device)
     os.makedirs(out_dir, exist_ok=True)
 
     for granularity in granularities:
@@ -1407,6 +1557,8 @@ def run(args):
                                 descriptions=descriptions[granularity])
             res['run_id'] = run_id
             res['runtime_sec'] = round(time.time() - start, 1)
+            if environment:
+                res['environment'] = environment
             results['runs'].append(res)
             summarize(results)
             with open(out_path, 'w') as f:
@@ -1440,17 +1592,25 @@ def run_multitask(args, out_dir):
     for head in MT_HEADS:
         data[head], labels[head], ties[head] = granularity_data(head, args)
     check_aligned(data['fine'], data['coarse'])
+    semantics = getattr(args, 'label_semantics', False)
+    descriptions = ({head: label_descriptions(head, labels[head]) for head in MT_HEADS}
+                    if semantics else None)
     paths = {head: results_path(out_dir, head, args) for head in MT_HEADS}
     check_results_files(args, [(paths[head], labels[head]) for head in MT_HEADS])
     device = torch_device(args)
+    environment = run_environment(device)
     os.makedirs(out_dir, exist_ok=True)
     protocol, variant, config = protocol_name(args), variant_name(args), stored_config(args)
     results = {head: {'granularity': head, 'protocol': protocol, 'variant': variant,
                       'model': args.model, 'labels': labels[head], 'label_tie': ties[head],
-                      'paper_test_f1': PAPER_F1[head], 'config': config,
+                      'paper_test_f1': PAPER_F1[head], 'config': dict(config),
                       'runs': resumable_runs(paths[head], labels[head], args.model, variant,
                                              args.seed_offset, args.save_predictions)}
                for head in MT_HEADS}
+    if semantics:
+        for head in MT_HEADS:
+            results[head]['config']['label_descriptions_sha256'] = \
+                ner_label_text.descriptions_sha256(labels[head], descriptions[head])
     done = set.intersection(*({r.get('run_id') for r in results[h]['runs']} for h in MT_HEADS))
 
     def save():
@@ -1466,6 +1626,9 @@ def run_multitask(args, out_dir):
     for head in MT_HEADS:
         if ties[head]:
             print(f"  {head} label cut tie: {ties[head]}")
+        if semantics:
+            print(f"  {head} label descriptions: sha256 "
+                  f"{results[head]['config']['label_descriptions_sha256'][:12]}")
 
     folds = make_folds(data['fine'], args, indices=True)     # parts as corpus positions
     if folds is None:
@@ -1485,11 +1648,14 @@ def run_multitask(args, out_dir):
         seed = int(run_id[4:]) if run_id.startswith('seed') else args.seeds[0]
         seed += args.seed_offset
         start = time.time()
-        records = train_multitask(seed, parts, labels, args, device, test_index=te)
+        records = train_multitask(seed, parts, labels, args, device, test_index=te,
+                                  descriptions=descriptions)
         runtime = round(time.time() - start, 1)
         for head, res in records.items():
             res['run_id'] = run_id
             res['runtime_sec'] = runtime      # the shared training time
+            if environment:
+                res['environment'] = environment
             # a run found in one file only is redone: its old record is replaced
             results[head]['runs'] = [r for r in results[head]['runs']
                                      if r.get('run_id') != run_id] + [res]
@@ -1505,6 +1671,96 @@ def run_multitask(args, out_dir):
               f"macro {s['macro']['mean']:.2f}, weighted {s['weighted']['mean']:.2f} "
               f"over {s['n_runs']} runs")
         print(f"Saved {paths[head]}")
+
+
+def run_teachers(args, out_dir):
+    """run() for --self-train --teachers N: one run per run_id, a results file per teacher seed.
+
+    The files are those of N runs with --tag m<offset> --seed-offset <offset> (offsets
+    0, 100, ...; variant crf_st<N>_m<offset>), each holding the students of its seed
+    (train_with_teachers). All are checked (check_results_files) before training and
+    written after every run; a run_id counts as done only if every file holds it.
+    """
+    granularities = ['fine', 'coarse'] if args.granularity == 'both' else [args.granularity]
+    tasks = {g: granularity_data(g, args) for g in granularities}
+    sample, corpus = self_training_corpus(args.self_train, getattr(args, 'self_train_sample',
+                                                                   SELF_TRAIN_SAMPLE))
+    offsets = teacher_offsets(args.teachers)
+    views = {off: SimpleNamespace(**{**vars(args), 'tag': f'm{off}', 'seed_offset': off})
+             for off in offsets}
+    for view in views.values():
+        check_results_files(view, [(results_path(out_dir, g, view), tasks[g][1])
+                                   for g in granularities], corpus['self_train_sha256'])
+    device = torch_device(args)
+    environment = run_environment(device)
+    os.makedirs(out_dir, exist_ok=True)
+    protocol = protocol_name(args)
+
+    for granularity in granularities:
+        data, labels, tie_info = tasks[granularity]
+        paths = {off: results_path(out_dir, granularity, view) for off, view in views.items()}
+        results = {}
+        for off, view in views.items():
+            variant = variant_name(view)
+            results[off] = {'granularity': granularity, 'protocol': protocol, 'variant': variant,
+                            'model': args.model, 'labels': labels, 'label_tie': tie_info,
+                            'paper_test_f1': PAPER_F1[granularity],
+                            'config': {**stored_config(view), **corpus},
+                            'runs': resumable_runs(paths[off], labels, args.model, variant, off,
+                                                   args.save_predictions,
+                                                   corpus['self_train_sha256'])}
+        done = set.intersection(*({r.get('run_id') for r in results[off]['runs']}
+                                  for off in offsets))
+
+        def save():
+            for off in offsets:
+                summarize(results[off])
+                with open(paths[off], 'w') as f:
+                    json.dump(results[off], f, indent=2)
+
+        print(f"\n=== NER {granularity}: {len(data)} sentences, {len(labels)} classes, "
+              f"protocol {protocol}, {args.teachers} teachers (seed offsets {offsets}), "
+              f"device {device} ===")
+        print(f"  self-training: {len(sample)} sentences sampled from {corpus['self_train']} "
+              f"(sha256 {corpus['self_train_sha256'][:12]})")
+        folds = make_folds(data, args, indices=True)
+        if folds is None:
+            folds = []
+            for seed in args.seeds:
+                split_seed = seed if args.vary_split else args.split_seed
+                folds.append((f'seed{seed}', *random_split(len(data), split_seed)))
+        for run_id, tr, va, te in folds:
+            if run_id in done:
+                print(f"  {run_id}: already done, skipping")
+                continue
+            train, val, test = ([data[i] for i in part] for part in (tr, va, te))
+            if args.max_train:
+                train = train[:args.max_train]
+            seed = int(run_id[4:]) if run_id.startswith('seed') else args.seeds[0]
+            start = time.time()
+            records = train_with_teachers(seed, offsets, train, val, test, labels, args, device,
+                                          sample, test_index=te)
+            runtime = round(time.time() - start, 1)
+            for off, res in records.items():
+                res['run_id'] = run_id
+                res['runtime_sec'] = runtime      # teachers and students together
+                if environment:
+                    res['environment'] = environment
+                # a run found in some files only is redone: its old records are replaced
+                results[off]['runs'] = [r for r in results[off]['runs']
+                                        if r.get('run_id') != run_id] + [res]
+            save()
+            print(f"  {run_id}, {runtime:.0f}s: students " + ', '.join(
+                f"seed {records[off]['seed']} test F1 {records[off]['f1']:.2f}"
+                for off in offsets), flush=True)
+        if any(results[off]['runs'] for off in offsets):
+            save()
+            for off in offsets:
+                summary = results[off]['summary']
+                print(f"  {results[off]['variant']}: micro F1 {summary['micro']['mean']:.2f} "
+                      f"95% CI {summary['micro']['ci95']} over {summary['n_runs']} runs")
+        for off in offsets:
+            print(f"Saved {paths[off]}")
 
 
 def tag_name(value):
@@ -1554,13 +1810,24 @@ def parse_args(argv=None):
                         help='with --crf: score the tags of each label from an embedding of its '
                              'description (fine: MMO definition; coarse: the MMO classes '
                              'annotated with the type) instead of a linear classifier (files '
-                             'tagged _crf_ls)')
+                             'tagged _crf_ls; with --multi-task, a head of this kind per '
+                             'granularity, files tagged _crf_mt_ls)')
     parser.add_argument('--self-train', default=argparse.SUPPRESS, metavar='CORPUS',
                         help='with --crf: self-training. The CRF run is the teacher; it tags a '
                              'fixed sample of 2,000 sentences of CORPUS (one raw sentence per '
                              'line), and a student with the same seed trains on the gold data '
                              'plus the confident tagged sentences, their loss weighted 0.5 (files '
                              'tagged _crf_st)')
+    parser.add_argument('--teachers', type=int, default=argparse.SUPPRESS, metavar='N',
+                        help='with --self-train: N >= 2 CRF teachers with the model seeds of '
+                             'seed offsets 0, 100, ..., 100 (N - 1); a silver sentence is one '
+                             'that every teacher tags alike, each tag with a marginal of at '
+                             'least 0.9 under every teacher, and every teacher seed trains a '
+                             'student. One run writes N files, tagged m0, m100, ... (files '
+                             'tagged _crf_st<N>_m<offset>); no --tag or --seed-offset')
+    parser.add_argument('--self-train-sample', type=int, default=argparse.SUPPRESS, metavar='N',
+                        help='with --self-train: the number of corpus sentences tagged (default '
+                             '2,000; 0: the whole corpus)')
     parser.add_argument('--tag', type=tag_name, default=None, metavar='NAME',
                         help='appended to the variant name and the results file (crf + m100: '
                              'crf_m100; baseline + m100: m100); lowercase letters and digits, '
@@ -1594,8 +1861,6 @@ def parse_args(argv=None):
     if getattr(args, 'label_semantics', False):
         if not args.crf:
             parser.error('--label-semantics needs --crf (its scores are the CRF emissions)')
-        if getattr(args, 'multi_task', False):
-            parser.error('--label-semantics is not available with --multi-task')
     if getattr(args, 'self_train', None) is not None:
         if not args.crf:
             parser.error('--self-train needs --crf (silver sentences are chosen by CRF marginals)')
@@ -1604,6 +1869,16 @@ def parse_args(argv=None):
                 parser.error(f"--self-train is not available with --{option.replace('_', '-')}")
         if not os.path.isfile(args.self_train):
             parser.error(f'--self-train: no such file: {args.self_train}')
+    for option in ('teachers', 'self_train_sample'):
+        if hasattr(args, option) and getattr(args, 'self_train', None) is None:
+            parser.error(f"--{option.replace('_', '-')} needs --self-train")
+    if getattr(args, 'teachers', 2) < 2:
+        parser.error('--teachers: at least 2 (one teacher is --self-train alone)')
+    if hasattr(args, 'teachers') and (args.tag or args.seed_offset):
+        parser.error('--teachers writes its own seed tags (m0, m100, ...): no --tag or '
+                     '--seed-offset')
+    if getattr(args, 'self_train_sample', 0) < 0:
+        parser.error('--self-train-sample: 0 (the whole corpus) or more sentences')
     if getattr(args, 'multi_task', False):
         if not args.crf:
             parser.error('--multi-task needs --crf (a CRF head per granularity)')

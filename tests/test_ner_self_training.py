@@ -78,6 +78,50 @@ def test_self_train_parser_checks(tmp_path, capsys):
         'crf_st_st'
 
 
+def test_teachers_parser_checks(tmp_path, capsys):
+    corpus = str(_corpus(tmp_path))
+    args = nb.parse_args(['--crf', '--self-train', corpus, '--teachers', '3',
+                          '--self-train-sample', '0', '--leave-one-paper-out'])
+    assert (args.teachers, args.self_train_sample) == (3, 0)
+    assert nb.variant_name(args) == 'crf_st3' and nb.reference_variant('crf_st3_m100') == 'crf'
+    # absent unless given: the config of the week-3 runs is unchanged
+    args = vars(nb.parse_args(['--crf', '--self-train', corpus]))
+    assert 'teachers' not in args and 'self_train_sample' not in args
+    for argv, error in ((['--crf', '--teachers', '3'], '--teachers needs --self-train'),
+                        (['--crf', '--self-train-sample', '0'],
+                         '--self-train-sample needs --self-train'),
+                        (['--crf', '--self-train', corpus, '--teachers', '1'], 'at least 2'),
+                        (['--crf', '--self-train', corpus, '--teachers', '3', '--tag', 'm0'],
+                         'no --tag or --seed-offset'),
+                        (['--crf', '--self-train', corpus, '--self-train-sample', '-1'],
+                         '--self-train-sample: 0')):
+        with pytest.raises(SystemExit):
+            nb.parse_args(argv)
+        assert error in capsys.readouterr().err
+    # a CRF run tagged st3 would write to the files of the 3-teacher runs
+    with pytest.raises(SystemExit):
+        nb.parse_args(['--crf', '--tag', 'st3_m0'])
+    assert 'would overwrite the results of the crf_st3' in capsys.readouterr().err
+
+
+def test_unanimous_silver_and_teacher_seeds():
+    sure = (('B-MAT', 'O'), 0.95)
+    assert nb.unanimous_silver([sure, sure, sure])
+    assert not nb.unanimous_silver([sure, sure, (('B-MAT', 'O'), 0.85)])   # one teacher unsure
+    assert not nb.unanimous_silver([sure, sure, (('B-PROP', 'O'), 0.99)])  # one disagrees
+    assert not nb.unanimous_silver([(('O', 'O'), 0.99)] * 3)               # no entity
+    assert nb.teacher_offsets(3) == [0, 100, 200]
+
+
+def test_sample_size_zero_is_the_whole_corpus(tmp_path):
+    corpus = _corpus(tmp_path)
+    sample, config = nb.self_training_corpus(str(corpus), 0)
+    assert sample == [nb.corpus_words(line) for line in CORPUS_LINES if line]
+    assert config['self_train_sample_size'] == 6
+    # the default sample is unchanged
+    assert nb.self_training_corpus(str(corpus))[1]['self_train_sample_size'] == 2000
+
+
 def test_self_training_files_are_a_variant_of_their_own(tmp_path):
     args = nb.parse_args(['--crf', '--self-train', str(_corpus(tmp_path)), '--tag', 'm100',
                           '--seed-offset', '100', '--leave-one-paper-out'])
@@ -492,3 +536,45 @@ def test_without_silver_the_student_is_the_teacher(tiny_run, tmp_path, monkeypat
         assert {k: teacher['result'][k] for k in RESULT_KEYS} == {k: run[k] for k in RESULT_KEYS}
         assert (run['self_training']['n_silver'], run['self_training']['n_skipped']) == (0, 1)
         assert run['n_train'] == 10 and run['seed'] == 0
+
+
+def test_self_training_with_three_teachers(tiny_run, tmp_path, monkeypatch):
+    corpus = _corpus(tmp_path)
+    monkeypatch.setattr(nb, 'unanimous_silver', lambda votes: True)   # every tagged sentence
+    flags = ('--vary-split', '--seeds', '0')
+    st3 = ('--crf', '--self-train', str(corpus), '--teachers', '3', '--self-train-sample', '0',
+           *flags, '--save-predictions')
+    record = tiny_run(*st3)
+    calls = list(record)
+    # three teachers (keep_tagger), then a student per teacher seed with the same silver data
+    assert [(c['seed'], c['teacher']) for c in calls] == [
+        (0, True), (100, True), (200, True), (0, False), (100, False), (200, False)]
+    teachers, students = calls[:3], calls[3:]
+    assert all(c['silver'] is None for c in teachers)
+    words = [nb.corpus_words(line) for line in CORPUS_LINES[:6] if line]
+    assert [w for w, _ in students[0]['silver']] == words[:5]          # the long one skipped
+    assert students[1]['silver'] == students[2]['silver'] == students[0]['silver']
+    for offset, student in zip((0, 100, 200), students):
+        res = _load(tmp_path, f'ner_results_fine_random_split_vary_crf_st3_m{offset}.json')
+        assert res['variant'] == f'crf_st3_m{offset}'
+        config = res['config']
+        assert (config['tag'], config['seed_offset'], config['teachers']) == (f'm{offset}', offset, 3)
+        assert config['self_train_sample_size'] == 6 and config['self_train'] == str(corpus)
+        run = res['runs'][0]
+        assert {k: run[k] for k in RESULT_KEYS} == {k: student['result'][k] for k in RESULT_KEYS}
+        info = run['self_training']
+        assert (info['n_sampled'], info['n_skipped'], info['n_silver']) == (6, 1, 5)
+        assert info['marginal_threshold'] == 0.9
+        assert [t['seed'] for t in info['teachers']] == [0, 100, 200]
+        assert [t['test_f1'] for t in info['teachers']] == [c['result']['f1'] for c in teachers]
+        assert [t['val_f1'] for t in info['teachers']] == [c['result']['val_f1'] for c in teachers]
+        assert 'test_pred' in run and run['seed'] == offset
+    # each teacher is the plain CRF run of its seed
+    for offset, teacher in zip((0, 100, 200), teachers):
+        tiny_run('--crf', *flags, '--tag', f'm{offset}', '--seed-offset', str(offset))
+        plain = _load(tmp_path, f'ner_results_fine_random_split_vary_crf_m{offset}.json')
+        assert {k: plain['runs'][0][k] for k in RESULT_KEYS} == \
+            {k: teacher['result'][k] for k in RESULT_KEYS}
+    # finished runs are skipped
+    n = len(record)
+    assert len(tiny_run(*st3)) == n

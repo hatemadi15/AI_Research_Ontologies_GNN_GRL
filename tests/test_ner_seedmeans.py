@@ -1,5 +1,5 @@
-"""Week-3 comparisons of 3-seed means (ner_seedmeans.py). Pure Python (no torch or seqeval);
-the tests that compute a confidence interval need scipy and skip without it."""
+"""Week-3 and week-4 comparisons of 3-seed means (ner_seedmeans.py). Pure Python (no torch or
+seqeval); the tests that compute a confidence interval need scipy and skip without it."""
 import json
 import subprocess
 import sys
@@ -65,7 +65,41 @@ def test_families_and_comparisons_follow_the_week3_protocol():
     assert ns.PROTOCOLS == {'random_split_vary': 5, 'leave_one_paper_out': 4}
     # report_results (standard library only) keeps its own copy of the order and the file name
     assert list(rr.WEEK3_COMPARISONS) == [(v, r) for v, r, _ in ns.COMPARISONS]
-    assert set(rr.WEEK3_NAMES) == set(ns.SYSTEMS) and rr.WEEK3_FILE == ns.OUT_NAME
+    week3 = {**ns.FAMILIES, **{name: (name,) for name in ns.SINGLE}}
+    assert set(rr.WEEK3_NAMES) == set(week3) and rr.WEEK3_FILE == ns.OUT_NAME
+    assert ns.comparison_list(3) is ns.COMPARISONS
+
+
+def test_week4_systems_and_comparisons_follow_the_week4_protocol():
+    assert ns.WEEK4_FAMILIES == {'crf_mt_ls': ('crf_mt_ls_m0', 'crf_mt_ls_m100', 'crf_mt_ls_m200'),
+                                 'crf_st3': ('crf_st3_m0', 'crf_st3_m100', 'crf_st3_m200')}
+    assert ns.WEEK4_SINGLE == ('crf_ls_ens3', 'crf_st_ens3', 'crf_mt_ens3')
+    assert set(ns.SYSTEMS) == {*ns.FAMILIES, *ns.WEEK4_FAMILIES, *ns.SINGLE, *ns.WEEK4_SINGLE}
+    # CPU: the label-semantics and self-training votes, decided on the held-out papers
+    assert ns.comparison_list(4) == (
+        ('crf_ls_ens3', 'crf_ens3', 'leave_one_paper_out'),
+        ('crf_st_ens3', 'crf_ens3', 'leave_one_paper_out'),
+        ('crf_ls_ens3', 'crf', None), ('crf_st_ens3', 'crf', None))
+    # GPU: the decisions of items 1-3 first, then the reported comparisons
+    assert ns.comparison_list(4, gpu=True) == (
+        ('crf_mt_ens3', 'crf_ens3', 'random_split_vary'),
+        ('crf_mt_ls', 'crf', ('random_split_vary', 'leave_one_paper_out')),
+        ('crf_st3', 'crf', 'leave_one_paper_out'),
+        ('crf_ls_ens3', 'crf_ens3', None), ('crf_st_ens3', 'crf_ens3', None),
+        ('crf_ens3', 'crf', None), ('crf_mt_ens3', 'crf', None), ('crf_mt', 'crf', None),
+        ('crf_ls', 'crf', None), ('crf_st', 'crf', None), ('crf_mt_ls', 'crf_mt', None),
+        ('crf_mt_ls', 'crf_ls', None), ('crf_st3', 'crf_st', None), ('crf_st3', 'crf_ens3', None))
+    with pytest.raises(ValueError):
+        ns.comparison_list(3, gpu=True)
+    assert ns.OUT_NAMES == {3: 'ner_week3_comparisons.json', 4: 'ner_week4_comparisons.json'}
+
+
+def test_decides_on_one_protocol_or_several():
+    assert ns.decides_on('random_split_vary', 'random_split_vary')
+    assert not ns.decides_on('random_split_vary', 'leave_one_paper_out')
+    both = ('random_split_vary', 'leave_one_paper_out')
+    assert ns.decides_on(both, 'random_split_vary') and ns.decides_on(both, 'leave_one_paper_out')
+    assert not ns.decides_on(None, 'random_split_vary')
 
 
 def test_file_names_and_keys():
@@ -205,6 +239,46 @@ def test_no_shared_run_id_skips_the_comparison(tmp_path, capsys):
     assert 'crf_ens3: no run_id with scores on both sides, skipped' in capsys.readouterr().out
 
 
+def test_week4_gpu_comparisons_decide_on_both_protocols(tmp_path, capsys):
+    """--week 4 --gpu: crf_mt_ls is decided on both protocols, written to the week-4 file."""
+    pytest.importorskip('scipy')
+    for protocol, base in (('random_split_vary', [70, 71, 72, 73, 74]),
+                           ('leave_one_paper_out', [50, 51, 52, 53])):
+        for n in (0, 100, 200):
+            _write(tmp_path, 'coarse', protocol, f'crf_m{n}', base)
+            _write(tmp_path, 'coarse', protocol, f'crf_mt_ls_m{n}', [b + 1 + n / 100 for b in base])
+    comps = ns.main(['--results', str(tmp_path), '--week', '4', '--gpu'])
+    assert {k: c['role'] for k, c in comps.items()} == {
+        'ner_results_coarse_random_split_vary_crf_mt_ls': 'decision',
+        'ner_results_coarse_leave_one_paper_out_crf_mt_ls': 'decision'}
+    for c in comps.values():
+        assert c['micro']['mean_diff'] == 2.0 and c['complete']
+    assert json.loads((tmp_path / 'ner_week4_comparisons.json').read_text()) == comps
+    assert not (tmp_path / ns.OUT_NAME).exists()
+    capsys.readouterr()
+    with pytest.raises(SystemExit) as excinfo:
+        ns.main(['--results', str(tmp_path), '--gpu'])
+    assert excinfo.value.code == 2 and '--gpu needs --week 4' in capsys.readouterr().err
+
+
+def test_gpu_minus_cpu_is_descriptive(tmp_path):
+    """--gpu adds, for systems in both directories, the GPU minus the CPU scores per split."""
+    pytest.importorskip('scipy')
+    gpu = tmp_path / 'gpu'
+    gpu.mkdir()
+    for n in (0, 100, 200):
+        _write(tmp_path, 'fine', 'leave_one_paper_out', f'crf_m{n}', [50, 51, 52, 53])
+        _write(gpu, 'fine', 'leave_one_paper_out', f'crf_m{n}', [51, 52, 53, 54])
+    comps = ns.main(['--results', str(gpu), '--week', '4', '--gpu'])
+    assert list(comps) == ['ner_results_fine_leave_one_paper_out_crf_gpu_vs_cpu']
+    c = comps['ner_results_fine_leave_one_paper_out_crf_gpu_vs_cpu']
+    assert (c['role'], c['hardware'], c['complete']) == (
+        'descriptive', {'variant': 'gpu', 'reference': 'cpu'}, True)
+    assert c['micro']['mean_diff'] == 1.0 and c['variant_files'] == c['reference_files']
+    # another CPU directory, or none with these files: no descriptive entry
+    assert ns.main(['--results', str(gpu), '--week', '4', '--gpu', '--cpu', str(gpu / 'x')]) == {}
+
+
 def test_script_runs_standalone(tmp_path):
     proc = subprocess.run([sys.executable, str(SCRIPT), '--results', str(tmp_path)],
                           capture_output=True, text=True, cwd=tmp_path)
@@ -247,3 +321,16 @@ def test_committed_week3_comparisons_are_up_to_date(tmp_path):
     out = tmp_path / ns.OUT_NAME
     ns.main(['--results', str(REPO / 'results'), '--out', str(out)])
     assert out.read_text() == (REPO / 'results' / ns.OUT_NAME).read_text()
+
+
+def test_committed_week4_comparisons_are_up_to_date(tmp_path):
+    """results/ner_week4_comparisons.json is what `--week 4` makes from results/ (the CPU
+    votes); results/gpu/ner_week4_comparisons.json, once there, from results/gpu/."""
+    pytest.importorskip('scipy')
+    for directory, extra in ((REPO / 'results', []), (REPO / 'results' / 'gpu', ['--gpu'])):
+        committed = directory / ns.OUT_NAMES[4]
+        if not committed.exists():
+            continue
+        out = tmp_path / f"{directory.name}_{ns.OUT_NAMES[4]}"
+        ns.main(['--results', str(directory), '--week', '4', *extra, '--out', str(out)])
+        assert out.read_text() == committed.read_text()

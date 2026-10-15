@@ -1,5 +1,5 @@
 """
-ner_seedmeans.py - week-3 NER comparisons of 3-seed means (ROADMAP §4, week-3 protocol)
+ner_seedmeans.py - NER comparisons of 3-seed means (ROADMAP §4, week-3 and week-4 protocols)
 
 Week 3 scores a model trained with three seeds on a split by the mean of its three runs
 (model seeds K, K + 100 and K + 200 on random split K; 0, 100 and 200 on a held-out
@@ -35,8 +35,28 @@ n_pairs, run_ids, complete, the per-split scores of both sides (variant_scores a
 reference_scores: mean, 95% CI and per_run for every F1 average, in run_ids order), and
 micro, micro_strict, macro and weighted, each with mean_diff, ci95 and per_run.
 
+Week 4 (--week 4) makes the comparisons of the week-4 protocol with the same scores and
+entries, written to ner_week4_comparisons.json:
+  - New systems: the families crf_mt_ls (label semantics on the multi-task model) and
+    crf_st3 (self-training with 3 teachers), = <family>_m0, _m100, _m200; and the votes
+    crf_ls_ens3, crf_st_ens3 and crf_mt_ens3 (ner_ensemble.py over the three seeds of
+    crf_ls, crf_st and crf_mt), scored once per split.
+  - The CPU runs (results/): the label-semantics and self-training votes vs crf_ens3,
+    decided over the held-out papers, and both votes vs crf (reported).
+  - The GPU runs (--gpu, results/gpu/): crf_mt_ens3 vs crf_ens3 (decided over the random
+    splits), crf_mt_ls vs crf (decided over the random splits and, separately, over the
+    held-out papers) and crf_st3 vs crf (decided over the held-out papers); then, reported,
+    the GPU repeats of the CPU votes (crf_ls_ens3 and crf_st_ens3 vs crf_ens3), crf_ens3,
+    crf_mt_ens3, crf_mt, crf_ls and crf_st vs crf, crf_mt_ls vs crf_mt and crf_ls, and
+    crf_st3 vs crf_st and crf_ens3. GPU runs are only compared with GPU runs, except in
+    the descriptive entries `<key>_gpu_vs_cpu` (role 'descriptive'): a system's GPU scores
+    minus its CPU scores (--cpu DIR, default the parent of the GPU directory), per split,
+    for the systems run on both (HARDWARE_SYSTEMS): what the hardware alone changes.
+
 Usage:
   python src/graph/ner_seedmeans.py [--results results] [--out results/ner_week3_comparisons.json]
+  python src/graph/ner_seedmeans.py --week 4                            # CPU votes
+  python src/graph/ner_seedmeans.py --week 4 --gpu --results results/gpu
 """
 
 import argparse
@@ -50,6 +70,7 @@ from ner_baseline import F1_AVERAGES, result_suffix
 
 RESULTS_DIR = Path(__file__).resolve().parents[2] / 'results'
 OUT_NAME = 'ner_week3_comparisons.json'
+OUT_NAMES = {3: OUT_NAME, 4: 'ner_week4_comparisons.json'}
 
 GRANULARITIES = ('fine', 'coarse')
 # pairs of a complete comparison: the 5 random splits and the 4 held-out papers
@@ -65,7 +86,15 @@ FAMILIES = {
 }
 # one run per split: the ensembles and the backbones of the mixed one
 SINGLE = ('crf_ens3', 'crf_mix3', 'crf_scibert', 'crf_pubmedbert')
-SYSTEMS = {**FAMILIES, **{name: (name,) for name in SINGLE}}
+# week 4: label semantics on the multi-task model, self-training with 3 teachers, and the
+# votes over the seeds of the week-3 changes that help
+WEEK4_FAMILIES = {
+    'crf_mt_ls': ('crf_mt_ls_m0', 'crf_mt_ls_m100', 'crf_mt_ls_m200'),
+    'crf_st3': ('crf_st3_m0', 'crf_st3_m100', 'crf_st3_m200'),
+}
+WEEK4_SINGLE = ('crf_ls_ens3', 'crf_st_ens3', 'crf_mt_ens3')
+SYSTEMS = {**FAMILIES, **WEEK4_FAMILIES,
+           **{name: (name,) for name in SINGLE + WEEK4_SINGLE}}
 
 # (variant, reference, protocol on which the week-3 rule decides; None: reported only),
 # in the protocol's reporting order
@@ -80,6 +109,52 @@ COMPARISONS = (
     ('crf_mt', 'crf', 'random_split_vary'),
     ('crf_dapt2', 'crf', 'random_split_vary'),
 )
+# week 4, in the protocol's reporting order; a decision may be taken on both protocols
+WEEK4_CPU_COMPARISONS = (
+    ('crf_ls_ens3', 'crf_ens3', 'leave_one_paper_out'),
+    ('crf_st_ens3', 'crf_ens3', 'leave_one_paper_out'),
+    ('crf_ls_ens3', 'crf', None),
+    ('crf_st_ens3', 'crf', None),
+)
+WEEK4_GPU_COMPARISONS = (
+    ('crf_mt_ens3', 'crf_ens3', 'random_split_vary'),
+    ('crf_mt_ls', 'crf', ('random_split_vary', 'leave_one_paper_out')),
+    ('crf_st3', 'crf', 'leave_one_paper_out'),
+    # the GPU repeats of the CPU votes (protocol amendment), reported
+    ('crf_ls_ens3', 'crf_ens3', None),
+    ('crf_st_ens3', 'crf_ens3', None),
+    ('crf_ens3', 'crf', None),
+    ('crf_mt_ens3', 'crf', None),
+    ('crf_mt', 'crf', None),
+    ('crf_ls', 'crf', None),
+    ('crf_st', 'crf', None),
+    ('crf_mt_ls', 'crf_mt', None),
+    ('crf_mt_ls', 'crf_ls', None),
+    ('crf_st3', 'crf_st', None),
+    ('crf_st3', 'crf_ens3', None),
+)
+
+
+# systems run on the CPU and again on the GPU: their GPU minus CPU scores are described
+HARDWARE_SYSTEMS = ('crf', 'crf_ens3', 'crf_mt', 'crf_ls', 'crf_st', 'crf_ls_ens3',
+                    'crf_st_ens3')
+
+
+def comparison_list(week, gpu=False):
+    """The comparisons of a week's protocol: week 3, or week 4 on the CPU or the GPU runs."""
+    if week == 3:
+        if gpu:
+            raise ValueError('the week-3 comparisons are made on the CPU runs only')
+        return COMPARISONS
+    return WEEK4_GPU_COMPARISONS if gpu else WEEK4_CPU_COMPARISONS
+
+
+def decides_on(decides, protocol):
+    """Whether the protocol's rule decides a comparison on `protocol` (decides: None, a
+    protocol or a tuple of protocols)."""
+    if decides is None:
+        return False
+    return protocol in ((decides,) if isinstance(decides, str) else decides)
 
 
 def file_names(granularity, protocol, system):
@@ -136,14 +211,15 @@ def load_scores(directory, names):
     return system_scores(files)
 
 
-def week3_comparisons(directory):
-    """Every week-3 comparison that the results files in `directory` allow, keyed as above.
+def week3_comparisons(directory, comparisons_list=COMPARISONS):
+    """Every comparison of `comparisons_list` (default: week 3) that the results files in
+    `directory` allow, keyed as above.
 
     Prints one line per comparison: its micro-F1 difference, or why it was skipped (a
     missing results file, or no run_id with scores on both sides).
     """
     comparisons = {}
-    for variant, reference, decides in COMPARISONS:
+    for variant, reference, decides in comparisons_list:
         for protocol, need in PROTOCOLS.items():
             for granularity in GRANULARITIES:
                 key = comparison_key(granularity, protocol, variant, reference)
@@ -161,7 +237,7 @@ def week3_comparisons(directory):
                 comp = compare(scores[variant], scores[reference])
                 entry = {'variant': variant, 'reference': reference, 'granularity': granularity,
                          'protocol': protocol,
-                         'role': 'decision' if protocol == decides else 'reported',
+                         'role': 'decision' if decides_on(decides, protocol) else 'reported',
                          'variant_files': files[variant], 'reference_files': files[reference],
                          'n_pairs': len(comp['run_ids']), 'run_ids': comp['run_ids'],
                          'complete': len(comp['run_ids']) >= need, **comp}
@@ -173,19 +249,62 @@ def week3_comparisons(directory):
     return comparisons
 
 
+def hardware_comparisons(gpu_dir, cpu_dir):
+    """The GPU scores of each HARDWARE_SYSTEMS system minus its CPU scores, per split.
+
+    Descriptive only (role 'descriptive'): the two sides differ in hardware, not in method.
+    Keyed <key of the system>_gpu_vs_cpu; skipped while a file is missing on either side.
+    """
+    out = {}
+    for system in HARDWARE_SYSTEMS:
+        for protocol, need in PROTOCOLS.items():
+            for granularity in GRANULARITIES:
+                names = file_names(granularity, protocol, system)
+                if not all(os.path.exists(os.path.join(d, fn))
+                           for d in (gpu_dir, cpu_dir) for fn in names):
+                    continue
+                gpu, cpu = load_scores(gpu_dir, names), load_scores(cpu_dir, names)
+                if not any(i in cpu for i in gpu):
+                    continue
+                comp = compare(gpu, cpu)
+                key = f'ner_results_{granularity}{result_suffix(protocol, system)}_gpu_vs_cpu'
+                out[key] = {'variant': system, 'reference': system, 'granularity': granularity,
+                            'protocol': protocol, 'role': 'descriptive',
+                            'hardware': {'variant': 'gpu', 'reference': 'cpu'},
+                            'variant_files': names, 'reference_files': names,
+                            'n_pairs': len(comp['run_ids']), 'run_ids': comp['run_ids'],
+                            'complete': len(comp['run_ids']) >= need, **comp}
+                d = out[key]['micro']
+                print(f"  {key}: GPU minus CPU micro F1 {d['mean_diff']:+.2f}, 95% CI "
+                      f"{d['ci95']} over {out[key]['n_pairs']} splits (descriptive)")
+    return out
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
-        description='Week-3 NER comparisons of 3-seed means (no training): reads the results '
-                    'files and writes ner_week3_comparisons.json')
+        description='NER comparisons of 3-seed means (no training): reads the results files '
+                    'and writes ner_week<N>_comparisons.json')
     parser.add_argument('--results', default=str(RESULTS_DIR), metavar='DIR',
                         help='directory with the NER results files (default: results/ of the repo)')
+    parser.add_argument('--week', type=int, choices=sorted(OUT_NAMES), default=3,
+                        help='the protocol whose comparisons are made (default: 3)')
+    parser.add_argument('--gpu', action='store_true',
+                        help='with --week 4: the comparisons of the GPU runs (results/gpu)')
+    parser.add_argument('--cpu', default=None, metavar='DIR',
+                        help='with --gpu: the CPU results for the descriptive GPU-minus-CPU '
+                             'entries (default: the parent of --results)')
     parser.add_argument('--out', default=None, metavar='PATH',
-                        help=f'output file (default: DIR/{OUT_NAME})')
+                        help='output file (default: DIR/ner_week<N>_comparisons.json)')
     args = parser.parse_args(argv)
     if not os.path.isdir(args.results):
         parser.error(f'results directory not found: {args.results}')
-    comparisons = week3_comparisons(args.results)
-    out = args.out or os.path.join(args.results, OUT_NAME)
+    if args.gpu and args.week != 4:
+        parser.error('--gpu needs --week 4: GPU runs started in week 4')
+    comparisons = week3_comparisons(args.results, comparison_list(args.week, args.gpu))
+    if args.gpu:
+        cpu = args.cpu or os.path.dirname(os.path.abspath(args.results))
+        comparisons.update(hardware_comparisons(args.results, cpu))
+    out = args.out or os.path.join(args.results, OUT_NAMES[args.week])
     with open(out, 'w') as f:
         json.dump(comparisons, f, indent=2)
     complete = sum(c['complete'] for c in comparisons.values())
