@@ -24,6 +24,10 @@ votes (ner_seedmeans.WEEK5_SYSTEMS) and writes ner_week5_seed_analysis.json next
     scores) and, where their files exist, the week-6 methods on a published split
     (SPLIT_METHODS): their scores and their difference from the CRF head, paired by seed
     (SOFC-Exp's S1 and S2 of the week-6 protocol).
+  - week6_types (week 6, reported alongside its decisions): per granularity, each week-6
+    method with all 10 seeds on the 4 held-out papers against the CRF head, per entity type:
+    the F1 of both, paired by seed offset and paper over the pairs whose test set has the
+    type, and their mean difference.
 
 A family or vote family is used only if all its files exist. Usage:
   python src/graph/ner_seed_analysis.py [--results results/gpu] [--out PATH]
@@ -39,8 +43,9 @@ from pathlib import Path
 import metrics
 import ner_ensemble
 from ner_baseline import F1_AVERAGES
-from ner_seedmeans import (GRANULARITIES, PROTOCOLS, WEEK5_OFFSETS, WEEK5_SYSTEMS,
-                           WEEK5_TRIPLES, file_names, spread, system_scores)
+from ner_seedmeans import (GRANULARITIES, LOPO, PROTOCOLS, WEEK5_OFFSETS, WEEK5_SYSTEMS,
+                           WEEK5_TRIPLES, WEEK6_METHODS, file_names, seed_family, spread,
+                           system_scores)
 
 RESULTS_DIR = Path(__file__).resolve().parents[2] / 'results' / 'gpu'
 OUT_NAME = 'ner_week5_seed_analysis.json'
@@ -132,6 +137,52 @@ def type_scores(vote_files):
     return out
 
 
+def type_differences(method_files, crf_files):
+    """Per entity type: the F1 of a method and of the CRF head, paired by member (seed offset)
+    and run_id (paper) over the pairs whose test set has the type; their means, the mean
+    difference, the number of papers and the mean test support. Most frequent type first."""
+    rows = {}
+    for method, crf in zip(method_files, crf_files, strict=True):
+        ours = {r['run_id']: r for r in method['runs']}
+        for ref in crf['runs']:
+            run = ours.get(ref['run_id'])
+            if run is None:
+                continue
+            for t, s in ref['per_class'].items():
+                if t in AVERAGES or not s['support']:
+                    continue
+                f1 = run['per_class'].get(t, {'f1-score': 0.0})['f1-score']
+                row = rows.setdefault(t, {'crf': [], 'method': [], 'papers': set(),
+                                          'support': []})
+                row['crf'].append(100 * s['f1-score'])
+                row['method'].append(100 * f1)
+                row['papers'].add(ref['run_id'])
+                row['support'].append(s['support'])
+    out = {}
+    for t, row in sorted(rows.items(), key=lambda kv: -statistics.mean(kv[1]['support'])):
+        out[t] = {'crf': round(statistics.mean(row['crf']), 2),
+                  'method': round(statistics.mean(row['method']), 2),
+                  'diff': round(statistics.mean(m - c for m, c in zip(row['method'],
+                                                                         row['crf'])), 2),
+                  'n_splits': len(row['papers']),
+                  'support_per_split': round(statistics.mean(row['support']), 1)}
+    return out
+
+
+def week6_type_differences(directory):
+    """{granularity: {method: type_differences}} on the 4 held-out papers, for the week-6
+    methods whose 10 seeds and the CRF head's are all there."""
+    out = {}
+    for g in GRANULARITIES:
+        crf = load_files(directory, file_names(g, LOPO, 'crf', WEEK5_SYSTEMS))
+        for method in WEEK6_METHODS:
+            files = load_files(directory, file_names(g, LOPO, method,
+                                                     {method: seed_family(method)}))
+            if crf and files:
+                out.setdefault(g, {})[method] = type_differences(files, crf)
+    return out
+
+
 def published_split(directory):
     """The published-split analysis per granularity (see the module docstring); granularities
     without both files are left out."""
@@ -198,6 +249,7 @@ def analyse(directory):
                 if votes:
                     out['types'].setdefault(key, {})[system] = type_scores(votes)
     out['published_split'] = published_split(directory)
+    out['week6_types'] = week6_type_differences(directory)
     return out
 
 
@@ -224,6 +276,10 @@ def main(argv=None):
             d = m['minus_crf']['micro']
             print(f"    {method}: {m['micro']['mean']:.2f} {m['micro']['ci95']}, minus the CRF "
                   f"head {d['mean_diff']:+.2f} {d['ci95']} over {m['n_pairs']} seeds")
+    for g, methods in result['week6_types'].items():
+        for method, types in methods.items():
+            print(f"  {method}, {g}-grained, per type (minus the CRF head): "
+                  + ', '.join(f"{t} {row['diff']:+.2f}" for t, row in types.items()))
     out = args.out or os.path.join(args.results, OUT_NAME)
     with open(out, 'w') as f:
         json.dump(result, f, indent=2)

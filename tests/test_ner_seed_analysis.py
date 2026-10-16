@@ -152,3 +152,34 @@ def test_published_split_analysis_of_sofc_exp_and_a_method(tmp_path):
         json.dumps(runs(3.4, ids=range(3))))
     ctx = sa.published_split(tmp_path)['sofc']['methods']['crf_ctx']
     assert ctx['n_pairs'] == 3 and ctx['minus_crf']['micro']['mean_diff'] == -1.0
+
+
+def test_week6_type_differences_pair_seeds_and_papers(tmp_path, capsys):
+    """Per entity type, a week-6 method against the CRF head on the held-out papers, paired by
+    seed offset and paper over the pairs whose test set has the type (reported alongside the
+    week-6 decisions, no decision); a method missing a seed is left out."""
+    pytest.importorskip('scipy')
+
+    def write(system, classes):
+        for j, name in enumerate(ns.file_names('fine', 'leave_one_paper_out', system,
+                                               {system: ns.seed_family(system)})):
+            runs = [_run(p, 70, classes(j, p)) for p in ('p1', 'p2')]
+            (tmp_path / name).write_text(json.dumps({'runs': runs}))
+    # PRO is predicted on p2 but absent from its test set: no pair there
+    write('crf', lambda j, p: ({'MAT': (0.8 - j / 100, 10), 'PRO': (0.5, 2)} if p == 'p1' else
+                               {'MAT': (0.6, 20), 'PRO': (0.0, 0)}))
+    write('crf_ctx', lambda j, p: ({'MAT': (0.9 - j / 100, 10), 'PRO': (0.75, 2)} if p == 'p1'
+                                   else {'MAT': (0.6, 20), 'PRO': (0.5, 0)}))
+    write('crf_deberta', lambda j, p: {'MAT': (0.5, 10)})
+    (tmp_path / ns.file_names('fine', 'leave_one_paper_out', 'crf_deberta',
+                              {'crf_deberta': ns.seed_family('crf_deberta')})[9]).unlink()
+    out = sa.week6_type_differences(tmp_path)
+    assert list(out) == ['fine'] and list(out['fine']) == ['crf_ctx']
+    mat, pro = out['fine']['crf_ctx'].values()
+    assert list(out['fine']['crf_ctx']) == ['MAT', 'PRO']          # most frequent first
+    assert mat == {'crf': 67.75, 'method': 72.75, 'diff': 5.0, 'n_splits': 2,
+                   'support_per_split': 15.0}
+    assert pro == {'crf': 50.0, 'method': 75.0, 'diff': 25.0, 'n_splits': 1,
+                   'support_per_split': 2.0}
+    assert sa.main(['--results', str(tmp_path)])['week6_types'] == out
+    assert 'crf_ctx, fine-grained, per type' in capsys.readouterr().out
