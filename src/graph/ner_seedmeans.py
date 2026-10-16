@@ -64,11 +64,25 @@ and entries, written to ner_week5_comparisons.json:
     papers), and the votes crf_mt_ens3, crf_ls_ens3 and crf_st3_ens3 vs crf_ens3 (both
     protocols: the reported system); reported: crf_ens3 vs crf.
 
+Week 6 (--week 6 --gpu, results/gpu/; week-6 protocol) tests methods for unseen papers,
+each a family crf_deberta (DeBERTa-v3-large), crf_ctx (document context) or crf_mt_st3
+(multi-task self-training), on the held-out papers:
+  - --screen: stage 1, seeds 0-200 (3-seed families, first votes), written to
+    ner_week6_screen.json. Each method against crf has role 'screen': a method goes to
+    stage 2 if its mean micro-F1 difference is above 0 at either granularity, which is
+    printed. Reported: crf_mt_st3 vs crf_mt, and each method's first vote vs crf_ens3.
+  - without --screen: stage 2, 10-seed families and vote families as in week 5, written
+    to ner_week6_comparisons.json. Decisions: each method vs crf, and each method's vote
+    vs the strongest system on unseen papers after week 5 (UNSEEN_BEST: crf_mt_ens3
+    fine-grained, crf_ens3 coarse-grained); the vote against the other granularity's
+    reference is reported. Reported: crf_mt_st3 vs crf_mt.
+
 Usage:
   python src/graph/ner_seedmeans.py [--results results] [--out results/ner_week3_comparisons.json]
   python src/graph/ner_seedmeans.py --week 4                            # CPU votes
   python src/graph/ner_seedmeans.py --week 4 --gpu --results results/gpu
   python src/graph/ner_seedmeans.py --week 5 --gpu --results results/gpu
+  python src/graph/ner_seedmeans.py --week 6 --gpu --results results/gpu [--screen]
 """
 
 import argparse
@@ -82,7 +96,9 @@ from ner_baseline import F1_AVERAGES, result_suffix
 
 RESULTS_DIR = Path(__file__).resolve().parents[2] / 'results'
 OUT_NAME = 'ner_week3_comparisons.json'
-OUT_NAMES = {3: OUT_NAME, 4: 'ner_week4_comparisons.json', 5: 'ner_week5_comparisons.json'}
+OUT_NAMES = {3: OUT_NAME, 4: 'ner_week4_comparisons.json', 5: 'ner_week5_comparisons.json',
+             6: 'ner_week6_comparisons.json'}
+SCREEN_NAME = 'ner_week6_screen.json'
 
 GRANULARITIES = ('fine', 'coarse')
 # pairs of a complete comparison: the 5 random splits and the 4 held-out papers
@@ -156,10 +172,10 @@ WEEK5_OFFSETS = tuple(range(0, 1000, 100))
 WEEK5_TRIPLES = (0, 300, 600)        # the first seed offset of each voting triple
 
 
-def seed_family(stem, untagged_zero=False):
-    """The variants of a 10-seed family: <stem>_m0 to <stem>_m900 (crf_mt has no m0 tag)."""
-    return tuple(stem if untagged_zero and off == 0 else f'{stem}_m{off}'
-                 for off in WEEK5_OFFSETS)
+def seed_family(stem, untagged_zero=False, offsets=WEEK5_OFFSETS):
+    """The variants of a seed family: <stem>_m0 to <stem>_m900 by default (crf_mt has no m0
+    tag)."""
+    return tuple(stem if untagged_zero and off == 0 else f'{stem}_m{off}' for off in offsets)
 
 
 def vote_family(stem):
@@ -189,30 +205,69 @@ WEEK5_COMPARISONS = (
 )
 
 
-def comparison_list(week, gpu=False):
-    """The comparisons of a week's protocol: week 3, week 4 on the CPU or the GPU runs, or
-    week 5 (GPU runs only)."""
+# week 6: methods for unseen papers, screened with seeds 0-200, then decided with 10 seeds
+WEEK6_METHODS = ('crf_deberta', 'crf_ctx', 'crf_mt_st3')
+SCREEN_OFFSETS = (0, 100, 200)
+LOPO = 'leave_one_paper_out'
+# the strongest system on unseen papers after week 5, per granularity (week-5 decision 2)
+UNSEEN_BEST = {'fine': 'crf_mt_ens3', 'coarse': 'crf_ens3'}
+WEEK6_SCREEN_SYSTEMS = {
+    'crf': seed_family('crf', offsets=SCREEN_OFFSETS),
+    'crf_mt': seed_family('crf_mt', untagged_zero=True, offsets=SCREEN_OFFSETS),
+    **{m: seed_family(m, offsets=SCREEN_OFFSETS) for m in WEEK6_METHODS},
+    **{f'{stem}_ens3': (f'{stem}_ens3',) for stem in ('crf', 'crf_mt') + WEEK6_METHODS},
+}
+WEEK6_SCREEN_COMPARISONS = (
+    *((m, 'crf', LOPO) for m in WEEK6_METHODS),
+    ('crf_mt_st3', 'crf_mt', None),
+    *((f'{m}_ens3', 'crf_ens3', None) for m in WEEK6_METHODS),
+)
+WEEK6_SYSTEMS = {
+    **WEEK5_SYSTEMS,
+    **{m: seed_family(m) for m in WEEK6_METHODS},
+    **{f'{m}_ens3': vote_family(m) for m in WEEK6_METHODS},
+}
+WEEK6_COMPARISONS = (
+    # decision 1: each method against the CRF head on the held-out papers
+    *((m, 'crf', LOPO) for m in WEEK6_METHODS),
+    # decision 2: each method's vote against the strongest system on unseen papers
+    *((f'{m}_ens3', ref, {g: LOPO}) for m in WEEK6_METHODS for g, ref in UNSEEN_BEST.items()),
+    # reported: what self-training adds to multi-task training
+    ('crf_mt_st3', 'crf_mt', None),
+)
+
+
+def comparison_list(week, gpu=False, screen=False):
+    """The comparisons of a week's protocol: week 3, week 4 on the CPU or the GPU runs,
+    week 5, or week 6 (its stage-1 screen with screen=True); weeks 5 and 6 GPU runs only."""
     if week == 3:
         if gpu:
             raise ValueError('the week-3 comparisons are made on the CPU runs only')
         return COMPARISONS
-    if week == 5:
+    if week in (5, 6):
         if not gpu:
-            raise ValueError('the week-5 comparisons are made on the GPU runs only')
+            raise ValueError(f'the week-{week} comparisons are made on the GPU runs only')
+        if week == 6:
+            return WEEK6_SCREEN_COMPARISONS if screen else WEEK6_COMPARISONS
         return WEEK5_COMPARISONS
     return WEEK4_GPU_COMPARISONS if gpu else WEEK4_CPU_COMPARISONS
 
 
-def system_list(week):
+def system_list(week, screen=False):
     """The systems (name: the variants of its results files) of a week's protocol."""
+    if week == 6:
+        return WEEK6_SCREEN_SYSTEMS if screen else WEEK6_SYSTEMS
     return WEEK5_SYSTEMS if week == 5 else SYSTEMS
 
 
-def decides_on(decides, protocol):
+def decides_on(decides, protocol, granularity=None):
     """Whether the protocol's rule decides a comparison on `protocol` (decides: None, a
-    protocol or a tuple of protocols)."""
+    protocol, a tuple of protocols, or {granularity: protocol(s)} when only some
+    granularities are decided)."""
     if decides is None:
         return False
+    if isinstance(decides, dict):
+        decides = decides.get(granularity, ())
     return protocol in ((decides,) if isinstance(decides, str) else decides)
 
 
@@ -271,9 +326,11 @@ def load_scores(directory, names):
     return system_scores(files)
 
 
-def week3_comparisons(directory, comparisons_list=COMPARISONS, systems=None):
+def week3_comparisons(directory, comparisons_list=COMPARISONS, systems=None,
+                      decision_role='decision'):
     """Every comparison of `comparisons_list` (default: week 3) that the results files in
-    `directory` allow, keyed as above; `systems` (default: SYSTEMS) names their files.
+    `directory` allow, keyed as above; `systems` (default: SYSTEMS) names their files, and
+    the comparisons that the rule decides get the role `decision_role`.
 
     Prints one line per comparison: its micro-F1 difference, or why it was skipped (a
     missing results file, or no run_id with scores on both sides).
@@ -297,7 +354,8 @@ def week3_comparisons(directory, comparisons_list=COMPARISONS, systems=None):
                 comp = compare(scores[variant], scores[reference])
                 entry = {'variant': variant, 'reference': reference, 'granularity': granularity,
                          'protocol': protocol,
-                         'role': 'decision' if decides_on(decides, protocol) else 'reported',
+                         'role': (decision_role if decides_on(decides, protocol, granularity)
+                                  else 'reported'),
                          'variant_files': files[variant], 'reference_files': files[reference],
                          'n_pairs': len(comp['run_ids']), 'run_ids': comp['run_ids'],
                          'complete': len(comp['run_ids']) >= need, **comp}
@@ -340,6 +398,25 @@ def hardware_comparisons(gpu_dir, cpu_dir):
     return out
 
 
+def screen_verdicts(comparisons):
+    """Per week-6 method with screen entries: 'goes to stage 2 (...)' if its mean micro-F1
+    difference against crf over the held-out papers is above 0 at either granularity, else
+    'stops (...)'; a method lacking a granularity's complete entry is 'incomplete'."""
+    out = {}
+    for method in WEEK6_METHODS:
+        found = {g: comparisons.get(comparison_key(g, LOPO, method, 'crf'))
+                 for g in GRANULARITIES}
+        if not any(found.values()):
+            continue
+        if not all(c and c['complete'] for c in found.values()):
+            out[method] = 'incomplete'
+            continue
+        diffs = ', '.join(f"{g} {c['micro']['mean_diff']:+.2f}" for g, c in found.items())
+        passed = any(c['micro']['mean_diff'] > 0 for c in found.values())
+        out[method] = f"{'goes to stage 2' if passed else 'stops'} ({diffs})"
+    return out
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
         description='NER comparisons of 3-seed means (no training): reads the results files '
@@ -353,21 +430,32 @@ def main(argv=None):
     parser.add_argument('--cpu', default=None, metavar='DIR',
                         help='with --gpu: the CPU results for the descriptive GPU-minus-CPU '
                              'entries (default: the parent of --results)')
+    parser.add_argument('--screen', action='store_true',
+                        help='with --week 6: the stage-1 screen (seeds 0-200), written to '
+                             f'{SCREEN_NAME}')
     parser.add_argument('--out', default=None, metavar='PATH',
                         help='output file (default: DIR/ner_week<N>_comparisons.json)')
     args = parser.parse_args(argv)
     if not os.path.isdir(args.results):
         parser.error(f'results directory not found: {args.results}')
     if args.gpu and args.week == 3:
-        parser.error('--gpu needs --week 4 or 5: GPU runs started in week 4')
-    if args.week == 5 and not args.gpu:
-        parser.error('--week 5 needs --gpu: week 5 runs on the GPU only')
-    comparisons = week3_comparisons(args.results, comparison_list(args.week, args.gpu),
-                                    system_list(args.week))
+        parser.error('--gpu needs --week 4 or later: GPU runs started in week 4')
+    if args.week >= 5 and not args.gpu:
+        parser.error(f'--week {args.week} needs --gpu: it runs on the GPU only')
+    if args.screen and args.week != 6:
+        parser.error('--screen needs --week 6')
+    comparisons = week3_comparisons(
+        args.results, comparison_list(args.week, args.gpu, args.screen),
+        system_list(args.week, args.screen),
+        decision_role='screen' if args.screen else 'decision')
     if args.gpu and args.week == 4:
         cpu = args.cpu or os.path.dirname(os.path.abspath(args.results))
         comparisons.update(hardware_comparisons(args.results, cpu))
-    out = args.out or os.path.join(args.results, OUT_NAMES[args.week])
+    if args.screen:
+        for method, verdict in screen_verdicts(comparisons).items():
+            print(f'  screen: {method} {verdict}')
+    out = args.out or os.path.join(args.results,
+                                   SCREEN_NAME if args.screen else OUT_NAMES[args.week])
     with open(out, 'w') as f:
         json.dump(comparisons, f, indent=2)
     complete = sum(c['complete'] for c in comparisons.values())

@@ -19,7 +19,11 @@ votes (ner_seedmeans.WEEK5_SYSTEMS) and writes ner_week5_seed_analysis.json next
   - published_split (week-5 amendment): per granularity, plain MatSciBERT and the CRF head on
     the published split, 10 model seeds each: the mean and 95% CI over the seeds of every F1
     average and where the published number lies; the CRF head minus plain MatSciBERT, paired
-    by seed; and the CRF votes over the seed triples 0-200, 300-500 and 600-800.
+    by seed; and the CRF votes over the seed triples 0-200, 300-500 and 600-800. Week 6 adds
+    SOFC-Exp's official split (granularity sofc, against the published MatSciBERT-CRF
+    scores) and, where their files exist, the week-6 methods on a published split
+    (SPLIT_METHODS): their scores and their difference from the CRF head, paired by seed
+    (SOFC-Exp's S1 and S2 of the week-6 protocol).
 
 A family or vote family is used only if all its files exist. Usage:
   python src/graph/ner_seed_analysis.py [--results results/gpu] [--out PATH]
@@ -43,7 +47,12 @@ OUT_NAME = 'ner_week5_seed_analysis.json'
 FAMILIES = ('crf', 'crf_mt', 'crf_ls', 'crf_st3')
 VOTES = tuple(f'{f}_ens3' for f in FAMILIES)
 AVERAGES = ('micro avg', 'macro avg', 'weighted avg')
-PUBLISHED_F1 = {'fine': 69.92, 'coarse': 72.32}       # Durmaz et al. 2024
+# micro F1: Durmaz et al. 2024 (MaterioMiner); SOFC-Exp: MatSciBERT-CRF (Gupta et al. 2022)
+PUBLISHED_F1 = {'fine': 69.92, 'coarse': 72.32, 'sofc': 84.77}
+PUBLISHED_MACRO = {'sofc': 82.39}
+PUBLISHED_SPLITS = ('fine', 'coarse', 'sofc')
+# week-6 methods run on a published split, compared with the CRF head by seed
+SPLIT_METHODS = ('crf_deberta', 'crf_ctx')
 
 
 def load_files(directory, names):
@@ -127,7 +136,7 @@ def published_split(directory):
     """The published-split analysis per granularity (see the module docstring); granularities
     without both files are left out."""
     out = {}
-    for g in GRANULARITIES:
+    for g in PUBLISHED_SPLITS:
         files = load_files(directory, [f'ner_results_{g}_published_split.json',
                                        f'ner_results_{g}_published_split_crf.json'])
         if not files:
@@ -136,6 +145,8 @@ def published_split(directory):
                 for name, f in zip(('baseline', 'crf'), files)}
         paper = PUBLISHED_F1[g]
         entry = {'published': paper}
+        if g in PUBLISHED_MACRO:
+            entry['published_macro'] = PUBLISHED_MACRO[g]
         for name, by_id in runs.items():
             entry[name] = {avg: spread([get(r) for r in by_id.values()])
                            for avg, get in F1_AVERAGES.items()}
@@ -152,6 +163,18 @@ def published_split(directory):
                                                [runs['crf'][i] for i in t]) for t in triples]
             entry['crf_votes'] = {avg: spread([get(v) for v in votes])
                                   for avg, get in F1_AVERAGES.items()}
+        for method in SPLIT_METHODS:
+            found = load_files(directory, [f'ner_results_{g}_published_split_{method}.json'])
+            if not found:
+                continue
+            by_id = {r['run_id']: r for r in found[0]['runs']}
+            ids = [i for i in runs['crf'] if i in by_id]
+            entry.setdefault('methods', {})[method] = {
+                **{avg: spread([get(r) for r in by_id.values()])
+                   for avg, get in F1_AVERAGES.items()},
+                'minus_crf': {avg: spread([get(by_id[i]) - get(runs['crf'][i]) for i in ids],
+                                          'mean_diff') for avg, get in F1_AVERAGES.items()},
+                'n_pairs': len(ids)}
         out[g] = entry
     return out
 
@@ -197,6 +220,10 @@ def main(argv=None):
         print(f"  published split, {g}: plain MatSciBERT {base['mean']:.2f} {base['ci95']} "
               f"(published {entry['published']:.2f}, {entry['baseline']['published_lies']}), "
               f"CRF head {crf['mean']:.2f} {crf['ci95']}")
+        for method, m in entry.get('methods', {}).items():
+            d = m['minus_crf']['micro']
+            print(f"    {method}: {m['micro']['mean']:.2f} {m['micro']['ci95']}, minus the CRF "
+                  f"head {d['mean_diff']:+.2f} {d['ci95']} over {m['n_pairs']} seeds")
     out = args.out or os.path.join(args.results, OUT_NAME)
     with open(out, 'w') as f:
         json.dump(result, f, indent=2)

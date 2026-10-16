@@ -118,3 +118,37 @@ def test_published_split_analysis(tmp_path):
     assert entry['crf_minus_baseline']['micro']['mean_diff'] == 2.0
     assert entry['crf_votes']['micro']['mean'] == 100.0       # every member predicts the gold
     assert sa.analyse(str(tmp_path))['published_split'] == out
+
+
+def test_published_split_analysis_of_sofc_exp_and_a_method(tmp_path):
+    """SOFC-Exp's official split (week 6): plain MatSciBERT and the CRF head against the
+    published MatSciBERT-CRF scores, and DeBERTa-v3-large against the CRF head by seed."""
+    pytest.importorskip('scipy')
+    pytest.importorskip('seqeval')
+    gold = ['B-X O', 'O B-X']
+
+    def runs(shift, ids=range(10)):
+        out = []
+        for j in ids:
+            run = _run(f'seed{100 * j}', 80 + shift + j / 10)
+            run.update({'test_index': [0, 1], 'test_gold': gold, 'test_pred': gold})
+            out.append(run)
+        return {'runs': out}
+    for variant, shift in (('', 0), ('_crf', 4.4), ('_crf_deberta', 5.4)):
+        (tmp_path / f'ner_results_sofc_published_split{variant}.json').write_text(
+            json.dumps(runs(shift)))
+    out = sa.published_split(tmp_path)
+    assert list(out) == ['sofc']
+    sofc = out['sofc']
+    assert (sofc['published'], sofc['published_macro']) == (84.77, 82.39)
+    assert sofc['crf']['micro']['mean'] == 84.85 and sofc['crf']['published_lies'] == 'within'
+    assert sofc['baseline']['published_lies'] == 'above'           # 84.77 above 80.45's CI
+    deberta = sofc['methods']['crf_deberta']
+    assert deberta['micro']['mean'] == 85.85 and deberta['n_pairs'] == 10
+    assert deberta['minus_crf']['micro']['mean_diff'] == 1.0
+    assert 'crf_ctx' not in sofc['methods']
+    # a method with fewer seeds is paired on the seeds both have
+    (tmp_path / 'ner_results_sofc_published_split_crf_ctx.json').write_text(
+        json.dumps(runs(3.4, ids=range(3))))
+    ctx = sa.published_split(tmp_path)['sofc']['methods']['crf_ctx']
+    assert ctx['n_pairs'] == 3 and ctx['minus_crf']['micro']['mean_diff'] == -1.0

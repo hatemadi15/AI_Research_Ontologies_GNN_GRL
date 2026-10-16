@@ -965,6 +965,112 @@ def test_week5_analysis_bullets(tmp_path):
             'coarse-grained one.') in readme
 
 
+def test_week6_lists_follow_ner_seedmeans():
+    ns = pytest.importorskip('ner_seedmeans')
+    assert rr.WEEK6_FILE == ns.OUT_NAMES[6] and rr.WEEK6_SCREEN_FILE == ns.SCREEN_NAME
+    assert rr.WEEK6_METHODS == ns.WEEK6_METHODS and rr.UNSEEN_BEST == ns.UNSEEN_BEST
+    assert list(rr.WEEK6_SCREEN_COMPARISONS) == [
+        (v, r) for v, r, _ in ns.comparison_list(6, True, screen=True)]
+    assert list(rr.WEEK6_COMPARISONS) == [(v, r) for v, r, _ in ns.comparison_list(6, True)]
+    assert set(rr.WEEK6_NAMES) >= set(ns.WEEK6_SYSTEMS) | set(ns.WEEK6_SCREEN_SYSTEMS)
+
+
+def test_week6_tables_and_bullets(tmp_path):
+    """The screen and the 10-seed comparisons get a table each, over the held-out papers, and
+    a bullet per comparison with each granularity's role."""
+    ws = Workspace(tmp_path)
+    lopo = 'leave_one_paper_out'
+    for g, micro in (('fine', (1.2, -0.5, 2.9)), ('coarse', (-0.4, -1.0, 0.2))):
+        ws.week4('crf_deberta', 'crf', g, lopo, gpu=True, role='screen', micro=micro,
+                 score=(50.0, 44.0, 56.0), name=rr.WEEK6_SCREEN_FILE)
+    ws.week4('crf_deberta_ens3', 'crf_mt_ens3', 'fine', lopo, gpu=True, role='decision',
+             micro=(2.0, 0.5, 3.5), score=(55.0, 48.0, 62.0), name=rr.WEEK6_FILE)
+    ws.week4('crf_deberta_ens3', 'crf_mt_ens3', 'coarse', lopo, gpu=True, role='reported',
+             micro=(1.0, -1.0, 3.0), score=(62.0, 56.0, 68.0), name=rr.WEEK6_FILE)
+    readme, _ = ws.generate()
+    rows = table_rows(readme, '#### NER week-6 screen')
+    assert [r.split(' | ')[:3] for r in rows] == [
+        ['| DeBERTa-v3-large vs CRF head', 'fine', '4'],
+        ['| DeBERTa-v3-large vs CRF head', 'coarse', '4']]
+    assert all(r.endswith('| screen |') for r in rows)
+    rows = table_rows(readme, '#### NER week-6 comparisons')
+    assert [r.split(' | ')[0] for r in rows] == ['| DeBERTa-v3-large vote vs multi-task vote'] * 2
+    assert ('* NER week 6 (GPU runs, 3-seed screen), DeBERTa-v3-large vs the CRF head (paired '
+            'micro-F1 difference, leaving one paper out): fine-grained no significant change '
+            '(+1.20, 95% CI [-0.50, +2.90]') in readme
+    assert 'the screen); coarse-grained' in readme
+    assert ('* NER week 6 (GPU runs, 10 seeds), DeBERTa-v3-large vote vs the multi-task vote '
+            '(paired micro-F1 difference, leaving one paper out): fine-grained improves (+2.00, '
+            '95% CI [+0.50, +3.50]') in readme
+    assert 'the pre-registered decision); coarse-grained no significant change' in readme
+
+
+def test_a_week6_vote_that_passes_takes_the_unseen_slot(tmp_path):
+    ws = Workspace(tmp_path)
+    lopo = 'leave_one_paper_out'
+    for g in ('fine', 'coarse'):
+        ws.week4('crf_ens3', 'crf', g, 'random_split_vary', gpu=True, micro=(2.0, 1.0, 3.0),
+                 score=(80.5, 78.0, 83.0), name=rr.WEEK5_FILE)
+        ws.week4('crf_ens3', 'crf', g, lopo, gpu=True, micro=(2.0, 1.0, 3.0),
+                 score=(50.0, 44.0, 56.0), name=rr.WEEK5_FILE)
+    ws.week4('crf_mt_ens3', 'crf_ens3', 'fine', lopo, gpu=True, role='decision',
+             micro=(3.6, 0.5, 6.8), score=(52.5, 44.0, 61.0), name=rr.WEEK5_FILE)
+    readme, roadmap = ws.generate()
+    fine = next(r for r in glance(readme).split('\n') if 'fine-grained, reported' in r)
+    assert 'on unseen papers the multi-task vote `crf_mt_ens3`' in fine
+    assert '(week-5 protocol; 10 seeds, GPU runs)' in fine
+    # fine-grained, the document-context vote beats the multi-task vote (decision 2)
+    ws.week4('crf_ctx_ens3', 'crf_mt_ens3', 'fine', lopo, gpu=True, role='decision',
+             micro=(1.5, 0.3, 2.7), score=(54.0, 46.0, 62.0), name=rr.WEEK6_FILE)
+    # reported only: does not count
+    ws.week4('crf_deberta_ens3', 'crf_mt_ens3', 'coarse', lopo, gpu=True, role='reported',
+             micro=(5.0, 1.0, 9.0), score=(66.0, 60.0, 72.0), name=rr.WEEK6_FILE)
+    readme, roadmap = ws.generate()
+    rows = [r for r in glance(readme).split('\n') if 'reported system' in r]
+    assert ('(week-5 and week-6 protocols; 10 seeds, GPU runs): 3-model seed ensemble '
+            '`crf_ens3`; on unseen papers the document-context vote `crf_ctx_ens3` | micro F1 '
+            '80.50 [78.00, 83.00] over 5 random splits; 54.00 on an unseen paper') in rows[0]
+    assert 'on unseen papers' not in rows[1]                  # coarse keeps crf_ens3
+    standing = next(line for line in roadmap.split('\n') if 'reported system' in line)
+    assert standing.startswith('| NER, reported system (week-5 and week-6 protocols;')
+
+
+def test_sofc_row_and_bullet(tmp_path):
+    ws = Workspace(tmp_path)
+    (ws.results / 'gpu').mkdir()
+    for variant, micro in ((None, (80.5, 79.9, 81.1)), ('crf', (84.8, 84.3, 85.3))):
+        (ws.results / 'gpu' / rr.ner_file('sofc', 'published_split', variant)).write_text(
+            json.dumps({'summary': {'n_runs': 10, 'micro': {'mean': micro[0],
+                                                            'ci95': list(micro[1:])},
+                                    'macro': {'mean': micro[0] - 2, 'ci95': [0, 0]}}}))
+    readme, _ = ws.generate()
+    row = next(r for r in glance(readme).split('\n') if 'SOFC-Exp' in r)
+    assert row == ('| NER on SOFC-Exp, the official split, 10 seeds (GPU runs) | plain '
+                   'MatSciBERT 80.50 [79.90, 81.10]; CRF head 84.80 [84.30, 85.30] (macro 82.80) '
+                   '| published MatSciBERT-CRF 84.77 micro, 82.39 macro (Gupta et al. 2022): '
+                   "within the CRF head's 95% CI (over seeds only) |")
+    spread = {'mean': 84.8, 'ci95': [84.3, 85.3]}
+    analysis = {'published_split': {'sofc': {
+        'published': 84.77, 'published_macro': 82.39,
+        'baseline': {'micro': {'mean': 80.5, 'ci95': [79.9, 81.1]}},
+        'crf': {'micro': spread, 'macro': {'mean': 82.8, 'ci95': [82.0, 83.6]}},
+        'crf_minus_baseline': {'micro': {'mean_diff': 4.3, 'ci95': [3.5, 5.1]},
+                               'micro_strict': {'mean_diff': 2.0, 'ci95': [1.0, 3.0]}},
+        'methods': {'crf_deberta': {'micro': {'mean': 85.6, 'ci95': [85.0, 86.2]},
+                                    'minus_crf': {'micro': {'mean_diff': 0.8,
+                                                            'ci95': [0.1, 1.5]}},
+                                    'n_pairs': 10}}}}}
+    (ws.results / 'gpu' / rr.WEEK5_ANALYSIS).write_text(json.dumps(analysis))
+    readme, _ = ws.generate()
+    assert ('* NER on SOFC-Exp (week 6; its official split, 26 training, 8 development and 11 '
+            'test articles; 10 model seeds, GPU runs; the 95% CIs are over seeds): plain '
+            'MatSciBERT 80.50 [79.90, 81.10], the CRF head 84.80 [84.30, 85.30] (macro 82.80), '
+            'against the published MatSciBERT-CRF 84.77 micro and 82.39 macro. The CRF head minus '
+            'plain MatSciBERT, paired by seed (S1): +4.30 [+3.50, +5.10], strict IOB2 +2.00 '
+            '[+1.00, +3.00]. DeBERTa-v3-large (S2): 85.60 [85.00, 86.20], minus the CRF head '
+            '+0.80 [+0.10, +1.50] over 10 seeds.\n') in readme
+
+
 def test_a_week3_file_that_is_not_an_object_is_reported(tmp_path, capsys):
     ws = Workspace(tmp_path)
     (ws.results / rr.WEEK3_FILE).write_text('[1, 2]')
