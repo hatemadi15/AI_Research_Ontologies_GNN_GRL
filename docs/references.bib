@@ -1,0 +1,381 @@
+% References for the NER paper (docs/PAPER.md). Each entry was checked on 2026-10-16 against
+% Crossref, the publisher's page, the ACL Anthology, arXiv, PMC or the official proceedings;
+% where these disagreed, against the paper itself. Notes on spellings and author lists are kept
+% as comments next to the entries they concern.
+%
+% Scope notes for the paper:
+% - durmaz2024materiominer: the article's title does not contain "MaterioMiner".
+% - potu2025ontology: its domain shift is between two fatigue datasets, not unseen papers of one.
+% - lipton2014optimal: the F1/2 threshold holds for calibrated binary decisions; entity-level F1
+%   under Viterbi decoding does not meet this exactly (motivation, not a guarantee).
+% - minkov2006ner: one weight on the O label before decoding, the direct precedent of the
+%   week-7 recall calibration (found after its protocol was fixed).
+% - du2021selftraining retrieves web sentences ("does not require in-domain unlabeled data");
+%   liang2020bond is the NER self-training precedent.
+% - gorman2019standard and sogaard2021random take opposite sides on random splits.
+
+@article{gupta2022matscibert,
+  author  = {Gupta, Tanishq and Zaki, Mohd and Krishnan, N. M. Anoop and {Mausam}},
+  title   = {{MatSciBERT}: A materials domain language model for text mining and information extraction},
+  journal = {npj Computational Materials},
+  volume  = {8},
+  number  = {1},
+  pages   = {102},
+  year    = {2022},
+  doi     = {10.1038/s41524-022-00784-w},
+  url     = {https://www.nature.com/articles/s41524-022-00784-w}
+}
+
+@article{durmaz2024materiominer,
+  author  = {Durmaz, Ali Riza and Thomas, Akhil and Mishra, Lokesh and Murthy, Rachana Niranjan and Straub, Thomas},
+  title   = {An ontology-based text mining dataset for extraction of process-structure-property entities},
+  journal = {Scientific Data},
+  volume  = {11},
+  number  = {1},
+  pages   = {1112},
+  year    = {2024},
+  doi     = {10.1038/s41597-024-03926-5},
+  url     = {https://www.nature.com/articles/s41597-024-03926-5}
+}
+
+@article{potu2025ontology,
+  author  = {Potu, Sai Teja and Niranjan Murthy, Rachana and Thomas, Akhil and Mishra, Lokesh and Prange, Natalie and Durmaz, Ali Riza},
+  title   = {Ontology-conformal recognition of materials entities using language models},
+  journal = {Scientific Reports},
+  volume  = {15},
+  number  = {1},
+  pages   = {18597},
+  year    = {2025},
+  doi     = {10.1038/s41598-025-03619-y},
+  url     = {https://www.nature.com/articles/s41598-025-03619-y}
+}
+
+@inproceedings{reimers2017reporting,
+  author    = {Reimers, Nils and Gurevych, Iryna},
+  title     = {Reporting Score Distributions Makes a Difference: Performance Study of {LSTM}-networks for Sequence Tagging},
+  booktitle = {Proceedings of the 2017 Conference on Empirical Methods in Natural Language Processing},
+  pages     = {338--348},
+  address   = {Copenhagen, Denmark},
+  publisher = {Association for Computational Linguistics},
+  year      = {2017},
+  doi       = {10.18653/v1/D17-1035},
+  url       = {https://aclanthology.org/D17-1035/}
+}
+
+@misc{dodge2020finetuning,
+  author        = {Dodge, Jesse and Ilharco, Gabriel and Schwartz, Roy and Farhadi, Ali and Hajishirzi, Hannaneh and Smith, Noah},
+  title         = {Fine-Tuning Pretrained Language Models: Weight Initializations, Data Orders, and Early Stopping},
+  year          = {2020},
+  eprint        = {2002.06305},
+  archivePrefix = {arXiv},
+  url           = {https://arxiv.org/abs/2002.06305}
+}
+
+@inproceedings{ma2022label,
+  author    = {Ma, Jie and Ballesteros, Miguel and Doss, Srikanth and Anubhai, Rishita and Mallya, Sunil and Al-Onaizan, Yaser and Roth, Dan},
+  title     = {Label Semantics for Few Shot Named Entity Recognition},
+  booktitle = {Findings of the Association for Computational Linguistics: {ACL} 2022},
+  pages     = {1956--1971},
+  address   = {Dublin, Ireland},
+  publisher = {Association for Computational Linguistics},
+  year      = {2022},
+  doi       = {10.18653/v1/2022.findings-acl.155},
+  url       = {https://aclanthology.org/2022.findings-acl.155/}
+}
+
+@misc{schweter2020flert,
+  author        = {Schweter, Stefan and Akbik, Alan},
+  title         = {{FLERT}: Document-Level Features for Named Entity Recognition},
+  year          = {2020},
+  eprint        = {2011.06993},
+  archivePrefix = {arXiv},
+  url           = {https://arxiv.org/abs/2011.06993}
+}
+
+@inproceedings{friedrich2020sofc,
+  author    = {Friedrich, Annemarie and Adel, Heike and Tomazic, Federico and Hingerl, Johannes and Benteau, Renou and Marusczyk, Anika and Lange, Lukas},
+  title     = {The {SOFC}-Exp Corpus and Neural Approaches to Information Extraction in the Materials Science Domain},
+  booktitle = {Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics},
+  pages     = {1255--1268},
+  address   = {Online},
+  publisher = {Association for Computational Linguistics},
+  year      = {2020},
+  doi       = {10.18653/v1/2020.acl-main.116},
+  url       = {https://aclanthology.org/2020.acl-main.116/}
+}
+
+% NOTE (lipton2014optimal): the published chapter, Crossref, PMC and the arXiv PDF all print the
+% third author as "Naryanaswamy"; the arXiv listing metadata gives "Narayanaswamy". Choose one.
+@inproceedings{lipton2014optimal,
+  author    = {Lipton, Zachary C. and Elkan, Charles and Naryanaswamy, Balakrishnan},
+  title     = {Optimal Thresholding of Classifiers to Maximize {F1} Measure},
+  booktitle = {Machine Learning and Knowledge Discovery in Databases: European Conference, {ECML} {PKDD} 2014, Nancy, France, September 15--19, 2014. Proceedings, Part {II}},
+  editor    = {Calders, Toon and Esposito, Floriana and H{\"u}llermeier, Eyke and Meo, Rosa},
+  series    = {Lecture Notes in Computer Science},
+  volume    = {8725},
+  pages     = {225--239},
+  publisher = {Springer Berlin Heidelberg},
+  year      = {2014},
+  doi       = {10.1007/978-3-662-44851-9_15}
+}
+
+@inproceedings{gale1992one,
+  author    = {Gale, William A. and Church, Kenneth W. and Yarowsky, David},
+  title     = {One Sense Per Discourse},
+  booktitle = {Speech and Natural Language: Proceedings of a Workshop Held at Harriman, {N}ew {Y}ork, {F}ebruary 23--26, 1992},
+  pages     = {233--237},
+  year      = {1992},
+  doi       = {10.3115/1075527.1075579},
+  url       = {https://aclanthology.org/H92-1045/}
+}
+
+@inproceedings{krishnan2006effective,
+  author    = {Krishnan, Vijay and Manning, Christopher D.},
+  title     = {An Effective Two-Stage Model for Exploiting Non-Local Dependencies in Named Entity Recognition},
+  booktitle = {Proceedings of the 21st International Conference on Computational Linguistics and 44th Annual Meeting of the Association for Computational Linguistics},
+  pages     = {1121--1128},
+  address   = {Sydney, Australia},
+  publisher = {Association for Computational Linguistics},
+  year      = {2006},
+  doi       = {10.3115/1220175.1220316},
+  url       = {https://aclanthology.org/P06-1141/}
+}
+
+@inproceedings{dai2020analysis,
+  author    = {Dai, Xiang and Adel, Heike},
+  title     = {An Analysis of Simple Data Augmentation for Named Entity Recognition},
+  booktitle = {Proceedings of the 28th International Conference on Computational Linguistics},
+  pages     = {3861--3867},
+  address   = {Barcelona, Spain (Online)},
+  publisher = {International Committee on Computational Linguistics},
+  year      = {2020},
+  doi       = {10.18653/v1/2020.coling-main.343},
+  url       = {https://aclanthology.org/2020.coling-main.343/}
+}
+
+@inproceedings{liang2020bond,
+  author    = {Liang, Chen and Yu, Yue and Jiang, Haoming and Er, Siawpeng and Wang, Ruijia and Zhao, Tuo and Zhang, Chao},
+  title     = {{BOND}: {BERT}-Assisted Open-Domain Named Entity Recognition with Distant Supervision},
+  booktitle = {Proceedings of the 26th {ACM} {SIGKDD} International Conference on Knowledge Discovery \& Data Mining ({KDD} '20)},
+  pages     = {1054--1064},
+  publisher = {ACM},
+  year      = {2020},
+  doi       = {10.1145/3394486.3403149}
+}
+
+@inproceedings{du2021selftraining,
+  author    = {Du, Jingfei and Grave, Edouard and Gunel, Beliz and Chaudhary, Vishrav and Celebi, Onur and Auli, Michael and Stoyanov, Veselin and Conneau, Alexis},
+  title     = {Self-training Improves Pre-training for Natural Language Understanding},
+  booktitle = {Proceedings of the 2021 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies},
+  pages     = {5408--5418},
+  address   = {Online},
+  publisher = {Association for Computational Linguistics},
+  year      = {2021},
+  doi       = {10.18653/v1/2021.naacl-main.426},
+  url       = {https://aclanthology.org/2021.naacl-main.426/}
+}
+
+@inproceedings{he2023debertav3,
+  author        = {He, Pengcheng and Gao, Jianfeng and Chen, Weizhu},
+  title         = {{DeBERTaV3}: Improving {DeBERTa} using {ELECTRA}-Style Pre-Training with Gradient-Disentangled Embedding Sharing},
+  booktitle     = {International Conference on Learning Representations ({ICLR} 2023)},
+  year          = {2023},
+  url           = {https://openreview.net/forum?id=sE7-XhLxHA},
+  eprint        = {2111.09543},
+  archivePrefix = {arXiv}
+}
+
+@inproceedings{lafferty2001conditional,
+  author    = {Lafferty, John and McCallum, Andrew and Pereira, Fernando},
+  title     = {Conditional Random Fields: Probabilistic Models for Segmenting and Labeling Sequence Data},
+  booktitle = {Proceedings of the 18th International Conference on Machine Learning ({ICML} 2001)},
+  pages     = {282--289},
+  year      = {2001},
+  url       = {https://repository.upenn.edu/handle/20.500.14332/6188}
+}
+
+@inproceedings{lample2016neural,
+  author    = {Lample, Guillaume and Ballesteros, Miguel and Subramanian, Sandeep and Kawakami, Kazuya and Dyer, Chris},
+  title     = {Neural Architectures for Named Entity Recognition},
+  booktitle = {Proceedings of the 2016 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies},
+  pages     = {260--270},
+  address   = {San Diego, California},
+  publisher = {Association for Computational Linguistics},
+  year      = {2016},
+  doi       = {10.18653/v1/N16-1030},
+  url       = {https://aclanthology.org/N16-1030/}
+}
+
+@misc{nakayama2018seqeval,
+  author = {Nakayama, Hiroki},
+  title  = {{seqeval}: A Python framework for sequence labeling evaluation},
+  year   = {2018},
+  url    = {https://github.com/chakki-works/seqeval},
+  note   = {Software available from https://github.com/chakki-works/seqeval}
+}
+
+@inproceedings{tjongkimsang2003introduction,
+  author    = {Tjong Kim Sang, Erik F. and De Meulder, Fien},
+  title     = {Introduction to the {CoNLL}-2003 Shared Task: Language-Independent Named Entity Recognition},
+  booktitle = {Proceedings of the Seventh Conference on Natural Language Learning at {HLT}-{NAACL} 2003},
+  pages     = {142--147},
+  year      = {2003},
+  doi       = {10.3115/1119176.1119195},
+  url       = {https://aclanthology.org/W03-0419/}
+}
+
+@article{weston2019named,
+  author  = {Weston, L. and Tshitoyan, V. and Dagdelen, J. and Kononova, O. and Trewartha, A. and Persson, K. A. and Ceder, G. and Jain, A.},
+  title   = {Named Entity Recognition and Normalization Applied to Large-Scale Information Extraction from the Materials Science Literature},
+  journal = {Journal of Chemical Information and Modeling},
+  volume  = {59},
+  number  = {9},
+  pages   = {3692--3702},
+  year    = {2019},
+  doi     = {10.1021/acs.jcim.9b00470}
+}
+
+@inproceedings{dror2018hitchhiker,
+  author    = {Dror, Rotem and Baumer, Gili and Shlomov, Segev and Reichart, Roi},
+  title     = {The Hitchhiker's Guide to Testing Statistical Significance in Natural Language Processing},
+  booktitle = {Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)},
+  pages     = {1383--1392},
+  address   = {Melbourne, Australia},
+  publisher = {Association for Computational Linguistics},
+  year      = {2018},
+  doi       = {10.18653/v1/P18-1128},
+  url       = {https://aclanthology.org/P18-1128/}
+}
+
+@inproceedings{gorman2019standard,
+  author    = {Gorman, Kyle and Bedrick, Steven},
+  title     = {We Need to Talk about Standard Splits},
+  booktitle = {Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics},
+  pages     = {2786--2791},
+  address   = {Florence, Italy},
+  publisher = {Association for Computational Linguistics},
+  year      = {2019},
+  doi       = {10.18653/v1/P19-1267},
+  url       = {https://aclanthology.org/P19-1267/}
+}
+
+@inproceedings{sogaard2021random,
+  author    = {S{\o}gaard, Anders and Ebert, Sebastian and Bastings, Jasmijn and Filippova, Katja},
+  title     = {We Need To Talk About Random Splits},
+  booktitle = {Proceedings of the 16th Conference of the European Chapter of the Association for Computational Linguistics: Main Volume},
+  pages     = {1823--1832},
+  address   = {Online},
+  publisher = {Association for Computational Linguistics},
+  year      = {2021},
+  doi       = {10.18653/v1/2021.eacl-main.156},
+  url       = {https://aclanthology.org/2021.eacl-main.156/}
+}
+
+@inproceedings{vanmiltenburg2021preregistering,
+  author    = {van Miltenburg, Emiel and van der Lee, Chris and Krahmer, Emiel},
+  title     = {Preregistering {NLP} research},
+  booktitle = {Proceedings of the 2021 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies},
+  pages     = {613--623},
+  address   = {Online},
+  publisher = {Association for Computational Linguistics},
+  year      = {2021},
+  doi       = {10.18653/v1/2021.naacl-main.51},
+  url       = {https://aclanthology.org/2021.naacl-main.51/}
+}
+
+@inproceedings{ovadia2019trust,
+  author        = {Ovadia, Yaniv and Fertig, Emily and Ren, Jie and Nado, Zachary and Sculley, D. and Nowozin, Sebastian and Dillon, Joshua V. and Lakshminarayanan, Balaji and Snoek, Jasper},
+  title         = {Can You Trust Your Model's Uncertainty? {E}valuating Predictive Uncertainty Under Dataset Shift},
+  booktitle     = {Advances in Neural Information Processing Systems},
+  volume        = {32},
+  publisher     = {Curran Associates, Inc.},
+  year          = {2019},
+  url           = {https://proceedings.neurips.cc/paper_files/paper/2019/hash/8558cb408c1d76621371888657d2eb1d-Abstract.html},
+  eprint        = {1906.02530},
+  archivePrefix = {arXiv}
+}
+
+% NOTE (bouthillier2021accounting): 17 authors as printed on the MLSys paper; the proceedings-site
+% metadata lists 16 (omits Dmitriy Serdyuk; "Nazanin Mohammadi Sepahvand" for "Naz Sepah").
+@inproceedings{bouthillier2021accounting,
+  author        = {Bouthillier, Xavier and Delaunay, Pierre and Bronzi, Mirko and Trofimov, Assya and Nichyporuk, Brennan and Szeto, Justin and Sepah, Naz and Raff, Edward and Madan, Kanika and Voleti, Vikram and Ebrahimi Kahou, Samira and Michalski, Vincent and Serdyuk, Dmitriy and Arbel, Tal and Pal, Chris and Varoquaux, Ga{\"e}l and Vincent, Pascal},
+  title         = {Accounting for Variance in Machine Learning Benchmarks},
+  booktitle     = {Proceedings of Machine Learning and Systems},
+  volume        = {3},
+  pages         = {747--769},
+  year          = {2021},
+  url           = {https://proceedings.mlsys.org/paper_files/paper/2021/hash/0184b0cd3cfb185989f858a1d9f5c1eb-Abstract.html},
+  eprint        = {2103.03098},
+  archivePrefix = {arXiv}
+}
+
+% ---- Added works ----
+
+@inproceedings{song2023matscinlp,
+  author    = {Song, Yu and Miret, Santiago and Liu, Bang},
+  title     = {{MatSci-NLP}: Evaluating Scientific Language Models on Materials Science Language Tasks Using Text-to-Schema Modeling},
+  booktitle = {Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)},
+  pages     = {3621--3639},
+  address   = {Toronto, Canada},
+  publisher = {Association for Computational Linguistics},
+  year      = {2023},
+  doi       = {10.18653/v1/2023.acl-long.201},
+  url       = {https://aclanthology.org/2023.acl-long.201/}
+}
+
+@article{trewartha2022quantifying,
+  author  = {Trewartha, Amalie and Walker, Nicholas and Huo, Haoyan and Lee, Sanghoon and Cruse, Kevin and Dagdelen, John and Dunn, Alexander and Persson, Kristin A. and Ceder, Gerbrand and Jain, Anubhav},
+  title   = {Quantifying the advantage of domain-specific pre-training on named entity recognition tasks in materials science},
+  journal = {Patterns},
+  volume  = {3},
+  number  = {4},
+  pages   = {100488},
+  year    = {2022},
+  doi     = {10.1016/j.patter.2022.100488}
+}
+
+@inproceedings{babl2025random,
+  author    = {Babl, Florian and Hennen, Moritz and Murauer, Jakob and Geierhos, Michaela},
+  title     = {Random Splitting Negatively Impacts {NER} Evaluation: Quantifying and Eliminating the Overestimation of {NER} Performance},
+  booktitle = {Findings of the Association for Computational Linguistics: {ACL} 2025},
+  pages     = {9724--9738},
+  address   = {Vienna, Austria},
+  publisher = {Association for Computational Linguistics},
+  year      = {2025},
+  doi       = {10.18653/v1/2025.findings-acl.504},
+  url       = {https://aclanthology.org/2025.findings-acl.504/}
+}
+
+@article{augenstein2017generalisation,
+  author  = {Augenstein, Isabelle and Derczynski, Leon and Bontcheva, Kalina},
+  title   = {Generalisation in named entity recognition: A quantitative analysis},
+  journal = {Computer Speech \& Language},
+  volume  = {44},
+  pages   = {61--83},
+  year    = {2017},
+  doi     = {10.1016/j.csl.2017.01.012}
+}
+
+@inproceedings{minkov2006ner,
+  author    = {Minkov, Einat and Wang, Richard C. and Tomasic, Anthony and Cohen, William W.},
+  title     = {{NER} Systems that Suit User's Preferences: Adjusting the Recall-Precision Trade-off for Entity Extraction},
+  booktitle = {Proceedings of the Human Language Technology Conference of the {NAACL}, Companion Volume: Short Papers},
+  pages     = {93--96},
+  address   = {New York City, USA},
+  publisher = {Association for Computational Linguistics},
+  year      = {2006},
+  doi       = {10.3115/1614049.1614073},
+  url       = {https://aclanthology.org/N06-2024/}
+}
+
+@inproceedings{suzuki2006training,
+  author    = {Suzuki, Jun and McDermott, Erik and Isozaki, Hideki},
+  title     = {Training Conditional Random Fields with Multivariate Evaluation Measures},
+  booktitle = {Proceedings of the 21st International Conference on Computational Linguistics and 44th Annual Meeting of the Association for Computational Linguistics},
+  pages     = {217--224},
+  address   = {Sydney, Australia},
+  publisher = {Association for Computational Linguistics},
+  year      = {2006},
+  doi       = {10.3115/1220175.1220203},
+  url       = {https://aclanthology.org/P06-1028/}
+}

@@ -78,14 +78,33 @@ gain survives? Splits, scoring and seeds on MaterioMiner".
    grouped by article.
 2. The authors' confirmation of the split and the scoring (item 6; the email
    is drafted). The reproduction (C1) already matches both numbers.
-3. Related work:
-   - MatSciBERT (Gupta et al., 2022) and MaterioMiner (Durmaz et al., 2024);
-   - out-of-distribution materials NER (Sci Rep 2025);
-   - seed variance and reporting score distributions (Reimers and Gurevych,
-     2017; Dodge et al., 2020);
-   - label semantics (Ma et al., 2022);
-   - document context (FLERT; Schweter and Akbik, 2020);
-   - self-training for NER;
-   - SOFC-Exp (Friedrich et al., 2020).
+3. Related work. `docs/references.bib` holds 32 checked references (verified
+   on 16 October against Crossref, publishers, the ACL Anthology and arXiv),
+   with notes on their scope:
+   - materials NER: MatSciBERT (Gupta et al., 2022); the MaterioMiner dataset
+     (Durmaz et al., 2024; its title does not contain "MaterioMiner"); the
+     closest prior work, Potu et al. (2025), whose domain shift is between
+     two fatigue datasets rather than unseen papers of one; SOFC-Exp
+     (Friedrich et al., 2020); Weston et al. (2019); Trewartha et al.
+     (2022); MatSci-NLP (Song et al., 2023);
+   - evaluation: seed variance and score distributions (Reimers and
+     Gurevych, 2017; Dodge et al., 2020; Bouthillier et al., 2021); splits
+     (Gorman and Bedrick, 2019, for random splits; Søgaard et al., 2021,
+     against them; Babl et al., 2025, on entity leakage in random NER
+     splits); unseen mentions (Augenstein et al., 2017); significance
+     testing (Dror et al., 2018); pre-registration (van Miltenburg et al.,
+     2021);
+   - the methods tested: CRFs (Lafferty et al., 2001; Lample et al., 2016),
+     label semantics (Ma et al., 2022, which embeds label names), document
+     context (FLERT; Schweter and Akbik, 2020), self-training (BOND, Liang et
+     al., 2020; Du et al., 2021 uses web text, not an in-domain corpus),
+     DeBERTa-v3 (He et al., 2023), mention replacement (Dai and Adel, 2020),
+     one sense per discourse (Gale et al., 1992; Krishnan and Manning, 2006);
+   - recall calibration: the F1-optimal threshold of a calibrated classifier
+     is half its F1 (Lipton et al., 2014); a single weight on the O label
+     already trades precision for recall in CRF extractors (Minkov et al.,
+     2006); training CRFs for F-score (Suzuki et al., 2006); calibration
+     under shift (Ovadia et al., 2019). The paper's contribution there is
+     the choice of the bias for unseen documents, on inner folds.
 4. The venue. Candidates are a materials-informatics journal or workshop, or
    a scholarly-document-processing workshop.
