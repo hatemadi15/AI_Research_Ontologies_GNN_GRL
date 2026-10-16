@@ -23,12 +23,13 @@ from the corpus (ner_baseline.load_split_corpus) through each run's test_index.
 
 Output: ner_results_<granularity>[_<protocol>]_<variant>.json next to the input (--out-dir
 overrides), where the variant is the input's with _dc (with --retype, _dcr) before its seed
-tag: crf_m300 gives crf_dc_m300, crf_ens3 gives crf_ens3_dc. Each run keeps its run_id,
-test_index and test_gold, has the new test_pred, the number of entities added (n_added) and
-retyped (n_retyped), and the input's f1 and f1_strict as input_f1 and input_f1_strict.
+tag: crf_m300 gives crf_dc_m300, crf_ens3 gives crf_ens3_dc. Each run has its run_id, the
+seqeval metrics, the number of entities added (n_added) and retyped (n_retyped), and the
+input's f1 and f1_strict as input_f1 and input_f1_strict; with --save-predictions also
+test_index, test_gold and the new test_pred (the rule regenerates them from the input).
 
 Usage:
-  python ner_consistency.py FILE [FILE ...] [--retype] [--out-dir DIR]
+  python ner_consistency.py FILE [FILE ...] [--retype] [--out-dir DIR] [--save-predictions]
 """
 
 import argparse
@@ -118,8 +119,9 @@ def dc_variant(variant, retype=False):
     return variant[:tag.start()] + suffix + variant[tag.start():]
 
 
-def apply(results, corpus, retype=False):
-    """The rule applied to every run of a parsed results file, scored (ner_baseline schema)."""
+def apply(results, corpus, retype=False, save_predictions=False):
+    """The rule applied to every run of a parsed results file, scored (ner_baseline schema);
+    save_predictions keeps the test sentences and the new predictions in each run."""
     out = {k: results[k] for k in COPIED_KEYS if k in results}
     out.update({'variant': dc_variant(results['variant'], retype),
                 'config': {'input': results['variant'], 'rule': RULE, 'retype': retype}})
@@ -158,9 +160,10 @@ def apply(results, corpus, retype=False):
             added, retyped = added + a, retyped + r
         res = score(gold, new)
         res.update({'run_id': run['run_id'], 'n_added': added, 'n_retyped': retyped,
-                    'input_f1': run['f1'], 'input_f1_strict': run['f1_strict'],
-                    'test_index': run['test_index'], 'test_gold': run['test_gold'],
-                    'test_pred': [' '.join(t) for t in new]})
+                    'input_f1': run['f1'], 'input_f1_strict': run['f1_strict']})
+        if save_predictions:
+            res.update({'test_index': run['test_index'], 'test_gold': run['test_gold'],
+                        'test_pred': [' '.join(t) for t in new]})
         runs.append(res)
     out['runs'] = runs
     summarize(out)
@@ -177,6 +180,8 @@ def main(argv=None):
                              '(variant _dcr)')
     parser.add_argument('--out-dir', default=None, metavar='DIR',
                         help='where to write (default: next to each input)')
+    parser.add_argument('--save-predictions', action='store_true',
+                        help='keep test_index, test_gold and the new test_pred in each run')
     args = parser.parse_args(argv)
     corpora = {}
     try:
@@ -186,7 +191,7 @@ def main(argv=None):
             g = results['granularity']
             if g not in corpora:
                 corpora[g] = load_split_corpus(g)
-            out = apply(results, corpora[g], args.retype)
+            out = apply(results, corpora[g], args.retype, args.save_predictions)
             name = os.path.join(args.out_dir or os.path.dirname(path) or '.',
                                 results_name(g, out['protocol'], out['variant']))
             if os.path.realpath(name) == os.path.realpath(path):

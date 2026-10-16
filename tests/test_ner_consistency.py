@@ -110,7 +110,7 @@ def test_results_are_rescored_per_document(tmp_path, monkeypatch, capsys):
     path = tmp_path / 'ner_results_fine_leave_one_paper_out_crf_m100.json'
     path.write_text(json.dumps(_results(pred)))
     monkeypatch.setattr(nc, 'load_split_corpus', lambda g: CORPUS)
-    assert nc.main([str(path)]) == 0
+    assert nc.main([str(path), '--save-predictions']) == 0
     out = json.loads((tmp_path / 'ner_results_fine_leave_one_paper_out_crf_dc_m100.json')
                      .read_text())
     assert out['variant'] == 'crf_dc_m100' and out['protocol'] == 'leave_one_paper_out'
@@ -123,6 +123,14 @@ def test_results_are_rescored_per_document(tmp_path, monkeypatch, capsys):
     assert b['test_pred'] == ['B-MAT O', 'O O'] and b['n_added'] == 0
     assert out['summary']['n_runs'] == 2 and out['summary']['run_ids'] == ['a', 'b']
     assert 'crf_dc_m100' in capsys.readouterr().out
+    # without --save-predictions the runs keep only their scores and counts
+    assert nc.main([str(path), '--out-dir', str(tmp_path / 'lean')]) == 2   # no such dir
+    (tmp_path / 'lean').mkdir()
+    assert nc.main([str(path), '--out-dir', str(tmp_path / 'lean')]) == 0
+    lean = json.loads((tmp_path / 'lean' / 'ner_results_fine_leave_one_paper_out_crf_dc_m100.json')
+                      .read_text())
+    assert not {'test_index', 'test_gold', 'test_pred'} & set(lean['runs'][0])
+    assert [r['f1'] for r in lean['runs']] == [r['f1'] for r in out['runs']]
 
 
 def test_unusable_inputs_are_reported(tmp_path, monkeypatch, capsys):
