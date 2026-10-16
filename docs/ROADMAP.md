@@ -2279,3 +2279,9 @@ option (the tiny-model check), and every earlier Kaggle batch is unchanged.
 **Budget:** 72 runs on at most 301 training sentences, about 40 minutes of
 one session (`w8b`), one lane per granularity. It runs on the next free
 kernel after the queued batches.
+
+*Clarification, made before any run of week 8:* both week-8 batches run from
+the commit that adds part 2 (`04352cd`), one bundle for both. Part 1's runs
+execute the same code there as at its own commit (`c06fc5e`):
+`--two-paper-size` is off unless given, and every other option writes
+byte-identical results files (the tiny-model check).
