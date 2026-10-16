@@ -128,7 +128,9 @@ from the committed results (no training; re-run it when results change):
    with the CRF head scores micro 84.98 and macro 82.31 on its official
    split with one seed, against the published 84.77 and 82.39. Its main
    comparisons need 10 seeds per split, on random splits and on folds
-   grouped by article.
+   grouped by article. Week 8, part 1 (ROADMAP §4, fixed before its runs)
+   runs the CRF head that way: 5 random sentence splits and 5 folds of 9
+   held-out articles, 10 seeds each.
 2. The authors' confirmation of the split and the scoring (item 6; the email
    is drafted). The reproduction (C1) already matches both numbers.
 3. Related work. `docs/references.bib` holds 34 checked references (verified

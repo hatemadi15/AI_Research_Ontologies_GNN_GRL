@@ -419,7 +419,9 @@ entity types as MaterioMiner's fine level to its coarse one.
   so only large, consistent gains pass, and the per-paper results vary
   widely (Figure 1's intervals).
 - **One second dataset with one split.** On SOFC-Exp the intervals are
-  over seeds only.
+  over seeds only. Week 8 (part 1) runs the CRF head on 5 random sentence
+  splits and 5 folds of held-out articles, to measure the gap of Section
+  5.2 on SOFC-Exp; the methods stay on the official split.
 - **Methods tested on MaterioMiner only.** Self-training used a fatigue
   corpus, which fits MaterioMiner's domain only, and coarse-to-fine
   completion was tested before SOFC-Exp's slot level was converted; their
