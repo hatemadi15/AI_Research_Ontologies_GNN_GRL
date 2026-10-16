@@ -56,7 +56,7 @@ A draft of the sections that hold for either paper type is in
 
 ## Figures and tables
 
-Figures 1–3 are drawn from the GPU results by `src/graph/paper_figures.py`
+Figures 1–4 are drawn from the GPU results by `src/graph/paper_figures.py`
 into `docs/figures/` (no training; re-run it when results change):
 - Figure 1 (`fig1_random_vs_unseen.png`): per system with 10 seeds on both
   protocols, micro F1 on the 5 random splits and on the 4 unseen papers,
@@ -70,6 +70,12 @@ into `docs/figures/` (no training; re-run it when results change):
 - Figure 3 (`fig3_types.png`): per coarse-grained type, the multi-task
   vote's F1 against its test support per split on the random splits; SDE,
   MIP, PRP, MOD and CPR are the low ones (C9).
+- Figure 4 (`fig4_threshold.png`): the CRF head's F1 per held-out paper at
+  each bias on the entity tags. Fine- and coarse-grained, the curves are
+  flat or fall, and their best bias differs in sign from paper to paper. A
+  third panel shows, pooled, the net share of the entities each step of the
+  bias adds that are right; it is at or below F1's break-even rate on
+  MaterioMiner and SOFC-Exp alike (C15).
 - Table 1: the published split (plain MatSciBERT and the CRF head, 10 seeds)
   next to the published numbers, under micro, macro, weighted and strict F1
   (C1, C3, C4).

@@ -75,3 +75,32 @@ def test_figures_are_written(tmp_path):
     written = pf.main(['--results', str(results), '--out', str(out)])
     assert written == ['fig1_random_vs_unseen.png', 'fig2_seeds.png', 'fig3_types.png']
     assert all((out / name).stat().st_size > 10000 for name in written)
+
+
+def test_threshold_data_and_figure4(tmp_path):
+    """Figure 4 (C15): per held-out paper the mean F1 over seeds at each bias, and, pooled, the
+    share of the entities added between two grid points that are right, against F1/2 at 0."""
+    def run(run_id, counts):            # counts: {D: [correct, predicted, gold]} of one paper
+        return {'run_id': run_id, 'bias_test': {d: {run_id: c} for d, c in counts.items()}}
+    for off in range(0, 1000, 100):
+        for g in ('fine', 'coarse'):
+            runs = [run('p1.conll', {'0': [4, 10, 10], '1': [5, 14, 10], '-1': [3, 6, 10]}),
+                    run('p2.conll', {'0': [6, 10, 10], '1': [6, 12, 10], '-1': [5, 8, 10]})]
+            (tmp_path / f'ner_results_{g}_leave_one_paper_out_crf_bias_m{off}.json').write_text(
+                json.dumps({'runs': runs}))
+    sofc = {'runs': [{'run_id': f'seed{k}', 'bias_test': {
+        '0': {'a1': [8, 10, 10], 'a2': [2, 2, 4]}, '1': {'a1': [8, 12, 10], 'a2': [2, 2, 4]}}}
+        for k in range(3)]}
+    (tmp_path / pf.SOFC_BIAS).write_text(json.dumps(sofc))
+    curves, steps = pf.threshold_data(tmp_path)
+    assert curves['fine']['p1'] == [(-1.0, 37.5), (0.0, 40.0), (1.0, pytest.approx(41.67,
+                                                                                   abs=0.01))]
+    points, breakeven = steps['fine-grained']
+    # pooled over 2 papers and 10 seeds: from -1 to 0, 60 more predicted and 20 more right
+    assert points == [(-0.5, pytest.approx(1 / 3)), (0.5, pytest.approx(1 / 6))]
+    assert breakeven == 25.0
+    points, breakeven = steps['SOFC-Exp']
+    assert points == [(0.5, 0.0)] and breakeven == pytest.approx(100 * 30 / 78)
+    pytest.importorskip('matplotlib')
+    pf.figure4(curves, steps, tmp_path / 'fig4.png')
+    assert (tmp_path / 'fig4.png').stat().st_size > 10000

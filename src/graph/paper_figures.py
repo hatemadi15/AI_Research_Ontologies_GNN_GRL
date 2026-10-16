@@ -13,6 +13,11 @@ No training: reads the 10-seed GPU results (results/gpu) and writes PNG files.
       with the week-6 screen's triple (seeds 0, 100 and 200) marked.
   fig3_types.png (C9): per coarse-grained type, the F1 of the reported system's votes
       (the multi-task vote) on the random splits against the type's test support per split.
+  fig4_threshold.png (C15): the CRF head's bias grid (week 7, part 2a; the bias_test counts
+      of the crf_bias runs): (a, b) per held-out paper, its mean micro F1 over the 10 seeds
+      at each bias D, fine- and coarse-grained; (c) pooled over papers (articles) and seeds,
+      the share of the entities added between two grid points that are right, against F1's
+      break-even rate (F1/2 at D = 0), for both granularities and SOFC-Exp.
 A figure whose results are missing is skipped (and named on stdout).
 
 Usage:
@@ -36,6 +41,10 @@ FIG1_SYSTEMS = {'crf': 'CRF head', 'crf_mt': 'multi-task', 'crf_ls': 'label sema
                 'crf_mt_ens3': 'multi-task vote', 'crf_ls_ens3': 'label-semantics vote',
                 'crf_st3_ens3': 'self-training vote'}
 SEED_OFFSETS = tuple(range(0, 1000, 100))
+# Figure 4: the bias grid of the CRF head (week 7, part 2a)
+SOFC_BIAS = 'ner_results_sofc_published_split_crf_bias.json'
+SHORT_PAPER = {'10.1007_s11340-021-00758-x': 's11340', '10.1038_ncomms7164': 'ncomms7164',
+               '10.1038_s41467-020-19071-7': 's41467', '10.3390_met10111458': 'met10111458'}
 SCREEN_TRIPLE = (0, 1, 2)                 # seed offsets 0, 100 and 200 (the week-6 screen)
 
 
@@ -193,6 +202,85 @@ def figure3(types, path):
     plt.close(fig)
 
 
+def bias_counts(files):
+    """{run_id: {D: [[correct, predicted, gold] per file]}} of crf_bias results files: per run
+    (a held-out paper, or a seed on SOFC-Exp), the entity counts at every bias D, summed over
+    the run's test papers or articles, one entry per file (seed)."""
+    out = {}
+    for f in files:
+        for run in f['runs']:
+            for d, papers in run['bias_test'].items():
+                totals = [sum(c[i] for c in papers.values()) for i in range(3)]
+                out.setdefault(run['run_id'], {}).setdefault(float(d), []).append(totals)
+    return out
+
+
+def threshold_data(directory):
+    """(curves, steps): curves[g][paper] = [(D, mean F1 over seeds)] for MaterioMiner's
+    granularities; steps[name] = ([(D midpoint, share of the added entities that are right)],
+    break-even F1/2 at D = 0), pooled over runs and seeds, for both granularities and SOFC-Exp.
+    Missing files leave their entries out."""
+    curves, steps, pooled = {}, {}, {}
+    for g in GRANULARITIES:
+        files = load(directory, [f'ner_results_{g}_leave_one_paper_out_crf_bias_m{off}.json'
+                                 for off in SEED_OFFSETS])
+        if files:
+            counts = bias_counts(files)
+            curves[g] = {paper.removesuffix('.conll'): [
+                (d, statistics.mean(200 * c / (p + n) if p + n else 0.0 for c, p, n in runs))
+                for d, runs in sorted(by_d.items())] for paper, by_d in counts.items()}
+            pooled[f'{g}-grained'] = counts
+    files = load(directory, [SOFC_BIAS])
+    if files:
+        pooled['SOFC-Exp'] = bias_counts(files)
+    for name, counts in pooled.items():
+        total = {}
+        for by_d in counts.values():
+            for d, runs in by_d.items():
+                acc = total.setdefault(d, [0, 0, 0])
+                for c in runs:
+                    for i in range(3):
+                        acc[i] += c[i]
+        grid = sorted(total)
+        points = [((a + b) / 2, (total[b][0] - total[a][0]) / (total[b][1] - total[a][1]))
+                  for a, b in zip(grid, grid[1:]) if total[b][1] != total[a][1]]
+        c, p, n = total[0.0]
+        steps[name] = (points, 100 * c / (p + n))
+    return curves, steps
+
+
+def figure4(curves, steps, path):
+    import matplotlib.pyplot as plt
+    fig, axes = plt.subplots(1, 3, figsize=(13, 3.9))
+    for ax, g in zip(axes[:2], GRANULARITIES):
+        if g not in curves:
+            ax.set_axis_off()
+            continue
+        for paper, points in sorted(curves[g].items()):
+            ax.plot([d for d, _ in points], [f for _, f in points], marker='o', ms=3,
+                    label=SHORT_PAPER.get(paper, paper))
+        ax.axvline(0, color='grey', lw=0.6, ls=':')
+        ax.set(xlabel='bias D on every entity tag', ylabel='micro F1 (mean of 10 seeds)',
+               title=f'({"ab"[GRANULARITIES.index(g)]}) {g}-grained, per held-out paper')
+        ax.legend(fontsize=7)
+        ax.grid(alpha=0.3)
+    ax = axes[2]
+    for (name, (points, breakeven)), color in zip(steps.items(),
+                                                   ('tab:blue', 'tab:orange', 'tab:green')):
+        ax.plot([d for d, _ in points], [100 * r for _, r in points], marker='o', ms=3,
+                color=color, label=name)
+        ax.axhline(breakeven, color=color, lw=1, ls='--')
+    ax.axvline(0, color='grey', lw=0.6, ls=':')
+    ax.set(xlabel='bias D (between two grid points)',
+           ylabel='net % of the added entities right',
+           title='(c) what the bias adds, pooled\n(dashed: break-even F1/2 at D = 0)')
+    ax.legend(fontsize=7)
+    ax.grid(alpha=0.3)
+    fig.tight_layout()
+    fig.savefig(path, dpi=160)
+    plt.close(fig)
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description='The figures of the paper plan')
     parser.add_argument('--results', default=os.path.join(
@@ -229,6 +317,12 @@ def main(argv=None):
         written.append('fig3_types.png')
     else:
         print('fig3: no per-type scores')
+    curves, steps = threshold_data(args.results)
+    if curves or steps:
+        figure4(curves, steps, os.path.join(args.out, 'fig4_threshold.png'))
+        written.append('fig4_threshold.png')
+    else:
+        print('fig4: no bias-grid results')
     print(f"wrote {', '.join(written) or 'nothing'} to {args.out}")
     return written
 

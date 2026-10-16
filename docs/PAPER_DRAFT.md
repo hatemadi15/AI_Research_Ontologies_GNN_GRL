@@ -290,9 +290,9 @@ every tag but O before Viterbi decoding:
   chose D = +1.25, +1.25, −1 and +0.25 fine-grained, but each paper's own
   curve is flat: the best D per paper in hindsight would gain only +0.56
   on average (+0.18 coarse-grained), and its sign differs by paper.
-- *Why:* the missed entities are not near the threshold. Pooled over the
-  papers and seeds, the head finds 5,386 of 13,280 fine-grained gold
-  entities.
+- *Why (Figure 4):* the missed entities are not near the threshold.
+  Pooled over the papers and seeds, the head finds 5,386 of 13,280
+  fine-grained gold entities.
   - D = +0.25 adds 358 predictions, of which 22% are right. The break-even
     rate for F1 is F1/2 = 23%, against 53.7% for the predictions above
     the threshold.
