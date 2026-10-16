@@ -1722,7 +1722,13 @@ evaluated types (the other two become O), on the same official split;
 `--granularity sofc_both --published-split --crf --multi-task` trains one
 encoder with a slot head and an entity head, as `--multi-task` does with
 MaterioMiner's levels, and writes `ner_results_sofc_slot_*` and
-`ner_results_sofc_*` files.
+`ner_results_sofc_*` files. On a tiny random model (CPU), the code before
+and after this change writes byte-identical results files, runtimes aside,
+for every MaterioMiner option it touches:
+- the CRF head;
+- multi-task training, also with a tag and seed offset, label semantics or
+  document context;
+- multi-task self-training.
 
 ### Week 7 protocol, part 2d: multi-task training on SOFC-Exp's two levels (fixed before any run)
 
