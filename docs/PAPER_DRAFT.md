@@ -4,8 +4,9 @@
 becomes (`docs/PAPER.md`): a methods paper if a method passes its
 pre-registered decisions and repeats on SOFC-Exp, otherwise an evaluation
 paper. Sections 1–5 and 7 rest on finished, committed results; Section 6
-(methods for unseen papers) waits for two runs: stage 2 of multi-task
-self-training and recall calibration (ROADMAP §4, weeks 6 and 7). The
+(methods for unseen papers) waits for its runs: stage 2 of multi-task
+self-training, recall calibration, mention replacement and multi-task
+training on SOFC-Exp's two levels (ROADMAP §4, weeks 6 and 7). The
 numbers come from `results/` through the claims table of `docs/PAPER.md`
 (C1–C14). References are keys of `docs/references.bib`.
 
@@ -222,21 +223,56 @@ lucky seeds; only 21 of the 120 triples of document context pass.
 
 ## 6 Methods for unseen papers (pending)
 
-Two candidates remain, each decided under a protocol committed before its
-runs:
-- **Multi-task self-training:** multi-task training with silver data from
-  40,000 in-domain sentences, tagged by 3 multi-task teachers. It passed the
-  week-6 screen with +6.06 [+1.05, +11.06] fine-grained against the CRF
-  head; its 10-seed decisions are next. SOFC-Exp's two levels (entity and
-  slot types) allow a repeat there, given an in-domain corpus for it.
-- **Recall calibration:** a bias on the CRF head's emission of every tag
-  but O before decoding. It is motivated by the F1-optimal threshold of a
-  calibrated classifier, half its F1 (lipton2014optimal), and by the
-  under-prediction of 5.7. The bias is chosen per held-out paper on inner
-  folds that never score that paper; on SOFC-Exp it is chosen on the
-  validation articles. A weight on the O label was used before to trade
-  precision for recall (minkov2006ner). What is new here is the choice of
-  the bias for unseen documents and its test under the 10-seed design.
+Each method is decided under a protocol committed before its runs. On
+MaterioMiner it is decided against the CRF head on the 4 held-out papers,
+and its vote against the strongest system on unseen papers (the multi-task
+vote fine-grained, the seed vote coarse-grained). A methods claim also
+needs its gain to repeat on SOFC-Exp.
+
+**6.1 Multi-task self-training.** Three multi-task teachers, trained with
+three seeds on the gold data, tag 40,000 sentences of open-access fatigue
+papers once, at both levels.
+- *Silver data:* a sentence becomes silver data for a level when the
+  teachers agree on its tags and every tag's CRF marginal is high. The
+  agreement and threshold are chosen, per level, from 5 fixed candidates
+  on the validation sentences.
+- *Students:* each student is a multi-task model trained on gold plus
+  silver sentences, the silver ones at weight 0.5 (liang2020bond).
+- *Status:* it passed the week-6 screen with +6.06 [+1.05, +11.06]
+  fine-grained against the CRF head; its 10-seed decisions are next.
+- *SOFC-Exp:* its two levels (entity and slot types) allow a repeat,
+  given an in-domain SOFC corpus tokenised as SOFC-Exp is.
+
+**6.2 Recall calibration.** On unseen papers the CRF head predicts too
+few entities (Section 5.7), so a bias D is added to the emission score of
+every tag but O before Viterbi decoding:
+
+    e'_t(y) = e_t(y) + D · [y ≠ O]
+
+- *Why it can help:* raising D trades precision for recall. For a
+  calibrated classifier the F1-optimal threshold is half the attainable F1
+  (lipton2014optimal). A single weight on the O label was used before to
+  trade precision for recall in CRF extractors (minkov2006ner).
+- *Choosing D for MaterioMiner:* D is chosen per held-out paper P from a
+  fixed grid (−1 to 3), without P's labels. The inner folds leave out P
+  and one other paper Q, train on the remaining two and score Q. D_P
+  maximises the mean F1 over the three Q and three inner seeds.
+- *Choosing D for SOFC-Exp:* D is chosen per run on the validation
+  articles, which are unseen articles.
+- *What is new:* the choice of the bias for unseen documents, and its test
+  under the 10-seed design.
+
+**6.3 Mention replacement** (dai2020analysis). Three copies of each
+training sentence with an entity, each mention replaced with probability
+0.5 by a training mention of the same type. The model sees each type's
+contexts with other names, which change from paper to paper. On a
+materials dataset the original study found gains for transformers mainly
+with 50–150 training sentences, so a large gain is not expected; it is
+screened with 3 seeds and decided with 10 only if the screen passes.
+
+**6.4 Multi-task training on SOFC-Exp's two levels.** Not a new method:
+the repeat of C7 on the second dataset, where the slot types stand to the
+entity types as MaterioMiner's fine level to its coarse one.
 
 ## 7 Limitations
 
