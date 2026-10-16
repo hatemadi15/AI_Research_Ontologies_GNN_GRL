@@ -1602,3 +1602,53 @@ heads of the same seed, or the two heads of a multi-task run), so it needs
 no GPU. SOFC-Exp has one level of types, so a gain could not be repeated
 there; under the week-6 rule for a claim, this would be a result on
 MaterioMiner only.
+
+### Week 7 protocol, part 2c: coarse-to-fine completion (fixed before any run)
+
+Part 2c tests the candidate above, which the gold annotations motivate:
+fine-grained recall on unseen papers is the bottleneck, the coarse-grained
+level misses far fewer entities, and the two levels nest. It needs no
+training: a rule on the saved test predictions of both granularities
+(`ner_coarse_to_fine.py`, committed with this protocol, before it is
+applied to any predictions). Held-out papers only (leave-one-paper-out).
+
+**The rule.** For the fold that holds out paper P, a mapping is taken from
+the gold annotations of the other three papers (all their sentences, both
+granularities):
+- a coarse-grained type C maps to the fine-grained type F if C has at least
+  10 spans there and at least 90% of them are fine-grained entities of type
+  F with the same span.
+
+In each test sentence of P, a coarse-grained predicted entity of a mapped
+type whose words are all predicted O at the fine-grained level becomes a
+fine-grained entity of the mapped type. No fine-grained prediction is
+removed or changed. The fold's mapping is stored with its output.
+
+**Inputs and names** (`_cf` before the seed tag): the fine-grained and
+coarse-grained predictions of the same seed and kind of system:
+- the CRF head, `crf_m<N>` of both granularities → `crf_cf_m<N>`;
+- the multi-task model's two heads, `crf_mt` (and `_m<N>`) → `crf_mt_cf`;
+- the multi-task vote of both granularities, `crf_mt_ens3` (and `_m300`,
+  `_m600`), made again with `ner_ensemble.py --save-predictions` (its
+  scores must equal the stored votes) → `crf_mt_ens3_cf`.
+
+**Decisions** (the rule as before, over the 4 held-out papers,
+fine-grained; the rule leaves the coarse level as it is):
+1. `crf_cf_m<N>` against `crf_m<N>`, 10-seed means per paper.
+2. `crf_mt_ens3_cf` against `crf_mt_ens3`, the strongest fine-grained system
+   on unseen papers after week 5, over its 3 seed triples.
+
+**Reported (no decision):** `crf_mt_cf` against `crf_mt`; the mapping of
+each fold; the number of entities added; precision and recall.
+
+**Scope.** SOFC-Exp has one level of types, so a gain cannot be repeated
+there. Under week 6's rule for a claim, a pass would be a result on
+MaterioMiner only, about a type hierarchy. That makes 2 comparisons:
+about 0.05 false passes are expected if the rule does nothing.
+
+**Expected before applying it** (from the gold annotations only): the
+mapped types are VAL → Value, STD → StateDescriptor and MAC →
+MaterialClass in every fold, and MAT → Alloy where the training papers
+reach 90%.
+
+**Budget:** no GPU; seconds per file.
