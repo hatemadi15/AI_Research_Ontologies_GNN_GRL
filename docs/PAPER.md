@@ -89,14 +89,24 @@ into `docs/figures/` (no training; re-run it when results change):
   fine-grained, each method's F1 minus the CRF head's (a vote minus the
   seed vote) on seen and on unseen names, with 95% CIs over the 4 papers
   (C17).
-- Table 1: the published split (plain MatSciBERT and the CRF head, 10 seeds)
-  next to the published numbers, under micro, macro, weighted and strict F1
-  (C1, C3, C4).
-- Table 2: every pre-registered comparison of weeks 1–5, its protocol, its
-  role (decision or reported) and its outcome, with the 3-seed and 10-seed
-  results side by side (C5–C8).
-- Table 3: default against strict IOB2 scoring for the baseline and the CRF
-  head (C4).
+Tables 1–4 are generated into `docs/tables/` by `src/graph/paper_tables.py`
+from the committed results (no training; re-run it when results change):
+- Table 1 (`table1_published_split.md`): the published splits, MaterioMiner's
+  two levels and SOFC-Exp's official split. Plain MatSciBERT and the CRF head
+  with 10 seeds under micro, macro, weighted and strict F1, the published
+  scores, the CRF head minus plain MatSciBERT, and on SOFC-Exp each method
+  minus the CRF head (C1, C3, C4, C13).
+- Table 2 (`table2_decisions.md`): every pre-registered decision and screen
+  on MaterioMiner, weeks 3–7: its machine, seeds per split, paired micro-F1
+  difference with 95% CI, and whether the CI lies above 0 (C5–C8). The
+  3-seed decisions of weeks 3 and 4 and their 10-seed repeats of week 5
+  stand in the same table. `tableA1_all_comparisons.md` adds the reported
+  and descriptive comparisons.
+- Table 3 (`table3_strict.md`): default against strict IOB2 scoring on the
+  published splits (C4).
+- Table 4 (`table4_unseen.md`): per setting, the share of unseen names, the
+  CRF head's recall on seen and unseen names, and its F1 under the four
+  matching criteria (C17, C18).
 
 ## Reproducibility appendix
 
