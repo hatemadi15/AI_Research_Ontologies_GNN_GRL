@@ -74,6 +74,12 @@ smoke4 again):
           0 to 900. E.g. w6c:deberta,mtst. sofc-ctx runs from the later commit of the
           week-6 amendment, so its session also repeats session b's SOFC-Exp CRF run of
           seed 0 (smoket), the reference of its runs
+Week 7, part 2a (recall calibration; the session first repeats the CRF run of smoke4,
+smokeu):
+  w7a     the CRF head with the bias grid (--entity-bias BIAS_GRID): the inner folds
+          (--leave-two-papers-out, seed offsets 0, 100 and 200; counts only), the held-out
+          papers again (seed offsets 0 to 900, with predictions) and SOFC-Exp's official
+          split (model seeds 0 to 900), both granularities, balanced over the lanes
 
 Usage:
   python src/graph/kaggle_jobs.py quota
@@ -139,7 +145,9 @@ PAPERS =('10.1007_s11340-021-00758-x', '10.1038_ncomms7164', '10.1038_s41467-020
           '10.3390_met10111458')      # the held-out papers (the MaterioMiner files)
 # relative GPU time of one run of each kind (a CRF run is 1), for balancing the lanes
 COST = {'crf': 1.0, 'mt': 1.7, 'ls': 1.1, 'mt_ls': 1.8, 'st': 2.5, 'st3': 22.0,
-        'deberta': 4.4, 'ctx': 2.7}
+        'deberta': 4.4, 'ctx': 2.7, 'sofc': 2.0}
+# week 7, part 2a: the biases that --entity-bias decodes besides 0 (ROADMAP §4)
+BIAS_GRID = ('-1', '-0.5', '0.25', '0.5', '0.75', '1', '1.25', '1.5', '2', '2.5', '3')
 # week 6: the options of each method on the held-out papers, and the stage-2 parts
 METHOD_FLAGS = {'deberta': ('--model', DEBERTA), 'ctx': ('--context', '64')}
 STAGE2 = ('deberta', 'ctx', 'mtst', 'sofc-deberta', 'sofc-ctx')
@@ -351,11 +359,26 @@ def batch_lanes(name):
             first.append(['--granularity', 'sofc', '--published-split', '--seeds', '0', '--crf',
                           '--tag', 'smoket', '--save-predictions', '--threads', str(THREADS)])
         return [first + lanes[0], fixed + lanes[1]]
+    if name == 'w7a':
+        # week 7, part 2a: recall calibration. An inner job is the 6 folds of a seed, each
+        # trained on two papers (about 4 CRF runs); no predictions, the counts suffice
+        bias = ('--entity-bias', *BIAS_GRID)
+        inner = [(COST['crf'] * 4,
+                  ['--granularity', g, '--leave-two-papers-out', '--crf', *bias, '--tag',
+                   f'm{off}', *(('--seed-offset', str(off)) if off else ()), '--threads',
+                   str(THREADS)])
+                 for g in GRANULARITIES for off in OFFSETS]
+        outer = [(COST['crf'] * RUNS['leave_one_paper_out'],
+                  job(g, 'leave_one_paper_out', *bias, offset=off, tag=f'm{off}'))
+                 for g in GRANULARITIES for off in OFFSETS + OFFSETS_W5]
+        sofc = [(COST['sofc'] * len(OFFSETS_PUBLISHED), published_job('sofc', '--crf', *bias))]
+        lanes = balance(inner + outer + sofc)
+        return [[repeat + ['--tag', 'smokeu']] + lanes[0], lanes[1]]
     raise ValueError(f'unknown batch {name!r}')
 
 
 BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'item3r',
-           'smoke4', 'w5a', 'w5b', 'w5c', 'smoke5', 'smoke6', 'w6a', 'w6b')
+           'smoke4', 'w5a', 'w5b', 'w5c', 'smoke5', 'smoke6', 'w6a', 'w6b', 'w7a')
 
 
 def batch_extras(name):

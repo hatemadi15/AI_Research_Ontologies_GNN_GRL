@@ -835,7 +835,7 @@ chance at class level. For a Task C-style result:
 | 4 | Done for NER: P1 "Next, after week 3" items 1, 2, 3 and 5, i.e. votes over the week-3 changes that help, label semantics on the multi-task model, self-training at scale, on Kaggle T4 GPUs (protocol below). Not started: context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | Met for NER by two changes, both on unseen papers. Coarse-grained, the label-semantics vote improves on `crf_ens3` on the CPU (+1.63 [+0.11, +3.16]); the GPU repeat does not confirm it (+0.40 [−1.36, +2.16]). Fine-grained, self-training with 3 teachers improves on the CRF head (GPU, +1.07 [+0.33, +1.80]; +1.22 [+0.60, +1.84] on the random splits, reported). The multi-task vote and label semantics on the multi-task model do not pass. Typing: not started |
 | 5 | Done: NER, P1 "Next, after week 4" item 1, i.e. 10 seeds per split for the CRF reference, multi-task, label semantics and self-training with 3 teachers, on Kaggle T4 GPUs, and the published split (amendment); items 2–7 and a paper outline prepared, and the week-6 options run once each at full size (protocol below). The original week-5 work moves to week 7 | Met. Of the claims re-tested with 10 seeds, fine-grained multi-task on the random splits passes (+1.83 [+0.32, +3.34]); the coarse-grained claims of week 3 and the self-training claim of week 4 do not. The reported system: the multi-task vote coarse-grained on the random splits and fine-grained on unseen papers, `crf_ens3` elsewhere. On the published split, plain MatSciBERT reproduces 69.92 and 72.32 and the CRF head beats both |
 | 6 | In progress: NER, P1 "Next, after week 5", towards a methods paper: methods for unseen papers (DeBERTa-v3-large, document context, multi-task self-training) screened with 3 seeds and decided with 10, and a second dataset (SOFC-Exp, 10 seeds); protocol below | A method whose vote improves on the strongest system on unseen papers under the 10-seed design, and on SOFC-Exp |
-| 7 | In progress: NER, part 1, document-level label consistency for unseen papers, a post-processing rule on the saved predictions (no GPU; protocol below); part 2, combinations of the methods that pass week 6 and mention replacement, fixed after the week-6 decisions. Then class-level taxonomy (LLM or cross-encoder + arborescence) and a relation annotation pilot | Part 1: the rule improves on the strongest system on unseen papers and on SOFC-Exp's CRF head. Taxonomy: first class-level F1 above chance; relation guidelines |
+| 7 | In progress: NER, part 1, document-level label consistency for unseen papers, a post-processing rule on the saved predictions (no GPU; protocol below); part 2a, recall calibration (a bias on the CRF head's emissions, chosen on inner folds; protocol below); part 2b, combinations of the methods that pass week 6 and mention replacement, fixed after the week-6 decisions. Then class-level taxonomy (LLM or cross-encoder + arborescence) and a relation annotation pilot | Part 1: the rule improves on the strongest system on unseen papers and on SOFC-Exp's CRF head. Taxonomy: first class-level F1 above chance; relation guidelines |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -1444,3 +1444,65 @@ cost: 36 inner runs on two papers (3 seeds, 6 pairs, 2 granularities) and
 the CRF head again with the grid (80 runs), about 5 GPU-hours; a 3-seed
 screen first takes about 2.5. Whether it enters part 2, and its decisions,
 are fixed with part 2's protocol after the week-6 decisions.
+
+### Week 7 protocol, part 2a: recall calibration (fixed before any run)
+
+Part 2a tests the recall calibration prepared above on the CRF head. It does
+not depend on week 6, so it is fixed now. Part 2b (combinations of the
+methods that pass week 6) is fixed after the week-6 decisions.
+
+**Runs.** One Kaggle session (`w7a`) from the commit that adds this
+protocol; it first repeats the week-4 run (`smokeu`). Every run decodes the
+bias grid D = −1, −0.5, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 2.5 and 3, and 0:
+- the inner folds: `--leave-two-papers-out --crf --entity-bias <grid>`,
+  model seeds 0, 100 and 200 (`crf_bias_m0/m100/m200`), both
+  granularities; 36 runs on two papers each, entity counts only;
+- the CRF head on the held-out papers again, with its predictions:
+  `--leave-one-paper-out --crf --entity-bias <grid> --save-predictions`,
+  model seeds 0 to 900 (`crf_bias_m<N>`), both granularities; 80 runs;
+- SOFC-Exp's official split: the CRF head with the grid and its
+  predictions, model seeds 0 to 900 (`crf_bias`); 10 runs.
+
+The D = 0 scores and predictions of every run on the held-out papers and on
+SOFC-Exp must equal those of the committed `crf_m<N>` runs and of session
+b's `crf` runs. A run that differs is not used, and the difference is
+reported.
+
+**The choice of D** (`ner_bias.py`, committed before any run):
+- MaterioMiner: `--choose inner`. Per held-out paper and granularity, D has
+  the highest mean F1 on the inner folds that hold out that paper and
+  another paper Q, scored on Q, over the 3 seeds. The held-out paper's
+  labels are never read. The result is `crf_eb_m<N>`.
+- SOFC-Exp: `--choose val`, each run's D from its validation articles,
+  which are unseen articles. The result is `crf_ebv`.
+
+**Decisions** (the rule as before: the 95% CI of the mean paired micro-F1
+difference above 0):
+1. `crf_eb_m<N>` against `crf_m<N>`, 10-seed means per held-out paper, per
+   granularity.
+2. Its votes (`crf_eb_ens3` over the 3 seed triples, `ner_ensemble.py`)
+   against the strongest system on unseen papers of week 5: `crf_mt_ens3`
+   fine-grained and `crf_ens3` coarse-grained. If a week-6 vote passes its
+   decision 2, the comparison with that vote is reported.
+3. SOFC-Exp: `crf_ebv` against `crf`, paired by seed.
+
+A claim needs decision 2 and SOFC-Exp, as in week 6. That makes 5
+comparisons; about 0.13 false passes are expected if the bias does nothing.
+
+**Reported alongside (no decision):**
+- `--choose val` on MaterioMiner (`crf_ebv_m<N>` against `crf_m<N>`). Its
+  validation sentences come from the training papers, so this shows whether
+  in-distribution validation finds the bias.
+- The D chosen per paper, the inner curves, and the held-out papers' own
+  curves (F1 per D, never used to choose).
+- Precision, recall and the number of predicted entities; strict, macro
+  and weighted F1.
+
+**Expected before the runs.** If the model's probabilities are roughly
+calibrated, the chosen D is positive and larger fine-grained (F1 about 47
+on unseen papers) than coarse-grained (about 59). The inner models train on
+two papers, not three, so their F1 is lower and D may come out somewhat
+larger than is best for the models trained on three.
+
+**Budget:** about 1.5 hours of one session's two GPUs (week 5's CRF jobs
+took about 1.2 minutes per run).

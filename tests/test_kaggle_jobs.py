@@ -263,6 +263,32 @@ def test_week6_stage2_batches(monkeypatch, capsys):
     assert kj.batch_name('w6c:mtst,deberta') == 'w6c:mtst,deberta'
 
 
+def test_week7_bias_batch(monkeypatch):
+    """w7a: the inner folds (seeds 0-200, counts only), the CRF head on the held-out papers
+    again (seeds 0-900, with predictions) and on SOFC-Exp's official split, all with the
+    bias grid; the repeat run first."""
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda: 'x' * 64)
+    lane0, lane1 = _parsed(kj.batch_lanes('w7a'))
+    assert lane0[0].tag == 'smokeu' and not _get(lane0[0], 'entity_bias')
+    jobs = lane0[1:] + lane1
+    assert all(a.crf and _get(a, 'entity_bias') == [float(b) for b in kj.BIAS_GRID]
+               for a in jobs)
+    assert 0.0 not in jobs[0].entity_bias and len(set(kj.BIAS_GRID)) == 11
+    inner = [a for a in jobs if _get(a, 'leave_two_papers_out')]
+    assert sorted((nb.variant_name(a), a.granularity, a.seed_offset) for a in inner) == sorted(
+        (f'crf_bias_m{off}', g, off) for off in (0, 100, 200) for g in ('fine', 'coarse'))
+    assert not any(a.save_predictions for a in inner)
+    outer = [a for a in jobs if a.leave_one_paper_out]
+    assert sorted((nb.variant_name(a), a.granularity, a.seed_offset) for a in outer) == sorted(
+        (f'crf_bias_m{off}', g, off) for off in range(0, 1000, 100) for g in ('fine', 'coarse'))
+    assert all(a.save_predictions and not _get(a, 'papers') for a in outer)
+    (sofc,) = [a for a in jobs if _get(a, 'published_split')]
+    assert (nb.variant_name(sofc), sofc.granularity, sofc.seeds, sofc.save_predictions) == (
+        'crf_bias', 'sofc', list(range(0, 1000, 100)), True)
+    assert len(jobs) == 6 + 20 + 1 and kj.batch_spec('w7a')['models'] == kj.MODELS
+    assert kj.batch_name('w7a') == 'w7a'
+
+
 def test_a_refused_push_stops(monkeypatch, capsys):
     """The Kaggle CLI exits 0 when it refuses a push; push must not report the batch."""
     monkeypatch.setattr(kj, 'corpus_sha256', lambda: 'x' * 64)
