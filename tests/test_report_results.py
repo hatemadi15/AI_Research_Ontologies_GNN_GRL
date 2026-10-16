@@ -995,14 +995,37 @@ def test_week6_tables_and_bullets(tmp_path):
     assert all(r.endswith('| screen |') for r in rows)
     rows = table_rows(readme, '#### NER week-6 comparisons')
     assert [r.split(' | ')[0] for r in rows] == ['| DeBERTa-v3-large vote vs multi-task vote'] * 2
-    assert ('* NER week 6 (GPU runs, 3-seed screen), DeBERTa-v3-large vs the CRF head (paired '
-            'micro-F1 difference, leaving one paper out): fine-grained no significant change '
-            '(+1.20, 95% CI [-0.50, +2.90]') in readme
-    assert 'the screen); coarse-grained' in readme
+    assert ('* NER week 6, the screen (GPU runs, seeds 0, 100 and 200, leaving one paper out; '
+            'mean paired micro-F1 difference [95% CI]; it decides only which methods get 10 '
+            'seeds): DeBERTa-v3-large goes to stage 2; against the CRF head fine-grained +1.20 '
+            '[-0.50, +2.90], coarse-grained -0.40 [-1.00, +0.20].\n') in readme
     assert ('* NER week 6 (GPU runs, 10 seeds), DeBERTa-v3-large vote vs the multi-task vote '
             '(paired micro-F1 difference, leaving one paper out): fine-grained improves (+2.00, '
             '95% CI [+0.50, +3.50]') in readme
     assert 'the pre-registered decision); coarse-grained no significant change' in readme
+
+
+def test_week6_screen_bullets_follow_the_screen_rule(tmp_path):
+    """A method stops unless a granularity's mean difference is above 0, whatever the CIs; the
+    screen's vote comparison rides along; a method with one granularity gets no bullet."""
+    ns = pytest.importorskip('ner_seedmeans')
+    ws = Workspace(tmp_path)
+    lopo = 'leave_one_paper_out'
+    for g, micro in (('fine', (-0.2, -0.4, -0.1)), ('coarse', (-3.0, -5.0, -1.0))):
+        ws.week4('crf_ctx', 'crf', g, lopo, gpu=True, role='screen', micro=micro,
+                 score=(50.0, 44.0, 56.0), name=rr.WEEK6_SCREEN_FILE)
+        ws.week4('crf_ctx_ens3', 'crf_ens3', g, lopo, gpu=True, role='reported',
+                 micro=(0.5, -0.5, 1.5), score=(52.0, 46.0, 58.0), name=rr.WEEK6_SCREEN_FILE)
+    ws.week4('crf_mt_st3', 'crf', 'fine', lopo, gpu=True, role='screen', micro=(4.0, 3.0, 5.0),
+             score=(50.0, 44.0, 56.0), name=rr.WEEK6_SCREEN_FILE)
+    readme, _ = ws.generate()
+    assert ('document context stops; against the CRF head fine-grained -0.20 [-0.40, -0.10], '
+            'coarse-grained -3.00 [-5.00, -1.00]; its vote against the 3-model seed ensemble '
+            'fine-grained +0.50 [-0.50, +1.50], coarse-grained +0.50 [-0.50, +1.50].\n') in readme
+    assert 'multi-task self-training goes' not in readme and 'improves' not in readme
+    screen = json.loads((ws.results / 'gpu' / rr.WEEK6_SCREEN_FILE).read_text())
+    assert ns.screen_verdicts(screen) == {'crf_ctx': 'stops (fine -0.20, coarse -3.00)',
+                                          'crf_mt_st3': 'incomplete'}
 
 
 def test_a_week6_vote_that_passes_takes_the_unseen_slot(tmp_path):

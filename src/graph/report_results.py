@@ -897,12 +897,37 @@ def ner_notes(res):
     note += (published_split_note(analysis) + seed_triples_note(analysis)
              + rare_types_note(res, analysis))
     screen = res.comparisons(GPU_PREFIX + WEEK6_SCREEN_FILE)
-    for variant, reference in WEEK6_SCREEN_COMPARISONS:
-        note += week6_verdict_line(screen, variant, reference, '3-seed screen')
+    for method in WEEK6_METHODS:
+        note += week6_screen_line(screen, method)
     week6 = res.comparisons(GPU_PREFIX + WEEK6_FILE)
     for variant, reference in WEEK6_COMPARISONS:
         note += week6_verdict_line(week6, variant, reference, '10 seeds')
     return note + sofc_note(analysis)
+
+
+def week6_screen_line(comps, method):
+    """One bullet for a method's week-6 screen ('' until both granularities are complete):
+    whether it goes to stage 2 (its mean micro-F1 difference against the CRF head above 0 at
+    either granularity, as in ner_seedmeans.screen_verdicts), the 3-seed differences, and the
+    screen's comparisons reported alongside. No verdict words: the screen decides nothing."""
+    found = {g: find_comparison(comps, g, LOPO, method, 'crf') for g in GRANULARITIES}
+    if not all(found.values()):
+        return ''
+    passed = any(c['micro']['mean_diff'] > 0 for c in found.values())
+    others = [(method, 'crf', f"against the {WEEK6_NAMES['crf']}"),
+              (f'{method}_ens3', 'crf_ens3', f"its vote against the {WEEK6_NAMES['crf_ens3']}")]
+    if method == 'crf_mt_st3':
+        others.append((method, 'crf_mt', f"against {WEEK6_NAMES['crf_mt']}"))
+    parts = []
+    for variant, reference, words in others:
+        diffs = [f"{g}-grained {delta_cell(c['micro'])}" for g in GRANULARITIES
+                 if (c := find_comparison(comps, g, LOPO, variant, reference))]
+        if diffs:
+            parts.append(f"{words} {', '.join(diffs)}")
+    return ("* NER week 6, the screen (GPU runs, seeds 0, 100 and 200, leaving one paper out; "
+            "mean paired micro-F1 difference [95% CI]; it decides only which methods get 10 "
+            f"seeds): {WEEK6_NAMES[method]} {'goes to stage 2' if passed else 'stops'}; "
+            + '; '.join(parts) + ".\n")
 
 
 def week6_verdict_line(comps, variant, reference, design):

@@ -340,6 +340,21 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
 | 3-model seed ensemble vs CRF head | leave one paper out | fine | 4 | 48.81 [42.13, 55.50] | +2.36 [+1.84, +2.88] | +1.96 [-0.23, +4.16] | reported |
 | 3-model seed ensemble vs CRF head | leave one paper out | coarse | 4 | 61.10 [55.73, 66.47] | +2.50 [+1.86, +3.13] | +2.49 [+1.63, +3.34] | reported |
 
+#### NER week-6 screen (3-seed means, held-out papers, GPU runs)
+
+Δ = method − reference on the same held-out paper, GPU runs only, with seeds 0, 100 and 200: a model scores the mean of its 3 runs, a vote over them scores once. Week-6 protocol, stage 1: a method goes to stage 2 (10 seeds) if its mean micro-F1 difference against the CRF head is above 0 at either granularity. The screen decides nothing.
+
+| Comparison | Granularity | Pairs | Variant micro F1 [95% CI] | Δ micro [95% CI] | Δ macro [95% CI] | Role |
+|---|---|---|---|---|---|---|
+| DeBERTa-v3-large vs CRF head | fine | 4 | 41.99 [33.69, 50.30] | -4.38 [-7.32, -1.45] | -3.34 [-4.55, -2.13] | screen |
+| DeBERTa-v3-large vs CRF head | coarse | 4 | 51.26 [47.18, 55.34] | -8.01 [-11.72, -4.30] | -6.76 [-14.33, +0.80] | screen |
+| document context vs CRF head | fine | 4 | 49.03 [43.40, 54.67] | +2.66 [+0.91, +4.40] | +2.11 [-2.30, +6.52] | screen |
+| document context vs CRF head | coarse | 4 | 58.77 [50.81, 66.73] | -0.50 [-3.82, +2.83] | -1.25 [-7.43, +4.94] | screen |
+| DeBERTa-v3-large vote vs 3-model seed ensemble | fine | 4 | 46.29 [36.19, 56.39] | -2.17 [-5.12, +0.78] | +2.13 [-0.25, +4.50] | reported |
+| DeBERTa-v3-large vote vs 3-model seed ensemble | coarse | 4 | 54.83 [49.19, 60.47] | -6.47 [-10.54, -2.39] | -5.22 [-16.95, +6.52] | reported |
+| document-context vote vs 3-model seed ensemble | fine | 4 | 51.38 [45.60, 57.16] | +2.92 [+0.02, +5.83] | +4.08 [-1.05, +9.21] | reported |
+| document-context vote vs 3-model seed ensemble | coarse | 4 | 61.59 [54.24, 68.94] | +0.29 [-4.64, +5.22] | -0.20 [-8.28, +7.87] | reported |
+
 **Reading the numbers**
 * The old "Term F1 0.91" corresponds to *0.12* pairwise alignment F1. The
   v5 outputs score higher (0.27, and 0.57–0.74 typing accuracy) only because
@@ -392,6 +407,8 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
 * NER, the published split (week-5 amendment: the release's partition and tags, micro F1 as its code scores it; 10 model seeds, GPU runs; the 95% CIs are over the seeds of one split): plain MatSciBERT, the paper's model, scores 70.19 [69.03, 71.35] fine-grained and 72.52 [71.88, 73.16] coarse-grained. Both published numbers lie within these intervals. The CRF head adds +3.12 [+1.62, +4.62] fine-grained and +2.96 [+1.30, +4.61] coarse-grained, paired by seed (strict IOB2 +1.70 [+0.21, +3.19] and +1.07 [-0.82, +2.97]), and its votes over the 3 seed triples score 74.57 and 77.00. Macro F1 is lower: 67.73 and 60.66 for plain MatSciBERT, 71.84 and 64.33 for the CRF head.
 * NER, how far a 3-seed design misleads (week 5, exploratory): for each family against the CRF head on the protocol of its decision, the share of the 120 triples of the 10 seeds (the same triple on both sides) whose 3-seed comparison passes the rule, and whose mean difference has the opposite sign to the 10-seed one. Multi-task (fine + coarse heads) over the 5 random splits: fine-grained (+1.83 [+0.32, +3.34] with 10 seeds) 41% pass, 0% opposite sign; coarse-grained (+0.71 [-0.15, +1.56] with 10 seeds) 15% pass, 8% opposite sign. Label semantics over the 4 held-out papers: fine-grained (+1.23 [-0.96, +3.42] with 10 seeds) 18% pass, 8% opposite sign; coarse-grained (-0.36 [-1.66, +0.94] with 10 seeds) 2% pass, 37% opposite sign. Self-training with 3 teachers over the 4 held-out papers: fine-grained (+1.74 [-1.16, +4.64] with 10 seeds) 16% pass, 6% opposite sign; coarse-grained (+1.56 [-0.88, +4.00] with 10 seeds) 8% pass, 2% opposite sign. The SD of a split's micro F1 over the 10 seeds of the CRF head averages 1.69 fine-grained and 1.46 coarse-grained over the 5 random splits, and 2.48 fine and 2.23 coarse over the 4 held-out papers.
 * NER, the coarse-grained types that keep macro F1 down (week 5, exploratory; the 3 votes of the reported system `crf_mt_ens3` over the 5 random splits, F1 and test entities per split): SDE 17.7 (3.0), MIP 17.7 (5.2), PRP 39.9 (8.0), MOD 41.7 (1.8), CPR 41.7 (2.0). Macro F1 counts each type alike: without SDE alone it would be 73.11 instead of 71.02 on the splits that have it.
+* NER week 6, the screen (GPU runs, seeds 0, 100 and 200, leaving one paper out; mean paired micro-F1 difference [95% CI]; it decides only which methods get 10 seeds): DeBERTa-v3-large stops; against the CRF head fine-grained -4.38 [-7.32, -1.45], coarse-grained -8.01 [-11.72, -4.30]; its vote against the 3-model seed ensemble fine-grained -2.17 [-5.12, +0.78], coarse-grained -6.47 [-10.54, -2.39].
+* NER week 6, the screen (GPU runs, seeds 0, 100 and 200, leaving one paper out; mean paired micro-F1 difference [95% CI]; it decides only which methods get 10 seeds): document context goes to stage 2; against the CRF head fine-grained +2.66 [+0.91, +4.40], coarse-grained -0.50 [-3.82, +2.83]; its vote against the 3-model seed ensemble fine-grained +2.92 [+0.02, +5.83], coarse-grained +0.29 [-4.64, +5.22].
 <!-- RESULTS:END -->
 
 ## Evaluation
