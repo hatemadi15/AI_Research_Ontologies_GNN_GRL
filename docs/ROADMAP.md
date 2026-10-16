@@ -383,6 +383,7 @@ runs with three (seeds 0–200 on both sides):
   sentences, not diversity alone;
 - it matches the largest method gain on unseen papers so far (multi-task
   self-training's screen, +6.06 fine-grained).
+- week 8, part 2 separates the papers from the sentences (protocol in §4).
 
 Next, after week 5, in this order. The aim is a methods paper (§4, week 6),
 with an evaluation paper if every option fails:
@@ -971,7 +972,7 @@ chance at class level. For a Task C-style result:
 | 5 | Done: NER, P1 "Next, after week 4" item 1, i.e. 10 seeds per split for the CRF reference, multi-task, label semantics and self-training with 3 teachers, on Kaggle T4 GPUs, and the published split (amendment); items 2–7 and a paper outline prepared, and the week-6 options run once each at full size (protocol below). The original week-5 work moves to week 7 | Met. Of the claims re-tested with 10 seeds, fine-grained multi-task on the random splits passes (+1.83 [+0.32, +3.34]); the coarse-grained claims of week 3 and the self-training claim of week 4 do not. The reported system: the multi-task vote coarse-grained on the random splits and fine-grained on unseen papers, `crf_ens3` elsewhere. On the published split, plain MatSciBERT reproduces 69.92 and 72.32 and the CRF head beats both |
 | 6 | In progress: NER, P1 "Next, after week 5", towards a methods paper: methods for unseen papers (DeBERTa-v3-large, document context, multi-task self-training) screened with 3 seeds and decided with 10, and a second dataset (SOFC-Exp, 10 seeds); protocol below. So far (P1, "Week 6 so far"): DeBERTa-v3-large stops at the screen; document context passes the screen but neither 10-seed decision; multi-task self-training passes the screen (+6.06 fine-grained), stage 2 next; on SOFC-Exp the CRF head improves on plain MatSciBERT (S1) | A method whose vote improves on the strongest system on unseen papers under the 10-seed design, and on SOFC-Exp |
 | 7 | In progress: NER, part 1, document-level label consistency for unseen papers, a post-processing rule on the saved predictions (no GPU; protocol below); part 2a, recall calibration (a bias on the CRF head's emissions, chosen on inner folds; done, no claim: the missed entities are not near the threshold); part 2b, mention replacement (screen, then 10 seeds if it passes; protocol below), and later the combinations of the methods that pass week 6, fixed after the week-6 decisions; part 2c, coarse-to-fine completion (done, no claim); part 2d, multi-task training on SOFC-Exp's two levels (protocol below); part 2e, SOFC-Exp's test articles cut into words as its training articles are (protocol below). Then class-level taxonomy (LLM or cross-encoder + arborescence) and a relation annotation pilot | Part 1: the rule improves on the strongest system on unseen papers and on SOFC-Exp's CRF head. Taxonomy: first class-level F1 above chance; relation guidelines |
-| 8 | Prepared: part 1, SOFC-Exp beyond its official split: the CRF head with 10 seeds on 5 random sentence splits and on 5 folds of 9 held-out articles (`--document-folds 5`; protocol below, descriptive) | The gap between random splits and unseen documents measured on a second corpus |
+| 8 | Prepared: part 1, SOFC-Exp beyond its official split: the CRF head with 10 seeds on 5 random sentence splits and on 5 folds of 9 held-out articles (`--document-folds 5`; protocol below, descriptive); part 2, more papers or more sentences: three training papers cut to the size of two against two papers (`--two-paper-size`; protocol below) | Part 1: the gap between random splits and unseen documents measured on a second corpus. Part 2: whether a third paper helps at the same number of training sentences |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -2233,3 +2234,48 @@ their stored runs.
 **Budget:** 100 runs of about 3.3 minutes, 10 jobs of 5 runs per GPU:
 about 2.8 hours of one session (`w8a`). It runs after the queued batches of
 weeks 6 and 7, on the next free kernel.
+
+### Week 8 protocol, part 2: more papers or more sentences? (fixed before any run)
+
+**Why.** A third training paper adds +7.36 F1 fine-grained and +8.90
+coarse-grained on an unseen paper (C19, exploratory), but a third paper also
+brings more sentences. Whether the gain comes from the papers or from the
+sentences decides what a materials-NER corpus should collect next: more
+papers, or more sentences of the same papers.
+
+**Design.** `--two-paper-size` (committed with this protocol): for each
+held-out paper P and each pair {Q, R} of the other three papers, P's
+leave-one-paper-out fold trained on all three other papers, its training
+sentences cut to as many as the pair alone gives: the training sentences of
+the `--leave-two-papers-out` fold that holds out P and the third paper
+(fold `P|Q+R`, variant `crf_p3n2`). The cut keeps the first of the fold's
+shuffled training sentences, a random sample of all three papers; the
+validation and test sentences are P's fold's. 12 folds per granularity, the
+CRF head, seed offsets 0, 100 and 200: 72 runs, with predictions. The
+two-paper side is week 7's inner folds (part 2a, the same seeds, counts at
+D = 0), which train the same CRF head on the pair.
+
+**Decision** (per granularity, the rule as before): diversity, F1 on P with
+three papers at the size of two minus F1 with the two papers alone, each
+side the mean over P's 3 pairs and the 3 seeds, paired over the 4 held-out
+papers. A CI above 0 means a third paper helps at the same number of
+training sentences. 2 decisions; about 0.05 false passes each if it does
+not.
+
+**Reported:** size, F1 with all three papers (the `crf` runs, seeds 0 to
+200) minus F1 with three papers at the size of two, over the 4 papers; and
+per pair. Diversity and size add up to C19's gain. The two sides of the
+decision validate on different sentences (15% of two papers or of three);
+validation only picks the epoch.
+
+**Expected before the runs:** diversity above 0 on both levels. A new paper
+brings new names and contexts (C17), which more sentences of the same
+papers do not.
+
+**Checks.** The session first repeats the CRF run of smoke4 (`smokeag`).
+Every existing option writes byte-identical results files with the new
+option (the tiny-model check), and every earlier Kaggle batch is unchanged.
+
+**Budget:** 72 runs on at most 301 training sentences, about 40 minutes of
+one session (`w8b`), one lane per granularity. It runs on the next free
+kernel after the queued batches.

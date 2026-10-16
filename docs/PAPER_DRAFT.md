@@ -334,7 +334,8 @@ all three other papers instead adds +7.36 [+1.98, +12.74] F1 fine-grained
 (39.02 to 46.38) and +8.90 [+5.90, +11.90] coarse-grained (50.37 to 59.27),
 over 4 papers and seeds 0–200; every paper gains, from +3.2 to +11.6. A
 third paper also brings more sentences, so this is the value of a paper
-with its sentences. It matches the largest method gain measured on unseen
+with its sentences; a pre-registered run (week 8, part 2) trains on three
+papers cut to the size of two to separate the two. It matches the largest method gain measured on unseen
 papers (multi-task self-training's screen, +6.06 fine-grained): for
 materials NER on new papers, annotating more papers is the lever to beat.
 

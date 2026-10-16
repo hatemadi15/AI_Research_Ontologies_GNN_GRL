@@ -116,7 +116,10 @@ held-out paper without its labels.
 `--document-folds K` holds out groups of whole documents (week 8; SOFC-Exp's articles): the
 documents, sorted and shuffled with the split seed, are dealt into K groups, and fold `fold<i>`
 tests on group i and trains and validates on the other documents' sentences, as
---leave-one-paper-out does.
+--leave-one-paper-out does. `--two-paper-size` (week 8, part 2) runs each held-out paper's
+fold of --leave-one-paper-out once per pair of the other papers, with its training sentences
+cut to the number that the pair alone gives (folds `P|Q+R`, variant `crf_p3n2`): three
+papers at the size of two.
 
 On a CUDA device a run is deterministic (cuda_determinism) and every run stores its
 `environment` (week-4 protocol: GPU runs are only compared with GPU runs).
@@ -145,6 +148,7 @@ Usage:
   python ner_baseline.py --leave-one-paper-out --crf --entity-bias 0.5 1 2 --save-predictions
   python ner_baseline.py --leave-two-papers-out --crf --entity-bias 0.5 1 2   # inner folds
   python ner_baseline.py --granularity sofc --document-folds 5 --crf --tag m0  # article folds
+  python ner_baseline.py --leave-one-paper-out --crf --two-paper-size --tag m0  # 3 papers, size 2
   python ner_baseline.py --granularity sofc_slot --published-split --crf    # SOFC-Exp slots
   python ner_baseline.py --granularity sofc_both --published-split --crf --multi-task
   python ner_baseline.py --granularity sofc_both --published-split --seeds 0 --crf --multi-task \
@@ -1683,7 +1687,7 @@ RESULT_FILE = re.compile(r'ner_results_(fine|coarse|sofc_slot|sofc)'
 PLAIN_VARIANTS = ('baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_st', 'crf_mt_ls', 'crf_st3',
                   'crf_ctx', 'crf_mt_st3', 'crf_mt_ctx', 'crf_mr', 'crf_bias', 'crf_mt_bias',
                   'crf_ls_bias', 'crf_mt_ls_bias', 'crf_ctx_bias', 'crf_mt_ctx_bias',
-                  'crf_mr_bias', 'crf_eb', 'crf_ebv')
+                  'crf_mr_bias', 'crf_eb', 'crf_ebv', 'crf_p3n2')
 
 
 def variant_name(args):
@@ -1710,6 +1714,8 @@ def variant_name(args):
             name = 'crf_mt_ctx' if multi_task else 'crf_ctx'
         if getattr(args, 'augment_mentions', 0):
             name = 'crf_mr'
+        if getattr(args, 'two_paper_size', False):
+            name = 'crf_p3n2'
         if hasattr(args, 'entity_bias'):
             name += '_bias'
     else:
@@ -1957,6 +1963,8 @@ def make_folds(data, args, indices=False, granularity=None):
     if args.leave_one_paper_out:
         docs = sorted({d for _, _, d in data})
         keep = held_out_papers(docs, getattr(args, 'papers', None))
+        if getattr(args, 'two_paper_size', False):
+            return two_paper_size_folds(data, docs, keep, args.split_seed, indices)
         return [(doc, *paper_fold(data, (doc,), args.split_seed, indices))
                 for doc in docs if doc in keep]
     if getattr(args, 'leave_two_papers_out', False):
@@ -1971,6 +1979,29 @@ def make_folds(data, args, indices=False, granularity=None):
 
 
 DOCUMENT_FOLDS = 'document_folds'
+
+
+def two_paper_size_folds(data, docs, keep, split_seed, indices=False):
+    """The folds of --two-paper-size (ROADMAP §4, week 8, part 2): for each held-out paper P
+    of `keep` and each pair {Q, R} of the other papers, P's leave-one-paper-out fold with its
+    training sentences cut to as many as the pair alone gives, i.e. the training sentences of
+    the --leave-two-papers-out fold that holds out P and the third paper (named P|Q+R). The
+    cut keeps the first of the fold's shuffled training sentences: a random sample of all
+    three other papers. The validation and test sentences are those of P's fold."""
+    folds = []
+    for paper in docs:
+        if paper not in keep:
+            continue
+        train, val, test = paper_fold(data, (paper,), split_seed, indices=True)
+        others = [d for d in docs if d != paper]
+        for pair in itertools.combinations(others, 2):
+            third = next(d for d in others if d not in pair)
+            size = len(paper_fold(data, (paper, third), split_seed, indices=True)[0])
+            parts = (train[:size], val, test)
+            if not indices:
+                parts = tuple([data[i] for i in part] for part in parts)
+            folds.append((f"{paper}|{'+'.join(pair)}", *parts))
+    return folds
 
 
 def document_groups(docs, k, split_seed):
@@ -2579,6 +2610,11 @@ def parse_args(argv=None):
                         help='train on two papers and test on the other two, for each of the 6 '
                              'pairs (folds <paper>+<paper>): the inner folds of --entity-bias '
                              '(ROADMAP §4, week 7)')
+    parser.add_argument('--two-paper-size', action='store_true', default=argparse.SUPPRESS,
+                        help='with --leave-one-paper-out: per held-out paper, one fold per pair '
+                             'of the other papers, trained on all three other papers with as '
+                             'many training sentences as the pair alone gives (folds P|Q+R, '
+                             'variant crf_p3n2; ROADMAP §4, week 8)')
     parser.add_argument('--document-folds', type=int, default=argparse.SUPPRESS, metavar='K',
                         help='hold out groups of whole documents: the documents, shuffled with '
                              'the split seed, dealt into K groups, each the test set of one fold '
@@ -2702,6 +2738,14 @@ def parse_args(argv=None):
         for option in ('vary_split', 'leave_one_paper_out', 'published_split'):
             if getattr(args, option, False):
                 parser.error(f"--leave-two-papers-out is a protocol of its own: no "
+                             f"--{option.replace('_', '-')}")
+    if hasattr(args, 'two_paper_size'):
+        if not args.leave_one_paper_out or not args.crf:
+            parser.error('--two-paper-size needs --leave-one-paper-out and --crf')
+        for option in ('multi_task', 'label_semantics', 'self_train', 'context',
+                       'augment_mentions', 'entity_bias'):
+            if getattr(args, option, None) not in (None, False):
+                parser.error(f"--two-paper-size is not available with "
                              f"--{option.replace('_', '-')}")
     if hasattr(args, 'document_folds'):
         if args.document_folds < 2:

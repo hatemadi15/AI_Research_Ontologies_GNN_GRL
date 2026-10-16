@@ -74,3 +74,33 @@ def test_sofc_exps_article_folds():
     tested = sorted(itertools.chain(*(test for *_, test in folds)))
     assert tested == list(range(876))
     assert [len({data[i][2] for i in test}) for *_, test in folds] == [9] * 5
+
+
+def test_two_paper_size_folds():
+    """--two-paper-size (week 8, part 2): per held-out paper and pair of the other papers, the
+    paper's fold with as many training sentences as the pair's --leave-two-papers-out fold."""
+    data = [(w, t, d) for k in range(5) for w, t, d in DATA if d != 'e.conll']   # 4 papers
+    args = nb.parse_args(['--leave-one-paper-out', '--crf', '--two-paper-size', '--tag', 'm0'])
+    folds = nb.make_folds(data, args, indices=True)
+    lopo = {name: rest for name, *rest in nb.make_folds(
+        data, SimpleNamespace(leave_one_paper_out=True, split_seed=0), True)}
+    two = {name: rest for name, *rest in nb.make_folds(
+        data, SimpleNamespace(leave_one_paper_out=False, leave_two_papers_out=True,
+                              split_seed=0), True)}
+    assert len(folds) == 4 * 3
+    for name, train, val, test in folds:
+        paper, pair = name.split('|')
+        q, r = pair.split('+')
+        third = ({'a.conll', 'b.conll', 'c.conll', 'd.conll'} - {paper, q, r}).pop()
+        full_train, full_val, full_test = lopo[paper]
+        assert (val, test) == (full_val, full_test)
+        assert train == full_train[:len(two['+'.join(sorted((paper, third)))][0])]
+    assert nb.variant_name(args) == 'crf_p3n2_m0'
+    one = nb.parse_args(['--leave-one-paper-out', '--crf', '--two-paper-size', '--papers', 'a'])
+    assert {name.split('|')[0] for name, *_ in nb.make_folds(data, one, True)} == {'a.conll'}
+    for argv in (['--crf', '--two-paper-size'], ['--leave-one-paper-out', '--two-paper-size'],
+                 ['--leave-one-paper-out', '--crf', '--two-paper-size', '--multi-task'],
+                 ['--leave-one-paper-out', '--crf', '--two-paper-size', '--context', '8'],
+                 ['--leave-one-paper-out', '--crf', '--tag', 'p3n2']):
+        with pytest.raises(SystemExit):
+            nb.parse_args(argv)

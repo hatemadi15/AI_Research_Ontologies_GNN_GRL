@@ -320,3 +320,33 @@ def test_paper_count_compares_two_and_three_training_papers(tmp_path):
                                                 'n_three': 3}
     assert out['fine']['three']['mean'] == 65.0
     assert out['fine']['three_minus_two']['mean_diff'] == pytest.approx(65.0 - 45.0)
+
+
+def test_paper_diversity_three_papers_at_the_size_of_two(tmp_path):
+    """Week 8, part 2: per held-out paper, two papers (inner folds), three papers at the size
+    of two (crf_p3n2, folds P|Q+R) and three papers; diversity and size over the 4 papers."""
+    pytest.importorskip('scipy')
+    papers = ['a.conll', 'b.conll', 'c.conll', 'd.conll']
+    for off in (0, 100, 200):
+        folds = [{'run_id': f'{p}+{q}', 'bias_test': {'0': {p: [4, 10, 10], q: [4, 10, 10]}}}
+                 for p, q in itertools.combinations(papers, 2)]           # F1 40 everywhere
+        (tmp_path / f'ner_results_fine_leave_two_papers_out_crf_bias_m{off}.json').write_text(
+            json.dumps({'runs': folds}))
+        sized = [_run(f"{p}|{'+'.join(pair)}", 45.0 + k)
+                 for k, p in enumerate(papers)
+                 for pair in itertools.combinations([q for q in papers if q != p], 2)]
+        (tmp_path / f'ner_results_fine_leave_one_paper_out_crf_p3n2_m{off}.json').write_text(
+            json.dumps({'runs': sized}))
+        full = [_run(p, 50.0 + 2 * k) for k, p in enumerate(papers)]
+        (tmp_path / f'ner_results_fine_leave_one_paper_out_crf_m{off}.json').write_text(
+            json.dumps({'runs': full}))
+    out = sa.paper_diversity(tmp_path)
+    assert set(out) == {'fine'}
+    assert out['fine']['papers']['b.conll'] == {'two': 40.0, 'three_at_two': 46.0,
+                                                'three': 52.0}
+    assert out['fine']['diversity']['mean_diff'] == 6.5           # 45 to 48 against 40
+    assert out['fine']['size']['mean_diff'] == 6.5                # 50 to 56 against 45 to 48
+    assert out['fine']['diversity']['passes']
+    (tmp_path / 'ner_results_fine_leave_one_paper_out_crf_p3n2_m200.json').write_text(
+        json.dumps({'runs': sized[:-1]}))                         # a pair missing: left out
+    assert sa.paper_diversity(tmp_path) == {}

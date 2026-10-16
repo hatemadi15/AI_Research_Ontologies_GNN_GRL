@@ -648,3 +648,18 @@ def test_week8_sofc_splits_batch(monkeypatch):
             assert a.crf and a.save_predictions and a.seeds == [0, 1, 2, 3, 4]
     assert all(a.document_folds == 5 for a in lane1)
     assert 'w8a' in kj.BATCHES and 'sofc_corpus_sha256' not in kj.batch_spec('w8a')
+
+
+def test_week8_paper_diversity_batch(monkeypatch):
+    """w8b (week 8, part 2): a repeat, then the CRF head with --two-paper-size on the held-out
+    papers, seed offsets 0 to 200, one lane per granularity."""
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda report=None: 'x' * 64)
+    lane0, lane1 = _parsed(kj.batch_lanes('w8b'))
+    assert lane0[0].tag == 'smokeag' and len(lane0) == 4 and len(lane1) == 3
+    for lane, granularity in ((lane0[1:], 'fine'), (lane1, 'coarse')):
+        assert [a.seed_offset for a in lane] == [0, 100, 200]
+        for a in lane:
+            assert (a.granularity, nb.protocol_name(a), nb.variant_name(a)) == (
+                granularity, 'leave_one_paper_out', f'crf_p3n2_m{a.seed_offset}')
+            assert a.two_paper_size and a.save_predictions
+    assert 'w8b' in kj.BATCHES

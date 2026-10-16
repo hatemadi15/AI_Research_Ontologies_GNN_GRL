@@ -105,6 +105,10 @@ Week 8, part 1 (SOFC-Exp beyond its official split):
           (smokeaf); then the CRF head on SOFC-Exp, model seed offsets 0 to 900 (crf_m<N>),
           on its 5 random sentence splits (lane 0) and its 5 article folds (lane 1,
           --document-folds 5)
+Week 8, part 2 (more papers or more sentences?):
+  w8b     the CRF run of smoke4 again (smokeag); then the CRF head on the held-out papers with
+          --two-paper-size (crf_p3n2_m<N>), seed offsets 0, 100 and 200, one lane per
+          granularity
 
 Usage:
   python src/graph/kaggle_jobs.py quota
@@ -465,6 +469,12 @@ def batch_lanes(name):
         return [[repeat + ['--tag', 'smokeae'], sofc_repeat,
                  *(sofc_split_job('random_split_vary', off) for off in OFFSETS_PUBLISHED)],
                 [sofc_split_job('document_folds', off) for off in OFFSETS_PUBLISHED]]
+    if name == 'w8b':
+        # week 8, part 2: three papers at the size of two (one lane per granularity, so the
+        # jobs that write a file share a lane)
+        lanes = [[job(g, 'leave_one_paper_out', '--two-paper-size', offset=off, tag=f'm{off}')
+                  for off in OFFSETS] for g in GRANULARITIES]
+        return [[repeat + ['--tag', 'smokeag']] + lanes[0], lanes[1]]
     if name == 'w7a':
         # week 7, part 2a: recall calibration. An inner job is the 6 folds of a seed, each
         # trained on two papers (about 4 CRF runs); no predictions, the counts suffice
@@ -485,7 +495,7 @@ def batch_lanes(name):
 
 BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'item3r',
            'smoke4', 'w5a', 'w5b', 'w5c', 'smoke5', 'smoke6', 'w6a', 'w6b', 'w7a', 'w7b',
-           'w7c', 'w7d', 'w7e', 'w8a')
+           'w7c', 'w7d', 'w7e', 'w8a', 'w8b')
 
 
 def batch_extras(name):

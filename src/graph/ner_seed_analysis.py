@@ -48,6 +48,14 @@ votes (ner_seedmeans.WEEK5_SYSTEMS) and writes ner_week5_seed_analysis.json next
     papers other than P and its partner; the counts at D = 0), each the mean over its runs,
     and their difference with its mean and 95% CI over the 4 papers. Three papers also hold
     more sentences than two, so this is the value of a third paper with its sentences.
+  - paper_diversity (week 8, part 2; its decision): more papers or more sentences. Per
+    granularity and held-out paper P, the CRF head's F1 on P (seeds 0 to 200) trained on two
+    of the other papers (the inner folds, as in paper_count), on all three at the size of
+    the pair (crf_p3n2, --two-paper-size, folds P|Q+R), and on all three (crf); each the mean
+    over its pairs and seeds. Then over the 4 papers, mean and 95% CI: diversity, three
+    papers at the size of two minus two papers (the decision: does a third paper help at
+    the same number of training sentences?), and size, three papers minus three papers at
+    the size of two.
   - sofc_splits (week 8, part 1; descriptive): SOFC-Exp beyond its official split. Per
     protocol, its 5 random sentence splits and its 5 article folds (--document-folds 5), the
     CRF head's 10-seed mean per split under every F1 average, with the mean and 95% CI over
@@ -348,6 +356,65 @@ def paper_count(directory):
     return out
 
 
+def paper_diversity(directory):
+    """The paper_diversity section (see the module docstring); a granularity is left out
+    unless every held-out paper has every pair, with every seed, on every side."""
+    out = {}
+    for g in GRANULARITIES:
+        names = {kind: [f'ner_results_{g}_{protocol}_{variant}_m{off}.json'
+                        for off in SCREEN_OFFSETS]
+                 for kind, protocol, variant in (('two', 'leave_two_papers_out', 'crf_bias'),
+                                                 ('sized', LOPO, 'crf_p3n2'),
+                                                 ('full', LOPO, 'crf'))}
+        files = {kind: load_files(directory, n) for kind, n in names.items()}
+        if not all(files.values()):
+            continue
+        f1 = {kind: {} for kind in files}
+        for f in files['two']:                    # held out: P and S; trained on the pair
+            for run in f['runs']:
+                held = run['run_id'].split('+')
+                for paper, (correct, pred, gold) in run['bias_test']['0'].items():
+                    third = next(h for h in held if h != paper)
+                    f1['two'].setdefault((paper, third), []).append(
+                        200 * correct / (pred + gold) if pred + gold else 0.0)
+        for f in files['sized']:
+            for run in f['runs']:
+                paper, pair = run['run_id'].split('|')
+                f1['sized'].setdefault((paper, pair), []).append(run['f1'])
+        for f in files['full']:
+            for run in f['runs']:
+                f1['full'].setdefault(run['run_id'], []).append(run['f1'])
+        papers = sorted(f1['full'])
+        rows, complete = {}, True
+        for paper in papers:
+            others = [p for p in papers if p != paper]
+            pairs = [(pair, next(p for p in others if p not in pair))
+                     for pair in itertools.combinations(others, 2)]
+            keys = [((paper, third), (paper, '+'.join(pair))) for pair, third in pairs]
+            n = len(SCREEN_OFFSETS)
+            if not all(len(f1['two'].get(k2, ())) == n and len(f1['sized'].get(k3, ())) == n
+                       for k2, k3 in keys) or len(f1['full'][paper]) != n:
+                complete = False
+                break
+            rows[paper] = {'two': statistics.mean(statistics.mean(f1['two'][k2])
+                                                  for k2, _ in keys),
+                           'three_at_two': statistics.mean(statistics.mean(f1['sized'][k3])
+                                                           for _, k3 in keys),
+                           'three': statistics.mean(f1['full'][paper])}
+        if not complete:
+            continue
+        out[g] = {'papers': {p: {k: round(v, 2) for k, v in r.items()}
+                             for p, r in rows.items()},
+                  **{k: spread([r[k] for r in rows.values()])
+                     for k in ('two', 'three_at_two', 'three')},
+                  'diversity': spread([r['three_at_two'] - r['two'] for r in rows.values()],
+                                      'mean_diff'),
+                  'size': spread([r['three'] - r['three_at_two'] for r in rows.values()],
+                                 'mean_diff')}
+        out[g]['diversity']['passes'] = out[g]['diversity']['ci95'][0] > 0
+    return out
+
+
 def sofc_splits(directory):
     """The sofc_splits section (see the module docstring); protocols without all 10 seed files
     of the CRF head are left out, the votes too without their predictions."""
@@ -398,6 +465,7 @@ def analyse(directory):
     out['week6_types'] = week6_type_differences(directory)
     out['sofc_splits'] = sofc_splits(directory)
     out['paper_count'] = paper_count(directory)
+    out['paper_diversity'] = paper_diversity(directory)
     out['errors'] = {}
     for protocol in PROTOCOLS:
         for g in GRANULARITIES:
@@ -441,6 +509,11 @@ def main(argv=None):
         print(f"  {g}-grained, an unseen paper: trained on 2 papers {entry['two']['mean']:.2f}, "
               f"on 3 {entry['three']['mean']:.2f}; the third paper {d['mean_diff']:+.2f} "
               f"{d['ci95']}")
+    for g, entry in result['paper_diversity'].items():
+        d, z = entry['diversity'], entry['size']
+        print(f"  {g}-grained, three papers at the size of two minus two papers: "
+              f"{d['mean_diff']:+.2f} {d['ci95']} ({'passes' if d['passes'] else 'no'}); "
+              f"three papers minus three at the size of two: {z['mean_diff']:+.2f} {z['ci95']}")
     for protocol, entry in result['sofc_splits'].items():
         if protocol != 'gap':
             print(f"  SOFC-Exp, {protocol}: the CRF head {entry['micro']['mean']:.2f} "
