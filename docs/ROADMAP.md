@@ -267,7 +267,12 @@ with an evaluation paper if every option fails:
    and each method that passes item 1 against the CRF head. A methods paper
    needs its gain on both datasets.
 3. **Combine the methods that pass** (week 7), for example multi-task
-   training with a larger encoder or with document context.
+   training with a larger encoder or with document context. Screen a
+   further method for unseen papers alongside: mention replacement (Dai and
+   Adel, 2020; `--augment-mentions K`, prepared in week 6 without training).
+   It adds K copies of each training sentence with its mentions swapped for
+   other training mentions of the same type, so that the model learns the
+   contexts rather than the names, which change from paper to paper.
 4. **Rare coarse-grained types** (item 5 below): silver sentences selected
    for SDE, MIP, PRP, MOD and CPR, or a class-balanced loss over them,
    judged by macro F1.

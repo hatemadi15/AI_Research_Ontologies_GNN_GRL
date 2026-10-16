@@ -259,6 +259,54 @@ def random_split(n, seed, ratios=(0.65, 0.15, 0.20)):
     return idx[:n_train], idx[n_train:n_train + n_val], idx[n_train + n_val:]
 
 
+MR_P = 0.5                    # chance that --augment-mentions replaces a mention
+
+
+def entity_spans(tags):
+    """(start, end, type) of the entities of IOB2 tags; an I- tag that does not continue an
+    entity of its type starts one, as seqeval's default mode reads it."""
+    out, start, kind = [], None, None
+    for i, tag in enumerate(list(tags) + ['O']):
+        inside = start is not None and tag == f'I-{kind}'
+        if start is not None and not inside:
+            out.append((start, i, kind))
+            start = None
+        if tag != 'O' and not inside:
+            start, kind = i, tag[2:]
+    return out
+
+
+def mention_replacements(sentences, k, seed, p=MR_P):
+    """Mention replacement (Dai and Adel, 2020) for --augment-mentions: per sentence with an
+    entity, k copies in which each mention is replaced, with probability p, by a mention of
+    the same type drawn from all the mentions of `sentences` (frequent ones more often).
+    Copies that change nothing are dropped. sentences: (words, tags); returns (words, tags).
+    """
+    rng = random.Random(seed)
+    pool = {}
+    for words, tags in sentences:
+        for start, end, kind in entity_spans(tags):
+            pool.setdefault(kind, []).append(tuple(words[start:end]))
+    out = []
+    for words, tags in sentences:
+        spans = entity_spans(tags)
+        if not spans:
+            continue
+        for _ in range(k):
+            new_words, new_tags, last, changed = [], [], 0, False
+            for start, end, kind in spans:
+                mention = tuple(words[start:end])
+                if rng.random() < p:
+                    mention = rng.choice(pool[kind])
+                    changed |= mention != tuple(words[start:end])
+                new_words += list(words[last:start]) + list(mention)
+                new_tags += list(tags[last:start]) + [f'B-{kind}'] + [f'I-{kind}'] * (len(mention) - 1)
+                last = end
+            if changed:
+                out.append((new_words + list(words[last:]), new_tags + list(tags[last:])))
+    return out
+
+
 def part_contexts(data, part):
     """Context sentences for --context: a (left, right) per position of `part`, in its order.
 
@@ -753,7 +801,7 @@ def is_silver(tags, marginals):
 
 
 def train_one(seed, train, val, test, labels, args, device, test_index=None, descriptions=None,
-              silver=None, keep_tagger=False, contexts=None):
+              silver=None, keep_tagger=False, contexts=None, augmented=None):
     """Fine-tune and test once; `seed` is the model seed (--seed-offset included).
 
     test_index (positions of `test` in the corpus) is stored with the
@@ -765,7 +813,8 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
     (result, tagger), the tagger holding the model with its best weights, the CRF,
     tokenizer, label2id and id2label (teacher_tags). contexts (--context): the
     part_contexts of train, val and test ({'train': ..., 'val': ..., 'test': ...}),
-    encoded around each sentence with up to args.context subwords per side.
+    encoded around each sentence with up to args.context subwords per side. augmented
+    (--augment-mentions): (words, tags) sentences trained on as gold ones.
     """
     import torch
     from transformers import (AutoModelForTokenClassification, AutoTokenizer,
@@ -804,6 +853,9 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
         # the gold sentences, then the silver ones; batches() shuffles them together
         weight = [1.0] * len(f_train) + [SILVER_WEIGHT] * len(silver)
         f_train += encode(tokenizer, silver, label2id, model.config.max_position_embeddings)
+    if augmented:
+        assert not silver, 'augmented sentences are gold ones, never silver'
+        f_train += encode(tokenizer, augmented, label2id, model.config.max_position_embeddings)
     f_val = encode_part('val', val)
     f_test = encode_part('test', test)
 
@@ -1405,7 +1457,7 @@ PLAIN_VARIANTS = ('baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_st', 'crf_mt
 
 def variant_name(args):
     """Variant of a run: 'baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_mt_ls', 'crf_st' or
-    'crf_st<N>', 'crf_mt_st<N>' or 'crf_ctx', then the tag.
+    'crf_st<N>', 'crf_mt_st<N>', 'crf_ctx' or 'crf_mr', then the tag.
 
     'cw' is --class-weights, 'crf_mt' is --crf --multi-task, 'crf_ls' is --crf
     --label-semantics, 'crf_mt_ls' both, 'crf_st' is --crf --self-train and 'crf_st<N>' that
@@ -1424,6 +1476,8 @@ def variant_name(args):
                 name = f'crf_mt_st{teachers}'
         if getattr(args, 'context', 0):
             name = 'crf_ctx'
+        if getattr(args, 'augment_mentions', 0):
+            name = 'crf_mr'
     else:
         name = 'cw' if args.class_weights else 'baseline'
     tag = getattr(args, 'tag', None)
@@ -1852,8 +1906,14 @@ def run(args):
                 contexts = ({name: part_contexts(data, part)
                              for name, part in (('train', tr), ('val', va), ('test', te))}
                             if getattr(args, 'context', 0) else None)
+                augmented = (mention_replacements([(w, t) for w, t, _ in train],
+                                                  args.augment_mentions, seed)
+                             if getattr(args, 'augment_mentions', 0) else None)
                 res = train_one(seed, train, val, test, labels, args, device, test_index=te,
-                                descriptions=descriptions[granularity], contexts=contexts)
+                                descriptions=descriptions[granularity], contexts=contexts,
+                                augmented=augmented)
+                if augmented is not None:
+                    res['n_augmented'] = len(augmented)
             res['run_id'] = run_id
             res['runtime_sec'] = round(time.time() - start, 1)
             if environment:
@@ -2237,6 +2297,11 @@ def parse_args(argv=None):
                              'neighbouring sentences of the same paper, and of the same part '
                              '(train, validation or test), on each side of a sentence in the '
                              'encoder input; only the sentence is tagged (files tagged _crf_ctx)')
+    parser.add_argument('--augment-mentions', type=int, default=argparse.SUPPRESS, metavar='K',
+                        help='with --crf: mention replacement (Dai and Adel, 2020). K copies '
+                             'of each training sentence with an entity, each mention replaced '
+                             f'with probability {MR_P} by a training mention of its type '
+                             '(files tagged _crf_mr)')
     parser.add_argument('--students', type=int, default=argparse.SUPPRESS, metavar='N',
                         help='with --teachers: N students, one per seed offset 0, 100, ..., '
                              '100 (N - 1), at least as many as the teachers, which keep the '
@@ -2313,6 +2378,15 @@ def parse_args(argv=None):
         for option in ('multi_task', 'label_semantics', 'self_train'):
             if getattr(args, option, None) not in (None, False):
                 parser.error(f"--context is not available with --{option.replace('_', '-')}")
+    if hasattr(args, 'augment_mentions'):
+        if not args.crf:
+            parser.error('--augment-mentions needs --crf')
+        if args.augment_mentions < 1:
+            parser.error('--augment-mentions: at least 1 copy')
+        for option in ('multi_task', 'label_semantics', 'self_train', 'context'):
+            if getattr(args, option, None) not in (None, False):
+                parser.error(f"--augment-mentions is not available with "
+                             f"--{option.replace('_', '-')}")
     if hasattr(args, 'students'):
         if not hasattr(args, 'teachers'):
             parser.error('--students needs --teachers')
