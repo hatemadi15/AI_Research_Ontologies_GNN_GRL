@@ -5,16 +5,19 @@ behind each claim, and what is still missing. It is updated as the weekly
 protocols (ROADMAP §4) finish. All numbers come from the results files in
 `results/` and the tables that `report_results.py` generates from them.
 
-**Type.** An evaluation and reproducibility paper. Week 5 settles this. With
-10 seeds per split, two of the three method gains of weeks 3–4 do not
-stand, and 3-seed comparisons of the same runs often mislead. The positive
-results are about evaluation: the reproduction on the published split, the
-gap to unseen papers, and what the CRF head and the seed vote do. It becomes
-a methods paper only if a week-6 change passes on unseen papers under the
-10-seed design (ROADMAP P1, "Next, after week 5", item 2).
+**Type.** The aim is a methods paper: a change that improves materials NER
+on unseen papers over the strongest system so far (the seed vote, or the
+multi-task vote fine-grained), decided under the 10-seed design and repeated
+on a second dataset. Week 6 tests three candidates (DeBERTa-v3-large,
+document context, multi-task self-training; ROADMAP P1, "Next, after week
+5"), and later weeks combine the ones that pass. If none passes once these
+options are exhausted, the paper is an evaluation and reproducibility paper.
+Claims C1–C9 hold either way: in a methods paper they are its baselines and
+evaluation protocol, in an evaluation paper its results.
 
-**Working title.** "How much of a materials-NER gain survives? Splits,
-scoring and seeds on MaterioMiner".
+**Working titles.** Methods: an approach for materials NER on unseen papers,
+named after the change that passes. Evaluation: "How much of a materials-NER
+gain survives? Splits, scoring and seeds on MaterioMiner".
 
 ## Claims and evidence
 

@@ -249,29 +249,31 @@ granularity) score exactly as the separately trained CRF runs. Week 5 used
     84.98 and macro 82.31, against the published 84.77 and 82.39 (Gupta et
     al., 2022): the converted corpus behaves like the original.
 
-Next, after week 5, in this order:
-1. **Test the findings on a second dataset.** SOFC-Exp is converted and
-   checked (above). Repeat the main comparisons there with 10 seeds per
-   split: the CRF head against plain MatSciBERT, default against strict
-   IOB2 scoring, the seed vote, and random splits against unseen documents.
-   Its 45 articles allow grouped folds by article, the analogue of leaving
-   one paper out. This shows which findings hold beyond the 4 MaterioMiner
-   papers, which the paper needs most.
-2. **Screen the methods for unseen papers, then confirm.** DeBERTa-v3-large,
-   document context and multi-task self-training (items 2–4 below) each with
-   3 seeds against the CRF head on the 4 held-out papers. Week 5 shows that
-   3 seeds cannot decide gains of 1–2 points, so a screen only selects which
-   methods get 10 seeds; the decision is made on those. Multi-task
-   self-training builds on the two changes that help: multi-task training,
-   whose vote now leads on unseen papers fine-grained, and self-training,
-   which improves on the random splits.
-3. **Rare coarse-grained types** (item 5 below): silver sentences selected
+Next, after week 5, in this order. The aim is a methods paper (§4, week 6),
+with an evaluation paper if every option fails:
+1. **Methods for unseen papers: screen, then decide with 10 seeds.**
+   DeBERTa-v3-large, document context and multi-task self-training (items
+   2–4 below), each against the CRF head on the 4 held-out papers. Week 5
+   shows that 3 seeds cannot decide gains of 1–2 points, so the 3-seed
+   screen only selects which methods get 10 seeds, and it lets almost every
+   real gain through. A method's vote must then beat the strongest system
+   on unseen papers: the multi-task vote fine-grained, `crf_ens3`
+   coarse-grained. Multi-task self-training builds on the two changes that
+   help: multi-task training, whose vote leads on unseen papers
+   fine-grained, and self-training, which improves on the random splits.
+2. **A second dataset.** SOFC-Exp is converted and checked (above). Its
+   official split holds out 11 of its 45 articles, so it measures unseen
+   documents. With 10 seeds there: the CRF head against plain MatSciBERT,
+   and each method that passes item 1 against the CRF head. A methods paper
+   needs its gain on both datasets.
+3. **Combine the methods that pass** (week 7), for example multi-task
+   training with a larger encoder or with document context.
+4. **Rare coarse-grained types** (item 5 below): silver sentences selected
    for SDE, MIP, PRP, MOD and CPR, or a class-balanced loss over them,
    judged by macro F1.
-4. **Write the paper** (`docs/PAPER.md`) as an evaluation paper: the
-   reproduction on the published split, the gap to unseen papers, the CRF
-   head's span validity, and what 10 seeds change. It becomes a methods
-   paper only if item 2 finds a change that passes on unseen papers.
+5. **Write the paper** (`docs/PAPER.md`): a methods paper if a change passes
+   items 1 and 2, otherwise an evaluation paper on the reproduction, the gap
+   to unseen papers, the CRF head's span validity and what 10 seeds change.
 
 Week 5 closes label semantics: with 10 seeds, neither the model nor its vote
 improves on either protocol.
@@ -824,7 +826,7 @@ chance at class level. For a Task C-style result:
 | 3 | Done: NER, P1 "Next, after week 2" items 1–5: comparisons of 3-seed means, a mixed-backbone ensemble, label semantics and self-training for unseen papers, multi-task again, in-domain pre-training (protocol below) | Met for two changes, both coarse-grained: multi-task on the random splits (+0.75 [+0.10, +1.39]) and label semantics on unseen papers (+1.17 [+0.94, +1.41]). The mixed-backbone vote, self-training and in-domain pre-training do not pass; the reported system stays `crf_ens3` |
 | 4 | Done for NER: P1 "Next, after week 3" items 1, 2, 3 and 5, i.e. votes over the week-3 changes that help, label semantics on the multi-task model, self-training at scale, on Kaggle T4 GPUs (protocol below). Not started: context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | Met for NER by two changes, both on unseen papers. Coarse-grained, the label-semantics vote improves on `crf_ens3` on the CPU (+1.63 [+0.11, +3.16]); the GPU repeat does not confirm it (+0.40 [−1.36, +2.16]). Fine-grained, self-training with 3 teachers improves on the CRF head (GPU, +1.07 [+0.33, +1.80]; +1.22 [+0.60, +1.84] on the random splits, reported). The multi-task vote and label semantics on the multi-task model do not pass. Typing: not started |
 | 5 | Done: NER, P1 "Next, after week 4" item 1, i.e. 10 seeds per split for the CRF reference, multi-task, label semantics and self-training with 3 teachers, on Kaggle T4 GPUs, and the published split (amendment); items 2–7 and a paper outline prepared, and the week-6 options run once each at full size (protocol below). The original week-5 work moves to week 7 | Met. Of the claims re-tested with 10 seeds, fine-grained multi-task on the random splits passes (+1.83 [+0.32, +3.34]); the coarse-grained claims of week 3 and the self-training claim of week 4 do not. The reported system: the multi-task vote coarse-grained on the random splits and fine-grained on unseen papers, `crf_ens3` elsewhere. On the published split, plain MatSciBERT reproduces 69.92 and 72.32 and the CRF head beats both |
-| 6 | NER, P1 "Next, after week 5": the main comparisons on a second dataset (SOFC-Exp, 10 seeds), then methods for unseen papers (DeBERTa-v3-large, document context, multi-task self-training) screened with 3 seeds and decided with 10; rare coarse-grained types; protocol fixed before its runs | The week-1–5 findings tested on SOFC-Exp; a change that improves on the reported system on unseen papers under the 10-seed design |
+| 6 | NER, P1 "Next, after week 5", towards a methods paper: methods for unseen papers (DeBERTa-v3-large, document context, multi-task self-training) screened with 3 seeds and decided with 10, and a second dataset (SOFC-Exp, 10 seeds); protocol fixed before its runs | A method whose vote improves on the strongest system on unseen papers under the 10-seed design, and on SOFC-Exp |
 | 7 | Class-level taxonomy (LLM or cross-encoder + arborescence); relation annotation pilot | First class-level taxonomy F1 above chance; relation guidelines |
 
 ### Week 2 protocol (fixed before any run)

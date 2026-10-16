@@ -539,13 +539,15 @@ Ten seeds per split also re-tested the gains of weeks 3 and 4, which used 3:
 New NER experiments should use the CRF head (`--crf`) and 10 seeds per split
 before a claim. GPU runs are compared only with GPU runs.
 
-The next steps are in ROADMAP P1, "Next, after week 5":
-1. the main comparisons on a second dataset, SOFC-Exp, converted and checked
-   against its published MatSciBERT-CRF scores;
-2. methods for unseen papers, screened with 3 seeds and decided with 10:
+The next steps are in ROADMAP P1, "Next, after week 5". They aim at a methods
+paper, with an evaluation paper if every option fails
+([docs/PAPER.md](docs/PAPER.md)):
+1. methods for unseen papers, screened with 3 seeds and decided with 10:
    DeBERTa-v3-large, document context and multi-task self-training;
-3. the rare coarse-grained types that keep macro F1 down;
-4. an evaluation paper ([docs/PAPER.md](docs/PAPER.md)).
+2. a second dataset, SOFC-Exp, converted and checked against its published
+   MatSciBERT-CRF scores, where a method's gain must repeat;
+3. combinations of the methods that pass;
+4. the rare coarse-grained types that keep macro F1 down.
 
 ## License
 
