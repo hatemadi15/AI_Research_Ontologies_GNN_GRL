@@ -211,7 +211,9 @@ WEEK7_SYSTEM_NAMES = {**WEEK6_NAMES, **{
 WEEK7_SOFC_LABELS = {**{m: f"Week 7, {name} on the CRF head's predictions"
                         for m, name in WEEK7_NAMES.items()},
                      'crf_ebv': 'Week 7, part 2a, recall calibration of the CRF head, its bias '
-                                'chosen on the validation articles, against the CRF head'}
+                                'chosen on the validation articles, against the CRF head',
+                     'crf_mt': 'Week 7, part 2d, multi-task training on both levels against the '
+                               'CRF head'}
 LOPO = 'leave_one_paper_out'
 # the exploratory analyses of the week-5 runs (ner_seed_analysis.py), in results/gpu/
 WEEK5_ANALYSIS = 'ner_week5_seed_analysis.json'
@@ -222,8 +224,22 @@ PROTOCOL_PHRASES = {'random_split_vary': 'over the 5 random splits',
                     'leave_one_paper_out': 'over the 4 held-out papers'}
 # the published F1 of each granularity (Durmaz et al. 2024), for the rows made from comparisons
 PUBLISHED_F1 = {'fine': 69.92, 'coarse': 72.32}
-# SOFC-Exp: MatSciBERT with a CRF on the official split (Gupta et al. 2022)
+# SOFC-Exp: MatSciBERT with a CRF on the official split (Gupta et al. 2022), the entity
+# types and the slot types (SOFC-Slot)
 SOFC_PUBLISHED = {'micro': 84.77, 'macro': 82.39}
+SOFC_SLOT_PUBLISHED = {'micro': 72.85, 'macro': 65.35}
+# SOFC-Exp's levels in the report: the bullet's lead, the name of the CRF head's comparison
+# with plain MatSciBERT and whether it decides (S1 of week 6; the slot level, week 7 part 2d,
+# reports it), the "At a glance" row's name and the published scores
+SOFC_LEVELS = {
+    'sofc': ("* NER on SOFC-Exp (week 6; its official split, 26 training, 8 development and 11 "
+             "test articles; 10 model seeds, GPU runs; the 95% CIs are over seeds)",
+             'S1, the CRF head', True, 'NER on SOFC-Exp', 'MatSciBERT-CRF', SOFC_PUBLISHED),
+    'sofc_slot': ("* NER on SOFC-Exp's slot types (week 7, part 2d; the 17 slot types that its "
+                  "evaluation scores, on the same sentences and official split; 10 model seeds, "
+                  "GPU runs; the 95% CIs are over seeds)", 'The CRF head', False,
+                  "NER on SOFC-Exp's slot types", 'MatSciBERT-CRF of SOFC-Slot',
+                  SOFC_SLOT_PUBLISHED)}
 # model seeds of a published-split comparison (0 to 900), all needed for its decision
 PUBLISHED_SEEDS = 10
 # `role` of a week-3 to week-5 comparison, as the verdict bullets word it
@@ -1066,20 +1082,25 @@ def week6_verdict_line(comps, variant, reference, design, week='6', names=WEEK6_
 
 
 def sofc_note(analysis):
-    """Bullet on SOFC-Exp's official split (week 6, S1 and S2) from the week-5 analyses
-    file; '' without it. S1 and S2 are decisions under the week-6 rule, over the 10 model
-    seeds (seed_decision)."""
-    e = dig(analysis, 'published_split', 'sofc')
+    """Bullets on SOFC-Exp's official split from the week-5 analyses file, one per level
+    (SOFC_LEVELS) that has its results; '' without them. S1 (entity types) and the methods are
+    decisions under the week-6 rule, over the 10 model seeds (seed_decision)."""
+    return ''.join(sofc_level_note(analysis, g) for g in SOFC_LEVELS)
+
+
+def sofc_level_note(analysis, g):
+    """The bullet of one SOFC-Exp level (see sofc_note); a method's votes, where the analysis
+    has them, are reported against the CRF votes, paired by seed triple."""
+    e = dig(analysis, 'published_split', g)
     if not e:
         return ''
+    lead, s1, s1_decides, _, published, _ = SOFC_LEVELS[g]
     base, crf = e['baseline'], e['crf']
-    line = ("* NER on SOFC-Exp (week 6; its official split, 26 training, 8 development and 11 "
-            "test articles; 10 model seeds, GPU runs; the 95% CIs are over seeds): plain "
-            f"MatSciBERT {interval(base['micro'])}, the CRF head {interval(crf['micro'])} "
-            f"(macro {crf['macro']['mean']:.2f}), against the published MatSciBERT-CRF "
-            f"{e['published']:.2f} micro and {e.get('published_macro', 0):.2f} macro. S1, the "
-            "CRF head against plain MatSciBERT, paired by seed: "
-            + seed_decision(e['crf_minus_baseline']))
+    line = (f"{lead}: plain MatSciBERT {interval(base['micro'])}, the CRF head "
+            f"{interval(crf['micro'])} (macro {crf['macro']['mean']:.2f}), against the "
+            f"published {published} {e['published']:.2f} micro and "
+            f"{e.get('published_macro', 0):.2f} macro. {s1} against plain MatSciBERT, paired "
+            "by seed: " + seed_decision(e['crf_minus_baseline'], decides=s1_decides))
     if 'crf_votes' in e:
         line += (f"; the CRF votes over the 3 seed triples score "
                  f"{e['crf_votes']['micro']['mean']:.2f}")
@@ -1090,6 +1111,10 @@ def sofc_note(analysis):
             label = f"S2, {WEEK6_NAMES[method]} against the CRF head"
         line += (f". {label}, paired by seed: {interval(m['micro'])}, "
                  + seed_decision(m['minus_crf'], decides=method not in WEEK7_REPORTED))
+        if 'votes' in m:
+            line += (f"; its votes over the 3 seed triples score {m['votes']['micro']['mean']:.2f}"
+                     ", against the CRF votes, paired by triple: "
+                     + seed_decision(m['votes_minus_crf_votes'], decides=False))
     return line + ".\n"
 
 
@@ -1436,20 +1461,21 @@ def published_split_row(res, g):
             f"{crf_where} that of the CRF head; the CIs are over seeds only |")
 
 
-def sofc_row(res):
-    """The "At a glance" row of SOFC-Exp's official split (week 6); '' until plain MatSciBERT
-    and the CRF head each have 10 runs."""
-    base = res.get(GPU_PREFIX + ner_file('sofc', 'published_split'))
-    crf = res.get(GPU_PREFIX + ner_file('sofc', 'published_split', 'crf'))
+def sofc_row(res, g='sofc'):
+    """The "At a glance" row of a SOFC-Exp level on its official split (week 6; the slot
+    types, week 7 part 2d); '' until plain MatSciBERT and the CRF head each have 10 runs."""
+    base = res.get(GPU_PREFIX + ner_file(g, 'published_split'))
+    crf = res.get(GPU_PREFIX + ner_file(g, 'published_split', 'crf'))
     if not (has_runs(base, 10) and has_runs(crf, 10)):
         return ''
+    _, _, _, name, published, scores = SOFC_LEVELS[g]
     lo, hi = crf['summary']['micro']['ci95']
-    paper = SOFC_PUBLISHED['micro']
+    paper = scores['micro']
     where = 'within' if lo <= paper <= hi else 'below' if paper < lo else 'above'
-    return (f"| NER on SOFC-Exp, the official split, 10 seeds (GPU runs) | plain MatSciBERT "
+    return (f"| {name}, the official split, 10 seeds (GPU runs) | plain MatSciBERT "
             f"{interval(base['summary']['micro'])}; CRF head {interval(crf['summary']['micro'])} "
-            f"(macro {crf['summary']['macro']['mean']:.2f}) | published MatSciBERT-CRF "
-            f"{paper:.2f} micro, {SOFC_PUBLISHED['macro']:.2f} macro (Gupta et al. 2022): "
+            f"(macro {crf['summary']['macro']['mean']:.2f}) | published {published} "
+            f"{paper:.2f} micro, {scores['macro']:.2f} macro (Gupta et al. 2022): "
             f"{where} the CRF head's 95% CI (over seeds only) |")
 
 
@@ -1566,9 +1592,10 @@ def glance_table(res):
         row = published_split_row(res, g)
         if row:
             glance.append(row)
-    row = sofc_row(res)
-    if row:
-        glance.append(row)
+    for g in SOFC_LEVELS:
+        row = sofc_row(res, g)
+        if row:
+            glance.append(row)
     for g in GRANULARITIES:
         week5 = week5_cells(res, g, 'on an unseen paper')
         if week5:

@@ -25,7 +25,10 @@ votes (ner_seedmeans.WEEK5_SYSTEMS) and writes ner_week5_seed_analysis.json next
     (SPLIT_METHODS): their scores and their difference from the CRF head, paired by seed
     (SOFC-Exp's S1 and S2 of the week-6 protocol). Week 7 adds the consistency rule on the
     CRF head (crf_dc, and crf_dcr with retyping) and recall calibration with the bias chosen
-    on the validation articles (crf_ebv, part 2a) in the same way.
+    on the validation articles (crf_ebv, part 2a) in the same way; part 2d adds SOFC-Exp's
+    slot level (sofc_slot, against the published MatSciBERT-CRF scores of SOFC-Slot) and
+    multi-task training on SOFC-Exp's two levels (crf_mt), whose votes over the seed triples
+    are also set against the CRF votes, paired by triple (VOTED_METHODS).
   - errors (exploratory; cited by the week-7 protocol, part 1): per protocol and
     granularity, the kinds of error of the CRF head over its 10 seeds: the share of gold
     entities that are correct, missed (no overlapping prediction), of the right span and
@@ -59,14 +62,16 @@ OUT_NAME = 'ner_week5_seed_analysis.json'
 FAMILIES = ('crf', 'crf_mt', 'crf_ls', 'crf_st3')
 VOTES = tuple(f'{f}_ens3' for f in FAMILIES)
 AVERAGES = ('micro avg', 'macro avg', 'weighted avg')
-# micro F1: Durmaz et al. 2024 (MaterioMiner); SOFC-Exp: MatSciBERT-CRF (Gupta et al. 2022)
-PUBLISHED_F1 = {'fine': 69.92, 'coarse': 72.32, 'sofc': 84.77}
-PUBLISHED_MACRO = {'sofc': 82.39}
-PUBLISHED_SPLITS = ('fine', 'coarse', 'sofc')
+# micro F1: Durmaz et al. 2024 (MaterioMiner); SOFC-Exp and its slots (SOFC-Slot):
+# MatSciBERT-CRF (Gupta et al. 2022, Supplementary Table 3 and Table 1)
+PUBLISHED_F1 = {'fine': 69.92, 'coarse': 72.32, 'sofc': 84.77, 'sofc_slot': 72.85}
+PUBLISHED_MACRO = {'sofc': 82.39, 'sofc_slot': 65.35}
+PUBLISHED_SPLITS = ('fine', 'coarse', 'sofc', 'sofc_slot')
 # methods on a published split, compared with the CRF head by seed: the week-6 methods,
 # the week-7 consistency rule on the CRF head's predictions (ner_consistency.py) and
-# recall calibration (ner_bias.py --choose val)
-SPLIT_METHODS = ('crf_deberta', 'crf_ctx', 'crf_dc', 'crf_dcr', 'crf_ebv')
+# recall calibration (ner_bias.py --choose val); multi-task training on SOFC-Exp's levels
+SPLIT_METHODS = ('crf_deberta', 'crf_ctx', 'crf_dc', 'crf_dcr', 'crf_ebv', 'crf_mt')
+VOTED_METHODS = ('crf_mt',)
 
 
 def load_files(directory, names):
@@ -218,6 +223,16 @@ def week6_type_differences(directory):
     return out
 
 
+def triple_votes(by_id):
+    """The votes of a system's runs {run_id: run} over the seed triples 0-200, 300-500 and
+    600-800 of a published split (run ids seed<K>); None unless every member is there."""
+    triples = [[f'seed{first + 100 * j}' for j in range(3)] for first in WEEK5_TRIPLES]
+    if not all(i in by_id for t in triples for i in t):
+        return None
+    return [ner_ensemble.ensemble_run(f'seed{t[0][4:]}_triple', [by_id[i] for i in t])
+            for t in triples]
+
+
 def published_split(directory):
     """The published-split analysis per granularity (see the module docstring); granularities
     without both files are left out."""
@@ -243,11 +258,9 @@ def published_split(directory):
         entry['crf_minus_baseline'] = {
             avg: spread([get(runs['crf'][i]) - get(runs['baseline'][i]) for i in ids],
                         'mean_diff') for avg, get in F1_AVERAGES.items()}
-        triples = [[f'seed{first + 100 * j}' for j in range(3)] for first in WEEK5_TRIPLES]
-        if all(i in runs['crf'] for t in triples for i in t):
-            votes = [ner_ensemble.ensemble_run(f'seed{t[0][4:]}_triple',
-                                               [runs['crf'][i] for i in t]) for t in triples]
-            entry['crf_votes'] = {avg: spread([get(v) for v in votes])
+        crf_votes = triple_votes(runs['crf'])
+        if crf_votes:
+            entry['crf_votes'] = {avg: spread([get(v) for v in crf_votes])
                                   for avg, get in F1_AVERAGES.items()}
         for method in SPLIT_METHODS:
             found = load_files(directory, [f'ner_results_{g}_published_split_{method}.json'])
@@ -255,12 +268,19 @@ def published_split(directory):
                 continue
             by_id = {r['run_id']: r for r in found[0]['runs']}
             ids = [i for i in runs['crf'] if i in by_id]
-            entry.setdefault('methods', {})[method] = {
+            found = entry.setdefault('methods', {})[method] = {
                 **{avg: spread([get(r) for r in by_id.values()])
                    for avg, get in F1_AVERAGES.items()},
                 'minus_crf': {avg: spread([get(by_id[i]) - get(runs['crf'][i]) for i in ids],
                                           'mean_diff') for avg, get in F1_AVERAGES.items()},
                 'n_pairs': len(ids)}
+            votes = triple_votes(by_id) if method in VOTED_METHODS else None
+            if votes and crf_votes:
+                found['votes'] = {avg: spread([get(v) for v in votes])
+                                  for avg, get in F1_AVERAGES.items()}
+                found['votes_minus_crf_votes'] = {
+                    avg: spread([get(v) - get(c) for v, c in zip(votes, crf_votes)],
+                                'mean_diff') for avg, get in F1_AVERAGES.items()}
         out[g] = entry
     return out
 

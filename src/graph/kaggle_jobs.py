@@ -80,6 +80,12 @@ smokeu):
           (--leave-two-papers-out, seed offsets 0, 100 and 200; counts only), the held-out
           papers again (seed offsets 0 to 900, with predictions) and SOFC-Exp's official
           split (model seeds 0 to 900), both granularities, balanced over the lanes
+Week 7, part 2d (SOFC-Exp's two levels):
+  w7b     the CRF run of smoke4 again (smokev), session b's SOFC-Exp CRF run of seed 0
+          (smokew) and the MaterioMiner multi-task run of split 0 (smokex), each to be
+          equal to its stored run; then SOFC-Exp's official split, model seeds 0 to 900:
+          plain MatSciBERT and the CRF head on the slot types (sofc_slot), and multi-task
+          training on both levels (sofc_both, a file per level)
 
 Usage:
   python src/graph/kaggle_jobs.py quota
@@ -359,6 +365,20 @@ def batch_lanes(name):
             first.append(['--granularity', 'sofc', '--published-split', '--seeds', '0', '--crf',
                           '--tag', 'smoket', '--save-predictions', '--threads', str(THREADS)])
         return [first + lanes[0], fixed + lanes[1]]
+    if name == 'w7b':
+        # week 7, part 2d: SOFC-Exp's slot level and multi-task training on its two levels;
+        # the repeats show that this commit leaves the stored SOFC-Exp CRF runs and the
+        # MaterioMiner multi-task runs as they were
+        sofc_repeat = ['--granularity', 'sofc', '--published-split', '--seeds', '0', '--crf',
+                       '--tag', 'smokew', '--save-predictions', '--threads', str(THREADS)]
+        mt_repeat = ['--vary-split', '--seeds', '0', '--crf', '--multi-task', '--tag',
+                     'smokex', '--save-predictions', '--threads', str(THREADS)]
+        costed = [(COST['sofc'] * len(OFFSETS_PUBLISHED), published_job('sofc_slot')),
+                  (COST['sofc'] * len(OFFSETS_PUBLISHED), published_job('sofc_slot', '--crf')),
+                  (COST['sofc'] * COST['mt'] * len(OFFSETS_PUBLISHED),
+                   published_job('sofc_both', '--crf', '--multi-task'))]
+        lanes = balance(costed, loads=[COST['crf'] + COST['sofc'], COST['mt']])
+        return [[repeat + ['--tag', 'smokev'], sofc_repeat] + lanes[0], [mt_repeat] + lanes[1]]
     if name == 'w7a':
         # week 7, part 2a: recall calibration. An inner job is the 6 folds of a seed, each
         # trained on two papers (about 4 CRF runs); no predictions, the counts suffice
@@ -378,7 +398,7 @@ def batch_lanes(name):
 
 
 BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'item3r',
-           'smoke4', 'w5a', 'w5b', 'w5c', 'smoke5', 'smoke6', 'w6a', 'w6b', 'w7a')
+           'smoke4', 'w5a', 'w5b', 'w5c', 'smoke5', 'smoke6', 'w6a', 'w6b', 'w7a', 'w7b')
 
 
 def batch_extras(name):

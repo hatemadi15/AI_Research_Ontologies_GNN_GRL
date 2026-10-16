@@ -21,7 +21,7 @@ fine-grained; 10-seed decisions next on MaterioMiner) and recall calibration
 (week 7, part 2a, running; it applies to both datasets). The week-6 protocol
 excluded multi-task methods from SOFC-Exp as a one-level corpus, but SOFC-Exp
 has a second level, 17 evaluated slot types that refine its 4 entity types
-(ROADMAP, "Prepared for part 2b"), so multi-task training (C7) and, if it
+(ROADMAP, "Prepared for part 2d"), so multi-task training (C7) and, if it
 passes, multi-task self-training can be repeated there.
 
 **Working titles.** Methods: an approach for materials NER on unseen papers,

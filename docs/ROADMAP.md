@@ -892,7 +892,7 @@ chance at class level. For a Task C-style result:
 | 4 | Done for NER: P1 "Next, after week 3" items 1, 2, 3 and 5, i.e. votes over the week-3 changes that help, label semantics on the multi-task model, self-training at scale, on Kaggle T4 GPUs (protocol below). Not started: context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | Met for NER by two changes, both on unseen papers. Coarse-grained, the label-semantics vote improves on `crf_ens3` on the CPU (+1.63 [+0.11, +3.16]); the GPU repeat does not confirm it (+0.40 [−1.36, +2.16]). Fine-grained, self-training with 3 teachers improves on the CRF head (GPU, +1.07 [+0.33, +1.80]; +1.22 [+0.60, +1.84] on the random splits, reported). The multi-task vote and label semantics on the multi-task model do not pass. Typing: not started |
 | 5 | Done: NER, P1 "Next, after week 4" item 1, i.e. 10 seeds per split for the CRF reference, multi-task, label semantics and self-training with 3 teachers, on Kaggle T4 GPUs, and the published split (amendment); items 2–7 and a paper outline prepared, and the week-6 options run once each at full size (protocol below). The original week-5 work moves to week 7 | Met. Of the claims re-tested with 10 seeds, fine-grained multi-task on the random splits passes (+1.83 [+0.32, +3.34]); the coarse-grained claims of week 3 and the self-training claim of week 4 do not. The reported system: the multi-task vote coarse-grained on the random splits and fine-grained on unseen papers, `crf_ens3` elsewhere. On the published split, plain MatSciBERT reproduces 69.92 and 72.32 and the CRF head beats both |
 | 6 | In progress: NER, P1 "Next, after week 5", towards a methods paper: methods for unseen papers (DeBERTa-v3-large, document context, multi-task self-training) screened with 3 seeds and decided with 10, and a second dataset (SOFC-Exp, 10 seeds); protocol below. So far (P1, "Week 6 so far"): DeBERTa-v3-large stops at the screen; document context passes the screen but neither 10-seed decision; multi-task self-training passes the screen (+6.06 fine-grained), stage 2 next; on SOFC-Exp the CRF head improves on plain MatSciBERT (S1) | A method whose vote improves on the strongest system on unseen papers under the 10-seed design, and on SOFC-Exp |
-| 7 | In progress: NER, part 1, document-level label consistency for unseen papers, a post-processing rule on the saved predictions (no GPU; protocol below); part 2a, recall calibration (a bias on the CRF head's emissions, chosen on inner folds; protocol below); part 2b, combinations of the methods that pass week 6 and mention replacement, fixed after the week-6 decisions. Then class-level taxonomy (LLM or cross-encoder + arborescence) and a relation annotation pilot | Part 1: the rule improves on the strongest system on unseen papers and on SOFC-Exp's CRF head. Taxonomy: first class-level F1 above chance; relation guidelines |
+| 7 | In progress: NER, part 1, document-level label consistency for unseen papers, a post-processing rule on the saved predictions (no GPU; protocol below); part 2a, recall calibration (a bias on the CRF head's emissions, chosen on inner folds; protocol below); part 2b, combinations of the methods that pass week 6 and mention replacement, fixed after the week-6 decisions; part 2c, coarse-to-fine completion (done, no claim); part 2d, multi-task training on SOFC-Exp's two levels (protocol below). Then class-level taxonomy (LLM or cross-encoder + arborescence) and a relation annotation pilot | Part 1: the rule improves on the strongest system on unseen papers and on SOFC-Exp's CRF head. Taxonomy: first class-level F1 above chance; relation guidelines |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -1682,7 +1682,7 @@ types, every entity token can carry a slot type, a finer level that our
 conversion had left out. Part 2c's result stands as a MaterioMiner result;
 the second level is described below.
 
-### Prepared for part 2b: SOFC-Exp's second level (slot types)
+### Prepared for part 2d: SOFC-Exp's second level (slot types)
 
 SOFC-Exp's annotation files give each token an entity tag and a slot tag
 (`annotations/entity_types_and_slots`). The slot level, read from the
@@ -1723,3 +1723,62 @@ evaluated types (the other two become O), on the same official split;
 encoder with a slot head and an entity head, as `--multi-task` does with
 MaterioMiner's levels, and writes `ner_results_sofc_slot_*` and
 `ner_results_sofc_*` files.
+
+### Week 7 protocol, part 2d: multi-task training on SOFC-Exp's two levels (fixed before any run)
+
+Multi-task training is the one training change that holds on MaterioMiner
+(C7): fine-grained +1.83 [+0.32, +3.34] over the CRF head on the random
+splits, and its vote fine-grained +3.65 [+0.49, +6.82] over the seed vote on
+unseen papers. A methods claim needs a gain on a second dataset. Part 2d
+repeats the comparison on SOFC-Exp, whose slot level (above) stands to its
+entity types as MaterioMiner's fine level to its coarse one.
+
+**Runs** (batch `w7b`, one Kaggle session with two lanes, from the commit
+of this protocol; GPU, deterministic, 10 model seeds 0 to 900 on the
+official split):
+- first, three repeats, each of which must equal its stored run, or the
+  batch is not used: the CRF run of smoke4 (`smokev`), session b's SOFC-Exp
+  CRF run of seed 0 (`smokew`: the entity-level reference below comes from
+  that session) and the MaterioMiner multi-task run of random split 0
+  (`smokex`: this commit changes how the multi-task code finds its data);
+- plain MatSciBERT and the CRF head on the slot level (`sofc_slot`,
+  variants `baseline` and `crf`);
+- multi-task training with a slot head and an entity head (`--granularity
+  sofc_both --crf --multi-task`, variant `crf_mt`, a file per level).
+
+The entity-level reference is the CRF head of week 6, S1 (session b, 10
+seeds).
+
+**Decisions** (week-6 rule: the 95% Student-t CI of the mean paired
+micro-F1 difference above 0; the pairs are the 10 model seeds, 9 degrees of
+freedom):
+1. slot level: `crf_mt` against `crf`;
+2. entity level: `crf_mt` against `crf`.
+
+If multi-task training does nothing, about 0.05 false passes are expected.
+
+**Reported (no decision):**
+- the CRF head against plain MatSciBERT on the slot level, paired by seed
+  (S1 on the second level);
+- both against the published SOFC-Slot numbers. MatSciBERT-CRF scores 72.85
+  micro and 65.35 macro, MatSciBERT-Linear 71.30 and 63.82. Their setup
+  differs: 3 seeds × 5 cross-validation splits, and the experiment-evoking
+  word trained as an 18th type;
+- the votes over the 3 seed triples: `crf_mt` votes against the CRF votes,
+  per level, paired by triple (2 degrees of freedom);
+- strict IOB2, macro and weighted F1, and per-type F1 on the slot level.
+
+**What a pass means.** Decision 1 repeats C7's fine-grained gain on a
+second dataset's finer level, which a methods paper needs. Decision 2 would
+go beyond MaterioMiner, where the coarse-grained gain did not hold.
+
+**Not tested here.** Multi-task self-training on SOFC-Exp needs its
+10-seed decisions on MaterioMiner first (week 6, stage 2) and an in-domain
+SOFC corpus. Recall calibration of the multi-task model needs part 2a's
+outcome first.
+
+**Budget:** about 1.2 hours of one session's two GPUs. Lane 0 runs two
+repeats, then plain MatSciBERT and the CRF head on the slots, about 70
+minutes; lane 1 runs the multi-task repeat and the multi-task runs, about
+60 minutes. It runs after the weekly quota resets, on the kernel that
+`w6c:sofc-ctx` leaves free.

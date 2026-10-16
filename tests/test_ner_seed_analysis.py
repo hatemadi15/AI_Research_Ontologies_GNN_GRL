@@ -166,6 +166,41 @@ def test_published_split_analysis_of_sofc_exp_and_a_method(tmp_path):
         'mean_diff'] == 1.0
 
 
+def test_published_split_of_sofc_exp_slots_and_multi_task(tmp_path):
+    """Week 7, part 2d: SOFC-Exp's slot level against the published SOFC-Slot scores, and
+    multi-task training against the CRF head, paired by seed and, for its votes over the seed
+    triples, by triple."""
+    pytest.importorskip('scipy')
+    pytest.importorskip('seqeval')
+    gold = ['B-anode_material O', 'O B-working_temperature']
+    miss = ['B-anode_material O', 'O O']
+
+    def runs(shift, pred):
+        out = []
+        for j in range(10):
+            run = _run(f'seed{100 * j}', 70 + shift + j / 10)
+            run.update({'test_index': [0, 1], 'test_gold': gold, 'test_pred': pred})
+            out.append(run)
+        return {'runs': out}
+    for variant, shift, pred in (('', 0, gold), ('_crf', 2, gold), ('_crf_mt', 3, miss)):
+        (tmp_path / f'ner_results_sofc_slot_published_split{variant}.json').write_text(
+            json.dumps(runs(shift, pred)))
+    slot = sa.published_split(tmp_path)['sofc_slot']
+    assert (slot['published'], slot['published_macro']) == (72.85, 65.35)
+    assert slot['crf']['published_lies'] == 'above'           # 72.85 above 72.45's CI
+    mt = slot['methods']['crf_mt']
+    assert mt['n_pairs'] == 10 and mt['minus_crf']['micro']['mean_diff'] == 1.0
+    # every CRF vote finds both entities; every multi-task vote one of the two
+    assert slot['crf_votes']['micro']['mean'] == 100.0
+    assert mt['votes']['micro']['mean'] == pytest.approx(66.67, abs=0.01)
+    assert mt['votes_minus_crf_votes']['micro']['mean_diff'] == pytest.approx(-33.33, abs=0.01)
+    assert len(mt['votes_minus_crf_votes']['micro']['per_run']) == 3
+    # the other methods are not voted
+    (tmp_path / 'ner_results_sofc_slot_published_split_crf_ebv.json').write_text(
+        json.dumps(runs(2.5, gold)))
+    assert 'votes' not in sa.published_split(tmp_path)['sofc_slot']['methods']['crf_ebv']
+
+
 def test_week6_type_differences_pair_seeds_and_papers(tmp_path, capsys):
     """Per entity type, a week-6 method against the CRF head on the held-out papers, paired by
     seed offset and paper over the pairs whose test set has the type (reported alongside the

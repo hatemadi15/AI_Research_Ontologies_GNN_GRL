@@ -1129,6 +1129,56 @@ def test_a_week6_vote_that_passes_takes_the_unseen_slot(tmp_path):
     assert standing.startswith('| NER, reported system (week-5 and week-6 protocols;')
 
 
+def test_sofc_slot_row_and_bullet(tmp_path):
+    """Week 7, part 2d: SOFC-Exp's slot level gets its own row and bullet (the CRF head
+    against plain MatSciBERT reported, not decided), and multi-task training decides on each
+    level, its votes reported against the CRF votes."""
+    ws = Workspace(tmp_path)
+    (ws.results / 'gpu').mkdir()
+    for variant, micro in ((None, (71.0, 70.0, 72.0)), ('crf', (72.5, 71.9, 73.1))):
+        (ws.results / 'gpu' / rr.ner_file('sofc_slot', 'published_split', variant)).write_text(
+            json.dumps({'summary': {'n_runs': 10, 'micro': {'mean': micro[0],
+                                                            'ci95': list(micro[1:])},
+                                    'macro': {'mean': micro[0] - 8, 'ci95': [0, 0]}}}))
+    readme, _ = ws.generate()
+    row = next(r for r in glance(readme).split('\n') if 'slot types' in r)
+    assert row == ("| NER on SOFC-Exp's slot types, the official split, 10 seeds (GPU runs) | "
+                   'plain MatSciBERT 71.00 [70.00, 72.00]; CRF head 72.50 [71.90, 73.10] (macro '
+                   '64.50) | published MatSciBERT-CRF of SOFC-Slot 72.85 micro, 65.35 macro '
+                   "(Gupta et al. 2022): within the CRF head's 95% CI (over seeds only) |")
+
+    def diff(mean, lo, hi, n=10):
+        return {'mean_diff': mean, 'ci95': [lo, hi], 'per_run': [mean] * n}
+    mt = {'micro': {'mean': 74.0, 'ci95': [73.4, 74.6]},
+          'minus_crf': {'micro': diff(1.5, 0.9, 2.1), 'micro_strict': diff(1.2, 0.6, 1.8)},
+          'n_pairs': 10, 'votes': {'micro': {'mean': 75.1, 'ci95': [74.0, 76.2]}},
+          'votes_minus_crf_votes': {'micro': diff(1.0, -0.5, 2.5, 3),
+                                    'micro_strict': diff(0.8, -0.7, 2.3, 3)}}
+    analysis = {'published_split': {'sofc_slot': {
+        'published': 72.85, 'published_macro': 65.35,
+        'baseline': {'micro': {'mean': 71.0, 'ci95': [70.0, 72.0]}},
+        'crf': {'micro': {'mean': 72.5, 'ci95': [71.9, 73.1]},
+                'macro': {'mean': 64.5, 'ci95': [63.0, 66.0]}},
+        'crf_minus_baseline': {'micro': diff(1.5, 0.5, 2.5), 'micro_strict': diff(1.0, 0.0, 2.0)},
+        'crf_votes': {'micro': {'mean': 74.1, 'ci95': [73.0, 75.2]}},
+        'methods': {'crf_mt': mt}}}}
+    (ws.results / 'gpu' / rr.WEEK5_ANALYSIS).write_text(json.dumps(analysis))
+    readme, _ = ws.generate()
+    assert ("* NER on SOFC-Exp's slot types (week 7, part 2d; the 17 slot types that its "
+            'evaluation scores, on the same sentences and official split; 10 model seeds, GPU '
+            'runs; the 95% CIs are over seeds): plain MatSciBERT 71.00 [70.00, 72.00], the CRF '
+            'head 72.50 [71.90, 73.10] (macro 64.50), against the published MatSciBERT-CRF of '
+            'SOFC-Slot 72.85 micro and 65.35 macro. The CRF head against plain MatSciBERT, paired '
+            'by seed: +1.50, 95% CI [+0.50, +2.50]; strict IOB2 +1.00 [+0.00, +2.00] (reported; '
+            'no decision); the CRF votes over the 3 seed triples score 74.10. Week 7, part 2d, '
+            'multi-task training on both levels against the CRF head, paired by seed: 74.00 '
+            '[73.40, 74.60], improves (+1.50, 95% CI [+0.90, +2.10]; strict IOB2 +1.20 [+0.60, '
+            '+1.80]); its votes over the 3 seed triples score 75.10, against the CRF votes, '
+            'paired by triple: +1.00, 95% CI [-0.50, +2.50]; strict IOB2 +0.80 [-0.70, +2.30] '
+            '(reported; no decision).\n') in readme
+    assert '* NER on SOFC-Exp (week 6' not in readme           # no entity-level results
+
+
 def test_sofc_row_and_bullet(tmp_path):
     ws = Workspace(tmp_path)
     (ws.results / 'gpu').mkdir()

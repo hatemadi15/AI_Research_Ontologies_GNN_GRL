@@ -289,6 +289,24 @@ def test_week7_bias_batch(monkeypatch):
     assert kj.batch_name('w7a') == 'w7a'
 
 
+def test_week7_sofc_levels_batch(monkeypatch):
+    """w7b: three repeats first (the CRF run of smoke4, session b's SOFC-Exp CRF run of seed
+    0, the MaterioMiner multi-task run of split 0), then SOFC-Exp's official split with 10
+    model seeds: plain MatSciBERT and the CRF head on the slot level, and multi-task training
+    on both levels."""
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda: 'x' * 64)
+    lane0, lane1 = _parsed(kj.batch_lanes('w7b'))
+    assert [a.tag for a in lane0[:2]] == ['smokev', 'smokew'] and lane1[0].tag == 'smokex'
+    assert (lane0[1].granularity, lane0[1].seeds, _get(lane0[1], 'published_split')) == (
+        'sofc', [0], True)
+    assert lane1[0].multi_task and lane1[0].vary_split and lane1[0].seeds == [0]
+    runs = sorted((a.granularity, nb.variant_name(a)) for a in lane0[2:] + lane1[1:])
+    assert runs == [('sofc_both', 'crf_mt'), ('sofc_slot', 'baseline'), ('sofc_slot', 'crf')]
+    for a in lane0[2:] + lane1[1:]:
+        assert a.published_split and a.save_predictions and a.seeds == list(range(0, 1000, 100))
+    assert kj.batch_name('w7b') == 'w7b' and kj.batch_spec('w7b')['models'] == kj.MODELS
+
+
 def test_a_refused_push_stops(monkeypatch, capsys):
     """The Kaggle CLI exits 0 when it refuses a push; push must not report the batch."""
     monkeypatch.setattr(kj, 'corpus_sha256', lambda: 'x' * 64)
