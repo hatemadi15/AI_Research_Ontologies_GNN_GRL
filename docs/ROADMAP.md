@@ -892,7 +892,7 @@ chance at class level. For a Task C-style result:
 | 4 | Done for NER: P1 "Next, after week 3" items 1, 2, 3 and 5, i.e. votes over the week-3 changes that help, label semantics on the multi-task model, self-training at scale, on Kaggle T4 GPUs (protocol below). Not started: context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | Met for NER by two changes, both on unseen papers. Coarse-grained, the label-semantics vote improves on `crf_ens3` on the CPU (+1.63 [+0.11, +3.16]); the GPU repeat does not confirm it (+0.40 [−1.36, +2.16]). Fine-grained, self-training with 3 teachers improves on the CRF head (GPU, +1.07 [+0.33, +1.80]; +1.22 [+0.60, +1.84] on the random splits, reported). The multi-task vote and label semantics on the multi-task model do not pass. Typing: not started |
 | 5 | Done: NER, P1 "Next, after week 4" item 1, i.e. 10 seeds per split for the CRF reference, multi-task, label semantics and self-training with 3 teachers, on Kaggle T4 GPUs, and the published split (amendment); items 2–7 and a paper outline prepared, and the week-6 options run once each at full size (protocol below). The original week-5 work moves to week 7 | Met. Of the claims re-tested with 10 seeds, fine-grained multi-task on the random splits passes (+1.83 [+0.32, +3.34]); the coarse-grained claims of week 3 and the self-training claim of week 4 do not. The reported system: the multi-task vote coarse-grained on the random splits and fine-grained on unseen papers, `crf_ens3` elsewhere. On the published split, plain MatSciBERT reproduces 69.92 and 72.32 and the CRF head beats both |
 | 6 | In progress: NER, P1 "Next, after week 5", towards a methods paper: methods for unseen papers (DeBERTa-v3-large, document context, multi-task self-training) screened with 3 seeds and decided with 10, and a second dataset (SOFC-Exp, 10 seeds); protocol below. So far (P1, "Week 6 so far"): DeBERTa-v3-large stops at the screen; document context passes the screen but neither 10-seed decision; multi-task self-training passes the screen (+6.06 fine-grained), stage 2 next; on SOFC-Exp the CRF head improves on plain MatSciBERT (S1) | A method whose vote improves on the strongest system on unseen papers under the 10-seed design, and on SOFC-Exp |
-| 7 | In progress: NER, part 1, document-level label consistency for unseen papers, a post-processing rule on the saved predictions (no GPU; protocol below); part 2a, recall calibration (a bias on the CRF head's emissions, chosen on inner folds; protocol below); part 2b, combinations of the methods that pass week 6 and mention replacement, fixed after the week-6 decisions; part 2c, coarse-to-fine completion (done, no claim); part 2d, multi-task training on SOFC-Exp's two levels (protocol below). Then class-level taxonomy (LLM or cross-encoder + arborescence) and a relation annotation pilot | Part 1: the rule improves on the strongest system on unseen papers and on SOFC-Exp's CRF head. Taxonomy: first class-level F1 above chance; relation guidelines |
+| 7 | In progress: NER, part 1, document-level label consistency for unseen papers, a post-processing rule on the saved predictions (no GPU; protocol below); part 2a, recall calibration (a bias on the CRF head's emissions, chosen on inner folds; protocol below); part 2b, mention replacement (screen, then 10 seeds if it passes; protocol below), and later the combinations of the methods that pass week 6, fixed after the week-6 decisions; part 2c, coarse-to-fine completion (done, no claim); part 2d, multi-task training on SOFC-Exp's two levels (protocol below). Then class-level taxonomy (LLM or cross-encoder + arborescence) and a relation annotation pilot | Part 1: the rule improves on the strongest system on unseen papers and on SOFC-Exp's CRF head. Taxonomy: first class-level F1 above chance; relation guidelines |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -1799,3 +1799,58 @@ repeats, then plain MatSciBERT and the CRF head on the slots, about 70
 minutes; lane 1 runs the multi-task repeat and the multi-task runs, about
 60 minutes. It runs after the weekly quota resets, on the kernel that
 `w6c:sofc-ctx` leaves free.
+
+### Week 7 protocol, part 2b: mention replacement (fixed before any run)
+
+The further method for unseen papers that the plan names ("Next, after
+week 5", item 3), prepared in week 6 without training. Mention replacement
+(Dai and Adel, 2020; `--augment-mentions 3`) adds 3 copies of each
+training sentence with an entity. In each copy, each mention is replaced
+with probability 0.5 by a mention of the same type drawn from the training
+sentences, frequent ones more often. Copies that change nothing are
+dropped, and the validation and test sentences are unchanged. The model
+sees each type's contexts with other names, which change from paper to
+paper. Variant `crf_mr_m<N>`; the copies are drawn with the run's model
+seed.
+
+**Settings.** 3 copies and p = 0.5 are fixed here, not tuned. Dai and Adel
+tune both on development data (1, 3, 6 or 10 copies; p from 0.1 to 0.7),
+but the validation sentences of the training papers say little about
+unseen papers (part 2a).
+
+**Prior.** Dai and Adel's Table 3 reports a transformer on the materials
+dataset MaSciP: +2.4 F1 with 50 training sentences, +0.6 with 150, −0.6
+with 500 and +0.2 on the full set. The training papers of a fold hold
+234–370 training sentences, so a large gain is unlikely. The screen costs
+about one GPU-hour, so it is run anyway.
+
+**Stage 1, the screen** (batch `w7c`, from the commit of this protocol).
+Seeds 0, 100 and 200 on the 4 held-out papers, at both granularities,
+against the CRF head (`crf_m0` to `crf_m200`), 3-seed means. Mention
+replacement goes to stage 2 if its mean micro-F1 difference is above 0 at
+either granularity, the week-6 screen rule. The screen decides nothing; its
+differences and the first vote (`crf_mr_ens3` against `crf_ens3`) are
+reported (`ner_seedmeans.py --week 7 --gpu --screen`).
+
+**Stage 2** (batch `w7d`, only if the screen passes it). Seed offsets 300 to
+900 are added on the held-out papers (10 seeds), with votes over the 3
+disjoint seed triples. The decisions are those of the week-6 methods:
+1. `crf_mr` against `crf` on the 4 held-out papers, per granularity;
+2. its vote against the strongest system on unseen papers: `crf_mt_ens3`
+   fine-grained, `crf_ens3` coarse-grained.
+
+S2 on SOFC-Exp is also a decision, since a methods claim needs it:
+`crf_mr` against the CRF head on the official split, 10 model seeds, paired
+by seed. That makes 5 decisions, so about 0.13 false passes are expected if
+mention replacement does nothing.
+
+**Reported:** strict IOB2, macro and weighted F1; the number of copies per
+run (`n_augmented`); per-type F1 if it passes.
+
+**Budget:**
+- the screen: 24 runs of about 4 times a CRF run, about 1 hour on one
+  session's two GPUs;
+- stage 2: 56 runs on the held-out papers and 10 on SOFC-Exp (about 12
+  minutes each), about 3.3 hours.
+
+It runs on kernel a after `w7b`.

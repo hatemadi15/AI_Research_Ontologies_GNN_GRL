@@ -86,6 +86,11 @@ Week 7, part 2d (SOFC-Exp's two levels):
           equal to its stored run; then SOFC-Exp's official split, model seeds 0 to 900:
           plain MatSciBERT and the CRF head on the slot types (sofc_slot), and multi-task
           training on both levels (sofc_both, a file per level)
+Week 7, part 2b (mention replacement, --augment-mentions 3; each session first repeats the
+CRF run of smoke4):
+  w7c     the screen: crf_mr_m0 to _m200 on the held-out papers, both granularities (smokey)
+  w7d     stage 2: seed offsets 300 to 900 on the held-out papers, and SOFC-Exp's official
+          split with model seeds 0 to 900 (S2), balanced over the lanes (smokez)
 
 Usage:
   python src/graph/kaggle_jobs.py quota
@@ -151,11 +156,13 @@ PAPERS =('10.1007_s11340-021-00758-x', '10.1038_ncomms7164', '10.1038_s41467-020
           '10.3390_met10111458')      # the held-out papers (the MaterioMiner files)
 # relative GPU time of one run of each kind (a CRF run is 1), for balancing the lanes
 COST = {'crf': 1.0, 'mt': 1.7, 'ls': 1.1, 'mt_ls': 1.8, 'st': 2.5, 'st3': 22.0,
-        'deberta': 4.4, 'ctx': 2.7, 'sofc': 2.7}   # sofc: 3.3 min per CRF run (session b, w6b)
+        'deberta': 4.4, 'ctx': 2.7, 'sofc': 2.7,   # sofc: 3.3 min per CRF run (session b, w6b)
+        'mr': 3.8}           # mention replacement, 3 copies: about 4 times the training sentences
 # week 7, part 2a: the biases that --entity-bias decodes besides 0 (ROADMAP §4)
 BIAS_GRID = ('-1', '-0.5', '0.25', '0.5', '0.75', '1', '1.25', '1.5', '2', '2.5', '3')
 # week 6: the options of each method on the held-out papers, and the stage-2 parts
-METHOD_FLAGS = {'deberta': ('--model', DEBERTA), 'ctx': ('--context', '64')}
+METHOD_FLAGS = {'deberta': ('--model', DEBERTA), 'ctx': ('--context', '64'),
+                'mr': ('--augment-mentions', '3')}
 STAGE2 = ('deberta', 'ctx', 'mtst', 'sofc-deberta', 'sofc-ctx')
 
 
@@ -191,8 +198,9 @@ def family(kind, flags, protocols=tuple(PROTOCOL_FLAGS), granularities=GRANULARI
 
 
 def method_jobs(method, offsets):
-    """(cost, job) of a week-6 method's seeds on the held-out papers, both granularities:
-    DeBERTa-v3-large (crf_deberta_m<N>) or document context (crf_ctx_m<N>)."""
+    """(cost, job) of a method's seeds on the held-out papers, both granularities: week 6's
+    DeBERTa-v3-large (crf_deberta_m<N>) or document context (crf_ctx_m<N>), week 7's mention
+    replacement (crf_mr_m<N>)."""
     return [(COST[method] * RUNS['leave_one_paper_out'],
              job(g, 'leave_one_paper_out', *METHOD_FLAGS[method], offset=off,
                  tag=f'deberta_m{off}' if method == 'deberta' else f'm{off}'))
@@ -379,6 +387,15 @@ def batch_lanes(name):
                    published_job('sofc_both', '--crf', '--multi-task'))]
         lanes = balance(costed, loads=[COST['crf'] + COST['sofc'], COST['mt']])
         return [[repeat + ['--tag', 'smokev'], sofc_repeat] + lanes[0], [mt_repeat] + lanes[1]]
+    if name in ('w7c', 'w7d'):
+        # week 7, part 2b: mention replacement, the screen (seeds 0-200) and stage 2
+        costed = method_jobs('mr', OFFSETS if name == 'w7c' else OFFSETS_W5)
+        if name == 'w7d':
+            costed.append((COST['sofc'] * COST['mr'] * len(OFFSETS_PUBLISHED),
+                           published_job('sofc', '--crf', *METHOD_FLAGS['mr'])))
+        lanes = balance(costed, loads=[COST['crf'], 0.0])
+        smoke = 'smokey' if name == 'w7c' else 'smokez'
+        return [[repeat + ['--tag', smoke]] + lanes[0], lanes[1]]
     if name == 'w7a':
         # week 7, part 2a: recall calibration. An inner job is the 6 folds of a seed, each
         # trained on two papers (about 4 CRF runs); no predictions, the counts suffice
@@ -398,7 +415,8 @@ def batch_lanes(name):
 
 
 BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'item3r',
-           'smoke4', 'w5a', 'w5b', 'w5c', 'smoke5', 'smoke6', 'w6a', 'w6b', 'w7a', 'w7b')
+           'smoke4', 'w5a', 'w5b', 'w5c', 'smoke5', 'smoke6', 'w6a', 'w6b', 'w7a', 'w7b',
+           'w7c', 'w7d')
 
 
 def batch_extras(name):

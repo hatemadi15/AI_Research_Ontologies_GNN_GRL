@@ -275,11 +275,38 @@ def test_week7_systems_and_comparisons_follow_the_week7_protocol():
     assert systems['crf_mt_cf'][:2] == ('crf_mt_cf', 'crf_mt_cf_m100')
     assert systems['crf_mt_ens3_cf'] == ('crf_mt_ens3_cf', 'crf_mt_ens3_cf_m300',
                                          'crf_mt_ens3_cf_m600')
-    assert comps[part2a + 4:] == (
+    assert comps[part2a + 4:part2a + 7] == (
         ('crf_cf', 'crf', {'fine': lopo}), ('crf_mt_ens3_cf', 'crf_mt_ens3', {'fine': lopo}),
         ('crf_mt_cf', 'crf_mt', None))
+    # part 2b, stage 2: mention replacement decided as the week-6 methods were
+    assert systems['crf_mr'] == tuple(f'crf_mr_m{n}' for n in range(0, 1000, 100))
+    assert systems['crf_mr_ens3'] == ('crf_mr_ens3', 'crf_mr_ens3_m300', 'crf_mr_ens3_m600')
+    assert comps[part2a + 7:] == (
+        ('crf_mr', 'crf', lopo), ('crf_mr_ens3', 'crf_mt_ens3', {'fine': lopo}),
+        ('crf_mr_ens3', 'crf_ens3', {'coarse': lopo}))
+    # its screen: seeds 0-200 against the CRF head; the first votes reported
+    screen = ns.system_list(7, screen=True)
+    assert screen['crf_mr'] == ('crf_mr_m0', 'crf_mr_m100', 'crf_mr_m200')
+    assert screen['crf_mr_ens3'] == ('crf_mr_ens3',) and screen['crf_ens3'] == ('crf_ens3',)
+    assert ns.comparison_list(7, gpu=True, screen=True) == (
+        ('crf_mr', 'crf', lopo), ('crf_mr_ens3', 'crf_ens3', None))
     with pytest.raises(ValueError):
         ns.comparison_list(7)
+
+
+def test_week7_screen_from_results_files(tmp_path, capsys):
+    """--week 7 --gpu --screen: mention replacement's 3-seed screen, its own file."""
+    pytest.importorskip('scipy')
+    lopo = 'leave_one_paper_out'
+    for g, gain in (('fine', -0.5), ('coarse', 0.25)):
+        for n in (0, 100, 200):
+            _write(tmp_path, g, lopo, f'crf_m{n}', [50, 51, 52, 53])
+            _write(tmp_path, g, lopo, f'crf_mr_m{n}', [50 + gain, 51 + gain, 52 + gain, 53 + gain])
+    comps = ns.main(['--results', str(tmp_path), '--week', '7', '--gpu', '--screen'])
+    assert comps[ns.comparison_key('fine', lopo, 'crf_mr', 'crf')]['role'] == 'screen'
+    assert (tmp_path / 'ner_week7_screen.json').exists()
+    assert not (tmp_path / 'ner_week6_screen.json').exists()
+    assert 'screen: crf_mr goes to stage 2 (fine -0.50, coarse +0.25)' in capsys.readouterr().out
 
 
 def test_week7_decisions_from_results_files(tmp_path):

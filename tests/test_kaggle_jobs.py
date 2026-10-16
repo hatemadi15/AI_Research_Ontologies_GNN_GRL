@@ -307,6 +307,25 @@ def test_week7_sofc_levels_batch(monkeypatch):
     assert kj.batch_name('w7b') == 'w7b' and kj.batch_spec('w7b')['models'] == kj.MODELS
 
 
+def test_week7_mention_replacement_batches(monkeypatch):
+    """w7c: the screen of mention replacement (3 copies), seeds 0-200 on the held-out papers;
+    w7d: stage 2, seeds 300-900 there and SOFC-Exp's official split (S2). The repeat first."""
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda: 'x' * 64)
+    for name, smoke, offsets in (('w7c', 'smokey', (0, 100, 200)),
+                                 ('w7d', 'smokez', tuple(range(300, 1000, 100)))):
+        lane0, lane1 = _parsed(kj.batch_lanes(name))
+        assert lane0[0].tag == smoke and not _get(lane0[0], 'augment_mentions')
+        jobs = lane0[1:] + lane1
+        assert all(a.crf and a.augment_mentions == 3 and a.save_predictions for a in jobs)
+        held_out = [a for a in jobs if a.leave_one_paper_out]
+        assert sorted((nb.variant_name(a), a.granularity, a.seed_offset) for a in held_out) == (
+            sorted((f'crf_mr_m{off}', g, off) for off in offsets for g in ('fine', 'coarse')))
+        sofc = [a for a in jobs if _get(a, 'published_split')]
+        assert [(nb.variant_name(a), a.granularity, a.seeds) for a in sofc] == (
+            [('crf_mr', 'sofc', list(range(0, 1000, 100)))] if name == 'w7d' else [])
+        assert kj.batch_name(name) == name
+
+
 def test_a_refused_push_stops(monkeypatch, capsys):
     """The Kaggle CLI exits 0 when it refuses a push; push must not report the batch."""
     monkeypatch.setattr(kj, 'corpus_sha256', lambda: 'x' * 64)
