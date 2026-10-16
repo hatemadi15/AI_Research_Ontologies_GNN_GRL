@@ -623,15 +623,23 @@ Ten seeds per split also re-tested the gains of weeks 3 and 4, which used 3:
 New NER experiments should use the CRF head (`--crf`) and 10 seeds per split
 before a claim. GPU runs are compared only with GPU runs.
 
-The next steps are in ROADMAP P1, "Next, after week 5". They aim at a methods
-paper, with an evaluation paper if every option fails
-([docs/PAPER.md](docs/PAPER.md)):
-1. methods for unseen papers, screened with 3 seeds and decided with 10:
-   DeBERTa-v3-large, document context and multi-task self-training;
-2. a second dataset, SOFC-Exp, converted and checked against its published
-   MatSciBERT-CRF scores, where a method's gain must repeat;
-3. combinations of the methods that pass;
-4. the rare coarse-grained types that keep macro F1 down.
+The work aims at a methods paper, with an evaluation paper if every option
+fails ([docs/PAPER.md](docs/PAPER.md); a draft of the sections that hold
+either way is in [docs/PAPER_DRAFT.md](docs/PAPER_DRAFT.md)). Where it
+stands (ROADMAP §4, weeks 6 and 7):
+1. Methods for unseen papers, screened with 3 seeds and decided with 10.
+   DeBERTa-v3-large stopped at the screen. Document context passed the
+   screen but neither 10-seed decision. Multi-task self-training passed the
+   screen (+6.06 fine-grained) and its 10-seed decisions run next.
+2. SOFC-Exp, the second dataset. The CRF head's gain repeats there (+1.22
+   [+0.50, +1.93]). Its second level of types (slot types, converted in
+   week 7) lets multi-task training be repeated there (part 2d, next).
+3. Week 7: document-level label consistency and coarse-to-fine completion
+   give no claim (the first hurts on SOFC-Exp). Recall calibration (a bias
+   on the CRF head's emissions, chosen on inner folds) is running, and
+   mention replacement is screened next.
+4. Then the combinations of the methods that pass, and the rare
+   coarse-grained types that keep macro F1 down.
 
 ## License
 
