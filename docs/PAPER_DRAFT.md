@@ -402,7 +402,9 @@ every tag but O before Viterbi decoding:
 **6.3 Mention replacement** (dai2020analysis). Three copies of each
 training sentence with an entity, each mention replaced with probability
 0.5 by a training mention of the same type. The model sees each type's
-contexts with other names, which change from paper to paper. On a
+contexts with other names, which change from paper to paper: 81% of a new
+paper's fine-grained entities are names the training papers lack, and the
+gains that hold are gains on them (Section 5.8). On a
 materials dataset the original study found gains for transformers mainly
 with 50–150 training sentences, so a large gain is not expected; it is
 screened with 3 seeds and decided with 10 only if the screen passes.
@@ -427,3 +429,8 @@ entity types as MaterioMiner's fine level to its coarse one.
 - **A deviation:** DeBERTa-v3-large did not fit a 15 GB GPU on SOFC-Exp at
   the protocol's batch size, so its planned SOFC-Exp comparison did not
   run.
+- **Annotation conventions differ between papers** (Section 5.9). Strict
+  F1 on a held-out paper also counts the spans and types its annotators
+  chose differently, which no model trained on the other papers can learn.
+  The decisions use strict F1 for comparability; the looser criteria are
+  reported, not decided on.
