@@ -145,7 +145,7 @@ PAPERS =('10.1007_s11340-021-00758-x', '10.1038_ncomms7164', '10.1038_s41467-020
           '10.3390_met10111458')      # the held-out papers (the MaterioMiner files)
 # relative GPU time of one run of each kind (a CRF run is 1), for balancing the lanes
 COST = {'crf': 1.0, 'mt': 1.7, 'ls': 1.1, 'mt_ls': 1.8, 'st': 2.5, 'st3': 22.0,
-        'deberta': 4.4, 'ctx': 2.7, 'sofc': 2.0}
+        'deberta': 4.4, 'ctx': 2.7, 'sofc': 2.7}   # sofc: 3.3 min per CRF run (session b, w6b)
 # week 7, part 2a: the biases that --entity-bias decodes besides 0 (ROADMAP §4)
 BIAS_GRID = ('-1', '-0.5', '0.25', '0.5', '0.75', '1', '1.25', '1.5', '2', '2.5', '3')
 # week 6: the options of each method on the held-out papers, and the stage-2 parts
