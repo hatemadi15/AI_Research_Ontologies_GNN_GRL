@@ -273,6 +273,9 @@ with an evaluation paper if every option fails:
    It adds K copies of each training sentence with its mentions swapped for
    other training mentions of the same type, so that the model learns the
    contexts rather than the names, which change from paper to paper.
+   *Week 7, part 1 (§4): document-level label consistency, a post-processing
+   rule that tags a paper's untagged occurrences of a term the model tags in
+   most of them; no training.*
 4. **Rare coarse-grained types** (item 5 below): silver sentences selected
    for SDE, MIP, PRP, MOD and CPR, or a class-balanced loss over them,
    judged by macro F1.
@@ -832,7 +835,7 @@ chance at class level. For a Task C-style result:
 | 4 | Done for NER: P1 "Next, after week 3" items 1, 2, 3 and 5, i.e. votes over the week-3 changes that help, label semantics on the multi-task model, self-training at scale, on Kaggle T4 GPUs (protocol below). Not started: context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | Met for NER by two changes, both on unseen papers. Coarse-grained, the label-semantics vote improves on `crf_ens3` on the CPU (+1.63 [+0.11, +3.16]); the GPU repeat does not confirm it (+0.40 [−1.36, +2.16]). Fine-grained, self-training with 3 teachers improves on the CRF head (GPU, +1.07 [+0.33, +1.80]; +1.22 [+0.60, +1.84] on the random splits, reported). The multi-task vote and label semantics on the multi-task model do not pass. Typing: not started |
 | 5 | Done: NER, P1 "Next, after week 4" item 1, i.e. 10 seeds per split for the CRF reference, multi-task, label semantics and self-training with 3 teachers, on Kaggle T4 GPUs, and the published split (amendment); items 2–7 and a paper outline prepared, and the week-6 options run once each at full size (protocol below). The original week-5 work moves to week 7 | Met. Of the claims re-tested with 10 seeds, fine-grained multi-task on the random splits passes (+1.83 [+0.32, +3.34]); the coarse-grained claims of week 3 and the self-training claim of week 4 do not. The reported system: the multi-task vote coarse-grained on the random splits and fine-grained on unseen papers, `crf_ens3` elsewhere. On the published split, plain MatSciBERT reproduces 69.92 and 72.32 and the CRF head beats both |
 | 6 | In progress: NER, P1 "Next, after week 5", towards a methods paper: methods for unseen papers (DeBERTa-v3-large, document context, multi-task self-training) screened with 3 seeds and decided with 10, and a second dataset (SOFC-Exp, 10 seeds); protocol below | A method whose vote improves on the strongest system on unseen papers under the 10-seed design, and on SOFC-Exp |
-| 7 | Class-level taxonomy (LLM or cross-encoder + arborescence); relation annotation pilot | First class-level taxonomy F1 above chance; relation guidelines |
+| 7 | In progress: NER, part 1, document-level label consistency for unseen papers, a post-processing rule on the saved predictions (no GPU; protocol below); part 2, combinations of the methods that pass week 6 and mention replacement, fixed after the week-6 decisions. Then class-level taxonomy (LLM or cross-encoder + arborescence) and a relation annotation pilot | Part 1: the rule improves on the strongest system on unseen papers and on SOFC-Exp's CRF head. Taxonomy: first class-level F1 above chance; relation guidelines |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -1331,3 +1334,68 @@ frozen week-6 commit. About 1.5 GPU-hours.
 **Later (not week 6):** the random splits for the methods that pass,
 combinations of the methods that pass (week 7), and the rare coarse-grained
 types.
+
+### Week 7 protocol, part 1: document-level label consistency (fixed before any run)
+
+Week 7 starts with a method for unseen papers that needs no training: label
+consistency within a document, applied to the saved test predictions of the
+10-seed GPU runs (`ner_consistency.py`). The rule was fixed in the commit
+that adds the tool, before it was applied to any model's predictions:
+- Within a document (a MaterioMiner paper, a SOFC-Exp article; only the
+  run's test sentences of it), each predicted entity gives a surface form,
+  its exact words.
+- An occurrence of a form is a place where its words appear. It is tagged
+  if a predicted entity has exactly that span, untagged if each of its words
+  is predicted O, and otherwise left alone.
+- A form with more tagged than untagged occurrences, and one most frequent
+  type among its tagged ones, gives that type to each untagged occurrence.
+- Longer forms go first, and an occurrence becomes an entity only while all
+  its words are still O, so no prediction is removed or changed.
+
+Variant `<input>_dc`, e.g. `crf_dc_m300` from `crf_m300`.
+
+**Why it may help.** On MaterioMiner, 60% of the gold mentions have a
+surface form that occurs more than once in their paper, 83% (fine) and 88%
+(coarse) of those with a single type, and 3% of the occurrences of an
+entity's words are untagged. A model that tags a new paper's term in some
+sentences and misses it in others can then be corrected from its own
+majority ("one sense per discourse", Gale et al., 1992; non-local
+consistency in NER, Krishnan and Manning, 2006). **Its cost** with perfect
+predictions: applied to the gold tags of the 4 papers, the rule adds 40
+fine-grained and 17 coarse-grained entities that the annotators left
+untagged, i.e. 1.52 and 0.36 points of F1; on SOFC-Exp's official test set
+it adds 30 (1.51 points), since SOFC-Exp leaves 14% of these occurrences
+untagged.
+
+**Decisions** (the decision rule as before: the 95% CI of the mean paired
+micro-F1 difference above 0, over the 4 held-out papers):
+1. The rule on the CRF head: `crf_dc_m<N>` against `crf_m<N>`, N = 0 to
+   900, 10-seed means per paper, per granularity.
+2. The rule on the strongest system on unseen papers: fine-grained the
+   multi-task vote (`crf_mt_ens3_dc` against `crf_mt_ens3`), coarse-grained
+   the seed vote (`crf_ens3_dc` against `crf_ens3`), each over its 3 seed
+   triples. The votes are made again with `ner_ensemble.py
+   --save-predictions` (scores unchanged), then the rule is applied.
+
+**SOFC-Exp:** the rule on session b's CRF head on the official split,
+paired by seed (10 seeds). A claim needs decision 2 and SOFC-Exp, as in
+week 6. That makes 5 comparisons: about 0.13 false passes are expected if
+the rule does nothing.
+
+**Reported alongside (no decision):**
+- the rule on the other granularity's vote (fine-grained `crf_ens3`,
+  coarse-grained `crf_mt_ens3`);
+- the rule on the random splits (the CRF head, 10 seeds);
+- the number of entities added, and precision and recall;
+- `--retype` (`_dcr`), which also gives the tagged occurrences of a
+  propagated form its type: on the gold tags it retypes 13 fine-grained and
+  27 coarse-grained entities.
+
+Once week 6's stage 2 is in, the rule on document context (`crf_ctx_dc`
+against `crf_ctx`, and on its votes) is also reported, without a decision;
+combining the two is for part 2.
+
+**Budget:** no GPU. Scoring takes seconds per file.
+
+Part 2 of week 7 (combinations of the methods that pass, mention
+replacement) is fixed after the week-6 decisions, before its runs.
