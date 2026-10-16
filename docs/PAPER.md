@@ -16,8 +16,10 @@ Claims C1–C10 hold either way: in a methods paper they are its baselines and
 evaluation protocol, in an evaluation paper its results. Document context
 passed the week-6 screen (+2.66 [+0.91, +4.40] fine-grained) but neither of
 its 10-seed decisions (+1.14 [−0.94, +3.22] against the CRF head). The
-candidates left are multi-task self-training (its screen is running) and
-recall calibration (week 7, part 2a, protocol fixed, runs pending).
+candidates left are multi-task self-training (screen +6.06 [+1.05, +11.06]
+fine-grained; 10-seed decisions next, MaterioMiner only, since the protocol
+excludes it from SOFC-Exp) and recall calibration (week 7, part 2a, running;
+it applies to both datasets).
 
 **Working titles.** Methods: an approach for materials NER on unseen papers,
 named after the change that passes. Evaluation: "How much of a materials-NER
@@ -38,7 +40,8 @@ gain survives? Splits, scoring and seeds on MaterioMiner".
 | C9 | A few rare coarse-grained types keep macro F1 near the published number: in the reported system's votes on the random splits, SDE and MIP score about 18 F1 and PRP, MOD and CPR 40–42, with 2–8 test entities per split. | `ner_week5_seed_analysis.json` (`types`) | Done (exploratory); week 6 targets them |
 | C10 | Where the CRF head fails on unseen papers: fine-grained it misses 36% of the gold entities outright (10% on random splits) and predicts 10,026 entities for 13,280 gold ones; 41% of these misses have a type seen fewer than 10 times in the three training papers. Coarse-grained it misses only 6%, but 16% get the right span and the wrong type, and 21% a wrong boundary. | `ner_week5_seed_analysis.json` (`errors`) | Done (exploratory, 10 seeds) |
 | C11 | A larger general-domain encoder does not transfer to unseen papers: DeBERTa-v3-large (435M parameters) with the CRF head scores −4.38 [−7.32, −1.45] fine-grained and −8.01 [−11.72, −4.30] coarse-grained against MatSciBERT (110M) on the held-out papers, while its validation scores on the training papers are similar. | `gpu/ner_week6_screen.json` | Screen (3 seeds). SOFC-Exp S2 did not run: out of memory on a 15 GB T4 at batch size 16 (a deviation; ROADMAP P1, "Week 6 so far") |
-| C12 | Document-level label consistency, a post-processing rule (a term the model tags in most of its occurrences in a paper is tagged in the rest), adds little: +0.30 [−0.35, +0.95] fine-grained and +0.12 [+0.01, +0.24] coarse-grained on the CRF head, no significant change on the strongest votes, and +0.10 / +0.06 on document context (reported). Retyping does better coarse-grained (+0.64 [+0.29, +1.00]), post hoc; it is decided on SOFC-Exp. | `gpu/ner_week7_comparisons.json` | Week 7 part 1: MaterioMiner done; SOFC-Exp pending |
+| C12 | Document-level label consistency, a post-processing rule (a term the model tags in most of its occurrences in a paper is tagged in the rest), adds little on MaterioMiner and hurts on SOFC-Exp: +0.30 [−0.35, +0.95] fine-grained and +0.12 [+0.01, +0.24] coarse-grained on the CRF head, no significant change on the strongest votes, +0.10 / +0.06 on document context (reported); on SOFC-Exp −0.42 [−0.61, −0.22], and −0.38 [−0.60, −0.15] with retyping (which did better coarse-grained on MaterioMiner, +0.64 [+0.29, +1.00], post hoc). How an annotation scheme treats repeated mentions decides whether "one sense per discourse" helps. | `gpu/ner_week7_comparisons.json`; `gpu/ner_week5_seed_analysis.json` (`published_split`, `sofc`) | Done (week 7, part 1) |
+| C13 | The CRF head's gain repeats on a second dataset: on SOFC-Exp's official split (11 unseen test articles, 10 seeds) it scores 83.75 [82.85, 84.65] against plain MatSciBERT's 82.53 [81.84, 83.23], +1.22 [+0.50, +1.93] paired by seed; its seed votes score 85.13. The published MatSciBERT-CRF (84.77) lies above the CI over seeds. | `gpu/ner_results_sofc_published_split*.json`; README, SOFC-Exp row | Done (week 6, S1) |
 
 ## Figures and tables
 
