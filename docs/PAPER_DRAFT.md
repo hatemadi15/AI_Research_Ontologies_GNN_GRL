@@ -8,7 +8,7 @@ Section 6 (methods for unseen papers), recall calibration is decided (no
 gain, C15). The others wait for their runs: stage 2 of multi-task
 self-training, mention replacement and multi-task training on SOFC-Exp's
 two levels (ROADMAP §4, weeks 6 and 7). The numbers come from `results/`
-through the claims table of `docs/PAPER.md` (C1–C17). References are keys of `docs/references.bib`.
+through the claims table of `docs/PAPER.md` (C1–C18). References are keys of `docs/references.bib`.
 
 ---
 
@@ -27,6 +27,10 @@ carry either way:
 - 81% of a new paper's fine-grained entities are names that no training
   paper annotates (35% on random splits), the model finds 35% of them, and
   every gain that holds on unseen papers is a gain on these names.
+- coarse-grained, the model finds almost every entity of a new paper (90.7
+  F1 when any overlap counts, 93.4 on random splits); most of the strict
+  gap lies in span boundaries and types that the papers' annotators set
+  differently.
 
 ## 1 Introduction
 
@@ -288,6 +292,35 @@ splits pooled).
 A method for unseen papers therefore has to raise F1 on names the training
 papers do not contain. That is where 81% of a new paper's entities are, and
 where every gain measured so far lands.
+
+**5.9 Found, but cut differently (C18).** seqeval counts a prediction only
+if its span and type are exactly those of a gold entity. SemEval-2013 Task
+9.1 (segurabedmar2013semeval) also scored looser criteria; we use them with
+each gold entity matched at most once and an overlap counted in full
+(exploratory):
+- **Coarse-grained,** the CRF head scores 58.60 on held-out papers when
+  span and type must match, 74.17 when only the span must, and 90.74
+  [89.17, 92.32] when any overlap counts. On random splits it scores 76.96,
+  83.91 and 93.38. The 18.4-point gap shrinks to 9.7 and then 2.6: on a new
+  paper the model finds almost every entity, and loses mostly on where the
+  boundaries go and which type applies.
+- **Fine-grained,** the gap shrinks from 31.0 to 25.0 and 18.3 (overlap F1
+  70.58 against 88.83). There the model misses entities outright (C10),
+  most of them unseen names (Section 5.8).
+- **Near misses.** On held-out papers, 31% of the fine-grained predictions
+  overlap a gold entity but differ in span or type (12% on random splits).
+  10.8% lie inside a longer gold entity: the new paper tags "multi-GB
+  cracks", "EBSD data" and "smooth samples" where the model tags the noun.
+  4.2% have a type that is an MMO ancestor or descendant of the gold one:
+  "samples" is a TestSpecimen in one paper and a FatigueTestSpecimen in
+  another.
+- **SOFC-Exp:** 83.75 strict and 88.80 under overlap; types are almost
+  never confused there (84.06 when only the span must match).
+
+Part of what looks like a failure to generalise is a difference in
+annotation conventions between papers, which a model trained on other
+papers cannot learn. We report strict F1 for comparison with published
+numbers and the looser criteria alongside.
 
 ## 6 Methods for unseen papers (pending)
 

@@ -343,6 +343,29 @@ entities equals every run's stored micro F1.
   unseen names against the CRF head (its vote against the seed vote),
   paired over papers or seeds.
 
+**Looser matching** (exploratory, 16 October; `ner_matching.py` on the
+saved predictions, no GPU; `results/gpu/ner_matching.json`, claim C18). The
+criteria of SemEval-2013 Task 9.1 (Segura-Bedmar et al., 2013): strict (span
+and type, seqeval's micro F1), exact (span, any type), type (overlap, same
+type) and overlap (any overlap, any type), each gold entity matched at most
+once.
+- **Coarse-grained,** the CRF head's gap between random splits and held-out
+  papers is 18.4 points strict, 9.7 exact and 2.6 under overlap (held-out
+  overlap F1 90.74 [89.17, 92.32] against 93.38). The model finds almost
+  every entity of a new paper; it loses on boundaries and types.
+- **Fine-grained,** 31.0 strict, 25.0 exact, 18.3 under overlap (70.58
+  against 88.83): there entities are missed outright, most of them unseen
+  names.
+- **Near misses** on held-out papers: 31% of the fine-grained predictions
+  (12% on random splits) overlap a gold entity with another span or type;
+  10.8% lie inside a longer gold entity ("multi-GB cracks", "EBSD data",
+  "smooth samples" where the model tags the noun), and 4.2% have an MMO
+  ancestor or descendant of the gold type ("samples" as TestSpecimen or
+  FatigueTestSpecimen, by paper).
+- **SOFC-Exp:** 83.75 strict, 88.80 under overlap.
+- Strict F1 stays the decision metric; the looser criteria are reported
+  alongside, as SemEval-2013 did.
+
 Next, after week 5, in this order. The aim is a methods paper (§4, week 6),
 with an evaluation paper if every option fails:
 1. **Methods for unseen papers: screen, then decide with 10 seeds.**

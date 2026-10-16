@@ -669,7 +669,11 @@ stands (ROADMAP §4, weeks 6 and 7):
    random splits, and the CRF head finds 35% of them (59% on random
    splits). Every gain that holds on unseen papers, and the CRF head's own
    gain, is a gain on these unseen names, so a method for unseen papers has
-   to improve on them.
+   to improve on them. Scored more loosely (`ner_matching.py`, the criteria
+   of SemEval-2013 Task 9.1), the model finds almost every coarse-grained
+   entity of a new paper (overlap F1 90.7 against 93.4 on random splits);
+   most of the strict gap lies in span boundaries and types that the
+   papers' annotators set differently.
 5. Then the combinations of the methods that pass, and the rare
    coarse-grained types that keep macro F1 down.
 

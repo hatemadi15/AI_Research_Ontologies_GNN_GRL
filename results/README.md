@@ -161,3 +161,16 @@ recall, precision and F1 are given per kind (pooled over seeds and splits):
 
 Figure 5 of the paper plan (`docs/figures/fig5_mentions.png`,
 `paper_figures.py`) draws it.
+
+Looser matching (exploratory, no training; claim C18): `gpu/ner_matching.json`
+(`ner_matching.py`) scores the same predictions under the four criteria of
+SemEval-2013 Task 9.1: strict (span and type; equal to the stored micro F1),
+exact (span, any type), type (overlap, same type) and overlap (any overlap,
+any type), each gold entity matched at most once. `systems` holds the mean
+and 95% CI over splits, papers or seeds for the CRF head, the multi-task
+model and their votes on both protocols, and for plain MatSciBERT and the
+CRF head on the published splits; `gap` the random-split minus held-out
+difference per criterion; `near_misses` the shares of the CRF head's
+predictions that are right, of another type (fine-grained, also of an MMO
+ancestor or descendant type), inside a longer gold entity, around a shorter
+one, crossing one, or spurious.
