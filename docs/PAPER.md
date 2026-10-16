@@ -12,8 +12,10 @@ on a second dataset. Week 6 tests three candidates (DeBERTa-v3-large,
 document context, multi-task self-training; ROADMAP P1, "Next, after week
 5"), and later weeks combine the ones that pass. If none passes once these
 options are exhausted, the paper is an evaluation and reproducibility paper.
-Claims C1–C9 hold either way: in a methods paper they are its baselines and
-evaluation protocol, in an evaluation paper its results.
+Claims C1–C10 hold either way: in a methods paper they are its baselines and
+evaluation protocol, in an evaluation paper its results. Document context
+passed the week-6 screen (+2.66 [+0.91, +4.40] fine-grained) and is being
+decided with 10 seeds; it is the leading candidate for a methods claim.
 
 **Working titles.** Methods: an approach for materials NER on unseen papers,
 named after the change that passes. Evaluation: "How much of a materials-NER
@@ -32,6 +34,9 @@ gain survives? Splits, scoring and seeds on MaterioMiner".
 | C7 | Multi-task training over both granularities is the one addition that holds: fine-grained +1.83 [+0.32, +3.34] over the CRF head on the random splits. Its vote improves on the seed vote coarse-grained on the random splits (+0.79 [+0.17, +1.42]) and fine-grained on unseen papers (+3.65 [+0.49, +6.82]): 2 of 12 vote comparisons, where about 0.3 would pass by chance. Self-training improves on the random splits (+1.05 and +1.04, reported, no decision). | `ner_week5_comparisons.json` | Done (GPU, 10 seeds) |
 | C8 | How far a 3-seed design misleads, from the 120 seed triples of the 10-seed runs: the 1.8-point multi-task gain passes in 41% of the triples; label semantics and self-training on unseen papers in 2–18%; up to 37% of the triples give the opposite sign. A split's micro F1 varies over seeds with an SD of 1.5–1.7 points on random splits and 2.2–2.5 on unseen papers. The 1-point CPU gains of week 3 that passed with 3 seeds do not hold with 10. | `ner_week5_seed_analysis.json` (`triples`, `spread`); README, "how far a 3-seed design misleads" | Done (exploratory) |
 | C9 | A few rare coarse-grained types keep macro F1 near the published number: in the reported system's votes on the random splits, SDE and MIP score about 18 F1 and PRP, MOD and CPR 40–42, with 2–8 test entities per split. | `ner_week5_seed_analysis.json` (`types`) | Done (exploratory); week 6 targets them |
+| C10 | Where the CRF head fails on unseen papers: fine-grained it misses 36% of the gold entities outright (10% on random splits) and predicts 10,026 entities for 13,280 gold ones; 41% of these misses have a type seen fewer than 10 times in the three training papers. Coarse-grained it misses only 6%, but 16% get the right span and the wrong type, and 21% a wrong boundary. | `ner_week5_seed_analysis.json` (`errors`) | Done (exploratory, 10 seeds) |
+| C11 | A larger general-domain encoder does not transfer to unseen papers: DeBERTa-v3-large (435M parameters) with the CRF head scores −4.38 [−7.32, −1.45] fine-grained and −8.01 [−11.72, −4.30] coarse-grained against MatSciBERT (110M) on the held-out papers, while its validation scores on the training papers are similar. | `gpu/ner_week6_screen.json` | Screen (3 seeds); SOFC-Exp S2 running |
+| C12 | Document-level label consistency, a post-processing rule (a term the model tags in most of its occurrences in a paper is tagged in the rest), adds little: +0.30 [−0.35, +0.95] fine-grained and +0.12 [+0.01, +0.24] coarse-grained on the CRF head, and no significant change on the strongest votes. Retyping does better coarse-grained (+0.64 [+0.29, +1.00]), post hoc; it is decided on SOFC-Exp. | `gpu/ner_week7_comparisons.json` | Week 7 part 1: MaterioMiner done; SOFC-Exp pending |
 
 ## Figures and tables
 
