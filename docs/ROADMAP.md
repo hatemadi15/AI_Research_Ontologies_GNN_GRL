@@ -295,6 +295,12 @@ multi-task self-training and SOFC-Exp's S2 for document context are next):
   +0.10 [−0.67, +0.88] fine-grained and +0.06 [−0.09, +0.21]
   coarse-grained, and +0.45 [−0.46, +1.36] and +0.04 [−0.19, +0.28] on
   its votes.
+- **Where the fine-grained gains come from** (exploratory; seeds 0 to 200,
+  the 4 held-out papers). Multi-task training mostly raises precision (CRF
+  head 52.1 precision, 42.7 recall; multi-task 58.8, 44.8), and
+  self-training on top raises both (61.7, 46.3). Coarse-grained, all three
+  sit near 59 and 59. Recall stays the bottleneck on unseen papers, which is
+  what week 7's recall calibration targets; the two may add up.
 - **Per type** (exploratory, 10 seeds × 4 papers): context's largest
   changes are on rare types, which a few entities swing (fine-grained
   MicrostructureEntity +18.9 and StrainRate −18.3; coarse-grained ODE −19.1
