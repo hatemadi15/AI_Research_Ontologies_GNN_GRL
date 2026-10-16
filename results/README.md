@@ -82,3 +82,28 @@ family, and the published split. The published split itself is in
 `gpu/ner_results_{fine,coarse}_published_split_crf.json` (the CRF head):
 `ner_baseline.py --published-split --seeds 0 100 ... 900`, the partition and
 tags that the MaterioMiner release ships (`data/raw/dataset/published_split/`).
+
+Week 6 (week-6 protocol) adds methods for unseen papers on the held-out
+papers: `_crf_deberta_m<N>` (DeBERTa-v3-large), `_crf_ctx_m<N>` (document
+context, `--context 64`) and `_crf_mt_st3_m<N>` (multi-task self-training),
+their votes (`_ens3`, `_ens3_m300`, `_ens3_m600`), and SOFC-Exp's official
+split (`gpu/ner_results_sofc_published_split*.json`: plain MatSciBERT, the
+CRF head and the methods, model seeds 0 to 900). `gpu/ner_week6_screen.json`
+(`ner_seedmeans.py --week 6 --gpu --screen`) holds the screen of seeds 0 to
+200, and `gpu/ner_week6_comparisons.json` (without `--screen`) the 10-seed
+decisions. `gpu/ner_week5_seed_analysis.json` adds SOFC-Exp to the published
+splits, the per-type F1 of each week-6 method against the CRF head
+(`week6_types`) and the CRF head's kinds of error (`errors`).
+
+Week 7, part 1 (week-7 protocol) applies the consistency rule
+(`ner_consistency.py`) to saved predictions; it trains nothing. `_dc` marks
+its output and `_dcr` its output with retyping, before the seed tag:
+`gpu/ner_results_<granularity>_<protocol>_crf_dc_m<N>.json` for the CRF head
+on both protocols, and `_crf_ens3_dc*` and `_crf_mt_ens3_dc*` for the votes
+on the held-out papers. The votes were made again with `ner_ensemble.py
+--save-predictions` (their scores equal the stored votes) before the rule was
+applied. The output files keep the scores, the number of entities added and
+retyped, and the input's F1 (`input_f1`), but not the predictions, which the
+rule regenerates in seconds. `gpu/ner_week7_comparisons.json`
+(`ner_seedmeans.py --week 7 --gpu --results results/gpu`) holds the
+comparisons.
