@@ -152,6 +152,12 @@ def test_published_split_analysis_of_sofc_exp_and_a_method(tmp_path):
         json.dumps(runs(3.4, ids=range(3))))
     ctx = sa.published_split(tmp_path)['sofc']['methods']['crf_ctx']
     assert ctx['n_pairs'] == 3 and ctx['minus_crf']['micro']['mean_diff'] == -1.0
+    # week 7: the consistency rule on the CRF head's predictions, paired in the same way
+    (tmp_path / 'ner_results_sofc_published_split_crf_dc.json').write_text(
+        json.dumps(runs(4.9)))
+    methods = sa.published_split(tmp_path)['sofc']['methods']
+    assert list(methods) == ['crf_deberta', 'crf_ctx', 'crf_dc']
+    assert methods['crf_dc']['minus_crf']['micro']['mean_diff'] == 0.5
 
 
 def test_week6_type_differences_pair_seeds_and_papers(tmp_path, capsys):

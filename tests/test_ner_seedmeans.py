@@ -92,7 +92,8 @@ def test_week4_systems_and_comparisons_follow_the_week4_protocol():
     with pytest.raises(ValueError):
         ns.comparison_list(3, gpu=True)
     assert ns.OUT_NAMES == {3: 'ner_week3_comparisons.json', 4: 'ner_week4_comparisons.json',
-                            5: 'ner_week5_comparisons.json', 6: 'ner_week6_comparisons.json'}
+                            5: 'ner_week5_comparisons.json', 6: 'ner_week6_comparisons.json',
+                            7: 'ner_week7_comparisons.json'}
 
 
 def test_week5_systems_and_comparisons_follow_the_week5_protocol():
@@ -244,6 +245,57 @@ def test_week6_decisions_from_results_files(tmp_path):
     assert comps[key.format('fine', 'crf_ctx_ens3_vs_crf_mt_ens3')]['micro']['mean_diff'] == 1.0
     assert len(comps[key.format('fine', 'crf_ctx')]['variant_files']) == 10
     assert (tmp_path / 'ner_week6_comparisons.json').exists()
+
+
+def test_week7_systems_and_comparisons_follow_the_week7_protocol():
+    """Part 1: the consistency rule on the CRF head and on the strongest vote of each
+    granularity (decisions on the held-out papers); retyping and context reported."""
+    lopo = 'leave_one_paper_out'
+    systems = ns.system_list(7)
+    assert systems['crf_dc'] == tuple(f'crf_dc_m{n}' for n in range(0, 1000, 100))
+    assert systems['crf_mt_ens3_dc'] == ('crf_mt_ens3_dc', 'crf_mt_ens3_dc_m300',
+                                         'crf_mt_ens3_dc_m600')
+    assert systems['crf_ens3_dcr'] == ('crf_ens3_dcr', 'crf_ens3_dcr_m300', 'crf_ens3_dcr_m600')
+    assert systems['crf_ctx_dc'] == tuple(f'crf_ctx_dc_m{n}' for n in range(0, 1000, 100))
+    assert systems['crf_mt_ens3'] == ns.WEEK5_SYSTEMS['crf_mt_ens3']
+    assert ns.comparison_list(7, gpu=True)[:3] == (
+        ('crf_dc', 'crf', lopo), ('crf_mt_ens3_dc', 'crf_mt_ens3', {'fine': lopo}),
+        ('crf_ens3_dc', 'crf_ens3', {'coarse': lopo}))
+    assert all(decides is None for _, _, decides in ns.comparison_list(7, gpu=True)[3:])
+    with pytest.raises(ValueError):
+        ns.comparison_list(7)
+
+
+def test_week7_decisions_from_results_files(tmp_path):
+    """--week 7 --gpu: the rule's decisions, and the random splits reported."""
+    pytest.importorskip('scipy')
+    lopo, rand = 'leave_one_paper_out', 'random_split_vary'
+    for g in ('fine', 'coarse'):
+        for n in range(0, 1000, 100):
+            _write(tmp_path, g, lopo, f'crf_m{n}', [50, 51, 52, 53])
+            _write(tmp_path, g, lopo, f'crf_dc_m{n}', [51, 52, 53, 55])
+            _write(tmp_path, g, rand, f'crf_m{n}', [70, 71, 72, 73, 74])
+            _write(tmp_path, g, rand, f'crf_dc_m{n}', [70, 71, 72, 73, 75])
+        for stem, plus in (('crf_ens3', 2), ('crf_mt_ens3', 3), ('crf_ens3_dc', 3),
+                           ('crf_mt_ens3_dc', 3.5)):
+            for name in ns.system_list(7)[stem]:
+                _write(tmp_path, g, lopo, name, [x + plus for x in (50, 51, 52, 53)])
+    comps = ns.main(['--results', str(tmp_path), '--week', '7', '--gpu'])
+    key = 'ner_results_{}_{}_{}'
+    roles = {k: c['role'] for k, c in comps.items()}
+    assert roles == {
+        key.format('fine', lopo, 'crf_dc'): 'decision',
+        key.format('coarse', lopo, 'crf_dc'): 'decision',
+        key.format('fine', rand, 'crf_dc'): 'reported',
+        key.format('coarse', rand, 'crf_dc'): 'reported',
+        key.format('fine', lopo, 'crf_mt_ens3_dc_vs_crf_mt_ens3'): 'decision',
+        key.format('coarse', lopo, 'crf_mt_ens3_dc_vs_crf_mt_ens3'): 'reported',
+        key.format('fine', lopo, 'crf_ens3_dc_vs_crf_ens3'): 'reported',
+        key.format('coarse', lopo, 'crf_ens3_dc_vs_crf_ens3'): 'decision'}
+    assert comps[key.format('fine', lopo, 'crf_dc')]['micro']['mean_diff'] == 1.25
+    assert comps[key.format('fine', lopo, 'crf_mt_ens3_dc_vs_crf_mt_ens3')]['micro'][
+        'mean_diff'] == 0.5
+    assert (tmp_path / 'ner_week7_comparisons.json').exists()
 
 
 def test_decides_on_one_protocol_or_several():

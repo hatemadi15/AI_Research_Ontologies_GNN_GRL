@@ -23,7 +23,8 @@ votes (ner_seedmeans.WEEK5_SYSTEMS) and writes ner_week5_seed_analysis.json next
     SOFC-Exp's official split (granularity sofc, against the published MatSciBERT-CRF
     scores) and, where their files exist, the week-6 methods on a published split
     (SPLIT_METHODS): their scores and their difference from the CRF head, paired by seed
-    (SOFC-Exp's S1 and S2 of the week-6 protocol).
+    (SOFC-Exp's S1 and S2 of the week-6 protocol). Week 7 adds the consistency rule on the
+    CRF head (crf_dc, and crf_dcr with retyping) in the same way.
   - week6_types (week 6, reported alongside its decisions): per granularity, each week-6
     method with all 10 seeds on the 4 held-out papers against the CRF head, per entity type:
     the F1 of both, paired by seed offset and paper over the pairs whose test set has the
@@ -56,8 +57,9 @@ AVERAGES = ('micro avg', 'macro avg', 'weighted avg')
 PUBLISHED_F1 = {'fine': 69.92, 'coarse': 72.32, 'sofc': 84.77}
 PUBLISHED_MACRO = {'sofc': 82.39}
 PUBLISHED_SPLITS = ('fine', 'coarse', 'sofc')
-# week-6 methods run on a published split, compared with the CRF head by seed
-SPLIT_METHODS = ('crf_deberta', 'crf_ctx')
+# methods on a published split, compared with the CRF head by seed: the week-6 methods,
+# and the week-7 consistency rule on the CRF head's predictions (ner_consistency.py)
+SPLIT_METHODS = ('crf_deberta', 'crf_ctx', 'crf_dc', 'crf_dcr')
 
 
 def load_files(directory, names):

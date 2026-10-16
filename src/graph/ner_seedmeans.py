@@ -77,12 +77,21 @@ each a family crf_deberta (DeBERTa-v3-large), crf_ctx (document context) or crf_
     fine-grained, crf_ens3 coarse-grained); the vote against the other granularity's
     reference is reported. Reported: crf_mt_st3 vs crf_mt.
 
+Week 7, part 1 (--week 7 --gpu; week-7 protocol) tests document-level label consistency
+(ner_consistency.py: the variant <input>_dc, or _dcr with retyping) on the saved
+predictions of the 10-seed runs:
+  - Decisions: crf_dc vs crf on the held-out papers, and the rule on the strongest system
+    on unseen papers (UNSEEN_BEST): crf_mt_ens3_dc vs crf_mt_ens3 fine-grained, crf_ens3_dc
+    vs crf_ens3 coarse-grained. Reported: the random splits, the other granularity's vote,
+    retyping (_dcr), and the rule on document context (crf_ctx_dc, crf_ctx_ens3_dc).
+
 Usage:
   python src/graph/ner_seedmeans.py [--results results] [--out results/ner_week3_comparisons.json]
   python src/graph/ner_seedmeans.py --week 4                            # CPU votes
   python src/graph/ner_seedmeans.py --week 4 --gpu --results results/gpu
   python src/graph/ner_seedmeans.py --week 5 --gpu --results results/gpu
   python src/graph/ner_seedmeans.py --week 6 --gpu --results results/gpu [--screen]
+  python src/graph/ner_seedmeans.py --week 7 --gpu --results results/gpu
 """
 
 import argparse
@@ -97,7 +106,7 @@ from ner_baseline import F1_AVERAGES, result_suffix
 RESULTS_DIR = Path(__file__).resolve().parents[2] / 'results'
 OUT_NAME = 'ner_week3_comparisons.json'
 OUT_NAMES = {3: OUT_NAME, 4: 'ner_week4_comparisons.json', 5: 'ner_week5_comparisons.json',
-             6: 'ner_week6_comparisons.json'}
+             6: 'ner_week6_comparisons.json', 7: 'ner_week7_comparisons.json'}
 SCREEN_NAME = 'ner_week6_screen.json'
 
 GRANULARITIES = ('fine', 'coarse')
@@ -237,6 +246,38 @@ WEEK6_COMPARISONS = (
 )
 
 
+# week 7, part 1: document-level label consistency (ner_consistency.py) on saved predictions
+DC_RULES = ('_dc', '_dcr')                    # propagation; with retyping (reported)
+
+
+def dc_family(variants, rule='_dc'):
+    """The consistency rule's outputs of a family: _dc (or _dcr) before each seed tag."""
+    out = []
+    for v in variants:
+        stem, sep, tag = v.rpartition('_m')
+        out.append(f'{stem}{rule}_m{tag}' if sep and tag.isdigit() else f'{v}{rule}')
+    return tuple(out)
+
+
+WEEK7_SYSTEMS = {
+    **WEEK6_SYSTEMS,
+    **{f'{stem}{rule}': dc_family(WEEK6_SYSTEMS[stem], rule)
+       for stem in ('crf', 'crf_ens3', 'crf_mt_ens3', 'crf_ctx', 'crf_ctx_ens3')
+       for rule in DC_RULES},
+}
+WEEK7_COMPARISONS = (
+    # decision 1: the rule on the CRF head (held-out papers; random splits reported)
+    ('crf_dc', 'crf', LOPO),
+    # decision 2: the rule on the strongest system on unseen papers, per granularity
+    *((f'{ref}_dc', ref, {g: LOPO}) for g, ref in UNSEEN_BEST.items()),
+    # reported: retyping, and the rule on document context
+    ('crf_dcr', 'crf', None),
+    *((f'{ref}_dcr', ref, None) for ref in UNSEEN_BEST.values()),
+    ('crf_ctx_dc', 'crf_ctx', None),
+    ('crf_ctx_ens3_dc', 'crf_ctx_ens3', None),
+)
+
+
 def comparison_list(week, gpu=False, screen=False):
     """The comparisons of a week's protocol: week 3, week 4 on the CPU or the GPU runs,
     week 5, or week 6 (its stage-1 screen with screen=True); weeks 5 and 6 GPU runs only."""
@@ -244,9 +285,11 @@ def comparison_list(week, gpu=False, screen=False):
         if gpu:
             raise ValueError('the week-3 comparisons are made on the CPU runs only')
         return COMPARISONS
-    if week in (5, 6):
+    if week in (5, 6, 7):
         if not gpu:
             raise ValueError(f'the week-{week} comparisons are made on the GPU runs only')
+        if week == 7:
+            return WEEK7_COMPARISONS
         if week == 6:
             return WEEK6_SCREEN_COMPARISONS if screen else WEEK6_COMPARISONS
         return WEEK5_COMPARISONS
@@ -255,6 +298,8 @@ def comparison_list(week, gpu=False, screen=False):
 
 def system_list(week, screen=False):
     """The systems (name: the variants of its results files) of a week's protocol."""
+    if week == 7:
+        return WEEK7_SYSTEMS
     if week == 6:
         return WEEK6_SCREEN_SYSTEMS if screen else WEEK6_SYSTEMS
     return WEEK5_SYSTEMS if week == 5 else SYSTEMS

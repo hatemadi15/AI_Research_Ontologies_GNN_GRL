@@ -175,6 +175,9 @@ WEEK6_NAMES = {**WEEK5_NAMES, 'crf_deberta': 'DeBERTa-v3-large', 'crf_ctx': 'doc
                'crf_mt_st3': 'multi-task self-training',
                'crf_deberta_ens3': 'DeBERTa-v3-large vote', 'crf_ctx_ens3': 'document-context vote',
                'crf_mt_st3_ens3': 'multi-task self-training vote'}
+# week 7, part 1: the consistency rule (ner_consistency.py); retyping is reported only
+WEEK7_NAMES = {'crf_dc': 'the consistency rule', 'crf_dcr': 'the consistency rule with retyping'}
+WEEK7_REPORTED = ('crf_dcr',)
 LOPO = 'leave_one_paper_out'
 # the exploratory analyses of the week-5 runs (ner_seed_analysis.py), in results/gpu/
 WEEK5_ANALYSIS = 'ner_week5_seed_analysis.json'
@@ -968,16 +971,23 @@ def sofc_note(analysis):
         line += (f"; the CRF votes over the 3 seed triples score "
                  f"{e['crf_votes']['micro']['mean']:.2f}")
     for method, m in e.get('methods', {}).items():
-        line += (f". S2, {WEEK6_NAMES[method]} against the CRF head, paired by seed: "
-                 f"{interval(m['micro'])}, " + seed_decision(m['minus_crf']))
+        if method in WEEK7_NAMES:
+            label = f"Week 7, {WEEK7_NAMES[method]} on the CRF head's predictions"
+        else:
+            label = f"S2, {WEEK6_NAMES[method]} against the CRF head"
+        line += (f". {label}, paired by seed: {interval(m['micro'])}, "
+                 + seed_decision(m['minus_crf'], decides=method not in WEEK7_REPORTED))
     return line + ".\n"
 
 
-def seed_decision(c):
-    """A paired difference over the model seeds of one split, worded as its decision (week-6
-    rule) when it has all PUBLISHED_SEEDS seeds; otherwise its numbers, reported only."""
+def seed_decision(c, decides=True):
+    """A paired difference over the model seeds of one split, worded as its decision (the
+    week-6 rule) when it is one and has all PUBLISHED_SEEDS seeds; otherwise its numbers,
+    reported only."""
     word, numbers = paired_verdict(c)
     n = len(c['micro']['per_run'])
+    if not decides:
+        return f"{numbers} (reported; no decision)"
     if n == PUBLISHED_SEEDS:
         return f"{word} ({numbers})"
     return f"{numbers} over {n} of the {PUBLISHED_SEEDS} seeds (reported; no decision)"
