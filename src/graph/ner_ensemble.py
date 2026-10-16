@@ -31,13 +31,17 @@ against a single model, run by run (same run_id, same test sentences).
     crf_m0, crf_m100, crf_m200 give crf_ens3, and members with later seeds only
     add the first one's tag (crf_m300, crf_m400, crf_m500 give crf_ens3_m300).
     Every run adds n_members, member_f1,
-    member_f1_strict and invalid_i_tags to the seqeval metrics; the summary is
+    member_f1_strict and invalid_i_tags to the seqeval metrics (with
+    --save-predictions also test_index, test_gold and the vote's test_pred, as
+    ner_baseline.py writes them, for post-processing such as
+    ner_consistency.py); the summary is
     that of ner_baseline.summarize plus `vs_member_mean`: the vote's micro F1
     minus the mean of its members', per run, with its mean and 95% CI
     (exploratory: what the vote adds over one model of the same kind).
 
 Usage:
   python ner_ensemble.py --members FILE FILE FILE [--out PATH] [--variant NAME]
+                         [--save-predictions]
   python ner_ensemble.py --members ner_results_fine_random_split_vary_crf_m{0,100,200}.json
   python ner_ensemble.py --variant crf_mix3 --members CRF_M0 CRF_SCIBERT CRF_PUBMEDBERT
 """
@@ -283,8 +287,9 @@ def identical_members(by_id, names):
 # ---------------------------------------------------------------------------
 # Ensemble results
 # ---------------------------------------------------------------------------
-def ensemble_run(run_id, runs):
-    """Metrics of the majority vote for one run_id; runs: the members' (checked) runs."""
+def ensemble_run(run_id, runs, save_predictions=False):
+    """Metrics of the majority vote for one run_id; runs: the members' (checked) runs.
+    save_predictions adds the test sentences, their gold tags and the vote's tags."""
     gold = [g.split() for g in runs[0]['test_gold']]
     preds = [[p.split() for p in r['test_pred']] for r in runs]   # member x sentence
     votes = [vote_tags(list(sentence)) for sentence in zip(*preds)]
@@ -293,6 +298,10 @@ def ensemble_run(run_id, runs):
                 'member_f1': [r['f1'] for r in runs],
                 'member_f1_strict': [r['f1_strict'] for r in runs],
                 'invalid_i_tags': sum(bad for _, bad in votes)})
+    if save_predictions:
+        res.update({'test_index': list(runs[0]['test_index']),
+                    'test_gold': list(runs[0]['test_gold']),
+                    'test_pred': [' '.join(tags) for tags, _ in votes]})
     return res
 
 
@@ -309,11 +318,12 @@ def member_gain(runs):
             'per_run': [round(d, 2) for d in diffs]}
 
 
-def combine(members, names, variant=None):
+def combine(members, names, variant=None, save_predictions=False):
     """Results (ner_baseline schema) of the majority-vote ensemble of the parsed member files.
 
     `variant` (--variant) names a mixed ensemble: the members may differ in model and
     variant, config['models'] lists their models, and `model` is 'mixed' if they differ.
+    save_predictions (--save-predictions) keeps the vote's test predictions per run.
     """
     named = variant is not None
     check_members(members, names, same_model=not named)
@@ -330,18 +340,19 @@ def combine(members, names, variant=None):
                'variant': variant, 'model': models[0] if len(set(models)) == 1 else 'mixed',
                'labels': first['labels'], 'label_tie': first['label_tie'],
                'paper_test_f1': first['paper_test_f1'], 'config': config,
-               'runs': [ensemble_run(run_id, [b[run_id] for b in by_id]) for run_id in by_id[0]]}
+               'runs': [ensemble_run(run_id, [b[run_id] for b in by_id], save_predictions)
+                        for run_id in by_id[0]]}
     summarize(results)
     if results['runs']:
         results['summary']['vs_member_mean'] = member_gain(results['runs'])
     return results
 
 
-def run(paths, out=None, variant=None):
+def run(paths, out=None, variant=None, save_predictions=False):
     """Read the member files, write the ensemble results file and print a summary."""
     members = [load_member(p) for p in paths]
     names = [os.path.basename(p) for p in paths]
-    results = combine(members, names, variant)
+    results = combine(members, names, variant, save_predictions)
     out = out or os.path.join(os.path.dirname(paths[0]), results_name(
         results['granularity'], results['protocol'], results['variant']))
     if os.path.realpath(out) in {os.path.realpath(p) for p in paths}:
@@ -388,11 +399,14 @@ def main(argv=None):
     parser.add_argument('--variant', type=variant_option, default=None, metavar='NAME',
                         help='variant of the ensemble and its results file (e.g. crf_mix3); the '
                              'members may then differ in model and variant (mixed backbones)')
+    parser.add_argument('--save-predictions', action='store_true',
+                        help="keep the vote's test predictions in each run (test_index, "
+                             "test_gold, test_pred), e.g. for ner_consistency.py")
     args = parser.parse_args(argv)
     if len(args.members) < 2:
         parser.error('--members needs at least 2 files')
     try:
-        run(args.members, args.out, args.variant)
+        run(args.members, args.out, args.variant, args.save_predictions)
     except EnsembleError as e:
         sys.exit(f'error: {e}')
 

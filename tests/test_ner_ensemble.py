@@ -673,3 +673,26 @@ def test_script_exits_with_a_message_not_a_traceback(tmp_path):
     assert proc.returncode == 1
     assert proc.stderr.startswith('error: ') and 'run_ids' in proc.stderr
     assert 'Traceback' not in proc.stderr and not (tmp_path / 'out.json').exists()
+
+
+def test_saved_vote_predictions(tmp_path):
+    """--save-predictions keeps the vote's test predictions in the members' format; without
+    it the runs have none (the stored votes stay as they are)."""
+    pytest.importorskip('seqeval')
+    pytest.importorskip('scipy')
+    members = _trio(scored=True)
+    paths = _write(tmp_path, members)
+    out = tmp_path / 'vote.json'
+    ne.main(['--members', *paths, '--out', str(out), '--save-predictions'])
+    res = json.loads(out.read_text())
+    plain = tmp_path / 'plain.json'
+    ne.main(['--members', *paths, '--out', str(plain)])
+    without = json.loads(plain.read_text())
+    for run, bare, own in zip(res['runs'], without['runs'], members[0]['runs']):
+        assert run['test_index'] == own['test_index'] and run['test_gold'] == own['test_gold']
+        voted = [' '.join(ne.vote_tags([p.split() for p in sentence])[0])
+                 for sentence in zip(*(m_run['test_pred'] for m_run in
+                                       (m['runs'][res['runs'].index(run)] for m in members)))]
+        assert run['test_pred'] == voted
+        assert {k: v for k, v in run.items() if not k.startswith('test_')} == bare
+        assert not {'test_index', 'test_gold', 'test_pred'} & set(bare)
