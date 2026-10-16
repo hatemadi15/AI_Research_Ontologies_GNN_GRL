@@ -1099,6 +1099,32 @@ def test_week6_screen_bullets_follow_the_screen_rule(tmp_path):
                                           'crf_mt_st3': 'incomplete'}
 
 
+def test_week7_mention_replacement_screen_and_decisions(tmp_path):
+    """Part 2b: mention replacement's screen gets a week-7 bullet (from its own file), and its
+    stage-2 decisions a bullet each, as the week-6 methods do."""
+    ns = pytest.importorskip('ner_seedmeans')
+    ws = Workspace(tmp_path)
+    lopo = 'leave_one_paper_out'
+    for g, micro in (('fine', (0.4, -1.0, 1.8)), ('coarse', (-0.3, -1.0, 0.4))):
+        ws.week4('crf_mr', 'crf', g, lopo, gpu=True, role='screen', micro=micro,
+                 score=(47.0, 40.0, 54.0), name=rr.WEEK7_SCREEN_FILE)
+    readme, _ = ws.generate()
+    assert ('* NER week 7, part 2b, the screen (GPU runs, seeds 0, 100 and 200, leaving one '
+            'paper out; mean paired micro-F1 difference [95% CI]; it decides only which methods '
+            'get 10 seeds): mention replacement goes to stage 2; against the CRF head '
+            'fine-grained +0.40 [-1.00, +1.80], coarse-grained -0.30 [-1.00, +0.40].\n') in readme
+    screen = json.loads((ws.results / 'gpu' / rr.WEEK7_SCREEN_FILE).read_text())
+    assert ns.screen_verdicts(screen, ns.WEEK7_METHODS) == {
+        'crf_mr': 'goes to stage 2 (fine +0.40, coarse -0.30)'}
+    for g in ('fine', 'coarse'):
+        ws.week4('crf_mr', 'crf', g, lopo, gpu=True, role='decision', micro=(0.2, -0.9, 1.3),
+                 score=(47.0, 40.0, 54.0), name=rr.WEEK7_FILE)
+    readme, _ = ws.generate()
+    assert ('* NER week 7, part 2b (GPU runs; mention replacement, 10 seeds), mention '
+            'replacement vs the CRF head (paired micro-F1 difference, leaving one paper out): '
+            'fine-grained no significant change') in readme
+
+
 def test_a_week6_vote_that_passes_takes_the_unseen_slot(tmp_path):
     ws = Workspace(tmp_path)
     lopo = 'leave_one_paper_out'

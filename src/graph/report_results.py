@@ -198,6 +198,10 @@ WEEK7A_DECISIONS = WEEK7A_COMPARISONS[:3]
 WEEK7C_COMPARISONS = (('crf_cf', 'crf'), ('crf_mt_ens3_cf', 'crf_mt_ens3'),
                       ('crf_mt_cf', 'crf_mt'))
 WEEK7C_DECISIONS = WEEK7C_COMPARISONS[:2]
+# Week 7, part 2b: mention replacement (--augment-mentions 3), screened and decided as the
+# week-6 methods; its screen has a file of its own
+WEEK7_SCREEN_FILE = 'ner_week7_screen.json'
+WEEK7B_DECISIONS = (('crf_mr', 'crf'), *(('crf_mr_ens3', ref) for ref in UNSEEN_BEST.values()))
 WEEK7_SYSTEM_NAMES = {**WEEK6_NAMES, **{
     f'{stem}{rule}': f'{WEEK6_NAMES[stem]} + {WEEK7_NAMES["crf" + rule]}'
     for stem in ('crf', 'crf_ens3', 'crf_mt_ens3', 'crf_ctx', 'crf_ctx_ens3')
@@ -205,6 +209,7 @@ WEEK7_SYSTEM_NAMES = {**WEEK6_NAMES, **{
     'crf_eb': 'CRF head + recall calibration',
     'crf_ebv': 'CRF head + recall calibration chosen on validation',
     'crf_eb_ens3': 'vote of the CRF head + recall calibration',
+    'crf_mr': 'mention replacement', 'crf_mr_ens3': 'mention-replacement vote',
     **{v: f'{WEEK6_NAMES[ref]} + coarse-to-fine completion'
        for v, ref in WEEK7C_COMPARISONS}}
 # the label of a week-7 method in the SOFC-Exp bullet (both parts decide on SOFC-Exp)
@@ -213,7 +218,8 @@ WEEK7_SOFC_LABELS = {**{m: f"Week 7, {name} on the CRF head's predictions"
                      'crf_ebv': 'Week 7, part 2a, recall calibration of the CRF head, its bias '
                                 'chosen on the validation articles, against the CRF head',
                      'crf_mt': 'Week 7, part 2d, multi-task training on both levels against the '
-                               'CRF head'}
+                               'CRF head',
+                     'crf_mr': 'Week 7, part 2b, S2, mention replacement against the CRF head'}
 LOPO = 'leave_one_paper_out'
 # the exploratory analyses of the week-5 runs (ner_seed_analysis.py), in results/gpu/
 WEEK5_ANALYSIS = 'ner_week5_seed_analysis.json'
@@ -1035,20 +1041,26 @@ def ner_notes(res):
         note += week6_verdict_line(week7, variant, reference,
                                    'coarse-to-fine completion on the saved predictions of 10 '
                                    'seeds', week='7, part 2c', names=WEEK7_SYSTEM_NAMES)
+    screen7 = res.comparisons(GPU_PREFIX + WEEK7_SCREEN_FILE)
+    note += week6_screen_line(screen7, 'crf_mr', week='7, part 2b', names=WEEK7_SYSTEM_NAMES)
+    for variant, reference in WEEK7B_DECISIONS:
+        note += week6_verdict_line(week7, variant, reference, 'mention replacement, 10 seeds',
+                                   week='7, part 2b', names=WEEK7_SYSTEM_NAMES)
     return note + sofc_note(analysis)
 
 
-def week6_screen_line(comps, method):
+def week6_screen_line(comps, method, week='6', names=WEEK6_NAMES):
     """One bullet for a method's week-6 screen ('' until both granularities are complete):
     whether it goes to stage 2 (its mean micro-F1 difference against the CRF head above 0 at
     either granularity, as in ner_seedmeans.screen_verdicts), the 3-seed differences, and the
-    screen's comparisons reported alongside. No verdict words: the screen decides nothing."""
+    screen's comparisons reported alongside. No verdict words: the screen decides nothing.
+    week and names serve the week-7 screen."""
     found = {g: find_comparison(comps, g, LOPO, method, 'crf') for g in GRANULARITIES}
     if not all(found.values()):
         return ''
     passed = any(c['micro']['mean_diff'] > 0 for c in found.values())
-    others = [(method, 'crf', f"against the {WEEK6_NAMES['crf']}"),
-              (f'{method}_ens3', 'crf_ens3', f"its vote against the {WEEK6_NAMES['crf_ens3']}")]
+    others = [(method, 'crf', f"against the {names['crf']}"),
+              (f'{method}_ens3', 'crf_ens3', f"its vote against the {names['crf_ens3']}")]
     if method == 'crf_mt_st3':
         others.append((method, 'crf_mt', f"against {WEEK6_NAMES['crf_mt']}"))
     parts = []
@@ -1057,9 +1069,9 @@ def week6_screen_line(comps, method):
                  if (c := find_comparison(comps, g, LOPO, variant, reference))]
         if diffs:
             parts.append(f"{words} {', '.join(diffs)}")
-    return ("* NER week 6, the screen (GPU runs, seeds 0, 100 and 200, leaving one paper out; "
-            "mean paired micro-F1 difference [95% CI]; it decides only which methods get 10 "
-            f"seeds): {WEEK6_NAMES[method]} {'goes to stage 2' if passed else 'stops'}; "
+    return (f"* NER week {week}, the screen (GPU runs, seeds 0, 100 and 200, leaving one paper "
+            "out; mean paired micro-F1 difference [95% CI]; it decides only which methods get "
+            f"10 seeds): {names[method]} {'goes to stage 2' if passed else 'stops'}; "
             + '; '.join(parts) + ".\n")
 
 

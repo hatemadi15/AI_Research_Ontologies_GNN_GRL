@@ -28,7 +28,8 @@ votes (ner_seedmeans.WEEK5_SYSTEMS) and writes ner_week5_seed_analysis.json next
     on the validation articles (crf_ebv, part 2a) in the same way; part 2d adds SOFC-Exp's
     slot level (sofc_slot, against the published MatSciBERT-CRF scores of SOFC-Slot) and
     multi-task training on SOFC-Exp's two levels (crf_mt), whose votes over the seed triples
-    are also set against the CRF votes, paired by triple (VOTED_METHODS).
+    are also set against the CRF votes, paired by triple (VOTED_METHODS); part 2b adds
+    mention replacement (crf_mr, S2).
   - errors (exploratory; cited by the week-7 protocol, part 1): per protocol and
     granularity, the kinds of error of the CRF head over its 10 seeds: the share of gold
     entities that are correct, missed (no overlapping prediction), of the right span and
@@ -70,7 +71,7 @@ PUBLISHED_SPLITS = ('fine', 'coarse', 'sofc', 'sofc_slot')
 # methods on a published split, compared with the CRF head by seed: the week-6 methods,
 # the week-7 consistency rule on the CRF head's predictions (ner_consistency.py) and
 # recall calibration (ner_bias.py --choose val); multi-task training on SOFC-Exp's levels
-SPLIT_METHODS = ('crf_deberta', 'crf_ctx', 'crf_dc', 'crf_dcr', 'crf_ebv', 'crf_mt')
+SPLIT_METHODS = ('crf_deberta', 'crf_ctx', 'crf_dc', 'crf_dcr', 'crf_ebv', 'crf_mt', 'crf_mr')
 VOTED_METHODS = ('crf_mt',)
 
 
