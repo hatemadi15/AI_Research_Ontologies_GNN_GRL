@@ -4,6 +4,7 @@ import importlib.util
 import io
 import json
 import tarfile
+from types import SimpleNamespace
 from pathlib import Path
 
 import pytest
@@ -98,6 +99,111 @@ def test_smoke1_repeats_one_crf_run_on_both_gpus():
     assert any('--label-semantics' in j for j in lanes[1])
     for j in (j for lane in lanes for j in lane):
         assert 'smoke' in nb.variant_name(nb.parse_args(j))   # never collected
+
+
+def test_week5_batches_add_seeds_300_to_900(monkeypatch):
+    """Week 5: smoke4, then w5a (self-training, 10 students) and w5b (crf, crf_ls and
+    crf_mt at seed offsets 300 to 900), each opened by a repeat of a week-4 CRF run."""
+    monkeypatch.setattr(nb.os.path, 'isfile', lambda path: True)    # the corpus is not here
+    assert kj.OFFSETS_W5 == (300, 400, 500, 600, 700, 800, 900)
+    repeat = ['--granularity', 'fine', '--vary-split', '--seeds', '0', '--crf',
+              '--save-predictions', '--threads', '2']
+    # smoke4: the CRF run of split 0 (the stored crf_m0 run, if the commit repeats it) and a
+    # tiny 3-teacher run with 4 students; neither is ever collected
+    crf_lane, st_lane = kj.batch_lanes('smoke4')
+    assert crf_lane == [repeat + ['--tag', 'smokee']]
+    (tiny,) = [nb.parse_args(j) for j in st_lane]
+    assert (tiny.teachers, tiny.students, tiny.self_train_sample, tiny.max_train) == (3, 4, 200, 32)
+    for job in crf_lane + st_lane:
+        args = nb.parse_args(job)
+        assert 'smoke' in nb.results_path('', args.granularity, args)
+    # w5a: a lane per granularity, the held-out papers first, every student seed 0 to 900
+    lanes = kj.batch_lanes('w5a')
+    for g, lane in zip(('fine', 'coarse'), lanes):
+        args = [nb.parse_args(j) for j in lane]
+        assert [nb.protocol_name(a) for a in args] == ['leave_one_paper_out', 'random_split_vary']
+        assert all(a.granularity == g and a.teachers == 3 and a.students == 10 and
+                   a.self_train_sample == 0 and a.self_train == kj.CORPUS and a.save_predictions
+                   for a in args)
+        assert all(nb.variant_name(a) == 'crf_st3' for a in args)
+    # w5b: the repeat first, then every new seed of the three families, one file per job
+    lanes = kj.batch_lanes('w5b')
+    assert lanes[0][0] == repeat + ['--tag', 'smokef']
+    jobs = [j for lane in lanes for j in lane][1:]
+    assert len(jobs) == 7 * 2 * 2 * 2 + 7 * 2          # crf and crf_ls; crf_mt (both heads)
+    files = [f for j in jobs for f in _written_files(j)]
+    assert len(files) == len(set(files)) == 7 * 2 * 2 * 3
+    assert {v for _, _, v in files} == {f'{s}_m{n}' for s in ('crf', 'crf_ls', 'crf_mt')
+                                        for n in kj.OFFSETS_W5}
+    for j in jobs:
+        args = nb.parse_args(j)
+        assert args.seed_offset == int(args.tag[1:]) >= 300 and args.save_predictions
+    assert abs(len(lanes[0]) - len(lanes[1])) <= 4
+    assert {'smoke4', 'w5a', 'w5b'} <= set(kj.BATCHES)
+
+
+def test_w5c_runs_the_published_split_with_10_model_seeds():
+    lanes = kj.batch_lanes('w5c')
+    assert lanes[0][0][-2:] == ['--tag', 'smokeg']               # the repeat of a week-4 run
+    jobs = [j for lane in lanes for j in lane][1:]
+    args = [nb.parse_args(j) for j in jobs]
+    assert all(a.published_split and a.seeds == list(range(0, 1000, 100)) and a.save_predictions
+               for a in args)
+    assert [(a.granularity, nb.variant_name(a)) for a in args] == [
+        ('fine', 'baseline'), ('fine', 'crf'), ('coarse', 'baseline'), ('coarse', 'crf')]
+    files = [f for j in jobs for f in _written_files(j)]
+    assert len(files) == len(set(files)) == 4
+    assert {p for _, p, _ in files} == {'published_split'}
+    assert 'w5c' in kj.BATCHES
+
+
+def test_smoke5_tries_the_week6_options_with_their_pins(monkeypatch):
+    monkeypatch.setattr(nb.os.path, 'isfile', lambda path: True)    # the corpus is not here
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda: 'x' * 64)
+    lanes = kj.batch_lanes('smoke5')
+    args = [nb.parse_args(j) for lane in lanes for j in lane]
+    repeat, *args = args                            # first the week-4 run again
+    assert (repeat.tag, repeat.granularity, repeat.seeds, repeat.crf) == ('smokel', 'fine', [0],
+                                                                         True)
+    assert repeat.vary_split and repeat.max_train == 0 and repeat.model == nb.DEFAULT_MODEL
+    assert all(a.max_train == 32 and a.epochs == 2 for a in args)
+    deberta = [a for a in args if a.model == kj.DEBERTA]
+    assert [a.tag for a in deberta] == ['smokeh', 'smokei']
+    assert {nb.variant_name(a) for a in args} >= {'crf_ctx_smokej', 'crf_mt_st3', 'crf_smokek'}
+    assert any(a.granularity == 'sofc' for a in args)
+    for a in args:                                  # never collected
+        assert 'smoke' in nb.results_path('', 'fine', a)
+    spec = kj.batch_spec('smoke5')
+    assert spec['models'][kj.DEBERTA] == '64a8c8eab3e352a784c658aef62be1662607476f'
+    assert 'sentencepiece==0.2.2' in spec['pip'] and set(kj.PIP) <= set(spec['pip'])
+    other = kj.batch_spec('w5c')                    # other batches keep their pins
+    assert other['models'] == kj.MODELS and other['pip'] == list(kj.PIP)
+
+
+def test_smoke6_runs_the_week6_options_at_full_size_outside_the_decision_splits(monkeypatch):
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda: 'x' * 64)
+    repeat, *args = [nb.parse_args(j) for lane in kj.batch_lanes('smoke6') for j in lane]
+    assert (repeat.tag, repeat.seeds, repeat.vary_split) == ('smokem', [0], True)
+    assert [(a.granularity, a.tag) for a in args] == [('fine', 'smoken'), ('fine', 'smokeo'),
+                                                      ('sofc', 'smokep')]
+    assert all(a.published_split and a.seeds == [0] and a.crf and a.max_train == 0
+               for a in args)
+    assert [a.model for a in args] == [kj.DEBERTA, nb.DEFAULT_MODEL, nb.DEFAULT_MODEL]
+    assert args[1].context == 64
+    for a in args:                                  # never collected
+        assert 'smoke' in nb.results_path('', a.granularity, a)
+    assert kj.batch_spec('smoke6')['models'] == kj.batch_spec('smoke5')['models']
+
+
+def test_a_refused_push_stops(monkeypatch, capsys):
+    """The Kaggle CLI exits 0 when it refuses a push; push must not report the batch."""
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda: 'x' * 64)
+    monkeypatch.setattr(kj, 'kaggle', lambda *a, **k: 'Kernel push error: Maximum batch GPU '
+                                                       'session count of 2 reached.')
+    args = SimpleNamespace(batch='w5c', kernel=kj.KERNEL, user='someone')
+    with pytest.raises(SystemExit, match='not pushed'):
+        kj.cmd_push(args)
+    assert 'lane 0' not in capsys.readouterr().out
 
 
 def test_balance_takes_the_longest_job_first_to_the_least_loaded_lane():
@@ -239,6 +345,22 @@ def test_run_jobs_restores_gpu_results_only(tmp_path):
     (inp / f'gpu__{name}').write_text(json.dumps(_gpu_file('seed0', env=None)))
     with pytest.raises(RuntimeError, match='not GPU runs'):
         rj.restore_results(tmp_path / 'input', tmp_path / 'other')
+
+
+def test_run_jobs_drops_the_restored_files_that_no_job_changed(tmp_path):
+    rj = _run_jobs()
+    inp = tmp_path / 'input' / 'datasets' / 'someone' / 'ner-gpu-bundle'
+    inp.mkdir(parents=True)
+    names = [f'ner_results_fine_random_split_vary_crf_m{k}.json' for k in (0, 100)]
+    for name in names:
+        (inp / f'gpu__{name}').write_text(json.dumps(_gpu_file('seed0')))
+    dest = tmp_path / 'processed' / 'ner'
+    assert rj.restore_results(tmp_path / 'input', dest) == names
+    (dest / names[1]).write_text(json.dumps(_gpu_file('seed1')))      # a job extended it
+    (dest / 'ner_results_fine_random_split_vary_crf_m200.json').write_text('{}')   # new
+    assert rj.drop_unchanged(tmp_path / 'input', dest, names) == [names[0]]
+    assert sorted(p.name for p in dest.iterdir()) == [
+        names[1], 'ner_results_fine_random_split_vary_crf_m200.json']
 
 
 def test_run_jobs_unpacks_an_extracted_tree_or_the_archive(tmp_path):

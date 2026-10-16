@@ -10,9 +10,9 @@ expectations from the literature, not results.
 <!-- STANDING:START -->
 | Task | Best leakage-free result in this repo | Reference |
 |---|---|---|
-| NER, fine / coarse (MatSciBERT, MaterioMiner protocol) | fine: micro 72.99 [70.86, 75.12] (macro 67.99) on the fixed split, 73.91 [69.36, 78.45] over 5 new splits, 43.51 leaving one paper out; coarse: micro 75.57 [74.14, 77.01] (macro 67.14) on the fixed split, 74.57 [73.15, 75.98] over 5 new splits, 54.34 leaving one paper out | 69.92 / 72.32 (Kumar et al. 2024; averaging not stated) |
+| NER, fine / coarse (MatSciBERT, MaterioMiner protocol) | fine: micro 72.99 [70.86, 75.12] (macro 67.99) on the fixed split, 73.91 [69.36, 78.45] over 5 new splits, 43.51 leaving one paper out; coarse: micro 75.57 [74.14, 77.01] (macro 67.14) on the fixed split, 74.57 [73.15, 75.98] over 5 new splits, 54.34 leaving one paper out | 69.92 / 72.32 (Durmaz et al. 2024; micro F1 in the release code) |
 | NER with the CRF head (`--crf`) | fine: micro 76.36 [71.00, 81.73] over 5 new splits, 49.44 leaving one paper out; coarse: micro 78.15 [76.61, 79.69] over 5 new splits, 59.82 leaving one paper out | same; the in-distribution fine-grained gain over the baseline disappears under strict IOB2 scoring |
-| NER, reported system (week-4 protocol) | fine: 3-model seed ensemble `crf_ens3`, micro 79.76 [76.14, 83.38] over 5 new splits, 49.55 leaving one paper out; coarse: 3-model seed ensemble `crf_ens3`, micro 79.45 [77.82, 81.09] over 5 new splits; on unseen papers the label-semantics vote `crf_ls_ens3`, 63.05 leaving one paper out (`crf_ens3` 61.42) | same; fine-grained beaten under micro, macro and weighted averaging, coarse-grained beaten under micro and weighted averaging |
+| NER, reported system (week-5 protocol; 10 seeds, GPU runs) | fine: 3-model seed ensemble `crf_ens3`, micro F1 79.68 [76.72, 82.65] over 5 new splits; on unseen papers the multi-task vote `crf_mt_ens3`, 52.47 leaving one paper out (`crf_ens3` 48.81); coarse: multi-task vote `crf_mt_ens3`, micro F1 79.43 [77.17, 81.69] over 5 new splits (`crf_ens3` 78.63); on unseen papers the 3-model seed ensemble `crf_ens3`, 61.10 leaving one paper out | same; fine-grained beaten under micro, macro and weighted averaging, coarse-grained beaten under micro and weighted averaging |
 | Term typing, 315 terms, pipeline (zero-shot) | accuracy 0.384 (LLM on: 0.429) | majority class 0.083 |
 | Term typing, 5-fold CV baselines | hybrid 0.496; hybrid + LLM 0.654 (set F1 0.598) | LLMs4OL 2025 MatOnto best F1 0.667 (different dataset) |
 | Clustering vs gold classes | ARI 0.035, B-cubed F1 0.183 (all-singletons baseline 0.475) | – |
@@ -26,7 +26,7 @@ Full tables: [README](../README.md#results).
 
 | Task | Published reference | Comparable today? |
 |---|---|---|
-| **NER on MaterioMiner** (span + class, seqeval entity F1) | MatSciBERT 69.92 fine-grained (top-27 classes) / 72.32 coarse-grained, random 65/15/20 split, 5 seeds, averaging not stated ([Kumar et al., Sci Data 2024](https://www.nature.com/articles/s41597-024-03926-5)). Out-of-distribution (different protocol): roughly 60 micro F1 for MatSciBERT (read from a figure), 36% above GPT-4 in-context learning ([Sci Rep 2025](https://www.nature.com/articles/s41598-025-03619-y)) | **Yes**, via `ner_baseline.py`. The paper's split is not published, so compare means with 95% CIs over several splits (§1). |
+| **NER on MaterioMiner** (span + class, seqeval entity F1) | MatSciBERT 69.92 fine-grained (top-27 classes) / 72.32 coarse-grained, random 65/15/20 split, 5 seeds. The paper does not state its averaging; its released code uses micro F1 in seqeval's default mode ([Durmaz et al., Sci Data 2024](https://www.nature.com/articles/s41597-024-03926-5)). Out-of-distribution (different protocol): roughly 60 micro F1 for MatSciBERT (read from a figure), 36% above GPT-4 in-context learning ([Sci Rep 2025](https://www.nature.com/articles/s41598-025-03619-y)) | **Yes**, via `ner_baseline.py --published-split`: on the split the release ships, plain MatSciBERT reproduces both numbers with 10 seeds (week 5). Over other splits, compare means with 95% CIs (§1). |
 | **Term typing**, gold spans given (MaterioMiner → MMO) | No published number. Closest public task: LLMs4OL 2025 Task B on MatOnto, best F1 0.667 (IRIS) ([overview](https://www.tib-op.org/ojs/index.php/ocp/article/view/2913)) | Our baselines establish the first numbers. MatOnto is a different dataset. |
 | **Taxonomy discovery** | LLMs4OL 2025 Task C on MatOnto, best F1 0.662 (SBU-NLP) | Not yet: the pipeline builds term-level is-a edges, which is a different task. |
 | **Relation extraction** | No text-level gold in MaterioMiner | No. Only class-level checks against 70 ontology restrictions are possible. |
@@ -58,10 +58,17 @@ not be reused.
 The pipeline currently consumes gold spans. A real end-to-end system needs NER,
 and NER is the only task with a published SOTA on this data.
 
-Status: with the CRF head (item 4), both granularities pass the
-pre-registered check across 5 random splits, if the paper reports micro F1:
-- fine-grained: 76.36 [71.00, 81.73] vs 69.92;
-- coarse-grained: 78.15 [76.61, 79.69] vs 72.32.
+Status: on the paper's own split (shipped with the release, scored like
+its code), plain MatSciBERT reproduces the published numbers with 10 seeds,
+and the CRF head (item 4) beats both (week 5; the CIs are over seeds only):
+- fine-grained: plain 70.19 [69.03, 71.35], CRF head 73.31 [72.28, 74.35],
+  published 69.92;
+- coarse-grained: plain 72.52 [71.88, 73.16], CRF head 75.48
+  [74.23, 76.72], published 72.32.
+
+Across 5 random splits the CRF head also passes the pre-registered check at
+both granularities: 76.36 [71.00, 81.73] fine-grained and 78.15
+[76.61, 79.69] coarse-grained.
 
 Week 2 tested three changes against the CRF head: multi-task training
 (item 2), domain-adaptive pre-training on the PubMed sentences (item 5) and
@@ -82,8 +89,8 @@ Mixing backbones adds nothing to the seed ensemble (item 8). Self-training
 (item 7) and in-domain pre-training (item 5) do not pass. The reported
 system therefore stays the seed ensemble `crf_ens3`.
 
-The paper does not state its averaging, so the comparison is made under
-each:
+The paper does not state its averaging (its released code uses micro F1),
+so the comparison is made under each:
 - fine-grained, the 95% CI over the random splits lies above 69.92 under
   micro, macro and weighted F1;
 - coarse-grained, it lies above 72.32 under micro and weighted F1, but not
@@ -173,7 +180,106 @@ papers:
 - self-training: +2.91 [−0.73, +6.56] on the CPU (week 3) and +2.14
   [−1.02, +5.29] on the GPU. With 3 teachers it is +1.07 [+0.33, +1.80].
 
-Next, after week 4, in this order:
+Week 5 (protocol in §4) re-ran four families with 10 model seeds per split
+on the GPU: the CRF reference, multi-task, label semantics and self-training
+with 3 teachers. The week-4 runs give seeds 0–200 and week 5 added 300–900;
+each vote is the mean over 3 disjoint seed triples. The runs repeat
+exactly: every other week-5 session first repeated a week-4 run, and the 54
+teachers retrained in the self-training session (3 per split or paper and
+granularity) score exactly as the separately trained CRF runs. Week 5 used
+10.7 GPU-hours, smoke sessions included.
+- **The earlier claims, with 10 seeds** (decision 1):
+  - Multi-task on the random splits: fine-grained improves, +1.83
+    [+0.32, +3.34], positive on every split. Coarse-grained, the week-3
+    claim does not stand: +0.71 [−0.15, +1.56].
+  - Label semantics on unseen papers: neither granularity passes.
+    Coarse-grained, the week-3 claim gives −0.36 [−1.66, +0.94];
+    fine-grained +1.23 [−0.96, +3.42].
+  - Self-training with 3 teachers on unseen papers: neither passes.
+    Fine-grained, the week-4 claim gives +1.74 [−1.16, +4.64];
+    coarse-grained +1.56 [−0.88, +4.00]. On the random splits (reported)
+    it improves at both granularities: +1.05 [+0.10, +2.00] and +1.04
+    [+0.16, +1.91].
+- **The reported system** (decision 2). 2 of the 12 vote comparisons pass,
+  where about 0.3 would pass by chance if no vote helped. Both are the
+  multi-task vote:
+  - coarse-grained on the random splits: +0.79 [+0.17, +1.42] over
+    `crf_ens3`, positive on every split (79.43 against 78.63);
+  - fine-grained on unseen papers: +3.65 [+0.49, +6.82], positive on every
+    paper (52.47 against 48.81).
+
+  `crf_ens3` keeps the other two slots: fine-grained on the random splits
+  (79.68) and coarse-grained on unseen papers (61.10). There it replaces the
+  label-semantics vote chosen on the CPU in week 4, which scores −0.63
+  [−1.72, +0.46] against it on the GPU. The self-training vote gains +0.93
+  to +1.12 in all four slots, but no CI excludes 0.
+- **The published split** (week-5 amendment; numbers above). The CRF head
+  adds +3.12 [+1.62, +4.62] fine-grained and +2.96 [+1.30, +4.61]
+  coarse-grained over plain MatSciBERT, paired by seed; under strict IOB2
+  scoring +1.70 [+0.21, +3.19] and +1.07 [−0.82, +2.97].
+- **How far 3 seeds mislead** (exploratory). For each family against the
+  CRF head on the protocol of its decision, a 3-seed comparison over the
+  same splits would pass the rule for:
+  - 41% of the 120 seed triples for fine-grained multi-task, the only one
+    of these gains that passes with 10 seeds (+1.83);
+  - 2–18% of them for label semantics and self-training on unseen papers,
+    which do not pass with 10 seeds.
+
+  Up to 37% of the triples give the opposite sign to the 10-seed difference
+  (coarse-grained label semantics). On one split, the CRF head's micro F1
+  varies over the 10 seeds with an SD of 1.5–1.7 points on the random splits
+  and 2.2–2.5 on unseen papers. The week-3 design therefore detected a
+  2-point gain less than half of the time, and its two coarse-grained passes
+  (+0.75 and +1.17) do not hold with 10 seeds.
+- **Rare coarse-grained types** (exploratory, item 5). In the reported
+  system's votes on the random splits, SDE and MIP score about 18 F1, and
+  PRP, MOD and CPR 40–42, with 2–8 test entities per split. Macro F1 counts
+  each of them as much as MEC, with 53. They keep coarse-grained macro F1
+  at 70.83 [64.49, 77.17], below 72.32 though not significantly.
+- **The week-6 options at full size** (no decision; one run each, seed 0, on
+  splits that no week-6 decision uses):
+  - DeBERTa-v3-large with the CRF head scores 74.38 on the published split,
+    fine-grained (MatSciBERT with the same seed: 73.49). It first trained
+    with a NaN loss: transformers 5 loads a model in the dtype of its
+    weights, and DeBERTa-v3's are float16. Models now load in float32,
+    which leaves the MatSciBERT runs unchanged (the repeat run matches);
+  - document context (64 subwords on each side) scores 74.56 on the same
+    split;
+  - on SOFC-Exp's official split, MatSciBERT with the CRF head scores micro
+    84.98 and macro 82.31, against the published 84.77 and 82.39 (Gupta et
+    al., 2022): the converted corpus behaves like the original.
+
+Next, after week 5, in this order. The aim is a methods paper (§4, week 6),
+with an evaluation paper if every option fails:
+1. **Methods for unseen papers: screen, then decide with 10 seeds.**
+   DeBERTa-v3-large, document context and multi-task self-training (items
+   2–4 below), each against the CRF head on the 4 held-out papers. Week 5
+   shows that 3 seeds cannot decide gains of 1–2 points, so the 3-seed
+   screen only selects which methods get 10 seeds, and it lets almost every
+   real gain through. A method's vote must then beat the strongest system
+   on unseen papers: the multi-task vote fine-grained, `crf_ens3`
+   coarse-grained. Multi-task self-training builds on the two changes that
+   help: multi-task training, whose vote leads on unseen papers
+   fine-grained, and self-training, which improves on the random splits.
+2. **A second dataset.** SOFC-Exp is converted and checked (above). Its
+   official split holds out 11 of its 45 articles, so it measures unseen
+   documents. With 10 seeds there: the CRF head against plain MatSciBERT,
+   and each method that passes item 1 against the CRF head. A methods paper
+   needs its gain on both datasets.
+3. **Combine the methods that pass** (week 7), for example multi-task
+   training with a larger encoder or with document context.
+4. **Rare coarse-grained types** (item 5 below): silver sentences selected
+   for SDE, MIP, PRP, MOD and CPR, or a class-balanced loss over them,
+   judged by macro F1.
+5. **Write the paper** (`docs/PAPER.md`): a methods paper if a change passes
+   items 1 and 2, otherwise an evaluation paper on the reproduction, the gap
+   to unseen papers, the CRF head's span validity and what 10 seeds change.
+
+Week 5 closes label semantics: with 10 seeds, neither the model nor its vote
+improves on either protocol.
+
+After week 4 the list was, in this order (week 5 ran item 1 and prepared
+items 2–7; protocol in §4):
 1. **Ten seeds per split before the next claim.** Two week-3 gains and the
    CPU label-semantics vote did not repeat on the GPU, so 3 seeds per split
    cannot settle gains of about 1 point. A GPU run takes about a minute.
@@ -184,6 +290,10 @@ Next, after week 4, in this order:
      reference, multi-task, label semantics, and self-training with 3
      teachers.
    - Decide the reported system on these 10-seed results.
+
+   *Week 5: done. Fine-grained multi-task on the random splits passes; the
+   coarse-grained claims of week 3 and the self-training claim of week 4 do
+   not (above).*
 2. **Multi-task and self-training together, fine-grained, on unseen
    papers.** These are the two changes whose fine-grained gains repeat on
    both machines:
@@ -202,18 +312,63 @@ Next, after week 4, in this order:
    MatSciBERT, SciBERT and PubMedBERT. DeBERTa-v3-large (435M parameters)
    is the obvious candidate on a 16 GB T4. Screen it with 3 seeds, then
    use the 10-seed design if it helps.
+
+   *Week 5 check (no training):*
+   - *Snapshot.* `microsoft/deberta-v3-large` at 64a8c8e has no
+     `tokenizer.json`, so the fast tokenizer is built from `spm.model`.
+     That needs `sentencepiece` (0.2.2) and `protobuf`, which the Kaggle
+     batch must pin.
+   - *Tokenizer.* With them it splits pre-tokenised words as our encoder
+     expects: one word ID per word, `▁` on a word's first piece.
+   - *Still open.* The weights come as `pytorch_model.bin`. Memory and
+     deterministic training on a T4 still need a GPU smoke test.
+   - *Smoke sessions.* A run fits on a T4 and repeats exactly. It trains
+     after the float32 fix: 74.38 with seed 0 on the published split
+     (above).
 4. **Document context.** Each sentence is tagged on its own, although the
    CoNLL files keep each paper's sentences in reading order. Give the
    encoder the neighbouring sentences as context and tag only the middle
    one (FLERT; Schweter and Akbik, 2020). This targets unseen papers, where
-   a term is often introduced once and then reused.
+   a term is often introduced once and then reused. *Week 5: `--context N`;
+   74.56 with seed 0 on the published split (above).*
 5. **Rare coarse-grained types.** The coarse-grained claim fails only
    under macro F1 (73.03 [67.79, 78.27] vs 72.32), where rare types count
    as much as frequent ones. The results files keep per-class F1. Find the
    types that pull macro F1 down and target them, for example with silver
-   sentences selected for those types.
+   sentences selected for those types. *Week 5: SDE, MIP, PRP, MOD and CPR
+   (above).*
 6. **Pin down the comparison with the paper** (item 4 below, still open):
    ask the authors for their split and averaging.
+
+   *Week 5: the release ships the split of the paper's experiments, and its
+   code scores micro F1 in seqeval's default mode. On that split, scored
+   that way, plain MatSciBERT reproduces both published numbers (above). An
+   email asking the authors to confirm the split, the scoring and the
+   training settings is drafted for the owner to send.*
+7. **A second materials NER dataset.** Every NER result so far rests on
+   the 4 MaterioMiner papers. Repeating the main comparisons on another
+   corpus would show which findings hold beyond them: the CRF head and its
+   vote, the 10-seed design, and the gap between random splits and unseen
+   documents. Candidates: SOFC-Exp (Friedrich et al., 2020) and MatScholar
+   (Weston et al., 2019). Check availability, licence and format first.
+
+   *Week 5 survey: SOFC-Exp is the choice.*
+   - *Licence and texts.* Its annotations are CC BY 4.0, and the texts of its
+     45 CC-BY articles ship with them.
+   - *Splits.* Every document has an ID, so the leave-one-document-out
+     protocol carries over. There is an official split by document (26
+     train, 8 dev, 11 test).
+   - *Published baselines.* MatSciBERT with a CRF reaches micro 84.77 and
+     macro 82.39 (Gupta et al., 2022).
+   - *Caveats.* It has 4 entity types (material, value, device, experiment),
+     annotated only in the sentences that describe experiments, and a
+     stand-off format, so the tokens must be rebuilt from character offsets.
+   - *MatScholar.* It is larger (800 abstracts, 7 types, CC BY 4.0), but its
+     released files lose the abstract boundaries, so no document-level
+     protocol is possible.
+   - *Converted* (`sofc_exp.py`, `--granularity sofc`): the counts of the
+     paper, and on the official split the published MatSciBERT-CRF scores
+     (above).
 
 Week 4 closes label semantics on the multi-task model, and the multi-task
 vote in distribution.
@@ -662,7 +817,7 @@ chance at class level. For a Task C-style result:
   instead of hand-written upper-level class lists, with a gold mapping through
   PMDco where it exists.
 
-## 4. Suggested order (5 weeks)
+## 4. Suggested order
 
 | Week | Work | Exit criterion |
 |---|---|---|
@@ -670,7 +825,9 @@ chance at class level. For a Task C-style result:
 | 2 | Done: multi-task NER (fine + coarse heads), domain-adaptive pre-training and a 3-model ensemble, all with `--crf` (P1 items 2, 5 and 8; protocol below) | Not met: no 95% CI lies above 0 against the CRF head on the random splits; the ensemble comes closest (+3.39 fine-grained, +1.30 coarse-grained) and is the only change that improves on unseen papers (coarse-grained) |
 | 3 | Done: NER, P1 "Next, after week 2" items 1–5: comparisons of 3-seed means, a mixed-backbone ensemble, label semantics and self-training for unseen papers, multi-task again, in-domain pre-training (protocol below) | Met for two changes, both coarse-grained: multi-task on the random splits (+0.75 [+0.10, +1.39]) and label semantics on unseen papers (+1.17 [+0.94, +1.41]). The mixed-backbone vote, self-training and in-domain pre-training do not pass; the reported system stays `crf_ens3` |
 | 4 | Done for NER: P1 "Next, after week 3" items 1, 2, 3 and 5, i.e. votes over the week-3 changes that help, label semantics on the multi-task model, self-training at scale, on Kaggle T4 GPUs (protocol below). Not started: context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | Met for NER by two changes, both on unseen papers. Coarse-grained, the label-semantics vote improves on `crf_ens3` on the CPU (+1.63 [+0.11, +3.16]); the GPU repeat does not confirm it (+0.40 [−1.36, +2.16]). Fine-grained, self-training with 3 teachers improves on the CRF head (GPU, +1.07 [+0.33, +1.80]; +1.22 [+0.60, +1.84] on the random splits, reported). The multi-task vote and label semantics on the multi-task model do not pass. Typing: not started |
-| 5 | Class-level taxonomy (LLM or cross-encoder + arborescence); relation annotation pilot | First class-level taxonomy F1 above chance; relation guidelines |
+| 5 | Done: NER, P1 "Next, after week 4" item 1, i.e. 10 seeds per split for the CRF reference, multi-task, label semantics and self-training with 3 teachers, on Kaggle T4 GPUs, and the published split (amendment); items 2–7 and a paper outline prepared, and the week-6 options run once each at full size (protocol below). The original week-5 work moves to week 7 | Met. Of the claims re-tested with 10 seeds, fine-grained multi-task on the random splits passes (+1.83 [+0.32, +3.34]); the coarse-grained claims of week 3 and the self-training claim of week 4 do not. The reported system: the multi-task vote coarse-grained on the random splits and fine-grained on unseen papers, `crf_ens3` elsewhere. On the published split, plain MatSciBERT reproduces 69.92 and 72.32 and the CRF head beats both |
+| 6 | NER, P1 "Next, after week 5", towards a methods paper: methods for unseen papers (DeBERTa-v3-large, document context, multi-task self-training) screened with 3 seeds and decided with 10, and a second dataset (SOFC-Exp, 10 seeds); protocol fixed before its runs | A method whose vote improves on the strongest system on unseen papers under the 10-seed design, and on SOFC-Exp |
+| 7 | Class-level taxonomy (LLM or cross-encoder + arborescence); relation annotation pilot | First class-level taxonomy F1 above chance; relation guidelines |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -919,3 +1076,133 @@ half of Kaggle's weekly quota of 30.
 
 Outcome: every planned run finished, the random splits of item 3 included,
 in 7.5 GPU-hours (smoke jobs included).
+
+### Week 5 protocol (fixed before any run)
+
+Week 5 runs item 1 of P1 "Next, after week 4" on the GPU: 10 model seeds per
+split, so that gains of about 1 point can be settled. It also prepares
+items 2–7 and a paper without training (below). The NER results are the
+closest to a paper, so this week replaces the original week-5 plan
+(class-level taxonomy, relation pilot), which moves to week 7.
+
+**Design.**
+- 10 model seeds per split: K + 100j for j = 0, …, 9 on random split K, and
+  100j on each held-out paper. Seed tags are m0 to m900; the multi-task run
+  of offset 0 keeps its name, `crf_mt`.
+- Families, each with 10 runs per split, at both granularities, on the 5
+  random splits and the 4 held-out papers:
+  1. the CRF reference `crf_m*`;
+  2. multi-task `crf_mt*`;
+  3. label semantics `crf_ls_m*`;
+  4. self-training with 3 teachers `crf_st3_m*`. The teachers and the
+     silver data stay those of week 4: the CRF runs of seed offsets 0, 100
+     and 200, the whole corpus, tags that all teachers give alike with every
+     marginal at least 0.9. Each of the 10 seeds trains a student on that
+     silver data, as the week-4 students did (new option `--students 10`).
+     The teachers are retrained in every run, and their scores must equal
+     those of the GPU `crf_m*` runs.
+- The week-4 GPU runs (offsets 0, 100 and 200) are kept; week 5 adds
+  offsets 300 to 900. Every run is a GPU run in the week-4 environment
+  (Kaggle T4, the pinned image, `transformers` and the MatSciBERT snapshot),
+  from one new frozen commit, with `--crf` and `--save-predictions`. New
+  options only add code. The first job checks that the new commit repeats a
+  week-4 run exactly.
+- Votes: the entity-level majority vote of 3, as before, over each of 3
+  disjoint seed triples: m0–m200, m300–m500 and m600–m800
+  (`<family>_ens3`, `<family>_ens3_m300` and `<family>_ens3_m600`). m900 is
+  in no vote.
+- Scores: on a split, a family scores the mean of its 10 runs, and a vote
+  the mean of its 3 triples.
+
+**Rule**, as in weeks 3 and 4: a change improves on its comparison, for a
+granularity, if the 95% Student-t CI of the mean paired micro-F1 difference
+lies above 0 over the protocol named for it (the 5 random splits or the 4
+held-out papers). The other protocol, strict IOB2, macro and weighted F1 are
+reported alongside. GPU runs are compared only with GPU runs.
+
+**Decisions.**
+1. The three claims so far, each re-tested on the protocol of its earlier
+   decision, at both granularities:
+   - multi-task vs `crf` over the 5 random splits (week 3: +0.75
+     coarse-grained on the CPU; the GPU repeat gave −0.08);
+   - label semantics vs `crf` over the 4 held-out papers (week 3: +1.17
+     coarse-grained on the CPU; the GPU repeat gave +0.07);
+   - self-training with 3 teachers vs `crf` over the 4 held-out papers
+     (week 4: +1.07 fine-grained).
+
+   A claim stands only if its 10-seed comparison passes. The 3-seed results
+   stay in the record.
+2. The reported system, for each protocol and granularity: the vote of the
+   CRF head, `crf_ens3`, unless `crf_mt_ens3`, `crf_ls_ens3` or
+   `crf_st3_ens3` improves on it; if several do, the one with the largest
+   mean difference. This replaces the week-4 slots, including the CPU
+   decision for `crf_ls_ens3`. With 12 comparisons at the 95% level, about
+   0.3 false passes are expected if no vote helps; the write-up states the
+   number of comparisons.
+
+**Reported alongside (no decision):**
+- each family vs `crf` on the other protocol, and `crf_ens3` vs `crf`;
+- the reported system against the published numbers (69.92 and 72.32)
+  under micro, macro and weighted F1, as in week 3;
+- exploratory, for the paper:
+  - the spread of each family over its 10 seeds, per split;
+  - for each family against `crf`, the share of the 120 seed triples (the
+    same triple on both sides) whose 3-seed comparison passes the rule, and
+    the share whose difference has the opposite sign to the 10-seed one:
+    how far a 3-seed design can mislead;
+  - per coarse-grained type, the F1 and support of the reported system: the
+    types that keep macro F1 below 72.32 (item 5).
+
+**Order and budget.**
+- Session b, existing options only: the check that a week-4 run repeats,
+  then `crf`, `crf_ls` and `crf_mt` at offsets 300 to 900 (315 runs; a
+  multi-task run gives both granularities), about 4 hours on its 2 GPUs.
+- Session a: first a smoke session (a tiny `--teachers 3 --students 4` run:
+  32 training sentences, 2 epochs, 200 corpus sentences). Then the
+  3-teacher runs, one lane per granularity: per split the teachers again,
+  the tagging and 7 new students, about 7 hours.
+- In all about 12 of the 22.5 GPU-hours left in Kaggle's weekly quota (until
+  17 October).
+
+**Prepared without training** (run in week 6, under a protocol fixed before
+its runs; the plan is to screen each new method with 3 seeds and confirm it
+with 10):
+- item 2, multi-task self-training: multi-task teachers tag the corpus once
+  for both granularities, multi-task students train on it, the silver
+  filter is chosen on the validation sets, and the students' vote is
+  compared with `crf_ens3`;
+- item 3, a larger encoder (DeBERTa-v3-large): its tokenizer and its memory
+  on a T4;
+- item 4, document context: the neighbouring sentences in the encoder
+  input, only the middle one tagged (FLERT);
+- item 5, rare coarse-grained types, from the per-type analysis above;
+- item 6, the split and averaging of the paper: an email to the
+  MaterioMiner authors, which the owner sends;
+- item 7, a second materials NER dataset: availability, licence and format
+  of the candidates, then a loader;
+- the paper: an outline in `docs/PAPER.md`, with each claim and the result
+  that supports it.
+
+**Amendment, before any run of it: the published split.** The MaterioMiner
+release (Durmaz et al., 2024; Fordatis, release v1.0.1, CC BY 4.0) ships the
+train, validation and test sentences of its experiments
+(`examples/data/*_grained_training`: 323, 57 and 96 sentences, a different
+partition per granularity). Each of them is one of the 476 corpus sentences,
+and the release code scores with seqeval's defaults: micro F1 in the default
+mode, our `f1`. Week 5 therefore also runs the published split, so that the
+comparison with 69.92 and 72.32 is like for like:
+- the release's partition and tags, copied to
+  `data/raw/dataset/published_split/` with their SHA-256. The tags differ
+  from the corpus files in 7 tokens of 6 fine-grained sentences, where the
+  release starts an entity with B-;
+- plain MatSciBERT (the paper's model) and the CRF head, 10 model seeds each
+  (0, 100, …, 900), at both granularities (new option `--published-split`);
+- reported, no decision:
+  - the mean over the 10 seeds, with its 95% CI, against 69.92 and 72.32,
+    under micro, macro and weighted F1 and strict IOB2. On one split, this
+    CI measures the seed variance only;
+  - the CRF head minus plain MatSciBERT, paired by seed;
+  - the CRF votes over the 3 seed triples.
+
+These runs use a later frozen commit than the other week-5 runs; their
+session again first repeats a week-4 run exactly. About 1 GPU-hour.

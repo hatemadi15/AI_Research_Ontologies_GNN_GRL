@@ -91,7 +91,79 @@ def test_week4_systems_and_comparisons_follow_the_week4_protocol():
         ('crf_mt_ls', 'crf_ls', None), ('crf_st3', 'crf_st', None), ('crf_st3', 'crf_ens3', None))
     with pytest.raises(ValueError):
         ns.comparison_list(3, gpu=True)
-    assert ns.OUT_NAMES == {3: 'ner_week3_comparisons.json', 4: 'ner_week4_comparisons.json'}
+    assert ns.OUT_NAMES == {3: 'ner_week3_comparisons.json', 4: 'ner_week4_comparisons.json',
+                            5: 'ner_week5_comparisons.json'}
+
+
+def test_week5_systems_and_comparisons_follow_the_week5_protocol():
+    """10 seeds per split (offsets 0 to 900), votes over 3 disjoint seed triples."""
+    offsets = range(0, 1000, 100)
+    assert ns.WEEK5_SYSTEMS['crf'] == tuple(f'crf_m{n}' for n in offsets)
+    assert ns.WEEK5_SYSTEMS['crf_mt'] == ('crf_mt',) + tuple(f'crf_mt_m{n}' for n in offsets[1:])
+    assert ns.WEEK5_SYSTEMS['crf_ls'] == tuple(f'crf_ls_m{n}' for n in offsets)
+    assert ns.WEEK5_SYSTEMS['crf_st3'] == tuple(f'crf_st3_m{n}' for n in offsets)
+    for stem in ('crf', 'crf_mt', 'crf_ls', 'crf_st3'):
+        assert ns.WEEK5_SYSTEMS[f'{stem}_ens3'] == (
+            f'{stem}_ens3', f'{stem}_ens3_m300', f'{stem}_ens3_m600')
+    assert len(ns.WEEK5_SYSTEMS) == 8
+    both = ('random_split_vary', 'leave_one_paper_out')
+    assert ns.comparison_list(5, gpu=True) == ns.WEEK5_COMPARISONS == (
+        ('crf_mt', 'crf', 'random_split_vary'),
+        ('crf_ls', 'crf', 'leave_one_paper_out'),
+        ('crf_st3', 'crf', 'leave_one_paper_out'),
+        ('crf_mt_ens3', 'crf_ens3', both), ('crf_ls_ens3', 'crf_ens3', both),
+        ('crf_st3_ens3', 'crf_ens3', both),
+        ('crf_ens3', 'crf', None))
+    with pytest.raises(ValueError):
+        ns.comparison_list(5)
+    assert ns.system_list(5) is ns.WEEK5_SYSTEMS and ns.system_list(4) is ns.SYSTEMS
+    # every file is named as ner_baseline.py and ner_ensemble.py write it
+    for system, variants in ns.WEEK5_SYSTEMS.items():
+        for protocol in ns.PROTOCOLS:
+            names = ns.file_names('fine', protocol, system, ns.WEEK5_SYSTEMS)
+            assert [nb.parse_result_name(fn) for fn in names] == \
+                [('fine', protocol, v) for v in variants]
+
+
+def test_week5_comparisons_from_results_files(tmp_path, capsys):
+    """--week 5 --gpu: 10-seed means and 3-vote means, written to the week-5 file."""
+    pytest.importorskip('scipy')
+    base = {'random_split_vary': [70, 71, 72, 73, 74], 'leave_one_paper_out': [50, 51, 52, 53]}
+    for protocol, scores in base.items():
+        for n in range(0, 1000, 100):
+            _write(tmp_path, 'fine', protocol, f'crf_m{n}', scores)
+            # self-training: +1 on average, the seeds spread around it
+            _write(tmp_path, 'fine', protocol, f'crf_st3_m{n}',
+                   [s + 1 + (n - 450) / 1000 for s in scores])
+        for stem, gain in (('crf', 0.0), ('crf_st3', 0.5)):
+            for name in ns.WEEK5_SYSTEMS[f'{stem}_ens3']:
+                _write(tmp_path, 'fine', protocol, name, [s + 2 + gain for s in scores])
+    comps = ns.main(['--results', str(tmp_path), '--week', '5', '--gpu'])
+    key = 'ner_results_fine_{}_{}'
+    assert {k: c['role'] for k, c in comps.items()} == {
+        key.format('random_split_vary', 'crf_st3'): 'reported',
+        key.format('leave_one_paper_out', 'crf_st3'): 'decision',
+        key.format('random_split_vary', 'crf_st3_ens3_vs_crf_ens3'): 'decision',
+        key.format('leave_one_paper_out', 'crf_st3_ens3_vs_crf_ens3'): 'decision',
+        key.format('random_split_vary', 'crf_ens3'): 'reported',
+        key.format('leave_one_paper_out', 'crf_ens3'): 'reported'}
+    st3 = comps[key.format('leave_one_paper_out', 'crf_st3')]
+    assert len(st3['variant_files']) == len(st3['reference_files']) == 10
+    assert st3['micro']['mean_diff'] == 1.0 and st3['complete'] and st3['n_pairs'] == 4
+    vote = comps[key.format('random_split_vary', 'crf_st3_ens3_vs_crf_ens3')]
+    assert vote['variant_files'] == [
+        f'ner_results_fine_random_split_vary_crf_st3_ens3{t}.json' for t in ('', '_m300', '_m600')]
+    assert vote['micro']['mean_diff'] == 0.5 and vote['n_pairs'] == 5
+    assert comps[key.format('random_split_vary', 'crf_ens3')]['micro']['mean_diff'] == 2.0
+    assert json.loads((tmp_path / 'ner_week5_comparisons.json').read_text()) == comps
+    # a family is compared only with all 10 seeds: without one, it is skipped
+    (tmp_path / 'ner_results_fine_leave_one_paper_out_crf_st3_m900.json').unlink()
+    comps = ns.main(['--results', str(tmp_path), '--week', '5', '--gpu'])
+    assert key.format('leave_one_paper_out', 'crf_st3') not in comps
+    assert 'crf_st3_m900.json, skipped' in capsys.readouterr().out
+    with pytest.raises(SystemExit) as excinfo:
+        ns.main(['--results', str(tmp_path), '--week', '5'])
+    assert excinfo.value.code == 2 and '--week 5 needs --gpu' in capsys.readouterr().err
 
 
 def test_decides_on_one_protocol_or_several():

@@ -44,6 +44,23 @@ writes its own results files, so the lanes never write the same file:
           saves its files after every split
 Every job has --crf, --save-predictions and --threads 2; the families have 3 seeds per
 split (seed offsets 0, 100 and 200) on the 5 random splits and the 4 held-out papers.
+Week 5 makes 10 seeds per split (offsets 0 to 900):
+  smoke4  a tiny 3-teacher run with 4 students (--students), and the CRF run of split 0
+          (fine-grained, seed 0) as smokee, which must equal the stored crf_m0 run
+  w5a     self-training with 3 teachers and 10 students: the teachers and the 7 students
+          that the week-4 files lack, per split; one lane per granularity, the held-out
+          papers first
+  w5b     the CRF run of smoke4 again (smokef), then crf_m*, crf_ls_m* and crf_mt_m* at
+          seed offsets 300 to 900
+  w5c     the published split (week-5 amendment): the CRF run of smoke4 again (smokeg),
+          then plain MatSciBERT and the CRF head, model seeds 0 to 900, a lane per
+          granularity
+  smoke5  the CRF run of smoke4 again (smokel), then the week-6 options, tiny: DeBERTa-v3-large
+          twice (with its pins, BATCH_EXTRAS), document context, multi-task self-training and
+          SOFC-Exp
+  smoke6  the CRF run of smoke4 again (smokem), then one full-size run of DeBERTa-v3-large and
+          of document context on the published split, and of SOFC-Exp on its official split:
+          splits that no week-6 decision uses
 
 Usage:
   python src/graph/kaggle_jobs.py quota
@@ -87,6 +104,12 @@ PIP = ('transformers==5.18.0', 'tokenizers==0.23.2', 'huggingface_hub==1.33.0',
 WHEELS = ('seqeval==1.2.2',)
 WHEEL_FILES = ('seqeval-1.2.2-py3-none-any.whl',)
 MODELS = {'m3rg-iitd/matscibert': 'ced9d8f5f208712c4a90f98a246fe32155b29995'}
+# a batch's extra pins (week-6 smoke tests): DeBERTa-v3-large, and sentencepiece, which its
+# tokenizer needs (its snapshot has no tokenizer.json)
+DEBERTA = 'microsoft/deberta-v3-large'
+DEBERTA_PINS = {'pip': ('sentencepiece==0.2.2',),
+                'models': {DEBERTA: '64a8c8eab3e352a784c658aef62be1662607476f'}}
+BATCH_EXTRAS = {'smoke5': DEBERTA_PINS, 'smoke6': DEBERTA_PINS}
 THREADS = 2
 DEADLINE_HOURS = 10                 # no job starts later; a Kaggle session lasts 12 hours
 RESULTS_PREFIX = 'gpu__'            # as in run_jobs.py
@@ -97,7 +120,9 @@ PROTOCOL_FLAGS = {'random_split_vary': ('--vary-split',),
 RUNS = {'random_split_vary': 5, 'leave_one_paper_out': 4}
 GRANULARITIES = ('fine', 'coarse')
 OFFSETS = (0, 100, 200)
-PAPERS = ('10.1007_s11340-021-00758-x', '10.1038_ncomms7164', '10.1038_s41467-020-19071-7',
+OFFSETS_W5 = tuple(range(300, 1000, 100))   # week 5: the seeds added to make 10 per split
+OFFSETS_PUBLISHED = tuple(range(0, 1000, 100))   # the model seeds on the published split
+PAPERS =('10.1007_s11340-021-00758-x', '10.1038_ncomms7164', '10.1038_s41467-020-19071-7',
           '10.3390_met10111458')      # the held-out papers (the MaterioMiner files)
 # relative GPU time of one run of each kind (a CRF run is 1), for balancing the lanes
 COST = {'crf': 1.0, 'mt': 1.7, 'ls': 1.1, 'mt_ls': 1.8, 'st': 2.5, 'st3': 22.0}
@@ -117,16 +142,17 @@ def job(granularity, protocol, *flags, offset=None, tag=None):
 
 
 def family(kind, flags, protocols=tuple(PROTOCOL_FLAGS), granularities=GRANULARITIES,
-           untagged_zero=False):
-    """(cost, job) per protocol, granularity and seed offset of a 3-seed family.
+           untagged_zero=False, offsets=OFFSETS):
+    """(cost, job) per protocol, granularity and seed offset of a family of seeds.
 
-    Seed tags are m0, m100 and m200; with untagged_zero the offset-0 member has no tag
-    (multi-task: crf_mt, crf_mt_m100, crf_mt_m200, as on the CPU).
+    Seed tags are m<offset> (m0, m100 and m200 by default; week 5 adds m300 to m900);
+    with untagged_zero the offset-0 member has no tag (multi-task: crf_mt, crf_mt_m100,
+    crf_mt_m200, as on the CPU).
     """
     out = []
     for protocol in protocols:
         for granularity in granularities:
-            for offset in OFFSETS:
+            for offset in offsets:
                 tag = None if untagged_zero and offset == 0 else f'm{offset}'
                 out.append((COST[kind] * RUNS[protocol],
                             job(granularity, protocol, *flags, offset=offset, tag=tag)))
@@ -196,16 +222,74 @@ def batch_lanes(name):
     if name == 'item3r':
         # one job per granularity: --seeds K jobs would leave the last K as the stored seeds
         return [[job(g, 'random_split_vary', *st3)] for g in GRANULARITIES]
+    # week 5 (ROADMAP §4): 10 seeds per split
+    repeat = ['--granularity', 'fine', '--vary-split', '--seeds', '0', '--crf',
+              '--save-predictions', '--threads', str(THREADS)]
+    if name == 'smoke4':
+        tiny = ('--max-train', '32', '--epochs', '2')
+        return [[repeat + ['--tag', 'smokee']],
+                [['--granularity', 'coarse', '--leave-one-paper-out', '--papers',
+                  '10.3390_met10111458', '--crf', *st, '--teachers', '3', '--students', '4',
+                  '--self-train-sample', '200', *tiny, '--save-predictions', '--threads',
+                  str(THREADS)]]]
+    if name == 'w5a':
+        # one lane per granularity (its jobs write its files); the held-out papers first
+        return [[job(g, protocol, *st3, '--students', '10')
+                 for protocol in ('leave_one_paper_out', 'random_split_vary')]
+                for g in GRANULARITIES]
+    if name == 'w5b':
+        lanes = balance(family('crf', (), offsets=OFFSETS_W5) +
+                        family('ls', ('--label-semantics',), offsets=OFFSETS_W5) +
+                        family('mt', ('--multi-task',), granularities=('both',),
+                               offsets=OFFSETS_W5))
+        return [[repeat + ['--tag', 'smokef']] + lanes[0], lanes[1]]
+    if name == 'smoke5':
+        # the week-6 options (prepared in week 5): DeBERTa-v3-large twice (memory and
+        # repeatability), document context, multi-task self-training and SOFC-Exp, all tiny;
+        # first the week-4 run again, with the new code and the extra pins
+        tiny = ('--max-train', '32', '--epochs', '2', '--save-predictions', '--threads',
+                str(THREADS))
+        deberta = ['--granularity', 'fine', '--vary-split', '--seeds', '0', '--crf', '--model',
+                   DEBERTA, *tiny]
+        paper = ('--leave-one-paper-out', '--papers', '10.3390_met10111458')
+        return [[repeat + ['--tag', 'smokel'], deberta + ['--tag', 'smokeh'],
+                 deberta + ['--tag', 'smokei']],
+                [['--granularity', 'coarse', *paper, '--crf', '--context', '64', '--tag',
+                  'smokej', *tiny],
+                 [*paper, '--crf', '--multi-task', '--self-train', CORPUS, '--teachers', '3',
+                  '--students', '4', '--self-train-sample', '200', *tiny],
+                 ['--granularity', 'sofc', '--leave-one-paper-out', '--papers', 'PMC3564701',
+                  '--crf', '--tag', 'smokek', *tiny]]]
+    if name == 'smoke6':
+        # the tiny runs of smoke5 learn nothing (F1 0 for every option), so one run of each
+        # option at full size, seed 0, on splits that no week-6 decision uses
+        published = ('--published-split', '--seeds', '0', '--crf', '--save-predictions',
+                     '--threads', str(THREADS))
+        return [[repeat + ['--tag', 'smokem'],
+                 ['--granularity', 'fine', *published, '--model', DEBERTA, '--tag', 'smoken']],
+                [['--granularity', 'fine', *published, '--context', '64', '--tag', 'smokeo'],
+                 ['--granularity', 'sofc', *published, '--tag', 'smokep']]]
+    if name == 'w5c':
+        # the published split (week-5 amendment): plain MatSciBERT and the CRF head, 10 seeds
+        seeds = ['--seeds', *(str(s) for s in OFFSETS_PUBLISHED)]
+
+        def published(g, *flags):
+            return ['--granularity', g, '--published-split', *seeds, *flags,
+                    '--save-predictions', '--threads', str(THREADS)]
+        return [[repeat + ['--tag', 'smokeg'], published('fine'), published('fine', '--crf')],
+                [published('coarse'), published('coarse', '--crf')]]
     raise ValueError(f'unknown batch {name!r}')
 
 
-BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'item3r')
+BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'item3r',
+           'smoke4', 'w5a', 'w5b', 'w5c', 'smoke5', 'smoke6')
 
 
 def batch_spec(name):
-    """The job spec that run_jobs.py runs (see its docstring)."""
-    return {'batch': name, 'gpu': GPU, 'pip': list(PIP), 'wheels': list(WHEEL_FILES),
-            'models': dict(MODELS),
+    """The job spec that run_jobs.py runs (see its docstring), with the batch's extra pins."""
+    extra = BATCH_EXTRAS.get(name, {})
+    return {'batch': name, 'gpu': GPU, 'pip': list(PIP) + list(extra.get('pip', ())),
+            'wheels': list(WHEEL_FILES), 'models': {**MODELS, **extra.get('models', {})},
             'corpus_sha256': corpus_sha256(), 'deadline_hours': DEADLINE_HOURS,
             'lanes': batch_lanes(name)}
 
@@ -415,7 +499,10 @@ def cmd_push(args):
         Path(folder, 'kernel-metadata.json').write_text(
             json.dumps(kernel_metadata(user, args.kernel), indent=2))
         timeout = str(int(3600 * (DEADLINE_HOURS + 1.5)))
-        print(kaggle('kernels', 'push', '-p', folder, '-t', timeout))
+        out = kaggle('kernels', 'push', '-p', folder, '-t', timeout)
+        print(out)
+    if 'error' in out.lower():       # the CLI exits 0 on a refused push (e.g. 2 GPU sessions)
+        raise SystemExit(f'batch {args.batch} not pushed')
     print(f"batch {args.batch}: " + '; '.join(f'lane {i}: {len(jobs)} jobs'
                                               for i, jobs in enumerate(spec['lanes'])))
 

@@ -10,6 +10,8 @@ data/processed/
 *.txt
 !requirements.txt
 !requirements-dev.txt
+# the published split of MaterioMiner (data/raw/dataset/published_split/README.md)
+!data/raw/dataset/published_split/*/*.txt
 
 # Python cache / virtual environments
 __pycache__/

@@ -67,3 +67,18 @@ for the systems run on both machines. New in `gpu/`: `_crf_mt_ls_m<N>`
 with 3 teachers, whose runs record each teacher's scores), and the vote
 `_crf_mt_ens3`. `kaggle_jobs.py collect` copies the files of a GPU session
 here after checking that every run is a GPU run with the shared environment.
+
+Week 5 (week-5 protocol) adds model seeds 300 to 900 to the families `crf`,
+`crf_mt`, `crf_ls` and `crf_st3` (`_m300` to `_m900`; the multi-task run of
+seed 0 keeps the name `_crf_mt`), and the votes over the seed triples 300–500
+and 600–800 (`_ens3_m300`, `_ens3_m600`, next to `_ens3` for 0–200).
+`gpu/ner_week5_comparisons.json` (`ner_seedmeans.py --week 5 --gpu --results
+results/gpu`) compares 10-seed means: a family scores the mean of its 10 runs
+on a split, a vote the mean of its 3 votes. `gpu/ner_week5_seed_analysis.json`
+(`ner_seed_analysis.py`) holds the exploratory analyses: the seed spread, the
+3-seed comparisons of all 120 seed triples, the per-type scores of each vote
+family, and the published split. The published split itself is in
+`gpu/ner_results_{fine,coarse}_published_split.json` (plain MatSciBERT) and
+`gpu/ner_results_{fine,coarse}_published_split_crf.json` (the CRF head):
+`ner_baseline.py --published-split --seeds 0 100 ... 900`, the partition and
+tags that the MaterioMiner release ships (`data/raw/dataset/published_split/`).

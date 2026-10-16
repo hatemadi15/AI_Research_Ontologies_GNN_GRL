@@ -1,0 +1,3988 @@
+{
+  "spread": {
+    "fine_random_split_vary": {
+      "crf": {
+        "per_split": {
+          "seed0": 2.04,
+          "seed1": 1.12,
+          "seed2": 1.37,
+          "seed3": 2.05,
+          "seed4": 1.89
+        },
+        "mean_sd": 1.69
+      },
+      "crf_mt": {
+        "per_split": {
+          "seed0": 1.33,
+          "seed1": 1.19,
+          "seed2": 1.21,
+          "seed3": 1.17,
+          "seed4": 1.36
+        },
+        "mean_sd": 1.25
+      },
+      "crf_ls": {
+        "per_split": {
+          "seed0": 1.13,
+          "seed1": 2.61,
+          "seed2": 1.28,
+          "seed3": 1.46,
+          "seed4": 2.24
+        },
+        "mean_sd": 1.74
+      },
+      "crf_st3": {
+        "per_split": {
+          "seed0": 2.26,
+          "seed1": 1.74,
+          "seed2": 1.15,
+          "seed3": 1.62,
+          "seed4": 1.86
+        },
+        "mean_sd": 1.73
+      }
+    },
+    "coarse_random_split_vary": {
+      "crf": {
+        "per_split": {
+          "seed0": 1.29,
+          "seed1": 1.18,
+          "seed2": 1.46,
+          "seed3": 1.56,
+          "seed4": 1.83
+        },
+        "mean_sd": 1.46
+      },
+      "crf_mt": {
+        "per_split": {
+          "seed0": 1.19,
+          "seed1": 1.43,
+          "seed2": 1.0,
+          "seed3": 0.89,
+          "seed4": 1.1
+        },
+        "mean_sd": 1.12
+      },
+      "crf_ls": {
+        "per_split": {
+          "seed0": 2.12,
+          "seed1": 1.5,
+          "seed2": 1.33,
+          "seed3": 1.86,
+          "seed4": 1.32
+        },
+        "mean_sd": 1.63
+      },
+      "crf_st3": {
+        "per_split": {
+          "seed0": 1.47,
+          "seed1": 1.43,
+          "seed2": 1.22,
+          "seed3": 1.39,
+          "seed4": 0.99
+        },
+        "mean_sd": 1.3
+      }
+    },
+    "fine_leave_one_paper_out": {
+      "crf": {
+        "per_split": {
+          "10.1007_s11340-021-00758-x.conll": 1.7,
+          "10.1038_ncomms7164.conll": 3.13,
+          "10.1038_s41467-020-19071-7.conll": 1.82,
+          "10.3390_met10111458.conll": 3.25
+        },
+        "mean_sd": 2.48
+      },
+      "crf_mt": {
+        "per_split": {
+          "10.1007_s11340-021-00758-x.conll": 2.39,
+          "10.1038_ncomms7164.conll": 2.5,
+          "10.1038_s41467-020-19071-7.conll": 3.57,
+          "10.3390_met10111458.conll": 3.06
+        },
+        "mean_sd": 2.88
+      },
+      "crf_ls": {
+        "per_split": {
+          "10.1007_s11340-021-00758-x.conll": 2.54,
+          "10.1038_ncomms7164.conll": 2.54,
+          "10.1038_s41467-020-19071-7.conll": 1.7,
+          "10.3390_met10111458.conll": 2.52
+        },
+        "mean_sd": 2.33
+      },
+      "crf_st3": {
+        "per_split": {
+          "10.1007_s11340-021-00758-x.conll": 2.98,
+          "10.1038_ncomms7164.conll": 3.67,
+          "10.1038_s41467-020-19071-7.conll": 2.63,
+          "10.3390_met10111458.conll": 1.45
+        },
+        "mean_sd": 2.68
+      }
+    },
+    "coarse_leave_one_paper_out": {
+      "crf": {
+        "per_split": {
+          "10.1007_s11340-021-00758-x.conll": 2.89,
+          "10.1038_ncomms7164.conll": 2.76,
+          "10.1038_s41467-020-19071-7.conll": 1.58,
+          "10.3390_met10111458.conll": 1.7
+        },
+        "mean_sd": 2.23
+      },
+      "crf_mt": {
+        "per_split": {
+          "10.1007_s11340-021-00758-x.conll": 2.01,
+          "10.1038_ncomms7164.conll": 1.92,
+          "10.1038_s41467-020-19071-7.conll": 0.96,
+          "10.3390_met10111458.conll": 1.9
+        },
+        "mean_sd": 1.7
+      },
+      "crf_ls": {
+        "per_split": {
+          "10.1007_s11340-021-00758-x.conll": 3.17,
+          "10.1038_ncomms7164.conll": 1.62,
+          "10.1038_s41467-020-19071-7.conll": 1.54,
+          "10.3390_met10111458.conll": 2.72
+        },
+        "mean_sd": 2.26
+      },
+      "crf_st3": {
+        "per_split": {
+          "10.1007_s11340-021-00758-x.conll": 2.01,
+          "10.1038_ncomms7164.conll": 1.39,
+          "10.1038_s41467-020-19071-7.conll": 2.05,
+          "10.3390_met10111458.conll": 1.43
+        },
+        "mean_sd": 1.72
+      }
+    }
+  },
+  "triples": {
+    "fine_random_split_vary": {
+      "crf_mt": {
+        "n_triples": 120,
+        "ten_seed": {
+          "mean_diff": 1.83,
+          "ci95": [
+            0.32,
+            3.34
+          ],
+          "passes": true
+        },
+        "share_above_0": 0.408,
+        "share_below_0": 0.0,
+        "share_opposite_sign": 0.0
+      },
+      "crf_ls": {
+        "n_triples": 120,
+        "ten_seed": {
+          "mean_diff": -0.45,
+          "ci95": [
+            -1.63,
+            0.73
+          ],
+          "passes": false
+        },
+        "share_above_0": 0.008,
+        "share_below_0": 0.067,
+        "share_opposite_sign": 0.242
+      },
+      "crf_st3": {
+        "n_triples": 120,
+        "ten_seed": {
+          "mean_diff": 1.05,
+          "ci95": [
+            0.1,
+            2.0
+          ],
+          "passes": true
+        },
+        "share_above_0": 0.3,
+        "share_below_0": 0.0,
+        "share_opposite_sign": 0.008
+      }
+    },
+    "coarse_random_split_vary": {
+      "crf_mt": {
+        "n_triples": 120,
+        "ten_seed": {
+          "mean_diff": 0.71,
+          "ci95": [
+            -0.15,
+            1.56
+          ],
+          "passes": false
+        },
+        "share_above_0": 0.15,
+        "share_below_0": 0.0,
+        "share_opposite_sign": 0.083
+      },
+      "crf_ls": {
+        "n_triples": 120,
+        "ten_seed": {
+          "mean_diff": 0.42,
+          "ci95": [
+            -1.19,
+            2.04
+          ],
+          "passes": false
+        },
+        "share_above_0": 0.025,
+        "share_below_0": 0.0,
+        "share_opposite_sign": 0.133
+      },
+      "crf_st3": {
+        "n_triples": 120,
+        "ten_seed": {
+          "mean_diff": 1.04,
+          "ci95": [
+            0.16,
+            1.91
+          ],
+          "passes": true
+        },
+        "share_above_0": 0.225,
+        "share_below_0": 0.0,
+        "share_opposite_sign": 0.008
+      }
+    },
+    "fine_leave_one_paper_out": {
+      "crf_mt": {
+        "n_triples": 120,
+        "ten_seed": {
+          "mean_diff": 3.72,
+          "ci95": [
+            0.57,
+            6.87
+          ],
+          "passes": true
+        },
+        "share_above_0": 0.433,
+        "share_below_0": 0.0,
+        "share_opposite_sign": 0.0
+      },
+      "crf_ls": {
+        "n_triples": 120,
+        "ten_seed": {
+          "mean_diff": 1.23,
+          "ci95": [
+            -0.96,
+            3.42
+          ],
+          "passes": false
+        },
+        "share_above_0": 0.175,
+        "share_below_0": 0.0,
+        "share_opposite_sign": 0.083
+      },
+      "crf_st3": {
+        "n_triples": 120,
+        "ten_seed": {
+          "mean_diff": 1.74,
+          "ci95": [
+            -1.16,
+            4.64
+          ],
+          "passes": false
+        },
+        "share_above_0": 0.158,
+        "share_below_0": 0.0,
+        "share_opposite_sign": 0.058
+      }
+    },
+    "coarse_leave_one_paper_out": {
+      "crf_mt": {
+        "n_triples": 120,
+        "ten_seed": {
+          "mean_diff": -0.56,
+          "ci95": [
+            -1.91,
+            0.79
+          ],
+          "passes": false
+        },
+        "share_above_0": 0.0,
+        "share_below_0": 0.05,
+        "share_opposite_sign": 0.158
+      },
+      "crf_ls": {
+        "n_triples": 120,
+        "ten_seed": {
+          "mean_diff": -0.36,
+          "ci95": [
+            -1.66,
+            0.94
+          ],
+          "passes": false
+        },
+        "share_above_0": 0.017,
+        "share_below_0": 0.067,
+        "share_opposite_sign": 0.367
+      },
+      "crf_st3": {
+        "n_triples": 120,
+        "ten_seed": {
+          "mean_diff": 1.56,
+          "ci95": [
+            -0.88,
+            4.0
+          ],
+          "passes": false
+        },
+        "share_above_0": 0.083,
+        "share_below_0": 0.0,
+        "share_opposite_sign": 0.017
+      }
+    }
+  },
+  "types": {
+    "fine_random_split_vary": {
+      "crf_ens3": {
+        "StressAmplitude": {
+          "f1": 30.88,
+          "support_per_split": 3.8,
+          "n": 15,
+          "macro_without": 79.28,
+          "macro_with": 77.49
+        },
+        "MechanicalProperty": {
+          "f1": 58.29,
+          "support_per_split": 8.2,
+          "n": 15,
+          "macro_without": 78.23,
+          "macro_with": 77.49
+        },
+        "LoadingType": {
+          "f1": 59.85,
+          "support_per_split": 5.6,
+          "n": 15,
+          "macro_without": 78.17,
+          "macro_with": 77.49
+        },
+        "TestSpecimen": {
+          "f1": 60.81,
+          "support_per_split": 4.6,
+          "n": 15,
+          "macro_without": 78.13,
+          "macro_with": 77.49
+        },
+        "FatigueTest": {
+          "f1": 66.42,
+          "support_per_split": 6.6,
+          "n": 15,
+          "macro_without": 77.92,
+          "macro_with": 77.49
+        },
+        "TensileYieldStrength": {
+          "f1": 67.65,
+          "support_per_split": 6.6,
+          "n": 15,
+          "macro_without": 77.87,
+          "macro_with": 77.49
+        },
+        "Mechanism": {
+          "f1": 67.96,
+          "support_per_split": 26.2,
+          "n": 15,
+          "macro_without": 77.86,
+          "macro_with": 77.49
+        },
+        "Location": {
+          "f1": 69.76,
+          "support_per_split": 6.8,
+          "n": 15,
+          "macro_without": 77.79,
+          "macro_with": 77.49
+        },
+        "StateDescriptor": {
+          "f1": 70.39,
+          "support_per_split": 23.2,
+          "n": 15,
+          "macro_without": 77.77,
+          "macro_with": 77.49
+        },
+        "GrainBoundary": {
+          "f1": 74.75,
+          "support_per_split": 6.8,
+          "n": 15,
+          "macro_without": 77.6,
+          "macro_with": 77.49
+        },
+        "DataSet": {
+          "f1": 75.53,
+          "support_per_split": 8.8,
+          "n": 15,
+          "macro_without": 77.57,
+          "macro_with": 77.49
+        },
+        "TestingMachine": {
+          "f1": 76.08,
+          "support_per_split": 7.2,
+          "n": 15,
+          "macro_without": 77.55,
+          "macro_with": 77.49
+        },
+        "FatigueTestSpecimen": {
+          "f1": 76.31,
+          "support_per_split": 11.2,
+          "n": 15,
+          "macro_without": 77.54,
+          "macro_with": 77.49
+        },
+        "TestingMedium": {
+          "f1": 78.77,
+          "support_per_split": 6.8,
+          "n": 15,
+          "macro_without": 77.44,
+          "macro_with": 77.49
+        },
+        "TensileUltimateStrength": {
+          "f1": 82.63,
+          "support_per_split": 4.6,
+          "n": 15,
+          "macro_without": 77.29,
+          "macro_with": 77.49
+        },
+        "Microstructure": {
+          "f1": 82.67,
+          "support_per_split": 6.0,
+          "n": 15,
+          "macro_without": 77.29,
+          "macro_with": 77.49
+        },
+        "MechanicalTreatment": {
+          "f1": 83.18,
+          "support_per_split": 6.8,
+          "n": 15,
+          "macro_without": 77.27,
+          "macro_with": 77.49
+        },
+        "MaterialClass": {
+          "f1": 85.07,
+          "support_per_split": 17.4,
+          "n": 15,
+          "macro_without": 77.2,
+          "macro_with": 77.49
+        },
+        "Crack": {
+          "f1": 88.35,
+          "support_per_split": 12.2,
+          "n": 15,
+          "macro_without": 77.07,
+          "macro_with": 77.49
+        },
+        "CrackInitation": {
+          "f1": 88.6,
+          "support_per_split": 7.4,
+          "n": 15,
+          "macro_without": 77.06,
+          "macro_with": 77.49
+        },
+        "StrainRate": {
+          "f1": 88.75,
+          "support_per_split": 5.4,
+          "n": 15,
+          "macro_without": 77.06,
+          "macro_with": 77.49
+        },
+        "MechanicalTestDataSet": {
+          "f1": 89.12,
+          "support_per_split": 4.8,
+          "n": 15,
+          "macro_without": 77.04,
+          "macro_with": 77.49
+        },
+        "Value": {
+          "f1": 91.53,
+          "support_per_split": 35.0,
+          "n": 15,
+          "macro_without": 76.95,
+          "macro_with": 77.49
+        },
+        "FatigueLifetime": {
+          "f1": 93.63,
+          "support_per_split": 5.4,
+          "n": 15,
+          "macro_without": 76.87,
+          "macro_with": 77.49
+        },
+        "Alloy": {
+          "f1": 94.73,
+          "support_per_split": 16.6,
+          "n": 15,
+          "macro_without": 76.83,
+          "macro_with": 77.49
+        },
+        "TwinBoundary": {
+          "f1": 95.2,
+          "support_per_split": 6.4,
+          "n": 15,
+          "macro_without": 76.81,
+          "macro_with": 77.49
+        },
+        "MicrostructureEntity": {
+          "f1": 95.36,
+          "support_per_split": 12.8,
+          "n": 15,
+          "macro_without": 76.8,
+          "macro_with": 77.49
+        }
+      },
+      "crf_mt_ens3": {
+        "StressAmplitude": {
+          "f1": 40.58,
+          "support_per_split": 3.8,
+          "n": 15,
+          "macro_without": 79.7,
+          "macro_with": 78.25
+        },
+        "MechanicalProperty": {
+          "f1": 59.71,
+          "support_per_split": 8.2,
+          "n": 15,
+          "macro_without": 78.96,
+          "macro_with": 78.25
+        },
+        "TensileYieldStrength": {
+          "f1": 60.92,
+          "support_per_split": 6.6,
+          "n": 15,
+          "macro_without": 78.92,
+          "macro_with": 78.25
+        },
+        "TestSpecimen": {
+          "f1": 66.29,
+          "support_per_split": 4.6,
+          "n": 15,
+          "macro_without": 78.71,
+          "macro_with": 78.25
+        },
+        "LoadingType": {
+          "f1": 67.15,
+          "support_per_split": 5.6,
+          "n": 15,
+          "macro_without": 78.68,
+          "macro_with": 78.25
+        },
+        "Location": {
+          "f1": 67.98,
+          "support_per_split": 6.8,
+          "n": 15,
+          "macro_without": 78.64,
+          "macro_with": 78.25
+        },
+        "DataSet": {
+          "f1": 69.88,
+          "support_per_split": 8.8,
+          "n": 15,
+          "macro_without": 78.57,
+          "macro_with": 78.25
+        },
+        "FatigueTest": {
+          "f1": 70.55,
+          "support_per_split": 6.6,
+          "n": 15,
+          "macro_without": 78.55,
+          "macro_with": 78.25
+        },
+        "StateDescriptor": {
+          "f1": 71.98,
+          "support_per_split": 23.2,
+          "n": 15,
+          "macro_without": 78.49,
+          "macro_with": 78.25
+        },
+        "Mechanism": {
+          "f1": 72.07,
+          "support_per_split": 26.2,
+          "n": 15,
+          "macro_without": 78.49,
+          "macro_with": 78.25
+        },
+        "TestingMedium": {
+          "f1": 74.15,
+          "support_per_split": 6.8,
+          "n": 15,
+          "macro_without": 78.41,
+          "macro_with": 78.25
+        },
+        "TestingMachine": {
+          "f1": 74.58,
+          "support_per_split": 7.2,
+          "n": 15,
+          "macro_without": 78.39,
+          "macro_with": 78.25
+        },
+        "GrainBoundary": {
+          "f1": 75.21,
+          "support_per_split": 6.8,
+          "n": 15,
+          "macro_without": 78.37,
+          "macro_with": 78.25
+        },
+        "TensileUltimateStrength": {
+          "f1": 76.08,
+          "support_per_split": 4.6,
+          "n": 15,
+          "macro_without": 78.33,
+          "macro_with": 78.25
+        },
+        "FatigueTestSpecimen": {
+          "f1": 79.83,
+          "support_per_split": 11.2,
+          "n": 15,
+          "macro_without": 78.19,
+          "macro_with": 78.25
+        },
+        "Microstructure": {
+          "f1": 82.29,
+          "support_per_split": 6.0,
+          "n": 15,
+          "macro_without": 78.09,
+          "macro_with": 78.25
+        },
+        "Crack": {
+          "f1": 84.92,
+          "support_per_split": 12.2,
+          "n": 15,
+          "macro_without": 77.99,
+          "macro_with": 78.25
+        },
+        "MaterialClass": {
+          "f1": 84.95,
+          "support_per_split": 17.4,
+          "n": 15,
+          "macro_without": 77.99,
+          "macro_with": 78.25
+        },
+        "MechanicalTreatment": {
+          "f1": 85.2,
+          "support_per_split": 6.8,
+          "n": 15,
+          "macro_without": 77.98,
+          "macro_with": 78.25
+        },
+        "CrackInitation": {
+          "f1": 88.43,
+          "support_per_split": 7.4,
+          "n": 15,
+          "macro_without": 77.86,
+          "macro_with": 78.25
+        },
+        "Value": {
+          "f1": 91.56,
+          "support_per_split": 35.0,
+          "n": 15,
+          "macro_without": 77.74,
+          "macro_with": 78.25
+        },
+        "StrainRate": {
+          "f1": 91.72,
+          "support_per_split": 5.4,
+          "n": 15,
+          "macro_without": 77.73,
+          "macro_with": 78.25
+        },
+        "FatigueLifetime": {
+          "f1": 94.01,
+          "support_per_split": 5.4,
+          "n": 15,
+          "macro_without": 77.64,
+          "macro_with": 78.25
+        },
+        "MicrostructureEntity": {
+          "f1": 95.03,
+          "support_per_split": 12.8,
+          "n": 15,
+          "macro_without": 77.6,
+          "macro_with": 78.25
+        },
+        "MechanicalTestDataSet": {
+          "f1": 95.28,
+          "support_per_split": 4.8,
+          "n": 15,
+          "macro_without": 77.59,
+          "macro_with": 78.25
+        },
+        "Alloy": {
+          "f1": 95.4,
+          "support_per_split": 16.6,
+          "n": 15,
+          "macro_without": 77.59,
+          "macro_with": 78.25
+        },
+        "TwinBoundary": {
+          "f1": 96.98,
+          "support_per_split": 6.4,
+          "n": 15,
+          "macro_without": 77.53,
+          "macro_with": 78.25
+        }
+      },
+      "crf_ls_ens3": {
+        "StressAmplitude": {
+          "f1": 42.59,
+          "support_per_split": 3.8,
+          "n": 15,
+          "macro_without": 78.39,
+          "macro_with": 77.07
+        },
+        "MechanicalProperty": {
+          "f1": 57.43,
+          "support_per_split": 8.2,
+          "n": 15,
+          "macro_without": 77.82,
+          "macro_with": 77.07
+        },
+        "TensileYieldStrength": {
+          "f1": 59.4,
+          "support_per_split": 6.6,
+          "n": 15,
+          "macro_without": 77.75,
+          "macro_with": 77.07
+        },
+        "LoadingType": {
+          "f1": 60.03,
+          "support_per_split": 5.6,
+          "n": 15,
+          "macro_without": 77.72,
+          "macro_with": 77.07
+        },
+        "TestSpecimen": {
+          "f1": 61.24,
+          "support_per_split": 4.6,
+          "n": 15,
+          "macro_without": 77.68,
+          "macro_with": 77.07
+        },
+        "Location": {
+          "f1": 63.34,
+          "support_per_split": 6.8,
+          "n": 15,
+          "macro_without": 77.6,
+          "macro_with": 77.07
+        },
+        "FatigueTest": {
+          "f1": 66.84,
+          "support_per_split": 6.6,
+          "n": 15,
+          "macro_without": 77.46,
+          "macro_with": 77.07
+        },
+        "StateDescriptor": {
+          "f1": 68.35,
+          "support_per_split": 23.2,
+          "n": 15,
+          "macro_without": 77.4,
+          "macro_with": 77.07
+        },
+        "Mechanism": {
+          "f1": 68.89,
+          "support_per_split": 26.2,
+          "n": 15,
+          "macro_without": 77.38,
+          "macro_with": 77.07
+        },
+        "TestingMedium": {
+          "f1": 70.77,
+          "support_per_split": 6.8,
+          "n": 15,
+          "macro_without": 77.31,
+          "macro_with": 77.07
+        },
+        "GrainBoundary": {
+          "f1": 74.71,
+          "support_per_split": 6.8,
+          "n": 15,
+          "macro_without": 77.16,
+          "macro_with": 77.07
+        },
+        "TensileUltimateStrength": {
+          "f1": 75.02,
+          "support_per_split": 4.6,
+          "n": 15,
+          "macro_without": 77.15,
+          "macro_with": 77.07
+        },
+        "FatigueTestSpecimen": {
+          "f1": 76.53,
+          "support_per_split": 11.2,
+          "n": 15,
+          "macro_without": 77.09,
+          "macro_with": 77.07
+        },
+        "DataSet": {
+          "f1": 76.77,
+          "support_per_split": 8.8,
+          "n": 15,
+          "macro_without": 77.08,
+          "macro_with": 77.07
+        },
+        "Crack": {
+          "f1": 80.09,
+          "support_per_split": 12.2,
+          "n": 15,
+          "macro_without": 76.95,
+          "macro_with": 77.07
+        },
+        "MaterialClass": {
+          "f1": 83.89,
+          "support_per_split": 17.4,
+          "n": 15,
+          "macro_without": 76.8,
+          "macro_with": 77.07
+        },
+        "Microstructure": {
+          "f1": 84.45,
+          "support_per_split": 6.0,
+          "n": 15,
+          "macro_without": 76.78,
+          "macro_with": 77.07
+        },
+        "TestingMachine": {
+          "f1": 84.6,
+          "support_per_split": 7.2,
+          "n": 15,
+          "macro_without": 76.78,
+          "macro_with": 77.07
+        },
+        "MechanicalTreatment": {
+          "f1": 84.72,
+          "support_per_split": 6.8,
+          "n": 15,
+          "macro_without": 76.77,
+          "macro_with": 77.07
+        },
+        "CrackInitation": {
+          "f1": 89.2,
+          "support_per_split": 7.4,
+          "n": 15,
+          "macro_without": 76.6,
+          "macro_with": 77.07
+        },
+        "Value": {
+          "f1": 90.59,
+          "support_per_split": 35.0,
+          "n": 15,
+          "macro_without": 76.55,
+          "macro_with": 77.07
+        },
+        "MechanicalTestDataSet": {
+          "f1": 91.26,
+          "support_per_split": 4.8,
+          "n": 15,
+          "macro_without": 76.52,
+          "macro_with": 77.07
+        },
+        "StrainRate": {
+          "f1": 91.49,
+          "support_per_split": 5.4,
+          "n": 15,
+          "macro_without": 76.51,
+          "macro_with": 77.07
+        },
+        "FatigueLifetime": {
+          "f1": 93.13,
+          "support_per_split": 5.4,
+          "n": 15,
+          "macro_without": 76.45,
+          "macro_with": 77.07
+        },
+        "Alloy": {
+          "f1": 94.02,
+          "support_per_split": 16.6,
+          "n": 15,
+          "macro_without": 76.42,
+          "macro_with": 77.07
+        },
+        "MicrostructureEntity": {
+          "f1": 94.93,
+          "support_per_split": 12.8,
+          "n": 15,
+          "macro_without": 76.38,
+          "macro_with": 77.07
+        },
+        "TwinBoundary": {
+          "f1": 96.53,
+          "support_per_split": 6.4,
+          "n": 15,
+          "macro_without": 76.32,
+          "macro_with": 77.07
+        }
+      },
+      "crf_st3_ens3": {
+        "StressAmplitude": {
+          "f1": 48.06,
+          "support_per_split": 3.8,
+          "n": 15,
+          "macro_without": 79.18,
+          "macro_with": 78.03
+        },
+        "TestSpecimen": {
+          "f1": 60.29,
+          "support_per_split": 4.6,
+          "n": 15,
+          "macro_without": 78.71,
+          "macro_with": 78.03
+        },
+        "TensileYieldStrength": {
+          "f1": 62.16,
+          "support_per_split": 6.6,
+          "n": 15,
+          "macro_without": 78.64,
+          "macro_with": 78.03
+        },
+        "MechanicalProperty": {
+          "f1": 62.87,
+          "support_per_split": 8.2,
+          "n": 15,
+          "macro_without": 78.61,
+          "macro_with": 78.03
+        },
+        "LoadingType": {
+          "f1": 62.89,
+          "support_per_split": 5.6,
+          "n": 15,
+          "macro_without": 78.61,
+          "macro_with": 78.03
+        },
+        "Location": {
+          "f1": 67.6,
+          "support_per_split": 6.8,
+          "n": 15,
+          "macro_without": 78.43,
+          "macro_with": 78.03
+        },
+        "FatigueTest": {
+          "f1": 68.86,
+          "support_per_split": 6.6,
+          "n": 15,
+          "macro_without": 78.38,
+          "macro_with": 78.03
+        },
+        "TestingMachine": {
+          "f1": 71.21,
+          "support_per_split": 7.2,
+          "n": 15,
+          "macro_without": 78.29,
+          "macro_with": 78.03
+        },
+        "Mechanism": {
+          "f1": 72.11,
+          "support_per_split": 26.2,
+          "n": 15,
+          "macro_without": 78.26,
+          "macro_with": 78.03
+        },
+        "GrainBoundary": {
+          "f1": 72.32,
+          "support_per_split": 6.8,
+          "n": 15,
+          "macro_without": 78.25,
+          "macro_with": 78.03
+        },
+        "StateDescriptor": {
+          "f1": 73.04,
+          "support_per_split": 23.2,
+          "n": 15,
+          "macro_without": 78.22,
+          "macro_with": 78.03
+        },
+        "TensileUltimateStrength": {
+          "f1": 76.83,
+          "support_per_split": 4.6,
+          "n": 15,
+          "macro_without": 78.07,
+          "macro_with": 78.03
+        },
+        "DataSet": {
+          "f1": 77.22,
+          "support_per_split": 8.8,
+          "n": 15,
+          "macro_without": 78.06,
+          "macro_with": 78.03
+        },
+        "FatigueTestSpecimen": {
+          "f1": 77.24,
+          "support_per_split": 11.2,
+          "n": 15,
+          "macro_without": 78.06,
+          "macro_with": 78.03
+        },
+        "TestingMedium": {
+          "f1": 78.57,
+          "support_per_split": 6.8,
+          "n": 15,
+          "macro_without": 78.01,
+          "macro_with": 78.03
+        },
+        "Microstructure": {
+          "f1": 82.44,
+          "support_per_split": 6.0,
+          "n": 15,
+          "macro_without": 77.86,
+          "macro_with": 78.03
+        },
+        "MechanicalTreatment": {
+          "f1": 83.93,
+          "support_per_split": 6.8,
+          "n": 15,
+          "macro_without": 77.8,
+          "macro_with": 78.03
+        },
+        "MaterialClass": {
+          "f1": 85.09,
+          "support_per_split": 17.4,
+          "n": 15,
+          "macro_without": 77.76,
+          "macro_with": 78.03
+        },
+        "TwinBoundary": {
+          "f1": 87.81,
+          "support_per_split": 6.4,
+          "n": 15,
+          "macro_without": 77.65,
+          "macro_with": 78.03
+        },
+        "Crack": {
+          "f1": 88.09,
+          "support_per_split": 12.2,
+          "n": 15,
+          "macro_without": 77.64,
+          "macro_with": 78.03
+        },
+        "CrackInitation": {
+          "f1": 88.27,
+          "support_per_split": 7.4,
+          "n": 15,
+          "macro_without": 77.63,
+          "macro_with": 78.03
+        },
+        "StrainRate": {
+          "f1": 88.5,
+          "support_per_split": 5.4,
+          "n": 15,
+          "macro_without": 77.63,
+          "macro_with": 78.03
+        },
+        "Value": {
+          "f1": 91.73,
+          "support_per_split": 35.0,
+          "n": 15,
+          "macro_without": 77.5,
+          "macro_with": 78.03
+        },
+        "Alloy": {
+          "f1": 92.01,
+          "support_per_split": 16.6,
+          "n": 15,
+          "macro_without": 77.49,
+          "macro_with": 78.03
+        },
+        "MicrostructureEntity": {
+          "f1": 94.93,
+          "support_per_split": 12.8,
+          "n": 15,
+          "macro_without": 77.38,
+          "macro_with": 78.03
+        },
+        "FatigueLifetime": {
+          "f1": 95.69,
+          "support_per_split": 5.4,
+          "n": 15,
+          "macro_without": 77.35,
+          "macro_with": 78.03
+        },
+        "MechanicalTestDataSet": {
+          "f1": 96.99,
+          "support_per_split": 4.8,
+          "n": 15,
+          "macro_without": 77.3,
+          "macro_with": 78.03
+        }
+      }
+    },
+    "coarse_random_split_vary": {
+      "crf_ens3": {
+        "SDE": {
+          "f1": 15.87,
+          "support_per_split": 3.2,
+          "n": 12,
+          "macro_without": 71.5,
+          "macro_with": 69.39
+        },
+        "MIP": {
+          "f1": 20.56,
+          "support_per_split": 5.2,
+          "n": 15,
+          "macro_without": 72.47,
+          "macro_with": 70.5
+        },
+        "MOD": {
+          "f1": 41.67,
+          "support_per_split": 1.8,
+          "n": 12,
+          "macro_without": 70.13,
+          "macro_with": 69.06
+        },
+        "PRP": {
+          "f1": 44.08,
+          "support_per_split": 8.0,
+          "n": 15,
+          "macro_without": 71.53,
+          "macro_with": 70.5
+        },
+        "CPR": {
+          "f1": 48.33,
+          "support_per_split": 2.0,
+          "n": 12,
+          "macro_without": 71.62,
+          "macro_with": 70.75
+        },
+        "CGE": {
+          "f1": 55.93,
+          "support_per_split": 2.4,
+          "n": 15,
+          "macro_without": 71.07,
+          "macro_with": 70.5
+        },
+        "PRO": {
+          "f1": 61.08,
+          "support_per_split": 12.2,
+          "n": 15,
+          "macro_without": 70.87,
+          "macro_with": 70.5
+        },
+        "PQT": {
+          "f1": 62.51,
+          "support_per_split": 16.6,
+          "n": 15,
+          "macro_without": 70.82,
+          "macro_with": 70.5
+        },
+        "ODE": {
+          "f1": 68.25,
+          "support_per_split": 2.8,
+          "n": 15,
+          "macro_without": 70.56,
+          "macro_with": 70.5
+        },
+        "MFP": {
+          "f1": 69.52,
+          "support_per_split": 13.0,
+          "n": 15,
+          "macro_without": 70.54,
+          "macro_with": 70.5
+        },
+        "LOC": {
+          "f1": 70.92,
+          "support_per_split": 10.4,
+          "n": 15,
+          "macro_without": 70.48,
+          "macro_with": 70.5
+        },
+        "DEF": {
+          "f1": 74.89,
+          "support_per_split": 27.6,
+          "n": 15,
+          "macro_without": 70.33,
+          "macro_with": 70.5
+        },
+        "MEC": {
+          "f1": 75.87,
+          "support_per_split": 52.6,
+          "n": 15,
+          "macro_without": 70.29,
+          "macro_with": 70.5
+        },
+        "STD": {
+          "f1": 75.93,
+          "support_per_split": 22.8,
+          "n": 15,
+          "macro_without": 70.28,
+          "macro_with": 70.5
+        },
+        "DAM": {
+          "f1": 77.56,
+          "support_per_split": 20.8,
+          "n": 15,
+          "macro_without": 70.22,
+          "macro_with": 70.5
+        },
+        "CHP": {
+          "f1": 77.64,
+          "support_per_split": 21.6,
+          "n": 15,
+          "macro_without": 70.21,
+          "macro_with": 70.5
+        },
+        "OBJ": {
+          "f1": 79.59,
+          "support_per_split": 20.8,
+          "n": 15,
+          "macro_without": 70.14,
+          "macro_with": 70.5
+        },
+        "MTP": {
+          "f1": 79.77,
+          "support_per_split": 30.0,
+          "n": 15,
+          "macro_without": 70.13,
+          "macro_with": 70.5
+        },
+        "DAT": {
+          "f1": 79.88,
+          "support_per_split": 14.4,
+          "n": 15,
+          "macro_without": 70.13,
+          "macro_with": 70.5
+        },
+        "EQU": {
+          "f1": 81.35,
+          "support_per_split": 15.6,
+          "n": 15,
+          "macro_without": 70.07,
+          "macro_with": 70.5
+        },
+        "CEL": {
+          "f1": 82.96,
+          "support_per_split": 7.0,
+          "n": 15,
+          "macro_without": 70.01,
+          "macro_with": 70.5
+        },
+        "MAC": {
+          "f1": 84.36,
+          "support_per_split": 17.4,
+          "n": 15,
+          "macro_without": 69.95,
+          "macro_with": 70.5
+        },
+        "MEP": {
+          "f1": 86.36,
+          "support_per_split": 33.6,
+          "n": 15,
+          "macro_without": 69.87,
+          "macro_with": 70.5
+        },
+        "ETP": {
+          "f1": 88.7,
+          "support_per_split": 7.0,
+          "n": 15,
+          "macro_without": 69.78,
+          "macro_with": 70.5
+        },
+        "VAL": {
+          "f1": 90.69,
+          "support_per_split": 34.6,
+          "n": 15,
+          "macro_without": 69.7,
+          "macro_with": 70.5
+        },
+        "MAT": {
+          "f1": 92.19,
+          "support_per_split": 17.6,
+          "n": 15,
+          "macro_without": 69.64,
+          "macro_with": 70.5
+        },
+        "MIC": {
+          "f1": 93.98,
+          "support_per_split": 23.0,
+          "n": 15,
+          "macro_without": 69.57,
+          "macro_with": 70.5
+        }
+      },
+      "crf_mt_ens3": {
+        "SDE": {
+          "f1": 17.73,
+          "support_per_split": 3.0,
+          "n": 13,
+          "macro_without": 73.11,
+          "macro_with": 71.02
+        },
+        "MIP": {
+          "f1": 17.74,
+          "support_per_split": 5.2,
+          "n": 15,
+          "macro_without": 72.92,
+          "macro_with": 70.83
+        },
+        "PRP": {
+          "f1": 39.86,
+          "support_per_split": 8.0,
+          "n": 15,
+          "macro_without": 72.04,
+          "macro_with": 70.83
+        },
+        "MOD": {
+          "f1": 41.67,
+          "support_per_split": 1.8,
+          "n": 12,
+          "macro_without": 70.19,
+          "macro_with": 69.11
+        },
+        "CPR": {
+          "f1": 41.67,
+          "support_per_split": 2.0,
+          "n": 12,
+          "macro_without": 72.25,
+          "macro_with": 71.1
+        },
+        "PRO": {
+          "f1": 61.19,
+          "support_per_split": 12.2,
+          "n": 15,
+          "macro_without": 71.21,
+          "macro_with": 70.83
+        },
+        "CGE": {
+          "f1": 62.11,
+          "support_per_split": 2.4,
+          "n": 15,
+          "macro_without": 71.18,
+          "macro_with": 70.83
+        },
+        "PQT": {
+          "f1": 63.14,
+          "support_per_split": 16.6,
+          "n": 15,
+          "macro_without": 71.14,
+          "macro_with": 70.83
+        },
+        "MFP": {
+          "f1": 70.42,
+          "support_per_split": 13.0,
+          "n": 15,
+          "macro_without": 70.85,
+          "macro_with": 70.83
+        },
+        "ODE": {
+          "f1": 71.11,
+          "support_per_split": 2.8,
+          "n": 15,
+          "macro_without": 70.8,
+          "macro_with": 70.83
+        },
+        "LOC": {
+          "f1": 73.49,
+          "support_per_split": 10.4,
+          "n": 15,
+          "macro_without": 70.72,
+          "macro_with": 70.83
+        },
+        "STD": {
+          "f1": 75.86,
+          "support_per_split": 22.8,
+          "n": 15,
+          "macro_without": 70.63,
+          "macro_with": 70.83
+        },
+        "MEC": {
+          "f1": 76.06,
+          "support_per_split": 52.6,
+          "n": 15,
+          "macro_without": 70.63,
+          "macro_with": 70.83
+        },
+        "CHP": {
+          "f1": 77.19,
+          "support_per_split": 21.6,
+          "n": 15,
+          "macro_without": 70.58,
+          "macro_with": 70.83
+        },
+        "DEF": {
+          "f1": 77.65,
+          "support_per_split": 27.6,
+          "n": 15,
+          "macro_without": 70.57,
+          "macro_with": 70.83
+        },
+        "DAM": {
+          "f1": 79.41,
+          "support_per_split": 20.8,
+          "n": 15,
+          "macro_without": 70.5,
+          "macro_with": 70.83
+        },
+        "MTP": {
+          "f1": 79.7,
+          "support_per_split": 30.0,
+          "n": 15,
+          "macro_without": 70.48,
+          "macro_with": 70.83
+        },
+        "OBJ": {
+          "f1": 80.2,
+          "support_per_split": 20.8,
+          "n": 15,
+          "macro_without": 70.46,
+          "macro_with": 70.83
+        },
+        "CEL": {
+          "f1": 82.08,
+          "support_per_split": 7.0,
+          "n": 15,
+          "macro_without": 70.39,
+          "macro_with": 70.83
+        },
+        "DAT": {
+          "f1": 83.26,
+          "support_per_split": 14.4,
+          "n": 15,
+          "macro_without": 70.34,
+          "macro_with": 70.83
+        },
+        "MAC": {
+          "f1": 84.66,
+          "support_per_split": 17.4,
+          "n": 15,
+          "macro_without": 70.29,
+          "macro_with": 70.83
+        },
+        "EQU": {
+          "f1": 85.56,
+          "support_per_split": 15.6,
+          "n": 15,
+          "macro_without": 70.25,
+          "macro_with": 70.83
+        },
+        "ETP": {
+          "f1": 86.05,
+          "support_per_split": 7.0,
+          "n": 15,
+          "macro_without": 70.24,
+          "macro_with": 70.83
+        },
+        "MEP": {
+          "f1": 86.48,
+          "support_per_split": 33.6,
+          "n": 15,
+          "macro_without": 70.22,
+          "macro_with": 70.83
+        },
+        "VAL": {
+          "f1": 91.61,
+          "support_per_split": 34.6,
+          "n": 15,
+          "macro_without": 70.01,
+          "macro_with": 70.83
+        },
+        "MAT": {
+          "f1": 92.8,
+          "support_per_split": 17.6,
+          "n": 15,
+          "macro_without": 69.97,
+          "macro_with": 70.83
+        },
+        "MIC": {
+          "f1": 94.01,
+          "support_per_split": 23.0,
+          "n": 15,
+          "macro_without": 69.92,
+          "macro_with": 70.83
+        }
+      },
+      "crf_ls_ens3": {
+        "SDE": {
+          "f1": 16.84,
+          "support_per_split": 2.8,
+          "n": 14,
+          "macro_without": 73.14,
+          "macro_with": 71.02
+        },
+        "MIP": {
+          "f1": 36.22,
+          "support_per_split": 5.2,
+          "n": 15,
+          "macro_without": 72.64,
+          "macro_with": 71.26
+        },
+        "PRP": {
+          "f1": 41.2,
+          "support_per_split": 8.0,
+          "n": 15,
+          "macro_without": 72.44,
+          "macro_with": 71.26
+        },
+        "MOD": {
+          "f1": 41.67,
+          "support_per_split": 1.8,
+          "n": 12,
+          "macro_without": 71.5,
+          "macro_with": 70.37
+        },
+        "CGE": {
+          "f1": 53.11,
+          "support_per_split": 2.4,
+          "n": 15,
+          "macro_without": 71.98,
+          "macro_with": 71.26
+        },
+        "CPR": {
+          "f1": 55.56,
+          "support_per_split": 2.0,
+          "n": 12,
+          "macro_without": 71.6,
+          "macro_with": 71.0
+        },
+        "PQT": {
+          "f1": 61.79,
+          "support_per_split": 16.6,
+          "n": 15,
+          "macro_without": 71.64,
+          "macro_with": 71.26
+        },
+        "LOC": {
+          "f1": 66.23,
+          "support_per_split": 10.4,
+          "n": 15,
+          "macro_without": 71.46,
+          "macro_with": 71.26
+        },
+        "PRO": {
+          "f1": 68.91,
+          "support_per_split": 12.2,
+          "n": 15,
+          "macro_without": 71.35,
+          "macro_with": 71.26
+        },
+        "MFP": {
+          "f1": 72.11,
+          "support_per_split": 13.0,
+          "n": 15,
+          "macro_without": 71.23,
+          "macro_with": 71.26
+        },
+        "STD": {
+          "f1": 73.26,
+          "support_per_split": 22.8,
+          "n": 15,
+          "macro_without": 71.18,
+          "macro_with": 71.26
+        },
+        "CHP": {
+          "f1": 74.68,
+          "support_per_split": 21.6,
+          "n": 15,
+          "macro_without": 71.13,
+          "macro_with": 71.26
+        },
+        "DAM": {
+          "f1": 75.46,
+          "support_per_split": 20.8,
+          "n": 15,
+          "macro_without": 71.1,
+          "macro_with": 71.26
+        },
+        "MEC": {
+          "f1": 76.02,
+          "support_per_split": 52.6,
+          "n": 15,
+          "macro_without": 71.08,
+          "macro_with": 71.26
+        },
+        "DEF": {
+          "f1": 77.49,
+          "support_per_split": 27.6,
+          "n": 15,
+          "macro_without": 71.02,
+          "macro_with": 71.26
+        },
+        "ODE": {
+          "f1": 79.05,
+          "support_per_split": 2.8,
+          "n": 15,
+          "macro_without": 70.95,
+          "macro_with": 71.26
+        },
+        "EQU": {
+          "f1": 79.78,
+          "support_per_split": 15.6,
+          "n": 15,
+          "macro_without": 70.93,
+          "macro_with": 71.26
+        },
+        "MTP": {
+          "f1": 80.35,
+          "support_per_split": 30.0,
+          "n": 15,
+          "macro_without": 70.91,
+          "macro_with": 71.26
+        },
+        "OBJ": {
+          "f1": 81.07,
+          "support_per_split": 20.8,
+          "n": 15,
+          "macro_without": 70.88,
+          "macro_with": 71.26
+        },
+        "MAC": {
+          "f1": 81.54,
+          "support_per_split": 17.4,
+          "n": 15,
+          "macro_without": 70.86,
+          "macro_with": 71.26
+        },
+        "ETP": {
+          "f1": 81.98,
+          "support_per_split": 7.0,
+          "n": 15,
+          "macro_without": 70.84,
+          "macro_with": 71.26
+        },
+        "DAT": {
+          "f1": 84.72,
+          "support_per_split": 14.4,
+          "n": 15,
+          "macro_without": 70.74,
+          "macro_with": 71.26
+        },
+        "MEP": {
+          "f1": 86.18,
+          "support_per_split": 33.6,
+          "n": 15,
+          "macro_without": 70.68,
+          "macro_with": 71.26
+        },
+        "CEL": {
+          "f1": 88.34,
+          "support_per_split": 7.0,
+          "n": 15,
+          "macro_without": 70.59,
+          "macro_with": 71.26
+        },
+        "VAL": {
+          "f1": 91.86,
+          "support_per_split": 34.6,
+          "n": 15,
+          "macro_without": 70.46,
+          "macro_with": 71.26
+        },
+        "MAT": {
+          "f1": 92.02,
+          "support_per_split": 17.6,
+          "n": 15,
+          "macro_without": 70.45,
+          "macro_with": 71.26
+        },
+        "MIC": {
+          "f1": 92.85,
+          "support_per_split": 23.0,
+          "n": 15,
+          "macro_without": 70.42,
+          "macro_with": 71.26
+        }
+      },
+      "crf_st3_ens3": {
+        "SDE": {
+          "f1": 17.94,
+          "support_per_split": 2.8,
+          "n": 14,
+          "macro_without": 73.94,
+          "macro_with": 71.84
+        },
+        "MIP": {
+          "f1": 20.13,
+          "support_per_split": 5.2,
+          "n": 15,
+          "macro_without": 73.93,
+          "macro_with": 71.9
+        },
+        "PRP": {
+          "f1": 47.96,
+          "support_per_split": 8.0,
+          "n": 15,
+          "macro_without": 72.83,
+          "macro_with": 71.9
+        },
+        "MOD": {
+          "f1": 48.34,
+          "support_per_split": 1.8,
+          "n": 12,
+          "macro_without": 70.99,
+          "macro_with": 70.14
+        },
+        "CGE": {
+          "f1": 57.44,
+          "support_per_split": 2.4,
+          "n": 15,
+          "macro_without": 72.47,
+          "macro_with": 71.9
+        },
+        "PQT": {
+          "f1": 60.86,
+          "support_per_split": 16.6,
+          "n": 15,
+          "macro_without": 72.34,
+          "macro_with": 71.9
+        },
+        "PRO": {
+          "f1": 61.66,
+          "support_per_split": 12.2,
+          "n": 15,
+          "macro_without": 72.3,
+          "macro_with": 71.9
+        },
+        "CPR": {
+          "f1": 63.89,
+          "support_per_split": 2.0,
+          "n": 12,
+          "macro_without": 72.33,
+          "macro_with": 72.02
+        },
+        "MFP": {
+          "f1": 71.85,
+          "support_per_split": 13.0,
+          "n": 15,
+          "macro_without": 71.91,
+          "macro_with": 71.9
+        },
+        "LOC": {
+          "f1": 72.49,
+          "support_per_split": 10.4,
+          "n": 15,
+          "macro_without": 71.87,
+          "macro_with": 71.9
+        },
+        "ETP": {
+          "f1": 72.97,
+          "support_per_split": 7.0,
+          "n": 15,
+          "macro_without": 71.85,
+          "macro_with": 71.9
+        },
+        "CHP": {
+          "f1": 76.6,
+          "support_per_split": 21.6,
+          "n": 15,
+          "macro_without": 71.71,
+          "macro_with": 71.9
+        },
+        "MEC": {
+          "f1": 77.27,
+          "support_per_split": 52.6,
+          "n": 15,
+          "macro_without": 71.69,
+          "macro_with": 71.9
+        },
+        "DEF": {
+          "f1": 77.7,
+          "support_per_split": 27.6,
+          "n": 15,
+          "macro_without": 71.67,
+          "macro_with": 71.9
+        },
+        "STD": {
+          "f1": 77.74,
+          "support_per_split": 22.8,
+          "n": 15,
+          "macro_without": 71.67,
+          "macro_with": 71.9
+        },
+        "DAM": {
+          "f1": 78.54,
+          "support_per_split": 20.8,
+          "n": 15,
+          "macro_without": 71.64,
+          "macro_with": 71.9
+        },
+        "EQU": {
+          "f1": 80.09,
+          "support_per_split": 15.6,
+          "n": 15,
+          "macro_without": 71.58,
+          "macro_with": 71.9
+        },
+        "MTP": {
+          "f1": 80.85,
+          "support_per_split": 30.0,
+          "n": 15,
+          "macro_without": 71.55,
+          "macro_with": 71.9
+        },
+        "OBJ": {
+          "f1": 82.21,
+          "support_per_split": 20.8,
+          "n": 15,
+          "macro_without": 71.49,
+          "macro_with": 71.9
+        },
+        "DAT": {
+          "f1": 82.34,
+          "support_per_split": 14.4,
+          "n": 15,
+          "macro_without": 71.49,
+          "macro_with": 71.9
+        },
+        "MAC": {
+          "f1": 84.49,
+          "support_per_split": 17.4,
+          "n": 15,
+          "macro_without": 71.41,
+          "macro_with": 71.9
+        },
+        "ODE": {
+          "f1": 84.83,
+          "support_per_split": 2.8,
+          "n": 15,
+          "macro_without": 71.38,
+          "macro_with": 71.9
+        },
+        "MEP": {
+          "f1": 85.43,
+          "support_per_split": 33.6,
+          "n": 15,
+          "macro_without": 71.37,
+          "macro_with": 71.9
+        },
+        "CEL": {
+          "f1": 85.71,
+          "support_per_split": 7.0,
+          "n": 15,
+          "macro_without": 71.36,
+          "macro_with": 71.9
+        },
+        "VAL": {
+          "f1": 92.96,
+          "support_per_split": 34.6,
+          "n": 15,
+          "macro_without": 71.07,
+          "macro_with": 71.9
+        },
+        "MAT": {
+          "f1": 93.56,
+          "support_per_split": 17.6,
+          "n": 15,
+          "macro_without": 71.05,
+          "macro_with": 71.9
+        },
+        "MIC": {
+          "f1": 94.12,
+          "support_per_split": 23.0,
+          "n": 15,
+          "macro_without": 71.03,
+          "macro_with": 71.9
+        }
+      }
+    },
+    "fine_leave_one_paper_out": {
+      "crf_ens3": {
+        "MechanicalTreatment": {
+          "f1": 0.0,
+          "support_per_split": 13.7,
+          "n": 7,
+          "macro_without": 42.31,
+          "macro_with": 40.3
+        },
+        "TestingMedium": {
+          "f1": 0.0,
+          "support_per_split": 10.9,
+          "n": 8,
+          "macro_without": 38.44,
+          "macro_with": 36.84
+        },
+        "TwinBoundary": {
+          "f1": 0.0,
+          "support_per_split": 15.6,
+          "n": 5,
+          "macro_without": 38.28,
+          "macro_with": 36.67
+        },
+        "MechanicalTestDataSet": {
+          "f1": 0.85,
+          "support_per_split": 8.7,
+          "n": 9,
+          "macro_without": 38.73,
+          "macro_with": 37.16
+        },
+        "StressAmplitude": {
+          "f1": 6.91,
+          "support_per_split": 8.3,
+          "n": 9,
+          "macro_without": 41.12,
+          "macro_with": 39.5
+        },
+        "LoadingType": {
+          "f1": 10.28,
+          "support_per_split": 8.3,
+          "n": 9,
+          "macro_without": 38.29,
+          "macro_with": 37.16
+        },
+        "MicrostructureEntity": {
+          "f1": 11.11,
+          "support_per_split": 16.7,
+          "n": 9,
+          "macro_without": 40.01,
+          "macro_with": 38.76
+        },
+        "TestSpecimen": {
+          "f1": 15.15,
+          "support_per_split": 7.5,
+          "n": 12,
+          "macro_without": 39.4,
+          "macro_with": 38.21
+        },
+        "FatigueTestSpecimen": {
+          "f1": 24.46,
+          "support_per_split": 12.2,
+          "n": 12,
+          "macro_without": 38.87,
+          "macro_with": 38.21
+        },
+        "GrainBoundary": {
+          "f1": 25.01,
+          "support_per_split": 12.2,
+          "n": 12,
+          "macro_without": 38.78,
+          "macro_with": 38.21
+        },
+        "TestingMachine": {
+          "f1": 25.45,
+          "support_per_split": 19.0,
+          "n": 6,
+          "macro_without": 39.15,
+          "macro_with": 38.57
+        },
+        "Location": {
+          "f1": 27.44,
+          "support_per_split": 7.8,
+          "n": 12,
+          "macro_without": 38.84,
+          "macro_with": 38.21
+        },
+        "StateDescriptor": {
+          "f1": 29.29,
+          "support_per_split": 26.5,
+          "n": 12,
+          "macro_without": 38.76,
+          "macro_with": 38.21
+        },
+        "FatigueTest": {
+          "f1": 35.83,
+          "support_per_split": 8.2,
+          "n": 12,
+          "macro_without": 38.07,
+          "macro_with": 38.21
+        },
+        "TensileYieldStrength": {
+          "f1": 36.28,
+          "support_per_split": 9.0,
+          "n": 8,
+          "macro_without": 36.87,
+          "macro_with": 36.8
+        },
+        "Mechanism": {
+          "f1": 37.23,
+          "support_per_split": 35.8,
+          "n": 12,
+          "macro_without": 38.27,
+          "macro_with": 38.21
+        },
+        "MechanicalProperty": {
+          "f1": 38.15,
+          "support_per_split": 13.0,
+          "n": 9,
+          "macro_without": 37.11,
+          "macro_with": 37.16
+        },
+        "DataSet": {
+          "f1": 43.05,
+          "support_per_split": 9.5,
+          "n": 12,
+          "macro_without": 38.03,
+          "macro_with": 38.21
+        },
+        "StrainRate": {
+          "f1": 44.45,
+          "support_per_split": 13.5,
+          "n": 6,
+          "macro_without": 38.4,
+          "macro_with": 38.57
+        },
+        "FatigueLifetime": {
+          "f1": 59.0,
+          "support_per_split": 8.7,
+          "n": 9,
+          "macro_without": 36.29,
+          "macro_with": 37.16
+        },
+        "Microstructure": {
+          "f1": 62.21,
+          "support_per_split": 8.8,
+          "n": 12,
+          "macro_without": 37.19,
+          "macro_with": 38.21
+        },
+        "TensileUltimateStrength": {
+          "f1": 63.4,
+          "support_per_split": 10.7,
+          "n": 7,
+          "macro_without": 37.79,
+          "macro_with": 38.79
+        },
+        "Crack": {
+          "f1": 68.29,
+          "support_per_split": 18.0,
+          "n": 12,
+          "macro_without": 36.82,
+          "macro_with": 38.21
+        },
+        "CrackInitation": {
+          "f1": 71.77,
+          "support_per_split": 8.5,
+          "n": 12,
+          "macro_without": 36.45,
+          "macro_with": 38.21
+        },
+        "Alloy": {
+          "f1": 72.38,
+          "support_per_split": 17.8,
+          "n": 12,
+          "macro_without": 36.58,
+          "macro_with": 38.21
+        },
+        "Value": {
+          "f1": 75.44,
+          "support_per_split": 41.8,
+          "n": 12,
+          "macro_without": 36.42,
+          "macro_with": 38.21
+        },
+        "MaterialClass": {
+          "f1": 75.85,
+          "support_per_split": 19.5,
+          "n": 12,
+          "macro_without": 36.42,
+          "macro_with": 38.21
+        }
+      },
+      "crf_mt_ens3": {
+        "MechanicalTreatment": {
+          "f1": 0.0,
+          "support_per_split": 13.7,
+          "n": 7,
+          "macro_without": 46.09,
+          "macro_with": 43.79
+        },
+        "TestingMedium": {
+          "f1": 0.0,
+          "support_per_split": 10.9,
+          "n": 8,
+          "macro_without": 41.48,
+          "macro_with": 39.72
+        },
+        "TwinBoundary": {
+          "f1": 0.0,
+          "support_per_split": 13.0,
+          "n": 6,
+          "macro_without": 41.42,
+          "macro_with": 39.66
+        },
+        "MechanicalTestDataSet": {
+          "f1": 4.44,
+          "support_per_split": 8.7,
+          "n": 9,
+          "macro_without": 41.45,
+          "macro_with": 39.87
+        },
+        "StressAmplitude": {
+          "f1": 10.86,
+          "support_per_split": 7.5,
+          "n": 10,
+          "macro_without": 44.67,
+          "macro_with": 42.97
+        },
+        "LoadingType": {
+          "f1": 15.4,
+          "support_per_split": 8.3,
+          "n": 9,
+          "macro_without": 40.91,
+          "macro_with": 39.87
+        },
+        "StrainRate": {
+          "f1": 16.67,
+          "support_per_split": 13.5,
+          "n": 6,
+          "macro_without": 40.4,
+          "macro_with": 39.45
+        },
+        "TestSpecimen": {
+          "f1": 21.87,
+          "support_per_split": 9.0,
+          "n": 10,
+          "macro_without": 42.15,
+          "macro_with": 41.2
+        },
+        "FatigueTestSpecimen": {
+          "f1": 25.43,
+          "support_per_split": 12.2,
+          "n": 12,
+          "macro_without": 43.65,
+          "macro_with": 42.79
+        },
+        "GrainBoundary": {
+          "f1": 25.57,
+          "support_per_split": 12.2,
+          "n": 12,
+          "macro_without": 43.66,
+          "macro_with": 42.79
+        },
+        "Location": {
+          "f1": 28.88,
+          "support_per_split": 7.8,
+          "n": 12,
+          "macro_without": 43.64,
+          "macro_with": 42.79
+        },
+        "MicrostructureEntity": {
+          "f1": 29.63,
+          "support_per_split": 16.7,
+          "n": 9,
+          "macro_without": 43.99,
+          "macro_with": 43.63
+        },
+        "TestingMachine": {
+          "f1": 32.59,
+          "support_per_split": 19.0,
+          "n": 6,
+          "macro_without": 39.8,
+          "macro_with": 39.45
+        },
+        "FatigueTest": {
+          "f1": 35.51,
+          "support_per_split": 8.2,
+          "n": 12,
+          "macro_without": 42.9,
+          "macro_with": 42.79
+        },
+        "DataSet": {
+          "f1": 41.0,
+          "support_per_split": 9.5,
+          "n": 12,
+          "macro_without": 42.97,
+          "macro_with": 42.79
+        },
+        "TensileYieldStrength": {
+          "f1": 42.1,
+          "support_per_split": 12.0,
+          "n": 6,
+          "macro_without": 39.32,
+          "macro_with": 39.45
+        },
+        "StateDescriptor": {
+          "f1": 43.54,
+          "support_per_split": 26.5,
+          "n": 12,
+          "macro_without": 42.88,
+          "macro_with": 42.79
+        },
+        "Mechanism": {
+          "f1": 44.69,
+          "support_per_split": 35.8,
+          "n": 12,
+          "macro_without": 42.68,
+          "macro_with": 42.79
+        },
+        "MechanicalProperty": {
+          "f1": 56.25,
+          "support_per_split": 13.0,
+          "n": 9,
+          "macro_without": 39.07,
+          "macro_with": 39.87
+        },
+        "FatigueLifetime": {
+          "f1": 68.67,
+          "support_per_split": 8.7,
+          "n": 9,
+          "macro_without": 38.63,
+          "macro_with": 39.87
+        },
+        "Crack": {
+          "f1": 69.11,
+          "support_per_split": 18.0,
+          "n": 12,
+          "macro_without": 41.6,
+          "macro_with": 42.79
+        },
+        "TensileUltimateStrength": {
+          "f1": 70.34,
+          "support_per_split": 12.5,
+          "n": 6,
+          "macro_without": 38.15,
+          "macro_with": 39.45
+        },
+        "CrackInitation": {
+          "f1": 70.37,
+          "support_per_split": 8.5,
+          "n": 12,
+          "macro_without": 41.33,
+          "macro_with": 42.79
+        },
+        "Microstructure": {
+          "f1": 72.12,
+          "support_per_split": 8.8,
+          "n": 12,
+          "macro_without": 41.4,
+          "macro_with": 42.79
+        },
+        "Value": {
+          "f1": 76.78,
+          "support_per_split": 41.8,
+          "n": 12,
+          "macro_without": 41.18,
+          "macro_with": 42.79
+        },
+        "Alloy": {
+          "f1": 77.18,
+          "support_per_split": 17.8,
+          "n": 12,
+          "macro_without": 41.23,
+          "macro_with": 42.79
+        },
+        "MaterialClass": {
+          "f1": 80.43,
+          "support_per_split": 19.5,
+          "n": 12,
+          "macro_without": 40.97,
+          "macro_with": 42.79
+        }
+      },
+      "crf_ls_ens3": {
+        "MechanicalTreatment": {
+          "f1": 0.0,
+          "support_per_split": 13.7,
+          "n": 7,
+          "macro_without": 43.25,
+          "macro_with": 41.13
+        },
+        "TestingMedium": {
+          "f1": 0.0,
+          "support_per_split": 9.7,
+          "n": 9,
+          "macro_without": 37.24,
+          "macro_with": 35.73
+        },
+        "TwinBoundary": {
+          "f1": 0.0,
+          "support_per_split": 13.0,
+          "n": 6,
+          "macro_without": 36.15,
+          "macro_with": 34.7
+        },
+        "StrainRate": {
+          "f1": 0.0,
+          "support_per_split": 13.5,
+          "n": 6,
+          "macro_without": 39.69,
+          "macro_with": 38.14
+        },
+        "LoadingType": {
+          "f1": 1.85,
+          "support_per_split": 8.3,
+          "n": 9,
+          "macro_without": 37.16,
+          "macro_with": 35.73
+        },
+        "StressAmplitude": {
+          "f1": 6.21,
+          "support_per_split": 6.8,
+          "n": 11,
+          "macro_without": 39.96,
+          "macro_with": 38.35
+        },
+        "MechanicalTestDataSet": {
+          "f1": 13.82,
+          "support_per_split": 8.7,
+          "n": 9,
+          "macro_without": 36.7,
+          "macro_with": 35.73
+        },
+        "MicrostructureEntity": {
+          "f1": 14.82,
+          "support_per_split": 16.7,
+          "n": 9,
+          "macro_without": 39.2,
+          "macro_with": 38.2
+        },
+        "TestSpecimen": {
+          "f1": 20.34,
+          "support_per_split": 9.0,
+          "n": 10,
+          "macro_without": 37.27,
+          "macro_with": 36.48
+        },
+        "GrainBoundary": {
+          "f1": 22.14,
+          "support_per_split": 12.2,
+          "n": 12,
+          "macro_without": 38.83,
+          "macro_with": 38.1
+        },
+        "Location": {
+          "f1": 26.7,
+          "support_per_split": 7.8,
+          "n": 12,
+          "macro_without": 38.8,
+          "macro_with": 38.1
+        },
+        "FatigueTestSpecimen": {
+          "f1": 27.84,
+          "support_per_split": 12.2,
+          "n": 12,
+          "macro_without": 38.64,
+          "macro_with": 38.1
+        },
+        "StateDescriptor": {
+          "f1": 30.49,
+          "support_per_split": 26.5,
+          "n": 12,
+          "macro_without": 38.68,
+          "macro_with": 38.1
+        },
+        "TestingMachine": {
+          "f1": 32.79,
+          "support_per_split": 19.0,
+          "n": 6,
+          "macro_without": 38.4,
+          "macro_with": 38.14
+        },
+        "FatigueTest": {
+          "f1": 33.58,
+          "support_per_split": 8.2,
+          "n": 12,
+          "macro_without": 38.01,
+          "macro_with": 38.1
+        },
+        "Mechanism": {
+          "f1": 37.66,
+          "support_per_split": 35.8,
+          "n": 12,
+          "macro_without": 38.13,
+          "macro_with": 38.1
+        },
+        "TensileYieldStrength": {
+          "f1": 40.89,
+          "support_per_split": 9.0,
+          "n": 8,
+          "macro_without": 35.6,
+          "macro_with": 35.78
+        },
+        "DataSet": {
+          "f1": 42.88,
+          "support_per_split": 9.5,
+          "n": 12,
+          "macro_without": 37.97,
+          "macro_with": 38.1
+        },
+        "MechanicalProperty": {
+          "f1": 44.78,
+          "support_per_split": 13.0,
+          "n": 9,
+          "macro_without": 35.29,
+          "macro_with": 35.73
+        },
+        "TensileUltimateStrength": {
+          "f1": 50.65,
+          "support_per_split": 9.4,
+          "n": 8,
+          "macro_without": 35.18,
+          "macro_with": 35.78
+        },
+        "FatigueLifetime": {
+          "f1": 59.42,
+          "support_per_split": 8.7,
+          "n": 9,
+          "macro_without": 34.79,
+          "macro_with": 35.73
+        },
+        "Crack": {
+          "f1": 63.33,
+          "support_per_split": 18.0,
+          "n": 12,
+          "macro_without": 37.0,
+          "macro_with": 38.1
+        },
+        "CrackInitation": {
+          "f1": 70.15,
+          "support_per_split": 8.5,
+          "n": 12,
+          "macro_without": 36.43,
+          "macro_with": 38.1
+        },
+        "MaterialClass": {
+          "f1": 71.96,
+          "support_per_split": 19.5,
+          "n": 12,
+          "macro_without": 36.47,
+          "macro_with": 38.1
+        },
+        "Microstructure": {
+          "f1": 72.79,
+          "support_per_split": 8.8,
+          "n": 12,
+          "macro_without": 36.46,
+          "macro_with": 38.1
+        },
+        "Alloy": {
+          "f1": 74.01,
+          "support_per_split": 17.8,
+          "n": 12,
+          "macro_without": 36.49,
+          "macro_with": 38.1
+        },
+        "Value": {
+          "f1": 76.12,
+          "support_per_split": 41.8,
+          "n": 12,
+          "macro_without": 36.31,
+          "macro_with": 38.1
+        }
+      },
+      "crf_st3_ens3": {
+        "MechanicalTreatment": {
+          "f1": 0.0,
+          "support_per_split": 16.0,
+          "n": 6,
+          "macro_without": 46.68,
+          "macro_with": 44.34
+        },
+        "MechanicalTestDataSet": {
+          "f1": 0.0,
+          "support_per_split": 8.7,
+          "n": 9,
+          "macro_without": 39.85,
+          "macro_with": 38.2
+        },
+        "TestingMedium": {
+          "f1": 0.0,
+          "support_per_split": 12.4,
+          "n": 7,
+          "macro_without": 38.17,
+          "macro_with": 36.55
+        },
+        "TwinBoundary": {
+          "f1": 0.0,
+          "support_per_split": 15.6,
+          "n": 5,
+          "macro_without": 38.41,
+          "macro_with": 36.8
+        },
+        "LoadingType": {
+          "f1": 8.0,
+          "support_per_split": 7.5,
+          "n": 10,
+          "macro_without": 39.61,
+          "macro_with": 38.27
+        },
+        "TestSpecimen": {
+          "f1": 11.5,
+          "support_per_split": 9.0,
+          "n": 10,
+          "macro_without": 39.52,
+          "macro_with": 38.27
+        },
+        "StressAmplitude": {
+          "f1": 13.09,
+          "support_per_split": 8.3,
+          "n": 9,
+          "macro_without": 43.9,
+          "macro_with": 42.36
+        },
+        "TestingMachine": {
+          "f1": 20.37,
+          "support_per_split": 19.0,
+          "n": 6,
+          "macro_without": 41.64,
+          "macro_with": 40.76
+        },
+        "StateDescriptor": {
+          "f1": 21.4,
+          "support_per_split": 26.5,
+          "n": 12,
+          "macro_without": 41.08,
+          "macro_with": 40.04
+        },
+        "MicrostructureEntity": {
+          "f1": 22.22,
+          "support_per_split": 16.7,
+          "n": 9,
+          "macro_without": 41.19,
+          "macro_with": 40.59
+        },
+        "GrainBoundary": {
+          "f1": 26.62,
+          "support_per_split": 12.2,
+          "n": 12,
+          "macro_without": 40.69,
+          "macro_with": 40.04
+        },
+        "Location": {
+          "f1": 29.57,
+          "support_per_split": 7.8,
+          "n": 12,
+          "macro_without": 40.69,
+          "macro_with": 40.04
+        },
+        "FatigueTestSpecimen": {
+          "f1": 31.57,
+          "support_per_split": 12.2,
+          "n": 12,
+          "macro_without": 40.41,
+          "macro_with": 40.04
+        },
+        "Mechanism": {
+          "f1": 34.42,
+          "support_per_split": 35.8,
+          "n": 12,
+          "macro_without": 40.42,
+          "macro_with": 40.04
+        },
+        "FatigueTest": {
+          "f1": 36.87,
+          "support_per_split": 8.2,
+          "n": 12,
+          "macro_without": 39.94,
+          "macro_with": 40.04
+        },
+        "DataSet": {
+          "f1": 39.42,
+          "support_per_split": 9.5,
+          "n": 12,
+          "macro_without": 40.1,
+          "macro_with": 40.04
+        },
+        "TensileUltimateStrength": {
+          "f1": 45.84,
+          "support_per_split": 8.3,
+          "n": 9,
+          "macro_without": 37.93,
+          "macro_with": 38.2
+        },
+        "StrainRate": {
+          "f1": 50.0,
+          "support_per_split": 13.5,
+          "n": 6,
+          "macro_without": 40.45,
+          "macro_with": 40.76
+        },
+        "MechanicalProperty": {
+          "f1": 52.36,
+          "support_per_split": 13.0,
+          "n": 9,
+          "macro_without": 37.52,
+          "macro_with": 38.2
+        },
+        "TensileYieldStrength": {
+          "f1": 55.84,
+          "support_per_split": 12.0,
+          "n": 6,
+          "macro_without": 40.14,
+          "macro_with": 40.76
+        },
+        "Crack": {
+          "f1": 64.39,
+          "support_per_split": 18.0,
+          "n": 12,
+          "macro_without": 38.9,
+          "macro_with": 40.04
+        },
+        "Microstructure": {
+          "f1": 65.12,
+          "support_per_split": 8.8,
+          "n": 12,
+          "macro_without": 38.94,
+          "macro_with": 40.04
+        },
+        "FatigueLifetime": {
+          "f1": 66.87,
+          "support_per_split": 8.7,
+          "n": 9,
+          "macro_without": 37.0,
+          "macro_with": 38.2
+        },
+        "Alloy": {
+          "f1": 70.32,
+          "support_per_split": 17.8,
+          "n": 12,
+          "macro_without": 38.6,
+          "macro_with": 40.04
+        },
+        "CrackInitation": {
+          "f1": 73.45,
+          "support_per_split": 8.5,
+          "n": 12,
+          "macro_without": 38.28,
+          "macro_with": 40.04
+        },
+        "MaterialClass": {
+          "f1": 77.34,
+          "support_per_split": 19.5,
+          "n": 12,
+          "macro_without": 38.18,
+          "macro_with": 40.04
+        },
+        "Value": {
+          "f1": 80.87,
+          "support_per_split": 41.8,
+          "n": 12,
+          "macro_without": 38.08,
+          "macro_with": 40.04
+        }
+      }
+    },
+    "coarse_leave_one_paper_out": {
+      "crf_ens3": {
+        "ETP": {
+          "f1": 0.0,
+          "support_per_split": 11.2,
+          "n": 8,
+          "macro_without": 50.85,
+          "macro_with": 48.9
+        },
+        "MOD": {
+          "f1": 0.0,
+          "support_per_split": 5.1,
+          "n": 7,
+          "macro_without": 51.34,
+          "macro_with": 49.39
+        },
+        "SDE": {
+          "f1": 18.25,
+          "support_per_split": 5.7,
+          "n": 11,
+          "macro_without": 51.56,
+          "macro_with": 50.26
+        },
+        "MIP": {
+          "f1": 19.33,
+          "support_per_split": 7.2,
+          "n": 12,
+          "macro_without": 51.06,
+          "macro_with": 49.81
+        },
+        "PRP": {
+          "f1": 23.41,
+          "support_per_split": 6.8,
+          "n": 12,
+          "macro_without": 50.9,
+          "macro_with": 49.81
+        },
+        "PQT": {
+          "f1": 24.56,
+          "support_per_split": 26.1,
+          "n": 10,
+          "macro_without": 50.75,
+          "macro_with": 49.75
+        },
+        "CGE": {
+          "f1": 27.23,
+          "support_per_split": 4.7,
+          "n": 9,
+          "macro_without": 51.79,
+          "macro_with": 50.82
+        },
+        "MTP": {
+          "f1": 38.93,
+          "support_per_split": 39.8,
+          "n": 12,
+          "macro_without": 50.25,
+          "macro_with": 49.81
+        },
+        "CEL": {
+          "f1": 40.09,
+          "support_per_split": 8.8,
+          "n": 12,
+          "macro_without": 50.26,
+          "macro_with": 49.81
+        },
+        "ODE": {
+          "f1": 41.1,
+          "support_per_split": 5.3,
+          "n": 9,
+          "macro_without": 51.68,
+          "macro_with": 51.22
+        },
+        "CPR": {
+          "f1": 46.67,
+          "support_per_split": 1.8,
+          "n": 12,
+          "macro_without": 49.89,
+          "macro_with": 49.81
+        },
+        "LOC": {
+          "f1": 51.71,
+          "support_per_split": 13.8,
+          "n": 12,
+          "macro_without": 49.73,
+          "macro_with": 49.81
+        },
+        "DAT": {
+          "f1": 52.04,
+          "support_per_split": 17.0,
+          "n": 12,
+          "macro_without": 49.72,
+          "macro_with": 49.81
+        },
+        "MFP": {
+          "f1": 55.11,
+          "support_per_split": 15.5,
+          "n": 12,
+          "macro_without": 49.6,
+          "macro_with": 49.81
+        },
+        "STD": {
+          "f1": 55.11,
+          "support_per_split": 26.2,
+          "n": 12,
+          "macro_without": 49.61,
+          "macro_with": 49.81
+        },
+        "MIC": {
+          "f1": 56.15,
+          "support_per_split": 26.0,
+          "n": 12,
+          "macro_without": 49.53,
+          "macro_with": 49.81
+        },
+        "PRO": {
+          "f1": 58.88,
+          "support_per_split": 14.5,
+          "n": 12,
+          "macro_without": 49.46,
+          "macro_with": 49.81
+        },
+        "CHP": {
+          "f1": 59.9,
+          "support_per_split": 26.2,
+          "n": 12,
+          "macro_without": 49.39,
+          "macro_with": 49.81
+        },
+        "DEF": {
+          "f1": 61.14,
+          "support_per_split": 36.8,
+          "n": 12,
+          "macro_without": 49.33,
+          "macro_with": 49.81
+        },
+        "DAM": {
+          "f1": 63.52,
+          "support_per_split": 30.8,
+          "n": 12,
+          "macro_without": 49.26,
+          "macro_with": 49.81
+        },
+        "OBJ": {
+          "f1": 63.74,
+          "support_per_split": 25.8,
+          "n": 12,
+          "macro_without": 49.26,
+          "macro_with": 49.81
+        },
+        "MEC": {
+          "f1": 69.23,
+          "support_per_split": 70.0,
+          "n": 12,
+          "macro_without": 49.01,
+          "macro_with": 49.81
+        },
+        "EQU": {
+          "f1": 70.11,
+          "support_per_split": 17.8,
+          "n": 12,
+          "macro_without": 48.96,
+          "macro_with": 49.81
+        },
+        "MAC": {
+          "f1": 71.46,
+          "support_per_split": 19.5,
+          "n": 12,
+          "macro_without": 48.93,
+          "macro_with": 49.81
+        },
+        "MAT": {
+          "f1": 73.36,
+          "support_per_split": 18.8,
+          "n": 12,
+          "macro_without": 48.87,
+          "macro_with": 49.81
+        },
+        "MEP": {
+          "f1": 75.83,
+          "support_per_split": 39.5,
+          "n": 12,
+          "macro_without": 48.75,
+          "macro_with": 49.81
+        },
+        "VAL": {
+          "f1": 77.31,
+          "support_per_split": 41.2,
+          "n": 12,
+          "macro_without": 48.68,
+          "macro_with": 49.81
+        }
+      },
+      "crf_mt_ens3": {
+        "ETP": {
+          "f1": 0.0,
+          "support_per_split": 10.0,
+          "n": 9,
+          "macro_without": 50.68,
+          "macro_with": 48.73
+        },
+        "MOD": {
+          "f1": 7.41,
+          "support_per_split": 4.0,
+          "n": 9,
+          "macro_without": 51.21,
+          "macro_with": 49.51
+        },
+        "PRP": {
+          "f1": 16.67,
+          "support_per_split": 6.8,
+          "n": 12,
+          "macro_without": 49.92,
+          "macro_with": 48.6
+        },
+        "MIP": {
+          "f1": 18.16,
+          "support_per_split": 7.2,
+          "n": 12,
+          "macro_without": 49.85,
+          "macro_with": 48.6
+        },
+        "SDE": {
+          "f1": 19.77,
+          "support_per_split": 6.3,
+          "n": 10,
+          "macro_without": 50.23,
+          "macro_with": 49.05
+        },
+        "CGE": {
+          "f1": 23.51,
+          "support_per_split": 4.7,
+          "n": 9,
+          "macro_without": 51.08,
+          "macro_with": 49.98
+        },
+        "PQT": {
+          "f1": 25.04,
+          "support_per_split": 29.0,
+          "n": 9,
+          "macro_without": 49.65,
+          "macro_with": 48.73
+        },
+        "ODE": {
+          "f1": 28.97,
+          "support_per_split": 5.3,
+          "n": 9,
+          "macro_without": 50.68,
+          "macro_with": 49.79
+        },
+        "CPR": {
+          "f1": 33.33,
+          "support_per_split": 1.8,
+          "n": 12,
+          "macro_without": 49.18,
+          "macro_with": 48.6
+        },
+        "MTP": {
+          "f1": 39.24,
+          "support_per_split": 39.8,
+          "n": 12,
+          "macro_without": 49.0,
+          "macro_with": 48.6
+        },
+        "CEL": {
+          "f1": 39.53,
+          "support_per_split": 8.8,
+          "n": 12,
+          "macro_without": 49.01,
+          "macro_with": 48.6
+        },
+        "LOC": {
+          "f1": 54.37,
+          "support_per_split": 13.8,
+          "n": 12,
+          "macro_without": 48.36,
+          "macro_with": 48.6
+        },
+        "MFP": {
+          "f1": 54.83,
+          "support_per_split": 15.5,
+          "n": 12,
+          "macro_without": 48.36,
+          "macro_with": 48.6
+        },
+        "DAT": {
+          "f1": 56.5,
+          "support_per_split": 17.0,
+          "n": 12,
+          "macro_without": 48.29,
+          "macro_with": 48.6
+        },
+        "STD": {
+          "f1": 56.53,
+          "support_per_split": 26.2,
+          "n": 12,
+          "macro_without": 48.31,
+          "macro_with": 48.6
+        },
+        "OBJ": {
+          "f1": 58.21,
+          "support_per_split": 25.8,
+          "n": 12,
+          "macro_without": 48.24,
+          "macro_with": 48.6
+        },
+        "MIC": {
+          "f1": 59.67,
+          "support_per_split": 26.0,
+          "n": 12,
+          "macro_without": 48.13,
+          "macro_with": 48.6
+        },
+        "PRO": {
+          "f1": 59.92,
+          "support_per_split": 14.5,
+          "n": 12,
+          "macro_without": 48.16,
+          "macro_with": 48.6
+        },
+        "CHP": {
+          "f1": 61.16,
+          "support_per_split": 26.2,
+          "n": 12,
+          "macro_without": 48.09,
+          "macro_with": 48.6
+        },
+        "DEF": {
+          "f1": 61.73,
+          "support_per_split": 36.8,
+          "n": 12,
+          "macro_without": 48.05,
+          "macro_with": 48.6
+        },
+        "EQU": {
+          "f1": 65.15,
+          "support_per_split": 17.8,
+          "n": 12,
+          "macro_without": 47.9,
+          "macro_with": 48.6
+        },
+        "DAM": {
+          "f1": 65.46,
+          "support_per_split": 30.8,
+          "n": 12,
+          "macro_without": 47.92,
+          "macro_with": 48.6
+        },
+        "MEC": {
+          "f1": 67.29,
+          "support_per_split": 70.0,
+          "n": 12,
+          "macro_without": 47.84,
+          "macro_with": 48.6
+        },
+        "MAC": {
+          "f1": 73.1,
+          "support_per_split": 19.5,
+          "n": 12,
+          "macro_without": 47.61,
+          "macro_with": 48.6
+        },
+        "MEP": {
+          "f1": 74.48,
+          "support_per_split": 39.5,
+          "n": 12,
+          "macro_without": 47.54,
+          "macro_with": 48.6
+        },
+        "MAT": {
+          "f1": 74.5,
+          "support_per_split": 18.8,
+          "n": 12,
+          "macro_without": 47.57,
+          "macro_with": 48.6
+        },
+        "VAL": {
+          "f1": 76.64,
+          "support_per_split": 41.2,
+          "n": 12,
+          "macro_without": 47.45,
+          "macro_with": 48.6
+        }
+      },
+      "crf_ls_ens3": {
+        "ETP": {
+          "f1": 0.0,
+          "support_per_split": 10.0,
+          "n": 9,
+          "macro_without": 49.61,
+          "macro_with": 47.7
+        },
+        "MOD": {
+          "f1": 3.03,
+          "support_per_split": 6.0,
+          "n": 6,
+          "macro_without": 51.41,
+          "macro_with": 49.57
+        },
+        "SDE": {
+          "f1": 14.14,
+          "support_per_split": 7.0,
+          "n": 9,
+          "macro_without": 51.62,
+          "macro_with": 50.15
+        },
+        "MIP": {
+          "f1": 19.37,
+          "support_per_split": 7.2,
+          "n": 12,
+          "macro_without": 50.15,
+          "macro_with": 48.94
+        },
+        "PRP": {
+          "f1": 22.32,
+          "support_per_split": 6.8,
+          "n": 12,
+          "macro_without": 50.02,
+          "macro_with": 48.94
+        },
+        "PQT": {
+          "f1": 25.53,
+          "support_per_split": 29.0,
+          "n": 9,
+          "macro_without": 48.56,
+          "macro_with": 47.7
+        },
+        "CGE": {
+          "f1": 27.62,
+          "support_per_split": 4.2,
+          "n": 10,
+          "macro_without": 50.9,
+          "macro_with": 49.97
+        },
+        "ODE": {
+          "f1": 29.36,
+          "support_per_split": 4.8,
+          "n": 10,
+          "macro_without": 50.04,
+          "macro_with": 49.17
+        },
+        "CEL": {
+          "f1": 38.49,
+          "support_per_split": 8.8,
+          "n": 12,
+          "macro_without": 49.43,
+          "macro_with": 48.94
+        },
+        "MTP": {
+          "f1": 40.13,
+          "support_per_split": 39.8,
+          "n": 12,
+          "macro_without": 49.32,
+          "macro_with": 48.94
+        },
+        "CPR": {
+          "f1": 49.72,
+          "support_per_split": 1.8,
+          "n": 12,
+          "macro_without": 48.84,
+          "macro_with": 48.94
+        },
+        "LOC": {
+          "f1": 49.95,
+          "support_per_split": 13.8,
+          "n": 12,
+          "macro_without": 48.9,
+          "macro_with": 48.94
+        },
+        "DAT": {
+          "f1": 50.06,
+          "support_per_split": 17.0,
+          "n": 12,
+          "macro_without": 48.88,
+          "macro_with": 48.94
+        },
+        "STD": {
+          "f1": 53.09,
+          "support_per_split": 26.2,
+          "n": 12,
+          "macro_without": 48.79,
+          "macro_with": 48.94
+        },
+        "MFP": {
+          "f1": 55.34,
+          "support_per_split": 15.5,
+          "n": 12,
+          "macro_without": 48.68,
+          "macro_with": 48.94
+        },
+        "CHP": {
+          "f1": 56.25,
+          "support_per_split": 26.2,
+          "n": 12,
+          "macro_without": 48.64,
+          "macro_with": 48.94
+        },
+        "PRO": {
+          "f1": 56.61,
+          "support_per_split": 14.5,
+          "n": 12,
+          "macro_without": 48.65,
+          "macro_with": 48.94
+        },
+        "OBJ": {
+          "f1": 59.89,
+          "support_per_split": 25.8,
+          "n": 12,
+          "macro_without": 48.52,
+          "macro_with": 48.94
+        },
+        "DEF": {
+          "f1": 61.47,
+          "support_per_split": 36.8,
+          "n": 12,
+          "macro_without": 48.41,
+          "macro_with": 48.94
+        },
+        "DAM": {
+          "f1": 62.39,
+          "support_per_split": 30.8,
+          "n": 12,
+          "macro_without": 48.39,
+          "macro_with": 48.94
+        },
+        "MIC": {
+          "f1": 62.65,
+          "support_per_split": 26.0,
+          "n": 12,
+          "macro_without": 48.36,
+          "macro_with": 48.94
+        },
+        "MAC": {
+          "f1": 64.91,
+          "support_per_split": 19.5,
+          "n": 12,
+          "macro_without": 48.3,
+          "macro_with": 48.94
+        },
+        "MEC": {
+          "f1": 68.1,
+          "support_per_split": 70.0,
+          "n": 12,
+          "macro_without": 48.15,
+          "macro_with": 48.94
+        },
+        "MAT": {
+          "f1": 70.41,
+          "support_per_split": 18.8,
+          "n": 12,
+          "macro_without": 48.09,
+          "macro_with": 48.94
+        },
+        "EQU": {
+          "f1": 70.59,
+          "support_per_split": 17.8,
+          "n": 12,
+          "macro_without": 48.03,
+          "macro_with": 48.94
+        },
+        "VAL": {
+          "f1": 76.85,
+          "support_per_split": 41.2,
+          "n": 12,
+          "macro_without": 47.79,
+          "macro_with": 48.94
+        },
+        "MEP": {
+          "f1": 76.94,
+          "support_per_split": 39.5,
+          "n": 12,
+          "macro_without": 47.79,
+          "macro_with": 48.94
+        }
+      },
+      "crf_st3_ens3": {
+        "ETP": {
+          "f1": 0.0,
+          "support_per_split": 11.2,
+          "n": 8,
+          "macro_without": 51.27,
+          "macro_with": 49.31
+        },
+        "SDE": {
+          "f1": 17.64,
+          "support_per_split": 5.2,
+          "n": 12,
+          "macro_without": 52.05,
+          "macro_with": 50.72
+        },
+        "MIP": {
+          "f1": 19.37,
+          "support_per_split": 7.2,
+          "n": 12,
+          "macro_without": 52.02,
+          "macro_with": 50.72
+        },
+        "PQT": {
+          "f1": 27.79,
+          "support_per_split": 29.0,
+          "n": 9,
+          "macro_without": 50.2,
+          "macro_with": 49.36
+        },
+        "CGE": {
+          "f1": 27.83,
+          "support_per_split": 4.7,
+          "n": 9,
+          "macro_without": 52.96,
+          "macro_with": 51.98
+        },
+        "MOD": {
+          "f1": 28.28,
+          "support_per_split": 6.0,
+          "n": 6,
+          "macro_without": 51.45,
+          "macro_with": 50.57
+        },
+        "PRP": {
+          "f1": 28.64,
+          "support_per_split": 6.8,
+          "n": 12,
+          "macro_without": 51.64,
+          "macro_with": 50.72
+        },
+        "ODE": {
+          "f1": 35.54,
+          "support_per_split": 5.3,
+          "n": 9,
+          "macro_without": 53.92,
+          "macro_with": 53.13
+        },
+        "CEL": {
+          "f1": 41.52,
+          "support_per_split": 8.8,
+          "n": 12,
+          "macro_without": 51.18,
+          "macro_with": 50.72
+        },
+        "MTP": {
+          "f1": 45.55,
+          "support_per_split": 39.8,
+          "n": 12,
+          "macro_without": 50.93,
+          "macro_with": 50.72
+        },
+        "CPR": {
+          "f1": 48.33,
+          "support_per_split": 1.8,
+          "n": 12,
+          "macro_without": 50.73,
+          "macro_with": 50.72
+        },
+        "STD": {
+          "f1": 50.88,
+          "support_per_split": 26.2,
+          "n": 12,
+          "macro_without": 50.71,
+          "macro_with": 50.72
+        },
+        "LOC": {
+          "f1": 53.8,
+          "support_per_split": 13.8,
+          "n": 12,
+          "macro_without": 50.6,
+          "macro_with": 50.72
+        },
+        "DAT": {
+          "f1": 55.1,
+          "support_per_split": 17.0,
+          "n": 12,
+          "macro_without": 50.54,
+          "macro_with": 50.72
+        },
+        "PRO": {
+          "f1": 55.21,
+          "support_per_split": 14.5,
+          "n": 12,
+          "macro_without": 50.57,
+          "macro_with": 50.72
+        },
+        "MIC": {
+          "f1": 55.76,
+          "support_per_split": 26.0,
+          "n": 12,
+          "macro_without": 50.49,
+          "macro_with": 50.72
+        },
+        "MFP": {
+          "f1": 56.49,
+          "support_per_split": 15.5,
+          "n": 12,
+          "macro_without": 50.49,
+          "macro_with": 50.72
+        },
+        "CHP": {
+          "f1": 60.33,
+          "support_per_split": 26.2,
+          "n": 12,
+          "macro_without": 50.32,
+          "macro_with": 50.72
+        },
+        "DEF": {
+          "f1": 65.2,
+          "support_per_split": 36.8,
+          "n": 12,
+          "macro_without": 50.11,
+          "macro_with": 50.72
+        },
+        "DAM": {
+          "f1": 65.89,
+          "support_per_split": 30.8,
+          "n": 12,
+          "macro_without": 50.11,
+          "macro_with": 50.72
+        },
+        "EQU": {
+          "f1": 66.69,
+          "support_per_split": 17.8,
+          "n": 12,
+          "macro_without": 50.06,
+          "macro_with": 50.72
+        },
+        "OBJ": {
+          "f1": 67.12,
+          "support_per_split": 25.8,
+          "n": 12,
+          "macro_without": 50.07,
+          "macro_with": 50.72
+        },
+        "MAT": {
+          "f1": 68.14,
+          "support_per_split": 18.8,
+          "n": 12,
+          "macro_without": 50.02,
+          "macro_with": 50.72
+        },
+        "MEP": {
+          "f1": 68.53,
+          "support_per_split": 39.5,
+          "n": 12,
+          "macro_without": 50.02,
+          "macro_with": 50.72
+        },
+        "MEC": {
+          "f1": 69.94,
+          "support_per_split": 70.0,
+          "n": 12,
+          "macro_without": 49.93,
+          "macro_with": 50.72
+        },
+        "MAC": {
+          "f1": 71.04,
+          "support_per_split": 19.5,
+          "n": 12,
+          "macro_without": 49.9,
+          "macro_with": 50.72
+        },
+        "VAL": {
+          "f1": 76.19,
+          "support_per_split": 41.2,
+          "n": 12,
+          "macro_without": 49.67,
+          "macro_with": 50.72
+        }
+      }
+    }
+  },
+  "published_split": {
+    "fine": {
+      "published": 69.92,
+      "baseline": {
+        "micro": {
+          "mean": 70.19,
+          "ci95": [
+            69.03,
+            71.35
+          ],
+          "per_run": [
+            71.82,
+            69.49,
+            69.29,
+            69.43,
+            68.58,
+            72.66,
+            72.6,
+            70.15,
+            68.02,
+            69.86
+          ]
+        },
+        "micro_strict": {
+          "mean": 71.61,
+          "ci95": [
+            70.51,
+            72.72
+          ],
+          "per_run": [
+            72.87,
+            71.27,
+            70.7,
+            71.1,
+            69.81,
+            74.05,
+            74.2,
+            70.77,
+            70.29,
+            71.06
+          ]
+        },
+        "macro": {
+          "mean": 67.73,
+          "ci95": [
+            65.85,
+            69.6
+          ],
+          "per_run": [
+            70.03,
+            69.42,
+            67.25,
+            64.24,
+            63.81,
+            71.39,
+            70.21,
+            68.59,
+            65.55,
+            66.79
+          ]
+        },
+        "weighted": {
+          "mean": 70.53,
+          "ci95": [
+            69.34,
+            71.73
+          ],
+          "per_run": [
+            71.6,
+            70.65,
+            69.3,
+            70.22,
+            68.87,
+            72.77,
+            73.33,
+            69.99,
+            67.98,
+            70.63
+          ]
+        },
+        "published_lies": "within"
+      },
+      "crf": {
+        "micro": {
+          "mean": 73.31,
+          "ci95": [
+            72.28,
+            74.35
+          ],
+          "per_run": [
+            73.49,
+            73.73,
+            74.05,
+            75.24,
+            70.89,
+            72.66,
+            73.16,
+            75.56,
+            72.69,
+            71.67
+          ]
+        },
+        "micro_strict": {
+          "mean": 73.31,
+          "ci95": [
+            72.28,
+            74.35
+          ],
+          "per_run": [
+            73.49,
+            73.73,
+            74.05,
+            75.24,
+            70.89,
+            72.66,
+            73.16,
+            75.56,
+            72.69,
+            71.67
+          ]
+        },
+        "macro": {
+          "mean": 71.84,
+          "ci95": [
+            70.14,
+            73.54
+          ],
+          "per_run": [
+            71.51,
+            73.32,
+            72.97,
+            74.91,
+            66.55,
+            70.88,
+            70.96,
+            74.47,
+            72.11,
+            70.7
+          ]
+        },
+        "weighted": {
+          "mean": 72.75,
+          "ci95": [
+            71.65,
+            73.86
+          ],
+          "per_run": [
+            72.55,
+            73.1,
+            73.62,
+            75.06,
+            69.9,
+            72.7,
+            71.88,
+            74.92,
+            71.55,
+            72.25
+          ]
+        },
+        "published_lies": "below"
+      },
+      "crf_minus_baseline": {
+        "micro": {
+          "mean_diff": 3.12,
+          "ci95": [
+            1.62,
+            4.62
+          ],
+          "per_run": [
+            1.67,
+            4.24,
+            4.76,
+            5.81,
+            2.31,
+            0.0,
+            0.56,
+            5.41,
+            4.67,
+            1.81
+          ]
+        },
+        "micro_strict": {
+          "mean_diff": 1.7,
+          "ci95": [
+            0.21,
+            3.19
+          ],
+          "per_run": [
+            0.62,
+            2.46,
+            3.35,
+            4.14,
+            1.08,
+            -1.39,
+            -1.04,
+            4.79,
+            2.4,
+            0.61
+          ]
+        },
+        "macro": {
+          "mean_diff": 4.11,
+          "ci95": [
+            1.77,
+            6.45
+          ],
+          "per_run": [
+            1.48,
+            3.9,
+            5.72,
+            10.67,
+            2.74,
+            -0.51,
+            0.75,
+            5.88,
+            6.56,
+            3.91
+          ]
+        },
+        "weighted": {
+          "mean_diff": 2.22,
+          "ci95": [
+            0.66,
+            3.78
+          ],
+          "per_run": [
+            0.95,
+            2.45,
+            4.32,
+            4.84,
+            1.03,
+            -0.07,
+            -1.45,
+            4.93,
+            3.57,
+            1.62
+          ]
+        }
+      },
+      "crf_votes": {
+        "micro": {
+          "mean": 74.57,
+          "ci95": [
+            73.42,
+            75.72
+          ],
+          "per_run": [
+            74.26,
+            75.1,
+            74.34
+          ]
+        },
+        "micro_strict": {
+          "mean": 74.57,
+          "ci95": [
+            73.42,
+            75.72
+          ],
+          "per_run": [
+            74.26,
+            75.1,
+            74.34
+          ]
+        },
+        "macro": {
+          "mean": 73.16,
+          "ci95": [
+            72.92,
+            73.4
+          ],
+          "per_run": [
+            73.05,
+            73.19,
+            73.24
+          ]
+        },
+        "weighted": {
+          "mean": 74.02,
+          "ci95": [
+            71.74,
+            76.3
+          ],
+          "per_run": [
+            73.76,
+            75.04,
+            73.26
+          ]
+        }
+      }
+    },
+    "coarse": {
+      "published": 72.32,
+      "baseline": {
+        "micro": {
+          "mean": 72.52,
+          "ci95": [
+            71.88,
+            73.16
+          ],
+          "per_run": [
+            72.69,
+            72.63,
+            72.07,
+            72.58,
+            72.45,
+            70.43,
+            72.52,
+            74.07,
+            72.77,
+            72.99
+          ]
+        },
+        "micro_strict": {
+          "mean": 74.4,
+          "ci95": [
+            73.54,
+            75.27
+          ],
+          "per_run": [
+            74.33,
+            74.51,
+            74.51,
+            74.03,
+            74.54,
+            72.03,
+            74.06,
+            77.01,
+            74.07,
+            74.95
+          ]
+        },
+        "macro": {
+          "mean": 60.66,
+          "ci95": [
+            59.09,
+            62.24
+          ],
+          "per_run": [
+            58.79,
+            60.64,
+            58.45,
+            61.67,
+            62.12,
+            56.45,
+            62.82,
+            61.3,
+            63.75,
+            60.66
+          ]
+        },
+        "weighted": {
+          "mean": 71.83,
+          "ci95": [
+            71.18,
+            72.47
+          ],
+          "per_run": [
+            71.75,
+            71.67,
+            71.58,
+            71.69,
+            72.04,
+            69.63,
+            72.11,
+            73.08,
+            72.61,
+            72.12
+          ]
+        },
+        "published_lies": "within"
+      },
+      "crf": {
+        "micro": {
+          "mean": 75.48,
+          "ci95": [
+            74.23,
+            76.72
+          ],
+          "per_run": [
+            77.66,
+            75.65,
+            76.32,
+            76.89,
+            76.54,
+            75.68,
+            75.41,
+            72.0,
+            75.65,
+            72.96
+          ]
+        },
+        "micro_strict": {
+          "mean": 75.48,
+          "ci95": [
+            74.23,
+            76.72
+          ],
+          "per_run": [
+            77.66,
+            75.65,
+            76.32,
+            76.89,
+            76.54,
+            75.68,
+            75.41,
+            72.0,
+            75.65,
+            72.96
+          ]
+        },
+        "macro": {
+          "mean": 64.33,
+          "ci95": [
+            61.97,
+            66.68
+          ],
+          "per_run": [
+            68.51,
+            64.9,
+            67.66,
+            65.02,
+            67.94,
+            60.76,
+            63.69,
+            59.07,
+            65.11,
+            60.61
+          ]
+        },
+        "weighted": {
+          "mean": 74.64,
+          "ci95": [
+            73.3,
+            75.99
+          ],
+          "per_run": [
+            76.88,
+            74.59,
+            75.82,
+            75.75,
+            76.42,
+            74.51,
+            74.9,
+            70.91,
+            74.65,
+            72.0
+          ]
+        },
+        "published_lies": "below"
+      },
+      "crf_minus_baseline": {
+        "micro": {
+          "mean_diff": 2.96,
+          "ci95": [
+            1.3,
+            4.61
+          ],
+          "per_run": [
+            4.97,
+            3.02,
+            4.25,
+            4.31,
+            4.09,
+            5.25,
+            2.89,
+            -2.07,
+            2.88,
+            -0.03
+          ]
+        },
+        "micro_strict": {
+          "mean_diff": 1.07,
+          "ci95": [
+            -0.82,
+            2.97
+          ],
+          "per_run": [
+            3.33,
+            1.14,
+            1.81,
+            2.86,
+            2.0,
+            3.65,
+            1.35,
+            -5.01,
+            1.58,
+            -1.99
+          ]
+        },
+        "macro": {
+          "mean_diff": 3.66,
+          "ci95": [
+            0.9,
+            6.43
+          ],
+          "per_run": [
+            9.72,
+            4.26,
+            9.21,
+            3.35,
+            5.82,
+            4.31,
+            0.87,
+            -2.23,
+            1.36,
+            -0.05
+          ]
+        },
+        "weighted": {
+          "mean_diff": 2.82,
+          "ci95": [
+            1.13,
+            4.5
+          ],
+          "per_run": [
+            5.13,
+            2.92,
+            4.24,
+            4.06,
+            4.38,
+            4.88,
+            2.79,
+            -2.17,
+            2.04,
+            -0.12
+          ]
+        }
+      },
+      "crf_votes": {
+        "micro": {
+          "mean": 77.0,
+          "ci95": [
+            74.71,
+            79.28
+          ],
+          "per_run": [
+            77.31,
+            77.72,
+            75.96
+          ]
+        },
+        "micro_strict": {
+          "mean": 77.0,
+          "ci95": [
+            74.71,
+            79.28
+          ],
+          "per_run": [
+            77.31,
+            77.72,
+            75.96
+          ]
+        },
+        "macro": {
+          "mean": 65.53,
+          "ci95": [
+            61.84,
+            69.22
+          ],
+          "per_run": [
+            66.66,
+            66.09,
+            63.85
+          ]
+        },
+        "weighted": {
+          "mean": 76.02,
+          "ci95": [
+            73.69,
+            78.36
+          ],
+          "per_run": [
+            76.17,
+            76.88,
+            75.02
+          ]
+        }
+      }
+    }
+  }
+}

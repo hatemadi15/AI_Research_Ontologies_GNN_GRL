@@ -103,11 +103,12 @@ class Workspace:
         return key
 
     def week4(self, variant, reference, granularity, protocol, *, gpu=False, role='reported',
-              micro=(0.5, -0.5, 1.5), score=(80.0, 78.0, 82.0)):
+              micro=(0.5, -0.5, 1.5), score=(80.0, 78.0, 82.0), name=rr.WEEK4_FILE):
         """Add one week-4 comparison: results/ner_week4_comparisons.json (CPU) or
-        results/gpu/ner_week4_comparisons.json (gpu=True)."""
+        results/gpu/ner_week4_comparisons.json (gpu=True); with name=rr.WEEK5_FILE and
+        gpu=True, a week-5 comparison."""
         n = FULL[protocol]
-        path = self.results / ('gpu' if gpu else '') / rr.WEEK4_FILE
+        path = self.results / ('gpu' if gpu else '') / name
         path.parent.mkdir(exist_ok=True)
         comps = json.loads(path.read_text()) if path.exists() else {}
         key = f'ner_results_{granularity}_{protocol}_{variant}'
@@ -782,6 +783,186 @@ def test_week4_gpu_multitask_vote_takes_the_in_distribution_slot(tmp_path):
     assert ('* NER, GPU minus CPU (descriptive, not a comparison of methods): the CRF head with '
             'the same seeds and splits, 3-seed means, fine-grained +0.90 [-0.50, +2.30] over the 5 '
             'random splits.') in readme
+
+
+def test_week5_lists_follow_ner_seedmeans():
+    ns = pytest.importorskip('ner_seedmeans')
+    assert rr.WEEK5_FILE == ns.OUT_NAMES[5]
+    assert list(rr.WEEK5_COMPARISONS) == [(v, r) for v, r, _ in ns.comparison_list(5, True)]
+    assert set(rr.WEEK5_NAMES) >= set(ns.WEEK5_SYSTEMS)
+
+
+def test_week5_table_and_verdicts(tmp_path):
+    """The week-5 comparisons (10-seed means of GPU runs) get their own table, in the
+    protocol's order, and a verdict bullet per comparison."""
+    ws = Workspace(tmp_path)
+    ws.week4('crf_st3_ens3', 'crf_ens3', 'fine', 'random_split_vary', gpu=True, role='decision',
+             micro=(0.4, -0.2, 1.0), name=rr.WEEK5_FILE)
+    for g, micro in (('fine', (1.1, 0.5, 1.7)), ('coarse', (0.8, -0.6, 2.2))):
+        ws.week4('crf_st3', 'crf', g, 'leave_one_paper_out', gpu=True, role='decision',
+                 micro=micro, score=(47.4, 40.2, 54.7), name=rr.WEEK5_FILE)
+    readme, _ = ws.generate()
+    rows = table_rows(readme, '#### NER week-5 comparisons')
+    assert [r.split(' | ')[:4] for r in rows] == [
+        ['| self-training with 3 teachers vs CRF head', 'leave one paper out', 'fine', '4'],
+        ['| self-training with 3 teachers vs CRF head', 'leave one paper out', 'coarse', '4'],
+        ['| vote of self-training with 3 teachers vs 3-model seed ensemble',
+         'new random split per seed', 'fine', '5']]
+    assert all(r.endswith('| decision |') for r in rows)
+    assert ('* NER week 5 (GPU runs, 10 seeds), self-training with 3 teachers vs the CRF head '
+            '(paired micro-F1 difference): leaving one paper out (the pre-registered decision): '
+            'fine-grained improves') in readme
+    assert '#### NER week-4 comparisons' not in readme
+
+
+def test_week5_reported_system_replaces_the_earlier_rows(tmp_path):
+    """With week-5 comparisons, the reported system is decided on them: crf_ens3 (its scores:
+    the 10-seed vote family's) unless a vote passes. A vote that replaces crf_ens3 is named,
+    with the score of crf_ens3 in parentheses, and so is the system on unseen papers if it
+    differs."""
+    ws = Workspace(tmp_path)
+    for g, paper in (('fine', 69.92), ('coarse', 72.32)):
+        ws.summary(g, 'random_split_vary', 'crf_ens3', 5, (79.5, 77.8, 81.1), paper=paper)
+        ws.summary(g, 'leave_one_paper_out', 'crf_ens3', 4, (61.42, 55.8, 67.0), paper=paper)
+    for g in ('fine', 'coarse'):
+        ws.week4('crf_ens3', 'crf', g, 'random_split_vary', gpu=True, micro=(2.0, 1.0, 3.0),
+                 score=(80.5, 78.0, 83.0), name=rr.WEEK5_FILE)
+        ws.week4('crf_ens3', 'crf', g, 'leave_one_paper_out', gpu=True, micro=(2.0, 1.0, 3.0),
+                 score=(50.0, 44.0, 56.0), name=rr.WEEK5_FILE)
+    # coarse, unseen papers: the vote of self-training passes, the label-semantics vote too
+    # but by less
+    ws.week4('crf_st3_ens3', 'crf_ens3', 'coarse', 'leave_one_paper_out', gpu=True,
+             role='decision', micro=(1.5, 0.5, 2.5), score=(62.0, 56.0, 68.0), name=rr.WEEK5_FILE)
+    ws.week4('crf_ls_ens3', 'crf_ens3', 'coarse', 'leave_one_paper_out', gpu=True,
+             role='decision', micro=(1.0, 0.2, 1.8), score=(61.5, 56.0, 67.0), name=rr.WEEK5_FILE)
+    readme, roadmap = ws.generate()
+    rows = [line for line in glance(readme).split('\n') if 'reported system' in line]
+    assert len(rows) == 2
+    assert rows[0].startswith('| NER, fine-grained, reported system (week-5 protocol; 10 seeds, '
+                              'GPU runs): 3-model seed ensemble `crf_ens3` | micro F1 80.50 '
+                              '[78.00, 83.00] over 5 random splits, 50.00 on an unseen paper | '
+                              'published 69.92 (none for an unseen paper): **beaten**')
+    assert rows[1].startswith('| NER, coarse-grained, reported system (week-5 protocol; 10 seeds, '
+                              'GPU runs): 3-model seed ensemble `crf_ens3`; on unseen papers the '
+                              'vote of self-training with 3 teachers `crf_st3_ens3` | micro F1 '
+                              '80.50 [78.00, 83.00] over 5 random splits; 62.00 on an unseen paper '
+                              '(`crf_ens3` 50.00) | published 72.32')
+    standing = next(line for line in roadmap.split('\n') if 'reported system' in line)
+    assert standing.startswith(
+        '| NER, reported system (week-5 protocol; 10 seeds, GPU runs) | fine: 3-model seed '
+        'ensemble `crf_ens3`, micro F1 80.50 [78.00, 83.00] over 5 new splits, 50.00 leaving one '
+        'paper out; coarse: 3-model seed ensemble `crf_ens3`, micro F1 80.50 [78.00, 83.00] over '
+        '5 new splits; on unseen papers the vote of self-training with 3 teachers '
+        '`crf_st3_ens3`, 62.00 leaving one paper out (`crf_ens3` 50.00) | same; ')
+
+    # fine, random splits: the multi-task vote passes; its scores decide against the paper
+    ws.week4('crf_mt_ens3', 'crf_ens3', 'fine', 'random_split_vary', gpu=True,
+             role='decision', micro=(1.0, 0.2, 1.8), score=(81.5, 79.0, 84.0), name=rr.WEEK5_FILE)
+    readme, roadmap = ws.generate()
+    row = next(line for line in glance(readme).split('\n') if 'fine-grained, reported' in line)
+    assert row.startswith('| NER, fine-grained, reported system (week-5 protocol; 10 seeds, GPU '
+                          'runs): multi-task vote `crf_mt_ens3`; on unseen papers the 3-model '
+                          'seed ensemble `crf_ens3` | micro F1 81.50 [79.00, 84.00] over 5 random '
+                          'splits (`crf_ens3` 80.50); 50.00 on an unseen paper | published 69.92')
+    standing = next(line for line in roadmap.split('\n') if 'reported system' in line)
+    assert ('fine: multi-task vote `crf_mt_ens3`, micro F1 81.50 [79.00, 84.00] over 5 new '
+            'splits (`crf_ens3` 80.50); on unseen papers the 3-model seed ensemble `crf_ens3`, '
+            '50.00 leaving one paper out; coarse:') in standing
+
+
+def test_published_split_row(tmp_path):
+    ws = Workspace(tmp_path)
+    (ws.results / 'gpu').mkdir()
+    for g, base, crf in (('fine', (70.5, 69.0, 72.0), (73.0, 72.0, 74.0)),
+                         ('coarse', (75.0, 74.0, 76.0), (77.0, 76.0, 78.0))):
+        for variant, micro in ((None, base), ('crf', crf)):
+            (ws.results / 'gpu' / rr.ner_file(g, 'published_split', variant)).write_text(
+                json.dumps({'summary': {'n_runs': 10, 'micro': {
+                    'mean': micro[0], 'ci95': list(micro[1:])}}}))
+    readme, _ = ws.generate()
+    rows = [line for line in glance(readme).split('\n') if 'published split' in line]
+    assert rows == [
+        "| NER, fine-grained, the published split (the release's partition, micro F1), 10 seeds "
+        "(GPU runs) | plain MatSciBERT 70.50 [69.00, 72.00]; CRF head 73.00 [72.00, 74.00] | "
+        "published 69.92: within the 95% CI of plain MatSciBERT (reproduced), below (**beaten**) "
+        "that of the CRF head; the CIs are over seeds only |",
+        "| NER, coarse-grained, the published split (the release's partition, micro F1), 10 seeds "
+        "(GPU runs) | plain MatSciBERT 75.00 [74.00, 76.00]; CRF head 77.00 [76.00, 78.00] | "
+        "published 72.32: below the 95% CI of plain MatSciBERT, below (**beaten**) that of the "
+        "CRF head; the CIs are over seeds only |"]
+
+
+def _spread(mean, lo, hi, diff=False):
+    return {'mean_diff' if diff else 'mean': mean, 'ci95': [lo, hi]}
+
+
+def test_week5_analysis_bullets(tmp_path):
+    """The exploratory week-5 analyses (ner_seed_analysis.py) give three bullets: the
+    published split, how far a 3-seed design misleads, and the rare coarse-grained types of
+    the reported system."""
+    ws = Workspace(tmp_path)
+    (ws.results / 'gpu').mkdir()
+    readme, _ = ws.generate()
+    assert 'published split (week-5' not in readme and 'how far a 3-seed' not in readme
+    published = {}
+    for g, paper, base, crf in (('fine', 69.92, 70.2, 73.3), ('coarse', 72.32, 72.5, 75.5)):
+        published[g] = {
+            'published': paper,
+            'baseline': {'micro': _spread(base, base - 1, base + 1),
+                         'macro': _spread(base - 3, base - 4, base - 2),
+                         'published_lies': 'within'},
+            'crf': {'micro': _spread(crf, crf - 1, crf + 1),
+                    'macro': _spread(crf - 2, crf - 3, crf - 1), 'published_lies': 'below'},
+            'crf_minus_baseline': {'micro': _spread(3.1, 1.6, 4.6, diff=True),
+                                   'micro_strict': _spread(1.7, 0.2, 3.2, diff=True)},
+            'crf_votes': {'micro': _spread(crf + 1, crf, crf + 2)}}
+    triple = {'n_triples': 120, 'share_above_0': 0.41, 'share_below_0': 0.0,
+              'share_opposite_sign': 0.083,
+              'ten_seed': {'mean_diff': 1.83, 'ci95': [0.32, 3.34], 'passes': True}}
+    types = {'SDE': {'f1': 17.7, 'support_per_split': 3.0, 'n': 12, 'macro_without': 73.11,
+                     'macro_with': 71.02},
+             'MIP': {'f1': 17.71, 'support_per_split': 5.2, 'n': 15, 'macro_without': 72.0,
+                     'macro_with': 71.0},
+             'MAT': {'f1': 92.2, 'support_per_split': 17.6, 'n': 15, 'macro_without': 70.6,
+                     'macro_with': 71.0}}
+    analysis = {'published_split': published,
+                'triples': {'fine_random_split_vary': {'crf_mt': triple}},
+                'spread': {f'{g}_{p}': {'crf': {'mean_sd': sd}} for g, p, sd in (
+                    ('fine', 'random_split_vary', 1.69), ('coarse', 'random_split_vary', 1.46),
+                    ('fine', 'leave_one_paper_out', 2.48),
+                    ('coarse', 'leave_one_paper_out', 2.23))},
+                'types': {'coarse_random_split_vary': {'crf_ens3': types}}}
+    (ws.results / 'gpu' / rr.WEEK5_ANALYSIS).write_text(json.dumps(analysis))
+    readme, _ = ws.generate()
+    assert ("* NER, the published split (week-5 amendment: the release's partition and tags, "
+            "micro F1 as its code scores it; 10 model seeds, GPU runs; the 95% CIs are over the "
+            "seeds of one split): plain MatSciBERT, the paper's model, scores 70.20 [69.20, "
+            "71.20] fine-grained and 72.50 [71.50, 73.50] coarse-grained. Both published "
+            "numbers lie within these intervals. The CRF head adds +3.10 [+1.60, +4.60] "
+            "fine-grained and +3.10 [+1.60, +4.60] coarse-grained, paired by seed (strict IOB2 "
+            "+1.70 [+0.20, +3.20] and +1.70 [+0.20, +3.20]), and its votes over the 3 seed "
+            "triples score 74.30 and 76.50. Macro F1 is lower: 67.20 and 69.50 for plain "
+            "MatSciBERT, 71.30 and 73.50 for the CRF head.\n") in readme
+    assert ("* NER, how far a 3-seed design misleads (week 5, exploratory): for each family "
+            "against the CRF head on the protocol of its decision, the share of the 120 triples "
+            "of the 10 seeds (the same triple on both sides) whose 3-seed comparison passes the "
+            "rule, and whose mean difference has the opposite sign to the 10-seed one. "
+            "Multi-task (fine + coarse heads) over the 5 random splits: fine-grained (+1.83 "
+            "[+0.32, +3.34] with 10 seeds) 41% pass, 8% opposite sign. The SD of a split's "
+            "micro F1 over the 10 seeds of the CRF head averages 1.69 fine-grained and 1.46 "
+            "coarse-grained over the 5 random splits, and 2.48 fine and 2.23 coarse over the 4 "
+            "held-out papers.\n") in readme
+    # without week-5 comparisons the reported system is crf_ens3
+    assert ("* NER, the coarse-grained types that keep macro F1 down (week 5, exploratory; the "
+            "3 votes of the reported system `crf_ens3` over the 5 random splits, F1 and test "
+            "entities per split): SDE 17.7 (3.0), MIP 17.7 (5.2), MAT 92.2 (17.6). Macro F1 "
+            "counts each type alike: without SDE alone it would be 73.11 instead of 71.02 on "
+            "the splits that have it.\n") in readme
+    published['coarse']['baseline']['published_lies'] = 'below'
+    (ws.results / 'gpu' / rr.WEEK5_ANALYSIS).write_text(json.dumps(analysis))
+    readme, _ = ws.generate()
+    assert ('The published 69.92 lies within the fine-grained interval, 72.32 below the '
+            'coarse-grained one.') in readme
 
 
 def test_a_week3_file_that_is_not_an_object_is_reported(tmp_path, capsys):
