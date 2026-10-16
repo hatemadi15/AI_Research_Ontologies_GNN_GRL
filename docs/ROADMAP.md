@@ -1651,4 +1651,12 @@ mapped types are VAL → Value, STD → StateDescriptor and MAC →
 MaterialClass in every fold, and MAT → Alloy where the training papers
 reach 90%.
 
+*Clarification, made when the tool first met the data and before any
+predictions were used:* 15 sentences are tokenised differently in the
+fine-grained and coarse-grained files (as the multi-task runs already
+handle). They cannot be aligned word by word, so they count for neither
+the mapping nor the completion, and their fine-grained predictions stay as
+they are. Each run stores how many test sentences this concerns
+(`n_unaligned`).
+
 **Budget:** no GPU; seconds per file.

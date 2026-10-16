@@ -10,7 +10,9 @@ coarse-grained type C maps to the fine-grained type F if C has at least MIN_SPAN
 and at least SHARE of them are fine-grained entities of type F with the same span. In each
 test sentence, a coarse-grained predicted entity of a mapped type whose words are all
 predicted O at the fine-grained level becomes a fine-grained entity of type F. No
-fine-grained prediction is removed or changed.
+fine-grained prediction is removed or changed. A sentence that the two corpora tokenise
+differently (15 in MaterioMiner) cannot be aligned word by word: it counts for neither the
+mapping nor the completion, and its fine-grained predictions stay as they are.
 
 Inputs: pairs of results files (--fine, --coarse, paired by position) of the same seed and
 kind of system, with saved predictions (ner_baseline.py --save-predictions, or a vote of
@@ -52,13 +54,14 @@ class CompletionError(ValueError):
 # The rule (pure Python)
 # ---------------------------------------------------------------------------
 def type_mapping(fine, coarse, min_spans=MIN_SPANS, share=SHARE):
-    """{coarse type: fine type} from aligned gold sentences: fine and coarse are lists of
-    (words, tags, ...) for the same sentences. A coarse type maps if it has at least
-    min_spans spans and at least `share` of them are fine entities of one type, same span."""
+    """{coarse type: fine type} from gold sentences: fine and coarse are lists of (words,
+    tags, ...) for the same corpus positions; a pair tokenised differently is left out. A
+    coarse type maps if it has at least min_spans spans and at least `share` of them are fine
+    entities of one type, same span."""
     seen, same = Counter(), {}
     for f, c in zip(fine, coarse, strict=True):
         if list(f[0]) != list(c[0]):
-            raise CompletionError('the fine-grained and coarse-grained sentences differ')
+            continue                                # not aligned word by word
         fine_spans = {(s, e): k for s, e, k in tags_to_spans(f[1])[0]}
         for s, e, k in tags_to_spans(c[1])[0]:
             seen[k] += 1
@@ -152,16 +155,21 @@ def apply(fine_results, coarse_results, corpora, save_predictions=False):
         coarse_pred = [p.split() for p in other['test_pred']]
         if any(tags_to_spans(p)[1] for p in pred + coarse_pred):
             raise CompletionError(f'run {paper}: the predictions are not valid IOB2')
-        new, added = [], 0
+        new, added, unaligned = [], 0, 0
         for k, i in enumerate(run['test_index']):
-            if len(fine[i][0]) != len(gold[k]):
+            if len(fine[i][0]) != len(gold[k]) or len(coarse[i][0]) != len(coarse_pred[k]):
                 raise CompletionError(f'run {paper}: test sentence {i} does not match the corpus')
+            if list(fine[i][0]) != list(coarse[i][0]):
+                new.append(pred[k])                     # not aligned word by word: unchanged
+                unaligned += 1
+                continue
             tags, n = complete(pred[k], coarse_pred[k], mapping)
             new.append(tags)
             added += n
         res = score(gold, new)
-        res.update({'run_id': paper, 'n_added': added, 'input_f1': run['f1'],
-                    'input_f1_strict': run['f1_strict'], 'mapping': mapping})
+        res.update({'run_id': paper, 'n_added': added, 'n_unaligned': unaligned,
+                    'input_f1': run['f1'], 'input_f1_strict': run['f1_strict'],
+                    'mapping': mapping})
         if save_predictions:
             res.update({'test_index': run['test_index'], 'test_gold': run['test_gold'],
                         'test_pred': [' '.join(t) for t in new]})

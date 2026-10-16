@@ -34,8 +34,11 @@ def test_a_coarse_type_maps_when_most_of_its_spans_are_one_fine_type():
     # a fine entity on another span does not count for the coarse span
     fine, coarse = _gold(['5/B-Value/B-VAL MPa/O/I-VAL'] * 10)
     assert cf.type_mapping(fine, coarse) == {}
-    with pytest.raises(cf.CompletionError):                  # the sentences must align
-        cf.type_mapping(_gold(['a'])[0], _gold(['b'])[1])
+    # a sentence tokenised differently at the two levels counts for nothing
+    fine, coarse = _gold(['5/B-Value/B-VAL'] * 10)
+    other, _ = _gold(['5x/B-Value/B-VAL'] * 10)
+    assert cf.type_mapping(fine + other[:1], coarse + coarse[:1]) == {'VAL': 'Value'}
+    assert cf.type_mapping(other, coarse) == {}
 
 
 def test_completion_adds_only_where_the_fine_level_is_all_o():
@@ -109,10 +112,29 @@ def test_results_are_completed_and_rescored(tmp_path, monkeypatch, capsys):
     assert run['mapping'] == {'VAL': 'Value'} and run['n_added'] == 2
     assert run['test_pred'] == ['B-Value I-Value O', 'B-Alloy O', 'O B-Value']
     # '7 MPa' is fine-grained O in the gold tags: 2 of the 3 predictions are right
-    assert run['f1'] == 80.0 and run['input_f1'] == 50.0
+    assert run['f1'] == 80.0 and run['input_f1'] == 50.0 and run['n_unaligned'] == 0
     assert out['config'] == {'input': 'crf_m100', 'coarse_input': 'crf_m100',
                              'rule': cf.RULE, 'min_spans': 10, 'share': 0.9}
     assert 'crf_cf_m100' in capsys.readouterr().out
+
+
+def test_a_sentence_tokenised_differently_is_left_alone(tmp_path, monkeypatch):
+    pytest.importorskip('seqeval')
+    pytest.importorskip('scipy')
+
+    def corpora():
+        fine, coarse, labels = _corpora()
+        words, tags, doc = coarse[0]
+        coarse[0] = (['7MPa', 'x', 'y'], tags, doc)        # same length, other words
+        return fine, coarse, labels
+    monkeypatch.setattr(cf, 'gold_corpora', corpora)
+    fine_path, coarse_path = _files(tmp_path, ['O O O', 'B-Alloy O', 'O O'],
+                                    ['B-VAL I-VAL O', 'B-MAT O', 'O B-VAL'])
+    assert cf.main(['--fine', fine_path, '--coarse', coarse_path, '--save-predictions']) == 0
+    (run,) = json.loads((tmp_path / 'ner_results_fine_leave_one_paper_out_crf_cf_m100.json')
+                        .read_text())['runs']
+    assert run['test_pred'] == ['O O O', 'B-Alloy O', 'O B-Value']
+    assert (run['n_added'], run['n_unaligned'], run['f1']) == (1, 1, 100.0)
 
 
 def test_unusable_inputs_are_reported(tmp_path, monkeypatch, capsys):
