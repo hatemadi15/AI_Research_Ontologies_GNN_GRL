@@ -653,7 +653,10 @@ stands (ROADMAP §4, weeks 6 and 7):
    into words as SOFC-Exp's training articles are).
 2. SOFC-Exp, the second dataset. The CRF head's gain repeats there (+1.22
    [+0.50, +1.93]). Its second level of types (slot types, converted in
-   week 7) lets multi-task training be repeated there (part 2d, next).
+   week 7) lets multi-task training be repeated there (part 2d, next). Its
+   test articles turn out to be cut into words differently from its
+   training articles (ChemDataExtractor for training, Java's BreakIterator
+   for test); part 2e measures what that costs.
 3. Week 7: document-level label consistency and coarse-to-fine completion
    give no claim (the first hurts on SOFC-Exp). Recall calibration (a bias
    on the CRF head's emissions, chosen on inner folds) gives no claim

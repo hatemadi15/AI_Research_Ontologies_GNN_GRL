@@ -84,7 +84,9 @@ therefore measures unseen documents.
   1,836 sentences of the 11 test articles. A model trained on `cm−2`,
   `O2−` and `high - temperature` is tested on `cm − 2`, `O2 −` and
   `high-temperature`; every result on the official split, the published
-  ones included, carries this.
+  ones included, carries this. What it costs is measured by scoring the
+  same models on the test articles cut as the training articles are (week
+  7, part 2e).
 
 ## 3 Evaluation protocol
 
