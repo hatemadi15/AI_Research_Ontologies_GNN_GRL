@@ -654,8 +654,10 @@ stands (ROADMAP §4, weeks 6 and 7):
    week 7) lets multi-task training be repeated there (part 2d, next).
 3. Week 7: document-level label consistency and coarse-to-fine completion
    give no claim (the first hurts on SOFC-Exp). Recall calibration (a bias
-   on the CRF head's emissions, chosen on inner folds) is running, and
-   mention replacement is screened next.
+   on the CRF head's emissions, chosen on inner folds) gives no claim
+   either: the entities the CRF head misses on unseen papers are not near
+   its decision threshold, so a decoding change cannot recover them.
+   Mention replacement is screened next.
 4. Then the combinations of the methods that pass, and the rare
    coarse-grained types that keep macro F1 down.
 

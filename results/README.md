@@ -115,3 +115,26 @@ retyped, and the input's F1 (`input_f1`), but not the predictions, which the
 rule regenerates in seconds. `gpu/ner_week7_comparisons.json`
 (`ner_seedmeans.py --week 7 --gpu --results results/gpu`) holds the
 comparisons.
+
+Week 7, part 2a (recall calibration; Kaggle session `w7a` of 16 October):
+- `gpu/ner_results_<granularity>_leave_one_paper_out_crf_bias_m<N>.json`
+  and `gpu/ner_results_sofc_published_split_crf_bias.json` are the CRF head
+  again with `--entity-bias` (model seeds 0 to 900). Its scores are those
+  of D = 0 and equal the `crf_m<N>` and `crf` files. For every D of the
+  grid, `bias_test` and `bias_val` hold the entity counts [correct,
+  predicted, gold] per test paper and of the validation sentences. The
+  predictions at each D (`test_pred_bias`) were dropped here and stay in
+  the pulled session (`data/processed/kaggle/ner-gpu-jobs/20261016T152832`,
+  not in git).
+- `_leave_two_papers_out_crf_bias_m{0,100,200}` are the inner folds
+  (`--leave-two-papers-out`, 6 pairs of papers), counts only.
+- `ner_bias.py` writes the runs at the chosen D:
+  - `_crf_eb_m<N>` (D from the inner folds, with predictions);
+  - `_crf_ebv_m<N>` and `gpu/ner_results_sofc_published_split_crf_ebv.json`
+    (D from each run's validation sentences);
+  - each run keeps its D (`bias`), its D = 0 scores (`input_f1`) and the
+    entity counts at 0 and at D (`entities`).
+- `gpu/ner_entity_bias_<granularity>_<protocol>_<choice>.json` hold the
+  chosen D, the inner curves and the test sets' own curves (reported,
+  never used to choose).
+- `_crf_eb_ens3*` are the votes over the seed triples.

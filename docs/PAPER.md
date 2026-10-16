@@ -16,9 +16,11 @@ Claims C1–C10 hold either way: in a methods paper they are its baselines and
 evaluation protocol, in an evaluation paper its results. Document context
 passed the week-6 screen (+2.66 [+0.91, +4.40] fine-grained) but neither of
 its 10-seed decisions (+1.14 [−0.94, +3.22] against the CRF head). The
-candidates left are multi-task self-training (screen +6.06 [+1.05, +11.06]
-fine-grained; 10-seed decisions next on MaterioMiner) and recall calibration
-(week 7, part 2a, running; it applies to both datasets). The week-6 protocol
+candidate left is multi-task self-training (screen +6.06 [+1.05, +11.06]
+fine-grained; 10-seed decisions next on MaterioMiner), with mention
+replacement screened next. Recall calibration (week 7, part 2a) passed none
+of its 5 decisions, and showed why a decoding change cannot close the recall
+gap on unseen papers (C15). The week-6 protocol
 excluded multi-task methods from SOFC-Exp as a one-level corpus, but SOFC-Exp
 has a second level, 17 evaluated slot types that refine its 4 entity types
 (ROADMAP, "Prepared for part 2d"), so multi-task training (C7) and, if it
@@ -46,6 +48,7 @@ gain survives? Splits, scoring and seeds on MaterioMiner".
 | C12 | Document-level label consistency, a post-processing rule (a term the model tags in most of its occurrences in a paper is tagged in the rest), adds little on MaterioMiner and hurts on SOFC-Exp: +0.30 [−0.35, +0.95] fine-grained and +0.12 [+0.01, +0.24] coarse-grained on the CRF head, no significant change on the strongest votes, +0.10 / +0.06 on document context (reported); on SOFC-Exp −0.42 [−0.61, −0.22], and −0.38 [−0.60, −0.15] with retyping (which did better coarse-grained on MaterioMiner, +0.64 [+0.29, +1.00], post hoc). How an annotation scheme treats repeated mentions decides whether "one sense per discourse" helps. | `gpu/ner_week7_comparisons.json`; `gpu/ner_week5_seed_analysis.json` (`published_split`, `sofc`) | Done (week 7, part 1) |
 | C13 | The CRF head's gain repeats on a second dataset: on SOFC-Exp's official split (11 unseen test articles, 10 seeds) it scores 83.75 [82.85, 84.65] against plain MatSciBERT's 82.53 [81.84, 83.23], +1.22 [+0.50, +1.93] paired by seed; its seed votes score 85.13. The published MatSciBERT-CRF (84.77) lies above the CI over seeds. | `gpu/ner_results_sofc_published_split*.json`; README, SOFC-Exp row | Done (week 6, S1) |
 | C14 | Using the type hierarchy after the fact adds little: completing the fine-grained predictions from the coarse-grained ones, where a coarse type maps to one fine type in the training papers, gives +0.34 [−0.91, +1.59] on the CRF head and +0.12 [−1.76, +2.01] on the multi-task vote (fine-grained, unseen papers). Its added entities are right 39% of the time. | `gpu/ner_week7_comparisons.json` (`_cf`) | Done (week 7, part 2c) |
+| C15 | The recall gap on unseen papers is not a decision-threshold problem. A bias on the CRF head's emission of every entity tag, chosen per held-out paper on inner folds (recall calibration), gives −0.59 [−1.75, +0.57] fine-grained and +0.17 [−0.14, +0.48] coarse-grained against the CRF head, its votes do not beat the strongest systems, and on SOFC-Exp (chosen on the validation articles) it gives −0.21 [−0.58, +0.17]. Even the best bias per paper in hindsight would gain +0.56 and +0.18. The entities a small bias adds are right 22% (fine-grained), 19% (coarse-grained) and 21% (SOFC-Exp) of the time, at or below F1's break-even rate and far below the precision of the predictions above the threshold (53.7%, 57.3%, 82.2%). A bias of +3 recovers 7% of the missed fine-grained entities, with 6 wrong entities per right one. | `gpu/ner_week7_comparisons.json` (`_eb`, `_ebv`); `gpu/ner_entity_bias_*.json`; the `bias_test` counts of `gpu/ner_results_*_crf_bias*.json`; ROADMAP, "Outcome of part 2a" | Done (week 7, part 2a; the counts analysis is exploratory) |
 
 A draft of the sections that hold for either paper type is in
 `docs/PAPER_DRAFT.md`.

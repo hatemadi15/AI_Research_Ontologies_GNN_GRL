@@ -3,12 +3,12 @@
 **Status.** A working draft of the sections that hold whichever paper this
 becomes (`docs/PAPER.md`): a methods paper if a method passes its
 pre-registered decisions and repeats on SOFC-Exp, otherwise an evaluation
-paper. Sections 1–5 and 7 rest on finished, committed results; Section 6
-(methods for unseen papers) waits for its runs: stage 2 of multi-task
-self-training, recall calibration, mention replacement and multi-task
-training on SOFC-Exp's two levels (ROADMAP §4, weeks 6 and 7). The
-numbers come from `results/` through the claims table of `docs/PAPER.md`
-(C1–C14). References are keys of `docs/references.bib`.
+paper. Sections 1–5 and 7 rest on finished, committed results. In
+Section 6 (methods for unseen papers), recall calibration is decided (no
+gain, C15). The others wait for their runs: stage 2 of multi-task
+self-training, mention replacement and multi-task training on SOFC-Exp's
+two levels (ROADMAP §4, weeks 6 and 7). The numbers come from `results/`
+through the claims table of `docs/PAPER.md` (C1–C15). References are keys of `docs/references.bib`.
 
 ---
 
@@ -21,7 +21,9 @@ carry either way:
 - of the additions tested under a pre-registered 10-seed design, only the
   CRF head, seed votes and multi-task training hold;
 - a 3-seed design passes a real 1.8-point gain in 41% of seed triples, and
-  let through a 2.7-point gain that 10 seeds shrank to 1.1.
+  let through a 2.7-point gain that 10 seeds shrank to 1.1;
+- the entities a model misses on unseen papers lie far below its decision
+  threshold, so shifting the threshold does not recover them.
 
 ## 1 Introduction
 
@@ -220,6 +222,9 @@ lucky seeds; only 21 of the 120 triples of document context pass.
 - **Macro F1:** a few rare coarse-grained types (SDE and MIP near 18 F1;
   PRP, MOD and CPR at 40–42, with 2–8 test entities per split) keep it near
   the published number.
+- **Not a threshold problem (C15; Section 6.2):** the missed entities are
+  not near the decision threshold. Lowering it adds entities that are right
+  only 22% of the time fine-grained.
 
 ## 6 Methods for unseen papers (pending)
 
@@ -261,6 +266,30 @@ every tag but O before Viterbi decoding:
   articles, which are unseen articles.
 - *What is new:* the choice of the bias for unseen documents, and its test
   under the 10-seed design.
+- *Result (C15): no gain.* Against the CRF head on the 4 held-out papers
+  it gives −0.59 [−1.75, +0.57] fine-grained and +0.17 [−0.14, +0.48]
+  coarse-grained. Its votes do not beat the strongest systems: −3.53
+  [−8.10, +1.05] against the multi-task vote, −0.09 [−0.75, +0.58] against
+  the seed vote. On SOFC-Exp it gives −0.21 [−0.58, +0.17]. The inner folds
+  chose D = +1.25, +1.25, −1 and +0.25 fine-grained, but each paper's own
+  curve is flat: the best D per paper in hindsight would gain only +0.56
+  on average (+0.18 coarse-grained), and its sign differs by paper.
+- *Why:* the missed entities are not near the threshold. Pooled over the
+  papers and seeds, the head finds 5,386 of 13,280 fine-grained gold
+  entities.
+  - D = +0.25 adds 358 predictions, of which 22% are right. The break-even
+    rate for F1 is F1/2 = 23%, against 53.7% for the predictions above
+    the threshold.
+  - D = +3, a factor of about 20 on the odds of a one-word entity,
+    recovers 7% of the 7,894 misses, at 6 wrong entities per right one.
+  - Coarse-grained and on SOFC-Exp the added entities are right 19% and
+    21% of the time, below break-even (29% and 42%).
+
+  The method assumed roughly calibrated probabilities. Under that
+  assumption the entities just below the threshold would be right more
+  often than F1's break-even rate; on unseen papers they are not. The
+  recall gap comes from what the model scores, not how its scores are
+  decoded.
 
 **6.3 Mention replacement** (dai2020analysis). Three copies of each
 training sentence with an entity, each mention replaced with probability

@@ -892,7 +892,7 @@ chance at class level. For a Task C-style result:
 | 4 | Done for NER: P1 "Next, after week 3" items 1, 2, 3 and 5, i.e. votes over the week-3 changes that help, label semantics on the multi-task model, self-training at scale, on Kaggle T4 GPUs (protocol below). Not started: context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | Met for NER by two changes, both on unseen papers. Coarse-grained, the label-semantics vote improves on `crf_ens3` on the CPU (+1.63 [+0.11, +3.16]); the GPU repeat does not confirm it (+0.40 [−1.36, +2.16]). Fine-grained, self-training with 3 teachers improves on the CRF head (GPU, +1.07 [+0.33, +1.80]; +1.22 [+0.60, +1.84] on the random splits, reported). The multi-task vote and label semantics on the multi-task model do not pass. Typing: not started |
 | 5 | Done: NER, P1 "Next, after week 4" item 1, i.e. 10 seeds per split for the CRF reference, multi-task, label semantics and self-training with 3 teachers, on Kaggle T4 GPUs, and the published split (amendment); items 2–7 and a paper outline prepared, and the week-6 options run once each at full size (protocol below). The original week-5 work moves to week 7 | Met. Of the claims re-tested with 10 seeds, fine-grained multi-task on the random splits passes (+1.83 [+0.32, +3.34]); the coarse-grained claims of week 3 and the self-training claim of week 4 do not. The reported system: the multi-task vote coarse-grained on the random splits and fine-grained on unseen papers, `crf_ens3` elsewhere. On the published split, plain MatSciBERT reproduces 69.92 and 72.32 and the CRF head beats both |
 | 6 | In progress: NER, P1 "Next, after week 5", towards a methods paper: methods for unseen papers (DeBERTa-v3-large, document context, multi-task self-training) screened with 3 seeds and decided with 10, and a second dataset (SOFC-Exp, 10 seeds); protocol below. So far (P1, "Week 6 so far"): DeBERTa-v3-large stops at the screen; document context passes the screen but neither 10-seed decision; multi-task self-training passes the screen (+6.06 fine-grained), stage 2 next; on SOFC-Exp the CRF head improves on plain MatSciBERT (S1) | A method whose vote improves on the strongest system on unseen papers under the 10-seed design, and on SOFC-Exp |
-| 7 | In progress: NER, part 1, document-level label consistency for unseen papers, a post-processing rule on the saved predictions (no GPU; protocol below); part 2a, recall calibration (a bias on the CRF head's emissions, chosen on inner folds; protocol below); part 2b, mention replacement (screen, then 10 seeds if it passes; protocol below), and later the combinations of the methods that pass week 6, fixed after the week-6 decisions; part 2c, coarse-to-fine completion (done, no claim); part 2d, multi-task training on SOFC-Exp's two levels (protocol below). Then class-level taxonomy (LLM or cross-encoder + arborescence) and a relation annotation pilot | Part 1: the rule improves on the strongest system on unseen papers and on SOFC-Exp's CRF head. Taxonomy: first class-level F1 above chance; relation guidelines |
+| 7 | In progress: NER, part 1, document-level label consistency for unseen papers, a post-processing rule on the saved predictions (no GPU; protocol below); part 2a, recall calibration (a bias on the CRF head's emissions, chosen on inner folds; done, no claim: the missed entities are not near the threshold); part 2b, mention replacement (screen, then 10 seeds if it passes; protocol below), and later the combinations of the methods that pass week 6, fixed after the week-6 decisions; part 2c, coarse-to-fine completion (done, no claim); part 2d, multi-task training on SOFC-Exp's two levels (protocol below). Then class-level taxonomy (LLM or cross-encoder + arborescence) and a relation annotation pilot | Part 1: the rule improves on the strongest system on unseen papers and on SOFC-Exp's CRF head. Taxonomy: first class-level F1 above chance; relation guidelines |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -1578,6 +1578,66 @@ larger than is best for the models trained on three.
 
 **Budget:** about 1.5 hours of one session's two GPUs (week 5's CRF jobs
 took about 1.2 minutes per run).
+
+**Outcome of part 2a: no claim; none of the 5 decisions passes.** The
+session (`w7a`, 96 minutes) ran all 116 runs. Its repeat of the week-4 run
+is identical, and all 90 runs on the held-out papers and SOFC-Exp equal
+their committed CRF runs at D = 0: scores, predictions and training
+history.
+- Decision 1, the calibrated CRF head (`crf_eb`) against the CRF head,
+  10-seed means on the 4 held-out papers: fine-grained −0.59 [−1.75,
+  +0.57], coarse-grained +0.17 [−0.14, +0.48].
+- Decision 2, its vote against the strongest system on unseen papers:
+  fine-grained −3.53 [−8.10, +1.05] against the multi-task vote,
+  coarse-grained −0.09 [−0.75, +0.58] against the seed vote.
+- SOFC-Exp, D chosen on the validation articles (`crf_ebv`) against the
+  CRF head, paired by seed: 83.55 against 83.75, −0.21 [−0.58, +0.17].
+- Reported: D chosen on MaterioMiner's validation sentences, +0.32 [−0.83,
+  +1.46] fine-grained and +0.09 [−0.24, +0.43] coarse-grained.
+
+The inner folds chose D = +1.25, +1.25, −1 and +0.25 fine-grained (papers
+s11340, ncomms7164, s41467, met10111458) and 0, −1, −1, −1 coarse-grained.
+The expectation before the runs (D positive, larger fine-grained) held for
+3 of 4 papers fine-grained, and the gain it predicted did not follow. Each
+paper's own curve (mean test F1 per D over 10 seeds, reported and never
+used to choose) is flat. Even the best D per paper in hindsight, which no
+rule could pick, would gain +0.56 fine-grained on average and +0.18
+coarse-grained. Its sign differs by paper (−1, −0.5, +0.25 and +1
+fine-grained), and the inner folds got the sign right on 1 of the 4
+papers.
+
+*Why (exploratory, the bias grid's entity counts pooled over the 4 papers
+and 10 seeds):* the CRF head does not score its missed entities just below
+the threshold.
+- **Fine-grained.** At D = 0 it finds 5,386 of 13,280 gold entities
+  (recall 40.6, precision 53.7).
+  - Raising D to +0.25 adds 358 predicted entities, and the number of
+    correct ones rises by 78 (22%). The break-even rate for F1 is F1/2 =
+    23%.
+  - D = +3 raises the odds of a one-word entity by a factor of e³ ≈ 20. It
+    adds 4,044 predicted entities and recovers 570 of the 7,894 missed ones
+    (7%), with 6.1 wrong entities per right one; precision falls to 42.3
+    and recall rises to 44.8.
+- **Coarse-grained.** The head already predicts about as many entities as
+  there are (21,963 for 21,940). D = +3 recovers 74 of its 9,348 misses
+  (0.8%). Its errors are wrong types and boundaries (C10), which one bias
+  on every entity tag cannot fix.
+- **SOFC-Exp.** Over the 10 runs the head predicts 10,161 entities for 9,780
+  gold ones. D = +3 adds 1,212 predictions and 4 correct entities. The test
+  curve peaks at D = −0.5 (+0.19, reported), while the validation articles
+  chose D > 0 in 7 of 10 runs.
+
+So the recall gap on unseen papers is not a decision-threshold problem.
+The entities a bias of +0.25 adds are right at or below the rate F1 needs
+to break even: 22% against 23% fine-grained, 19% against 29%
+coarse-grained, 21% against 42% on SOFC-Exp. The predictions above the
+threshold are right 53.7%, 57.3% and 82.2% of the time. Most missed
+entities stay out of reach at any bias on the grid. The premise of the
+expectation, roughly calibrated probabilities, under which the entities
+just below the threshold would be right more often than the break-even
+rate, does not hold on unseen papers. A fix has to change what the model scores, not how its
+scores are decoded. This fits C7: the change that helps fine-grained on
+unseen papers (the multi-task vote) mostly buys precision, not recall.
 
 **A candidate for part 2b, from the gold annotations only (no protocol
 yet): coarse-to-fine completion.** On the held-out papers the CRF head
