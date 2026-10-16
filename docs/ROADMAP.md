@@ -1399,3 +1399,17 @@ combining the two is for part 2.
 
 Part 2 of week 7 (combinations of the methods that pass, mention
 replacement) is fixed after the week-6 decisions, before its runs.
+
+**Amendment, after MaterioMiner's results and before SOFC-Exp's.** On the
+held-out papers the rule passes one of its 4 decisions (the CRF head,
+coarse-grained, +0.12 [+0.01, +0.24]); its votes do not pass, so there is
+no claim. Retyping, reported only, does better coarse-grained: +0.64
+[+0.29, +1.00] on the CRF head and +0.83 [+0.32, +1.34] on the seed vote.
+This fits where the CRF head errs on unseen papers (exploratory, its 10
+seeds): coarse-grained, 16% of the gold entities get the right span but the
+wrong type and 6% are missed; fine-grained, 36% are missed. A post-hoc
+result decides nothing, so retyping is tested where it has not been seen:
+on SOFC-Exp, `crf_dcr` against the CRF head (paired by seed, 10 seeds) is
+a decision, alongside `crf_dc`. That makes 6 comparisons in part 1, about
+0.15 false passes if neither rule does anything. The MaterioMiner results
+of retyping stay reported, as fixed above.

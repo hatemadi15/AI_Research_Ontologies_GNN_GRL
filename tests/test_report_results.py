@@ -1130,7 +1130,7 @@ def test_sofc_row_and_bullet(tmp_path):
                                 'minus_crf': {'micro': diff(1.2, 0.2, 2.2, 4),
                                               'micro_strict': diff(1.0, 0.1, 1.9, 4)},
                                 'n_pairs': 4},
-                    # week 7: the consistency rule decides; retyping is only reported
+                    # week 7: on SOFC-Exp both rules decide (the amendment to part 1)
                     'crf_dc': {'micro': {'mean': 85.3, 'ci95': [84.8, 85.8]},
                                'minus_crf': {'micro': diff(0.5, 0.2, 0.8),
                                              'micro_strict': diff(0.4, 0.1, 0.7)},
@@ -1154,9 +1154,8 @@ def test_sofc_row_and_bullet(tmp_path):
             '4 of the 10 seeds (reported; no decision). Week 7, the consistency rule on the CRF '
             "head's predictions, paired by seed: 85.30 [84.80, 85.80], improves (+0.50, 95% CI "
             '[+0.20, +0.80]; strict IOB2 +0.40 [+0.10, +0.70]). Week 7, the consistency rule with '
-            "retyping on the CRF head's predictions, paired by seed: 85.20 [84.70, 85.70], +0.40, "
-            '95% CI [+0.10, +0.70]; strict IOB2 +0.30 [+0.00, +0.60] (reported; no decision).\n'
-            ) in readme
+            "retyping on the CRF head's predictions, paired by seed: 85.20 [84.70, 85.70], improves "
+            '(+0.40, 95% CI [+0.10, +0.70]; strict IOB2 +0.30 [+0.00, +0.60]).\n') in readme
 
 
 def test_a_week3_file_that_is_not_an_object_is_reported(tmp_path, capsys):

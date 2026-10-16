@@ -180,7 +180,8 @@ WEEK6_NAMES = {**WEEK5_NAMES, 'crf_deberta': 'DeBERTa-v3-large', 'crf_ctx': 'doc
 # document context are reported only
 WEEK7_FILE = 'ner_week7_comparisons.json'
 WEEK7_NAMES = {'crf_dc': 'the consistency rule', 'crf_dcr': 'the consistency rule with retyping'}
-WEEK7_REPORTED = ('crf_dcr',)
+# on SOFC-Exp both are decisions (the amendment to part 1, before SOFC-Exp's results)
+WEEK7_REPORTED = ()
 WEEK7_COMPARISONS = (('crf_dc', 'crf'), *((f'{ref}_dc', ref) for ref in UNSEEN_BEST.values()),
                      ('crf_dcr', 'crf'), *((f'{ref}_dcr', ref) for ref in UNSEEN_BEST.values()),
                      ('crf_ctx_dc', 'crf_ctx'), ('crf_ctx_ens3_dc', 'crf_ctx_ens3'))
