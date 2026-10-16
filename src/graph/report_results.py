@@ -175,9 +175,21 @@ WEEK6_NAMES = {**WEEK5_NAMES, 'crf_deberta': 'DeBERTa-v3-large', 'crf_ctx': 'doc
                'crf_mt_st3': 'multi-task self-training',
                'crf_deberta_ens3': 'DeBERTa-v3-large vote', 'crf_ctx_ens3': 'document-context vote',
                'crf_mt_st3_ens3': 'multi-task self-training vote'}
-# week 7, part 1: the consistency rule (ner_consistency.py); retyping is reported only
+# Week 7, part 1 (week-7 protocol): the consistency rule (ner_consistency.py) on the saved
+# predictions of the 10-seed runs, as in ner_seedmeans.WEEK7_COMPARISONS; retyping (_dcr) and
+# document context are reported only
+WEEK7_FILE = 'ner_week7_comparisons.json'
 WEEK7_NAMES = {'crf_dc': 'the consistency rule', 'crf_dcr': 'the consistency rule with retyping'}
 WEEK7_REPORTED = ('crf_dcr',)
+WEEK7_COMPARISONS = (('crf_dc', 'crf'), *((f'{ref}_dc', ref) for ref in UNSEEN_BEST.values()),
+                     ('crf_dcr', 'crf'), *((f'{ref}_dcr', ref) for ref in UNSEEN_BEST.values()),
+                     ('crf_ctx_dc', 'crf_ctx'), ('crf_ctx_ens3_dc', 'crf_ctx_ens3'))
+# the week-7 decisions, which get a bullet each
+WEEK7_DECISIONS = WEEK7_COMPARISONS[:3]
+WEEK7_SYSTEM_NAMES = {**WEEK6_NAMES, **{
+    f'{stem}{rule}': f'{WEEK6_NAMES[stem]} + {WEEK7_NAMES["crf" + rule]}'
+    for stem in ('crf', 'crf_ens3', 'crf_mt_ens3', 'crf_ctx', 'crf_ctx_ens3')
+    for rule in ('_dc', '_dcr')}}
 LOPO = 'leave_one_paper_out'
 # the exploratory analyses of the week-5 runs (ner_seed_analysis.py), in results/gpu/
 WEEK5_ANALYSIS = 'ner_week5_seed_analysis.json'
@@ -719,6 +731,38 @@ def ner_week6_table(res, name, title, intro, comparisons):
     return out
 
 
+WEEK7_INTRO = (
+    "Δ = with the rule − without it, on the same split, GPU runs only, 10 model seeds: a model "
+    "scores the mean of its 10 runs, a vote the mean of its votes over 3 disjoint seed triples. "
+    "Week-7 protocol, part 1: the consistency rule (`ner_consistency.py`, fixed before it was "
+    "applied) on the saved test predictions. Pre-registered rule: a change improves on its "
+    "reference only if the 95% Student-t CI of the mean micro-F1 difference lies entirely above "
+    "0. Decisions, on the 4 held-out papers: the rule on the CRF head, and on the strongest "
+    "system on unseen papers (the multi-task vote fine-grained, the 3-model seed ensemble "
+    "coarse-grained). The other rows are reported without a decision.\n")
+
+
+def ner_week7_table(res):
+    """Week-7 comparisons, part 1 ([] if none is complete): the held-out papers first."""
+    comps = res.comparisons(GPU_PREFIX + WEEK7_FILE)
+    rows = [c for variant, reference in WEEK7_COMPARISONS
+            for protocol in (LOPO, 'random_split_vary') for g in GRANULARITIES
+            for c in [find_comparison(comps, g, protocol, variant, reference)] if c]
+    if not rows:
+        return []
+    out = ["\n#### NER week-7 comparisons, part 1 (the consistency rule, 10-seed means, GPU "
+           "runs)\n", WEEK7_INTRO, WEEK3_COLUMNS.replace('Δ strict micro', 'Role'),
+           "|---|---|---|---|---|---|---|---|"]
+    for c in rows:
+        v = dig(c, 'variant_scores', 'micro')
+        out.append(f"| {WEEK7_SYSTEM_NAMES[c['variant']]} vs "
+                   f"{WEEK7_SYSTEM_NAMES[c['reference']]} | {PROTOCOL_NAMES[c['protocol']]} | "
+                   f"{c['granularity']} | {c['n_pairs']} | {interval(v) if v else '–'} | "
+                   f"{delta_cell(c['micro'])} | {delta_cell(c['macro'])} | "
+                   f"{c.get('role', 'reported')} |")
+    return out
+
+
 def build_tables(res):
     """All tables between the "At a glance" table and "Reading the numbers"."""
     out = (term_typing_tables(res) + other_levels_table(res) + ablation_table(res)
@@ -729,7 +773,8 @@ def build_tables(res):
                              WEEK6_SCREEN_INTRO, WEEK6_SCREEN_COMPARISONS)
            + ner_week6_table(res, WEEK6_FILE,
                              'NER week-6 comparisons (10-seed means, held-out papers, GPU runs)',
-                             WEEK6_INTRO, WEEK6_COMPARISONS))
+                             WEEK6_INTRO, WEEK6_COMPARISONS)
+           + ner_week7_table(res))
     return '\n'.join(out).strip()
 
 
@@ -907,6 +952,11 @@ def ner_notes(res):
     week6 = res.comparisons(GPU_PREFIX + WEEK6_FILE)
     for variant, reference in WEEK6_COMPARISONS:
         note += week6_verdict_line(week6, variant, reference, '10 seeds')
+    week7 = res.comparisons(GPU_PREFIX + WEEK7_FILE)
+    for variant, reference in WEEK7_DECISIONS:
+        note += week6_verdict_line(week7, variant, reference,
+                                   'the consistency rule on the saved predictions of 10 seeds',
+                                   week='7, part 1', names=WEEK7_SYSTEM_NAMES)
     return note + sofc_note(analysis)
 
 
@@ -935,9 +985,9 @@ def week6_screen_line(comps, method):
             + '; '.join(parts) + ".\n")
 
 
-def week6_verdict_line(comps, variant, reference, design):
+def week6_verdict_line(comps, variant, reference, design, week='6', names=WEEK6_NAMES):
     """One bullet for a week-6 comparison over the held-out papers, each granularity with
-    its role ('' if none is complete)."""
+    its role ('' if none is complete); week and names serve the week-7 comparisons."""
     parts = []
     for g in GRANULARITIES:
         c = find_comparison(comps, g, LOPO, variant, reference)
@@ -947,8 +997,9 @@ def week6_verdict_line(comps, variant, reference, design):
                          f"{ROLE_WORDS.get(c.get('role'), ROLE_WORDS['reported'])})")
     if not parts:
         return ''
-    return (f"* NER week 6 (GPU runs, {design}), {WEEK6_NAMES[variant]} vs the "
-            f"{WEEK6_NAMES[reference]} (paired micro-F1 difference, leaving one paper out): "
+    sep = '; ' if week != '6' else ', '
+    return (f"* NER week {week} (GPU runs{sep}{design}), {names[variant]} vs the "
+            f"{names[reference]} (paired micro-F1 difference, leaving one paper out): "
             + '; '.join(parts) + ".\n")
 
 

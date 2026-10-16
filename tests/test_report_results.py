@@ -1005,6 +1005,45 @@ def test_week6_tables_and_bullets(tmp_path):
     assert 'the pre-registered decision); coarse-grained no significant change' in readme
 
 
+def test_week7_table_and_bullets(tmp_path):
+    """Week 7, part 1: the consistency rule gets a table over both protocols (the held-out
+    papers first) and a bullet per decision, with each granularity's role."""
+    ws = Workspace(tmp_path)
+    lopo, rand = 'leave_one_paper_out', 'random_split_vary'
+    for g, micro, role in (('fine', (0.30, -0.35, 0.95), 'decision'),
+                           ('coarse', (0.12, 0.01, 0.24), 'decision')):
+        ws.week4('crf_dc', 'crf', g, lopo, gpu=True, role=role, micro=micro,
+                 score=(49.0, 45.0, 53.0), name=rr.WEEK7_FILE)
+    ws.week4('crf_dc', 'crf', 'fine', rand, gpu=True, micro=(-0.12, -0.40, 0.16),
+             score=(77.5, 76.0, 79.0), name=rr.WEEK7_FILE)
+    ws.week4('crf_mt_ens3_dc', 'crf_mt_ens3', 'fine', lopo, gpu=True, role='decision',
+             micro=(0.33, -0.74, 1.40), score=(53.0, 47.0, 59.0), name=rr.WEEK7_FILE)
+    ws.week4('crf_dcr', 'crf', 'coarse', lopo, gpu=True, micro=(0.64, 0.29, 1.00),
+             score=(59.0, 55.0, 63.0), name=rr.WEEK7_FILE)
+    readme, _ = ws.generate()
+    rows = table_rows(readme, '#### NER week-7 comparisons, part 1')
+    assert [r.split(' | ')[:3] for r in rows] == [
+        ['| CRF head + the consistency rule vs CRF head', 'leave one paper out', 'fine'],
+        ['| CRF head + the consistency rule vs CRF head', 'leave one paper out', 'coarse'],
+        ['| CRF head + the consistency rule vs CRF head', 'new random split per seed', 'fine'],
+        ['| multi-task vote + the consistency rule vs multi-task vote', 'leave one paper out',
+         'fine'],
+        ['| CRF head + the consistency rule with retyping vs CRF head', 'leave one paper out',
+         'coarse']]
+    assert [r.rsplit(' | ', 1)[1] for r in rows] == ['decision |', 'decision |', 'reported |',
+                                                     'decision |', 'reported |']
+    assert ('* NER week 7, part 1 (GPU runs; the consistency rule on the saved predictions of 10 '
+            'seeds), CRF head + the consistency rule vs the CRF head (paired micro-F1 difference, '
+            'leaving one paper out): fine-grained no significant change (+0.30, 95% CI [-0.35, '
+            '+0.95]') in readme
+    assert ('the pre-registered decision); coarse-grained improves (+0.12, 95% CI [+0.01, '
+            '+0.24]') in readme
+    assert '* NER week 7, part 1 (GPU runs; the consistency rule on the saved predictions of 10 ' \
+        'seeds), multi-task vote + the consistency rule vs the multi-task vote' in readme
+    # retyping is reported in the table only
+    assert 'retyping vs the CRF head' not in readme
+
+
 def test_week6_screen_bullets_follow_the_screen_rule(tmp_path):
     """A method stops unless a granularity's mean difference is above 0, whatever the CIs; the
     screen's vote comparison rides along; a method with one granularity gets no bullet."""
