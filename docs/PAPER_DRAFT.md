@@ -8,7 +8,7 @@ Section 6 (methods for unseen papers), recall calibration is decided (no
 gain, C15). The others wait for their runs: stage 2 of multi-task
 self-training, mention replacement and multi-task training on SOFC-Exp's
 two levels (ROADMAP §4, weeks 6 and 7). The numbers come from `results/`
-through the claims table of `docs/PAPER.md` (C1–C15). References are keys of `docs/references.bib`.
+through the claims table of `docs/PAPER.md` (C1–C16). References are keys of `docs/references.bib`.
 
 ---
 
@@ -77,6 +77,14 @@ therefore measures unseen documents.
   (e.g. anode material or working temperature). Each slot type falls within
   one entity type. The 17 that the dataset's evaluation scores hold 3,172
   mentions (702 in the test articles).
+- Its test articles are tokenized differently from its training articles
+  (C16). ChemDataExtractor's tokenizer (swain2016chemdataextractor)
+  reproduces the tokens of all 7,630 sentences of the 34 training and
+  development articles. Java's word BreakIterator reproduces 1,833 of the
+  1,836 sentences of the 11 test articles. A model trained on `cm−2`,
+  `O2−` and `high - temperature` is tested on `cm − 2`, `O2 −` and
+  `high-temperature`; every result on the official split, the published
+  ones included, carries this.
 
 ## 3 Evaluation protocol
 
@@ -245,8 +253,14 @@ papers once, at both levels.
   silver sentences, the silver ones at weight 0.5 (liang2020bond).
 - *Status:* it passed the week-6 screen with +6.06 [+1.05, +11.06]
   fine-grained against the CRF head; its 10-seed decisions are next.
-- *SOFC-Exp:* its two levels (entity and slot types) allow a repeat,
-  given an in-domain SOFC corpus tokenised as SOFC-Exp is.
+- *SOFC-Exp:* its two levels (entity and slot types) allow a repeat. The
+  corpus is 40,000 sentences of 292 open-access SOFC articles, with
+  SOFC-Exp's articles and any sentence sharing an 8-gram with them left out.
+  It is cut into words with the tokenizer of SOFC-Exp's training articles.
+  As SOFC-Exp annotates only sentences that describe experiments, a corpus
+  sentence can be silver only if every teacher tags an experiment in it.
+  This repeat is fixed before the MaterioMiner decisions, and runs if one
+  of them passes.
 
 **6.2 Recall calibration.** On unseen papers the CRF head predicts too
 few entities (Section 5.7), so a bias D is added to the emission score of

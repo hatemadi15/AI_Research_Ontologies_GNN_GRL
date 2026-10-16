@@ -49,6 +49,7 @@ gain survives? Splits, scoring and seeds on MaterioMiner".
 | C13 | The CRF head's gain repeats on a second dataset: on SOFC-Exp's official split (11 unseen test articles, 10 seeds) it scores 83.75 [82.85, 84.65] against plain MatSciBERT's 82.53 [81.84, 83.23], +1.22 [+0.50, +1.93] paired by seed; its seed votes score 85.13. The published MatSciBERT-CRF (84.77) lies above the CI over seeds. | `gpu/ner_results_sofc_published_split*.json`; README, SOFC-Exp row | Done (week 6, S1) |
 | C14 | Using the type hierarchy after the fact adds little: completing the fine-grained predictions from the coarse-grained ones, where a coarse type maps to one fine type in the training papers, gives +0.34 [−0.91, +1.59] on the CRF head and +0.12 [−1.76, +2.01] on the multi-task vote (fine-grained, unseen papers). Its added entities are right 39% of the time. | `gpu/ner_week7_comparisons.json` (`_cf`) | Done (week 7, part 2c) |
 | C15 | The recall gap on unseen papers is not a decision-threshold problem. A bias on the CRF head's emission of every entity tag, chosen per held-out paper on inner folds (recall calibration), gives −0.59 [−1.75, +0.57] fine-grained and +0.17 [−0.14, +0.48] coarse-grained against the CRF head, its votes do not beat the strongest systems, and on SOFC-Exp (chosen on the validation articles) it gives −0.21 [−0.58, +0.17]. Even the best bias per paper in hindsight would gain +0.56 and +0.18. The entities a small bias adds are right 22% (fine-grained), 19% (coarse-grained) and 21% (SOFC-Exp) of the time, at or below F1's break-even rate and far below the precision of the predictions above the threshold (53.7%, 57.3%, 82.2%). A bias of +3 recovers 7% of the missed fine-grained entities, with 6 wrong entities per right one. | `gpu/ner_week7_comparisons.json` (`_eb`, `_ebv`); `gpu/ner_entity_bias_*.json`; the `bias_test` counts of `gpu/ner_results_*_crf_bias*.json`; ROADMAP, "Outcome of part 2a" | Done (week 7, part 2a; the counts analysis is exploratory) |
+| C16 | SOFC-Exp's test articles are cut into words differently from its training articles, against what its README states (Stanford CoreNLP). ChemDataExtractor 1.3.0's word tokenizer gives the tokens of all 7,630 sentences of the 26 training and 8 development articles, and Java's word BreakIterator gives 1,833 of the 1,836 sentences of the 11 test articles. CoreNLP (3.9.2, 4.0.0, 4.5.7) gives at most 48.6% of all sentences. Training has `Fig.`, `cm−2`, `O2−` and `high - temperature` where the test articles have `Fig .`, `cm − 2`, `O2 −` and `high-temperature`. Every result on the official split, the published ones included, is scored under this shift. | The release's texts and token offsets (scratch checks, ROADMAP §4, week-6 amendment); `tests/test_chem_tokenize.py` (7,630 of 7,630 on the committed tokens) | Done (exploratory; to report as a dataset note) |
 
 A draft of the sections that hold for either paper type is in
 `docs/PAPER_DRAFT.md`.
@@ -101,14 +102,15 @@ into `docs/figures/` (no training; re-run it when results change):
    grouped by article.
 2. The authors' confirmation of the split and the scoring (item 6; the email
    is drafted). The reproduction (C1) already matches both numbers.
-3. Related work. `docs/references.bib` holds 32 checked references (verified
+3. Related work. `docs/references.bib` holds 33 checked references (verified
    on 16 October against Crossref, publishers, the ACL Anthology and arXiv),
    with notes on their scope:
    - materials NER: MatSciBERT (Gupta et al., 2022); the MaterioMiner dataset
      (Durmaz et al., 2024; its title does not contain "MaterioMiner"); the
      closest prior work, Potu et al. (2025), whose domain shift is between
      two fatigue datasets rather than unseen papers of one; SOFC-Exp
-     (Friedrich et al., 2020); Weston et al. (2019); Trewartha et al.
+     (Friedrich et al., 2020; its tokens come from ChemDataExtractor, Swain and
+     Cole, 2016, and Java's BreakIterator, C16); Weston et al. (2019); Trewartha et al.
      (2022); MatSci-NLP (Song et al., 2023);
    - evaluation: seed variance and score distributions (Reimers and
      Gurevych, 2017; Dodge et al., 2020; Bouthillier et al., 2021); splits

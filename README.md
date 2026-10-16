@@ -648,7 +648,9 @@ stands (ROADMAP §4, weeks 6 and 7):
 1. Methods for unseen papers, screened with 3 seeds and decided with 10.
    DeBERTa-v3-large stopped at the screen. Document context passed the
    screen but neither 10-seed decision. Multi-task self-training passed the
-   screen (+6.06 fine-grained) and its 10-seed decisions run next.
+   screen (+6.06 fine-grained) and its 10-seed decisions run next; its repeat
+   on SOFC-Exp is fixed before them (an SOFC corpus of 40,000 sentences, cut
+   into words as SOFC-Exp's training articles are).
 2. SOFC-Exp, the second dataset. The CRF head's gain repeats there (+1.22
    [+0.50, +1.93]). Its second level of types (slot types, converted in
    week 7) lets multi-task training be repeated there (part 2d, next).
