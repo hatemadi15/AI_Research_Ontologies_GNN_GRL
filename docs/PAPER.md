@@ -20,7 +20,10 @@ candidate left is multi-task self-training (screen +6.06 [+1.05, +11.06]
 fine-grained; 10-seed decisions next on MaterioMiner), with mention
 replacement screened next. Recall calibration (week 7, part 2a) passed none
 of its 5 decisions, and showed why a decoding change cannot close the recall
-gap on unseen papers (C15). The week-6 protocol
+gap on unseen papers (C15). Most entities of an unseen paper are names the
+training papers never annotate (81% fine-grained), and every gain that holds
+there is a gain on those names (C17), so that is what a method for unseen
+papers has to improve. The week-6 protocol
 excluded multi-task methods from SOFC-Exp as a one-level corpus, but SOFC-Exp
 has a second level, 17 evaluated slot types that refine its 4 entity types
 (ROADMAP, "Prepared for part 2d"), so multi-task training (C7) and, if it
@@ -50,13 +53,14 @@ gain survives? Splits, scoring and seeds on MaterioMiner".
 | C14 | Using the type hierarchy after the fact adds little: completing the fine-grained predictions from the coarse-grained ones, where a coarse type maps to one fine type in the training papers, gives +0.34 [−0.91, +1.59] on the CRF head and +0.12 [−1.76, +2.01] on the multi-task vote (fine-grained, unseen papers). Its added entities are right 39% of the time. | `gpu/ner_week7_comparisons.json` (`_cf`) | Done (week 7, part 2c) |
 | C15 | The recall gap on unseen papers is not a decision-threshold problem. A bias on the CRF head's emission of every entity tag, chosen per held-out paper on inner folds (recall calibration), gives −0.59 [−1.75, +0.57] fine-grained and +0.17 [−0.14, +0.48] coarse-grained against the CRF head, its votes do not beat the strongest systems, and on SOFC-Exp (chosen on the validation articles) it gives −0.21 [−0.58, +0.17]. Even the best bias per paper in hindsight would gain +0.56 and +0.18. The entities a small bias adds are right 22% (fine-grained), 19% (coarse-grained) and 21% (SOFC-Exp) of the time, at or below F1's break-even rate and far below the precision of the predictions above the threshold (53.7%, 57.3%, 82.2%). A bias of +3 recovers 7% of the missed fine-grained entities, with 6 wrong entities per right one. | `gpu/ner_week7_comparisons.json` (`_eb`, `_ebv`); `gpu/ner_entity_bias_*.json`; the `bias_test` counts of `gpu/ner_results_*_crf_bias*.json`; ROADMAP, "Outcome of part 2a" | Done (week 7, part 2a; the counts analysis is exploratory) |
 | C16 | SOFC-Exp's test articles are cut into words differently from its training articles, against what its README states (Stanford CoreNLP). ChemDataExtractor 1.3.0's word tokenizer gives the tokens of all 7,630 sentences of the 26 training and 8 development articles, and Java's word BreakIterator gives 1,833 of the 1,836 sentences of the 11 test articles. CoreNLP (3.9.2, 4.0.0, 4.5.7) gives at most 48.6% of all sentences. Training has `Fig.`, `cm−2`, `O2−` and `high - temperature` where the test articles have `Fig .`, `cm − 2`, `O2 −` and `high-temperature`. Every result on the official split, the published ones included, is scored under this shift. | The release's texts and token offsets (scratch checks, ROADMAP §4, week-6 amendment); `tests/test_chem_tokenize.py` (7,630 of 7,630 on the committed tokens) | Done (exploratory; to report as a dataset note) |
+| C17 | Unseen papers are mostly unseen names, and the gains that hold are gains on them. On a held-out paper, 81% of the fine-grained gold entities (79% coarse-grained; 72–83% per paper) are names that no training sentence annotates with that type, against 35% (40%) on random splits and 40% (39%) on the published split. The CRF head finds 59% of the unseen names on random splits but 35% in a new paper (seen names: 88% and 71%). With the random splits' mix of names its recall per kind on held-out papers would give 58.5 instead of 40.6: the mix of names and the lower recall within each kind each account for 40–60% of the recall gap, 37 points fine-grained and 20 coarse-grained (in either order of the decomposition). Patterned names transfer (unseen Value 76%, Alloy and MaterialClass 72%), descriptive ones do not (StateDescriptor 30%, Mechanism 33%, GrainBoundary 3%). On SOFC-Exp, 49% of the test names are unseen and the CRF head finds 82% of them. On held-out papers every fine-grained gain is significant only on unseen names: multi-task +4.02 [+1.53, +6.51] (seen +2.88 [−2.70, +8.47]), its vote +3.60 [+2.32, +4.88], the context vote +2.68 [+0.84, +4.53], multi-task self-training's screen +6.44 [+2.25, +10.62]. The CRF head's gain over plain MatSciBERT is on unseen names too: +5.94 [+3.11, +8.76] on the published split (fine-grained) and +3.02 [+1.99, +4.05] on SOFC-Exp, against −0.47 and −0.52 on seen ones. | `gpu/ner_mentions.json` (`ner_mentions.py`; its F1 over all names equals every run's stored micro F1) | Done (exploratory; the per-kind differences carry no decision) |
 
 A draft of the sections that hold for either paper type is in
 `docs/PAPER_DRAFT.md`.
 
 ## Figures and tables
 
-Figures 1–4 are drawn from the GPU results by `src/graph/paper_figures.py`
+Figures 1–5 are drawn from the GPU results by `src/graph/paper_figures.py`
 into `docs/figures/` (no training; re-run it when results change):
 - Figure 1 (`fig1_random_vs_unseen.png`): per system with 10 seeds on both
   protocols, micro F1 on the 5 random splits and on the 4 unseen papers,
@@ -76,6 +80,14 @@ into `docs/figures/` (no training; re-run it when results change):
   third panel shows, pooled, the net share of the entities each step of the
   bias adds that are right; it is at or below F1's break-even rate on
   MaterioMiner and SOFC-Exp alike (C15).
+- Figure 5 (`fig5_mentions.png`): (a) per setting, the share of the gold
+  test entities whose name is an entity of the same type in the training
+  sentences, of another type only, or unseen: 34–40% unseen on random and
+  published splits, 79–81% on held-out papers, 49% on SOFC-Exp; (b) the CRF
+  head's recall on seen and unseen names; (c) on held-out papers,
+  fine-grained, each method's F1 minus the CRF head's (a vote minus the
+  seed vote) on seen and on unseen names, with 95% CIs over the 4 papers
+  (C17).
 - Table 1: the published split (plain MatSciBERT and the CRF head, 10 seeds)
   next to the published numbers, under micro, macro, weighted and strict F1
   (C1, C3, C4).

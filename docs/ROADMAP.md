@@ -306,6 +306,43 @@ multi-task self-training and SOFC-Exp's S2 for document context are next):
   MicrostructureEntity +18.9 and StrainRate −18.3; coarse-grained ODE −19.1
   and CPR −17.8).
 
+**Seen and unseen names** (exploratory, 16 October; `ner_mentions.py` on
+the saved predictions, no GPU; `results/gpu/ner_mentions.json`, claim C17,
+Figure 5). Following Augenstein et al. (2017), a gold test entity is seen if
+its exact words are an entity of the same type in the run's training
+sentences, and unseen if they are no entity there. Each run's split is
+rebuilt and checked against its stored test sentences, and the F1 over all
+entities equals every run's stored micro F1.
+- **The mix.** 81% of a held-out paper's fine-grained entities are unseen
+  (79% coarse-grained; 72–83% per paper), against 35% (40%) on random splits
+  and 40% (39%) on the published split. On SOFC-Exp's official split, 49%.
+- **Recall per kind.** The CRF head finds 88% of the seen and 59% of the
+  unseen fine-grained entities on random splits, 71% and 35% on held-out
+  papers; coarse-grained 89/63 and 82/52; SOFC-Exp 89/82. The mix and the
+  lower recall within each kind each account for 40–60% of the recall gap
+  between the protocols (fine-grained 77.8 to 40.6; with the random splits'
+  mix the held-out recalls per kind would give 58.5).
+- **Per type.** Patterned names transfer to a new paper (unseen Value 76%,
+  Alloy and MaterialClass 72%); descriptive ones do not (StateDescriptor
+  30%, Mechanism 33%, GrainBoundary 3%, TestingMachine 6%).
+- **Where the gains are.** Paired over the 4 held-out papers, fine-grained
+  F1 on unseen names: multi-task +4.02 [+1.53, +6.51], its vote +3.60
+  [+2.32, +4.88], the context vote +2.68 [+0.84, +4.53], multi-task
+  self-training's screen +6.44 [+2.25, +10.62]; none is significant on the
+  seen names, which are few. The CRF head's gain over plain MatSciBERT is
+  on unseen names too (+5.94 on the published split, +3.02 on SOFC-Exp;
+  −0.47 and −0.52 on seen names), and so is self-training's on the random
+  splits (+2.61 and +2.26; seen +0.10 and +0.00).
+- **What it means for the methods.** A method for unseen papers has to raise
+  F1 on names the training papers do not contain. Mention replacement (part
+  2b) targets this directly; self-training adds such names through its
+  silver sentences.
+- **Reported alongside the pending runs** (fixed now, before stage 2 of
+  multi-task self-training, part 2b's screen and part 2d run; no decision):
+  `ner_mentions.py` on their files, i.e. each method's F1 on seen and
+  unseen names against the CRF head (its vote against the seed vote),
+  paired over papers or seeds.
+
 Next, after week 5, in this order. The aim is a methods paper (§4, week 6),
 with an evaluation paper if every option fails:
 1. **Methods for unseen papers: screen, then decide with 10 seeds.**

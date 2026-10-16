@@ -663,7 +663,14 @@ stands (ROADMAP §4, weeks 6 and 7):
    either: the entities the CRF head misses on unseen papers are not near
    its decision threshold, so a decoding change cannot recover them.
    Mention replacement is screened next.
-4. Then the combinations of the methods that pass, and the rare
+4. Why unseen papers are hard (exploratory, no GPU; `ner_mentions.py`):
+   81% of a held-out paper's fine-grained entities are names that its
+   three training papers never annotate with that type, against 35% on
+   random splits, and the CRF head finds 35% of them (59% on random
+   splits). Every gain that holds on unseen papers, and the CRF head's own
+   gain, is a gain on these unseen names, so a method for unseen papers has
+   to improve on them.
+5. Then the combinations of the methods that pass, and the rare
    coarse-grained types that keep macro F1 down.
 
 ## License

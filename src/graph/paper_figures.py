@@ -18,6 +18,13 @@ No training: reads the 10-seed GPU results (results/gpu) and writes PNG files.
       at each bias D, fine- and coarse-grained; (c) pooled over papers (articles) and seeds,
       the share of the entities added between two grid points that are right, against F1's
       break-even rate (F1/2 at D = 0), for both granularities and SOFC-Exp.
+  fig5_mentions.png (C17; ner_mentions.json): (a) per setting (MaterioMiner's random splits,
+      published split and held-out papers per granularity, SOFC-Exp's official split), the
+      shares of the gold test entities whose words are an entity of the same type in the
+      training sentences (seen), only of another type, or none (unseen); (b) the CRF head's
+      recall on the seen and the unseen ones; (c) on the held-out papers, fine-grained, each
+      method's F1 minus the CRF head's on seen and on unseen entities, with 95% CIs over the
+      4 papers (votes against the CRF head's vote).
 A figure whose results are missing is skipped (and named on stdout).
 
 Usage:
@@ -46,6 +53,22 @@ SOFC_BIAS = 'ner_results_sofc_published_split_crf_bias.json'
 SHORT_PAPER = {'10.1007_s11340-021-00758-x': 's11340', '10.1038_ncomms7164': 'ncomms7164',
                '10.1038_s41467-020-19071-7': 's41467', '10.3390_met10111458': 'met10111458'}
 SCREEN_TRIPLE = (0, 1, 2)                 # seed offsets 0, 100 and 200 (the week-6 screen)
+# Figure 5: seen and unseen test entities (ner_mentions.py)
+MENTIONS = 'ner_mentions.json'
+SCREEN_SEEDS = (0, 100, 200)
+MENTION_SETTINGS = {'fine_random_split_vary': 'fine, random splits',
+                    'fine_published_split': 'fine, published split',
+                    'fine_leave_one_paper_out': 'fine, unseen papers',
+                    'coarse_random_split_vary': 'coarse, random splits',
+                    'coarse_published_split': 'coarse, published split',
+                    'coarse_leave_one_paper_out': 'coarse, unseen papers',
+                    'sofc_published_split': 'SOFC-Exp, unseen articles'}
+MENTION_METHODS = {'crf_mt': 'multi-task', 'crf_mt_ens3': 'multi-task vote',
+                   'crf_st3': 'self-training', 'crf_ls': 'label semantics',
+                   'crf_ctx': 'document context', 'crf_ctx_ens3': 'context vote',
+                   'crf_mt_st3': 'multi-task self-training', 'crf_mr': 'mention replacement',
+                   'crf_mr_ens3': 'mention-replacement vote',
+                   'crf_mt_st3_ens3': 'multi-task self-training vote'}
 
 
 def load(directory, names):
@@ -281,6 +304,84 @@ def figure4(curves, steps, path):
     plt.close(fig)
 
 
+def mention_data(mentions):
+    """([(label, shares by kind, recalls of seen and unseen, recall of all)], [(label, seen
+    difference, unseen difference)]) for Figure 5, from ner_mentions.json; a difference is
+    (mean, CI low, CI high). Settings and methods without results are left out."""
+    settings = []
+    for key, label in MENTION_SETTINGS.items():
+        crf = mentions.get('systems', {}).get(key, {}).get('crf')
+        if crf:
+            settings.append((label, {k: crf[k]['share'] for k in ('seen', 'seen_other',
+                                                                   'unseen')},
+                             (crf['seen']['recall'], crf['unseen']['recall']),
+                             crf['all']['recall']))
+    methods = []
+    found = mentions.get('methods', {}).get(f'fine_{LOPO}', {})
+    for system, label in MENTION_METHODS.items():
+        if system in found:
+            m = found[system]
+            label += ' (screen, 3 seeds)' if m.get('seeds') == list(SCREEN_SEEDS) else ''
+            methods.append((label, *((m[k]['mean_diff'], *m[k]['ci95'])
+                                     for k in ('seen', 'unseen'))))
+    return settings, methods
+
+
+def figure5(settings, methods, path):
+    import matplotlib.pyplot as plt
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5.2),
+                             gridspec_kw={'width_ratios': [1, 1, 1.1]})
+    labels = [s[0] for s in settings][::-1]
+    rows = settings[::-1]
+    ax = axes[0]
+    left = [0.0] * len(rows)
+    for kind, color, name in (('seen', 'tab:blue', 'seen, same type'),
+                              ('seen_other', 'tab:grey', 'seen, other type only'),
+                              ('unseen', 'tab:red', 'unseen')):
+        widths = [100 * r[1][kind] for r in rows]
+        ax.barh(range(len(rows)), widths, left=left, color=color, label=name, height=0.6)
+        left = [a + b for a, b in zip(left, widths)]
+    for k, r in enumerate(rows):
+        ax.annotate(f"{100 * r[1]['unseen']:.0f}%", (100, k), xytext=(-3, 0),
+                    textcoords='offset points', ha='right', va='center', fontsize=7,
+                    color='white')
+    ax.set_yticks(range(len(rows)), labels, fontsize=8)
+    ax.set(xlim=(0, 100), xlabel='% of the gold test entities',
+           title='(a) are the test names in the training data?')
+    ax.legend(fontsize=7, loc='upper center', bbox_to_anchor=(0.5, -0.13), ncol=3)
+    ax = axes[1]
+    for k, r in enumerate(rows):
+        seen, unseen = r[2]
+        ax.plot([unseen, seen], [k, k], color='lightgrey', lw=2, zorder=1)
+        ax.plot(seen, k, 'o', color='tab:blue', ms=6,
+                label='seen, same type' if k == 0 else None)
+        ax.plot(unseen, k, 's', color='tab:red', ms=6, label='unseen' if k == 0 else None)
+        ax.plot(r[3], k, '|', color='black', ms=10, label='all' if k == 0 else None)
+    ax.set_yticks(range(len(rows)), [''] * len(rows))
+    ax.set(xlim=(0, 100), xlabel='recall of the CRF head (pooled over seeds and splits)',
+           title='(b) how many of them the CRF head finds')
+    ax.legend(fontsize=7, loc='upper center', bbox_to_anchor=(0.5, -0.13), ncol=3)
+    ax.grid(alpha=0.3, axis='x')
+    ax = axes[2]
+    if methods:
+        rows = methods[::-1]
+        for k, (label, seen, unseen) in enumerate(rows):
+            for (mean, lo, hi), dy, color, marker, name in (
+                    (seen, 0.15, 'tab:blue', 'o', 'seen, same type'),
+                    (unseen, -0.15, 'tab:red', 's', 'unseen')):
+                ax.errorbar(mean, k + dy, xerr=[[mean - lo], [hi - mean]], fmt=marker,
+                            color=color, ms=5, capsize=2, label=name if k == 0 else None)
+        ax.axvline(0, color='grey', lw=0.8)
+        ax.set_yticks(range(len(rows)), [r[0] for r in rows], fontsize=8)
+        ax.legend(fontsize=7, loc='upper center', bbox_to_anchor=(0.5, -0.13), ncol=2)
+        ax.grid(alpha=0.3, axis='x')
+    ax.set(xlabel='F1 minus the CRF head or its vote (95% CI, 4 papers)',
+           title='(c) unseen papers, fine-grained: the gains')
+    fig.tight_layout()
+    fig.savefig(path, dpi=160, bbox_inches='tight')
+    plt.close(fig)
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description='The figures of the paper plan')
     parser.add_argument('--results', default=os.path.join(
@@ -323,6 +424,13 @@ def main(argv=None):
         written.append('fig4_threshold.png')
     else:
         print('fig4: no bias-grid results')
+    mentions = (load(args.results, [MENTIONS]) or [{}])[0]
+    settings, methods = mention_data(mentions)
+    if settings:
+        figure5(settings, methods, os.path.join(args.out, 'fig5_mentions.png'))
+        written.append('fig5_mentions.png')
+    else:
+        print('fig5: no mention analysis')
     print(f"wrote {', '.join(written) or 'nothing'} to {args.out}")
     return written
 

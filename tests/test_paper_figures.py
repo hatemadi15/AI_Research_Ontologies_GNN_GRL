@@ -104,3 +104,38 @@ def test_threshold_data_and_figure4(tmp_path):
     pytest.importorskip('matplotlib')
     pf.figure4(curves, steps, tmp_path / 'fig4.png')
     assert (tmp_path / 'fig4.png').stat().st_size > 10000
+
+
+def test_mention_data_and_figure5(tmp_path):
+    """Figure 5 (C17): per setting the CRF head's shares of seen and unseen test entities and
+    its recall on each; on held-out papers (fine-grained) each method's paired differences,
+    the screen's marked, the settings and methods without results left out."""
+    def kinds(seen, unseen, recall_seen, recall_unseen):
+        return {'seen': {'share': seen, 'recall': recall_seen},
+                'seen_other': {'share': round(1 - seen - unseen, 3), 'recall': 0.0},
+                'unseen': {'share': unseen, 'recall': recall_unseen},
+                'all': {'recall': seen * recall_seen + unseen * recall_unseen}}
+
+    def diff(mean):
+        return {'mean_diff': mean, 'ci95': [mean - 1, mean + 1]}
+    mentions = {'systems': {'fine_random_split_vary': {'crf': kinds(0.65, 0.345, 88, 59)},
+                            'fine_leave_one_paper_out': {'crf': kinds(0.17, 0.81, 71, 35)},
+                            'sofc_published_split': {'crf': kinds(0.51, 0.49, 89, 82)}},
+                'methods': {'fine_leave_one_paper_out': {
+                    'crf_mt': {'seeds': list(range(0, 1000, 100)), 'seen': diff(3),
+                               'unseen': diff(4)},
+                    'crf_mt_ens3': {'seeds': [0, 300, 600], 'seen': diff(3), 'unseen': diff(4)},
+                    'crf_mt_st3': {'seeds': [0, 100, 200], 'seen': diff(5), 'unseen': diff(6)},
+                    'crf_unknown': {'seeds': [0], 'seen': diff(0), 'unseen': diff(0)}}}}
+    settings, methods = pf.mention_data(mentions)
+    assert [s[0] for s in settings] == ['fine, random splits', 'fine, unseen papers',
+                                        'SOFC-Exp, unseen articles']
+    assert settings[1][1] == {'seen': 0.17, 'seen_other': 0.02, 'unseen': 0.81}
+    assert settings[1][2] == (71, 35)
+    assert methods == [('multi-task', (3, 2, 4), (4, 3, 5)),
+                       ('multi-task vote', (3, 2, 4), (4, 3, 5)),
+                       ('multi-task self-training (screen, 3 seeds)', (5, 4, 6), (6, 5, 7))]
+    assert pf.mention_data({}) == ([], [])
+    pytest.importorskip('matplotlib')
+    pf.figure5(settings, methods, tmp_path / 'fig5.png')
+    assert (tmp_path / 'fig5.png').stat().st_size > 10000

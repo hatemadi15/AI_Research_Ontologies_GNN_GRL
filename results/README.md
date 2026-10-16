@@ -139,3 +139,25 @@ Week 7, part 2a (recall calibration; Kaggle session `w7a` of 16 October):
   chosen D, the inner curves and the test sets' own curves (reported,
   never used to choose).
 - `_crf_eb_ens3*` are the votes over the seed triples.
+
+Seen and unseen test names (exploratory, no training; claim C17 of
+`docs/PAPER.md`): `gpu/ner_mentions.json` (`ner_mentions.py`) splits the gold
+test entities of every stored run with predictions by whether their exact
+words are an entity of the same type in the run's training sentences (seen),
+only of another type, or none (unseen), each run's split rebuilt as
+`ner_baseline.py` builds it. A prediction takes a kind the same way, so
+recall, precision and F1 are given per kind (pooled over seeds and splits):
+- `systems`: every family with all its files (10 seeds, or the screen's 3)
+  and its votes (made again from the members' predictions) on both
+  protocols, and plain MatSciBERT, the CRF head and the methods on the
+  published splits (MaterioMiner and SOFC-Exp);
+- `papers`, `types`: each held-out paper's shares of the kinds, and per type
+  the CRF head's unseen share and its recall on seen and unseen entities;
+- `gap`: the CRF head's recall on random splits and held-out papers, and the
+  two counterfactual mixes of kinds;
+- `methods`: each method against the CRF head (a vote against its vote),
+  F1 per kind, paired over splits, papers or seeds, mean and 95% CI (no
+  decision). Its F1 over all kinds equals the stored micro F1 of every run.
+
+Figure 5 of the paper plan (`docs/figures/fig5_mentions.png`,
+`paper_figures.py`) draws it.

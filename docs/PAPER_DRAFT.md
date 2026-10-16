@@ -8,7 +8,7 @@ Section 6 (methods for unseen papers), recall calibration is decided (no
 gain, C15). The others wait for their runs: stage 2 of multi-task
 self-training, mention replacement and multi-task training on SOFC-Exp's
 two levels (ROADMAP §4, weeks 6 and 7). The numbers come from `results/`
-through the claims table of `docs/PAPER.md` (C1–C16). References are keys of `docs/references.bib`.
+through the claims table of `docs/PAPER.md` (C1–C17). References are keys of `docs/references.bib`.
 
 ---
 
@@ -24,6 +24,9 @@ carry either way:
   let through a 2.7-point gain that 10 seeds shrank to 1.1;
 - the entities a model misses on unseen papers lie far below its decision
   threshold, so shifting the threshold does not recover them.
+- 81% of a new paper's fine-grained entities are names that no training
+  paper annotates (35% on random splits), the model finds 35% of them, and
+  every gain that holds on unseen papers is a gain on these names.
 
 ## 1 Introduction
 
@@ -235,6 +238,56 @@ lucky seeds; only 21 of the 120 triples of document context pass.
 - **Not a threshold problem (C15; Section 6.2):** the missed entities are
   not near the decision threshold. Lowering it adds entities that are right
   only 22% of the time fine-grained.
+
+**5.8 Unseen papers are mostly unseen names (C17; Figure 5).** Following
+augenstein2017generalisation, a gold test entity is *seen* if its exact
+words are an entity of the same type in the run's training sentences and
+*unseen* if they are no entity there; a third kind, seen with another type
+only, holds 0.5–2% of the entities. Predictions are split the same way, so
+recall, precision and F1 can be given per kind (exploratory; all seeds and
+splits pooled).
+- **The mix.** On random splits, 35% of the fine-grained test entities are
+  unseen (coarse-grained 40%; on the published split 40% and 39%): random
+  sentence splits put a paper's names on both sides, as babl2025random find
+  for other corpora. On a held-out paper, 81% are unseen (coarse-grained
+  79%), between 72% and 83% for each paper.
+- **Unseen names in a new paper are harder.** Fine-grained, the CRF head
+  finds 88% of the seen and 59% of the unseen entities of a random split,
+  but 71% and 35% of those of a held-out paper (coarse-grained, 89% and 63%
+  against 82% and 52%).
+- **Both effects count.** The CRF head's fine-grained recall falls from 77.8
+  on random splits to 40.6 on held-out papers. With the random splits' mix
+  of seen and unseen names, its recall per kind on held-out papers would
+  give 58.5. The mix and the lower recall within each kind each account
+  for 40–60% of the gap, in either order of the decomposition. The same
+  holds coarse-grained, where recall falls from 77.7 to 57.4.
+- **Patterned names transfer, descriptive ones do not.** On held-out
+  papers, the CRF head finds 76% of the unseen Value entities and 72% of
+  the unseen Alloy and MaterialClass entities, whose names follow patterns
+  (numbers with units, alloy designations). It finds 30% of the unseen
+  StateDescriptor and 33% of the unseen Mechanism entities, and almost
+  none of the unseen GrainBoundary, TestingMachine or StressAmplitude
+  entities.
+- **SOFC-Exp is easier.** 49% of its test entities are unseen, and the CRF
+  head finds 82% of them (89% of the seen). Its articles share one topic,
+  its 4 types are broad, and its most frequent type, VALUE, is found at
+  95–97% whether seen or not.
+- **The gains are on unseen names.** Paired over the 4 held-out papers
+  (fine-grained F1), every gain is significant only on unseen names:
+  multi-task training +4.02 [+1.53, +6.51] (seen +2.88 [−2.70, +8.47]),
+  its vote against the seed vote +3.60 [+2.32, +4.88], the context vote
+  +2.68 [+0.84, +4.53], and multi-task self-training's screen (3 seeds)
+  +6.44 [+2.25, +10.62]. Seen names are few in a new paper, so their
+  intervals are wide. The CRF head's own gain over plain MatSciBERT lies on
+  unseen names as well: +5.94 [+3.11, +8.76] on the published split
+  (fine-grained) and +3.02 [+1.99, +4.05] on SOFC-Exp, against −0.47 and
+  −0.52 on seen names. On the random splits, self-training gains +2.61
+  [+0.50, +4.73] (fine-grained) and +2.26 [+0.92, +3.60] (coarse-grained)
+  on unseen names and nothing on seen ones.
+
+A method for unseen papers therefore has to raise F1 on names the training
+papers do not contain. That is where 81% of a new paper's entities are, and
+where every gain measured so far lands.
 
 ## 6 Methods for unseen papers (pending)
 
