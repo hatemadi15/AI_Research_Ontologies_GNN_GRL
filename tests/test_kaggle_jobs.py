@@ -195,6 +195,70 @@ def test_smoke6_runs_the_week6_options_at_full_size_outside_the_decision_splits(
     assert kj.batch_spec('smoke6')['models'] == kj.batch_spec('smoke5')['models']
 
 
+def _parsed(lanes):
+    return [[nb.parse_args(j) for j in lane] for lane in lanes]
+
+
+def _get(a, name, default=None):
+    return getattr(a, name, default)                # options without a default are absent
+
+
+def test_week6_screen_batches(monkeypatch):
+    """w6a: DeBERTa-v3-large and document context, seeds 0-200 on the held-out papers; w6b:
+    multi-task self-training per paper in one lane, and SOFC-Exp's official split."""
+    monkeypatch.setattr(nb.os.path, 'isfile', lambda path: True)    # the corpus is not here
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda: 'x' * 64)
+    a0, a1 = _parsed(kj.batch_lanes('w6a'))
+    assert (a0[0].tag, a0[0].seeds, a0[0].vary_split) == ('smokeq', [0], True)
+    screen = a0[1:] + a1
+    assert all(a.leave_one_paper_out and not _get(a, 'papers') and a.crf for a in screen)
+    assert sorted((nb.variant_name(a), a.granularity) for a in screen) == sorted(
+        (f'{stem}_m{off}', g) for stem in ('crf_deberta', 'crf_ctx') for off in (0, 100, 200)
+        for g in ('fine', 'coarse'))
+    for a in screen:
+        assert a.seed_offset == int(nb.variant_name(a).rsplit('_m', 1)[1])
+        deberta = nb.variant_name(a).startswith('crf_deberta')
+        assert a.model == (kj.DEBERTA if deberta else nb.DEFAULT_MODEL)
+        assert _get(a, 'context', 0) == (0 if deberta else 64)
+    assert kj.batch_spec('w6a')['models'][kj.DEBERTA] == kj.DEBERTA_PINS['models'][kj.DEBERTA]
+    b0, b1 = _parsed(kj.batch_lanes('w6b'))
+    assert b0[0].tag == 'smoker'
+    assert [a.papers for a in b0[1:]] == [[p] for p in kj.PAPERS]
+    assert all(_get(a, 'multi_task') and a.granularity == 'both' and _get(a, 'teachers') == 3
+               and _get(a, 'students') == 3 and _get(a, 'self_train_sample') == 0
+               and nb.variant_name(a) == 'crf_mt_st3' for a in b0[1:])
+    assert [(a.granularity, a.published_split, a.crf) for a in b1] == [('sofc', True, False),
+                                                                       ('sofc', True, True)]
+    assert all(a.seeds == list(range(0, 1000, 100)) for a in b1)
+    assert kj.batch_spec('w6b')['models'] == kj.MODELS
+
+
+def test_week6_stage2_batches(monkeypatch, capsys):
+    monkeypatch.setattr(nb.os.path, 'isfile', lambda path: True)
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda: 'x' * 64)
+    lane0, lane1 = _parsed(kj.batch_lanes('w6c:deberta,ctx,mtst'))
+    assert lane0[0].tag == 'smokes'
+    mtst = [a for a in lane0 + lane1 if _get(a, 'multi_task')]
+    assert lane1[:4] == mtst and all(_get(a, 'students') == 10 for a in mtst)   # 1 lane, first
+    seeds = [a for a in lane0[1:] + lane1[4:]]
+    assert sorted((nb.variant_name(a), a.granularity) for a in seeds) == sorted(
+        (f'{stem}_m{off}', g) for stem in ('crf_deberta', 'crf_ctx')
+        for off in range(300, 1000, 100) for g in ('fine', 'coarse'))
+    assert kj.batch_extras('w6c:deberta,ctx,mtst') == kj.DEBERTA_PINS
+    assert kj.batch_extras('w6c:ctx,mtst') == {}
+    (repeat,), (sofc,) = _parsed(kj.batch_lanes('w6c:sofc-deberta'))
+    assert (nb.variant_name(sofc), sofc.granularity, sofc.published_split, sofc.model) == (
+        'crf_deberta', 'sofc', True, kj.DEBERTA)
+    (_,), (ctx,) = _parsed(kj.batch_lanes('w6c:sofc-ctx'))
+    assert (nb.variant_name(ctx), _get(ctx, 'context'), ctx.seeds) == (
+        'crf_ctx', 64, list(range(0, 1000, 100)))
+    for bad in ('w6c:', 'w6c:foo', 'w6c:mtst,mtst', 'w6d'):
+        with pytest.raises(SystemExit):
+            kj.main(['--user', 'someone', 'push', '--batch', bad])
+    assert 'w6c:<methods>' in capsys.readouterr().err
+    assert kj.batch_name('w6c:mtst,deberta') == 'w6c:mtst,deberta'
+
+
 def test_a_refused_push_stops(monkeypatch, capsys):
     """The Kaggle CLI exits 0 when it refuses a push; push must not report the batch."""
     monkeypatch.setattr(kj, 'corpus_sha256', lambda: 'x' * 64)

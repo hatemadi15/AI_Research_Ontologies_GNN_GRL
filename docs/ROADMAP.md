@@ -826,7 +826,7 @@ chance at class level. For a Task C-style result:
 | 3 | Done: NER, P1 "Next, after week 2" items 1–5: comparisons of 3-seed means, a mixed-backbone ensemble, label semantics and self-training for unseen papers, multi-task again, in-domain pre-training (protocol below) | Met for two changes, both coarse-grained: multi-task on the random splits (+0.75 [+0.10, +1.39]) and label semantics on unseen papers (+1.17 [+0.94, +1.41]). The mixed-backbone vote, self-training and in-domain pre-training do not pass; the reported system stays `crf_ens3` |
 | 4 | Done for NER: P1 "Next, after week 3" items 1, 2, 3 and 5, i.e. votes over the week-3 changes that help, label semantics on the multi-task model, self-training at scale, on Kaggle T4 GPUs (protocol below). Not started: context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | Met for NER by two changes, both on unseen papers. Coarse-grained, the label-semantics vote improves on `crf_ens3` on the CPU (+1.63 [+0.11, +3.16]); the GPU repeat does not confirm it (+0.40 [−1.36, +2.16]). Fine-grained, self-training with 3 teachers improves on the CRF head (GPU, +1.07 [+0.33, +1.80]; +1.22 [+0.60, +1.84] on the random splits, reported). The multi-task vote and label semantics on the multi-task model do not pass. Typing: not started |
 | 5 | Done: NER, P1 "Next, after week 4" item 1, i.e. 10 seeds per split for the CRF reference, multi-task, label semantics and self-training with 3 teachers, on Kaggle T4 GPUs, and the published split (amendment); items 2–7 and a paper outline prepared, and the week-6 options run once each at full size (protocol below). The original week-5 work moves to week 7 | Met. Of the claims re-tested with 10 seeds, fine-grained multi-task on the random splits passes (+1.83 [+0.32, +3.34]); the coarse-grained claims of week 3 and the self-training claim of week 4 do not. The reported system: the multi-task vote coarse-grained on the random splits and fine-grained on unseen papers, `crf_ens3` elsewhere. On the published split, plain MatSciBERT reproduces 69.92 and 72.32 and the CRF head beats both |
-| 6 | NER, P1 "Next, after week 5", towards a methods paper: methods for unseen papers (DeBERTa-v3-large, document context, multi-task self-training) screened with 3 seeds and decided with 10, and a second dataset (SOFC-Exp, 10 seeds); protocol fixed before its runs | A method whose vote improves on the strongest system on unseen papers under the 10-seed design, and on SOFC-Exp |
+| 6 | In progress: NER, P1 "Next, after week 5", towards a methods paper: methods for unseen papers (DeBERTa-v3-large, document context, multi-task self-training) screened with 3 seeds and decided with 10, and a second dataset (SOFC-Exp, 10 seeds); protocol below | A method whose vote improves on the strongest system on unseen papers under the 10-seed design, and on SOFC-Exp |
 | 7 | Class-level taxonomy (LLM or cross-encoder + arborescence); relation annotation pilot | First class-level taxonomy F1 above chance; relation guidelines |
 
 ### Week 2 protocol (fixed before any run)
@@ -1206,3 +1206,100 @@ comparison with 69.92 and 72.32 is like for like:
 
 These runs use a later frozen commit than the other week-5 runs; their
 session again first repeats a week-4 run exactly. About 1 GPU-hour.
+
+### Week 6 protocol (fixed before any run)
+
+Week 6 runs items 1 and 2 of P1 "Next, after week 5", towards a methods
+paper: three methods for unseen papers on MaterioMiner, and the second
+dataset, SOFC-Exp. Every run is a GPU run in the week-5 environment (Kaggle
+T4, the pinned image, `transformers` and the MatSciBERT snapshot,
+deterministic CUDA) with `--crf` and `--save-predictions`, from one new
+frozen commit, the one that adds this protocol. That commit loads every
+model in float32 (week 5), which leaves the MatSciBERT runs unchanged; each
+session first repeats a week-4 run to show it.
+
+**Methods.** Each changes one thing against the CRF head; every other
+setting is that of the CRF runs (learning rate 5e-5, batch 16, 20 epochs,
+the best epoch on validation F1).
+1. DeBERTa-v3-large (`--model microsoft/deberta-v3-large`, snapshot
+   64a8c8e, with `sentencepiece` 0.2.2 for its tokenizer): a general-domain
+   encoder of 435M parameters, against MatSciBERT's 110M. Variant
+   `crf_deberta_m<N>`.
+2. Document context (`--context 64`): up to 64 subwords of the neighbouring
+   sentences of the same paper and part on each side, only the sentence
+   itself labelled (FLERT). Variant `crf_ctx_m<N>`.
+3. Multi-task self-training (`--multi-task --self-train <fatigue corpus>
+   --teachers 3 --self-train-sample 0`). The teachers are 3 multi-task
+   models with the seeds of `crf_mt`, `crf_mt_m100` and `crf_mt_m200`,
+   retrained in every run; their scores must equal those stored runs. They
+   tag the whole corpus once for both granularities. Per granularity, the
+   silver filter is chosen on the validation sentences from 5 candidates
+   (3 of 3 teachers agree with every marginal at least 0.9, 0.8 or 0.7; 2 of
+   3 at 0.9 or 0.8): the one with the most sentences among those right at
+   least as often as the strictest. Each student is a multi-task model
+   trained on gold plus silver sentences, silver weight 0.5. Variant
+   `crf_mt_st3_m<N>`; one run gives both granularities.
+
+**Stage 1, the screen.** Seeds 0, 100 and 200 on the 4 held-out papers, at
+both granularities: each method against the CRF head (`crf_m0` to
+`crf_m200`, GPU), 3-seed means. A method goes to stage 2 if its mean
+micro-F1 difference is above 0 at either granularity. The screen decides
+nothing. Week 5 showed that 3 seeds miss most real gains of 1–2 points, but
+rarely give a gain the wrong sign (0–8% of the triples for the gains that
+passed or came close), so this rule lets almost every real gain through.
+A method that the screen stops is reported with its 3 seeds.
+
+**Stage 2, the decisions.** Seed offsets 300 to 900 are added, giving 10
+seeds per paper; votes are taken over the 3 disjoint seed triples, as in
+week 5. For each method in stage 2:
+1. the method against the CRF head on the 4 held-out papers, per
+   granularity (10-seed means);
+2. the method's vote against the strongest system on unseen papers:
+   fine-grained the multi-task vote `crf_mt_ens3` (52.47), coarse-grained
+   `crf_ens3` (61.10).
+
+With 3 methods, 2 granularities and 2 decisions there are 12 comparisons:
+about 0.3 false passes are expected if no method helps, and the write-up
+states the number. A method claim for the paper needs decision 2 and its
+gain to repeat on SOFC-Exp.
+
+**SOFC-Exp** (`--granularity sofc` on its official split: 26 training, 8
+development and 11 test articles; model seeds 0 to 900):
+- S1: the CRF head against plain MatSciBERT, paired by seed: the week-5
+  finding on a second dataset. Reported alongside: the published
+  MatSciBERT-CRF scores (micro 84.77, macro 82.39; Gupta et al., 2022),
+  strict IOB2, and the CRF votes over the 3 seed triples.
+- S2: DeBERTa-v3-large against the CRF head on the same split, paired by
+  seed, whether or not it reaches stage 2. Document context gets S2 only if
+  it reaches stage 2: SOFC-Exp annotates only some sentences of each
+  article, so its context must first take the unannotated sentences from
+  the article texts. Multi-task self-training does not apply (one
+  granularity, and the corpus is about fatigue).
+- On one split, the CIs are over the 10 seeds only, as on the published
+  MaterioMiner split.
+
+**Rule**, as before: a change improves on its comparison if the 95%
+Student-t CI of the mean paired micro-F1 difference lies above 0, over the 4
+held-out papers or, on SOFC-Exp, over the 10 seeds.
+
+**Reported alongside (no decision):** strict IOB2, macro and weighted F1;
+multi-task self-training against multi-task (`crf_mt`); each screen; each
+method's first vote (seeds 0–200) in the screen; the per-type F1 of a method
+that passes.
+
+**Order and budget** (Kaggle's weekly quota: 11.8 hours left until 17
+October, then 30 hours):
+- Session a (`w6a`): the repeat run, then the DeBERTa and document-context
+  screens, balanced over its 2 GPUs (12 jobs of 4 runs, about 2 hours).
+- Session b (`w6b`): the repeat run and the multi-task self-training screen,
+  one job per paper in one lane, since they extend the same files (about 3
+  hours); in the other lane SOFC-Exp, plain MatSciBERT and the CRF head (20
+  runs, about 1.5 hours).
+- Then stage 2 (`w6c:<methods>`) for the methods that pass the screen, and
+  S2 (`w6c:sofc-deberta`), as the quota allows: about 4 GPU-hours for
+  DeBERTa, 2.5 for document context and 4.5 for multi-task self-training on
+  the papers, and about 3.5 for DeBERTa on SOFC-Exp.
+
+**Later (not week 6):** the random splits for the methods that pass,
+combinations of the methods that pass (week 7), and the rare coarse-grained
+types.

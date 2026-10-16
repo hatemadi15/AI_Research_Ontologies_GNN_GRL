@@ -61,6 +61,17 @@ Week 5 makes 10 seeds per split (offsets 0 to 900):
   smoke6  the CRF run of smoke4 again (smokem), then one full-size run of DeBERTa-v3-large and
           of document context on the published split, and of SOFC-Exp on its official split:
           splits that no week-6 decision uses
+Week 6 (methods for unseen papers, and SOFC-Exp; each session first runs the CRF run of
+smoke4 again):
+  w6a     the screen of DeBERTa-v3-large (crf_deberta_m*) and document context (crf_ctx_m*):
+          seed offsets 0, 100 and 200 on the held-out papers, both granularities
+  w6b     the screen of multi-task self-training (crf_mt_st3_m*, 3 students), one job per
+          held-out paper in one lane (they extend the same files); SOFC-Exp's official
+          split with plain MatSciBERT and the CRF head, model seeds 0 to 900
+  w6c:M   stage 2 for the methods M (comma-separated): deberta and ctx add seed offsets 300
+          to 900 on the held-out papers; mtst trains 10 students per paper (one lane);
+          sofc-deberta and sofc-ctx run the method on SOFC-Exp's official split, model seeds
+          0 to 900. E.g. w6c:deberta,mtst
 
 Usage:
   python src/graph/kaggle_jobs.py quota
@@ -109,7 +120,7 @@ MODELS = {'m3rg-iitd/matscibert': 'ced9d8f5f208712c4a90f98a246fe32155b29995'}
 DEBERTA = 'microsoft/deberta-v3-large'
 DEBERTA_PINS = {'pip': ('sentencepiece==0.2.2',),
                 'models': {DEBERTA: '64a8c8eab3e352a784c658aef62be1662607476f'}}
-BATCH_EXTRAS = {'smoke5': DEBERTA_PINS, 'smoke6': DEBERTA_PINS}
+BATCH_EXTRAS = {'smoke5': DEBERTA_PINS, 'smoke6': DEBERTA_PINS, 'w6a': DEBERTA_PINS}
 THREADS = 2
 DEADLINE_HOURS = 10                 # no job starts later; a Kaggle session lasts 12 hours
 RESULTS_PREFIX = 'gpu__'            # as in run_jobs.py
@@ -125,7 +136,11 @@ OFFSETS_PUBLISHED = tuple(range(0, 1000, 100))   # the model seeds on the publis
 PAPERS =('10.1007_s11340-021-00758-x', '10.1038_ncomms7164', '10.1038_s41467-020-19071-7',
           '10.3390_met10111458')      # the held-out papers (the MaterioMiner files)
 # relative GPU time of one run of each kind (a CRF run is 1), for balancing the lanes
-COST = {'crf': 1.0, 'mt': 1.7, 'ls': 1.1, 'mt_ls': 1.8, 'st': 2.5, 'st3': 22.0}
+COST = {'crf': 1.0, 'mt': 1.7, 'ls': 1.1, 'mt_ls': 1.8, 'st': 2.5, 'st3': 22.0,
+        'deberta': 4.4, 'ctx': 2.7}
+# week 6: the options of each method on the held-out papers, and the stage-2 parts
+METHOD_FLAGS = {'deberta': ('--model', DEBERTA), 'ctx': ('--context', '64')}
+STAGE2 = ('deberta', 'ctx', 'mtst', 'sofc-deberta', 'sofc-ctx')
 
 
 # ---------------------------------------------------------------------------
@@ -159,9 +174,44 @@ def family(kind, flags, protocols=tuple(PROTOCOL_FLAGS), granularities=GRANULARI
     return out
 
 
-def balance(costed, lanes=LANES):
-    """Jobs over `lanes`: longest first, each to the least loaded lane (ties: lowest)."""
-    loads = [0.0] * lanes
+def method_jobs(method, offsets):
+    """(cost, job) of a week-6 method's seeds on the held-out papers, both granularities:
+    DeBERTa-v3-large (crf_deberta_m<N>) or document context (crf_ctx_m<N>)."""
+    return [(COST[method] * RUNS['leave_one_paper_out'],
+             job(g, 'leave_one_paper_out', *METHOD_FLAGS[method], offset=off,
+                 tag=f'deberta_m{off}' if method == 'deberta' else f'm{off}'))
+            for g in GRANULARITIES for off in offsets]
+
+
+def mtst_jobs(students):
+    """Multi-task self-training on the held-out papers (crf_mt_st3_m*, both granularities),
+    one job per paper: 3 multi-task teachers tag the whole corpus, `students` students."""
+    return [['--leave-one-paper-out', '--papers', paper, '--crf', '--multi-task',
+             '--self-train', CORPUS, '--teachers', '3', '--students', str(students),
+             '--self-train-sample', '0', '--save-predictions', '--threads', str(THREADS)]
+            for paper in PAPERS]
+
+
+def published_job(granularity, *flags):
+    """One job on the published split (SOFC-Exp: its official split), model seeds 0 to 900."""
+    return ['--granularity', granularity, '--published-split', '--seeds',
+            *(str(s) for s in OFFSETS_PUBLISHED), *flags, '--save-predictions', '--threads',
+            str(THREADS)]
+
+
+def stage2_methods(name):
+    """The methods of a stage-2 batch name 'w6c:M1,M2,...' (ValueError if one is unknown)."""
+    methods = name[len('w6c:'):].split(',')
+    unknown = [m for m in methods if m not in STAGE2]
+    if not methods or unknown or len(set(methods)) < len(methods):
+        raise ValueError(f'unknown or repeated stage-2 methods {name!r}; known: {STAGE2}')
+    return methods
+
+
+def balance(costed, lanes=LANES, loads=None):
+    """Jobs over `lanes`: longest first, each to the least loaded lane (ties: lowest);
+    `loads` gives the lanes' starting loads."""
+    loads = [0.0] * lanes if loads is None else list(loads)
     out = [[] for _ in range(lanes)]
     for cost, args in sorted(costed, key=lambda c: -c[0]):
         lane = loads.index(min(loads))
@@ -271,23 +321,60 @@ def batch_lanes(name):
                  ['--granularity', 'sofc', *published, '--tag', 'smokep']]]
     if name == 'w5c':
         # the published split (week-5 amendment): plain MatSciBERT and the CRF head, 10 seeds
-        seeds = ['--seeds', *(str(s) for s in OFFSETS_PUBLISHED)]
-
-        def published(g, *flags):
-            return ['--granularity', g, '--published-split', *seeds, *flags,
-                    '--save-predictions', '--threads', str(THREADS)]
-        return [[repeat + ['--tag', 'smokeg'], published('fine'), published('fine', '--crf')],
-                [published('coarse'), published('coarse', '--crf')]]
+        return [[repeat + ['--tag', 'smokeg'], published_job('fine'),
+                 published_job('fine', '--crf')],
+                [published_job('coarse'), published_job('coarse', '--crf')]]
+    # week 6 (ROADMAP §4): the screen, then stage 2 for the methods that pass it
+    if name == 'w6a':
+        lanes = balance(method_jobs('deberta', OFFSETS) + method_jobs('ctx', OFFSETS))
+        return [[repeat + ['--tag', 'smokeq']] + lanes[0], lanes[1]]
+    if name == 'w6b':
+        return [[repeat + ['--tag', 'smoker'], *mtst_jobs(3)],
+                [published_job('sofc'), published_job('sofc', '--crf')]]
+    if name.startswith('w6c:'):
+        # jobs that extend the same files share lane 1 (mtst); the others are balanced
+        methods = stage2_methods(name)
+        fixed = mtst_jobs(10) if 'mtst' in methods else []
+        costed = [c for m in ('deberta', 'ctx') if m in methods
+                  for c in method_jobs(m, OFFSETS_W5)]
+        costed += [(10 * COST['deberta'] * 3, published_job('sofc', '--crf', '--model', DEBERTA,
+                                                            '--tag', 'deberta'))
+                   for m in methods if m == 'sofc-deberta']
+        costed += [(10 * COST['ctx'] * 3, published_job('sofc', '--crf', '--context', '64'))
+                   for m in methods if m == 'sofc-ctx']
+        lanes = balance(costed, loads=[1.0, 70.0 * len(fixed)])
+        return [[repeat + ['--tag', 'smokes']] + lanes[0], fixed + lanes[1]]
     raise ValueError(f'unknown batch {name!r}')
 
 
 BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'item3r',
-           'smoke4', 'w5a', 'w5b', 'w5c', 'smoke5', 'smoke6')
+           'smoke4', 'w5a', 'w5b', 'w5c', 'smoke5', 'smoke6', 'w6a', 'w6b')
+
+
+def batch_extras(name):
+    """The extra pins of a batch (BATCH_EXTRAS; DeBERTa's for a stage-2 batch with it)."""
+    if name.startswith('w6c:') and any('deberta' in m for m in stage2_methods(name)):
+        return DEBERTA_PINS
+    return BATCH_EXTRAS.get(name, {})
+
+
+def batch_name(name):
+    """argparse type of --batch: a name of BATCHES or a stage-2 batch w6c:M1,M2,..."""
+    if name in BATCHES:
+        return name
+    if name.startswith('w6c:'):
+        try:
+            stage2_methods(name)
+            return name
+        except ValueError as exc:
+            raise argparse.ArgumentTypeError(str(exc)) from exc
+    raise argparse.ArgumentTypeError(f'unknown batch {name!r}; known: {", ".join(BATCHES)}, '
+                                     'w6c:<methods>')
 
 
 def batch_spec(name):
     """The job spec that run_jobs.py runs (see its docstring), with the batch's extra pins."""
-    extra = BATCH_EXTRAS.get(name, {})
+    extra = batch_extras(name)
     return {'batch': name, 'gpu': GPU, 'pip': list(PIP) + list(extra.get('pip', ())),
             'wheels': list(WHEEL_FILES), 'models': {**MODELS, **extra.get('models', {})},
             'corpus_sha256': corpus_sha256(), 'deadline_hours': DEADLINE_HOURS,
@@ -555,7 +642,8 @@ def main(argv=None):
     p.add_argument('--commit', default='HEAD', help='the frozen commit (default: HEAD)')
     p.set_defaults(func=cmd_bundle)
     p = sub.add_parser('push', help="push a batch's jobs as a GPU kernel")
-    p.add_argument('--batch', choices=BATCHES, required=True)
+    p.add_argument('--batch', type=batch_name, required=True,
+                   help=f"one of {', '.join(BATCHES)}, or w6c:<methods> (stage 2 of week 6)")
     p.set_defaults(func=cmd_push)
     sub.add_parser('status', help="the kernel's status").set_defaults(func=cmd_status)
     sub.add_parser('pull', help="download the kernel's outputs").set_defaults(func=cmd_pull)
