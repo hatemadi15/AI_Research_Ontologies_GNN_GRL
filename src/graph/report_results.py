@@ -187,10 +187,24 @@ WEEK7_COMPARISONS = (('crf_dc', 'crf'), *((f'{ref}_dc', ref) for ref in UNSEEN_B
                      ('crf_ctx_dc', 'crf_ctx'), ('crf_ctx_ens3_dc', 'crf_ctx_ens3'))
 # the week-7 decisions, which get a bullet each
 WEEK7_DECISIONS = WEEK7_COMPARISONS[:3]
+# Week 7, part 2a: recall calibration (ner_bias.py), the bias chosen per held-out paper on
+# inner folds (crf_eb) or on the validation sentences (crf_ebv; reported on MaterioMiner, a
+# decision on SOFC-Exp), as in ner_seedmeans.WEEK7_COMPARISONS
+WEEK7A_COMPARISONS = (('crf_eb', 'crf'), *(('crf_eb_ens3', ref) for ref in UNSEEN_BEST.values()),
+                      ('crf_ebv', 'crf'))
+WEEK7A_DECISIONS = WEEK7A_COMPARISONS[:3]
 WEEK7_SYSTEM_NAMES = {**WEEK6_NAMES, **{
     f'{stem}{rule}': f'{WEEK6_NAMES[stem]} + {WEEK7_NAMES["crf" + rule]}'
     for stem in ('crf', 'crf_ens3', 'crf_mt_ens3', 'crf_ctx', 'crf_ctx_ens3')
-    for rule in ('_dc', '_dcr')}}
+    for rule in ('_dc', '_dcr')},
+    'crf_eb': 'CRF head + recall calibration',
+    'crf_ebv': 'CRF head + recall calibration chosen on validation',
+    'crf_eb_ens3': 'vote of the CRF head + recall calibration'}
+# the label of a week-7 method in the SOFC-Exp bullet (both parts decide on SOFC-Exp)
+WEEK7_SOFC_LABELS = {**{m: f"Week 7, {name} on the CRF head's predictions"
+                        for m, name in WEEK7_NAMES.items()},
+                     'crf_ebv': 'Week 7, part 2a, recall calibration of the CRF head, its bias '
+                                'chosen on the validation articles, against the CRF head'}
 LOPO = 'leave_one_paper_out'
 # the exploratory analyses of the week-5 runs (ner_seed_analysis.py), in results/gpu/
 WEEK5_ANALYSIS = 'ner_week5_seed_analysis.json'
@@ -743,17 +757,30 @@ WEEK7_INTRO = (
     "coarse-grained). The other rows are reported without a decision.\n")
 
 
-def ner_week7_table(res):
-    """Week-7 comparisons, part 1 ([] if none is complete): the held-out papers first."""
+WEEK7A_INTRO = (
+    "Δ = with the bias − without it, on the same split, GPU runs only, 10 model seeds: a model "
+    "scores the mean of its 10 runs, a vote the mean of its votes over 3 disjoint seed triples. "
+    "Week-7 protocol, part 2a: recall calibration, a bias on the CRF head's emission of every "
+    "tag but O before decoding, chosen per held-out paper on inner folds that never score that "
+    "paper (`ner_bias.py`). Pre-registered rule: a change improves on its reference only if the "
+    "95% Student-t CI of the mean micro-F1 difference lies entirely above 0. Decisions, on the "
+    "4 held-out papers: the calibrated CRF head against the CRF head, and its vote against the "
+    "strongest system on unseen papers after week 5 (the multi-task vote fine-grained, the "
+    "3-model seed ensemble coarse-grained). The other rows are reported without a decision.\n")
+
+
+def ner_week7_table(res, comparisons=WEEK7_COMPARISONS,
+                    title='part 1 (the consistency rule, 10-seed means, GPU runs)',
+                    intro=WEEK7_INTRO):
+    """Week-7 comparisons of one part ([] if none is complete): the held-out papers first."""
     comps = res.comparisons(GPU_PREFIX + WEEK7_FILE)
-    rows = [c for variant, reference in WEEK7_COMPARISONS
+    rows = [c for variant, reference in comparisons
             for protocol in (LOPO, 'random_split_vary') for g in GRANULARITIES
             for c in [find_comparison(comps, g, protocol, variant, reference)] if c]
     if not rows:
         return []
-    out = ["\n#### NER week-7 comparisons, part 1 (the consistency rule, 10-seed means, GPU "
-           "runs)\n", WEEK7_INTRO, WEEK3_COLUMNS.replace('Δ strict micro', 'Role'),
-           "|---|---|---|---|---|---|---|---|"]
+    out = [f"\n#### NER week-7 comparisons, {title}\n", intro,
+           WEEK3_COLUMNS.replace('Δ strict micro', 'Role'), "|---|---|---|---|---|---|---|---|"]
     for c in rows:
         v = dig(c, 'variant_scores', 'micro')
         out.append(f"| {WEEK7_SYSTEM_NAMES[c['variant']]} vs "
@@ -775,7 +802,10 @@ def build_tables(res):
            + ner_week6_table(res, WEEK6_FILE,
                              'NER week-6 comparisons (10-seed means, held-out papers, GPU runs)',
                              WEEK6_INTRO, WEEK6_COMPARISONS)
-           + ner_week7_table(res))
+           + ner_week7_table(res)
+           + ner_week7_table(res, WEEK7A_COMPARISONS,
+                             'part 2a (recall calibration, 10-seed means, GPU runs)',
+                             WEEK7A_INTRO))
     return '\n'.join(out).strip()
 
 
@@ -958,6 +988,10 @@ def ner_notes(res):
         note += week6_verdict_line(week7, variant, reference,
                                    'the consistency rule on the saved predictions of 10 seeds',
                                    week='7, part 1', names=WEEK7_SYSTEM_NAMES)
+    for variant, reference in WEEK7A_DECISIONS:
+        note += week6_verdict_line(week7, variant, reference,
+                                   'recall calibration, its bias chosen on inner folds, 10 seeds',
+                                   week='7, part 2a', names=WEEK7_SYSTEM_NAMES)
     return note + sofc_note(analysis)
 
 
@@ -1023,8 +1057,8 @@ def sofc_note(analysis):
         line += (f"; the CRF votes over the 3 seed triples score "
                  f"{e['crf_votes']['micro']['mean']:.2f}")
     for method, m in e.get('methods', {}).items():
-        if method in WEEK7_NAMES:
-            label = f"Week 7, {WEEK7_NAMES[method]} on the CRF head's predictions"
+        if method in WEEK7_SOFC_LABELS:
+            label = WEEK7_SOFC_LABELS[method]
         else:
             label = f"S2, {WEEK6_NAMES[method]} against the CRF head"
         line += (f". {label}, paired by seed: {interval(m['micro'])}, "

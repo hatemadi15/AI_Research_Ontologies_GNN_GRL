@@ -1044,6 +1044,38 @@ def test_week7_table_and_bullets(tmp_path):
     assert 'retyping vs the CRF head' not in readme
 
 
+def test_week7_part2a_table_and_bullets(tmp_path):
+    """Week 7, part 2a: recall calibration gets a table of its own and a bullet per decision;
+    the bias chosen on validation is reported in the table only."""
+    ws = Workspace(tmp_path)
+    lopo = 'leave_one_paper_out'
+    for g, micro in (('fine', (1.50, 0.40, 2.60)), ('coarse', (0.20, -0.30, 0.70))):
+        ws.week4('crf_eb', 'crf', g, lopo, gpu=True, role='decision', micro=micro,
+                 score=(48.0, 44.0, 52.0), name=rr.WEEK7_FILE)
+    ws.week4('crf_eb_ens3', 'crf_mt_ens3', 'fine', lopo, gpu=True, role='decision',
+             micro=(-0.50, -2.00, 1.00), score=(51.0, 45.0, 57.0), name=rr.WEEK7_FILE)
+    ws.week4('crf_ebv', 'crf', 'fine', lopo, gpu=True, micro=(0.05, -0.10, 0.20),
+             score=(46.6, 42.0, 51.0), name=rr.WEEK7_FILE)
+    readme, _ = ws.generate()
+    rows = table_rows(readme, '#### NER week-7 comparisons, part 2a')
+    assert [r.split(' | ')[:3] for r in rows] == [
+        ['| CRF head + recall calibration vs CRF head', 'leave one paper out', 'fine'],
+        ['| CRF head + recall calibration vs CRF head', 'leave one paper out', 'coarse'],
+        ['| vote of the CRF head + recall calibration vs multi-task vote', 'leave one paper out',
+         'fine'],
+        ['| CRF head + recall calibration chosen on validation vs CRF head',
+         'leave one paper out', 'fine']]
+    assert [r.rsplit(' | ', 1)[1] for r in rows] == ['decision |'] * 3 + ['reported |']
+    assert ('* NER week 7, part 2a (GPU runs; recall calibration, its bias chosen on inner folds, '
+            '10 seeds), CRF head + recall calibration vs the CRF head (paired micro-F1 '
+            'difference, leaving one paper out): fine-grained improves (+1.50, 95% CI [+0.40, '
+            '+2.60]') in readme
+    assert ('* NER week 7, part 2a (GPU runs; recall calibration, its bias chosen on inner folds, '
+            '10 seeds), vote of the CRF head + recall calibration vs the multi-task vote') in readme
+    assert 'chosen on validation vs the CRF head' not in readme
+    assert '#### NER week-7 comparisons, part 1' not in readme
+
+
 def test_week6_screen_bullets_follow_the_screen_rule(tmp_path):
     """A method stops unless a granularity's mean difference is above 0, whatever the CIs; the
     screen's vote comparison rides along; a method with one granularity gets no bullet."""
@@ -1138,6 +1170,11 @@ def test_sofc_row_and_bullet(tmp_path):
                     'crf_dcr': {'micro': {'mean': 85.2, 'ci95': [84.7, 85.7]},
                                 'minus_crf': {'micro': diff(0.4, 0.1, 0.7),
                                               'micro_strict': diff(0.3, 0.0, 0.6)},
+                                'n_pairs': 10},
+                    # week 7, part 2a: recall calibration, chosen on the validation articles
+                    'crf_ebv': {'micro': {'mean': 85.0, 'ci95': [84.5, 85.5]},
+                                'minus_crf': {'micro': diff(0.2, -0.1, 0.5),
+                                              'micro_strict': diff(0.1, -0.2, 0.4)},
                                 'n_pairs': 10}}}}}
     (ws.results / 'gpu' / rr.WEEK5_ANALYSIS).write_text(json.dumps(analysis))
     readme, _ = ws.generate()
@@ -1155,7 +1192,10 @@ def test_sofc_row_and_bullet(tmp_path):
             "head's predictions, paired by seed: 85.30 [84.80, 85.80], improves (+0.50, 95% CI "
             '[+0.20, +0.80]; strict IOB2 +0.40 [+0.10, +0.70]). Week 7, the consistency rule with '
             "retyping on the CRF head's predictions, paired by seed: 85.20 [84.70, 85.70], improves "
-            '(+0.40, 95% CI [+0.10, +0.70]; strict IOB2 +0.30 [+0.00, +0.60]).\n') in readme
+            '(+0.40, 95% CI [+0.10, +0.70]; strict IOB2 +0.30 [+0.00, +0.60]). Week 7, part 2a, '
+            'recall calibration of the CRF head, its bias chosen on the validation articles, '
+            'against the CRF head, paired by seed: 85.00 [84.50, 85.50], no significant change '
+            '(+0.20, 95% CI [-0.10, +0.50]; strict IOB2 +0.10 [-0.20, +0.40]).\n') in readme
 
 
 def test_a_week3_file_that_is_not_an_object_is_reported(tmp_path, capsys):

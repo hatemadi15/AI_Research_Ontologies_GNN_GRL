@@ -24,7 +24,8 @@ votes (ner_seedmeans.WEEK5_SYSTEMS) and writes ner_week5_seed_analysis.json next
     scores) and, where their files exist, the week-6 methods on a published split
     (SPLIT_METHODS): their scores and their difference from the CRF head, paired by seed
     (SOFC-Exp's S1 and S2 of the week-6 protocol). Week 7 adds the consistency rule on the
-    CRF head (crf_dc, and crf_dcr with retyping) in the same way.
+    CRF head (crf_dc, and crf_dcr with retyping) and recall calibration with the bias chosen
+    on the validation articles (crf_ebv, part 2a) in the same way.
   - errors (exploratory; cited by the week-7 protocol, part 1): per protocol and
     granularity, the kinds of error of the CRF head over its 10 seeds: the share of gold
     entities that are correct, missed (no overlapping prediction), of the right span and
@@ -63,8 +64,9 @@ PUBLISHED_F1 = {'fine': 69.92, 'coarse': 72.32, 'sofc': 84.77}
 PUBLISHED_MACRO = {'sofc': 82.39}
 PUBLISHED_SPLITS = ('fine', 'coarse', 'sofc')
 # methods on a published split, compared with the CRF head by seed: the week-6 methods,
-# and the week-7 consistency rule on the CRF head's predictions (ner_consistency.py)
-SPLIT_METHODS = ('crf_deberta', 'crf_ctx', 'crf_dc', 'crf_dcr')
+# the week-7 consistency rule on the CRF head's predictions (ner_consistency.py) and
+# recall calibration (ner_bias.py --choose val)
+SPLIT_METHODS = ('crf_deberta', 'crf_ctx', 'crf_dc', 'crf_dcr', 'crf_ebv')
 
 
 def load_files(directory, names):

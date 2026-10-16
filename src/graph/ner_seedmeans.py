@@ -84,6 +84,10 @@ predictions of the 10-seed runs:
     on unseen papers (UNSEEN_BEST): crf_mt_ens3_dc vs crf_mt_ens3 fine-grained, crf_ens3_dc
     vs crf_ens3 coarse-grained. Reported: the random splits, the other granularity's vote,
     retyping (_dcr), and the rule on document context (crf_ctx_dc, crf_ctx_ens3_dc).
+Part 2a (the same file) tests recall calibration (ner_bias.py: crf_eb, its bias chosen on
+inner folds; crf_ebv, on the validation sentences):
+  - Decisions: crf_eb vs crf on the held-out papers, and its vote crf_eb_ens3 vs
+    UNSEEN_BEST per granularity. Reported: crf_ebv vs crf.
 
 Usage:
   python src/graph/ner_seedmeans.py [--results results] [--out results/ner_week3_comparisons.json]
@@ -264,6 +268,11 @@ WEEK7_SYSTEMS = {
     **{f'{stem}{rule}': dc_family(WEEK6_SYSTEMS[stem], rule)
        for stem in ('crf', 'crf_ens3', 'crf_mt_ens3', 'crf_ctx', 'crf_ctx_ens3')
        for rule in DC_RULES},
+    # part 2a: recall calibration (ner_bias.py), the bias chosen on inner folds (crf_eb) or
+    # on the validation sentences (crf_ebv), and the votes of crf_eb
+    'crf_eb': seed_family('crf_eb'),
+    'crf_ebv': seed_family('crf_ebv'),
+    'crf_eb_ens3': vote_family('crf_eb'),
 }
 WEEK7_COMPARISONS = (
     # decision 1: the rule on the CRF head (held-out papers; random splits reported)
@@ -275,6 +284,12 @@ WEEK7_COMPARISONS = (
     *((f'{ref}_dcr', ref, None) for ref in UNSEEN_BEST.values()),
     ('crf_ctx_dc', 'crf_ctx', None),
     ('crf_ctx_ens3_dc', 'crf_ctx_ens3', None),
+    # part 2a, decision 1: recall calibration on the CRF head (held-out papers)
+    ('crf_eb', 'crf', LOPO),
+    # decision 2: its vote against the strongest system on unseen papers after week 5
+    *(('crf_eb_ens3', ref, {g: LOPO}) for g, ref in UNSEEN_BEST.items()),
+    # reported: the bias chosen on the validation sentences (from the training papers)
+    ('crf_ebv', 'crf', None),
 )
 
 

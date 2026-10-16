@@ -158,6 +158,12 @@ def test_published_split_analysis_of_sofc_exp_and_a_method(tmp_path):
     methods = sa.published_split(tmp_path)['sofc']['methods']
     assert list(methods) == ['crf_deberta', 'crf_ctx', 'crf_dc']
     assert methods['crf_dc']['minus_crf']['micro']['mean_diff'] == 0.5
+    # week 7, part 2a: recall calibration, its bias chosen on the validation articles
+    (tmp_path / 'ner_results_sofc_published_split_crf_ebv.json').write_text(
+        json.dumps(runs(5.4)))
+    methods = sa.published_split(tmp_path)['sofc']['methods']
+    assert list(methods)[-1] == 'crf_ebv' and methods['crf_ebv']['minus_crf']['micro'][
+        'mean_diff'] == 1.0
 
 
 def test_week6_type_differences_pair_seeds_and_papers(tmp_path, capsys):

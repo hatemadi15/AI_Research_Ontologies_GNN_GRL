@@ -258,10 +258,17 @@ def test_week7_systems_and_comparisons_follow_the_week7_protocol():
     assert systems['crf_ens3_dcr'] == ('crf_ens3_dcr', 'crf_ens3_dcr_m300', 'crf_ens3_dcr_m600')
     assert systems['crf_ctx_dc'] == tuple(f'crf_ctx_dc_m{n}' for n in range(0, 1000, 100))
     assert systems['crf_mt_ens3'] == ns.WEEK5_SYSTEMS['crf_mt_ens3']
-    assert ns.comparison_list(7, gpu=True)[:3] == (
+    comps = ns.comparison_list(7, gpu=True)
+    assert comps[:3] == (
         ('crf_dc', 'crf', lopo), ('crf_mt_ens3_dc', 'crf_mt_ens3', {'fine': lopo}),
         ('crf_ens3_dc', 'crf_ens3', {'coarse': lopo}))
-    assert all(decides is None for _, _, decides in ns.comparison_list(7, gpu=True)[3:])
+    # part 2a: recall calibration, the bias chosen on inner folds; on validation reported
+    assert systems['crf_eb'] == tuple(f'crf_eb_m{n}' for n in range(0, 1000, 100))
+    assert systems['crf_eb_ens3'] == ('crf_eb_ens3', 'crf_eb_ens3_m300', 'crf_eb_ens3_m600')
+    assert comps[-4:] == (
+        ('crf_eb', 'crf', lopo), ('crf_eb_ens3', 'crf_mt_ens3', {'fine': lopo}),
+        ('crf_eb_ens3', 'crf_ens3', {'coarse': lopo}), ('crf_ebv', 'crf', None))
+    assert all(decides is None for _, _, decides in comps[3:-4])
     with pytest.raises(ValueError):
         ns.comparison_list(7)
 
