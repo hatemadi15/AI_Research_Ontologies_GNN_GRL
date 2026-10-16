@@ -307,24 +307,48 @@ def mention_replacements(sentences, k, seed, p=MR_P):
     return out
 
 
-def part_contexts(data, part):
+def part_contexts(data, part, full_texts=None):
     """Context sentences for --context: a (left, right) per position of `part`, in its order.
 
     The context of a sentence is the other sentences of the same paper within the same part
     (train, validation or test), as word lists, nearest first: left those before it, right
     those after it in corpus order. Other parts never serve as context, so no test sentence
     is seen in training.
+
+    full_texts (SOFC-Exp, which annotates only some sentences of an article): {document stem:
+    {'sentences': every sentence of its text, 'annotated': the positions of its annotated
+    sentences}}. A document whose annotated sentences are all in `part` takes its context
+    from the whole text, annotated sentences or not.
     """
     by_doc = {}
     for i in sorted(part):
         by_doc.setdefault(data[i][2], []).append(i)
     where = {i: (doc, k) for doc, idx in by_doc.items() for k, i in enumerate(idx)}
+    whole = {}
+    for doc, idx in by_doc.items():
+        text = (full_texts or {}).get(doc.removesuffix('.conll'))
+        if text and len(idx) == sum(d == doc for _, _, d in data):
+            whole[doc] = text
     out = []
     for i in part:
         doc, k = where[i]
+        if doc in whole:
+            sentences, at = whole[doc]['sentences'], whole[doc]['annotated'][k]
+            out.append((sentences[:at][::-1], sentences[at + 1:]))
+            continue
         idx = by_doc[doc]
         out.append(([data[j][0] for j in reversed(idx[:k])], [data[j][0] for j in idx[k + 1:]]))
     return out
+
+
+def load_full_texts(granularity):
+    """The whole texts for document context (part_contexts): SOFC-Exp's context.json, or
+    None (MaterioMiner, whose files hold every sentence of its papers)."""
+    path = os.path.join(RAW_DIR, 'sofc_exp', 'context.json')
+    if granularity != 'sofc' or not os.path.exists(path):
+        return None
+    with open(path, encoding='utf-8') as f:
+        return json.load(f)
 
 
 def context_words(tokenizer, left, right, budget):
@@ -1903,7 +1927,8 @@ def run(args):
                 res = train_self_training(seed, train, val, test, labels, args, device, sample,
                                           test_index=te)
             else:
-                contexts = ({name: part_contexts(data, part)
+                texts = load_full_texts(granularity) if getattr(args, 'context', 0) else None
+                contexts = ({name: part_contexts(data, part, texts)
                              for name, part in (('train', tr), ('val', va), ('test', te))}
                             if getattr(args, 'context', 0) else None)
                 augmented = (mention_replacements([(w, t) for w, t, _ in train],

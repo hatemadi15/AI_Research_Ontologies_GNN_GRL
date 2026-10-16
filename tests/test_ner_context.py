@@ -29,6 +29,22 @@ def test_contexts_are_the_same_paper_and_part_nearest_first():
     assert out[5] == ([], [words[5]])
 
 
+def test_contexts_from_the_whole_text_when_a_document_is_wholly_in_the_part():
+    """SOFC-Exp annotates only some sentences; its context.json gives every sentence. A
+    document whose annotated sentences all lie in the part takes its context from there."""
+    texts = {'a': {'sentences': [['t0'], DATA[0][0], ['t2'], DATA[1][0], DATA[2][0],
+                                 DATA[3][0], ['t6']],
+                   'annotated': [1, 3, 4, 5]}}
+    whole = nb.part_contexts(DATA, [0, 1, 2, 3, 4], texts)
+    assert whole[0] == ([['t0']], [['t2'], DATA[1][0], DATA[2][0], DATA[3][0], ['t6']])
+    assert whole[1] == ([['t2'], DATA[0][0], ['t0']], [DATA[2][0], DATA[3][0], ['t6']])
+    assert whole[4] == nb.part_contexts(DATA, [0, 1, 2, 3, 4])[4]       # b has no text
+    # a document split over parts keeps the same-part rule
+    split = nb.part_contexts(DATA, [0, 2], texts)
+    assert split == nb.part_contexts(DATA, [0, 2])
+    assert nb.load_full_texts('fine') is None
+
+
 def test_context_parser_checks(capsys):
     args = nb.parse_args(['--crf', '--context', '64', '--leave-one-paper-out'])
     assert args.context == 64 and nb.variant_name(args) == 'crf_ctx'

@@ -17,7 +17,8 @@ def _corpus(root, entity_rows=None):
     """Two documents. d1: 'Title text.' (not annotated), then 'Ni anode at 800 C.' (annotated,
     tokens at offsets relative to the sentence); d2: one annotated sentence."""
     c = root / 'sofc-exp-corpus'
-    for sub in ('texts', 'annotations/sentences', 'annotations/entity_types_and_slots'):
+    for sub in ('texts', 'annotations/sentences', 'annotations/entity_types_and_slots',
+                'annotations/tokens'):
         (c / sub).mkdir(parents=True)
     (c / 'SOFC-Exp-Metadata.csv').write_text('name\tset\nd1\ttrain\nd2\ttest\n')
     (c / 'texts' / 'd1.txt').write_text('Title text. Ni anode at 800 C.')
@@ -30,6 +31,11 @@ def _corpus(root, entity_rows=None):
     (c / 'annotations' / 'sentences' / 'd2.csv').write_text('1\t1\t0\t9\n')
     (c / 'annotations' / 'entity_types_and_slots' / 'd2.csv').write_text(
         '1\t1\t0\t3\tB-MATERIAL\tO\n1\t2\t4\t9\tB-DEVICE\tO\n')
+    # every sentence's tokens, offsets relative to the sentence
+    (c / 'annotations' / 'tokens' / 'd1.csv').write_text(
+        '1\t1\t0\t5\n1\t2\t6\t10\n1\t3\t10\t11\n'
+        '2\t1\t0\t2\n2\t2\t3\t8\n2\t3\t9\t11\n2\t4\t12\t15\n2\t5\t16\t17\n2\t6\t17\t18\n')
+    (c / 'annotations' / 'tokens' / 'd2.csv').write_text('1\t1\t0\t3\n1\t2\t4\t9\n')
     return c
 
 
@@ -46,6 +52,11 @@ def test_conversion_of_a_toy_corpus(tmp_path):
     assert conll.read_conll_sentences(out / 'd2.conll') == [
         (['YSZ', 'cells'], ['B-MATERIAL', 'B-DEVICE'])]
     assert json.loads((out / 'split.json').read_text()) == {'d1': 'train', 'd2': 'test'}
+    # the whole texts, for document context: the title is context, not annotated
+    assert json.loads((out / 'context.json').read_text()) == {
+        'd1': {'sentences': [['Title', 'text', '.'], ['Ni', 'anode', 'at', '800', 'C', '.']],
+               'annotated': [1]},
+        'd2': {'sentences': [['YSZ', 'cells']], 'annotated': [0]}}
     with pytest.raises(se.ConversionError, match='not those of the paper'):
         se.convert(corpus, out)
 
@@ -72,6 +83,31 @@ def test_the_committed_files_have_the_counts_of_the_paper():
     split = json.loads((DATA / 'split.json').read_text())
     assert sorted(split) == [f.stem for f in files]
     assert Counter(split.values()) == {'train': 26, 'dev': 8, 'test': 11}
+
+
+def test_the_token_files_must_cut_the_annotated_words(tmp_path):
+    corpus = _corpus(tmp_path)
+    (corpus / 'annotations' / 'tokens' / 'd2.csv').write_text('1\t1\t0\t9\n')   # one token
+    with pytest.raises(se.ConversionError, match='whitespace'):
+        se.convert(corpus, tmp_path / 'out', expected={'documents': 2, 'sentences': 2,
+                                                         'entities': 5})
+    (corpus / 'annotations' / 'tokens' / 'd2.csv').write_text('1\t1\t0\t3\n')    # one word short
+    with pytest.raises(se.ConversionError, match='cut different words'):
+        se.convert(corpus, tmp_path / 'out', expected={'documents': 2, 'sentences': 2,
+                                                         'entities': 5})
+
+
+def test_the_committed_context_holds_every_article_sentence():
+    files = sorted(DATA.glob('*.conll'))
+    context = json.loads((DATA / 'context.json').read_text(encoding='utf-8'))
+    assert sorted(context) == [f.stem for f in files]
+    for f in files:
+        entry = context[f.stem]
+        annotated = [entry['sentences'][k] for k in entry['annotated']]
+        assert annotated == [words for words, _ in conll.read_conll_sentences(f)]
+        assert entry['annotated'] == sorted(entry['annotated'])
+    assert sum(len(e['annotated']) for e in context.values()) == 876
+    assert sum(len(e['sentences']) for e in context.values()) > 5000
 
 
 def test_ner_baseline_reads_sofc_exp_as_granularity_sofc(capsys):

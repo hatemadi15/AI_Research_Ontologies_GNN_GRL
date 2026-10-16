@@ -20,6 +20,12 @@ between sentences (the format of the MaterioMiner files). It also writes split.j
 official document split of SOFC-Exp-Metadata.csv (26 train, 8 dev, 11 test), and checks
 the counts of the paper: 45 documents, 876 sentences and 4,590 entities.
 
+context.json holds the whole text of each document for document context (ner_baseline.py
+--context): {doc: {"sentences": every sentence as tokens, in text order, annotated or not
+(annotations/tokens/<doc>.csv, offsets relative to the sentence), "annotated": the
+positions among them of the sentences of <doc>.conll}}. The annotated sentences' tokens
+must equal those of the entity annotations.
+
 Usage:
   git clone https://github.com/boschresearch/sofc-exp_textmining_resources.git <dir>
   python src/graph/sofc_exp.py <dir>/sofc-exp-corpus [--out data/raw/dataset/sofc_exp]
@@ -80,6 +86,33 @@ def convert_document(corpus, doc):
     return out
 
 
+def document_context(corpus, doc, annotated):
+    """Every sentence of a document as tokens, in text order, and the positions among them
+    of its annotated sentences (`annotated`: convert_document's output, whose words they must
+    match)."""
+    corpus = Path(corpus)
+    text = (corpus / 'texts' / f'{doc}.txt').read_text(encoding='utf-8')
+    begins = {sid: int(begin) for sid, _, begin, _ in
+              read_rows(corpus / 'annotations' / 'sentences' / f'{doc}.csv')}
+    tagged = {row[0] for row in
+              read_rows(corpus / 'annotations' / 'entity_types_and_slots' / f'{doc}.csv')}
+    tokens = {}
+    for sid, _, begin, end in (row[:4] for row in
+                               read_rows(corpus / 'annotations' / 'tokens' / f'{doc}.csv')):
+        word = text[begins[sid] + int(begin):begins[sid] + int(end)]
+        if not word or re.search(r'\s', word):
+            raise ConversionError(f'{doc}: sentence {sid}: token {word!r} is empty or has '
+                                  f'whitespace')
+        tokens.setdefault(sid, []).append((int(begin), word))
+    order = sorted(tokens, key=lambda sid: begins[sid])
+    sentences = [[w for _, w in sorted(tokens[sid])] for sid in order]
+    positions = [k for k, sid in enumerate(order) if sid in tagged]
+    if [sentences[k] for k in positions] != [words for words, _ in annotated]:
+        raise ConversionError(f'{doc}: the token files and the entity annotations cut '
+                              f'different words')
+    return {'sentences': sentences, 'annotated': positions}
+
+
 def read_split(corpus):
     """{document: 'train', 'dev' or 'test'} from SOFC-Exp-Metadata.csv."""
     with open(Path(corpus) / 'SOFC-Exp-Metadata.csv', encoding='utf-8', newline='') as f:
@@ -97,8 +130,10 @@ def convert(corpus, out_dir=OUT_DIR, expected=EXPECTED):
         raise ConversionError('the metadata and the annotation files name different documents')
     out_dir.mkdir(parents=True, exist_ok=True)
     counts = Counter()
+    context = {}
     for doc in docs:
         sentences = convert_document(corpus, doc)
+        context[doc] = document_context(corpus, doc, sentences)
         lines = []
         for words, tags in sentences:
             lines += [f'{w} {t}' for w, t in zip(words, tags)] + ['']
@@ -106,6 +141,8 @@ def convert(corpus, out_dir=OUT_DIR, expected=EXPECTED):
         (out_dir / f'{doc}.conll').write_text('\n'.join(lines), encoding='utf-8')
         counts['sentences'] += len(sentences)
     (out_dir / 'split.json').write_text(json.dumps(split, indent=2, sort_keys=True) + '\n')
+    (out_dir / 'context.json').write_text(json.dumps(context, sort_keys=True) + '\n',
+                                          encoding='utf-8')
     stats = {'documents': len(docs), 'sentences': counts.pop('sentences'),
              'entities': sum(counts.values()), 'types': dict(sorted(counts.items())),
              'split': dict(sorted(Counter(split.values()).items()))}
