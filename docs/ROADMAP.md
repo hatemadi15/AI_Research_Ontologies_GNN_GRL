@@ -1860,6 +1860,17 @@ beyond a search):*
   general SOFC sentence names materials in other roles, so slot-level
   silver data would be noisier than MaterioMiner's.
 
+*Correction, 16 October, after these notes:* the tokens are not CoreNLP's,
+whatever the release's README says:
+- the training and development articles were cut with ChemDataExtractor
+  1.3.0, the test articles with Java's `BreakIterator`;
+- the SOFC corpus uses ChemDataExtractor's tokenizer;
+- only sentences in which the teachers tag an experiment can be silver.
+
+All three are in the week-6 amendment at the end of this section. Recall
+calibration of the multi-task model is dropped: part 2a found that a bias
+does not recover the missed entities.
+
 **Budget:** about 1.2 hours of one session's two GPUs. Lane 0 runs two
 repeats, then plain MatSciBERT and the CRF head on the slots, about 70
 minutes; lane 1 runs the multi-task repeat and the multi-task runs, about
@@ -1920,3 +1931,119 @@ run (`n_augmented`); per-type F1 if it passes.
   minutes each), about 3.3 hours.
 
 It runs on kernel a after `w7b`.
+
+### Week 6 amendment, before stage 2's results: multi-task self-training on SOFC-Exp (fixed before any run)
+
+The week-6 protocol left multi-task self-training out of SOFC-Exp for two
+reasons: one level of types, and a corpus about fatigue. Neither holds any
+more. SOFC-Exp has a second level (part 2d), and an SOFC corpus is built
+here. This amendment is fixed on 16 October, before stage 2 of multi-task
+self-training on MaterioMiner (`w6c:mtst`, after midnight UTC) gives any
+result. A methods claim needs a method's gain to repeat on SOFC-Exp, so
+without this the method could not make one.
+
+**SOFC-Exp's tokens (found while building the corpus; exploratory).** The
+release's README says Stanford CoreNLP cut the texts into tokens; the paper
+names ChemDataExtractor. On the release's texts and token offsets:
+- ChemDataExtractor 1.3.0's word tokenizer (`ChemWordTokenizer`) gives the
+  tokens of every sentence of the 26 training and 8 development articles,
+  all 7,630 of them. Stanford CoreNLP (3.9.2, 4.0.0 or 4.5.7, with the
+  options tried) gives at most 48.6% of all sentences.
+- The 11 test articles were cut otherwise. Java's word `BreakIterator` (US
+  locale, presumably INCEpTION's default) gives 1,833 of their 1,836
+  sentences; the other 3 differ at a combining dot accent. ChemDataExtractor
+  gives 41%.
+
+So the test articles are cut into words differently from the articles a
+model trains on: the test articles have `Fig .`, `cm − 2`, `O2 −`,
+`high-temperature` and `3%`, where training has `Fig.`, `cm−2`, `O2−`,
+`high - temperature` and `3 %`. Every result on SOFC-Exp's official split
+shares this, the published ones included, and the test set is used as
+released. Sentences were split by Java's sentence `BreakIterator` in all
+articles (the README).
+
+**The corpus** (`build_sofc_corpus.py`; `results/sofc_corpus.json`):
+- Search: Europe PMC's open-access full texts with "solid oxide", SOFC or
+  SOFCs in the title, 377 hits. 29 are SOFC-Exp's own articles and 3 are
+  corrections, so 345 are eligible. They are read in a fixed random order
+  until the filtered pool reaches 60,000 sentences: 292 articles.
+- Text: the fatigue corpus's rules, except that superscripts are written
+  inline (`cm−2`, `Fe3+`), as SOFC-Exp's texts write them.
+- Filters: 104 duplicates are dropped, and 3,208 sentences that share a
+  word 8-gram with any of the 9,466 sentences of SOFC-Exp's 45 articles.
+- Kept: 40,000 sentences (a seed-0 sample of the pool, median 26 words),
+  cut into words with ChemDataExtractor 1.3.0's tokenizer, the tokenizer of
+  the training articles. It is vendored as `src/graph/chem_tokenize.py`
+  (MIT licence) and gives the original's spans on all 9,466 sentences.
+- SHA-256 `1b6a00d2…`.
+
+**The method** (`--granularity sofc_both --published-split --crf
+--multi-task --self-train <SOFC corpus> --teachers 3 --students 10
+--self-train-sample 0`) is that of MaterioMiner (week 6, method 3), with
+the slot level as the fine head and the entity level as the coarse one:
+- Teachers: 3 multi-task models, model seeds 0, 100 and 200 on the official
+  split (568 training and 135 validation sentences). They must equal part
+  2d's `crf_mt` runs of those seeds.
+- Silver filter: each head's, chosen on the validation articles from the
+  same 5 candidates.
+- One change, fixed now: SOFC-Exp annotates only sentences that describe
+  experiments (875 of its 876 annotated sentences have an EXPERIMENT
+  entity). So a corpus sentence can be silver, for either head, only if
+  every teacher's entity head tags an EXPERIMENT entity in it.
+- Students: 10, model seeds 0 to 900 (`crf_mt_st3_m<N>`), each trained on
+  the gold training sentences plus the silver ones at weight 0.5, with a
+  slot-level and an entity-level file. The corpus is read as space-separated
+  words.
+
+**Decisions** (S2 for multi-task self-training; paired by seed over the 10
+seeds; the rule as before):
+1. Slot level: its slot head against the slot-level CRF head (`crf` on
+   `sofc_slot`, part 2d).
+2. Entity level: its entity head against the CRF head (`crf` on `sofc`,
+   session b).
+
+A methods claim for multi-task self-training needs its decision 2 on
+MaterioMiner at one granularity and S2 at the matching level: fine-grained
+with the slot level, coarse-grained with the entity level. 2 decisions:
+about 0.05 false passes.
+
+**Reported (no decision):**
+- against multi-task training on the same levels (part 2d's `crf_mt`,
+  paired by seed);
+- the votes over the 3 seed triples against the CRF votes;
+- strict IOB2, macro and weighted F1;
+- the silver data: sentences in scope, silver per head, the chosen
+  filters;
+- the teachers against part 2d's `crf_mt` runs.
+
+**When it runs:** only if multi-task self-training passes at least one of
+its 4 decisions on MaterioMiner. Without one, no claim could follow, and it
+is reported as not run. It also needs part 2d's results (`w7b`) for
+decision 1 and for the check of the teachers.
+- Batch: `w6c:sofc-mtst`, from the commit of this amendment.
+- Repeats first: the CRF run of smoke4 (`smokeaa`) and session b's SOFC-Exp
+  CRF run of seed 0 (`smokeab`).
+- Lanes: each GPU trains the 3 teachers and 5 of the 10 students
+  (`--student-offsets`), so the two lanes' teachers and silver data must be
+  identical.
+
+**Budget:** about 2 hours of one session. MaterioMiner's multi-task
+self-training took 51–91 minutes per paper for 3 teachers and 3 students;
+here each GPU trains 3 teachers and 5 students.
+
+**Prepared (tests only, no training):**
+- `chem_tokenize.py` and `build_sofc_corpus.py`;
+- `ner_baseline.py` reads an SOFC corpus as spaced words, applies the scope
+  rule with `sofc_both`, and has `--student-offsets` (not stored in the
+  config);
+- `kaggle_jobs.py` puts the SOFC corpus in the bundle (SHA-256 checked) and
+  has the batch, and the kernel installs the corpus only for a batch that
+  uses it.
+
+Two checks that nothing else changed:
+- On a tiny random model, the MaterioMiner options write byte-identical
+  results files, runtimes aside, before and after: the CRF head,
+  multi-task training, label semantics, document context, self-training
+  with one or two teachers and extra students, and multi-task
+  self-training.
+- The fatigue corpus rebuilds with the same SHA-256.

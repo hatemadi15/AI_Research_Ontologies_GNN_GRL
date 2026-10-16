@@ -1,5 +1,6 @@
 """Kaggle GPU runs (kaggle_jobs.py, src/kaggle/run_jobs.py) and the CUDA settings of
 ner_baseline.py. No network, no GPU and no torch: the Kaggle CLI is never called."""
+import argparse
 import importlib.util
 import io
 import json
@@ -402,7 +403,8 @@ def test_build_bundle(tmp_path):
     wheel.write_bytes(b'PK')
     out = tmp_path / 'bundle'
     info = kj.build_bundle('HEAD', out, results_dir=results, corpus=corpus,
-                           expected_sha256=kj.file_sha256(corpus), wheels=[wheel])
+                           expected_sha256=kj.file_sha256(corpus), wheels=[wheel],
+                           sofc_report=tmp_path / 'no_sofc_corpus.json')
     assert sorted(p.name for p in out.iterdir()) == [
         'BUNDLE.json', 'code.tar.gz', 'fatigue_sentences.txt',
         'gpu__ner_results_fine_random_split_vary_crf_m0.json', 'seqeval-1.2.2-py3-none-any.whl']
@@ -413,7 +415,8 @@ def test_build_bundle(tmp_path):
     with tarfile.open(out / 'code.tar.gz') as tar:
         assert 'src/graph/ner_baseline.py' in tar.getnames()
     with pytest.raises(SystemExit):
-        kj.build_bundle('HEAD', out, results_dir=results, corpus=corpus, expected_sha256='0' * 64)
+        kj.build_bundle('HEAD', out, results_dir=results, corpus=corpus, expected_sha256='0' * 64,
+                        sofc_report=tmp_path / 'no_sofc_corpus.json')
 
 
 # ---------------------------------------------------------------------------
@@ -540,3 +543,75 @@ def test_torch_device_on_a_cpu_leaves_determinism_alone():
     args = nb.parse_args(['--crf', '--device', 'cpu', '--threads', '1'])
     assert nb.torch_device(args) == 'cpu'
     assert not torch.are_deterministic_algorithms_enabled()
+
+
+def test_sofc_mtst_batch(monkeypatch):
+    """w6c:sofc-mtst (week-6 amendment): two repeats, then multi-task self-training on
+    SOFC-Exp's two levels with the SOFC corpus, the 3 teachers in both lanes and the students
+    split 0-400 / 500-900; only this batch's spec carries the SOFC corpus's SHA-256."""
+    monkeypatch.setattr(kj, 'corpus_sha256',
+                        lambda report=kj.CORPUS_REPORT: 'f' * 64 if report == kj.CORPUS_REPORT
+                        else 's' * 64)
+    name = 'w6c:sofc-mtst'
+    assert kj.batch_name(name) == name
+    lane0, lane1 = _parsed(kj.batch_lanes(name))
+    assert [a.tag for a in lane0[:2]] == ['smokeaa', 'smokeab']
+    assert (lane0[1].granularity, lane0[1].seeds, _get(lane0[1], 'published_split')) == (
+        'sofc', [0], True)
+    for args, offsets in ((lane0[2], [0, 100, 200, 300, 400]), (lane1[0], [500, 600, 700, 800,
+                                                                         900])):
+        assert (args.granularity, args.seeds, args.self_train) == ('sofc_both', [0],
+                                                                   kj.SOFC_CORPUS)
+        assert args.published_split and args.multi_task and args.crf and args.save_predictions
+        assert (args.teachers, args.students, args.self_train_sample) == (3, 10, 0)
+        assert args.student_offsets == offsets and nb.variant_name(args) == 'crf_mt_st3'
+    assert len(lane0) == 3 and len(lane1) == 1
+    spec = kj.batch_spec(name)
+    assert (spec['corpus_sha256'], spec['sofc_corpus_sha256']) == ('f' * 64, 's' * 64)
+    assert 'sofc_corpus_sha256' not in kj.batch_spec('w7b')
+    with pytest.raises(argparse.ArgumentTypeError, match='alone'):
+        kj.batch_name('w6c:ctx,sofc-mtst')
+
+
+def test_build_bundle_with_the_sofc_corpus(tmp_path):
+    corpus = tmp_path / 'corpus.txt'
+    corpus.write_text('One sentence.\n')
+    sofc = tmp_path / 'sofc.txt'
+    sofc.write_text('The Ni - YSZ anode .\n')
+    report = tmp_path / 'sofc_corpus.json'
+    report.write_text(json.dumps({'corpus': {'sha256': kj.file_sha256(sofc)}}))
+    out = tmp_path / 'bundle'
+    info = kj.build_bundle('HEAD', out, results_dir=tmp_path / 'none', corpus=corpus,
+                           expected_sha256=kj.file_sha256(corpus), sofc_corpus=sofc,
+                           sofc_report=report)
+    assert (out / 'sofc_sentences.txt').read_bytes() == sofc.read_bytes()
+    assert info['sofc_corpus_sha256'] == kj.file_sha256(sofc)
+    report.write_text(json.dumps({'corpus': {'sha256': '0' * 64}}))
+    with pytest.raises(SystemExit, match='SHA-256'):
+        kj.build_bundle('HEAD', out, results_dir=tmp_path / 'none', corpus=corpus,
+                        expected_sha256=kj.file_sha256(corpus), sofc_corpus=sofc,
+                        sofc_report=report)
+    info = kj.build_bundle('HEAD', out, results_dir=tmp_path / 'none', corpus=corpus,
+                           expected_sha256=kj.file_sha256(corpus), sofc_report=tmp_path / 'no')
+    assert info['sofc_corpus_sha256'] is None and not (out / 'sofc_sentences.txt').exists()
+    report.write_text(json.dumps({'corpus': {'sha256': kj.file_sha256(sofc)}}))
+    with pytest.raises(SystemExit, match='build_sofc_corpus'):      # the report, no corpus
+        kj.build_bundle('HEAD', out, results_dir=tmp_path / 'none', corpus=corpus,
+                        expected_sha256=kj.file_sha256(corpus), sofc_corpus=tmp_path / 'gone',
+                        sofc_report=report)
+
+
+def test_run_jobs_places_the_sofc_corpus_only_when_asked(tmp_path):
+    rj = _run_jobs()
+    inputs, repo = tmp_path / 'input', tmp_path / 'repo'
+    (inputs / 'bundle').mkdir(parents=True)
+    corpus = inputs / 'bundle' / 'sofc_sentences.txt'
+    corpus.write_text('The Ni - YSZ anode .\n')
+    assert rj.place_sofc_corpus({}, inputs, repo) is None and not repo.exists()
+    digest = rj.file_sha256(corpus)
+    assert rj.place_sofc_corpus({'sofc_corpus_sha256': digest}, inputs, repo) == digest
+    assert (repo / rj.SOFC_CORPUS).read_bytes() == corpus.read_bytes()
+    with pytest.raises(RuntimeError, match='SHA-256'):
+        rj.place_sofc_corpus({'sofc_corpus_sha256': '0' * 64}, inputs, repo)
+    with pytest.raises(FileNotFoundError):
+        rj.place_sofc_corpus({'sofc_corpus_sha256': digest}, tmp_path / 'empty', repo)

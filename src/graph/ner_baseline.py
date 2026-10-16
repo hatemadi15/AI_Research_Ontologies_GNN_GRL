@@ -142,6 +142,9 @@ Usage:
   python ner_baseline.py --leave-two-papers-out --crf --entity-bias 0.5 1 2   # inner folds
   python ner_baseline.py --granularity sofc_slot --published-split --crf    # SOFC-Exp slots
   python ner_baseline.py --granularity sofc_both --published-split --crf --multi-task
+  python ner_baseline.py --granularity sofc_both --published-split --seeds 0 --crf --multi-task \
+      --self-train data/processed/corpus/sofc_sentences.txt --teachers 3 --students 10 \
+      --student-offsets 500 600 700 800 900 --self-train-sample 0   # SOFC-Exp, half the students
   python ner_baseline.py --compare                                        # paired comparison
 """
 
@@ -856,10 +859,13 @@ def corpus_words(text):
     return WORD_RE.findall(''.join(chars))
 
 
-def self_training_corpus(path, size=SELF_TRAIN_SAMPLE, seed=SELF_TRAIN_SEED):
+def self_training_corpus(path, size=SELF_TRAIN_SAMPLE, seed=SELF_TRAIN_SEED, spaced=False):
     """The fixed sample of a --self-train corpus as word lists, and its config entries.
 
-    One raw sentence per line, blank lines skipped (dapt_mlm.read_sentences).
+    One raw sentence per line, blank lines skipped (dapt_mlm.read_sentences), cut into
+    words by corpus_words; with `spaced`, one sentence per line with its words separated
+    by spaces (an SOFC corpus, build_sofc_corpus.py: the words of SOFC-Exp's tokenizer),
+    split on whitespace, and the config also holds self_train_words: 'spaces'.
     random.Random(seed) shuffles the sentence numbers and the first `size` make the
     sample, in corpus order: independent of the split and the model seed, and drawn
     before any sentence is skipped (fit_sample). Size 0 takes the whole corpus. The
@@ -872,10 +878,20 @@ def self_training_corpus(path, size=SELF_TRAIN_SAMPLE, seed=SELF_TRAIN_SEED):
     order = list(range(len(sentences)))
     random.Random(seed).shuffle(order)
     size = size or len(sentences)          # 0: the whole corpus (--self-train-sample 0)
-    sample = [corpus_words(sentences[i]) for i in sorted(order[:size])]
-    return sample, {'self_train': dapt_mlm.display_path(path),
-                    'self_train_sha256': dapt_mlm.file_sha256(path),
-                    'self_train_sample_size': size, 'self_train_silver_weight': SILVER_WEIGHT}
+    words = str.split if spaced else corpus_words
+    sample = [words(sentences[i]) for i in sorted(order[:size])]
+    config = {'self_train': dapt_mlm.display_path(path),
+              'self_train_sha256': dapt_mlm.file_sha256(path),
+              'self_train_sample_size': size, 'self_train_silver_weight': SILVER_WEIGHT}
+    if spaced:
+        config['self_train_words'] = 'spaces'
+    return sample, config
+
+
+def spaced_corpus(args):
+    """True when the --self-train corpus holds words separated by spaces: SOFC-Exp's
+    granularities (build_sofc_corpus.py)."""
+    return args.granularity in (*SOFC, 'sofc_both')
 
 
 def fit_sample(tokenizer, sample, max_length):
@@ -1091,6 +1107,14 @@ def train_self_training(seed, train, val, test, labels, args, device, sample, te
 def teacher_offsets(n):
     """Seed offsets of --teachers n: 0, 100, ..., 100 (n - 1), as the seed families."""
     return [100 * k for k in range(n)]
+
+
+def student_offsets_of(args):
+    """The seed offsets of the students a --teachers run trains: --student-offsets, else
+    those of --students (else of --teachers)."""
+    if hasattr(args, 'student_offsets'):
+        return list(args.student_offsets)
+    return teacher_offsets(getattr(args, 'students', args.teachers))
 
 
 def unanimous_silver(tagged):
@@ -1537,6 +1561,18 @@ def choose_filter(val_votes, gold):
     return (best['agree'], best['threshold']), table
 
 
+# SOFC-Exp annotates the sentences that describe experiments (875 of its 876 have an EXPERIMENT
+# entity; ROADMAP §4, week-6 amendment): an SOFC corpus sentence can be silver only if every
+# teacher's entity head (the coarse head of sofc_both) tags an EXPERIMENT entity in it
+SOFC_SCOPE_TAG = 'B-EXPERIMENT'
+
+
+def in_sofc_scope(tagged, n):
+    """Per sample sentence, whether every teacher's coarse head (SOFC-Exp's entity types)
+    tags an EXPERIMENT entity in it; tagged: per teacher, {head: [(tags, least marginal)]}."""
+    return [all(SOFC_SCOPE_TAG in t['coarse'][i][0] for t in tagged) for i in range(n)]
+
+
 def mt_teacher_tags(tagger, sentences, batch_size, device):
     """{head: teacher_tags of sentences[head]} by a multi-task tagger (train_multitask with
     keep_tagger), each head with the snapshot of its best epoch."""
@@ -1559,9 +1595,12 @@ def train_mt_with_teachers(seed, offsets, parts, labels, args, device, sample, t
     head's silver filter is chosen on its validation sentences (choose_filter), and a
     sentence is silver for a head if the filter keeps it (filtered_tags). Each seed of
     `student_offsets` (default: the teachers') then trains a multi-task student on the gold
-    data plus the silver sentences, each labelled for the heads it is silver for. Every
-    record adds `self_training`: n_sampled, n_skipped, n_silver per head, n_silver_sentences,
-    the filters (with their validation tables) and the teachers' scores per head.
+    data plus the silver sentences, each labelled for the heads it is silver for. With
+    --granularity sofc_both a sentence is silver only if every teacher's entity head tags an
+    EXPERIMENT entity in it (in_sofc_scope; SOFC-Exp annotates the sentences that describe
+    experiments). Every record adds `self_training`: n_sampled, n_skipped, n_silver per head,
+    n_silver_sentences (with sofc_both also n_in_scope), the filters (with their validation
+    tables) and the teachers' scores per head.
     """
     teacher_args = SimpleNamespace(**{**vars(args), 'save_predictions': False})
     val_words = {h: [t for t, _, _ in parts[h][1]] for h in MT_HEADS}
@@ -1592,6 +1631,10 @@ def train_mt_with_teachers(seed, offsets, parts, labels, args, device, sample, t
         filters[h] = choose_filter(votes, [g for _, g, _ in parts[h][1]])
         silver_tags[h] = [filtered_tags(v, *filters[h][0])
                           for v in zip(*(t[h] for t in tagged))]
+    scope = in_sofc_scope(tagged, len(sentences)) if args.granularity == 'sofc_both' else None
+    if scope is not None:
+        for h in MT_HEADS:
+            silver_tags[h] = [t if ok else None for t, ok in zip(silver_tags[h], scope)]
     silver = [(words, {h: silver_tags[h][i] for h in MT_HEADS})
               for i, words in enumerate(sentences)
               if any(silver_tags[h][i] is not None for h in MT_HEADS)]
@@ -1601,6 +1644,8 @@ def train_mt_with_teachers(seed, offsets, parts, labels, args, device, sample, t
             'filters': {h: {'agree': filters[h][0][0], 'threshold': filters[h][0][1],
                             'validation': filters[h][1]} for h in MT_HEADS},
             'teachers': teachers}
+    if scope is not None:
+        info['n_in_scope'] = sum(scope)
     print(f"    silver: {info['n_silver']} of {len(sentences)} tagged sentences (filters "
           f"{ {h: filters[h][0] for h in MT_HEADS} }); students:", flush=True)
     students = {}
@@ -1983,7 +2028,7 @@ def results_path(out_dir, granularity, args):
 def stored_config(args):
     """The arguments saved as `config` (the granularity is a field of its own)."""
     return {k: v for k, v in vars(args).items()
-            if k not in ('granularity', 'compare', 'overwrite', 'papers')}
+            if k not in ('granularity', 'compare', 'overwrite', 'papers', 'student_offsets')}
 
 
 def torch_device(args):
@@ -2054,7 +2099,8 @@ def run(args):
     self_train = getattr(args, 'self_train', None) is not None
     # --self-train: the sample, and the corpus path, SHA-256, sample size and silver weight
     sample, corpus = (self_training_corpus(args.self_train, getattr(args, 'self_train_sample',
-                                                                    SELF_TRAIN_SAMPLE))
+                                                                    SELF_TRAIN_SAMPLE),
+                                           spaced=spaced_corpus(args))
                       if self_train else (None, {}))
     # every results file is checked before any training, so a run never stops halfway
     check_results_files(args, [(results_path(out_dir, g, args), tasks[g][1])
@@ -2264,9 +2310,10 @@ def run_teachers(args, out_dir):
     granularities = granularities_of(args)
     tasks = {g: granularity_data(g, args) for g in granularities}
     sample, corpus = self_training_corpus(args.self_train, getattr(args, 'self_train_sample',
-                                                                   SELF_TRAIN_SAMPLE))
+                                                                   SELF_TRAIN_SAMPLE),
+                                          spaced=spaced_corpus(args))
     offsets = teacher_offsets(args.teachers)
-    student_offsets = teacher_offsets(getattr(args, 'students', args.teachers))
+    student_offsets = student_offsets_of(args)
     views = {off: SimpleNamespace(**{**vars(args), 'tag': f'm{off}', 'seed_offset': off})
              for off in student_offsets}
     for view in views.values():
@@ -2363,9 +2410,10 @@ def run_mt_teachers(args, out_dir):
         data[head], labels[head], ties[head] = granularity_data(gran[head], args)
     check_aligned(data['fine'], data['coarse'])
     sample, corpus = self_training_corpus(args.self_train, getattr(args, 'self_train_sample',
-                                                                   SELF_TRAIN_SAMPLE))
+                                                                   SELF_TRAIN_SAMPLE),
+                                          spaced=spaced_corpus(args))
     offsets = teacher_offsets(args.teachers)
-    student_offsets = teacher_offsets(getattr(args, 'students', args.teachers))
+    student_offsets = student_offsets_of(args)
     views = {off: SimpleNamespace(**{**vars(args), 'tag': f'm{off}', 'seed_offset': off})
              for off in student_offsets}
     paths = {(h, off): results_path(out_dir, gran[h], view) for off, view in views.items()
@@ -2544,6 +2592,12 @@ def parse_args(argv=None):
                              '100 (N - 1), at least as many as the teachers, which keep the '
                              'first offsets and so the silver data. Students already in their '
                              'results files are not trained again (ROADMAP §4, week 5)')
+    parser.add_argument('--student-offsets', type=int, nargs='+', default=argparse.SUPPRESS,
+                        metavar='OFFSET',
+                        help='with --teachers: train only the students of these seed offsets '
+                             '(multiples of 100), not all those of --students; the teachers '
+                             'are trained as always, so the two GPUs of a session can share '
+                             'the students of one run (not stored in the config)')
     parser.add_argument('--self-train-sample', type=int, default=argparse.SUPPRESS, metavar='N',
                         help='with --self-train: the number of corpus sentences tagged (default '
                              '2,000; 0: the whole corpus)')
@@ -2645,6 +2699,12 @@ def parse_args(argv=None):
         if args.students < args.teachers:
             parser.error('--students: at least as many as --teachers (every teacher seed '
                          'trains a student)')
+    if hasattr(args, 'student_offsets'):
+        if not hasattr(args, 'teachers'):
+            parser.error('--student-offsets needs --teachers')
+        offsets = args.student_offsets
+        if len(set(offsets)) != len(offsets) or any(o < 0 or o % 100 for o in offsets):
+            parser.error('--student-offsets: distinct multiples of 100 (0, 100, ...)')
     if getattr(args, 'self_train_sample', 0) < 0:
         parser.error('--self-train-sample: 0 (the whole corpus) or more sentences')
     if getattr(args, 'multi_task', False):

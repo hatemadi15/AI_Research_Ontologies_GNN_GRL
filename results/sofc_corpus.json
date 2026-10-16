@@ -1,0 +1,3383 @@
+{
+  "script": "src/graph/build_sofc_corpus.py",
+  "protocol": "docs/ROADMAP.md \u00a74, week-6 amendment: multi-task self-training on SOFC-Exp",
+  "selection": {
+    "source": "Europe PMC REST API",
+    "search_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+    "fulltext_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/{pmcid}/fullTextXML",
+    "result_type": "core",
+    "query": "OPEN_ACCESS:y AND HAS_FT:y AND (TITLE:\"solid oxide\" OR TITLE:SOFC OR TITLE:SOFCs)",
+    "title_terms": [
+      "solid oxide",
+      "solid-oxide",
+      "SOFC",
+      "SOFCs"
+    ],
+    "exclude_title_terms": [
+      "author correction",
+      "correction",
+      "erratum",
+      "corrigendum",
+      "retraction"
+    ],
+    "excluded_pmcids": [
+      "PMC3564701",
+      "PMC3730159",
+      "PMC3793895",
+      "PMC4021905",
+      "PMC4222441",
+      "PMC4313086",
+      "PMC4495617",
+      "PMC4578433",
+      "PMC4663492",
+      "PMC4673446",
+      "PMC4698742",
+      "PMC4735809",
+      "PMC4770875",
+      "PMC4772004",
+      "PMC4895149",
+      "PMC4986314",
+      "PMC4992832",
+      "PMC5075869",
+      "PMC5216129",
+      "PMC5331335",
+      "PMC5456601",
+      "PMC5456866",
+      "PMC5456869",
+      "PMC5457052",
+      "PMC5457058",
+      "PMC5457196",
+      "PMC5457246",
+      "PMC5700654",
+      "PMC5706185",
+      "PMC5793538",
+      "PMC5848893",
+      "PMC5944822",
+      "PMC6073263",
+      "PMC6158676",
+      "PMC6164086",
+      "PMC6247067",
+      "PMC6249295",
+      "PMC6337513",
+      "PMC6370853",
+      "PMC6427619",
+      "PMC6445146",
+      "PMC6461657",
+      "PMC6517467",
+      "PMC6523084",
+      "PMC6632008"
+    ],
+    "local_filters": [
+      "a PMCID",
+      "not one of SOFC-Exp's articles",
+      "language eng",
+      "a title term in the title",
+      "no exclusion term in the title"
+    ],
+    "order": "PMCIDs sorted as strings, then random.Random(0).shuffle",
+    "superscripts": "inline, as in the texts of SOFC-Exp",
+    "words": "chem_tokenize.ChemWordTokenizer (ChemDataExtractor 1.3.0), space-separated"
+  },
+  "settings": {
+    "seed": 0,
+    "target_pool": 60000,
+    "max_sentences": 40000,
+    "chunk": 10,
+    "min_words": 5,
+    "max_words": 120,
+    "min_alpha_fraction": 0.5,
+    "max_inline_formula_chars": 30,
+    "ngram": 8,
+    "language": "eng",
+    "page_size": 500,
+    "min_request_interval_seconds": 0.25,
+    "timeout_seconds": 60,
+    "retries": 4,
+    "backoff_seconds": 2.0,
+    "abbreviations": [
+      "approx",
+      "at",
+      "ca",
+      "cf",
+      "eq",
+      "eqs",
+      "fig",
+      "figs",
+      "no",
+      "nos",
+      "pp",
+      "ref",
+      "refs",
+      "resp",
+      "sec",
+      "sect",
+      "vol",
+      "vs",
+      "wt",
+      "et al"
+    ],
+    "dotted_abbreviations": "(?:[A-Za-z]{1,2}\\.)+[A-Za-z]{1,2}",
+    "skipped_sections": "^[\\d.\\s]*(acknowledg|funding|conflicts? of interest|competing interests?|author contributions?|data availability|availability of data|ethic|abbreviations|nomenclature|supplementary|references|declarations?|disclosure)",
+    "splitter": "build_fatigue_corpus.split_sentences"
+  },
+  "counts": {
+    "hits": 377,
+    "api_hit_count": 377,
+    "hits_rejected": 32,
+    "eligible_articles": 345,
+    "articles_used": 292,
+    "articles_downloaded": 290,
+    "failed_downloads": 0,
+    "articles_without_text": 2,
+    "target_reached": true,
+    "paragraphs": 12587,
+    "raw_sentences": 66961,
+    "cut_by_formula": 2831,
+    "length_filtered": 698,
+    "length_filtered_by": {
+      "too_short": 659,
+      "too_long": 11,
+      "non_alphabetic": 28
+    },
+    "after_length_filter": 63432,
+    "duplicates_dropped": 104,
+    "overlap_dropped": 3208,
+    "pool": 60120,
+    "kept": 40000
+  },
+  "rejected_by_reason": {
+    "title_term:correction": 3,
+    "sofc_exp_article": 29
+  },
+  "excluded_by_title": [
+    {
+      "pmcid": "PMC12877121",
+      "term": "correction",
+      "title": "Correction: In situ high temperature X-ray diffraction and dilatometric analysis of CGO-Cu composites for solid oxide devices."
+    },
+    {
+      "pmcid": "PMC12868515",
+      "term": "correction",
+      "title": "Correction: Alternative Strategy for Development of Dielectric Calcium Copper Titanate-Based Electrolytes for Low-Temperature Solid Oxide Fuel Cells."
+    },
+    {
+      "pmcid": "PMC5895048",
+      "term": "correction",
+      "title": "Correction: Indirect adaptive soft computing based wavelet-embedded control paradigms for WT/PV/SOFC in a grid/charging station connected hybrid power system."
+    }
+  ],
+  "failed": [
+    {
+      "pmcid": "PMC11633548",
+      "status": "no_text",
+      "error": "no body paragraphs"
+    },
+    {
+      "pmcid": "PMC6247070",
+      "status": "no_text",
+      "error": "no body paragraphs"
+    }
+  ],
+  "articles": [
+    {
+      "pmcid": "PMC9596828",
+      "doi": "10.1002/advs.202203768",
+      "year": "2022",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Proton-Mediated and Ir-Catalyzed Iron/Iron-Oxide Redox Kinetics for Enhanced Rechargeability and Durability of Solid Oxide Iron-Air Battery.",
+      "pool_sentences": 151,
+      "corpus_sentences": 102
+    },
+    {
+      "pmcid": "PMC9190786",
+      "doi": "10.1039/d2ra02546a",
+      "year": "2022",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "Evaluation of Nd0.8-x Sr0.2Ca x CoO3-\u03b4 (x = 0, 0.05, 0.1, 0.15, 0.2) as a cathode material for intermediate-temperature solid oxide fuel cells.",
+      "pool_sentences": 131,
+      "corpus_sentences": 94
+    },
+    {
+      "pmcid": "PMC10113921",
+      "doi": "10.1039/d2ra07088j",
+      "year": "2023",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "Synthesis of transition metal doped lanthanum silicate oxyapatites by a facile co-precipitation method and their evaluation as solid oxide fuel cell electrolytes.",
+      "pool_sentences": 152,
+      "corpus_sentences": 96
+    },
+    {
+      "pmcid": "PMC5324695",
+      "doi": "10.1002/cssc.201601320",
+      "year": "2017",
+      "journal": "ChemSusChem",
+      "license": "cc by-nc",
+      "title": "Evaluation of the Effect of Sulfur on the Performance of Nickel/Gadolinium-Doped Ceria Based Solid Oxide Fuel Cell Anodes.",
+      "pool_sentences": 293,
+      "corpus_sentences": 209
+    },
+    {
+      "pmcid": "PMC12314861",
+      "doi": "10.1021/acsami.5c08989",
+      "year": "2025",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "Introduction of Multiple CeO2 Interlayers to Avoid Ni Agglomeration in Nanoscale Ni-YSZ Solid Oxide Cell Hydrogen Electrodes.",
+      "pool_sentences": 201,
+      "corpus_sentences": 130
+    },
+    {
+      "pmcid": "PMC11422708",
+      "doi": "10.1039/d4ra05191b",
+      "year": "2024",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Influence of intrinsic spin ordering in La0.6Sr0.4Co0.8Fe0.2O3-\u03b4 and Ba0.6Sr0.4Co0.8Fe0.2O3-\u03b4 towards electrocatalysis of oxygen redox reaction in solid oxide cell.",
+      "pool_sentences": 255,
+      "corpus_sentences": 168
+    },
+    {
+      "pmcid": "PMC13434558",
+      "doi": "10.1038/s41467-026-74549-0",
+      "year": "2026",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Entropy-driven order-to-disorder transition in perovskite anodes for high-performance solid oxide fuel cells.",
+      "pool_sentences": 265,
+      "corpus_sentences": 190
+    },
+    {
+      "pmcid": "PMC5017500",
+      "doi": "10.3390/s16081336",
+      "year": "2016",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fault Diagnosis Strategies for SOFC-Based Power Generation Plants.",
+      "pool_sentences": 261,
+      "corpus_sentences": 171
+    },
+    {
+      "pmcid": "PMC4915224",
+      "doi": "10.1021/acs.chemmater.6b00351",
+      "year": "2016",
+      "journal": "Chemistry of materials : a publication of the American Chemical Society",
+      "license": null,
+      "title": "Operando X-ray Investigation of Electrode/Electrolyte Interfaces in Model Solid Oxide Fuel Cells.",
+      "pool_sentences": 133,
+      "corpus_sentences": 95
+    },
+    {
+      "pmcid": "PMC10456402",
+      "doi": "10.3390/membranes13080717",
+      "year": "2023",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Structure and Physical Properties of Ceramic Materials Based on ZrO2-Sc2O3 for SOFC Electrolytic Membranes Obtained from Powders of Melted Solid Solutions with a Similar Composition.",
+      "pool_sentences": 122,
+      "corpus_sentences": 77
+    },
+    {
+      "pmcid": "PMC9523621",
+      "doi": "10.1021/acsami.2c06565",
+      "year": "2022",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "Modulating the Energy Band Structure of the Mg-Doped Sr0.5Pr0.5Fe0.2Mg0.2Ti0.6O3-\u03b4 Electrolyte with Boosted Ionic Conductivity and Electrochemical Performance for Solid Oxide Fuel Cells.",
+      "pool_sentences": 321,
+      "corpus_sentences": 209
+    },
+    {
+      "pmcid": "PMC7866839",
+      "doi": "10.3390/ma14030641",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Mixed Ionic-Electronic Conductivity, Redox Behavior and Thermochemical Expansion of Mn-Substituted 5YSZ as an Interlayer Material for Reversible Solid Oxide Cells.",
+      "pool_sentences": 202,
+      "corpus_sentences": 138
+    },
+    {
+      "pmcid": "PMC3157151",
+      "doi": "10.1038/ncomms1359",
+      "year": "2011",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "Promotion of water-mediated carbon removal by nanostructured barium oxide/nickel interfaces in solid oxide fuel cells.",
+      "pool_sentences": 151,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC8690037",
+      "doi": "10.1039/d0ra09239h",
+      "year": "2020",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Integrated Cr and S poisoning of a La0.6Sr0.4Co0.2Fe0.8O3-\u03b4 (LSCF) cathode for solid oxide fuel cells.",
+      "pool_sentences": 94,
+      "corpus_sentences": 70
+    },
+    {
+      "pmcid": "PMC5456594",
+      "doi": "10.3390/ma9100814",
+      "year": "2016",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Numerical Investigation of the Thermal Stresses of a Planar Solid Oxide Fuel Cell.",
+      "pool_sentences": 122,
+      "corpus_sentences": 79
+    },
+    {
+      "pmcid": "PMC12102167",
+      "doi": "10.1038/s41598-025-97761-2",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Impact of solid oxide FC-RFB and IPFC on a renewable multi-area power system using combined PI and FOPD controllers optimized by the African Vulture algorithm.",
+      "pool_sentences": 353,
+      "corpus_sentences": 241
+    },
+    {
+      "pmcid": "PMC10582619",
+      "doi": "10.1039/d3ra04991d",
+      "year": "2023",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Fe-based double perovskite with Zn doping for enhanced electrochemical performance as intermediate-temperature solid oxide fuel cell cathode material.",
+      "pool_sentences": 129,
+      "corpus_sentences": 70
+    },
+    {
+      "pmcid": "PMC9960879",
+      "doi": "10.3390/ijms24044137",
+      "year": "2023",
+      "journal": "International journal of molecular sciences",
+      "license": "cc by",
+      "title": "Thermo-Electro-Chemo-Mechanical Coupled Modeling of Solid Oxide Fuel Cell with LSCF-GDC Composite Cathode.",
+      "pool_sentences": 156,
+      "corpus_sentences": 98
+    },
+    {
+      "pmcid": "PMC7770899",
+      "doi": "10.1007/s40820-020-00518-x",
+      "year": "2020",
+      "journal": "Nano-micro letters",
+      "license": "cc by",
+      "title": "Superionic Conductivity in Ceria-Based Heterostructure Composites for Low-Temperature Solid Oxide Fuel Cells.",
+      "pool_sentences": 278,
+      "corpus_sentences": 172
+    },
+    {
+      "pmcid": "PMC8233395",
+      "doi": "10.1038/s41467-021-24255-w",
+      "year": "2021",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Nanoengineering of cathode layers for solid oxide fuel cells to achieve superior power densities.",
+      "pool_sentences": 176,
+      "corpus_sentences": 117
+    },
+    {
+      "pmcid": "PMC11818537",
+      "doi": "10.3390/ma18030542",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Valence Variability Induced in SrMoO\u2083 Perovskite by Mn Doping: Evaluation of a New Family of Anodes for Solid-Oxide Fuel Cells.",
+      "pool_sentences": 153,
+      "corpus_sentences": 110
+    },
+    {
+      "pmcid": "PMC5248633",
+      "doi": "10.1002/cssc.201600813",
+      "year": "2017",
+      "journal": "ChemSusChem",
+      "license": "cc by",
+      "title": "New Method for the Deposition of Nickel Oxide in Porous Scaffolds for Electrodes in Solid Oxide Fuel Cells and Electrolyzers.",
+      "pool_sentences": 152,
+      "corpus_sentences": 100
+    },
+    {
+      "pmcid": "PMC7762248",
+      "doi": "10.3390/polym12122927",
+      "year": "2020",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Numerical Modeling of Ink Widening and Coating Gap in Roll-to-Roll Slot-Die Coating of Solid Oxide Fuel Cell Electrolytic Layer.",
+      "pool_sentences": 68,
+      "corpus_sentences": 53
+    },
+    {
+      "pmcid": "PMC9000260",
+      "doi": "10.3390/ma15072540",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Review of X-ray Photoelectron Spectroscopy Technique to Analyze the Stability and Degradation Mechanism of Solid Oxide Fuel Cell Cathode Materials.",
+      "pool_sentences": 249,
+      "corpus_sentences": 174
+    },
+    {
+      "pmcid": "PMC11421414",
+      "doi": "10.1039/d4ra04253k",
+      "year": "2024",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Performance optimization of metal-supported solid oxide fuel cells using cathode and full cell impregnation with La0.4Sr0.6Co0.2Fe0.7Nb0.1O3-\u03b4 electrode.",
+      "pool_sentences": 148,
+      "corpus_sentences": 106
+    },
+    {
+      "pmcid": "PMC9295724",
+      "doi": "10.1039/d2ta03335f",
+      "year": "2022",
+      "journal": "Journal of materials chemistry. A",
+      "license": "cc by",
+      "title": "In situ techniques reveal the true capabilities of SOFC cathode materials and their sudden degradation due to omnipresent sulfur trace impurities.",
+      "pool_sentences": 183,
+      "corpus_sentences": 118
+    },
+    {
+      "pmcid": "PMC6213107",
+      "doi": "10.3390/ma11101824",
+      "year": "2018",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Yb\u2082O\u2083 Doped Zr0.92Y0.08O2-\u03b1(8YSZ) and Its Composite Electrolyte for Intermediate Temperature Solid Oxide Fuel Cells.",
+      "pool_sentences": 64,
+      "corpus_sentences": 34
+    },
+    {
+      "pmcid": "PMC7844816",
+      "doi": "10.1021/acsami.0c15368",
+      "year": "2021",
+      "journal": "ACS applied materials & interfaces",
+      "license": null,
+      "title": "Route to High-Performance Micro-solid Oxide Fuel Cells on Metallic Substrates.",
+      "pool_sentences": 179,
+      "corpus_sentences": 127
+    },
+    {
+      "pmcid": "PMC10754136",
+      "doi": "10.1002/advs.202304555",
+      "year": "2023",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Nickel-Regulated Composite Cathode with Balanced Triple Conductivity for Proton-Conducting Solid Oxide Fuel Cells.",
+      "pool_sentences": 131,
+      "corpus_sentences": 90
+    },
+    {
+      "pmcid": "PMC8007576",
+      "doi": "10.1038/s41598-021-86572-w",
+      "year": "2021",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Infiltrated thin film structure with hydrogel-mediated precursor ink for durable SOFCs.",
+      "pool_sentences": 143,
+      "corpus_sentences": 93
+    },
+    {
+      "pmcid": "PMC6981856",
+      "doi": "10.3390/ma13010131",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Preparation of Hydrogen Electrodes of Solid Oxide Cells by Infiltration: Effects of the Preparation Procedure on the Resulting Microstructure.",
+      "pool_sentences": 200,
+      "corpus_sentences": 129
+    },
+    {
+      "pmcid": "PMC12810391",
+      "doi": "10.1021/acs.iecr.5c04217",
+      "year": "2026",
+      "journal": "Industrial & engineering chemistry research",
+      "license": "cc by",
+      "title": "Economic NMPC for a Reversible Solid Oxide Cell.",
+      "pool_sentences": 224,
+      "corpus_sentences": 147
+    },
+    {
+      "pmcid": "PMC10044886",
+      "doi": "10.1039/d3ta00978e",
+      "year": "2023",
+      "journal": "Journal of materials chemistry. A",
+      "license": "cc by",
+      "title": "Electronic and ionic effects of sulphur and other acidic adsorbates on the surface of an SOFC cathode material.",
+      "pool_sentences": 234,
+      "corpus_sentences": 151
+    },
+    {
+      "pmcid": "PMC11519435",
+      "doi": "10.1016/j.isci.2024.111014",
+      "year": "2024",
+      "journal": "iScience",
+      "license": "cc by",
+      "title": "Syngas enhancement for Fischer-Tropsch integration via solid oxide electrolyzer cell co-electrolysis with or without methane.",
+      "pool_sentences": 358,
+      "corpus_sentences": 251
+    },
+    {
+      "pmcid": "PMC11243402",
+      "doi": "10.3390/ma17133257",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Redox Stability Optimization in Anode-Supported Solid Oxide Fuel Cells.",
+      "pool_sentences": 127,
+      "corpus_sentences": 86
+    },
+    {
+      "pmcid": "PMC12072978",
+      "doi": "10.3390/ma18092112",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Comparative Study of Physicochemical Properties of Biochar Samples Derived from Nutshells as a Solid Fuel for Direct Carbon Solid Oxide Fuel Cells.",
+      "pool_sentences": 362,
+      "corpus_sentences": 260
+    },
+    {
+      "pmcid": "PMC12514256",
+      "doi": "10.1038/s41598-025-19316-9",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Accurate prediction of green hydrogen production based on solid oxide electrolysis cell via soft computing algorithms.",
+      "pool_sentences": 260,
+      "corpus_sentences": 175
+    },
+    {
+      "pmcid": "PMC9316799",
+      "doi": "10.3390/membranes12070682",
+      "year": "2022",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Direct Electrophoretic Deposition and Characterization of Thin-Film Membranes Based on Doped BaCeO3 and CeO2 for Anode-Supported Solid Oxide Fuel Cells.",
+      "pool_sentences": 254,
+      "corpus_sentences": 175
+    },
+    {
+      "pmcid": "PMC6921628",
+      "doi": "10.1021/acsomega.9b03193",
+      "year": "2019",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "In Situ Exsolved Ni-Decorated Ba(Ce0.9Y0.1)0.8Ni0.2O3-\u03b4 Perovskite as Carbon-Resistant Composite Anode for Hydrocarbon-Fueled Solid Oxide Fuel Cells.",
+      "pool_sentences": 100,
+      "corpus_sentences": 60
+    },
+    {
+      "pmcid": "PMC9822438",
+      "doi": "10.3390/ma16010399",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Improved Electrochemical Performance of Sm0.2Ce0.8O1.9 (SDC) Nanoparticles Decorated SrCo0.8Fe0.1Ga0.1O3-\u03b4 (SCFG) Fiber, Fabricated by Electrospinning, for IT-SOFCs Cathode Application.",
+      "pool_sentences": 109,
+      "corpus_sentences": 73
+    },
+    {
+      "pmcid": "PMC12855912",
+      "doi": "10.1038/s41598-025-34342-3",
+      "year": "2026",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Solid oxide fuel cell simulation model tuning using operating conditions dependent optimization techniques.",
+      "pool_sentences": 292,
+      "corpus_sentences": 184
+    },
+    {
+      "pmcid": "PMC8134428",
+      "doi": "10.1038/s41598-021-90211-9",
+      "year": "2021",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Comparison of electrochemical impedance spectra for electrolyte-supported solid oxide fuel cells (SOFCs) and protonic ceramic fuel cells (PCFCs).",
+      "pool_sentences": 106,
+      "corpus_sentences": 64
+    },
+    {
+      "pmcid": "PMC10856775",
+      "doi": "10.3390/ma17030632",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The Preparation and Properties of Ti(Nb)-Si-C Coating on the Pre-Oxidized Ferritic Stainless Steel for Solid Oxide Fuel Cell Interconnect.",
+      "pool_sentences": 160,
+      "corpus_sentences": 106
+    },
+    {
+      "pmcid": "PMC9389253",
+      "doi": "10.1016/j.isci.2022.104855",
+      "year": "2022",
+      "journal": "iScience",
+      "license": "cc by-nc-nd",
+      "title": "Nickel-iron nanoparticles encapsulated in carbon nanotubes prepared from waste plastics for low-temperature solid oxide fuel cells.",
+      "pool_sentences": 175,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC10302054",
+      "doi": "10.3390/membranes13060585",
+      "year": "2023",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Solid Oxide Fuel Cells with Magnetron Sputtered Single-Layer SDC and Multilayer SDC/YSZ/SDC Electrolytes.",
+      "pool_sentences": 191,
+      "corpus_sentences": 140
+    },
+    {
+      "pmcid": "PMC8036809",
+      "doi": "10.3390/ma14071715",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Undoped Sr2MMoO6 Double Perovskite Molybdates (M = Ni, Mg, Fe) as Promising Anode Materials for Solid Oxide Fuel Cells.",
+      "pool_sentences": 230,
+      "corpus_sentences": 154
+    },
+    {
+      "pmcid": "PMC11313725",
+      "doi": "10.3390/molecules29153654",
+      "year": "2024",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "LaMnO3-Type Perovskite Nanofibers as Effective Catalysts for On-Cell CH4 Reforming via Solid Oxide Fuel Cells.",
+      "pool_sentences": 111,
+      "corpus_sentences": 74
+    },
+    {
+      "pmcid": "PMC12612980",
+      "doi": "10.1021/acsomega.5c05721",
+      "year": "2025",
+      "journal": "ACS omega",
+      "license": "cc by",
+      "title": "Engineering Lamellar Stainless Steel 410S Porous Supports via a Water-Based Tape Casting Method: A Scalable Path for MS-SOFCs.",
+      "pool_sentences": 245,
+      "corpus_sentences": 165
+    },
+    {
+      "pmcid": "PMC7407173",
+      "doi": "10.3390/membranes10070148",
+      "year": "2020",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "In Situ Raman Characterization of SOFC Materials in Operational Conditions: A Doped Ceria Study.",
+      "pool_sentences": 164,
+      "corpus_sentences": 115
+    },
+    {
+      "pmcid": "PMC9417260",
+      "doi": "10.1039/d1na00852h",
+      "year": "2022",
+      "journal": "Nanoscale advances",
+      "license": "cc by-nc",
+      "title": "Nanoscale interface engineering for solid oxide fuel cells using atomic layer deposition.",
+      "pool_sentences": 161,
+      "corpus_sentences": 104
+    },
+    {
+      "pmcid": "PMC5587257",
+      "doi": "10.1371/journal.pone.0183750",
+      "year": "2017",
+      "journal": "PloS one",
+      "license": "cc by",
+      "title": "Indirect adaptive soft computing based wavelet-embedded control paradigms for WT/PV/SOFC in a grid/charging station connected hybrid power system.",
+      "pool_sentences": 356,
+      "corpus_sentences": 245
+    },
+    {
+      "pmcid": "PMC12219754",
+      "doi": "10.1038/s41598-025-05251-2",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "A new modified incomprehensible but intelligible-in-time logics algorithm for modeling solid oxide fuel cell.",
+      "pool_sentences": 286,
+      "corpus_sentences": 184
+    },
+    {
+      "pmcid": "PMC11173469",
+      "doi": "10.3390/ma17112622",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Quantifying Microstructure Features for High-Performance Solid Oxide Cells.",
+      "pool_sentences": 136,
+      "corpus_sentences": 92
+    },
+    {
+      "pmcid": "PMC10331923",
+      "doi": "10.1039/d3ra01698f",
+      "year": "2023",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Enabling fast ionic transport in CeO2-La1-2xBaxBixFeO3 nanocomposite electrolyte for low temperature solid oxide fuel cell application.",
+      "pool_sentences": 184,
+      "corpus_sentences": 125
+    },
+    {
+      "pmcid": "PMC8307112",
+      "doi": "10.3390/ma14143836",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Manganese-Cobalt Based Spinel Coatings Processed by Electrophoretic Deposition Method: The Influence of Sintering on Degradation Issues of Solid Oxide Cell Oxygen Electrodes at 750 \u00b0C.",
+      "pool_sentences": 145,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC9228182",
+      "doi": "10.3390/nano12121991",
+      "year": "2022",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Recent Progress in the Design, Characterisation and Application of LaAlO3- and LaGaO3-Based Solid Oxide Fuel Cell Electrolytes.",
+      "pool_sentences": 229,
+      "corpus_sentences": 153
+    },
+    {
+      "pmcid": "PMC10580316",
+      "doi": "10.1021/acsenergylett.3c01251",
+      "year": "2023",
+      "journal": "ACS energy letters",
+      "license": "cc by",
+      "title": "A Synergistic Three-Phase, Triple-Conducting Air Electrode for Reversible Proton-Conducting Solid Oxide Cells.",
+      "pool_sentences": 133,
+      "corpus_sentences": 84
+    },
+    {
+      "pmcid": "PMC7261932",
+      "doi": "10.3389/fchem.2020.00348",
+      "year": "2020",
+      "journal": "Frontiers in chemistry",
+      "license": "cc by",
+      "title": "Europium-Doped Ceria Nanowires as Anode for Solid Oxide Fuel Cells.",
+      "pool_sentences": 178,
+      "corpus_sentences": 124
+    },
+    {
+      "pmcid": "PMC13335915",
+      "doi": "10.1002/advs.75578",
+      "year": "2026",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Synergized Tri-Phase Anode via Purposive Ba2+ Doping at the La3+ Site in LaFe0.7Ni0.3O3-\u03b4 for Improved SOFC Performance.",
+      "pool_sentences": 53,
+      "corpus_sentences": 32
+    },
+    {
+      "pmcid": "PMC11596265",
+      "doi": "10.3390/molecules29225299",
+      "year": "2024",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Preparation and Properties of Fe-Based Double Perovskite Oxide as Cathode Material for Intermediate-Temperature Solid Oxide Fuel Cell.",
+      "pool_sentences": 133,
+      "corpus_sentences": 88
+    },
+    {
+      "pmcid": "PMC12194827",
+      "doi": "10.3390/ma18122827",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Multi-Physics Coupling of Rectangular Channels with Different Aspect Ratios in Solid Oxide Electrolysis Cells.",
+      "pool_sentences": 132,
+      "corpus_sentences": 96
+    },
+    {
+      "pmcid": "PMC9035593",
+      "doi": "10.3389/fchem.2022.873758",
+      "year": "2022",
+      "journal": "Frontiers in chemistry",
+      "license": "cc by",
+      "title": "Sol-Gel Combustion-Assisted Electrostatic Spray Deposition for Durable Solid Oxide Fuel Cell Cathodes.",
+      "pool_sentences": 135,
+      "corpus_sentences": 94
+    },
+    {
+      "pmcid": "PMC11299173",
+      "doi": "10.1021/acs.energyfuels.4c00673",
+      "year": "2024",
+      "journal": "Energy & fuels : an American Chemical Society journal",
+      "license": "cc by",
+      "title": "Inkjet-Printed LSM-YSZ Thin Films for Enhanced Oxygen Electrodes in Solid Oxide Fuel Cells.",
+      "pool_sentences": 147,
+      "corpus_sentences": 99
+    },
+    {
+      "pmcid": "PMC11990097",
+      "doi": "10.3390/molecules30071482",
+      "year": "2025",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Ni-Doped Pr0.5Ba0.5CoO3+\u03b4 Perovskite with Low Polarization Resistance and Thermal Expansivity as a Cathode Material for Solid Oxide Fuel Cells.",
+      "pool_sentences": 134,
+      "corpus_sentences": 101
+    },
+    {
+      "pmcid": "PMC8252760",
+      "doi": "10.1002/cssc.202100330",
+      "year": "2021",
+      "journal": "ChemSusChem",
+      "license": "cc by",
+      "title": "Performance and Limitations of Nickel-Doped Chromite Anodes in Electrolyte-Supported Solid Oxide Fuel Cells.",
+      "pool_sentences": 286,
+      "corpus_sentences": 174
+    },
+    {
+      "pmcid": "PMC12028804",
+      "doi": "10.3390/ma18081802",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Advances in Nanostructured Electrodes for Solid Oxide Cells by Infiltration or Exsolution.",
+      "pool_sentences": 443,
+      "corpus_sentences": 300
+    },
+    {
+      "pmcid": "PMC9659401",
+      "doi": "10.1073/pnas.2203256119",
+      "year": "2022",
+      "journal": "Proceedings of the National Academy of Sciences of the United States of America",
+      "license": "cc by-nc-nd",
+      "title": "Origin for electrochemically driven phase transformation in the oxygen electrode for a solid oxide cell.",
+      "pool_sentences": 126,
+      "corpus_sentences": 85
+    },
+    {
+      "pmcid": "PMC11253547",
+      "doi": "10.1016/j.heliyon.2024.e33245",
+      "year": "2024",
+      "journal": "Heliyon",
+      "license": "cc by-nc",
+      "title": "Initial stage oxidation corrosion of commercial ferritic stainless steels with different Cr contents at 650 \u00b0C for solid oxide fuel cells.",
+      "pool_sentences": 346,
+      "corpus_sentences": 221
+    },
+    {
+      "pmcid": "PMC9457391",
+      "doi": "10.3390/ma15175805",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Novel SrO-Containing Glass-Ceramic Sealants for Solid Oxide Electrolysis Cells (SOEC): Their Design and Characterization under Relevant Conditions.",
+      "pool_sentences": 189,
+      "corpus_sentences": 126
+    },
+    {
+      "pmcid": "PMC9967699",
+      "doi": "10.3390/membranes13020120",
+      "year": "2023",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Development of a Multichannel Membrane Reactor with a Solid Oxide Cell Design.",
+      "pool_sentences": 222,
+      "corpus_sentences": 143
+    },
+    {
+      "pmcid": "PMC8870936",
+      "doi": "10.3390/e24020224",
+      "year": "2022",
+      "journal": "Entropy (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Coupled Transport Effects in Solid Oxide Fuel Cell Modeling.",
+      "pool_sentences": 368,
+      "corpus_sentences": 243
+    },
+    {
+      "pmcid": "PMC11934105",
+      "doi": "10.1039/d4ra09097g",
+      "year": "2025",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Modification of B-site substituted by high-valence Nb in PrBa0.5Sr0.5Co1.5Fe0.5O5+\u03b4 as a highly active air electrode for solid oxide fuel cell.",
+      "pool_sentences": 153,
+      "corpus_sentences": 90
+    },
+    {
+      "pmcid": "PMC11947808",
+      "doi": "10.1021/acsomega.4c11179",
+      "year": "2025",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Performance Prediction and Evaluation of Biogas-Fed Solid Oxide Fuel Cell Plants Based on the Spatial and Temporal Fusion Model under Fluctuation Fuel Types and Processing Options.",
+      "pool_sentences": 183,
+      "corpus_sentences": 130
+    },
+    {
+      "pmcid": "PMC9782004",
+      "doi": "10.3390/ma15248737",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Tuning Cu-Content La1-xSrxNi1-yCuyO3-\u03b4 with Strontium Doping as Cobalt-Free Cathode Materials for High-Performance Anode-Supported IT-SOFCs.",
+      "pool_sentences": 125,
+      "corpus_sentences": 79
+    },
+    {
+      "pmcid": "PMC7040604",
+      "doi": "10.3390/ma13030599",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Performance of a Direct Methane Solid Oxide Fuel Cell Using Nickel-Ceria-Yttria Stabilized Zirconia as the Anode.",
+      "pool_sentences": 244,
+      "corpus_sentences": 160
+    },
+    {
+      "pmcid": "PMC11312731",
+      "doi": "10.3390/ma17153791",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Physicochemical Properties of (La,Sr)CoO3 Thick Films on Fe-25Cr Steel under Exposure to SOFC Cathode Operating Conditions.",
+      "pool_sentences": 175,
+      "corpus_sentences": 111
+    },
+    {
+      "pmcid": "PMC11478097",
+      "doi": "10.3390/ma17194689",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "High-Temperature Mechanical-Conductive Behaviors of Proton-Conducting Ceramic Electrolytes in Solid Oxide Fuel Cells.",
+      "pool_sentences": 165,
+      "corpus_sentences": 108
+    },
+    {
+      "pmcid": "PMC8596528",
+      "doi": "10.3906/kim-2104-56",
+      "year": "2021",
+      "journal": "Turkish journal of chemistry",
+      "license": "cc by",
+      "title": "Effect of fuel choice on conductivity and morphological properties of samarium doped ceria electrolytes for IT-SOFC.",
+      "pool_sentences": 166,
+      "corpus_sentences": 113
+    },
+    {
+      "pmcid": "PMC10744890",
+      "doi": "10.3390/ma16247638",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "SrTiO3-SrVO3 Ceramics for Solid Oxide Fuel Cell Anodes: A Route from Oxidized Precursors.",
+      "pool_sentences": 153,
+      "corpus_sentences": 105
+    },
+    {
+      "pmcid": "PMC10253820",
+      "doi": "10.3390/ma16113919",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Chemical Compatibility and Electrochemical Performance of Ba7Ta3.7Mo1.3O20.15 Electrolytes for Solid Oxide Fuel Cells.",
+      "pool_sentences": 109,
+      "corpus_sentences": 82
+    },
+    {
+      "pmcid": "PMC11775559",
+      "doi": "10.1002/advs.202409272",
+      "year": "2025",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Nanosurface-Reconstructed Fuel Electrode by Selective Etching for Highly Efficient and Stable Solid Oxide Cells.",
+      "pool_sentences": 160,
+      "corpus_sentences": 98
+    },
+    {
+      "pmcid": "PMC7497703",
+      "doi": "10.1021/acs.accounts.0c00218",
+      "year": "2020",
+      "journal": "Accounts of chemical research",
+      "license": null,
+      "title": "Increasing Complexity Approach to the Fundamental Surface and Interface Chemistry on SOFC Anode Materials.",
+      "pool_sentences": 118,
+      "corpus_sentences": 74
+    },
+    {
+      "pmcid": "PMC12491632",
+      "doi": "10.1038/s41598-025-16800-0",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Intelligent-based AT-SHAPF control for enhanced power quality in SOFC-driven hybrid system.",
+      "pool_sentences": 177,
+      "corpus_sentences": 118
+    },
+    {
+      "pmcid": "PMC13185698",
+      "doi": "10.1039/d5ra10040b",
+      "year": "2026",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "Effect of K2O/SrO on structural, thermal, optical, and mechanical properties of SiO2-B2O3-SnO2 glass for IT/LT-SOFC applications.",
+      "pool_sentences": 321,
+      "corpus_sentences": 205
+    },
+    {
+      "pmcid": "PMC11677629",
+      "doi": "10.3390/ma17246113",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Closing the Loop: Solid Oxide Fuel and Electrolysis Cells Materials for a Net-Zero Economy.",
+      "pool_sentences": 366,
+      "corpus_sentences": 241
+    },
+    {
+      "pmcid": "PMC5015090",
+      "doi": "10.1038/srep32997",
+      "year": "2016",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Nanoionics and Nanocatalysts: Conformal Mesoporous Surface Scaffold for Cathode of Solid Oxide Fuel Cells.",
+      "pool_sentences": 137,
+      "corpus_sentences": 91
+    },
+    {
+      "pmcid": "PMC9513820",
+      "doi": "10.1021/acsaem.1c04116",
+      "year": "2022",
+      "journal": "ACS applied energy materials",
+      "license": "cc by",
+      "title": "LaCrO3-CeO2-Based Nanocomposite Electrodes for Efficient Symmetrical Solid Oxide Fuel Cells.",
+      "pool_sentences": 146,
+      "corpus_sentences": 95
+    },
+    {
+      "pmcid": "PMC12806198",
+      "doi": "10.1002/advs.202516807",
+      "year": "2026",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Catastrophic Degradation in Solid Oxide Fuel Cells Caused by Air Supply Interruption in Real-World Operations: Fundamental Mechanisms and Mitigation Strategies.",
+      "pool_sentences": 261,
+      "corpus_sentences": 167
+    },
+    {
+      "pmcid": "PMC9146529",
+      "doi": "10.3390/ma15103585",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Influence of Low Sintering Temperature on BaCe0.2Zr0.6Y0.2O3-\u03b4 IT-SOFC Perovskite Electrolyte Synthesized by Co-Precipitation Method.",
+      "pool_sentences": 119,
+      "corpus_sentences": 81
+    },
+    {
+      "pmcid": "PMC9573475",
+      "doi": "10.3390/ma15196947",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Destabilization and Ion Conductivity of Yttria-Stabilized Zirconia for Solid Oxide Electrolyte by Thermal Aging.",
+      "pool_sentences": 60,
+      "corpus_sentences": 38
+    },
+    {
+      "pmcid": "PMC11696671",
+      "doi": "10.1016/j.heliyon.2024.e40996",
+      "year": "2024",
+      "journal": "Heliyon",
+      "license": "cc by",
+      "title": "Numerical investigation of micro solid oxide fuel cell performance in combination with artificial intelligence approach.",
+      "pool_sentences": 232,
+      "corpus_sentences": 155
+    },
+    {
+      "pmcid": "PMC5455642",
+      "doi": "10.3390/ma8074239",
+      "year": "2015",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Preparation and Properties of (YCa)(TiMn)O3-d Ceramics Interconnect of Solid Oxide Fuel Cells.",
+      "pool_sentences": 113,
+      "corpus_sentences": 77
+    },
+    {
+      "pmcid": "PMC11243253",
+      "doi": "10.3390/molecules29132991",
+      "year": "2024",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Ca-Doping Cobalt-Free Double Perovskite Oxide as a Cathode Material for Intermediate-Temperature Solid Oxide Fuel Cell.",
+      "pool_sentences": 136,
+      "corpus_sentences": 84
+    },
+    {
+      "pmcid": "PMC12204581",
+      "doi": "10.1371/journal.pone.0326559",
+      "year": "2025",
+      "journal": "PloS one",
+      "license": "cc by",
+      "title": "Enhanced power density in solid oxide fuel cells using nickel-assisted gadolinium-doped ceria anodes.",
+      "pool_sentences": 162,
+      "corpus_sentences": 117
+    },
+    {
+      "pmcid": "PMC10609398",
+      "doi": "10.3390/nano13202790",
+      "year": "2023",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Oxygen Vacancy Ordering and Molten Salt Corrosion Behavior of ZnO-Doped CeYSZ for Solid Oxide Membranes.",
+      "pool_sentences": 122,
+      "corpus_sentences": 80
+    },
+    {
+      "pmcid": "PMC12451737",
+      "doi": "10.1021/acs.jpclett.5c02422",
+      "year": "2025",
+      "journal": "The journal of physical chemistry letters",
+      "license": "cc by",
+      "title": "Operando Evaluation of the Electrochemically Active Area in a Solid Oxide Fuel Cell Porous Electrode by Micro X-ray Absorption Spectroscopy.",
+      "pool_sentences": 131,
+      "corpus_sentences": 99
+    },
+    {
+      "pmcid": "PMC8708419",
+      "doi": "10.3390/nano11123224",
+      "year": "2021",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "New Insights on the Nickel State Deposited by Hydrazine Wet-Chemical Synthesis Route in the Ni/BCY15 Proton-Conducting SOFC Anode.",
+      "pool_sentences": 286,
+      "corpus_sentences": 199
+    },
+    {
+      "pmcid": "PMC10938513",
+      "doi": "10.1126/sciadv.abj8590",
+      "year": "2021",
+      "journal": "Science advances",
+      "license": "cc by-nc",
+      "title": "Naturally diffused sintering aid for highly conductive bilayer electrolytes in solid oxide cells.",
+      "pool_sentences": 130,
+      "corpus_sentences": 88
+    },
+    {
+      "pmcid": "PMC13564369",
+      "doi": "10.1021/acs.chemrev.5c00529",
+      "year": "2026",
+      "journal": "Chemical reviews",
+      "license": "cc by",
+      "title": "Recent Advances and Future Perspectives of Proton-Conducting Electrolytes for Reversible Solid Oxide Cells.",
+      "pool_sentences": 2500,
+      "corpus_sentences": 1646
+    },
+    {
+      "pmcid": "PMC10568590",
+      "doi": "10.1021/acsomega.3c03928",
+      "year": "2023",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Novel Hybrid Modeling and Analysis Method for Steam Reforming Solid Oxide Fuel Cell System Multifault Degradation Fusion Assessment.",
+      "pool_sentences": 313,
+      "corpus_sentences": 201
+    },
+    {
+      "pmcid": "PMC8465349",
+      "doi": "10.3390/nano11092290",
+      "year": "2021",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Recent Progress in Semiconductor-Ionic Conductor Nanomaterial as a Membrane for Low-Temperature Solid Oxide Fuel Cells.",
+      "pool_sentences": 174,
+      "corpus_sentences": 110
+    },
+    {
+      "pmcid": "PMC9297027",
+      "doi": "10.1098/rsos.220227",
+      "year": "2022",
+      "journal": "Royal Society open science",
+      "license": "cc by",
+      "title": "A high-performance Ni-CeO2/Ni/Ni-Y2O3\u00b7ZrO2 three-layer anode for direct iso-octane feeding of solid oxide fuel cells.",
+      "pool_sentences": 118,
+      "corpus_sentences": 75
+    },
+    {
+      "pmcid": "PMC13370578",
+      "doi": "10.1039/d6sc03402k",
+      "year": "2026",
+      "journal": "Chemical science",
+      "license": "cc by-nc",
+      "title": "Conductivity optimization of La0.3Sr0.7TiO3/La0.8Sr0.2MnO3 bilayer interconnects via interfacial oxygen partial pressure regulation and its application in FT-SIS-SOFCs.",
+      "pool_sentences": 317,
+      "corpus_sentences": 215
+    },
+    {
+      "pmcid": "PMC7411689",
+      "doi": "10.3390/ma13143231",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Lanthanum Ferrites-Based Exsolved Perovskites as Fuel-Flexible Anode for Solid Oxide Fuel Cells.",
+      "pool_sentences": 208,
+      "corpus_sentences": 146
+    },
+    {
+      "pmcid": "PMC7762234",
+      "doi": "10.3390/nano10122445",
+      "year": "2020",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Metal Exsolution to Enhance the Catalytic Activity of Electrodes in Solid Oxide Fuel Cells.",
+      "pool_sentences": 241,
+      "corpus_sentences": 168
+    },
+    {
+      "pmcid": "PMC7078369",
+      "doi": "10.1016/j.mex.2020.100822",
+      "year": "2020",
+      "journal": "MethodsX",
+      "license": "cc by-nc-nd",
+      "title": "High performance modeling of heterogeneous SOFC electrode microstructures using the MOOSE framework: ERMINE (Electrochemical Reactions in MIcrostructural NEtworks).",
+      "pool_sentences": 193,
+      "corpus_sentences": 128
+    },
+    {
+      "pmcid": "PMC9841986",
+      "doi": "10.1021/acs.jpca.2c07049",
+      "year": "2023",
+      "journal": "The journal of physical chemistry. A",
+      "license": "cc by-nc-nd",
+      "title": "Heterogeneous and Combined Heterogeneous/Homogeneous Combustion Modeling of SOFC Off-Gases.",
+      "pool_sentences": 253,
+      "corpus_sentences": 168
+    },
+    {
+      "pmcid": "PMC12676356",
+      "doi": "10.1021/acsomega.5c02399",
+      "year": "2025",
+      "journal": "ACS omega",
+      "license": "cc by",
+      "title": "A Brief Review of H2S and Nitrogen-Based Contaminants from Biogas: Effects on Reforming Catalysts and SOFC Anodes.",
+      "pool_sentences": 339,
+      "corpus_sentences": 228
+    },
+    {
+      "pmcid": "PMC12738752",
+      "doi": "10.1038/s41378-025-01072-5",
+      "year": "2025",
+      "journal": "Microsystems & nanoengineering",
+      "license": "cc by-nc-nd",
+      "title": "A high-thermal-insulation and portable microreactor for integrating widely used planar-type SOFC and enabling handheld power generation.",
+      "pool_sentences": 268,
+      "corpus_sentences": 183
+    },
+    {
+      "pmcid": "PMC8552236",
+      "doi": "10.1021/acsomega.1c01359",
+      "year": "2021",
+      "journal": "ACS omega",
+      "license": "cc by",
+      "title": "Temperature Gradient Control of the Solid Oxide Fuel Cell under Variable Load.",
+      "pool_sentences": 94,
+      "corpus_sentences": 67
+    },
+    {
+      "pmcid": "PMC9786882",
+      "doi": "10.3390/membranes12121222",
+      "year": "2022",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Development of La1.7Ca0.3Ni1-yCuyO4+\u03b4 Materials for Oxygen Permeation Membranes and Cathodes for Intermediate-Temperature Solid Oxide Fuel Cells.",
+      "pool_sentences": 208,
+      "corpus_sentences": 128
+    },
+    {
+      "pmcid": "PMC6591329",
+      "doi": "10.1038/s41598-019-45668-0",
+      "year": "2019",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Scheelite type Sr1-xBaxWO4 (x = 0.1, 0.2, 0.3) for possible application in Solid Oxide Fuel Cell electrolytes.",
+      "pool_sentences": 148,
+      "corpus_sentences": 90
+    },
+    {
+      "pmcid": "PMC11507636",
+      "doi": "10.3390/e26100872",
+      "year": "2024",
+      "journal": "Entropy (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Transported Entropy of Ions and Peltier Coefficients in 8YSZ and 10Sc1CeSZ Electrolytes for Solid Oxide Cells.",
+      "pool_sentences": 225,
+      "corpus_sentences": 153
+    },
+    {
+      "pmcid": "PMC9611669",
+      "doi": "10.3390/membranes12101006",
+      "year": "2022",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Magnesium-Doped Sr2(Fe,Mo)O6-\u03b4 Double Perovskites with Excellent Redox Stability as Stable Electrode Materials for Symmetrical Solid Oxide Fuel Cells.",
+      "pool_sentences": 148,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC12347996",
+      "doi": "10.3390/ma18153424",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Mechanism of Topotactic Reduction-Oxidation Between Mg-Doped SrMoO3 Perovskites and SrMoO4 Scheelites, Utilized as Anode Materials for Solid Oxide Fuel Cells.",
+      "pool_sentences": 50,
+      "corpus_sentences": 29
+    },
+    {
+      "pmcid": "PMC10780477",
+      "doi": "10.3390/nano14010082",
+      "year": "2023",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Bonding State and Thermal Expansion Coefficient of Mn-Doped Ba0.5Sr0.5FeO3-\u03b4 Perovskite Oxides for IT-SOFCs.",
+      "pool_sentences": 88,
+      "corpus_sentences": 59
+    },
+    {
+      "pmcid": "PMC11438972",
+      "doi": "10.1038/s41598-024-72541-6",
+      "year": "2024",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Optimal parameter identification of solid oxide fuel cell using modified fire Hawk algorithm.",
+      "pool_sentences": 293,
+      "corpus_sentences": 204
+    },
+    {
+      "pmcid": "PMC9959674",
+      "doi": "10.3390/ma16041634",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Glass-Zirconia Composites as Seals for Solid Oxide Cells: Preparation, Properties, and Stability over Repeated Thermal Cycles.",
+      "pool_sentences": 171,
+      "corpus_sentences": 114
+    },
+    {
+      "pmcid": "PMC11268505",
+      "doi": "10.1039/d4sc03306j",
+      "year": "2024",
+      "journal": "Chemical science",
+      "license": "cc by",
+      "title": "Advancements and prospects of perovskite-based fuel electrodes in solid oxide cells for CO2 electrolysis to CO.",
+      "pool_sentences": 484,
+      "corpus_sentences": 317
+    },
+    {
+      "pmcid": "PMC9181521",
+      "doi": "10.3390/ma15113819",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Al-Doped SrMoO3 Perovskites as Promising Anode Materials in Solid Oxide Fuel Cells.",
+      "pool_sentences": 108,
+      "corpus_sentences": 70
+    },
+    {
+      "pmcid": "PMC12882970",
+      "doi": "10.1007/s11581-024-05824-7",
+      "year": "2026",
+      "journal": "Ionics",
+      "license": "cc by",
+      "title": "A tutorial review on solid oxide fuel cells: fundamentals, materials, and applications.",
+      "pool_sentences": 179,
+      "corpus_sentences": 116
+    },
+    {
+      "pmcid": "PMC9060954",
+      "doi": "10.1039/c8ra07586g",
+      "year": "2019",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Effects of dispersed copper nanoparticles on Ni-ceria based dry methanol fuelled low temperature solid oxide fuel cells.",
+      "pool_sentences": 150,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC8490757",
+      "doi": "10.3389/fchem.2021.719826",
+      "year": "2021",
+      "journal": "Frontiers in chemistry",
+      "license": "cc by",
+      "title": "Editorial: High Temperature Solid Oxide Cells.",
+      "pool_sentences": 44,
+      "corpus_sentences": 27
+    },
+    {
+      "pmcid": "PMC6961478",
+      "doi": "10.1007/s10800-017-1114-x",
+      "year": "2017",
+      "journal": "Journal of applied electrochemistry",
+      "license": "cc by",
+      "title": "Inkjet printing infiltration of Ni-Gd:CeO2 anodes for low temperature solid oxide fuel cells.",
+      "pool_sentences": 216,
+      "corpus_sentences": 129
+    },
+    {
+      "pmcid": "PMC4148670",
+      "doi": "10.1038/srep05754",
+      "year": "2014",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-sa",
+      "title": "Micro-tubular solid oxide fuel cell based on a porous yttria-stabilized zirconia support.",
+      "pool_sentences": 106,
+      "corpus_sentences": 63
+    },
+    {
+      "pmcid": "PMC5063150",
+      "doi": "10.1002/advs.201500186",
+      "year": "2016",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Redox-Reversible Iron Orthovanadate Cathode for Solid Oxide Steam Electrolyzer.",
+      "pool_sentences": 117,
+      "corpus_sentences": 76
+    },
+    {
+      "pmcid": "PMC6641108",
+      "doi": "10.1021/acsomega.6b00433",
+      "year": "2017",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "Mechanism of Cathodic Performance Enhancement by a Few-Nanometer-Thick Oxide Overcoat on Porous Pt Cathodes of Solid Oxide Fuel Cells.",
+      "pool_sentences": 105,
+      "corpus_sentences": 71
+    },
+    {
+      "pmcid": "PMC9965424",
+      "doi": "10.3390/ma16041755",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Characterization of Ruddlesden-Popper La2-xBaxNiO4\u00b1\u03b4 Nickelates as Potential Electrocatalysts for Solid Oxide Cells.",
+      "pool_sentences": 207,
+      "corpus_sentences": 148
+    },
+    {
+      "pmcid": "PMC12329657",
+      "doi": "10.1039/d5ra03822g",
+      "year": "2025",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Electrochemical evaluation of Ni-BaZr0.8Y0.1X0.1O3-\u03b4 (X=Co, Mn) perovskite anodes synthesized through spinach (green) and oxalic (chemical) assisted auto-combustion routes for IT-SOFCs.",
+      "pool_sentences": 158,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC4065647",
+      "doi": "10.1186/1556-276x-9-286",
+      "year": "2014",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "Triple-phase boundary and power density enhancement in thin solid oxide fuel cells by controlled etching of the nickel anode.",
+      "pool_sentences": 62,
+      "corpus_sentences": 41
+    },
+    {
+      "pmcid": "PMC10889947",
+      "doi": "10.3390/membranes14020044",
+      "year": "2024",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "A High-Strength Solid Oxide Fuel Cell Supported by an Ordered Porous Cathode Membrane.",
+      "pool_sentences": 136,
+      "corpus_sentences": 88
+    },
+    {
+      "pmcid": "PMC12892881",
+      "doi": "10.1021/acsaem.5c03226",
+      "year": "2026",
+      "journal": "ACS applied energy materials",
+      "license": "cc by",
+      "title": "In Situ Characterization of Strontium Titanium Ferrite Perovskites for Application as Electrodes of Solid Oxide Cells.",
+      "pool_sentences": 334,
+      "corpus_sentences": 233
+    },
+    {
+      "pmcid": "PMC11937304",
+      "doi": "10.1038/s41467-025-58178-7",
+      "year": "2025",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "Co-expression of multi-genes for polynary perovskite electrocatalysts for reversible solid oxide cells.",
+      "pool_sentences": 290,
+      "corpus_sentences": 202
+    },
+    {
+      "pmcid": "PMC13224741",
+      "doi": "10.1021/acs.energyfuels.6c00185",
+      "year": "2026",
+      "journal": "Energy & fuels : an American Chemical Society journal",
+      "license": "cc by-nc-nd",
+      "title": "Strategies for Tuning the Electrical Properties of La2NiTiO6 Perovskite Derivatives and Their Evaluation as Potential Air Electrodes in Reversible Solid Oxide Cells.",
+      "pool_sentences": 330,
+      "corpus_sentences": 223
+    },
+    {
+      "pmcid": "PMC11472266",
+      "doi": "10.1021/acsami.4c07968",
+      "year": "2024",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "Ni-Doped SFM Double-Perovskite Electrocatalyst for High-Performance Symmetrical Direct-Ammonia-Fed Solid Oxide Fuel Cells.",
+      "pool_sentences": 206,
+      "corpus_sentences": 143
+    },
+    {
+      "pmcid": "PMC12673522",
+      "doi": "10.1021/acsami.5c12421",
+      "year": "2025",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by-nc-nd",
+      "title": "Deciphering Ni Content-Induced Microstructural Evolution in Ni-YSZ Cermets for Direct Ammonia SOFC Performance.",
+      "pool_sentences": 240,
+      "corpus_sentences": 147
+    },
+    {
+      "pmcid": "PMC8779859",
+      "doi": "10.3390/ma15020642",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Improvement of La0.8Sr0.2MnO3-\u03b4 Cathode Material for Solid Oxide Fuel Cells by Addition of YFe0.5Co0.5O3.",
+      "pool_sentences": 133,
+      "corpus_sentences": 84
+    },
+    {
+      "pmcid": "PMC4288223",
+      "doi": "10.1038/srep07667",
+      "year": "2015",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Electrochemical performance and carbon deposition resistance of M-BaZr\u2080.\u2081Ce\u2080.\u2087Y\u2080.\u2081Yb\u2080.\u2081O\u2083\u208b\u03b4 (M = Pd, Cu, Ni or NiCu) anodes for solid oxide fuel cells.",
+      "pool_sentences": 80,
+      "corpus_sentences": 52
+    },
+    {
+      "pmcid": "PMC10125182",
+      "doi": "10.1021/acsenvironau.1c00014",
+      "year": "2022",
+      "journal": "ACS environmental Au",
+      "license": "cc by-nc-nd",
+      "title": "Optimizing Solid Oxide Fuel Cell Performance to Re-evaluate Its Role in the Mobility Sector.",
+      "pool_sentences": 314,
+      "corpus_sentences": 200
+    },
+    {
+      "pmcid": "PMC11013187",
+      "doi": "10.3390/polym16070932",
+      "year": "2024",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Integrated Heat Recovery System Based on Mixed Ionic-Electronic Conducting Membrane for Improved Solid Oxide Co-Electrolyzer Performance.",
+      "pool_sentences": 248,
+      "corpus_sentences": 152
+    },
+    {
+      "pmcid": "PMC9145612",
+      "doi": "10.3390/ma15103663",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Triple Perovskite Nd1.5Ba1.5CoFeMnO9-\u03b4-Sm0.2Ce0.8O1.9 Composite as Cathodes for the Intermediate Temperature Solid Oxide Fuel Cells.",
+      "pool_sentences": 179,
+      "corpus_sentences": 110
+    },
+    {
+      "pmcid": "PMC5315022",
+      "doi": "10.1039/c6ta08110j",
+      "year": "2017",
+      "journal": "Journal of materials chemistry. A",
+      "license": "cc by",
+      "title": "A solid oxide photoelectrochemical cell with UV light-driven oxygen storage in mixed conducting electrodes.",
+      "pool_sentences": 280,
+      "corpus_sentences": 194
+    },
+    {
+      "pmcid": "PMC11297024",
+      "doi": "10.1038/s41598-024-62414-3",
+      "year": "2024",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Solid oxide fuel cell (SOFC) control strategy enhancement by adaptive neuro-fuzzy inference system (ANFIS).",
+      "pool_sentences": 182,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC12749743",
+      "doi": "10.1038/s41467-025-66361-z",
+      "year": "2025",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "Elucidating the role of interfacial charge transfer on the oxygen incorporation/evolution reactions for solid oxide cells.",
+      "pool_sentences": 203,
+      "corpus_sentences": 122
+    },
+    {
+      "pmcid": "PMC11639050",
+      "doi": "10.1021/acs.nanolett.4c03679",
+      "year": "2024",
+      "journal": "Nano letters",
+      "license": "cc by",
+      "title": "Low Area Specific Resistance La-Doped Bi2O3 Nanocomposite Thin Film Cathodes for Solid Oxide Fuel Cell Applications.",
+      "pool_sentences": 97,
+      "corpus_sentences": 67
+    },
+    {
+      "pmcid": "PMC8400315",
+      "doi": "10.3390/polym13162774",
+      "year": "2021",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "An Overview on the Novel Core-Shell Electrodes for Solid Oxide Fuel Cell (SOFC) Using Polymeric Methodology.",
+      "pool_sentences": 289,
+      "corpus_sentences": 188
+    },
+    {
+      "pmcid": "PMC10889990",
+      "doi": "10.3390/ma17040869",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Mo-Doped LSCF as a Novel Coke-Resistant Anode for Biofuel-Fed SOFC.",
+      "pool_sentences": 225,
+      "corpus_sentences": 148
+    },
+    {
+      "pmcid": "PMC10342450",
+      "doi": "10.3390/ma16134673",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Preparation of Bi2O3-YSZ and YSB-YSZ Composite Powders by a Microemulsion Method and Their Performance as Electrolytes in a Solid Oxide Fuel Cell.",
+      "pool_sentences": 190,
+      "corpus_sentences": 124
+    },
+    {
+      "pmcid": "PMC11150971",
+      "doi": "10.1016/j.isci.2024.109982",
+      "year": "2024",
+      "journal": "iScience",
+      "license": "cc by-nc",
+      "title": "Developing abundant rare-earth iron perovskite electrodes for high-performance and low-cost solid oxide fuel cells.",
+      "pool_sentences": 87,
+      "corpus_sentences": 63
+    },
+    {
+      "pmcid": "PMC6641171",
+      "doi": "10.1021/acsomega.7b00275",
+      "year": "2017",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "Rapid and Low-Energy Fabrication of Symmetrical Solid Oxide Cells by Microwave Methods.",
+      "pool_sentences": 144,
+      "corpus_sentences": 94
+    },
+    {
+      "pmcid": "PMC12942563",
+      "doi": "10.3390/ma19040733",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Material Composition Design for Long-Term Stability of Solid Oxide Fuel Cell Based on Creep Damage and Failure Probability.",
+      "pool_sentences": 160,
+      "corpus_sentences": 114
+    },
+    {
+      "pmcid": "PMC12430071",
+      "doi": "10.3390/nano15171314",
+      "year": "2025",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Graphene/Zirconia Composites for Components in Solid Oxide Fuel Cells: Microstructure and Electrical Conductivity.",
+      "pool_sentences": 183,
+      "corpus_sentences": 120
+    },
+    {
+      "pmcid": "PMC7659948",
+      "doi": "10.3390/ma13214702",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Characterization of Glass-Ceramic Sealant for Solid Oxide Fuel Cells at Operating Conditions by Electrochemical Impedance Spectroscopy.",
+      "pool_sentences": 159,
+      "corpus_sentences": 104
+    },
+    {
+      "pmcid": "PMC3701165",
+      "doi": "10.1038/srep02138",
+      "year": "2013",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Chemically stable proton conducting doped BaCeO\u2083 -no more fear to SOFC wastes.",
+      "pool_sentences": 105,
+      "corpus_sentences": 72
+    },
+    {
+      "pmcid": "PMC9735547",
+      "doi": "10.3390/molecules27238396",
+      "year": "2022",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Solid Oxide Cells with Phase-Inversion Tape-Casted Hydrogen Electrode and SrSc0.175Nb0.025Co0.8O3-\u03b4 Oxygen Electrode for High-Performance Reversible Power Generation and Hydrogen Production.",
+      "pool_sentences": 151,
+      "corpus_sentences": 93
+    },
+    {
+      "pmcid": "PMC5292655",
+      "doi": "10.1016/j.jare.2016.12.006",
+      "year": "2017",
+      "journal": "Journal of advanced research",
+      "license": "cc by-nc-nd",
+      "title": "Effect of strontium on Nd doped Ba1-x Sr x Ce0.65Zr0.25Nd0.1O3-\u03b4 proton conductor as an electrolyte for solid oxide fuel cells.",
+      "pool_sentences": 212,
+      "corpus_sentences": 138
+    },
+    {
+      "pmcid": "PMC3744084",
+      "doi": "10.1038/srep02426",
+      "year": "2013",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Highly efficient and robust cathode materials for low-temperature solid oxide fuel cells: PrBa0.5Sr0.5Co(2-x)Fe(x)O(5+\u03b4).",
+      "pool_sentences": 85,
+      "corpus_sentences": 48
+    },
+    {
+      "pmcid": "PMC13209439",
+      "doi": "10.3390/nano16100633",
+      "year": "2026",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Nickel Coarsening and Mass Transfer Performance Prediction in Direct Internal Reforming Solid Oxide Fuel Cells.",
+      "pool_sentences": 180,
+      "corpus_sentences": 121
+    },
+    {
+      "pmcid": "PMC10256929",
+      "doi": "10.1016/j.heliyon.2023.e16164",
+      "year": "2023",
+      "journal": "Heliyon",
+      "license": "cc by",
+      "title": "Exergy-economic assessment of a hybrid power, cooling and heating generation system based on SOFC.",
+      "pool_sentences": 173,
+      "corpus_sentences": 119
+    },
+    {
+      "pmcid": "PMC12362729",
+      "doi": "10.1002/advs.202502504",
+      "year": "2025",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Large Area High-Performance Thin Film Solid Oxide Fuel Cell with Nanoscale Anode Functional Layer by Scalable Reactive Sputtering.",
+      "pool_sentences": 108,
+      "corpus_sentences": 74
+    },
+    {
+      "pmcid": "PMC9698536",
+      "doi": "10.3390/ma15228268",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Tailoring the Stability of Ti-Doped Sr2Fe1.4TixMo0.6-xO6-\u03b4 Electrode Materials for Solid Oxide Fuel Cells.",
+      "pool_sentences": 107,
+      "corpus_sentences": 69
+    },
+    {
+      "pmcid": "PMC6377679",
+      "doi": "10.1038/s41598-019-39518-2",
+      "year": "2019",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Spring Based Connection of External Wires to a Thin Film Temperature Sensor Integrated Inside a Solid Oxide Fuel Cell.",
+      "pool_sentences": 177,
+      "corpus_sentences": 115
+    },
+    {
+      "pmcid": "PMC8704428",
+      "doi": "10.3390/nano11123435",
+      "year": "2021",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Solid Oxide Cell Electrode Nanocomposites Fabricated by Inkjet Printing Infiltration of Ceria Scaffolds.",
+      "pool_sentences": 166,
+      "corpus_sentences": 117
+    },
+    {
+      "pmcid": "PMC9832435",
+      "doi": "10.1021/acsaem.2c02592",
+      "year": "2023",
+      "journal": "ACS applied energy materials",
+      "license": "cc by",
+      "title": "Rational Development of IT-SOFC Electrodes Based on the Nanofunctionalization of La0.6Sr0.4Ga0.3Fe0.7O3 with Oxides. Part 2: Anodes by Means of Manganite Oxide.",
+      "pool_sentences": 225,
+      "corpus_sentences": 150
+    },
+    {
+      "pmcid": "PMC11696565",
+      "doi": "10.1038/s41598-024-84013-y",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Investigating the effect of parameters in the thermodynamic analysis of the solid oxide fuel cell cycle using response surface methodology.",
+      "pool_sentences": 165,
+      "corpus_sentences": 105
+    },
+    {
+      "pmcid": "PMC11435114",
+      "doi": "10.3390/molecules29184492",
+      "year": "2024",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Ni-Doped Pr0.7Ba0.3MnO3-\u03b4 Cathodes for Enhancing Electrolysis of CO2 in Solid Oxide Electrolytic Cells.",
+      "pool_sentences": 158,
+      "corpus_sentences": 100
+    },
+    {
+      "pmcid": "PMC13466902",
+      "doi": "10.3390/ma19153175",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Enhancing Durability and Efficiency of Electrochemical Energy Devices (Batteries and Solid Oxide Cells) Through Thermal Spray Coating Technologies: A Review.",
+      "pool_sentences": 430,
+      "corpus_sentences": 274
+    },
+    {
+      "pmcid": "PMC5571178",
+      "doi": "10.1038/s41598-017-09934-3",
+      "year": "2017",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Distributed Optical Fiber Sensors with Ultrafast Laser Enhanced Rayleigh Backscattering Profiles for Real-Time Monitoring of Solid Oxide Fuel Cell Operations.",
+      "pool_sentences": 195,
+      "corpus_sentences": 133
+    },
+    {
+      "pmcid": "PMC6356560",
+      "doi": "10.3390/ma12020298",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Shear Performance at Room and High Temperatures of Glass\u207bCeramic Sealants for Solid Oxide Electrolysis Cell Technology.",
+      "pool_sentences": 124,
+      "corpus_sentences": 78
+    },
+    {
+      "pmcid": "PMC10411681",
+      "doi": "10.1093/nsr/nwad078",
+      "year": "2023",
+      "journal": "National science review",
+      "license": "cc by",
+      "title": "In situ electrochemical reconstruction of Sr2Fe1.45Ir0.05Mo0.5O6-\u03b4 perovskite cathode for CO2 electrolysis in solid oxide electrolysis cells.",
+      "pool_sentences": 143,
+      "corpus_sentences": 96
+    },
+    {
+      "pmcid": "PMC9000417",
+      "doi": "10.3390/nano12071059",
+      "year": "2022",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Classification of Solid Oxide Fuel Cells.",
+      "pool_sentences": 324,
+      "corpus_sentences": 203
+    },
+    {
+      "pmcid": "PMC6427277",
+      "doi": "10.3390/ma12050702",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Controlled Coprecipitation of Amorphous Cerium-Based Carbonates with Suitable Morphology as Precursors of Ceramic Electrolytes for IT-SOFCs.",
+      "pool_sentences": 121,
+      "corpus_sentences": 75
+    },
+    {
+      "pmcid": "PMC9597290",
+      "doi": "10.1039/d2ra05665h",
+      "year": "2022",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "LSCF-WO3 semiconductor composite electrolytes for low-temperature solid oxide fuel cells.",
+      "pool_sentences": 108,
+      "corpus_sentences": 75
+    },
+    {
+      "pmcid": "PMC12128030",
+      "doi": "10.1021/acsami.4c21980",
+      "year": "2025",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "Reduced Thermal Expansion and Improved Electrochemical Performance in Pr-Substituted SrFeO3 as Symmetrical Electrode for Solid Oxide Fuel Cells.",
+      "pool_sentences": 185,
+      "corpus_sentences": 131
+    },
+    {
+      "pmcid": "PMC12854247",
+      "doi": "10.1002/cssc.202501679",
+      "year": "2026",
+      "journal": "ChemSusChem",
+      "license": "cc by",
+      "title": "Li\uf8ffCo Dual-Doped Ceria-Based Composite as a Promising Low-Temperature Electrolyte for Metal-Supported Solid Oxide Electrolyzers.",
+      "pool_sentences": 309,
+      "corpus_sentences": 203
+    },
+    {
+      "pmcid": "PMC5002044",
+      "doi": "10.1007/s11434-016-1146-3",
+      "year": "2016",
+      "journal": "Science bulletin",
+      "license": "cc by",
+      "title": "Solid oxide fuel cell interconnect design optimization considering the thermal stresses.",
+      "pool_sentences": 157,
+      "corpus_sentences": 113
+    },
+    {
+      "pmcid": "PMC9940111",
+      "doi": "10.1021/acsami.2c20731",
+      "year": "2023",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "Closed-Pore Formation in Oxygen Electrodes for Solid Oxide Electrolysis Cells Investigated by Impedance Spectroscopy.",
+      "pool_sentences": 350,
+      "corpus_sentences": 242
+    },
+    {
+      "pmcid": "PMC6427658",
+      "doi": "10.3390/ma12050777",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Textured Sr\u2082Sc0.1Nb0.1Co1.5Fe0.3O6-2\u03b4 Thin Film Cathodes for IT-SOFCs.",
+      "pool_sentences": 163,
+      "corpus_sentences": 112
+    },
+    {
+      "pmcid": "PMC11170649",
+      "doi": "10.1021/acsomega.4c00869",
+      "year": "2024",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Novel Anion-Doped Cathode Material SrFe1-x Si x O3-\u03b4F y for Intermediate-Temperature Solid Oxide Fuel Cells.",
+      "pool_sentences": 158,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC9083137",
+      "doi": "10.1039/c8ra04059a",
+      "year": "2018",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "A first-principles study on divergent reactions of using a Sr3Fe2O7 cathode in both oxygen ion conducting and proton conducting solid oxide fuel cells.",
+      "pool_sentences": 139,
+      "corpus_sentences": 89
+    },
+    {
+      "pmcid": "PMC5509747",
+      "doi": "10.1038/s41598-017-05725-y",
+      "year": "2017",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Effect of Nb2O5 doping on improving the thermo-mechanical stability of sealing interfaces for solid oxide fuel cells.",
+      "pool_sentences": 105,
+      "corpus_sentences": 64
+    },
+    {
+      "pmcid": "PMC9326814",
+      "doi": "10.1021/acsaem.2c00888",
+      "year": "2022",
+      "journal": "ACS applied energy materials",
+      "license": "cc by",
+      "title": "Formation and Detection of High-Pressure Oxygen in Closed Pores of La0.6Sr0.4CoO3-\u03b4 Solid Oxide Electrolysis Anodes.",
+      "pool_sentences": 222,
+      "corpus_sentences": 144
+    },
+    {
+      "pmcid": "PMC11054718",
+      "doi": "10.3390/nano14080673",
+      "year": "2024",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A High-Performance and Durable Direct-Ammonia Symmetrical Solid Oxide Fuel Cell with Nano La0.6Sr0.4Fe0.7Ni0.2Mo0.1O3-\u03b4-Decorated Doped Ceria Electrode.",
+      "pool_sentences": 204,
+      "corpus_sentences": 141
+    },
+    {
+      "pmcid": "PMC10146722",
+      "doi": "10.3390/ma16083231",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Oxygen Vacancy and Valence Band Structure of Ba0.5Sr0.5Fe1-xCuxO3-\u03b4 (x = 0-0.15) with Enhanced ORR Activity for IT-SOFCs.",
+      "pool_sentences": 81,
+      "corpus_sentences": 48
+    },
+    {
+      "pmcid": "PMC5362096",
+      "doi": "10.1371/journal.pone.0173966",
+      "year": "2017",
+      "journal": "PloS one",
+      "license": "cc by",
+      "title": "Adaptive control paradigm for photovoltaic and solid oxide fuel cell in a grid-integrated hybrid renewable energy system.",
+      "pool_sentences": 289,
+      "corpus_sentences": 198
+    },
+    {
+      "pmcid": "PMC10254195",
+      "doi": "10.3390/ma16113978",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Failure Mechanism and Optimization of Metal-Supported Solid Oxide Fuel Cells.",
+      "pool_sentences": 209,
+      "corpus_sentences": 147
+    },
+    {
+      "pmcid": "PMC6942056",
+      "doi": "10.1186/s11671-019-3226-1",
+      "year": "2020",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "An Anisotropic Microstructure Evolution in a Solid Oxide Fuel Cell Anode.",
+      "pool_sentences": 160,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC8622447",
+      "doi": "10.3390/nano11113095",
+      "year": "2021",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Inkjet Printing Infiltration of the Doped Ceria Interlayer in Commercial Anode-Supported SOFCs.",
+      "pool_sentences": 174,
+      "corpus_sentences": 116
+    },
+    {
+      "pmcid": "PMC10456803",
+      "doi": "10.3390/membranes13080698",
+      "year": "2023",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Design of Mixed Ionic-Electronic Materials for Permselective Membranes and Solid Oxide Fuel Cells Based on Their Oxygen and Hydrogen Mobility.",
+      "pool_sentences": 254,
+      "corpus_sentences": 175
+    },
+    {
+      "pmcid": "PMC11943553",
+      "doi": "10.3390/ma18061272",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Review of Nanofiber Electrodes and the In Situ Exsolution of Nanoparticles for Solid Oxide Cells.",
+      "pool_sentences": 303,
+      "corpus_sentences": 193
+    },
+    {
+      "pmcid": "PMC10644096",
+      "doi": "10.1039/d3ra01507f",
+      "year": "2023",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "A novel yttrium stabilized zirconia and ceria composite electrolyte lowering solid oxide fuel cells working temperature to 400 \u00b0C.",
+      "pool_sentences": 105,
+      "corpus_sentences": 76
+    },
+    {
+      "pmcid": "PMC8746150",
+      "doi": "10.3390/ma15010141",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Layered Oxygen-Deficient Double Perovskites as Promising Cathode Materials for Solid Oxide Fuel Cells.",
+      "pool_sentences": 241,
+      "corpus_sentences": 163
+    },
+    {
+      "pmcid": "PMC9919894",
+      "doi": "10.3390/molecules28031462",
+      "year": "2023",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Investigation on Long-Term Stability of Vermiculite Seals for Reversible Solid Oxide Cell.",
+      "pool_sentences": 188,
+      "corpus_sentences": 120
+    },
+    {
+      "pmcid": "PMC7044191",
+      "doi": "10.1038/s41598-020-60174-4",
+      "year": "2020",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "A Promising Proton Conducting Electrolyte BaZr1-xHoxO3-\u03b4 (0.05 \u2264 x \u2264 0.20) Ceramics for Intermediate Temperature Solid Oxide Fuel Cells.",
+      "pool_sentences": 161,
+      "corpus_sentences": 104
+    },
+    {
+      "pmcid": "PMC6227958",
+      "doi": "10.1098/rsos.180634",
+      "year": "2018",
+      "journal": "Royal Society open science",
+      "license": "cc by",
+      "title": "Chromium deposition and poisoning of La2NiO4 cathode of solid oxide fuel cell.",
+      "pool_sentences": 105,
+      "corpus_sentences": 65
+    },
+    {
+      "pmcid": "PMC9425036",
+      "doi": "10.3389/fchem.2022.959863",
+      "year": "2022",
+      "journal": "Frontiers in chemistry",
+      "license": "cc by",
+      "title": "Heterointerface Effect in Accelerating the Cathodic Oxygen Reduction for Intermediate-Temperature Solid Oxide Fuel Cells.",
+      "pool_sentences": 147,
+      "corpus_sentences": 98
+    },
+    {
+      "pmcid": "PMC10204638",
+      "doi": "10.1039/d3ra01469j",
+      "year": "2023",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "Cu-doped Nd0.6Sr0.4Co1-xCuxO3-\u03b4 (x = 0, 0.05, 0.1, 0.15, 0.2) as the cathode for intermediate-temperature solid oxide fuel cells.",
+      "pool_sentences": 126,
+      "corpus_sentences": 84
+    },
+    {
+      "pmcid": "PMC10442770",
+      "doi": "10.1039/d3ra02571c",
+      "year": "2023",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "Improving the durability of cobaltite cathode of solid oxide fuel cells - a review.",
+      "pool_sentences": 370,
+      "corpus_sentences": 247
+    },
+    {
+      "pmcid": "PMC4050380",
+      "doi": "10.1038/srep05246",
+      "year": "2014",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Three-dimensional microstructural imaging of sulfur poisoning-induced degradation in a Ni-YSZ anode of solid oxide fuel cells.",
+      "pool_sentences": 190,
+      "corpus_sentences": 134
+    },
+    {
+      "pmcid": "PMC8953221",
+      "doi": "10.3390/ma15062298",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Medium-Entropy SrV1/3Fe1/3Mo1/3O3 with High Conductivity and Strong Stability as SOFCs High-Performance Anode.",
+      "pool_sentences": 143,
+      "corpus_sentences": 96
+    },
+    {
+      "pmcid": "PMC12796496",
+      "doi": "10.1038/s41598-026-35161-w",
+      "year": "2026",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "In situ high temperature X-ray diffraction and dilatometric analysis of CGO-Cu composites for solid oxide devices.",
+      "pool_sentences": 128,
+      "corpus_sentences": 83
+    },
+    {
+      "pmcid": "PMC8695701",
+      "doi": "10.1039/d0ra10313f",
+      "year": "2021",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "Nb and Cu co-doped (La,Sr)(Co,Fe)O3: a stable electrode for solid oxide cells.",
+      "pool_sentences": 187,
+      "corpus_sentences": 122
+    },
+    {
+      "pmcid": "PMC12988180",
+      "doi": "10.1038/s41467-026-69110-y",
+      "year": "2026",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Scalable modular design of solid oxide fuel cell systems for enhanced large-scale power generation.",
+      "pool_sentences": 525,
+      "corpus_sentences": 331
+    },
+    {
+      "pmcid": "PMC10258784",
+      "doi": "10.1007/s11356-023-27661-3",
+      "year": "2023",
+      "journal": "Environmental science and pollution research international",
+      "license": null,
+      "title": "Sustainability and affordability of Chinese-funded renewable energy project in sub-Saharan Africa: a hybridized solid oxide fuel cell, temperature sensors, and lithium-based solar system approach.",
+      "pool_sentences": 265,
+      "corpus_sentences": 177
+    },
+    {
+      "pmcid": "PMC8190658",
+      "doi": "10.3389/fchem.2021.627699",
+      "year": "2021",
+      "journal": "Frontiers in chemistry",
+      "license": "cc by",
+      "title": "Simulation of the Electrochemical Impedance in a Three-Dimensional, Complex Microstructure of Solid Oxide Fuel Cell Cathode and Its Application in the Microstructure Characterization.",
+      "pool_sentences": 165,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC4379434",
+      "doi": "10.1107/s1600576715002447",
+      "year": "2015",
+      "journal": "Journal of applied crystallography",
+      "license": "cc by",
+      "title": "X-ray micro Laue diffraction tomography analysis of a solid oxide fuel cell.",
+      "pool_sentences": 115,
+      "corpus_sentences": 84
+    },
+    {
+      "pmcid": "PMC9589057",
+      "doi": "10.3389/fchem.2022.1027713",
+      "year": "2022",
+      "journal": "Frontiers in chemistry",
+      "license": "cc by",
+      "title": "Ti/Ni co-doped perovskite cathode with excellent catalytic activity and CO2 chemisorption ability via nanocatalysts exsolution for solid oxide electrolysis cell.",
+      "pool_sentences": 129,
+      "corpus_sentences": 98
+    },
+    {
+      "pmcid": "PMC8394259",
+      "doi": "10.3390/e23081029",
+      "year": "2021",
+      "journal": "Entropy (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Thermodynamic Analysis of a Solid Oxide Fuel Cell Based Combined Cooling, Heating, and Power System Integrated with Biomass Gasification.",
+      "pool_sentences": 197,
+      "corpus_sentences": 133
+    },
+    {
+      "pmcid": "PMC10577394",
+      "doi": "10.1039/d3ra04777f",
+      "year": "2023",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Phosphorus-substitution effect on the phase stabilization, electrical and spectroscopic properties of LAMOX-based electrolyte for solid oxide fuel cells.",
+      "pool_sentences": 99,
+      "corpus_sentences": 58
+    },
+    {
+      "pmcid": "PMC10347428",
+      "doi": "10.1021/acsami.3c04627",
+      "year": "2023",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "Durable and High-Performance Thin-Film BHYb-Coated BZCYYb Bilayer Electrolytes for Proton-Conducting Reversible Solid Oxide Cells.",
+      "pool_sentences": 147,
+      "corpus_sentences": 100
+    },
+    {
+      "pmcid": "PMC6414614",
+      "doi": "10.1038/s41467-019-09083-3",
+      "year": "2019",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Electrochemical conversion of methane to ethylene in a solid oxide electrolyzer.",
+      "pool_sentences": 158,
+      "corpus_sentences": 106
+    },
+    {
+      "pmcid": "PMC12136471",
+      "doi": "10.1371/journal.pone.0320562",
+      "year": "2025",
+      "journal": "PloS one",
+      "license": "cc by",
+      "title": "Influence of ZrO2 content on the mechanical, electrical, and microstructural characteristics of La1-xZrxCo1-yMnyO3 perovskites for IT-SOFC cathodes.",
+      "pool_sentences": 157,
+      "corpus_sentences": 110
+    },
+    {
+      "pmcid": "PMC9655730",
+      "doi": "10.3390/ma15217760",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Performance Analysis of Anode-Supported Solid Oxide Fuel Cells: A Machine Learning Approach.",
+      "pool_sentences": 310,
+      "corpus_sentences": 216
+    },
+    {
+      "pmcid": "PMC11009920",
+      "doi": "10.1021/acsami.3c19099",
+      "year": "2024",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "SrMo0.9O3-\u03b4 Perovskite with Segregated Ru Nanoparticles Performing as Anode in Solid Oxide Fuel Cells.",
+      "pool_sentences": 132,
+      "corpus_sentences": 86
+    },
+    {
+      "pmcid": "PMC7513007",
+      "doi": "10.3390/e20070484",
+      "year": "2018",
+      "journal": "Entropy (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Energy and Exergy Analyses of a Solid Oxide Fuel Cell-Gas Turbine-Organic Rankine Cycle Power Plant with Liquefied Natural Gas as Heat Sink.",
+      "pool_sentences": 249,
+      "corpus_sentences": 179
+    },
+    {
+      "pmcid": "PMC9443464",
+      "doi": "10.1002/advs.202202096",
+      "year": "2022",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "In Situ Nanoscale Dynamics Imaging in a Proton-Conducting Solid Oxide for Protonic Ceramic Fuel Cells.",
+      "pool_sentences": 134,
+      "corpus_sentences": 88
+    },
+    {
+      "pmcid": "PMC11221743",
+      "doi": "10.1371/journal.pone.0298277",
+      "year": "2024",
+      "journal": "PloS one",
+      "license": "cc by",
+      "title": "Optimized design of planar solid oxide fuel cell interconnectors.",
+      "pool_sentences": 213,
+      "corpus_sentences": 157
+    },
+    {
+      "pmcid": "PMC4517511",
+      "doi": "10.1038/srep12640",
+      "year": "2015",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Effect of proton-conduction in electrolyte on electric efficiency of multi-stage solid oxide fuel cells.",
+      "pool_sentences": 122,
+      "corpus_sentences": 74
+    },
+    {
+      "pmcid": "PMC7393395",
+      "doi": "10.1016/j.heliyon.2020.e04450",
+      "year": "2020",
+      "journal": "Heliyon",
+      "license": "cc by-nc-nd",
+      "title": "Parametric sensitivity analysis for a natural gas fueled high temperature tubular solid oxide fuel cell.",
+      "pool_sentences": 175,
+      "corpus_sentences": 112
+    },
+    {
+      "pmcid": "PMC11313999",
+      "doi": "10.3390/ma17153864",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Synthesis and Characterisation of Nanocrystalline CoxFe1-xGDC Powders as a Functional Anode Material for the Solid Oxide Fuel Cell.",
+      "pool_sentences": 298,
+      "corpus_sentences": 183
+    },
+    {
+      "pmcid": "PMC5024100",
+      "doi": "10.1038/srep33154",
+      "year": "2016",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Building better lithium-sulfur batteries: from LiNO3 to solid oxide catalyst.",
+      "pool_sentences": 163,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC10134232",
+      "doi": "10.1021/acsomega.3c00293",
+      "year": "2023",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Efficiency Maximization of a Direct Internal Reforming Solid Oxide Fuel Cell in a Two-Layer Self-Optimizing Control Structure.",
+      "pool_sentences": 259,
+      "corpus_sentences": 178
+    },
+    {
+      "pmcid": "PMC11278583",
+      "doi": "10.3390/ma17143503",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Investigating the Effects of the Physicochemical Properties of Cellulose-Derived Biocarbon on Direct Carbon Solid Oxide Fuel Cell Performance.",
+      "pool_sentences": 357,
+      "corpus_sentences": 240
+    },
+    {
+      "pmcid": "PMC9781791",
+      "doi": "10.3390/ma15248783",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "High-Entropy Materials in SOFC Technology: Theoretical Foundations for Their Creation, Features of Synthesis, and Recent Achievements.",
+      "pool_sentences": 474,
+      "corpus_sentences": 308
+    },
+    {
+      "pmcid": "PMC6813630",
+      "doi": "10.1002/fuce.201800200",
+      "year": "2019",
+      "journal": "Fuel cells (Weinheim)",
+      "license": "cc by-nc-nd",
+      "title": "Design of a Pilot SOFC System for the Combined Production of Hydrogen and Electricity under Refueling Station Requirements.",
+      "pool_sentences": 323,
+      "corpus_sentences": 216
+    },
+    {
+      "pmcid": "PMC11633512",
+      "doi": "10.1002/advs.202402348",
+      "year": "2024",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Boosting Electrochemical Performance via Extra-Role of La-Doped CeO2-\u03b4 Interlayer for \"Oxygen Provider\" at High-Current SOFC Operation.",
+      "pool_sentences": 183,
+      "corpus_sentences": 116
+    },
+    {
+      "pmcid": "PMC9504200",
+      "doi": "10.3390/membranes12090896",
+      "year": "2022",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "The Properties of Intermediate-Temperature Solid Oxide Fuel Cells with Thin Film Gadolinium-Doped Ceria Electrolyte.",
+      "pool_sentences": 79,
+      "corpus_sentences": 53
+    },
+    {
+      "pmcid": "PMC8097098",
+      "doi": "10.3389/fchem.2021.633868",
+      "year": "2021",
+      "journal": "Frontiers in chemistry",
+      "license": "cc by",
+      "title": "Enhanced Electrochemical Properties of Non-stoichiometric Layered Perovskites, Sm1-xBaCo2O5+d, for IT-SOFC Cathodes.",
+      "pool_sentences": 165,
+      "corpus_sentences": 111
+    },
+    {
+      "pmcid": "PMC9230922",
+      "doi": "10.3390/mi13060884",
+      "year": "2022",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Enhanced Performance of La0.8Sr0.2FeO3-\u03b4-Gd0.2Ce0.8O2-\u03b4 Cathode for Solid Oxide Fuel Cells by Surface Modification with BaCO3 Nanoparticles.",
+      "pool_sentences": 111,
+      "corpus_sentences": 77
+    },
+    {
+      "pmcid": "PMC10623512",
+      "doi": "10.1021/acsami.3c07115",
+      "year": "2023",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by-nc-nd",
+      "title": "Achieving Fast Oxygen Reduction on Oxide Electrodes by Creating 3D Multiscale Micro-Nano Structures for Low-Temperature Solid Oxide Fuel Cells.",
+      "pool_sentences": 171,
+      "corpus_sentences": 110
+    },
+    {
+      "pmcid": "PMC13298811",
+      "doi": "10.1021/acsami.5c21439",
+      "year": "2026",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "When a Low-Temperature Solid Oxide Solution Is the Best Solution: Inserting Guest Ions into the Ceria Host Lattice to Improve Silver Catalyst Activity for Soot Combustion.",
+      "pool_sentences": 319,
+      "corpus_sentences": 215
+    },
+    {
+      "pmcid": "PMC11541448",
+      "doi": "10.1016/j.heliyon.2024.e39645",
+      "year": "2024",
+      "journal": "Heliyon",
+      "license": "cc by-nc-nd",
+      "title": "Thermodynamic investigation of the efficiency of ammonia-powered marine solid oxide fuel cells with gas turbine.",
+      "pool_sentences": 160,
+      "corpus_sentences": 107
+    },
+    {
+      "pmcid": "PMC10450687",
+      "doi": "10.1021/acsami.3c08667",
+      "year": "2023",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "Unveiling the Electrocatalytic Activity of the GdBa0.5Sr0.5Co2-xCuxO5+\u03b4 (x \u2265 1) Oxygen Electrodes for Solid Oxide Cells.",
+      "pool_sentences": 357,
+      "corpus_sentences": 238
+    },
+    {
+      "pmcid": "PMC11760886",
+      "doi": "10.1038/s41598-025-86493-y",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "SOFCs integrated with SMES under dynamic power control using Chernobyl disaster optimizer.",
+      "pool_sentences": 170,
+      "corpus_sentences": 119
+    },
+    {
+      "pmcid": "PMC7512987",
+      "doi": "10.3390/e20060469",
+      "year": "2018",
+      "journal": "Entropy (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Impact of Multi-Causal Transport Mechanisms in an Electrolyte Supported Planar SOFC with (ZrO2)x-1(Y2O3)x Electrolyte.",
+      "pool_sentences": 268,
+      "corpus_sentences": 179
+    },
+    {
+      "pmcid": "PMC4495065",
+      "doi": "10.1007/s00706-014-1220-y",
+      "year": "2014",
+      "journal": "Monatshefte fur chemie",
+      "license": "cc by",
+      "title": "Correlation between hydrogen production rate, current, and electrode overpotential in a solid oxide electrolysis cell with La0.6Sr0.4FeO3-\u03b4 thin-film cathode.",
+      "pool_sentences": 111,
+      "corpus_sentences": 74
+    },
+    {
+      "pmcid": "PMC13454186",
+      "doi": "10.1038/s41467-026-74229-z",
+      "year": "2026",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Optimizing reversible solid oxide cell technology for long-term energy storage in Europe's decarbonized frameworks.",
+      "pool_sentences": 396,
+      "corpus_sentences": 274
+    },
+    {
+      "pmcid": "PMC9582352",
+      "doi": "10.3389/fchem.2022.1034993",
+      "year": "2022",
+      "journal": "Frontiers in chemistry",
+      "license": "cc by",
+      "title": "Effect of TiO2 as an additive on the sintering performance of Sm-doped CeO2-based electrolyte for solid oxide fuel cells.",
+      "pool_sentences": 135,
+      "corpus_sentences": 90
+    },
+    {
+      "pmcid": "PMC12506614",
+      "doi": "10.1002/adma.202500183",
+      "year": "2025",
+      "journal": "Advanced materials (Deerfield Beach, Fla.)",
+      "license": "cc by-nc-nd",
+      "title": "Ultra-Fast Microwave-Assisted Volumetric Heating Engineered Defect-Free Ceria/Zirconia Bilayer Electrolytes for Solid Oxide Electrochemical Cells.",
+      "pool_sentences": 190,
+      "corpus_sentences": 130
+    },
+    {
+      "pmcid": "PMC12294799",
+      "doi": "10.3390/e27070659",
+      "year": "2025",
+      "journal": "Entropy (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Entropy Generation Analysis and Performance Comparison of a Solid Oxide Fuel Cell with an Embedded Porous Pipe Inside of a Mono-Block-Layer-Build Geometry and a Planar Geometry with Trapezoidal Baffles.",
+      "pool_sentences": 244,
+      "corpus_sentences": 162
+    },
+    {
+      "pmcid": "PMC11329660",
+      "doi": "10.1038/s41598-024-59030-6",
+      "year": "2024",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Gd-doped ceria with extraordinary oxygen-ion conductivity for low temperature solid oxide fuel cells.",
+      "pool_sentences": 183,
+      "corpus_sentences": 121
+    },
+    {
+      "pmcid": "PMC8623907",
+      "doi": "10.3390/ma14226755",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The Utilisation of Solid Fuels Derived from Waste Pistachio Shells in Direct Carbon Solid Oxide Fuel Cells.",
+      "pool_sentences": 380,
+      "corpus_sentences": 247
+    },
+    {
+      "pmcid": "PMC12102459",
+      "doi": "10.1007/s40820-025-01764-7",
+      "year": "2025",
+      "journal": "Nano-micro letters",
+      "license": "cc by",
+      "title": "Machine Learning Tailored Anodes for Efficient Hydrogen Energy Generation in Proton-Conducting Solid Oxide Electrolysis Cells.",
+      "pool_sentences": 228,
+      "corpus_sentences": 157
+    },
+    {
+      "pmcid": "PMC8509600",
+      "doi": "10.3390/ma14195584",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Opportunities, Challenges and Prospects for Electrodeposition of Thin-Film Functional Layers in Solid Oxide Fuel Cell Technology.",
+      "pool_sentences": 445,
+      "corpus_sentences": 291
+    },
+    {
+      "pmcid": "PMC6539058",
+      "doi": "10.3390/ma12091486",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Thermal Conductivity of Molten Carbonates with Dispersed Solid Oxide from Differential Scanning Calorimetry.",
+      "pool_sentences": 110,
+      "corpus_sentences": 68
+    },
+    {
+      "pmcid": "PMC13173327",
+      "doi": "10.1002/smll.73272",
+      "year": "2026",
+      "journal": "Small (Weinheim an der Bergstrasse, Germany)",
+      "license": "cc by",
+      "title": "Toward Efficient and Reliable Chemical Upgrading Using Solid Oxide Electrochemical Reactors, Mechanisms, Challenges, and Design Principles.",
+      "pool_sentences": 616,
+      "corpus_sentences": 409
+    },
+    {
+      "pmcid": "PMC4046126",
+      "doi": "10.1038/srep05179",
+      "year": "2014",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Visualizing the structural evolution of LSM/xYSZ composite cathodes for SOFC by in-situ neutron diffraction.",
+      "pool_sentences": 187,
+      "corpus_sentences": 121
+    },
+    {
+      "pmcid": "PMC9048589",
+      "doi": "10.1039/c9ra09476h",
+      "year": "2020",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Rational synthesis of 10GDC electrolyte through a microwave irradiation GNP facile route for SOFC applications.",
+      "pool_sentences": 116,
+      "corpus_sentences": 83
+    },
+    {
+      "pmcid": "PMC9464968",
+      "doi": "10.1016/j.isci.2022.105009",
+      "year": "2022",
+      "journal": "iScience",
+      "license": "cc by-nc-nd",
+      "title": "A comprehensive investigation of direct ammonia-fueled thin-film solid-oxide fuel cells: Performance, limitation, and prospects.",
+      "pool_sentences": 264,
+      "corpus_sentences": 185
+    },
+    {
+      "pmcid": "PMC6883038",
+      "doi": "10.1038/s41467-019-13426-5",
+      "year": "2019",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Nanocomposite electrodes for high current density over 3 A cm-2 in solid oxide electrolysis cells.",
+      "pool_sentences": 178,
+      "corpus_sentences": 125
+    },
+    {
+      "pmcid": "PMC11267496",
+      "doi": "10.1021/acsaem.4c00824",
+      "year": "2024",
+      "journal": "ACS applied energy materials",
+      "license": "cc by",
+      "title": "Influence of A-Site Deficiency and Ca Concentration on the Electrical and Crystallographic Properties of (Nd0.2Sr0.7-x Ca x ) y Ti0.95Fe0.05O3-\u03b4-Based Fuel Electrode for Solid Oxide Cells.",
+      "pool_sentences": 212,
+      "corpus_sentences": 132
+    },
+    {
+      "pmcid": "PMC9933099",
+      "doi": "10.1021/acsomega.2c06808",
+      "year": "2023",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Preparation and Electrochemical Properties of Cathode Materials Ln2-x Y x CuO4+\u03b4 for Solid Oxide Fuel Cell.",
+      "pool_sentences": 91,
+      "corpus_sentences": 72
+    },
+    {
+      "pmcid": "PMC8510350",
+      "doi": "10.3390/ma14195826",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Large Area Deposition by Radio Frequency Sputtering of Gd0.1Ce0.9O1.95 Buffer Layers in Solid Oxide Fuel Cells: Structural, Morphological and Electrochemical Investigation.",
+      "pool_sentences": 133,
+      "corpus_sentences": 95
+    },
+    {
+      "pmcid": "PMC12869283",
+      "doi": "10.1039/d5ra08813e",
+      "year": "2026",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Kinetic evolution of ZrO2-modified silicate-based glass sealants during sintering and crystallization in planar solid oxide fuel cells.",
+      "pool_sentences": 280,
+      "corpus_sentences": 180
+    },
+    {
+      "pmcid": "PMC5903906",
+      "doi": "10.1126/sciadv.aar5100",
+      "year": "2018",
+      "journal": "Science advances",
+      "license": "cc by-nc",
+      "title": "Highly efficient electrochemical reforming of CH4/CO2 in a solid oxide electrolyser.",
+      "pool_sentences": 143,
+      "corpus_sentences": 97
+    },
+    {
+      "pmcid": "PMC9550866",
+      "doi": "10.3389/fchem.2022.991922",
+      "year": "2022",
+      "journal": "Frontiers in chemistry",
+      "license": "cc by",
+      "title": "Effect of MgO and Fe2O3 dual sintering aids on the microstructure and electrochemical performance of the solid state Gd0.2Ce0.8O2-\u03b4 electrolyte in intermediate-temperature solid oxide fuel cells.",
+      "pool_sentences": 175,
+      "corpus_sentences": 117
+    },
+    {
+      "pmcid": "PMC10442917",
+      "doi": "10.1021/acscatal.3c02544",
+      "year": "2023",
+      "journal": "ACS catalysis",
+      "license": "cc by",
+      "title": "Ultralow Loading of Ru as a Bifunctional Catalyst for the Oxygen Electrode of Solid Oxide Cells.",
+      "pool_sentences": 146,
+      "corpus_sentences": 105
+    },
+    {
+      "pmcid": "PMC11427654",
+      "doi": "10.1007/s40820-024-01523-0",
+      "year": "2024",
+      "journal": "Nano-micro letters",
+      "license": "cc by",
+      "title": "Alternative Strategy for Development of Dielectric Calcium Copper Titanate-Based Electrolytes for Low-Temperature Solid Oxide Fuel Cells.",
+      "pool_sentences": 318,
+      "corpus_sentences": 217
+    },
+    {
+      "pmcid": "PMC11305322",
+      "doi": "10.1016/j.heliyon.2024.e34631",
+      "year": "2024",
+      "journal": "Heliyon",
+      "license": "cc by-nc",
+      "title": "Performance evaluation and economic analysis of integrated solid oxide electrolyzer cell and proton exchange membrane fuel cell for power generation.",
+      "pool_sentences": 199,
+      "corpus_sentences": 133
+    },
+    {
+      "pmcid": "PMC11013270",
+      "doi": "10.3390/nano14070603",
+      "year": "2024",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Ru-Ce0.7Zr0.3O2-\u03b4 as an Anode Catalyst for the Internal Reforming of Dimethyl Ether in Solid Oxide Fuel Cells.",
+      "pool_sentences": 179,
+      "corpus_sentences": 120
+    },
+    {
+      "pmcid": "PMC10754860",
+      "doi": "10.1016/j.heliyon.2023.e23275",
+      "year": "2024",
+      "journal": "Heliyon",
+      "license": "cc by-nc-nd",
+      "title": "Development of oxidation-resistant and electrically conductive coating of Ti-Al-C system for the lightweight interconnects of solid oxide fuel cells.",
+      "pool_sentences": 82,
+      "corpus_sentences": 53
+    },
+    {
+      "pmcid": "PMC7882693",
+      "doi": "10.3389/fchem.2020.595608",
+      "year": "2020",
+      "journal": "Frontiers in chemistry",
+      "license": "cc by",
+      "title": "Perovskite Chromite With In-Situ Assembled Ni-Co Nano-Alloys: A Potential Bifunctional Electrode Catalyst for Solid Oxide Cells.",
+      "pool_sentences": 196,
+      "corpus_sentences": 132
+    },
+    {
+      "pmcid": "PMC9426435",
+      "doi": "10.1039/d2ra03823d",
+      "year": "2022",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "A-site deficient semiconductor electrolyte Sr1-x Co x FeO3-\u03b4 for low-temperature (450-550 \u00b0C) solid oxide fuel cells.",
+      "pool_sentences": 131,
+      "corpus_sentences": 85
+    },
+    {
+      "pmcid": "PMC10391679",
+      "doi": "10.1016/j.isci.2023.107002",
+      "year": "2023",
+      "journal": "iScience",
+      "license": "cc by-nc-nd",
+      "title": "Composite electrolyte used for low temperature SOFCs to work at 390\u00b0C.",
+      "pool_sentences": 121,
+      "corpus_sentences": 81
+    },
+    {
+      "pmcid": "PMC11832975",
+      "doi": "10.1007/s40820-024-01600-4",
+      "year": "2025",
+      "journal": "Nano-micro letters",
+      "license": "cc by",
+      "title": "Tailoring the Reversible Phase Transition of Perovskite Nanofiber Electrodes for High-Performance and Durable Reversible Solid Oxide Cells.",
+      "pool_sentences": 181,
+      "corpus_sentences": 121
+    },
+    {
+      "pmcid": "PMC11869164",
+      "doi": "10.1021/acs.chemrev.4c00614",
+      "year": "2025",
+      "journal": "Chemical reviews",
+      "license": "cc by",
+      "title": "A Comprehensive Review of Modeling of Solid Oxide Fuel Cells: From Large Systems to Fine Electrodes.",
+      "pool_sentences": 1722,
+      "corpus_sentences": 1137
+    },
+    {
+      "pmcid": "PMC11826904",
+      "doi": "10.1021/acsami.4c19043",
+      "year": "2025",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "Enhancing the Performance of Metal-Supported Solid Oxide Fuel Cells via Infiltration with an Aqueous Solution of Metal Nitrate Salts.",
+      "pool_sentences": 146,
+      "corpus_sentences": 99
+    },
+    {
+      "pmcid": "PMC13045212",
+      "doi": "10.1002/advs.202517694",
+      "year": "2026",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "A Novel Metal Foam-Supported Solid Oxide Fuel Cell With High Specific Power.",
+      "pool_sentences": 120,
+      "corpus_sentences": 83
+    },
+    {
+      "pmcid": "PMC12462558",
+      "doi": "10.1002/smll.202506595",
+      "year": "2025",
+      "journal": "Small (Weinheim an der Bergstrasse, Germany)",
+      "license": "cc by-nc-nd",
+      "title": "Mechanistic Insights into Performance and Stability Enhancement of Infiltrated Solid Oxide Electrochemical Cell Electrodes.",
+      "pool_sentences": 212,
+      "corpus_sentences": 146
+    },
+    {
+      "pmcid": "PMC13440377",
+      "doi": "10.1002/advs.77023",
+      "year": "2026",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Decoupling Electronic-Ionic Transport and Catalysis Enables High-Performance, Chemically Stable Sr-Free Air Electrodes for High-Temperature Solid Oxide Cells.",
+      "pool_sentences": 222,
+      "corpus_sentences": 146
+    },
+    {
+      "pmcid": "PMC9979349",
+      "doi": "10.1021/acsomega.2c07855",
+      "year": "2023",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Superior Electrochemical Performance of a Ce0.8Gd0.2O2-\u03b4/Zr0.8Sc0.2O2-\u03b4 Thin Bilayer-Protected Gadolinium-Doped Ceria Electrolyte in Intermediate-Temperature Solid Oxide Fuel Cells.",
+      "pool_sentences": 118,
+      "corpus_sentences": 87
+    },
+    {
+      "pmcid": "PMC9044291",
+      "doi": "10.1039/d1ra07223d",
+      "year": "2021",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Highly enhanced electrical properties of lanthanum-silicate-oxide-based SOFC electrolytes with co-doped tin and bismuth in La9.33-x Bi x Si6-y Sn y O26.",
+      "pool_sentences": 91,
+      "corpus_sentences": 59
+    },
+    {
+      "pmcid": "PMC7146754",
+      "doi": "10.1021/acsami.9b20918",
+      "year": "2020",
+      "journal": "ACS applied materials & interfaces",
+      "license": null,
+      "title": "Generating C4 Alkenes in Solid Oxide Fuel Cells via Cofeeding H2 and n-Butane Using a Selective Anode Electrocatalyst.",
+      "pool_sentences": 134,
+      "corpus_sentences": 98
+    },
+    {
+      "pmcid": "PMC13003146",
+      "doi": "10.1038/s41467-026-69338-8",
+      "year": "2026",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "A medium-entropy oxygen electrode enables high-performance and contaminant-tolerant reversible solid oxide cells.",
+      "pool_sentences": 235,
+      "corpus_sentences": 153
+    },
+    {
+      "pmcid": "PMC9472216",
+      "doi": "10.1021/acsami.2c11779",
+      "year": "2022",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "Development of Electrode-Supported Proton Conducting Solid Oxide Cells and their Evaluation as Electrochemical Hydrogen Pumps.",
+      "pool_sentences": 229,
+      "corpus_sentences": 155
+    },
+    {
+      "pmcid": "PMC8746223",
+      "doi": "10.3390/ma15010278",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Development of Ni-Sr(V,Ti)O3-\u03b4 Fuel Electrodes for Solid Oxide Fuel Cells.",
+      "pool_sentences": 231,
+      "corpus_sentences": 154
+    },
+    {
+      "pmcid": "PMC9841442",
+      "doi": "10.1039/d2ra06750a",
+      "year": "2023",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Effect of calcium doping on the electrocatalytic activity of the Bi1-x Ca x FeO3-\u03b4 oxygen electrode for solid oxide fuel cells.",
+      "pool_sentences": 127,
+      "corpus_sentences": 81
+    },
+    {
+      "pmcid": "PMC11294939",
+      "doi": "10.3389/fchem.2024.1421125",
+      "year": "2024",
+      "journal": "Frontiers in chemistry",
+      "license": "cc by",
+      "title": "The CO2 electrolysing mechanism in single-phase mixed-conducting cathode of solid oxide cell.",
+      "pool_sentences": 170,
+      "corpus_sentences": 116
+    },
+    {
+      "pmcid": "PMC13061294",
+      "doi": "10.3906/kim-2011-48",
+      "year": "2021",
+      "journal": "Turkish journal of chemistry",
+      "license": "cc by",
+      "title": "Thermal stresses in SOFC stacks: the role of mismatch among thermal conductivity of adjacent components.",
+      "pool_sentences": 200,
+      "corpus_sentences": 134
+    },
+    {
+      "pmcid": "PMC13229311",
+      "doi": "10.1371/journal.pone.0350332",
+      "year": "2026",
+      "journal": "PloS one",
+      "license": "cc by",
+      "title": "Modeling of solid oxide fuel cells and optimal parameter extraction at various operating data using an optimization method.",
+      "pool_sentences": 218,
+      "corpus_sentences": 152
+    },
+    {
+      "pmcid": "PMC11215268",
+      "doi": "10.1016/j.heliyon.2024.e32509",
+      "year": "2024",
+      "journal": "Heliyon",
+      "license": "cc by",
+      "title": "In-situ electrochemical impedance analysis of a commercial SOFC stack fueled by real wood gas.",
+      "pool_sentences": 287,
+      "corpus_sentences": 191
+    },
+    {
+      "pmcid": "PMC8187505",
+      "doi": "10.1007/s40820-020-00574-3",
+      "year": "2021",
+      "journal": "Nano-micro letters",
+      "license": "cc by",
+      "title": "A Bulk-Heterostructure Nanocomposite Electrolyte of Ce0.8Sm0.2O2-\u03b4-SrTiO3 for Low-Temperature Solid Oxide Fuel Cells.",
+      "pool_sentences": 167,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC8466903",
+      "doi": "10.3390/nano11092277",
+      "year": "2021",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Remarkable Ionic Conductivity in a LZO-SDC Composite for Low-Temperature Solid Oxide Fuel Cells.",
+      "pool_sentences": 187,
+      "corpus_sentences": 115
+    },
+    {
+      "pmcid": "PMC13450474",
+      "doi": "10.1021/acsnano.6c02036",
+      "year": "2026",
+      "journal": "ACS nano",
+      "license": "cc by",
+      "title": "Structural Origin of the Improved Ionic Conductance in CeO2-ZrO2-CeO2 Triple-Layer Electrolytes for Thin-Film Solid Oxide Fuel Cells.",
+      "pool_sentences": 224,
+      "corpus_sentences": 138
+    },
+    {
+      "pmcid": "PMC10933915",
+      "doi": "10.3390/ma17051216",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Controllable Technology for Thermal Expansion Coefficient of Commercial Materials for Solid Oxide Electrolytic Cells.",
+      "pool_sentences": 84,
+      "corpus_sentences": 60
+    },
+    {
+      "pmcid": "PMC11013831",
+      "doi": "10.3390/nano14070561",
+      "year": "2024",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Thermally Stable Silver Cathode Covered by Samaria-Doped Ceria for Low-Temperature Solid Oxide Fuel Cells.",
+      "pool_sentences": 138,
+      "corpus_sentences": 93
+    },
+    {
+      "pmcid": "PMC7287985",
+      "doi": "10.3390/ma13102267",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Molten Salt Synthesis of High-Performance, Nanostructured La0.6Sr0.4FeO3-\u03b4 Oxygen Electrode of a Reversible Solid Oxide Cell.",
+      "pool_sentences": 90,
+      "corpus_sentences": 55
+    },
+    {
+      "pmcid": "PMC8805794",
+      "doi": "10.1039/d1ta07128a",
+      "year": "2022",
+      "journal": "Journal of materials chemistry. A",
+      "license": "cc by",
+      "title": "Investigating oxygen reduction pathways on pristine SOFC cathode surfaces by in situ PLD impedance spectroscopy.",
+      "pool_sentences": 232,
+      "corpus_sentences": 149
+    },
+    {
+      "pmcid": "PMC11407089",
+      "doi": "10.1016/j.heliyon.2024.e37271",
+      "year": "2024",
+      "journal": "Heliyon",
+      "license": "cc by-nc",
+      "title": "A numerical analysis of metal-supported solid oxide fuel cell with a focus on temperature field.",
+      "pool_sentences": 254,
+      "corpus_sentences": 171
+    },
+    {
+      "pmcid": "PMC12456371",
+      "doi": "10.1002/cssc.202501131",
+      "year": "2025",
+      "journal": "ChemSusChem",
+      "license": "cc by-nc",
+      "title": "Status and Outlook of Solid Oxide Cells for Hydrocarbon Fuel Conversion.",
+      "pool_sentences": 289,
+      "corpus_sentences": 189
+    }
+  ],
+  "leakage": {
+    "sofc_exp_sentences": 9466,
+    "sofc_exp_ngrams": 243051,
+    "overlap_by_document": {
+      "PMC6632008": 104,
+      "PMC6445146": 73,
+      "PMC5944822": 138,
+      "PMC6461657": 240,
+      "PMC4495617": 166,
+      "PMC5331335": 51,
+      "PMC4698742": 32,
+      "PMC4021905": 200,
+      "PMC5457058": 204,
+      "PMC5457196": 306,
+      "PMC5456869": 239,
+      "PMC6249295": 181,
+      "PMC6370853": 182,
+      "PMC5216129": 125,
+      "PMC6517467": 138,
+      "PMC3793895": 99,
+      "PMC6247067": 270,
+      "PMC5700654": 235,
+      "PMC4222441": 104,
+      "PMC4986314": 46,
+      "PMC5456601": 205,
+      "PMC5793538": 265,
+      "PMC6073263": 86,
+      "PMC4772004": 164,
+      "PMC5075869": 70,
+      "PMC4673446": 244,
+      "PMC6523084": 228,
+      "PMC5456866": 143,
+      "PMC6158676": 94,
+      "PMC6427619": 37,
+      "PMC4663492": 108,
+      "PMC5457246": 81,
+      "PMC5706185": 77,
+      "PMC5848893": 101,
+      "PMC6337513": 87,
+      "PMC4992832": 100,
+      "PMC3564701": 64,
+      "PMC4735809": 75,
+      "PMC6164086": 42,
+      "PMC5457052": 43,
+      "PMC3730159": 27,
+      "PMC4313086": 48,
+      "PMC4895149": 36,
+      "PMC4578433": 46,
+      "PMC4770875": 49
+    },
+    "overlap_examples": [
+      {
+        "sentence": "Briefly, BaCO3 (Sigma\u2013Aldrich, ACS Reagent, \u226599%), CeO2 (Acro's Organics, 99.9%), ZrO2 (Alfa Aesar, 99.7%), Y2O3 (Alfa Aesar, 99.9%), and Yb2O3 (Sigma\u2013Aldrich, 99.9%) were intimately mixed according to their stoichiometries with ethanol in a milling jar for 24 h, followed by drying in an oven and calcining at 900 \u00b0C for 10 h in air.",
+        "ngram": "( alfa aesar , 99 . 9 %",
+        "docs": [
+          "PMC6632008"
+        ]
+      },
+      {
+        "sentence": "La0.8Sr0.2MnO3 (LSM)/(Bi0.75Y0.25)0.93Ce0.07O1.5 (BYC) Air Electrode: It was prepared by combustion method using nitrates as the metal precursors.",
+        "ngram": "la0 . 8sr0 . 2mno3 ( lsm )",
+        "docs": [
+          "PMC6445146"
+        ]
+      },
+      {
+        "sentence": "Briefly, for LSM preparation, stoichiometric amounts of La(NO3)3\u00b76H2O (Sigma\u2013Aldrich), Sr(NO3)2 (Sigma\u2013Aldrich), and Mn(NO3)2\u00b74H2O (Sigma\u2013Aldrich) were first dissolved into 0.2 m citric acid (CA, Sigma\u2013Aldrich) solution with a molar ratio of metal ions:CA = 1:2.",
+        "ngram": "stoichiometric amounts of la ( no3 ) 3",
+        "docs": [
+          "PMC5944822"
+        ]
+      },
+      {
+        "sentence": "The BYC powders were prepared by a similar process with Bi(NO3)3\u00b75H2O (Sigma\u2013Aldrich), Y(NO3)3\u00b76H2O (Sigma\u2013Aldrich), and Ce(NO3)3\u00b76H2O (Sigma\u2013Aldrich) as the metal precursors, except that the molar ratio of the metal ions to CA was 1:1.5 and the calcination temperature was 700 \u00b0C.",
+        "ngram": ") , y ( no3 ) 3 \u00b7",
+        "docs": [
+          "PMC6461657"
+        ]
+      },
+      {
+        "sentence": "The whole assembly was then calcined at 800 \u00b0C for 2 h.",
+        "ngram": "calcined at 800 \u00b0 c for 2 h",
+        "docs": [
+          "PMC5944822"
+        ]
+      },
+      {
+        "sentence": "The phase compositions of the prepared ESU materials were examined by X\u2010ray diffraction (XRD, Rigaku D/MAX\u20102100) at a scan rate of 5\u00b0 min\u20131 from 10\u00b0 to 80\u00b0.",
+        "ngram": "were examined by x - ray diffraction (",
+        "docs": [
+          "PMC4495617"
+        ]
+      },
+      {
+        "sentence": "The morphologies of the ESU materials and battery cell components were examined by an ultra\u2010high resolution field emission scanning electron microscope (UHR\u2010FESEM) (HITACHI, Regulus 8230) equipped with energy dispersive X\u2010ray spectroscopy (EDS).",
+        "ngram": "energy dispersive x - ray spectroscopy ( eds",
+        "docs": [
+          "PMC5331335"
+        ]
+      },
+      {
+        "sentence": "The solid oxide fuel cell (SOFC) is an all-solid-state device for efficient energy conversion at high operating temperature.",
+        "ngram": "solid oxide fuel cell ( sofc ) is",
+        "docs": [
+          "PMC4698742"
+        ]
+      },
+      {
+        "sentence": "Despite its extremely impressive energy conversion efficiency, its high operating temperature (800\u20131000 \u00b0C) limits the applications for this technology and thus hinders its further development.",
+        "ngram": "temperature ( 800 - 1000 \u00b0 c )",
+        "docs": [
+          "PMC4021905"
+        ]
+      },
+      {
+        "sentence": "In recent years, Perovskite oxide (ABO3) with mixed ion\u2013electron conductors (MIEC) has been extensively studied and applied in intermediate-temperature solid oxide fuel cells (IT-SOFCs).",
+        "ngram": "in intermediate - temperature solid oxide fuel cells",
+        "docs": [
+          "PMC5457058"
+        ]
+      },
+      {
+        "sentence": "However, Co-based materials have a high coefficient of thermal expansion (CTE), which results in high thermal stress at high temperature and limits their further development.",
+        "ngram": "high coefficient of thermal expansion ( cte )",
+        "docs": [
+          "PMC5457196"
+        ]
+      },
+      {
+        "sentence": "In this work, Ca was used to replace Nd in Nd0.8\u2212xSr0.2CaxCoO3\u2212\u03b4 (x = 0, 0.05, 0.1, 0.15, 0.2) to investigate the effect of Ca content on the crystal structure.",
+        "ngram": "- \u03b4 ( x = 0 , 0",
+        "docs": [
+          "PMC4495617",
+          "PMC5456869"
+        ]
+      },
+      {
+        "sentence": "Nd0.8\u2212xSr0.2CaxCoO3\u2212\u03b4(x = 0, 0.05, 0.1, 0.15, 0.2) was prepared by EDTA\u2013citric acid (CA) method.",
+        "ngram": "- \u03b4 ( x = 0 , 0",
+        "docs": [
+          "PMC4495617",
+          "PMC5456869"
+        ]
+      },
+      {
+        "sentence": "Nd(NO3)3\u00b76H2O (Aldrich, 99%), Sr(NO3)2 (Aldrich, 99.99%), Co(NO3)2\u00b76H2O (Aldrich, 99.99%), and Ca(NO3)2\u00b74H2O (Aldrich, 99%) were dissolved in ammonia and stirred thoroughly.",
+        "ngram": "( no3 ) 3 \u00b7 6h2o ( aldrich",
+        "docs": [
+          "PMC6249295",
+          "PMC6370853"
+        ]
+      },
+      {
+        "sentence": "Nd0.8\u2212xSr0.2CaxCoO3\u2212\u03b4 (x = 0, 0.05, 0.1, 0.15, 0.2) samples were named NSC, NSC0.05C, NSC0.1C, NSC0.15C, and NSC0.2C, respectively.",
+        "ngram": "- \u03b4 ( x = 0 , 0",
+        "docs": [
+          "PMC4495617",
+          "PMC5456869"
+        ]
+      },
+      {
+        "sentence": "Similar method was used to prepare NSCxC + GDC hybrid powder by ball milling an equal mass mixture of NSCxC/GDC and calcining at 900 \u00b0C for 5 h.",
+        "ngram": "at 900 \u00b0 c for 5 h .",
+        "docs": [
+          "PMC5216129"
+        ]
+      },
+      {
+        "sentence": "Moreover, the atomic content of Nd, Sr, Ca, Co, and O in the Nd0.8\u2212xSr0.2CaxCoO3\u2212\u03b4 (x = 0, 0.05, 0.1, 0.15, 0.2) samples are listed in Table 2.",
+        "ngram": "- \u03b4 ( x = 0 , 0",
+        "docs": [
+          "PMC4495617",
+          "PMC5456869"
+        ]
+      },
+      {
+        "sentence": "The cross-sectional SEM images of the NSCxC|GDC|NiO-GDC cell with an anode support structure are shown in Fig. 4, and 4(a\u2013e) displays the interface between NSCxC and GDC connection.",
+        "ngram": "the cross - sectional sem images of the",
+        "docs": [
+          "PMC5331335",
+          "PMC6517467"
+        ]
+      },
+      {
+        "sentence": "At 200\u2013600 \u00b0C, the thermal expansion behavior of the material gradually shifts from non-linear to linear with the increasing Ca content, and the average CTE gradually decreases in all temperature bands from 25.7603 \u00d7 10\u22126 K\u22121 for NSC to 19.7623 \u00d7 10\u22126 K\u22121 for NSC0.2C (35\u2013800 \u00b0C).",
+        "ngram": "\u00d7 10 - 6 k - 1 for",
+        "docs": [
+          "PMC3793895",
+          "PMC5457058",
+          "PMC5457196"
+        ]
+      },
+      {
+        "sentence": "The weakening of CTE by Ca addition is relatively limited within the 600\u2013800 \u00b0C range and decreases from 24.2049 \u00d7 10\u22126 K\u22121 for NSC to 23.9310 \u00d7 10\u22126 K\u22121 for NSC0.2C.",
+        "ngram": "\u00d7 10 - 6 k - 1 for",
+        "docs": [
+          "PMC3793895",
+          "PMC5457058",
+          "PMC5457196"
+        ]
+      }
+    ],
+    "duplicate_examples": [
+      {
+        "sentence": "Scheme-C is created by introducing an Interline Power Flow Controller (IPFC) into Arena-1 in order to reduce these oscillations and enhance dynamic performance.",
+        "duplicate_of": 3252
+      },
+      {
+        "sentence": "A key component of the Flexible AC Transmission System (FACTS) is the IPFC, which improves power flow regulation and reduces frequency oscillations.",
+        "duplicate_of": 3253
+      },
+      {
+        "sentence": "Thermal-biodiesel components are positioned in Arena-1, thermal elements in Arena-2, and thermal-hydro elements in Arena-3 (Scheme-A), resulting in a diverse multi-area power system aimed to improve power generation and distribution stability and efficiency.",
+        "duplicate_of": 3166
+      },
+      {
+        "sentence": "In EIS, the frequency range was 1 MHz to 0.1 Hz and the amplitude of applied voltage was 10 mV.",
+        "duplicate_of": 4139
+      },
+      {
+        "sentence": "The layers were dried at room temperature in a Petri dish for 24 h.",
+        "duplicate_of": 7710
+      },
+      {
+        "sentence": "The results are shown in Figure 6.",
+        "duplicate_of": 5908
+      },
+      {
+        "sentence": "The authors declare no competing financial interest.",
+        "duplicate_of": 6178
+      },
+      {
+        "sentence": "The SC is in charge mode.",
+        "duplicate_of": 10216
+      },
+      {
+        "sentence": "The minor differences are more than likely attributed to the reproducibility issues rather than to the effect of Cr evaporation and performance degradation.",
+        "duplicate_of": 11094
+      },
+      {
+        "sentence": "The percentage values of Fe3+ and Fe4+ are listed in Table S3.",
+        "duplicate_of": 3446
+      },
+      {
+        "sentence": "The authors declare no competing financial interest.",
+        "duplicate_of": 6178
+      },
+      {
+        "sentence": "The elemental distribution and lattice spacing of the material were also characterized using transmission electron microscopy (TEM, JEOL, 2100F, Tokyo, Japan).",
+        "duplicate_of": 11965
+      },
+      {
+        "sentence": "The authors declare no competing financial interest.",
+        "duplicate_of": 6178
+      },
+      {
+        "sentence": "The presence of 3% H2O in the feed is therefore not relevant when the cell is operated under a load demand of 180 mA\u00b7cm-2.",
+        "duplicate_of": 15355
+      },
+      {
+        "sentence": "This increased conductivity is because of improved grain growth and microstructural changes.",
+        "duplicate_of": 18052
+      },
+      {
+        "sentence": "However, for 1500 \u00b0C 8YSZ, the interatomic distance to the first nearest neighbor of Zr increased with the formation of the tetragonal phase.",
+        "duplicate_of": 18145
+      },
+      {
+        "sentence": "The activation energy of 1300 and 1400 \u00b0C 8YSZ was 0.86 and 0.87 eV, respectively, and the activation energy of 8YSZ at 1500 \u00b0C was significantly increased to 0.92 eV.",
+        "duplicate_of": 18155
+      },
+      {
+        "sentence": "Grain size increased with sintering temperature and soak time.",
+        "duplicate_of": 18465
+      },
+      {
+        "sentence": "Grain size increased with sintering temperature and soak time.",
+        "duplicate_of": 18465
+      },
+      {
+        "sentence": "The authors declare no competing financial interest.",
+        "duplicate_of": 6178
+      }
+    ]
+  },
+  "corpus": {
+    "path": "data/processed/corpus/sofc_sentences.txt",
+    "sentences": 40000,
+    "words": 1144676,
+    "sha256": "1b6a00d2b22d46dd190771156a2d06446cd9edf4dfea755df51a052e73d9be47"
+  },
+  "run": {
+    "search_retrieved": "2026-10-16T15:56:18Z",
+    "started": "2026-10-16T15:56:15Z",
+    "finished": "2026-10-16T16:03:25Z",
+    "seconds": 430.1,
+    "used_articles_downloaded_now": 292,
+    "http_requests": 301,
+    "cache_dir": "data/processed/corpus/europepmc_sofc"
+  }
+}

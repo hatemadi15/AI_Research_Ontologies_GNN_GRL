@@ -154,3 +154,138 @@ def test_multitask_self_training_run(tmp_path, monkeypatch):
     n = len(calls)
     nb.run(nb.parse_args(argv))                       # finished runs are skipped
     assert len(calls) == n
+
+
+# ---- SOFC-Exp's two levels (week-6 amendment) ----
+
+def test_in_sofc_scope():
+    exp, mat = (('B-EXPERIMENT', 'O'), 0.9), (('B-MATERIAL', 'O'), 0.99)
+    tagged = [{'coarse': [exp, exp, mat], 'fine': []}, {'coarse': [exp, mat, mat], 'fine': []}]
+    assert nb.in_sofc_scope(tagged, 3) == [True, False, False]     # every teacher, or none
+
+
+def test_spaced_corpus(tmp_path):
+    corpus = tmp_path / 'c.txt'
+    corpus.write_text('The Ni - YSZ anode gave 0.5 W cm−2 .\n\nFe3+ and O2− ions\n',
+                      encoding='utf-8')
+    sample, config = nb.self_training_corpus(str(corpus), 0, spaced=True)
+    assert sample == [['The', 'Ni', '-', 'YSZ', 'anode', 'gave', '0.5', 'W', 'cm−2', '.'],
+                      ['Fe3+', 'and', 'O2−', 'ions']]
+    assert config['self_train_words'] == 'spaces' and config['self_train_sample_size'] == 2
+    plain, config = nb.self_training_corpus(str(corpus), 0)
+    assert plain[1] == ['Fe3', '+', 'and', 'O2', '-', 'ions'] and 'self_train_words' not in config
+    assert nb.spaced_corpus(nb.parse_args(['--granularity', 'sofc_both'])) and \
+        not nb.spaced_corpus(nb.parse_args([]))
+
+
+def test_student_offsets(tmp_path, capsys):
+    corpus = tmp_path / 'c.txt'
+    corpus.write_text('steel alloy\n')
+    base = ['--crf', '--multi-task', '--self-train', str(corpus), '--teachers', '3',
+            '--students', '10']
+    assert nb.student_offsets_of(nb.parse_args(base)) == list(range(0, 1000, 100))
+    args = nb.parse_args(base + ['--student-offsets', '500', '600', '700'])
+    assert nb.student_offsets_of(args) == [500, 600, 700]
+    assert 'student_offsets' not in nb.stored_config(args)          # a schedule, as --papers
+    for argv, error in ((base + ['--student-offsets', '50'], 'multiples of 100'),
+                        (base + ['--student-offsets', '100', '100'], 'distinct'),
+                        (['--crf', '--self-train', str(corpus), '--student-offsets', '0'],
+                         '--student-offsets needs --teachers')):
+        with pytest.raises(SystemExit):
+            nb.parse_args(argv)
+        assert error in capsys.readouterr().err
+
+
+def _tiny_model(tmp_path):
+    import torch
+    import transformers
+    path = tmp_path / 'tiny'
+    path.mkdir()
+    vocab = ['[PAD]', '[UNK]', '[CLS]', '[SEP]', '[MASK]', *TOY_WORDS, '##s']
+    (path / 'vocab.txt').write_text('\n'.join(vocab) + '\n')
+    transformers.BertTokenizerFast(str(path / 'vocab.txt')).save_pretrained(path)
+    torch.manual_seed(0)
+    transformers.BertModel(transformers.BertConfig(
+        vocab_size=len(vocab), hidden_size=16, num_hidden_layers=1, num_attention_heads=2,
+        intermediate_size=32, max_position_embeddings=64)).save_pretrained(path)
+    return path
+
+
+def _toy_sofc():
+    """SOFC-Exp's two levels on the toy sentences: slot tags from the fine ones, entity tags
+    from the coarse ones (Condition as EXPERIMENT); papers a and b train, c is dev, d test."""
+    toy = _toy_corpora()
+    slot_of = {'Steel': 'anode_material', 'Alloy': 'cathode_material',
+               'Strength': 'power_density', 'Yield': 'resistance', 'Temp': 'working_temperature'}
+    entity_of = {'Material': 'MATERIAL', 'Property': 'VALUE', 'Condition': 'EXPERIMENT'}
+
+    def rename(tags, names):
+        return [t if t == 'O' else f'{t[:2]}{names[t[2:]]}' for t in tags]
+    return {'sofc_slot': [(t, rename(tags, slot_of), d) for t, tags, d in toy['fine']],
+            'sofc': [(t, rename(tags, entity_of), d) for t, tags, d in toy['coarse']]}
+
+
+def test_multitask_self_training_on_sofc_exp(tmp_path, monkeypatch):
+    """--granularity sofc_both: the corpus read as spaced words, silver only where every
+    teacher tags an EXPERIMENT entity (in_sofc_scope), and --student-offsets: the teachers as
+    always, then only the students asked for, a slot-level and an entity-level file each."""
+    pytest.importorskip('torch')
+    pytest.importorskip('transformers')
+    pytest.importorskip('seqeval')
+    pytest.importorskip('scipy')
+    path = _tiny_model(tmp_path)
+    corpus = tmp_path / 'corpus.txt'
+    corpus.write_text('steel alloy-yield room\nhigh tensile strength\nroom temperature steel\n')
+    corpora = _toy_sofc()
+    monkeypatch.setattr(nb, 'PROCESSED_DIR', str(tmp_path))
+    monkeypatch.setattr(nb, 'load_split_corpus', lambda granularity: corpora[granularity])
+    raw = tmp_path / 'raw'
+    (raw / 'sofc_exp').mkdir(parents=True)
+    (raw / 'sofc_exp' / 'split.json').write_text(json.dumps(
+        {'a': 'train', 'b': 'train', 'c': 'dev', 'd': 'test'}))
+    monkeypatch.setattr(nb, 'RAW_DIR', str(raw))
+    monkeypatch.setattr(nb, 'filtered_tags', lambda votes, agree, threshold: list(votes[0][0]))
+    scopes = []
+
+    def scope(tagged, n):                 # the second corpus sentence is out of scope
+        scopes.append((len(tagged), n))
+        return [True, False, True][:n]
+    monkeypatch.setattr(nb, 'in_sofc_scope', scope)
+    calls, train = [], nb.train_multitask
+
+    def spy(seed, *args, **kwargs):
+        calls.append((seed, kwargs.get('keep_tagger', False), kwargs.get('silver')))
+        return train(seed, *args, **kwargs)
+    monkeypatch.setattr(nb, 'train_multitask', spy)
+    argv = ['--top-k', '4', '--model', str(path), '--epochs', '2', '--threads', '1',
+            '--device', 'cpu', '--granularity', 'sofc_both', '--published-split', '--seeds', '0',
+            '--crf', '--multi-task', '--self-train', str(corpus), '--teachers', '3',
+            '--students', '4', '--student-offsets', '200', '300', '--self-train-sample', '0',
+            '--save-predictions']
+    nb.run(nb.parse_args(argv))
+    assert [(s, k) for s, k, _ in calls] == [(0, True), (100, True), (200, True),
+                                            (200, False), (300, False)]
+    assert scopes == [(3, 3)]
+    silver = calls[3][2]
+    assert [words for words, _ in silver] == [['steel', 'alloy-yield', 'room'],
+                                              ['room', 'temperature', 'steel']]
+    assert calls[4][2] == silver
+    assert not list((tmp_path / 'ner').glob('*_m0.json'))
+    assert not list((tmp_path / 'ner').glob('*_m100.json'))
+    for off in (200, 300):
+        for g in ('sofc_slot', 'sofc'):
+            res = json.loads((tmp_path / 'ner' / f'ner_results_{g}_published_split_'
+                                                  f'crf_mt_st3_m{off}.json').read_text())
+            assert (res['granularity'], res['variant']) == (g, f'crf_mt_st3_m{off}')
+            config = res['config']
+            assert config['students'] == 4 and 'student_offsets' not in config
+            assert config['self_train_words'] == 'spaces'
+            (run,) = res['runs']
+            assert (run['run_id'], run['seed']) == ('seed0', off) and 'test_pred' in run
+            info = run['self_training']
+            assert (info['n_in_scope'], info['n_silver_sentences']) == (2, 2)
+            assert info['n_silver'] == {'fine': 2, 'coarse': 2}
+            assert [t['seed'] for t in info['teachers']] == [0, 100, 200]
+    n = len(calls)
+    nb.run(nb.parse_args(argv))                       # finished runs are skipped
+    assert len(calls) == n

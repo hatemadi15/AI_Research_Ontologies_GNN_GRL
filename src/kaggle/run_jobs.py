@@ -8,9 +8,10 @@ of a frozen commit, the fatigue corpus and the GPU results so far). On Kaggle it
   1. checks the GPUs: one per lane, each of the spec's type (`gpu`, e.g. Tesla T4);
   2. installs the spec's pinned packages (`pip`, from PyPI) and the bundle's wheels
      (`wheels`, packages that PyPI has as source only); torch is the Kaggle image's;
-  3. unpacks the code, the corpus (its SHA-256 must be `corpus_sha256`) and the GPU
-     results so far (bundle files gpu__ner_results_*.json; every run must be a GPU run,
-     i.e. have an `environment`), so that finished runs are skipped;
+  3. unpacks the code, the corpus (its SHA-256 must be `corpus_sha256`), the SOFC corpus
+     when the spec has `sofc_corpus_sha256` (bundle file sofc_sentences.txt, with that
+     SHA-256) and the GPU results so far (bundle files gpu__ner_results_*.json; every run
+     must be a GPU run, i.e. have an `environment`), so that finished runs are skipped;
   4. downloads the pinned model snapshots (`models`: repository -> commit) and makes
      them the ones that `from_pretrained(<repository>)` loads; the jobs then run offline;
   5. runs the lanes at the same time, one per GPU (CUDA_VISIBLE_DEVICES=<lane>), and the
@@ -43,6 +44,7 @@ INPUT = Path('/kaggle/input')
 WORK = Path('/kaggle/working')
 REPO = Path('/tmp/repo')
 CORPUS = Path('data/processed/corpus/fatigue_sentences.txt')   # in the repository
+SOFC_CORPUS = Path('data/processed/corpus/sofc_sentences.txt')  # with sofc_corpus_sha256
 ENV_KEYS = ('KAGGLE_KERNEL_RUN_TYPE', 'KAGGLE_DOCKER_IMAGE', 'KAGGLE_CONTAINER_NAME')
 
 
@@ -57,6 +59,24 @@ def file_sha256(path):
 def find(root, name):
     """The first path called `name` under `root`, in sorted order (any mount layout)."""
     return next(iter(sorted(Path(root).rglob(name))), None)
+
+
+def place_sofc_corpus(spec, inputs, repo):
+    """The SOFC corpus into the repository when the spec asks for it (sofc_corpus_sha256):
+    sofc_sentences.txt of the bundle, with that SHA-256. Returns the SHA-256, or None when
+    the batch does not use it."""
+    expected = spec.get('sofc_corpus_sha256')
+    if not expected:
+        return None
+    corpus = find(inputs, 'sofc_sentences.txt')
+    if corpus is None:
+        raise FileNotFoundError(f'sofc_sentences.txt is not under {inputs}')
+    digest = file_sha256(corpus)
+    if digest != expected:
+        raise RuntimeError(f'SOFC corpus SHA-256 {digest} is not {expected}')
+    (repo / SOFC_CORPUS).parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(corpus, repo / SOFC_CORPUS)
+    return digest
 
 
 def unpack(root, archive, marker, dest):
@@ -237,10 +257,12 @@ def main(spec):
             raise RuntimeError(f'corpus SHA-256 {digest} is not {spec["corpus_sha256"]}')
         (REPO / CORPUS).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(corpus, REPO / CORPUS)
+        sofc_digest = place_sofc_corpus(spec, INPUT, REPO)
         restored = restore_results(INPUT, processed / 'ner')
         pinned = pin_models(spec['models'])
         manifest.update(lambda d: d['setup'].update({
-            'code': how, 'bundle': bundle, 'corpus_sha256': digest, 'restored': restored,
+            'code': how, 'bundle': bundle, 'corpus_sha256': digest,
+            **({'sofc_corpus_sha256': sofc_digest} if sofc_digest else {}), 'restored': restored,
             'models': pinned, 'environment': environment(),
             'setup_minutes': round((time.time() - started) / 60, 2)}))
         deadline = started + 3600 * spec.get('deadline_hours', 10)

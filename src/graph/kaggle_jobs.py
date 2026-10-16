@@ -73,7 +73,11 @@ smoke4 again):
           sofc-deberta and sofc-ctx run the method on SOFC-Exp's official split, model seeds
           0 to 900. E.g. w6c:deberta,mtst. sofc-ctx runs from the later commit of the
           week-6 amendment, so its session also repeats session b's SOFC-Exp CRF run of
-          seed 0 (smoket), the reference of its runs
+          seed 0 (smoket), the reference of its runs. sofc-mtst (alone in its batch):
+          multi-task self-training on SOFC-Exp's two levels with the SOFC corpus
+          (SOFC_CORPUS, in the bundle as sofc_sentences.txt), its official split; each lane
+          trains the 3 teachers and 5 of the 10 students (--student-offsets), after the
+          repeats smokeaa (the CRF run of smoke4) and smokeab (session b's SOFC-Exp CRF run)
 Week 7, part 2a (recall calibration; the session first repeats the CRF run of smoke4,
 smokeu):
   w7a     the CRF head with the bias grid (--entity-bias BIAS_GRID): the inner folds
@@ -118,6 +122,9 @@ WORK_DIR = ROOT / 'data' / 'processed' / 'kaggle'
 GPU_RESULTS = ROOT / 'results' / 'gpu'
 CORPUS = 'data/processed/corpus/fatigue_sentences.txt'
 CORPUS_REPORT = ROOT / 'results' / 'fatigue_corpus.json'
+# the SOFC corpus (week-6 amendment: multi-task self-training on SOFC-Exp, build_sofc_corpus.py)
+SOFC_CORPUS = 'data/processed/corpus/sofc_sentences.txt'
+SOFC_CORPUS_REPORT = ROOT / 'results' / 'sofc_corpus.json'
 
 DATASET = 'ner-gpu-bundle'
 KERNEL = 'ner-gpu-jobs'
@@ -163,7 +170,9 @@ BIAS_GRID = ('-1', '-0.5', '0.25', '0.5', '0.75', '1', '1.25', '1.5', '2', '2.5'
 # week 6: the options of each method on the held-out papers, and the stage-2 parts
 METHOD_FLAGS = {'deberta': ('--model', DEBERTA), 'ctx': ('--context', '64'),
                 'mr': ('--augment-mentions', '3')}
-STAGE2 = ('deberta', 'ctx', 'mtst', 'sofc-deberta', 'sofc-ctx')
+STAGE2 = ('deberta', 'ctx', 'mtst', 'sofc-deberta', 'sofc-ctx', 'sofc-mtst')
+# the two lanes of sofc-mtst: each trains the 3 teachers and half of the 10 students
+SOFC_MTST_LANES = (OFFSETS_PUBLISHED[:5], OFFSETS_PUBLISHED[5:])
 
 
 # ---------------------------------------------------------------------------
@@ -223,12 +232,25 @@ def published_job(granularity, *flags):
             str(THREADS)]
 
 
+def sofc_mtst_job(student_offsets):
+    """Multi-task self-training on SOFC-Exp's two levels (crf_mt_st3_m*, a slot-level and an
+    entity-level file per student): its official split, model seed 0 + offset; 3 teachers
+    tag the whole SOFC corpus, then the students of `student_offsets` (of 10) train."""
+    return ['--granularity', 'sofc_both', '--published-split', '--seeds', '0', '--crf',
+            '--multi-task', '--self-train', SOFC_CORPUS, '--teachers', '3', '--students', '10',
+            '--student-offsets', *(str(o) for o in student_offsets), '--self-train-sample', '0',
+            '--save-predictions', '--threads', str(THREADS)]
+
+
 def stage2_methods(name):
-    """The methods of a stage-2 batch name 'w6c:M1,M2,...' (ValueError if one is unknown)."""
+    """The methods of a stage-2 batch name 'w6c:M1,M2,...' (ValueError if one is unknown,
+    or if sofc-mtst, which takes both lanes, comes with another)."""
     methods = name[len('w6c:'):].split(',')
     unknown = [m for m in methods if m not in STAGE2]
     if not methods or unknown or len(set(methods)) < len(methods):
         raise ValueError(f'unknown or repeated stage-2 methods {name!r}; known: {STAGE2}')
+    if 'sofc-mtst' in methods and len(methods) > 1:
+        raise ValueError('sofc-mtst takes both lanes of its session: w6c:sofc-mtst alone')
     return methods
 
 
@@ -355,6 +377,14 @@ def batch_lanes(name):
     if name == 'w6b':
         return [[repeat + ['--tag', 'smoker'], *mtst_jobs(3)],
                 [published_job('sofc'), published_job('sofc', '--crf')]]
+    if name == 'w6c:sofc-mtst':
+        # the week-6 amendment's S2 for multi-task self-training: from its own commit, so the
+        # session repeats session b's SOFC-Exp CRF run of seed 0 (smokeab); its teachers must
+        # equal the multi-task runs of seeds 0, 100 and 200 of part 2d (w7b)
+        sofc_repeat = ['--granularity', 'sofc', '--published-split', '--seeds', '0', '--crf',
+                       '--tag', 'smokeab', '--save-predictions', '--threads', str(THREADS)]
+        return [[repeat + ['--tag', 'smokeaa'], sofc_repeat, sofc_mtst_job(SOFC_MTST_LANES[0])],
+                [sofc_mtst_job(SOFC_MTST_LANES[1])]]
     if name.startswith('w6c:'):
         # jobs that extend the same files share lane 1 (mtst); the others are balanced
         methods = stage2_methods(name)
@@ -441,12 +471,17 @@ def batch_name(name):
 
 
 def batch_spec(name):
-    """The job spec that run_jobs.py runs (see its docstring), with the batch's extra pins."""
+    """The job spec that run_jobs.py runs (see its docstring), with the batch's extra pins;
+    a batch whose jobs use the SOFC corpus also has its SHA-256 (sofc_corpus_sha256)."""
     extra = batch_extras(name)
-    return {'batch': name, 'gpu': GPU, 'pip': list(PIP) + list(extra.get('pip', ())),
+    lanes = batch_lanes(name)
+    spec = {'batch': name, 'gpu': GPU, 'pip': list(PIP) + list(extra.get('pip', ())),
             'wheels': list(WHEEL_FILES), 'models': {**MODELS, **extra.get('models', {})},
             'corpus_sha256': corpus_sha256(), 'deadline_hours': DEADLINE_HOURS,
-            'lanes': batch_lanes(name)}
+            'lanes': lanes}
+    if any(SOFC_CORPUS in job for lane in lanes for job in lane):
+        spec['sofc_corpus_sha256'] = corpus_sha256(SOFC_CORPUS_REPORT)
+    return spec
 
 
 def render_script(spec, template=None):
@@ -484,7 +519,8 @@ def file_sha256(path):
 
 
 def corpus_sha256(report=CORPUS_REPORT):
-    """The SHA-256 of the fatigue corpus recorded when it was built (week 3)."""
+    """The SHA-256 of the fatigue corpus recorded when it was built (week 3), or of the
+    corpus of another report (the SOFC corpus: SOFC_CORPUS_REPORT)."""
     return json.loads(Path(report).read_text())['corpus']['sha256']
 
 
@@ -495,11 +531,13 @@ def is_gpu_runs_file(path):
 
 
 def build_bundle(commit, out_dir, root=ROOT, results_dir=GPU_RESULTS, corpus=None,
-                 expected_sha256=None, wheels=()):
+                 expected_sha256=None, wheels=(), sofc_corpus=None, sofc_report=None):
     """Write the bundle files to out_dir (emptied first); returns BUNDLE.json's content.
 
     code.tar.gz is `git archive` of `commit` (the frozen code, tracked files only); the
-    corpus must have the recorded SHA-256; the results files of GPU runs go in as
+    corpus must have the recorded SHA-256, and so must the SOFC corpus, which goes in as
+    sofc_sentences.txt when its report (sofc_report, default SOFC_CORPUS_REPORT) exists
+    (BUNDLE.json's sofc_corpus_sha256, else None); the results files of GPU runs go in as
     gpu__<name>.json, those whose every run has an environment (the votes made from GPU
     runs have none and are not needed to resume runs), and the `wheels` (paths) as they
     are.
@@ -518,13 +556,26 @@ def build_bundle(commit, out_dir, root=ROOT, results_dir=GPU_RESULTS, corpus=Non
     if digest != expected:
         raise SystemExit(f'{corpus}: SHA-256 {digest}, not the recorded {expected}')
     shutil.copy2(corpus, out_dir / 'fatigue_sentences.txt')
+    sofc_report = Path(sofc_report) if sofc_report is not None else SOFC_CORPUS_REPORT
+    sofc_digest = None
+    if sofc_report.exists():
+        sofc_corpus = Path(sofc_corpus) if sofc_corpus is not None else Path(root) / SOFC_CORPUS
+        if not sofc_corpus.is_file():
+            raise SystemExit(f'{sofc_corpus} is missing (python src/graph/build_sofc_corpus.py '
+                             f'rebuilds it, with --offline from its cache)')
+        sofc_digest = file_sha256(sofc_corpus)
+        if sofc_digest != corpus_sha256(sofc_report):
+            raise SystemExit(f'{sofc_corpus}: SHA-256 {sofc_digest}, not the recorded '
+                             f'{corpus_sha256(sofc_report)}')
+        shutil.copy2(sofc_corpus, out_dir / 'sofc_sentences.txt')
     results = sorted(p.name for p in Path(results_dir).glob('ner_results_*.json')
                      if is_gpu_runs_file(p)) if Path(results_dir).is_dir() else []
     for name in results:
         shutil.copy2(Path(results_dir) / name, out_dir / f'{RESULTS_PREFIX}{name}')
     for wheel in wheels:
         shutil.copy2(wheel, out_dir / Path(wheel).name)
-    info = {'commit': full, 'corpus_sha256': digest, 'results': results,
+    info = {'commit': full, 'corpus_sha256': digest, 'sofc_corpus_sha256': sofc_digest,
+            'results': results,
             'wheels': sorted(Path(w).name for w in wheels),
             'created': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}
     (out_dir / 'BUNDLE.json').write_text(json.dumps(info, indent=2))
