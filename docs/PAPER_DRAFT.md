@@ -70,6 +70,10 @@ on solid oxide fuel cells, 35.0k tokens, 4,590 entities of 4 types
 (MATERIAL, VALUE, DEVICE, EXPERIMENT). Its official split holds out whole
 articles: 26 / 8 / 11 articles, 568 / 135 / 173 sentences. Its test set
 therefore measures unseen documents.
+- A second level, slot types, refines the entity types on the same tokens
+  (e.g. anode material or working temperature). Each slot type falls within
+  one entity type. The 17 that the dataset's evaluation scores hold 3,172
+  mentions (702 in the test articles).
 
 ## 3 Evaluation protocol
 
@@ -223,8 +227,8 @@ runs:
 - **Multi-task self-training:** multi-task training with silver data from
   40,000 in-domain sentences, tagged by 3 multi-task teachers. It passed the
   week-6 screen with +6.06 [+1.05, +11.06] fine-grained against the CRF
-  head; its 10-seed decisions are next. It cannot be repeated on SOFC-Exp,
-  which has one level of types.
+  head; its 10-seed decisions are next. SOFC-Exp's two levels (entity and
+  slot types) allow a repeat there, given an in-domain corpus for it.
 - **Recall calibration:** a bias on the CRF head's emission of every tag
   but O before decoding. It is motivated by the F1-optimal threshold of a
   calibrated classifier, half its F1 (lipton2014optimal), and by the
@@ -241,10 +245,10 @@ runs:
   widely (Figure 1's intervals).
 - **One second dataset with one split.** On SOFC-Exp the intervals are
   over seeds only.
-- **Methods that SOFC-Exp cannot test.** Multi-task training,
-  self-training on a fatigue corpus and coarse-to-fine completion need
-  MaterioMiner's two levels or its domain, so their results rest on
-  MaterioMiner alone.
+- **Methods tested on MaterioMiner only.** Self-training used a fatigue
+  corpus, which fits MaterioMiner's domain only, and coarse-to-fine
+  completion was tested before SOFC-Exp's slot level was converted; their
+  results rest on MaterioMiner alone.
 - **The released split** is undocumented. Its use reproduces the published
   numbers, but the authors have yet to confirm that it is theirs.
 - **A deviation:** DeBERTa-v3-large did not fit a 15 GB GPU on SOFC-Exp at

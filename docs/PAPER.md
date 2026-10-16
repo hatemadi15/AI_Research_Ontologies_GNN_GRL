@@ -17,9 +17,12 @@ evaluation protocol, in an evaluation paper its results. Document context
 passed the week-6 screen (+2.66 [+0.91, +4.40] fine-grained) but neither of
 its 10-seed decisions (+1.14 [−0.94, +3.22] against the CRF head). The
 candidates left are multi-task self-training (screen +6.06 [+1.05, +11.06]
-fine-grained; 10-seed decisions next, MaterioMiner only, since the protocol
-excludes it from SOFC-Exp) and recall calibration (week 7, part 2a, running;
-it applies to both datasets).
+fine-grained; 10-seed decisions next on MaterioMiner) and recall calibration
+(week 7, part 2a, running; it applies to both datasets). The week-6 protocol
+excluded multi-task methods from SOFC-Exp as a one-level corpus, but SOFC-Exp
+has a second level, 17 evaluated slot types that refine its 4 entity types
+(ROADMAP, "Prepared for part 2b"), so multi-task training (C7) and, if it
+passes, multi-task self-training can be repeated there.
 
 **Working titles.** Methods: an approach for materials NER on unseen papers,
 named after the change that passes. Evaluation: "How much of a materials-NER

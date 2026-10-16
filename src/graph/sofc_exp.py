@@ -20,6 +20,12 @@ between sentences (the format of the MaterioMiner files). It also writes split.j
 official document split of SOFC-Exp-Metadata.csv (26 train, 8 dev, 11 test), and checks
 the counts of the paper: 45 documents, 876 sentences and 4,590 entities.
 
+The slot tags are a second, finer level of types on the same tokens (19 slot types, e.g.
+anode_material or working_temperature; every slot token lies inside an entity). They are
+written to <out>_slot/<doc>.conll (data/raw/dataset/sofc_exp_slot): the same sentences,
+with the slot tags of the corpus, all of them (ner_baseline.py --granularity sofc_slot
+keeps the 17 that SOFC-Exp's own evaluation scores).
+
 context.json holds the whole text of each document for document context (ner_baseline.py
 --context): {doc: {"sentences": every sentence as tokens, in text order, annotated or not
 (annotations/tokens/<doc>.csv, offsets relative to the sentence), "annotated": the
@@ -41,7 +47,10 @@ from pathlib import Path
 
 OUT_DIR = Path(__file__).resolve().parents[2] / 'data' / 'raw' / 'dataset' / 'sofc_exp'
 EXPECTED = {'documents': 45, 'sentences': 876, 'entities': 4590}
+EXPECTED_SLOTS = 4263            # the slot mentions of the corpus (counted, not in the paper)
 TAG = re.compile(r'O|[BI]-[A-Z]+')
+SLOT_TAG = re.compile(r'O|[BI]-[a-z_]+')
+LEVELS = {'entity': (4, TAG), 'slot': (5, SLOT_TAG)}     # the tag column of each level
 
 
 class ConversionError(ValueError):
@@ -54,8 +63,10 @@ def read_rows(path):
             if line.strip()]
 
 
-def convert_document(corpus, doc):
-    """[(tokens, tags)] of the annotated sentences of one document, in text order."""
+def convert_document(corpus, doc, level='entity'):
+    """[(tokens, tags)] of the annotated sentences of one document, in text order: the entity
+    tags, or with level='slot' the slot tags."""
+    column, pattern = LEVELS[level]
     corpus = Path(corpus)
     text = (corpus / 'texts' / f'{doc}.txt').read_text(encoding='utf-8')
     sentences = {}
@@ -64,7 +75,8 @@ def convert_document(corpus, doc):
         sentences[sid] = (experiment == '1', int(begin))
     tokens = {}
     for row in read_rows(corpus / 'annotations' / 'entity_types_and_slots' / f'{doc}.csv'):
-        sid, _, begin, end, tag = row[:5]
+        sid, _, begin, end = row[:4]
+        tag = row[column] if len(row) > column else None
         annotated, offset = sentences[sid]
         if not annotated:
             raise ConversionError(f'{doc}: sentence {sid} has entity tags but is not annotated')
@@ -72,7 +84,7 @@ def convert_document(corpus, doc):
         if not word or re.search(r'\s', word):
             raise ConversionError(f'{doc}: sentence {sid}: token {word!r} is empty or has '
                                   f'whitespace')
-        if not TAG.fullmatch(tag):
+        if tag is None or not pattern.fullmatch(tag):
             raise ConversionError(f'{doc}: sentence {sid}: tag {tag!r}')
         tokens.setdefault(sid, []).append((offset + int(begin), word, tag))
     out = []
@@ -120,35 +132,52 @@ def read_split(corpus):
     return {row['name']: row['set'] for row in rows}
 
 
-def convert(corpus, out_dir=OUT_DIR, expected=EXPECTED):
-    """Write <doc>.conll for every document and split.json to out_dir; returns the counts."""
+def write_conll(path, sentences):
+    """One "token tag" line per token, a blank line between sentences."""
+    lines = []
+    for words, tags in sentences:
+        lines += [f'{w} {t}' for w, t in zip(words, tags)] + ['']
+    Path(path).write_text('\n'.join(lines), encoding='utf-8')
+
+
+def convert(corpus, out_dir=OUT_DIR, expected=EXPECTED, expected_slots=EXPECTED_SLOTS):
+    """Write <doc>.conll for every document, split.json and context.json to out_dir, and the
+    slot tags' <doc>.conll to <out_dir>_slot; returns the counts."""
     corpus, out_dir = Path(corpus), Path(out_dir)
+    slot_dir = out_dir.with_name(out_dir.name + '_slot')
     split = read_split(corpus)
     docs = sorted(p.stem for p in (corpus / 'annotations' / 'entity_types_and_slots')
                   .glob('*.csv'))
     if sorted(split) != docs:
         raise ConversionError('the metadata and the annotation files name different documents')
     out_dir.mkdir(parents=True, exist_ok=True)
-    counts = Counter()
+    slot_dir.mkdir(parents=True, exist_ok=True)
+    counts, slots = Counter(), Counter()
     context = {}
     for doc in docs:
         sentences = convert_document(corpus, doc)
+        slot_sentences = convert_document(corpus, doc, 'slot')
+        if [w for w, _ in slot_sentences] != [w for w, _ in sentences]:
+            raise ConversionError(f'{doc}: the slot tags cut other sentences')
         context[doc] = document_context(corpus, doc, sentences)
-        lines = []
-        for words, tags in sentences:
-            lines += [f'{w} {t}' for w, t in zip(words, tags)] + ['']
-            counts.update(t[2:] for t in tags if t.startswith('B-'))
-        (out_dir / f'{doc}.conll').write_text('\n'.join(lines), encoding='utf-8')
+        for name, found, store in ((out_dir, sentences, counts),
+                                   (slot_dir, slot_sentences, slots)):
+            write_conll(name / f'{doc}.conll', found)
+            for _, tags in found:
+                store.update(t[2:] for t in tags if t.startswith('B-'))
         counts['sentences'] += len(sentences)
     (out_dir / 'split.json').write_text(json.dumps(split, indent=2, sort_keys=True) + '\n')
     (out_dir / 'context.json').write_text(json.dumps(context, sort_keys=True) + '\n',
                                           encoding='utf-8')
     stats = {'documents': len(docs), 'sentences': counts.pop('sentences'),
              'entities': sum(counts.values()), 'types': dict(sorted(counts.items())),
+             'slots': sum(slots.values()), 'slot_types': dict(sorted(slots.items())),
              'split': dict(sorted(Counter(split.values()).items()))}
     found = {k: stats[k] for k in expected}
     if found != expected:
         raise ConversionError(f'counts {found}, not those of the paper {expected}')
+    if stats['slots'] != expected_slots:
+        raise ConversionError(f"{stats['slots']} slot mentions, not {expected_slots}")
     return stats
 
 

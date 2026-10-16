@@ -785,8 +785,8 @@ WEEK7C_INTRO = (
     "fine-grained entity where the fine level predicts only O. Pre-registered rule: a change "
     "improves on its reference only if the 95% Student-t CI of the mean micro-F1 difference "
     "lies entirely above 0. Decisions: the rule on the CRF head and on the multi-task vote; "
-    "the multi-task model is reported. SOFC-Exp has one level of types, so this is a result "
-    "on MaterioMiner only.\n")
+    "the multi-task model is reported. Tested on MaterioMiner only (SOFC-Exp's slot level was "
+    "not yet converted).\n")
 
 
 def ner_week7_table(res, comparisons=WEEK7_COMPARISONS,

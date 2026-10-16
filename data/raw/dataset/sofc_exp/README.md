@@ -17,6 +17,12 @@ their DOIs in the repository's `SOFC-Exp-Metadata.csv`.
   experiments), in text order, one "token tag" line per token (BIO tags), with a blank line
   between sentences. The tokens are cut out of the texts at the corpus's offsets.
 - `split.json`: the official split by article (26 train, 8 dev, 11 test).
+- `../sofc_exp_slot/<PMC id>.conll`: the same sentences with the corpus's slot tags, a finer
+  level of types on the same tokens (19 slot types, 4,263 mentions; every slot token lies
+  inside an entity, and each slot type within one entity type). `ner_baseline.py
+  --granularity sofc_slot` keeps the 17 that SOFC-Exp's evaluation scores (not
+  `experiment_evoking_word`, the EXPERIMENT entity under another name, nor the single
+  `interconnect_material`).
 
 The conversion checks the counts of the paper: 45 articles, 876 sentences and 4,590
 entities. These are 1,492 MATERIAL, 1,475 VALUE, 1,090 EXPERIMENT and 533 DEVICE.

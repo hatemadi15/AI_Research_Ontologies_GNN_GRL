@@ -11,6 +11,7 @@ import sofc_exp as se
 
 REPO = Path(__file__).resolve().parents[1]
 DATA = REPO / 'data' / 'raw' / 'dataset' / 'sofc_exp'
+SLOTS = REPO / 'data' / 'raw' / 'dataset' / 'sofc_exp_slot'
 
 
 def _corpus(root, entity_rows=None):
@@ -23,14 +24,16 @@ def _corpus(root, entity_rows=None):
     (c / 'SOFC-Exp-Metadata.csv').write_text('name\tset\nd1\ttrain\nd2\ttest\n')
     (c / 'texts' / 'd1.txt').write_text('Title text. Ni anode at 800 C.')
     (c / 'annotations' / 'sentences' / 'd1.csv').write_text('1\t0\t0\t11\n2\t1\t12\t30\n')
-    rows = entity_rows or ['2\t1\t0\t2\tB-MATERIAL\tO', '2\t2\t3\t8\tB-DEVICE\tO',
-                           '2\t3\t9\t11\tO\tO', '2\t4\t12\t15\tB-VALUE\tO',
-                           '2\t5\t16\t17\tI-VALUE\tO', '2\t6\t17\t18\tO\tO']
+    rows = entity_rows or ['2\t1\t0\t2\tB-MATERIAL\tB-anode_material',
+                           '2\t2\t3\t8\tB-DEVICE\tO', '2\t3\t9\t11\tO\tO',
+                           '2\t4\t12\t15\tB-VALUE\tB-working_temperature',
+                           '2\t5\t16\t17\tI-VALUE\tI-working_temperature',
+                           '2\t6\t17\t18\tO\tO']
     (c / 'annotations' / 'entity_types_and_slots' / 'd1.csv').write_text('\n'.join(rows) + '\n')
     (c / 'texts' / 'd2.txt').write_text('YSZ cells')
     (c / 'annotations' / 'sentences' / 'd2.csv').write_text('1\t1\t0\t9\n')
     (c / 'annotations' / 'entity_types_and_slots' / 'd2.csv').write_text(
-        '1\t1\t0\t3\tB-MATERIAL\tO\n1\t2\t4\t9\tB-DEVICE\tO\n')
+        '1\t1\t0\t3\tB-MATERIAL\tB-electrolyte_material\n1\t2\t4\t9\tB-DEVICE\tB-device\n')
     # every sentence's tokens, offsets relative to the sentence
     (c / 'annotations' / 'tokens' / 'd1.csv').write_text(
         '1\t1\t0\t5\n1\t2\t6\t10\n1\t3\t10\t11\n'
@@ -44,13 +47,26 @@ def test_conversion_of_a_toy_corpus(tmp_path):
     assert se.convert_document(corpus, 'd1') == [
         (['Ni', 'anode', 'at', '800', 'C', '.'],
          ['B-MATERIAL', 'B-DEVICE', 'O', 'B-VALUE', 'I-VALUE', 'O'])]
+    assert se.convert_document(corpus, 'd1', 'slot') == [
+        (['Ni', 'anode', 'at', '800', 'C', '.'],
+         ['B-anode_material', 'O', 'O', 'B-working_temperature', 'I-working_temperature', 'O'])]
     out = tmp_path / 'out'
-    stats = se.convert(corpus, out, expected={'documents': 2, 'sentences': 2, 'entities': 5})
+    stats = se.convert(corpus, out, expected={'documents': 2, 'sentences': 2, 'entities': 5},
+                       expected_slots=4)
     assert stats == {'documents': 2, 'sentences': 2, 'entities': 5,
                      'types': {'DEVICE': 2, 'MATERIAL': 2, 'VALUE': 1},
+                     'slots': 4, 'slot_types': {'anode_material': 1, 'device': 1,
+                                                'electrolyte_material': 1,
+                                                'working_temperature': 1},
                      'split': {'test': 1, 'train': 1}}
     assert conll.read_conll_sentences(out / 'd2.conll') == [
         (['YSZ', 'cells'], ['B-MATERIAL', 'B-DEVICE'])]
+    # the slot tags of the same sentences, in a directory of their own
+    assert conll.read_conll_sentences(tmp_path / 'out_slot' / 'd2.conll') == [
+        (['YSZ', 'cells'], ['B-electrolyte_material', 'B-device'])]
+    with pytest.raises(se.ConversionError, match='4 slot mentions, not 3'):
+        se.convert(corpus, out, expected={'documents': 2, 'sentences': 2, 'entities': 5},
+                   expected_slots=3)
     assert json.loads((out / 'split.json').read_text()) == {'d1': 'train', 'd2': 'test'}
     # the whole texts, for document context: the title is context, not annotated
     assert json.loads((out / 'context.json').read_text()) == {
@@ -73,6 +89,17 @@ def test_conversion_errors(tmp_path, rows, error):
         se.convert_document(corpus, 'd1')
 
 
+@pytest.mark.parametrize('rows, error', [
+    (['2\t1\t0\t2\tB-MATERIAL'], 'tag None'),                         # no slot column
+    (['2\t1\t0\t2\tB-MATERIAL\tB-Anode'], 'tag'),
+    (['2\t1\t0\t2\tB-MATERIAL\tI-anode_material'], 'does not continue'),
+])
+def test_slot_conversion_errors(tmp_path, rows, error):
+    corpus = _corpus(tmp_path, rows)
+    with pytest.raises(se.ConversionError, match=error):
+        se.convert_document(corpus, 'd1', 'slot')
+
+
 def test_the_committed_files_have_the_counts_of_the_paper():
     files = sorted(DATA.glob('*.conll'))
     assert len(files) == 45
@@ -83,6 +110,23 @@ def test_the_committed_files_have_the_counts_of_the_paper():
     split = json.loads((DATA / 'split.json').read_text())
     assert sorted(split) == [f.stem for f in files]
     assert Counter(split.values()) == {'train': 26, 'dev': 8, 'test': 11}
+
+
+def test_the_committed_slot_files_tag_the_same_sentences():
+    """The slot level: the sentences of the entity files, 4,263 slot mentions of 19 types,
+    every slot token inside an entity."""
+    files = sorted(SLOTS.glob('*.conll'))
+    assert [f.name for f in files] == [f.name for f in sorted(DATA.glob('*.conll'))]
+    slots = Counter()
+    for f in files:
+        entity = conll.read_conll_sentences(DATA / f.name)
+        slot = conll.read_conll_sentences(f)
+        assert [w for w, _ in slot] == [w for w, _ in entity]
+        for (_, s_tags), (_, e_tags) in zip(slot, entity):
+            assert all(e != 'O' for s, e in zip(s_tags, e_tags) if s != 'O')
+            slots.update(t[2:] for t in s_tags if t.startswith('B-'))
+    assert sum(slots.values()) == 4263 and len(slots) == 19
+    assert slots['experiment_evoking_word'] == 1090 and slots['interconnect_material'] == 1
 
 
 def test_the_token_files_must_cut_the_annotated_words(tmp_path):
@@ -134,3 +178,38 @@ def test_ner_baseline_reads_sofc_exp_as_granularity_sofc(capsys):
     with pytest.raises(SystemExit):
         nb.parse_args(['--granularity', 'sofc', '--crf', '--multi-task'])
     assert '--granularity must be both' in capsys.readouterr().err
+
+
+def test_ner_baseline_reads_the_slot_level_as_granularity_sofc_slot(capsys):
+    """--granularity sofc_slot: the 17 slot types that SOFC-Exp's evaluation scores (the
+    experiment-evoking word and interconnect_material are O), the same sentences and split
+    as sofc; sofc_both names the two levels, and multi-task runs on the official split."""
+    from types import SimpleNamespace
+
+    import ner_baseline as nb
+    args = SimpleNamespace(top_k=27)
+    data, labels, tie = nb.granularity_data('sofc_slot', args)
+    entity, _, _ = nb.granularity_data('sofc', args)
+    assert labels == sorted(nb.SOFC_SLOT_TYPES) and len(labels) == 17 and tie == {}
+    assert [(w, d) for w, _, d in data] == [(w, d) for w, _, d in entity]
+    tags = Counter(t[2:] for _, g, _ in data for t in g if t.startswith('B-'))
+    assert sum(tags.values()) == 4263 - 1090 - 1 and set(tags) == set(labels)
+    assert nb.published_split(data, 'sofc_slot')[0] == nb.published_split(entity, 'sofc')[0]
+    assert nb.PAPER_F1['sofc_slot'] is None
+    for g in ('sofc', 'sofc_slot'):
+        name = f'ner_results_{g}_published_split_crf_mt.json'
+        assert nb.parse_result_name(name) == (g, 'published_split', 'crf_mt')
+    args = nb.parse_args(['--granularity', 'sofc_both', '--published-split', '--crf',
+                          '--multi-task'])
+    assert nb.head_granularities(args) == {'fine': 'sofc_slot', 'coarse': 'sofc'}
+    assert nb.granularities_of(args) == ['sofc_slot', 'sofc']
+    assert nb.granularities_of(nb.parse_args(['--granularity', 'sofc'])) == ['sofc']
+    assert nb.granularities_of(nb.parse_args([])) == ['fine', 'coarse']
+    for argv, message in ((['--published-split', '--crf', '--multi-task'], 'not available'),
+                          (['--granularity', 'sofc_slot', '--crf', '--label-semantics'],
+                           'MaterioMiner types only'),
+                          (['--granularity', 'sofc_both', '--crf', '--multi-task',
+                            '--label-semantics'], 'MaterioMiner types only')):
+        with pytest.raises(SystemExit):
+            nb.parse_args(argv)
+        assert message in capsys.readouterr().err

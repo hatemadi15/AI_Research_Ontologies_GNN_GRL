@@ -1674,3 +1674,52 @@ and 39% of them are right; on the multi-task model 457, 35% right. That is
 above the break-even precision of about F1/2, so they help a little, but
 too few to show over 4 papers. The fine-grained misses are mostly not of
 the types the coarse level can vouch for.
+
+*Correction, 16 October, after the outcome:* the scope notes above (and
+the week-6 protocol's exclusion of multi-task self-training from SOFC-Exp)
+say that SOFC-Exp has one level of types. It has two: besides its 4 entity
+types, every entity token can carry a slot type, a finer level that our
+conversion had left out. Part 2c's result stands as a MaterioMiner result;
+the second level is described below.
+
+### Prepared for part 2b: SOFC-Exp's second level (slot types)
+
+SOFC-Exp's annotation files give each token an entity tag and a slot tag
+(`annotations/entity_types_and_slots`). The slot level, read from the
+corpus (no training):
+- 4,263 slot mentions of 19 types on the same 876 sentences; every slot
+  token lies inside an entity, and every slot tag continues validly (IOB2).
+- Each slot type falls within one entity type, mention by mention: the
+  materials (anode, cathode, electrolyte, interlayer, support material,
+  fuel) are MATERIAL entities;
+  the values (working temperature, power density, resistance, thickness,
+  current density, conductivity, open circuit voltage, time of operation,
+  voltage, degradation rate) are VALUE entities; `device` refines DEVICE;
+  `experiment_evoking_word` (1,090) is the EXPERIMENT entity under another
+  name.
+- SOFC-Exp's own evaluation (the authors' `evaluate_cross_validation.py`)
+  scores 17 of them: all but `experiment_evoking_word` and
+  `interconnect_material` (one mention), which its code maps to O. The
+  17 hold 3,172 mentions: 2,066 / 404 / 702 in the train, dev and test
+  articles.
+- Published reference: MatSciBERT's paper reports "SOFC-Slot" with the
+  same official test set, MatSciBERT-CRF micro F1 72.85 ± 1.11 and macro
+  F1 65.35 ± 2.73 (3 seeds × 5 cross-validation splits; Supplementary
+  Table 3 and Table 1), trained with the experiment-evoking word as an
+  extra type.
+
+What this changes: SOFC-Exp has the structure that multi-task training
+uses (two nested levels on the same sentences, like MaterioMiner's fine
+and coarse levels), so the one training change that holds on MaterioMiner
+(C7) can be repeated on a second dataset, and so can multi-task
+self-training if it passes its 10-seed decisions (it would also need an
+in-domain corpus for SOFC-Exp).
+
+Prepared (tests only, no training): `sofc_exp.py` writes the slot tags to
+`data/raw/dataset/sofc_exp_slot/` (the entity files unchanged, byte for
+byte); `ner_baseline.py --granularity sofc_slot` reads them with the 17
+evaluated types (the other two become O), on the same official split;
+`--granularity sofc_both --published-split --crf --multi-task` trains one
+encoder with a slot head and an entity head, as `--multi-task` does with
+MaterioMiner's levels, and writes `ner_results_sofc_slot_*` and
+`ner_results_sofc_*` files.

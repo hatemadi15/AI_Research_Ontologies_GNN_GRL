@@ -57,7 +57,10 @@ corpora is one example with both tag sequences; the 15 that are not give two
 examples, each labelled for one head only and never passed to the other
 head's CRF. Each head is tested with the snapshot of its best validation F1.
 One run writes both files (`_crf_mt`, single-task schema plus `multi_task`);
-a run counts as done once both files hold it.
+a run counts as done once both files hold it. `--granularity sofc_both` does the
+same for SOFC-Exp's two levels: its slot types (`sofc_slot`, the 'fine' head)
+and its entity types (`sofc`, the 'coarse' head), which tag the same sentences;
+there the official split by article serves both (`--published-split`).
 
 `--label-semantics` (with `--crf`; ROADMAP §4, week-3 protocol, variant 2)
 replaces the linear token classifier by a label-semantic head: the score of B-X
@@ -137,6 +140,8 @@ Usage:
       --self-train data/processed/corpus/fatigue_sentences.txt --self-train-sample 0
   python ner_baseline.py --leave-one-paper-out --crf --entity-bias 0.5 1 2 --save-predictions
   python ner_baseline.py --leave-two-papers-out --crf --entity-bias 0.5 1 2   # inner folds
+  python ner_baseline.py --granularity sofc_slot --published-split --crf    # SOFC-Exp slots
+  python ner_baseline.py --granularity sofc_both --published-split --crf --multi-task
   python ner_baseline.py --compare                                        # paired comparison
 """
 
@@ -160,15 +165,30 @@ import ner_label_text
 from config import PROCESSED_DIR, RAW_DIR
 
 PAPER_F1 = {'fine': 69.92, 'coarse': 72.32,
-            'sofc': None}       # SOFC-Exp (--granularity sofc): no published number of this kind
+            'sofc': None,       # SOFC-Exp (--granularity sofc): no published number of this kind
+            'sofc_slot': None}
 DEFAULT_MODEL = 'm3rg-iitd/matscibert'
+# SOFC-Exp's two levels of types on the same sentences: the 4 entity types ('sofc') and the
+# slot types ('sofc_slot'), of which those that its authors' evaluation scores are kept (the
+# experiment-evoking word, the EXPERIMENT entity under another name, and the one
+# interconnect_material become O)
+SOFC = ('sofc', 'sofc_slot')
+SOFC_SLOT_TYPES = ('anode_material', 'cathode_material', 'conductivity', 'current_density',
+                   'degradation_rate', 'device', 'electrolyte_material', 'fuel_used',
+                   'interlayer_material', 'open_circuit_voltage', 'power_density', 'resistance',
+                   'support_material', 'thickness', 'time_of_operation', 'voltage',
+                   'working_temperature')
+# --granularity both / sofc_both: a dataset's two levels, the finer first (the multi-task
+# heads 'fine' and 'coarse' of --multi-task)
+GRANULARITY_PAIRS = {'both': ('fine', 'coarse'), 'sofc_both': ('sofc_slot', 'sofc')}
 
 
 def load_split_corpus(granularity):
     """[(tokens, tags, doc_id)] for one granularity (files read separately); 'sofc' is the
-    SOFC-Exp corpus (data/raw/dataset/sofc_exp, sofc_exp.py), one CoNLL file per article."""
+    SOFC-Exp corpus (data/raw/dataset/sofc_exp, sofc_exp.py), one CoNLL file per article,
+    and 'sofc_slot' its slot tags on the same sentences (data/raw/dataset/sofc_exp_slot)."""
     folder = {'fine': 'fine_grained_ner', 'coarse': 'coarse_grained_ner',
-              'sofc': 'sofc_exp'}[granularity]
+              'sofc': 'sofc_exp', 'sofc_slot': 'sofc_exp_slot'}[granularity]
     datadir = os.path.join(RAW_DIR, folder)
     data = []
     for fn in sorted(f for f in os.listdir(datadir) if f.endswith('.conll')):
@@ -193,15 +213,15 @@ PUBLISHED_SPLIT_SHA256 = {
 
 def published_split(data, granularity):
     """([train, val, test positions in `data`], data with the release's tags) of the
-    published split of a granularity (--published-split). For SOFC-Exp ('sofc') it is the
-    official split by article, with the corpus's own tags.
+    published split of a granularity (--published-split). For SOFC-Exp ('sofc', 'sofc_slot')
+    it is the official split by article, with the corpus's own tags.
 
     The release files must have their recorded SHA-256, and each of their sentences must be
     a sentence of `data` (the same words), each used once, so that the three parts cover
     the corpus. Every sentence then takes the release's tags; the parts keep the order of
     the files.
     """
-    if granularity == 'sofc':
+    if granularity in SOFC:
         # SOFC-Exp: the official split by article (split.json; train, dev and test)
         with open(os.path.join(RAW_DIR, 'sofc_exp', 'split.json')) as f:
             split = json.load(f)
@@ -362,10 +382,10 @@ def part_contexts(data, part, full_texts=None):
 
 
 def load_full_texts(granularity):
-    """The whole texts for document context (part_contexts): SOFC-Exp's context.json, or
-    None (MaterioMiner, whose files hold every sentence of its papers)."""
+    """The whole texts for document context (part_contexts): SOFC-Exp's context.json (both
+    levels), or None (MaterioMiner, whose files hold every sentence of its papers)."""
     path = os.path.join(RAW_DIR, 'sofc_exp', 'context.json')
-    if granularity != 'sofc' or not os.path.exists(path):
+    if granularity not in SOFC or not os.path.exists(path):
         return None
     with open(path, encoding='utf-8') as f:
         return json.load(f)
@@ -1605,7 +1625,7 @@ F1_AVERAGES = {
 # part is absent for the fixed split, the variant part for the baseline. The protocol
 # is tried first, so the baseline file of a protocol never reads as a variant named
 # like the protocol.
-RESULT_FILE = re.compile(r'ner_results_(fine|coarse|sofc)'
+RESULT_FILE = re.compile(r'ner_results_(fine|coarse|sofc_slot|sofc)'
                          r'(?:_(random_split_vary|leave_one_paper_out|leave_two_papers_out|'
                          r'published_split))?'
                          r'(?:_([a-z0-9_]+))?\.json')
@@ -1914,15 +1934,28 @@ def held_out_papers(docs, papers):
 def granularity_data(granularity, args):
     """(data, labels, tie info) of a granularity, tags of the classes not kept mapped to O.
 
-    Fine: the --top-k classes; coarse: all types.
+    Fine: the --top-k classes; SOFC-Exp's slots: SOFC_SLOT_TYPES; otherwise all types.
     """
     data = load_split_corpus(granularity)
     labels, tie_info = select_labels(data, args.top_k if granularity == 'fine' else None)
+    if granularity == 'sofc_slot':
+        labels = [t for t in labels if t in SOFC_SLOT_TYPES]
     keep = set(labels)
     data = [(t, restrict_tags(g, keep), d) for t, g, d in data]
     if getattr(args, 'published_split', False):
         _, data = published_split(data, granularity)      # the release's tags
     return data, labels, tie_info
+
+
+def granularities_of(args):
+    """The granularities that --granularity names: one, or a dataset's two levels."""
+    return list(GRANULARITY_PAIRS.get(args.granularity, (args.granularity,)))
+
+
+def head_granularities(args):
+    """{multi-task head: its granularity}: MaterioMiner's fine and coarse levels, or SOFC-Exp's
+    slots ('fine' head) and entity types ('coarse' head)."""
+    return dict(zip(MT_HEADS, GRANULARITY_PAIRS[args.granularity]))
 
 
 def protocol_name(args):
@@ -2013,7 +2046,7 @@ def run(args):
     if hasattr(args, 'teachers'):
         run_teachers(args, out_dir)
         return
-    granularities = ['fine', 'coarse'] if args.granularity == 'both' else [args.granularity]
+    granularities = granularities_of(args)
     tasks = {g: granularity_data(g, args) for g in granularities}
     semantics = getattr(args, 'label_semantics', False)
     descriptions = {g: label_descriptions(g, tasks[g][1]) if semantics else None
@@ -2126,22 +2159,23 @@ def run_multitask(args, out_dir):
     training and written after every run; a run_id counts as done only if both
     files hold it.
     """
+    gran = head_granularities(args)
     data, labels, ties = {}, {}, {}
     for head in MT_HEADS:
-        data[head], labels[head], ties[head] = granularity_data(head, args)
+        data[head], labels[head], ties[head] = granularity_data(gran[head], args)
     check_aligned(data['fine'], data['coarse'])
     semantics = getattr(args, 'label_semantics', False)
     descriptions = ({head: label_descriptions(head, labels[head]) for head in MT_HEADS}
                     if semantics else None)
-    paths = {head: results_path(out_dir, head, args) for head in MT_HEADS}
+    paths = {head: results_path(out_dir, gran[head], args) for head in MT_HEADS}
     check_results_files(args, [(paths[head], labels[head]) for head in MT_HEADS])
     device = torch_device(args)
     environment = run_environment(device)
     os.makedirs(out_dir, exist_ok=True)
     protocol, variant, config = protocol_name(args), variant_name(args), stored_config(args)
-    results = {head: {'granularity': head, 'protocol': protocol, 'variant': variant,
+    results = {head: {'granularity': gran[head], 'protocol': protocol, 'variant': variant,
                       'model': args.model, 'labels': labels[head], 'label_tie': ties[head],
-                      'paper_test_f1': PAPER_F1[head], 'config': dict(config),
+                      'paper_test_f1': PAPER_F1[gran[head]], 'config': dict(config),
                       'runs': resumable_runs(paths[head], labels[head], args.model, variant,
                                              args.seed_offset, args.save_predictions)}
                for head in MT_HEADS}
@@ -2158,8 +2192,9 @@ def run_multitask(args, out_dir):
                 json.dump(results[head], f, indent=2)
 
     offset = f", seed offset {args.seed_offset}" if args.seed_offset else ''
-    print(f"\n=== NER multi-task: {len(data['fine'])} sentences, {len(labels['fine'])} fine and "
-          f"{len(labels['coarse'])} coarse classes, protocol {protocol}, variant {variant}"
+    print(f"\n=== NER multi-task: {len(data['fine'])} sentences, {len(labels['fine'])} "
+          f"{gran['fine']} and {len(labels['coarse'])} {gran['coarse']} classes, protocol "
+          f"{protocol}, variant {variant}"
           f"{offset}, device {device} ===")
     for head in MT_HEADS:
         if ties[head]:
@@ -2168,14 +2203,16 @@ def run_multitask(args, out_dir):
             print(f"  {head} label descriptions: sha256 "
                   f"{results[head]['config']['label_descriptions_sha256'][:12]}")
 
-    folds = make_folds(data['fine'], args, indices=True)     # parts as corpus positions
+    folds = make_folds(data['fine'], args, indices=True,     # parts as corpus positions
+                       granularity=gran['fine'])
     if folds is None:
         folds = []
         for seed in args.seeds:
             split_seed = seed if args.vary_split else args.split_seed
             folds.append((f'seed{seed}', *random_split(len(data['fine']), split_seed)))
     # the published numbers are in-distribution; no reference for held-out papers
-    ref = {h: '' if held_out_protocol(args) else f" (paper {PAPER_F1[h]})" for h in MT_HEADS}
+    ref = {h: f" (paper {PAPER_F1[gran[h]]})" if PAPER_F1[gran[h]] and not
+           held_out_protocol(args) else '' for h in MT_HEADS}
     for run_id, tr, va, te in folds:
         if run_id in done:
             print(f"  {run_id}: already done, skipping")
@@ -2183,7 +2220,7 @@ def run_multitask(args, out_dir):
         if args.max_train:
             tr = tr[:args.max_train]
         parts = {h: tuple([data[h][i] for i in part] for part in (tr, va, te)) for h in MT_HEADS}
-        contexts = ({h: {name: part_contexts(data[h], part, load_full_texts(h))
+        contexts = ({h: {name: part_contexts(data[h], part, load_full_texts(gran[h]))
                          for name, part in (('train', tr), ('val', va), ('test', te))}
                      for h in MT_HEADS} if getattr(args, 'context', 0) else None)
         seed = int(run_id[4:]) if run_id.startswith('seed') else args.seeds[0]
@@ -2224,7 +2261,7 @@ def run_teachers(args, out_dir):
     trains the teachers and the students that its run_id lacks; only the files that got
     a new student are written, after every run.
     """
-    granularities = ['fine', 'coarse'] if args.granularity == 'both' else [args.granularity]
+    granularities = granularities_of(args)
     tasks = {g: granularity_data(g, args) for g in granularities}
     sample, corpus = self_training_corpus(args.self_train, getattr(args, 'self_train_sample',
                                                                    SELF_TRAIN_SAMPLE))
@@ -2320,9 +2357,10 @@ def run_mt_teachers(args, out_dir):
     student counts as done only if both of its files hold the run, and a run trains the
     teachers and the students that its run_id lacks.
     """
+    gran = head_granularities(args)
     data, labels, ties = {}, {}, {}
     for head in MT_HEADS:
-        data[head], labels[head], ties[head] = granularity_data(head, args)
+        data[head], labels[head], ties[head] = granularity_data(gran[head], args)
     check_aligned(data['fine'], data['coarse'])
     sample, corpus = self_training_corpus(args.self_train, getattr(args, 'self_train_sample',
                                                                    SELF_TRAIN_SAMPLE))
@@ -2330,7 +2368,7 @@ def run_mt_teachers(args, out_dir):
     student_offsets = teacher_offsets(getattr(args, 'students', args.teachers))
     views = {off: SimpleNamespace(**{**vars(args), 'tag': f'm{off}', 'seed_offset': off})
              for off in student_offsets}
-    paths = {(h, off): results_path(out_dir, h, view) for off, view in views.items()
+    paths = {(h, off): results_path(out_dir, gran[h], view) for off, view in views.items()
              for h in MT_HEADS}
     for off, view in views.items():
         check_results_files(view, [(paths[h, off], labels[h]) for h in MT_HEADS],
@@ -2344,8 +2382,9 @@ def run_mt_teachers(args, out_dir):
         variant = variant_name(view)
         for h in MT_HEADS:
             results[h, off] = {
-                'granularity': h, 'protocol': protocol, 'variant': variant, 'model': args.model,
-                'labels': labels[h], 'label_tie': ties[h], 'paper_test_f1': PAPER_F1[h],
+                'granularity': gran[h], 'protocol': protocol, 'variant': variant,
+                'model': args.model, 'labels': labels[h], 'label_tie': ties[h],
+                'paper_test_f1': PAPER_F1[gran[h]],
                 'config': {**stored_config(view), **corpus},
                 'runs': resumable_runs(paths[h, off], labels[h], args.model, variant, off,
                                        args.save_predictions, corpus['self_train_sha256'])}
@@ -2365,7 +2404,7 @@ def run_mt_teachers(args, out_dir):
           f"{len(student_offsets)} students, device {device} ===")
     print(f"  self-training: {len(sample)} sentences sampled from {corpus['self_train']} "
           f"(sha256 {corpus['self_train_sha256'][:12]})")
-    folds = make_folds(data['fine'], args, indices=True)
+    folds = make_folds(data['fine'], args, indices=True, granularity=gran['fine'])
     if folds is None:
         folds = []
         for seed in args.seeds:
@@ -2418,10 +2457,12 @@ def tag_name(value):
 
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(description='MatSciBERT NER baseline')
-    parser.add_argument('--granularity', choices=['fine', 'coarse', 'both', 'sofc'],
+    parser.add_argument('--granularity', choices=['fine', 'coarse', 'both', 'sofc',
+                                                  'sofc_slot', 'sofc_both'],
                         default='both',
                         help="MaterioMiner's fine or coarse labels, or both; sofc: the SOFC-Exp "
-                             "corpus (sofc_exp.py), its four entity types")
+                             "corpus (sofc_exp.py), its four entity types; sofc_slot: its slot "
+                             "types; sofc_both: both SOFC-Exp levels")
     parser.add_argument('--seeds', type=int, nargs='+', default=[0, 1, 2, 3, 4])
     parser.add_argument('--split-seed', type=int, default=0)
     parser.add_argument('--vary-split', action='store_true',
@@ -2541,6 +2582,8 @@ def parse_args(argv=None):
                              f"--{option.replace('_', '-')}")
     if getattr(args, 'published_split', False):
         for option in ('vary_split', 'leave_one_paper_out', 'multi_task'):
+            if option == 'multi_task' and args.granularity == 'sofc_both':
+                continue                  # SOFC-Exp: one split by article for both levels
             if getattr(args, option, False):
                 parser.error(f"--published-split is not available with "
                              f"--{option.replace('_', '-')} (its fine-grained and "
@@ -2553,6 +2596,8 @@ def parse_args(argv=None):
     if getattr(args, 'label_semantics', False):
         if not args.crf:
             parser.error('--label-semantics needs --crf (its scores are the CRF emissions)')
+        if args.granularity in (*SOFC, 'sofc_both'):
+            parser.error('--label-semantics has descriptions of the MaterioMiner types only')
     if getattr(args, 'self_train', None) is not None:
         if not args.crf:
             parser.error('--self-train needs --crf (silver sentences are chosen by CRF marginals)')
@@ -2605,9 +2650,9 @@ def parse_args(argv=None):
     if getattr(args, 'multi_task', False):
         if not args.crf:
             parser.error('--multi-task needs --crf (a CRF head per granularity)')
-        if args.granularity != 'both':
+        if args.granularity not in GRANULARITY_PAIRS:
             parser.error('--multi-task trains the fine and the coarse head together: '
-                         '--granularity must be both (the default)')
+                         '--granularity must be both (the default) or sofc_both')
     # neither the tag nor the name in a seed tag (mt of mt_m100) may give a plain variant:
     # --crf --tag mt would write over crf_mt, --crf --tag mt_m100 over the multi-task crf_mt_m100
     stem = SimpleNamespace(**{**vars(args), 'tag': args.tag.split('_')[0]}) if args.tag else None
