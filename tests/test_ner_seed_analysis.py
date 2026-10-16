@@ -1,5 +1,6 @@
 """Exploratory analyses of the week-5 10-seed runs (ner_seed_analysis.py). Pure Python; the
 tests that compute a confidence interval need scipy and skip without it."""
+import itertools
 import json
 
 import pytest
@@ -294,3 +295,28 @@ def test_sofc_splits_random_against_article_folds(tmp_path):
     assert out['random_split_vary']['crf_votes']['micro']['mean'] == pytest.approx(66.67)
     (tmp_path / 'ner_results_sofc_document_folds_crf_m900.json').unlink()
     assert set(sa.sofc_splits(tmp_path)) == {'random_split_vary'}
+
+
+def test_paper_count_compares_two_and_three_training_papers(tmp_path):
+    """A third training paper: per held-out paper, F1 trained on 2 papers (the inner folds'
+    counts at D = 0) against F1 trained on 3 (leave-one-paper-out), over the 4 papers."""
+    pytest.importorskip('scipy')
+    papers = ['a.conll', 'b.conll', 'c.conll', 'd.conll']
+    for off in (0, 100, 200):
+        folds = [{'run_id': f'{p}+{q}', 'bias_test': {'0': {p: [4, 10, 10], q: [5, 10, 10]}}}
+                 for p, q in itertools.combinations(papers, 2)]
+        (tmp_path / f'ner_results_fine_leave_two_papers_out_crf_bias_m{off}.json').write_text(
+            json.dumps({'runs': folds}))
+        lopo = [_run(p, 50.0 + 10 * k) for k, p in enumerate(papers)]
+        (tmp_path / f'ner_results_fine_leave_one_paper_out_crf_m{off}.json').write_text(
+            json.dumps({'runs': lopo}))
+    out = sa.paper_count(tmp_path)
+    assert set(out) == {'fine'}
+    # paper a is the first of its 3 pairs (F1 40 each time), d the second (50); b is first
+    # in 2 of its pairs (40, 40, 50), c in 1 (50, 50, 40)
+    assert {p: r['two'] for p, r in out['fine']['papers'].items()} == {
+        'a.conll': 40.0, 'b.conll': 43.33, 'c.conll': 46.67, 'd.conll': 50.0}
+    assert out['fine']['papers']['a.conll'] == {'two': 40.0, 'three': 50.0, 'n_two': 9,
+                                                'n_three': 3}
+    assert out['fine']['three']['mean'] == 65.0
+    assert out['fine']['three_minus_two']['mean_diff'] == pytest.approx(65.0 - 45.0)

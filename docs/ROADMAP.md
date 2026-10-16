@@ -372,6 +372,18 @@ once.
 - Strict F1 stays the decision metric; the looser criteria are reported
   alongside, as SemEval-2013 did.
 
+**A third training paper** (exploratory, 16 October; `ner_seed_analysis.py`,
+`paper_count`, no GPU; claim C19). Week 7's inner folds (part 2a) trained
+the CRF head on two papers; their counts at D = 0 give its F1 on each
+held-out paper with two training papers, against the leave-one-paper-out
+runs with three (seeds 0–200 on both sides):
+- fine-grained 39.02 → 46.38, +7.36 [+1.98, +12.74]; coarse-grained 50.37 →
+  59.27, +8.90 [+5.90, +11.90]; every paper gains (+3.2 to +11.6);
+- a third paper also brings more sentences, so this is a paper with its
+  sentences, not diversity alone;
+- it matches the largest method gain on unseen papers so far (multi-task
+  self-training's screen, +6.06 fine-grained).
+
 Next, after week 5, in this order. The aim is a methods paper (§4, week 6),
 with an evaluation paper if every option fails:
 1. **Methods for unseen papers: screen, then decide with 10 seeds.**

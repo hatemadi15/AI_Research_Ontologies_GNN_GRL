@@ -41,6 +41,13 @@ votes (ner_seedmeans.WEEK5_SYSTEMS) and writes ner_week5_seed_analysis.json next
     method with all 10 seeds on the 4 held-out papers against the CRF head, per entity type:
     the F1 of both, paired by seed offset and paper over the pairs whose test set has the
     type, and their mean difference.
+  - paper_count (exploratory): what a third training paper is worth on an unseen paper. Per
+    granularity and held-out paper P, the CRF head's F1 on P trained on the 3 other papers
+    (crf_m0 to _m200, leave-one-paper-out) and on 2 of them (the inner folds of week 7, part
+    2a, --leave-two-papers-out with seeds 0 to 200: each fold that tests P trains on the 2
+    papers other than P and its partner; the counts at D = 0), each the mean over its runs,
+    and their difference with its mean and 95% CI over the 4 papers. Three papers also hold
+    more sentences than two, so this is the value of a third paper with its sentences.
   - sofc_splits (week 8, part 1; descriptive): SOFC-Exp beyond its official split. Per
     protocol, its 5 random sentence splits and its 5 article folds (--document-folds 5), the
     CRF head's 10-seed mean per split under every F1 average, with the mean and 95% CI over
@@ -61,9 +68,9 @@ from pathlib import Path
 import metrics
 import ner_ensemble
 from ner_baseline import F1_AVERAGES
-from ner_seedmeans import (GRANULARITIES, LOPO, PROTOCOLS, WEEK5_OFFSETS, WEEK5_SYSTEMS,
-                           WEEK5_TRIPLES, WEEK6_METHODS, file_names, seed_family, spread,
-                           system_scores)
+from ner_seedmeans import (GRANULARITIES, LOPO, PROTOCOLS, SCREEN_OFFSETS, WEEK5_OFFSETS,
+                           WEEK5_SYSTEMS, WEEK5_TRIPLES, WEEK6_METHODS, file_names, seed_family,
+                           spread, system_scores)
 
 RESULTS_DIR = Path(__file__).resolve().parents[2] / 'results' / 'gpu'
 OUT_NAME = 'ner_week5_seed_analysis.json'
@@ -309,6 +316,38 @@ def published_split(directory):
     return out
 
 
+def paper_count(directory):
+    """The paper_count section (see the module docstring); granularities without all the files
+    are left out."""
+    out = {}
+    for g in GRANULARITIES:
+        two = load_files(directory, [f'ner_results_{g}_leave_two_papers_out_crf_bias_m{off}.json'
+                                     for off in SCREEN_OFFSETS])
+        three = load_files(directory, [f'ner_results_{g}_{LOPO}_crf_m{off}.json'
+                                       for off in SCREEN_OFFSETS])
+        if not two or not three:
+            continue
+        f1 = {'two': {}, 'three': {}}
+        for f in two:
+            for run in f['runs']:
+                for paper, (correct, pred, gold) in run['bias_test']['0'].items():
+                    f1['two'].setdefault(paper, []).append(
+                        200 * correct / (pred + gold) if pred + gold else 0.0)
+        for f in three:
+            for run in f['runs']:
+                f1['three'].setdefault(run['run_id'], []).append(run['f1'])
+        papers = sorted(set(f1['two']) & set(f1['three']))
+        rows = {p: {k: round(statistics.mean(f1[k][p]), 2) for k in ('two', 'three')}
+                for p in papers}
+        out[g] = {'papers': {p: {**r, 'n_two': len(f1['two'][p]),
+                                 'n_three': len(f1['three'][p])} for p, r in rows.items()},
+                  'two': spread([r['two'] for r in rows.values()]),
+                  'three': spread([r['three'] for r in rows.values()]),
+                  'three_minus_two': spread([r['three'] - r['two'] for r in rows.values()],
+                                            'mean_diff')}
+    return out
+
+
 def sofc_splits(directory):
     """The sofc_splits section (see the module docstring); protocols without all 10 seed files
     of the CRF head are left out, the votes too without their predictions."""
@@ -358,6 +397,7 @@ def analyse(directory):
     out['published_split'] = published_split(directory)
     out['week6_types'] = week6_type_differences(directory)
     out['sofc_splits'] = sofc_splits(directory)
+    out['paper_count'] = paper_count(directory)
     out['errors'] = {}
     for protocol in PROTOCOLS:
         for g in GRANULARITIES:
@@ -396,6 +436,11 @@ def main(argv=None):
             print(f"    plain MatSciBERT on the retokenized test articles: {m['micro']['mean']:.2f} "
                   f"{m['micro']['ci95']}, minus plain MatSciBERT {d['mean_diff']:+.2f} "
                   f"{d['ci95']} over {m['n_pairs']} seeds")
+    for g, entry in result['paper_count'].items():
+        d = entry['three_minus_two']
+        print(f"  {g}-grained, an unseen paper: trained on 2 papers {entry['two']['mean']:.2f}, "
+              f"on 3 {entry['three']['mean']:.2f}; the third paper {d['mean_diff']:+.2f} "
+              f"{d['ci95']}")
     for protocol, entry in result['sofc_splits'].items():
         if protocol != 'gap':
             print(f"  SOFC-Exp, {protocol}: the CRF head {entry['micro']['mean']:.2f} "

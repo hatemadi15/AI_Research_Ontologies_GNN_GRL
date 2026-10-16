@@ -140,6 +140,12 @@ Week 7, part 2a (recall calibration; Kaggle session `w7a` of 16 October):
   never used to choose).
 - `_crf_eb_ens3*` are the votes over the seed triples.
 
+`gpu/ner_week5_seed_analysis.json` also holds `paper_count` (claim C19): per
+held-out paper, the CRF head's F1 trained on two papers (the inner folds'
+counts at D = 0) and on three (leave-one-paper-out), seeds 0 to 200, and
+their difference over the 4 papers; and `sofc_splits` (week 8, part 1), empty
+until its runs come in.
+
 Seen and unseen test names (exploratory, no training; claim C17 of
 `docs/PAPER.md`): `gpu/ner_mentions.json` (`ner_mentions.py`) splits the gold
 test entities of every stored run with predictions by whether their exact

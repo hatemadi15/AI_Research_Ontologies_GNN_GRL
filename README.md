@@ -676,7 +676,9 @@ stands (ROADMAP §4, weeks 6 and 7):
    of SemEval-2013 Task 9.1), the model finds almost every coarse-grained
    entity of a new paper (overlap F1 90.7 against 93.4 on random splits);
    most of the strict gap lies in span boundaries and types that the
-   papers' annotators set differently.
+   papers' annotators set differently. And a third training paper adds
+   +7.4 (fine) and +8.9 (coarse) F1 on an unseen paper, as much as the best
+   method so far.
 5. Then the combinations of the methods that pass, and the rare
    coarse-grained types that keep macro F1 down.
 

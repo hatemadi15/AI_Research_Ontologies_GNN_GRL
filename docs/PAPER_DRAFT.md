@@ -8,7 +8,7 @@ Section 6 (methods for unseen papers), recall calibration is decided (no
 gain, C15). The others wait for their runs: stage 2 of multi-task
 self-training, mention replacement and multi-task training on SOFC-Exp's
 two levels (ROADMAP §4, weeks 6 and 7). The numbers come from `results/`
-through the claims table of `docs/PAPER.md` (C1–C18). References are keys of `docs/references.bib`.
+through the claims table of `docs/PAPER.md` (C1–C19). References are keys of `docs/references.bib`.
 
 ---
 
@@ -327,6 +327,16 @@ Part of what looks like a failure to generalise is a difference in
 annotation conventions between papers, which a model trained on other
 papers cannot learn. We report strict F1 for comparison with published
 numbers and the looser criteria alongside.
+
+**5.10 What one more paper is worth (C19).** The inner folds of Section
+6.2 train the CRF head on two papers. On each held-out paper, training on
+all three other papers instead adds +7.36 [+1.98, +12.74] F1 fine-grained
+(39.02 to 46.38) and +8.90 [+5.90, +11.90] coarse-grained (50.37 to 59.27),
+over 4 papers and seeds 0–200; every paper gains, from +3.2 to +11.6. A
+third paper also brings more sentences, so this is the value of a paper
+with its sentences. It matches the largest method gain measured on unseen
+papers (multi-task self-training's screen, +6.06 fine-grained): for
+materials NER on new papers, annotating more papers is the lever to beat.
 
 ## 6 Methods for unseen papers (pending)
 
