@@ -1305,6 +1305,29 @@ October, then 30 hours):
   DeBERTa, 2.5 for document context and 4.5 for multi-task self-training on
   the papers, and about 3.5 for DeBERTa on SOFC-Exp.
 
+**Amendment, after the screen and before any run of it: document context
+on SOFC-Exp.** The screen sends document context to stage 2 (fine-grained
++2.66 against the CRF head), so it gets S2. SOFC-Exp annotates 876 of the
+9,466 sentences of its 45 articles, so the context comes from the article
+texts, as fixed above:
+- `data/raw/dataset/sofc_exp/context.json` (`sofc_exp.py`): every sentence
+  of each article, cut from the release's token files, and the positions of
+  its annotated sentences, whose words must equal those of the corpus;
+- `--context 64` takes an article's context from its whole text when all its
+  annotated sentences are in the part (train, validation or test), which
+  holds for every article of the official split; otherwise, as on
+  MaterioMiner, from the annotated sentences of the same part.
+
+S2 for document context: `--context 64` against the CRF head of session b
+on the official split, model seeds 0 to 900, paired by seed, under the rule
+below. The code for the article texts came after the protocol, so these
+runs (`w6c:sofc-ctx`) use a later frozen commit, the one that adds this
+amendment. That commit changes nothing else that a run executes (it also
+adds mention replacement, an option for week 7, off unless asked for). Its
+session first repeats the week-4 run, then session b's SOFC-Exp CRF run of
+seed 0 (`smoket`); both must be identical. Every other week-6 run keeps the
+frozen week-6 commit. About 1.5 GPU-hours.
+
 **Later (not week 6):** the random splits for the methods that pass,
 combinations of the methods that pass (week 7), and the rare coarse-grained
 types.

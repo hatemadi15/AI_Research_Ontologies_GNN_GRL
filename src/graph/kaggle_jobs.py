@@ -71,7 +71,9 @@ smoke4 again):
   w6c:M   stage 2 for the methods M (comma-separated): deberta and ctx add seed offsets 300
           to 900 on the held-out papers; mtst trains 10 students per paper (one lane);
           sofc-deberta and sofc-ctx run the method on SOFC-Exp's official split, model seeds
-          0 to 900. E.g. w6c:deberta,mtst
+          0 to 900. E.g. w6c:deberta,mtst. sofc-ctx runs from the later commit of the
+          week-6 amendment, so its session also repeats session b's SOFC-Exp CRF run of
+          seed 0 (smoket), the reference of its runs
 
 Usage:
   python src/graph/kaggle_jobs.py quota
@@ -343,7 +345,12 @@ def batch_lanes(name):
         costed += [(10 * COST['ctx'] * 3, published_job('sofc', '--crf', '--context', '64'))
                    for m in methods if m == 'sofc-ctx']
         lanes = balance(costed, loads=[1.0, 70.0 * len(fixed)])
-        return [[repeat + ['--tag', 'smokes']] + lanes[0], fixed + lanes[1]]
+        first = [repeat + ['--tag', 'smokes']]
+        if 'sofc-ctx' in methods:
+            # the amendment's later commit must give session b's SOFC-Exp CRF run again
+            first.append(['--granularity', 'sofc', '--published-split', '--seeds', '0', '--crf',
+                          '--tag', 'smoket', '--save-predictions', '--threads', str(THREADS)])
+        return [first + lanes[0], fixed + lanes[1]]
     raise ValueError(f'unknown batch {name!r}')
 
 

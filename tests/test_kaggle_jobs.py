@@ -249,9 +249,13 @@ def test_week6_stage2_batches(monkeypatch, capsys):
     (repeat,), (sofc,) = _parsed(kj.batch_lanes('w6c:sofc-deberta'))
     assert (nb.variant_name(sofc), sofc.granularity, sofc.published_split, sofc.model) == (
         'crf_deberta', 'sofc', True, kj.DEBERTA)
-    (_,), (ctx,) = _parsed(kj.batch_lanes('w6c:sofc-ctx'))
+    (_, again), (ctx,) = _parsed(kj.batch_lanes('w6c:sofc-ctx'))
     assert (nb.variant_name(ctx), _get(ctx, 'context'), ctx.seeds) == (
         'crf_ctx', 64, list(range(0, 1000, 100)))
+    # the later commit of the amendment repeats the reference run of seed 0 (session b)
+    assert (nb.variant_name(again), again.granularity, again.published_split, again.seeds,
+            _get(again, 'context', 0)) == ('crf_smoket', 'sofc', True, [0], 0)
+    assert len(kj.batch_lanes('w6c:sofc-deberta')[0]) == 1      # no repeat without sofc-ctx
     for bad in ('w6c:', 'w6c:foo', 'w6c:mtst,mtst', 'w6d'):
         with pytest.raises(SystemExit):
             kj.main(['--user', 'someone', 'push', '--batch', bad])
