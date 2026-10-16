@@ -95,6 +95,11 @@ CRF run of smoke4):
   w7c     the screen: crf_mr_m0 to _m200 on the held-out papers, both granularities (smokey)
   w7d     stage 2: seed offsets 300 to 900 on the held-out papers, and SOFC-Exp's official
           split with model seeds 0 to 900 (S2), balanced over the lanes (smokez)
+Week 7, part 2e (SOFC-Exp's test tokens):
+  w7e     the CRF run of smoke4 again (smokeac) and session b's SOFC-Exp CRF run of seed 0
+          (smokead); then the CRF head (lane 0) and plain MatSciBERT (lane 1) on the official
+          split, model seeds 0 to 900, scored on the test articles cut into words as the
+          training articles are (--retokenized-test, variants crf_cdetest and cdetest)
 
 Usage:
   python src/graph/kaggle_jobs.py quota
@@ -426,6 +431,15 @@ def batch_lanes(name):
         lanes = balance(costed, loads=[COST['crf'], 0.0])
         smoke = 'smokey' if name == 'w7c' else 'smokez'
         return [[repeat + ['--tag', smoke]] + lanes[0], lanes[1]]
+    if name == 'w7e':
+        # week 7, part 2e: SOFC-Exp's test articles cut as its training articles are; the
+        # runs train as session b's (their training must equal it, seed by seed)
+        sofc_repeat = ['--granularity', 'sofc', '--published-split', '--seeds', '0', '--crf',
+                       '--tag', 'smokead', '--save-predictions', '--threads', str(THREADS)]
+        retokenized = ('--retokenized-test', '--tag', 'cdetest')
+        return [[repeat + ['--tag', 'smokeac'], sofc_repeat,
+                 published_job('sofc', '--crf', *retokenized)],
+                [published_job('sofc', *retokenized)]]
     if name == 'w7a':
         # week 7, part 2a: recall calibration. An inner job is the 6 folds of a seed, each
         # trained on two papers (about 4 CRF runs); no predictions, the counts suffice
@@ -446,7 +460,7 @@ def batch_lanes(name):
 
 BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'item3r',
            'smoke4', 'w5a', 'w5b', 'w5c', 'smoke5', 'smoke6', 'w6a', 'w6b', 'w7a', 'w7b',
-           'w7c', 'w7d')
+           'w7c', 'w7d', 'w7e')
 
 
 def batch_extras(name):

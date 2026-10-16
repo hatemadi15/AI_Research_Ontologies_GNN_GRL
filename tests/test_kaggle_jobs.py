@@ -615,3 +615,18 @@ def test_run_jobs_places_the_sofc_corpus_only_when_asked(tmp_path):
         rj.place_sofc_corpus({'sofc_corpus_sha256': '0' * 64}, inputs, repo)
     with pytest.raises(FileNotFoundError):
         rj.place_sofc_corpus({'sofc_corpus_sha256': digest}, tmp_path / 'empty', repo)
+
+
+def test_week7_retokenized_test_batch(monkeypatch):
+    """w7e (part 2e): two repeats, then the CRF head and plain MatSciBERT on SOFC-Exp's
+    official split, 10 model seeds, scored on the retokenized test articles."""
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda report=None: 'x' * 64)
+    lane0, lane1 = _parsed(kj.batch_lanes('w7e'))
+    assert [a.tag for a in lane0[:2]] == ['smokeac', 'smokead']
+    assert not _get(lane0[1], 'retokenized_test') and lane0[1].granularity == 'sofc'
+    runs = lane0[2:] + lane1
+    assert sorted(nb.variant_name(a) for a in runs) == ['cdetest', 'crf_cdetest']
+    for a in runs:
+        assert (a.granularity, a.seeds) == ('sofc', list(range(0, 1000, 100)))
+        assert a.retokenized_test and a.published_split and a.save_predictions
+    assert kj.batch_name('w7e') == 'w7e' and 'sofc_corpus_sha256' not in kj.batch_spec('w7e')

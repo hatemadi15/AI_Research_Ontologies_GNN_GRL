@@ -892,7 +892,7 @@ chance at class level. For a Task C-style result:
 | 4 | Done for NER: P1 "Next, after week 3" items 1, 2, 3 and 5, i.e. votes over the week-3 changes that help, label semantics on the multi-task model, self-training at scale, on Kaggle T4 GPUs (protocol below). Not started: context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | Met for NER by two changes, both on unseen papers. Coarse-grained, the label-semantics vote improves on `crf_ens3` on the CPU (+1.63 [+0.11, +3.16]); the GPU repeat does not confirm it (+0.40 [−1.36, +2.16]). Fine-grained, self-training with 3 teachers improves on the CRF head (GPU, +1.07 [+0.33, +1.80]; +1.22 [+0.60, +1.84] on the random splits, reported). The multi-task vote and label semantics on the multi-task model do not pass. Typing: not started |
 | 5 | Done: NER, P1 "Next, after week 4" item 1, i.e. 10 seeds per split for the CRF reference, multi-task, label semantics and self-training with 3 teachers, on Kaggle T4 GPUs, and the published split (amendment); items 2–7 and a paper outline prepared, and the week-6 options run once each at full size (protocol below). The original week-5 work moves to week 7 | Met. Of the claims re-tested with 10 seeds, fine-grained multi-task on the random splits passes (+1.83 [+0.32, +3.34]); the coarse-grained claims of week 3 and the self-training claim of week 4 do not. The reported system: the multi-task vote coarse-grained on the random splits and fine-grained on unseen papers, `crf_ens3` elsewhere. On the published split, plain MatSciBERT reproduces 69.92 and 72.32 and the CRF head beats both |
 | 6 | In progress: NER, P1 "Next, after week 5", towards a methods paper: methods for unseen papers (DeBERTa-v3-large, document context, multi-task self-training) screened with 3 seeds and decided with 10, and a second dataset (SOFC-Exp, 10 seeds); protocol below. So far (P1, "Week 6 so far"): DeBERTa-v3-large stops at the screen; document context passes the screen but neither 10-seed decision; multi-task self-training passes the screen (+6.06 fine-grained), stage 2 next; on SOFC-Exp the CRF head improves on plain MatSciBERT (S1) | A method whose vote improves on the strongest system on unseen papers under the 10-seed design, and on SOFC-Exp |
-| 7 | In progress: NER, part 1, document-level label consistency for unseen papers, a post-processing rule on the saved predictions (no GPU; protocol below); part 2a, recall calibration (a bias on the CRF head's emissions, chosen on inner folds; done, no claim: the missed entities are not near the threshold); part 2b, mention replacement (screen, then 10 seeds if it passes; protocol below), and later the combinations of the methods that pass week 6, fixed after the week-6 decisions; part 2c, coarse-to-fine completion (done, no claim); part 2d, multi-task training on SOFC-Exp's two levels (protocol below). Then class-level taxonomy (LLM or cross-encoder + arborescence) and a relation annotation pilot | Part 1: the rule improves on the strongest system on unseen papers and on SOFC-Exp's CRF head. Taxonomy: first class-level F1 above chance; relation guidelines |
+| 7 | In progress: NER, part 1, document-level label consistency for unseen papers, a post-processing rule on the saved predictions (no GPU; protocol below); part 2a, recall calibration (a bias on the CRF head's emissions, chosen on inner folds; done, no claim: the missed entities are not near the threshold); part 2b, mention replacement (screen, then 10 seeds if it passes; protocol below), and later the combinations of the methods that pass week 6, fixed after the week-6 decisions; part 2c, coarse-to-fine completion (done, no claim); part 2d, multi-task training on SOFC-Exp's two levels (protocol below); part 2e, SOFC-Exp's test articles cut into words as its training articles are (protocol below). Then class-level taxonomy (LLM or cross-encoder + arborescence) and a relation annotation pilot | Part 1: the rule improves on the strongest system on unseen papers and on SOFC-Exp's CRF head. Taxonomy: first class-level F1 above chance; relation guidelines |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -2047,3 +2047,57 @@ Two checks that nothing else changed:
   with one or two teachers and extra students, and multi-task
   self-training.
 - The fatigue corpus rebuilds with the same SHA-256.
+
+### Week 7 protocol, part 2e: SOFC-Exp's test tokens (fixed before any run)
+
+**The question.** How much does the shift between SOFC-Exp's training and
+test tokens cost on its official split? The test articles are cut into
+words by Java's BreakIterator, the training articles by ChemDataExtractor
+(C16; the amendment above).
+
+**The data.** `sofc_exp.py --retokenized-test` writes
+`data/raw/dataset/sofc_exp_test_cde/`:
+- the 173 annotated sentences of the 11 test articles, the same text cut
+  into words by ChemDataExtractor's tokenizer; 140 of them are cut
+  differently from the release;
+- the entity tags carried over by character offsets: 978 entities;
+- 14 of them inexact: a boundary falls inside a word, so the entity takes
+  the whole words;
+- 2 of them lost: a word holds two entities, as `(PBMCo)-LSGM` does, and
+  only the first keeps it. The retokenized test has 976 gold entities.
+
+**Runs** (batch `w7e`, from the commit of this protocol): the CRF head
+(`--crf --retokenized-test --tag cdetest`) and plain MatSciBERT
+(`--retokenized-test --tag cdetest`), model seeds 0 to 900.
+- Training and validation are those of session b's runs, so the models are
+  session b's. Every run's training (best epoch and validation F1 per epoch)
+  must equal its session-b run: then only the test words differ.
+- The session first repeats the CRF run of smoke4 (`smokeac`) and session
+  b's SOFC-Exp CRF run of seed 0 (`smokead`).
+
+**Decisions** (the rule as before): per model, micro F1 on the retokenized
+test articles minus micro F1 on the released ones, paired by seed over the
+10 seeds:
+1. the CRF head: `crf_cdetest` against `crf`;
+2. plain MatSciBERT: `cdetest` against `baseline`.
+
+A CI above 0 means the shift costs that model F1 on the official split; a
+CI below 0, that the released words suit it better. 2 comparisons.
+
+**Reported:** strict, macro and weighted F1; per-type F1. The 2 lost
+entities: dropping 2 of 978 gold entities changes F1 by about 0.2 points
+at most.
+
+**Expected before the runs:** the words that differ are mostly inside
+MATERIAL and VALUE entities: formulas with charges, units and hyphenated
+names. A model trained on ChemDataExtractor's words should find their
+boundaries at least as well when the test articles are cut the same way,
+so the difference should be at least 0.
+
+**What a result changes.** Every SOFC-Exp comparison in this project
+pairs systems on the same test words, so no decision changes either way.
+A cost would mean that results on the official split, the published ones
+included, understate what the models do on consistently tokenized text.
+
+**Budget:** 20 runs of about 3.3 minutes, 10 per GPU: about 40 minutes of
+one session. It runs on kernel a after part 2b's batches.

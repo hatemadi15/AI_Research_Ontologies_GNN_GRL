@@ -98,6 +98,87 @@ def convert_document(corpus, doc, level='entity'):
     return out
 
 
+def entity_spans(tokens):
+    """[(begin, end, type)] of the entities of one sentence's [(begin, end, tag)] tokens
+    (BIO tags, character offsets)."""
+    spans = []
+    for begin, end, tag in tokens:
+        if tag.startswith('B-'):
+            spans.append([begin, end, tag[2:]])
+        elif tag.startswith('I-'):
+            spans[-1][1] = end
+    return [tuple(span) for span in spans]
+
+
+def retokenize_sentence(text, entities, tokenizer):
+    """(words, tags, counts) of a sentence's text cut by `tokenizer` (span_tokenize), with
+    the tags of its entities ([(begin, end, type)] in text order, offsets in `text`).
+
+    The words that overlap an entity, and no earlier one, take its type, the first B-.
+    counts: 'inexact', the entities whose begin or end falls inside a word or that share
+    a word with an earlier entity (they cover the words they get), and 'lost', those left
+    without a word (one word holds two entities, e.g. "(NiO)-yttria")."""
+    spans = list(tokenizer.span_tokenize(text))
+    tags = ['O'] * len(spans)
+    counts = Counter(inexact=0, lost=0)
+    for begin, end, kind in entities:
+        overlap = [k for k, (b, e) in enumerate(spans) if b < end and e > begin]
+        inside = [k for k in overlap if tags[k] == 'O']
+        if not inside:
+            counts['lost'] += 1
+            continue
+        counts['inexact'] += (inside != overlap or spans[inside[0]][0] != begin
+                              or spans[inside[-1]][1] != end)
+        for k in inside:
+            tags[k] = ('B-' if k == inside[0] else 'I-') + kind
+    return [text[b:e] for b, e in spans], tags, counts
+
+
+def retokenized_document(corpus, doc, tokenizer):
+    """(sentences, counts) of one document's annotated sentences cut into words by
+    `tokenizer`, the entity tags carried over by character offsets (retokenize_sentence):
+    [(words, tags)] in text order, and the entities, inexact and lost ones."""
+    corpus = Path(corpus)
+    text = (corpus / 'texts' / f'{doc}.txt').read_text(encoding='utf-8')
+    bounds = {sid: (int(begin), int(end)) for sid, _, begin, end in
+              read_rows(corpus / 'annotations' / 'sentences' / f'{doc}.csv')}
+    tokens = {}
+    for row in read_rows(corpus / 'annotations' / 'entity_types_and_slots' / f'{doc}.csv'):
+        sid, _, begin, end, tag = row[:5]
+        tokens.setdefault(sid, []).append((int(begin), int(end), tag))
+    out, counts = [], Counter()
+    for sid in sorted(tokens, key=lambda s: bounds[s][0]):
+        begin, end = bounds[sid]
+        entities = entity_spans(sorted(tokens[sid]))
+        words, tags, found = retokenize_sentence(text[begin:end], entities, tokenizer)
+        out.append((words, tags))
+        counts.update(found, entities=len(entities))
+    return out, counts
+
+
+def write_retokenized_test(corpus, out_dir, tokenizer=None):
+    """<doc>.conll of every test article of the official split, cut into words by
+    ChemDataExtractor's tokenizer (chem_tokenize; that of the training and development
+    articles), and stats.json; returns the stats."""
+    if tokenizer is None:
+        from chem_tokenize import ChemWordTokenizer
+        tokenizer = ChemWordTokenizer()
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    split = read_split(corpus)
+    stats = {'tokenizer': 'chem_tokenize.ChemWordTokenizer (ChemDataExtractor 1.3.0)',
+             'documents': {}}
+    for doc in sorted(d for d, part in split.items() if part == 'test'):
+        sentences, counts = retokenized_document(corpus, doc, tokenizer)
+        write_conll(out_dir / f'{doc}.conll', sentences)
+        stats['documents'][doc] = {'sentences': len(sentences), 'entities': counts['entities'],
+                                   'inexact': counts['inexact'], 'lost': counts['lost']}
+    for key in ('sentences', 'entities', 'inexact', 'lost'):
+        stats[key] = sum(d[key] for d in stats['documents'].values())
+    (out_dir / 'stats.json').write_text(json.dumps(stats, indent=2) + '\n')
+    return stats
+
+
 def document_context(corpus, doc, annotated):
     """Every sentence of a document as tokens, in text order, and the positions among them
     of its annotated sentences (`annotated`: convert_document's output, whose words they must
@@ -185,11 +266,17 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description='SOFC-Exp as CoNLL files for ner_baseline.py')
     parser.add_argument('corpus', help='the sofc-exp-corpus directory of the repository')
     parser.add_argument('--out', default=str(OUT_DIR), metavar='DIR')
+    parser.add_argument('--retokenized-test', default=None, metavar='DIR',
+                        help="also write the test articles cut into words by ChemDataExtractor's "
+                             'tokenizer to DIR (data/raw/dataset/sofc_exp_test_cde)')
     args = parser.parse_args(argv)
     if not os.path.isdir(args.corpus):
         parser.error(f'not a directory: {args.corpus}')
     stats = convert(args.corpus, args.out)
     print(json.dumps(stats, indent=2))
+    if args.retokenized_test:
+        test = write_retokenized_test(args.corpus, args.retokenized_test)
+        print(json.dumps({k: test[k] for k in ('sentences', 'entities', 'inexact', 'lost')}))
     return stats
 
 

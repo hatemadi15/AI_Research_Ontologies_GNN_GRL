@@ -29,7 +29,9 @@ votes (ner_seedmeans.WEEK5_SYSTEMS) and writes ner_week5_seed_analysis.json next
     slot level (sofc_slot, against the published MatSciBERT-CRF scores of SOFC-Slot) and
     multi-task training on SOFC-Exp's two levels (crf_mt), whose votes over the seed triples
     are also set against the CRF votes, paired by triple (VOTED_METHODS); part 2b adds
-    mention replacement (crf_mr, S2).
+    mention replacement (crf_mr, S2); part 2e the CRF head and plain MatSciBERT scored on
+    SOFC-Exp's test articles cut into words as its training articles are (crf_cdetest
+    against the CRF head; cdetest against plain MatSciBERT, baseline_retokenized_test).
   - errors (exploratory; cited by the week-7 protocol, part 1): per protocol and
     granularity, the kinds of error of the CRF head over its 10 seeds: the share of gold
     entities that are correct, missed (no overlapping prediction), of the right span and
@@ -71,7 +73,10 @@ PUBLISHED_SPLITS = ('fine', 'coarse', 'sofc', 'sofc_slot')
 # methods on a published split, compared with the CRF head by seed: the week-6 methods,
 # the week-7 consistency rule on the CRF head's predictions (ner_consistency.py) and
 # recall calibration (ner_bias.py --choose val); multi-task training on SOFC-Exp's levels
-SPLIT_METHODS = ('crf_deberta', 'crf_ctx', 'crf_dc', 'crf_dcr', 'crf_ebv', 'crf_mt', 'crf_mr')
+SPLIT_METHODS = ('crf_deberta', 'crf_ctx', 'crf_dc', 'crf_dcr', 'crf_ebv', 'crf_mt', 'crf_mr',
+                 'crf_cdetest')
+# week 7, part 2e: plain MatSciBERT scored on SOFC-Exp's retokenized test articles
+RETOKENIZED_BASELINE = 'cdetest'
 VOTED_METHODS = ('crf_mt',)
 
 
@@ -282,6 +287,18 @@ def published_split(directory):
                 found['votes_minus_crf_votes'] = {
                     avg: spread([get(v) - get(c) for v, c in zip(votes, crf_votes)],
                                 'mean_diff') for avg, get in F1_AVERAGES.items()}
+        found = load_files(directory,
+                           [f'ner_results_{g}_published_split_{RETOKENIZED_BASELINE}.json'])
+        if found:
+            by_id = {r['run_id']: r for r in found[0]['runs']}
+            ids = [i for i in runs['baseline'] if i in by_id]
+            entry['baseline_retokenized_test'] = {
+                **{avg: spread([get(r) for r in by_id.values()])
+                   for avg, get in F1_AVERAGES.items()},
+                'minus_baseline': {avg: spread([get(by_id[i]) - get(runs['baseline'][i])
+                                                for i in ids], 'mean_diff')
+                                   for avg, get in F1_AVERAGES.items()},
+                'n_pairs': len(ids)}
         out[g] = entry
     return out
 
@@ -338,6 +355,12 @@ def main(argv=None):
             d = m['minus_crf']['micro']
             print(f"    {method}: {m['micro']['mean']:.2f} {m['micro']['ci95']}, minus the CRF "
                   f"head {d['mean_diff']:+.2f} {d['ci95']} over {m['n_pairs']} seeds")
+        if 'baseline_retokenized_test' in entry:
+            m = entry['baseline_retokenized_test']
+            d = m['minus_baseline']['micro']
+            print(f"    plain MatSciBERT on the retokenized test articles: {m['micro']['mean']:.2f} "
+                  f"{m['micro']['ci95']}, minus plain MatSciBERT {d['mean_diff']:+.2f} "
+                  f"{d['ci95']} over {m['n_pairs']} seeds")
     for g, methods in result['week6_types'].items():
         for method, types in methods.items():
             print(f"  {method}, {g}-grained, per type (minus the CRF head): "

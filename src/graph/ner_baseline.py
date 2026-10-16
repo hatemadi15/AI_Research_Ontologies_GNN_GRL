@@ -1976,12 +1976,42 @@ def held_out_papers(docs, papers):
     return {stems[p.removesuffix('.conll')] for p in papers}
 
 
+# SOFC-Exp's test articles cut into words by ChemDataExtractor's tokenizer, that of its training
+# and development articles (sofc_exp.py --retokenized-test; ROADMAP §4, week 7, part 2e)
+RETOKENIZED_TEST = 'sofc_exp_test_cde'
+
+
+def with_retokenized_test(data):
+    """SOFC-Exp's entity-level data with the sentences of its test articles taken from
+    RETOKENIZED_TEST (--retokenized-test): the same sentences and entities, cut into words as
+    the training articles are. Each test article must be there with as many sentences."""
+    folder = os.path.join(RAW_DIR, RETOKENIZED_TEST)
+    with open(os.path.join(RAW_DIR, 'sofc_exp', 'split.json')) as f:
+        split = json.load(f)
+    docs = sorted({d for _, _, d in data if split[d.removesuffix('.conll')] == 'test'})
+    found = sorted(f for f in os.listdir(folder) if f.endswith('.conll'))
+    if found != docs:
+        raise SystemExit(f'{folder}: {len(found)} articles, not the {len(docs)} test articles')
+    test = {fn: [(t, g, fn) for t, g in conll.read_conll_sentences(os.path.join(folder, fn))]
+            for fn in docs}
+    out = []
+    for doc, group in itertools.groupby(data, key=lambda x: x[2]):
+        group = list(group)
+        if doc in test and len(test[doc]) != len(group):
+            raise SystemExit(f'{folder}/{doc}: {len(test[doc])} sentences, not {len(group)}')
+        out += test.get(doc, group)
+    return out
+
+
 def granularity_data(granularity, args):
     """(data, labels, tie info) of a granularity, tags of the classes not kept mapped to O.
 
-    Fine: the --top-k classes; SOFC-Exp's slots: SOFC_SLOT_TYPES; otherwise all types.
+    Fine: the --top-k classes; SOFC-Exp's slots: SOFC_SLOT_TYPES; otherwise all types. With
+    --retokenized-test, SOFC-Exp's test articles cut as its training articles are.
     """
     data = load_split_corpus(granularity)
+    if getattr(args, 'retokenized_test', False):
+        data = with_retokenized_test(data)
     labels, tie_info = select_labels(data, args.top_k if granularity == 'fine' else None)
     if granularity == 'sofc_slot':
         labels = [t for t in labels if t in SOFC_SLOT_TYPES]
@@ -2592,6 +2622,12 @@ def parse_args(argv=None):
                              '100 (N - 1), at least as many as the teachers, which keep the '
                              'first offsets and so the silver data. Students already in their '
                              'results files are not trained again (ROADMAP §4, week 5)')
+    parser.add_argument('--retokenized-test', action='store_true', default=argparse.SUPPRESS,
+                        help="with --granularity sofc --published-split and a --tag: SOFC-Exp's "
+                             "test articles cut into words by ChemDataExtractor's tokenizer, "
+                             "that of its training articles (data/raw/dataset/sofc_exp_test_cde), "
+                             "instead of the release's words (Java's BreakIterator); training and "
+                             "validation unchanged (ROADMAP §4, week 7, part 2e)")
     parser.add_argument('--student-offsets', type=int, nargs='+', default=argparse.SUPPRESS,
                         metavar='OFFSET',
                         help='with --teachers: train only the students of these seed offsets '
@@ -2699,6 +2735,12 @@ def parse_args(argv=None):
         if args.students < args.teachers:
             parser.error('--students: at least as many as --teachers (every teacher seed '
                          'trains a student)')
+    if hasattr(args, 'retokenized_test'):
+        if args.granularity != 'sofc' or not getattr(args, 'published_split', False):
+            parser.error('--retokenized-test is for --granularity sofc --published-split')
+        if not args.tag:
+            parser.error('--retokenized-test needs a --tag (the runs train as the stored ones '
+                         'and must not overwrite them)')
     if hasattr(args, 'student_offsets'):
         if not hasattr(args, 'teachers'):
             parser.error('--student-offsets needs --teachers')

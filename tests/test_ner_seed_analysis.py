@@ -201,6 +201,31 @@ def test_published_split_of_sofc_exp_slots_and_multi_task(tmp_path):
     assert 'votes' not in sa.published_split(tmp_path)['sofc_slot']['methods']['crf_ebv']
 
 
+def test_retokenized_test_of_sofc_exp(tmp_path):
+    """Week 7, part 2e: the CRF head and plain MatSciBERT scored on the retokenized test
+    articles, each against the same model on the released test articles, paired by seed."""
+    pytest.importorskip('scipy')
+
+    pytest.importorskip('seqeval')
+    gold = ['B-MATERIAL O', 'O B-VALUE']
+
+    def runs(shift):
+        out = []
+        for j in range(10):
+            run = _run(f'seed{100 * j}', 80 + shift + j / 10)
+            run.update({'test_index': [0, 1], 'test_gold': gold, 'test_pred': gold})
+            out.append(run)
+        return {'runs': out}
+    for variant, shift in (('', 0), ('_crf', 1), ('_crf_cdetest', 1.5), ('_cdetest', 0.25)):
+        (tmp_path / f'ner_results_sofc_published_split{variant}.json').write_text(
+            json.dumps(runs(shift)))
+    sofc = sa.published_split(tmp_path)['sofc']
+    crf = sofc['methods']['crf_cdetest']
+    assert crf['n_pairs'] == 10 and crf['minus_crf']['micro']['mean_diff'] == 0.5
+    plain = sofc['baseline_retokenized_test']
+    assert plain['n_pairs'] == 10 and plain['minus_baseline']['micro']['mean_diff'] == 0.25
+
+
 def test_week6_type_differences_pair_seeds_and_papers(tmp_path, capsys):
     """Per entity type, a week-6 method against the CRF head on the held-out papers, paired by
     seed offset and paper over the pairs whose test set has the type (reported alongside the

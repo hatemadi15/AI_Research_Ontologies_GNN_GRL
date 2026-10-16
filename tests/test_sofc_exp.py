@@ -213,3 +213,73 @@ def test_ner_baseline_reads_the_slot_level_as_granularity_sofc_slot(capsys):
         with pytest.raises(SystemExit):
             nb.parse_args(argv)
         assert message in capsys.readouterr().err
+
+
+# ---- the test articles cut as the training articles are (week 7, part 2e) ----
+
+def test_retokenize_sentence_carries_the_entities_over_by_offsets():
+    from chem_tokenize import ChemWordTokenizer
+    text = 'A (NiO)-yttria cell gave 0.5 W cm−2 at 800 °C with Pr0.5Ba0.5MnO3-δ.'
+    entities = [(3, 6, 'MATERIAL'), (8, 14, 'MATERIAL'), (25, 35, 'VALUE'), (39, 45, 'VALUE'),
+                (51, 67, 'MATERIAL')]
+    words, tags, counts = se.retokenize_sentence(text, entities, ChemWordTokenizer())
+    assert list(zip(words, tags)) == [
+        ('A', 'O'), ('(NiO)-yttria', 'B-MATERIAL'), ('cell', 'O'), ('gave', 'O'),
+        ('0.5', 'B-VALUE'), ('W', 'I-VALUE'), ('cm−2', 'I-VALUE'), ('at', 'O'),
+        ('800', 'B-VALUE'), ('°', 'I-VALUE'), ('C', 'I-VALUE'), ('with', 'O'),
+        ('Pr0.5Ba0.5MnO3-δ', 'B-MATERIAL'), ('.', 'O')]
+    # NiO gets the word it shares with yttria (inexact), and yttria is left without one
+    assert (counts['inexact'], counts['lost']) == (1, 1)
+    assert se.entity_spans([(0, 3, 'B-X'), (4, 6, 'I-X'), (7, 9, 'O'), (10, 12, 'B-Y')]) == [
+        (0, 6, 'X'), (10, 12, 'Y')]
+
+
+def test_the_committed_retokenized_test_articles():
+    folder = se.OUT_DIR.with_name('sofc_exp_test_cde')
+    stats = json.loads((folder / 'stats.json').read_text())
+    assert (stats['sentences'], stats['entities'], stats['inexact'], stats['lost']) == (
+        173, 978, 14, 2)
+    split = json.loads((se.OUT_DIR / 'split.json').read_text())
+    test = sorted(d for d, part in split.items() if part == 'test')
+    assert sorted(p.stem for p in folder.glob('*.conll')) == test == sorted(stats['documents'])
+    entities = changed = 0
+    for doc in test:
+        new = conll.read_conll_sentences(folder / f'{doc}.conll')
+        old = conll.read_conll_sentences(se.OUT_DIR / f'{doc}.conll')
+        assert len(new) == len(old)
+        for (words, tags), (old_words, _) in zip(new, old):
+            assert ''.join(words) == ''.join(old_words)          # the same text, cut otherwise
+            changed += words != old_words
+            entities += sum(t.startswith('B-') for t in tags)
+    assert entities == 978 - 2 and changed == 140
+
+
+def test_ner_baseline_retokenized_test(capsys):
+    """--retokenized-test: the test articles' sentences from sofc_exp_test_cde, the training
+    and validation sentences and the split unchanged."""
+    from types import SimpleNamespace
+
+    import ner_baseline as nb
+    plain, labels, _ = nb.granularity_data('sofc', SimpleNamespace(top_k=27))
+    data, labels2, _ = nb.granularity_data('sofc', SimpleNamespace(top_k=27,
+                                                                    retokenized_test=True))
+    assert labels2 == labels
+    parts, _ = nb.published_split(plain, 'sofc')
+    parts2, _ = nb.published_split(data, 'sofc')
+    assert [len(p) for p in parts2] == [len(p) for p in parts] == [568, 135, 173]
+    for k in (0, 1):
+        assert [data[i] for i in parts2[k]] == [plain[i] for i in parts[k]]
+    test = [data[i] for i in parts2[2]]
+    assert sum(w != plain[i][0] for (w, _, _), i in zip(test, parts[2])) == 140
+    args = nb.parse_args(['--granularity', 'sofc', '--published-split', '--crf',
+                          '--retokenized-test', '--tag', 'cdetest'])
+    assert nb.variant_name(args) == 'crf_cdetest' and nb.stored_config(args)['retokenized_test']
+    for argv, message in ((['--granularity', 'sofc', '--published-split', '--crf',
+                            '--retokenized-test'], 'needs a --tag'),
+                          (['--granularity', 'sofc_slot', '--published-split', '--crf',
+                            '--retokenized-test', '--tag', 'cdetest'], 'is for --granularity'),
+                          (['--granularity', 'sofc', '--crf', '--retokenized-test', '--tag',
+                            'cdetest'], 'is for --granularity')):
+        with pytest.raises(SystemExit):
+            nb.parse_args(argv)
+        assert message in capsys.readouterr().err

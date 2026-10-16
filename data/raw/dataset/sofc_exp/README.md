@@ -38,3 +38,8 @@ amendment, "multi-task self-training on SOFC-Exp"):
 So the test articles are cut into words differently from the training ones: `Fig .`,
 `cm − 2` and `high-temperature` in the test articles, `Fig.`, `cm−2` and
 `high - temperature` in training. The files here keep the release's tokens.
+`python src/graph/sofc_exp.py <dir>/sofc-exp-corpus --retokenized-test
+data/raw/dataset/sofc_exp_test_cde` also writes the test articles' annotated sentences cut by
+ChemDataExtractor's tokenizer, the entity tags carried over by character offsets (978
+entities: 14 take whole words around them, 2 share a word with another entity and are lost;
+stats.json). `ner_baseline.py --retokenized-test` scores on them (ROADMAP §4, week 7, part 2e).
