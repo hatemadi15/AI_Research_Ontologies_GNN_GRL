@@ -50,7 +50,8 @@ def test_augment_parser_and_names(capsys):
     for argv, error in ((['--augment-mentions', '2'], 'needs --crf'),
                         (['--crf', '--augment-mentions', '0'], 'at least 1'),
                         (['--crf', '--augment-mentions', '2', '--multi-task'], 'not available'),
-                        (['--crf', '--augment-mentions', '2', '--context', '8'], 'not available')):
+                        (['--crf', '--augment-mentions', '2', '--context', '8'], 'not available'),
+                        (['--crf', '--tag', 'mr'], 'would overwrite')):
         with pytest.raises(SystemExit):
             nb.parse_args(argv)
         assert error in capsys.readouterr().err

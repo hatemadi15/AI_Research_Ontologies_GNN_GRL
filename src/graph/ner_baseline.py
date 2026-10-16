@@ -95,6 +95,11 @@ the same tags and it is silver for each teacher alone. Then every teacher seed t
 student as above. One run writes N files, `_crf_st<N>_m<offset>` (the files of --tag
 m<offset> --seed-offset <offset>), and each record stores the teachers' scores.
 
+`--context N` (week-6 protocol) encodes each sentence between up to N subwords of the
+neighbouring sentences of the same paper and part on each side (FLERT) and tags only the
+sentence; SOFC-Exp takes them from its article texts (`context.json`). With `--multi-task`,
+both heads read that input (files `_crf_mt_ctx`).
+
 On a CUDA device a run is deterministic (cuda_determinism) and every run stores its
 `environment` (week-4 protocol: GPU runs are only compared with GPU runs).
 
@@ -116,6 +121,7 @@ Usage:
   python ner_baseline.py --leave-one-paper-out --crf --teachers 3 --self-train-sample 0 \\
       --self-train data/processed/corpus/fatigue_sentences.txt            # 3 teachers
   python ner_baseline.py --leave-one-paper-out --crf --context 64 --tag m0   # document context
+  python ner_baseline.py --leave-one-paper-out --crf --multi-task --context 64 --tag m0
   python ner_baseline.py --leave-one-paper-out --crf --multi-task --teachers 3 --students 10 \\
       --self-train data/processed/corpus/fatigue_sentences.txt --self-train-sample 0
   python ner_baseline.py --compare                                        # paired comparison
@@ -1082,17 +1088,32 @@ def multitask_examples(fine, coarse):
     return examples
 
 
-def encode_multitask(tokenizer, examples, label2id, max_length=512):
+def multitask_contexts(fine, coarse, contexts):
+    """The context of each example of multitask_examples(fine, coarse), in its order: the
+    fine corpus's for a sentence both corpora tokenise alike, each corpus's own for the two
+    examples of one they tokenise differently. contexts: {head: a (left, right) per sentence
+    of that head's list (part_contexts)}."""
+    out = []
+    for k, ((f_tokens, _, _), (c_tokens, _, _)) in enumerate(zip(fine, coarse, strict=True)):
+        out.append(contexts['fine'][k])
+        if f_tokens != c_tokens:
+            out.append(contexts['coarse'][k])
+    return out
+
+
+def encode_multitask(tokenizer, examples, label2id, max_length=512, contexts=None, budget=0):
     """encode() for every head: {head: features}, in the order of `examples`.
 
     An example without tags for a head has only -100 labels for it, so that
-    multitask_loss never passes it to that head's CRF.
+    multitask_loss never passes it to that head's CRF. contexts and budget (--context):
+    as in encode(), a (left, right) per example (multitask_contexts).
     """
     features = {}
     for head in MT_HEADS:
         sentences = [(tokens, ['O'] * len(tokens) if tags[head] is None else tags[head])
                      for tokens, tags in examples]
-        features[head] = encode(tokenizer, sentences, label2id[head], max_length)
+        features[head] = encode(tokenizer, sentences, label2id[head], max_length, contexts,
+                                budget)
         for feature, (_, tags) in zip(features[head], examples):
             if tags[head] is None:
                 feature['labels'] = [-100] * len(feature['labels'])
@@ -1213,7 +1234,7 @@ def multitask_history(log, head):
 
 
 def train_multitask(seed, parts, labels, args, device, test_index=None, descriptions=None,
-                    silver=None, keep_tagger=False):
+                    silver=None, keep_tagger=False, contexts=None):
     """Fine-tune one encoder with a fine and a coarse CRF head together; test each head.
 
     parts: {head: (train, val, test)}, lists of (tokens, tags, doc) for the same
@@ -1233,7 +1254,10 @@ def train_multitask(seed, parts, labels, args, device, test_index=None, descript
     on with the gold examples, each row's NLL weighted SILVER_WEIGHT (a head without silver
     tags for a sentence does not see it). keep_tagger: return (records, tagger), the
     tagger holding the model, the tokenizer, label2id and id2label per head, and the
-    snapshot of each head's best epoch (`snapshots`; mt_teacher_tags).
+    snapshot of each head's best epoch (`snapshots`; mt_teacher_tags). contexts (--context):
+    {head: {'train'|'val'|'test': part_contexts of that part of the head's corpus}}; each
+    sentence is encoded with up to args.context subwords of context per side, as in train_one
+    (a training example takes its context as in multitask_contexts).
     """
     import torch
     from transformers import AutoTokenizer, get_linear_schedule_with_warmup, set_seed
@@ -1256,7 +1280,14 @@ def train_multitask(seed, parts, labels, args, device, test_index=None, descript
     pad_id = tokenizer.pad_token_id
 
     examples = multitask_examples(parts['fine'][0], parts['coarse'][0])
-    f_train = encode_multitask(tokenizer, examples, label2id)
+    if contexts is None:
+        f_train = encode_multitask(tokenizer, examples, label2id)
+    else:
+        assert not silver, 'silver sentences have no document context'
+        f_train = encode_multitask(
+            tokenizer, examples, label2id, model.encoder.config.max_position_embeddings,
+            multitask_contexts(parts['fine'][0], parts['coarse'][0],
+                               {h: contexts[h]['train'] for h in MT_HEADS}), args.context)
     weight = None
     if silver:
         # the gold examples, then the silver ones; multitask_batches shuffles them together
@@ -1265,8 +1296,14 @@ def train_multitask(seed, parts, labels, args, device, test_index=None, descript
         for h in MT_HEADS:
             f_train[h] += extra[h]
         weight = [1.0] * len(examples) + [SILVER_WEIGHT] * len(silver)
-    f_val, f_test = ({h: encode(tokenizer, [(t, g) for t, g, _ in parts[h][k]], label2id[h])
-                      for h in MT_HEADS} for k in (1, 2))
+    if contexts is None:
+        f_val, f_test = ({h: encode(tokenizer, [(t, g) for t, g, _ in parts[h][k]], label2id[h])
+                          for h in MT_HEADS} for k in (1, 2))
+    else:
+        f_val, f_test = ({h: encode(tokenizer, [(t, g) for t, g, _ in parts[h][k]], label2id[h],
+                                    model.encoder.config.max_position_embeddings,
+                                    contexts[h][name], args.context)
+                          for h in MT_HEADS} for k, name in ((1, 'val'), (2, 'test')))
 
     optimizer = torch.optim.AdamW(
         [{'params': [*model.encoder.parameters(), *model.heads.parameters()]},
@@ -1476,12 +1513,12 @@ RESULT_FILE = re.compile(r'ner_results_(fine|coarse|sofc)'
                          r'(?:_([a-z0-9_]+))?\.json')
 # untagged variants: a tagged variant must not take the name of one (--crf --tag mt: crf_mt)
 PLAIN_VARIANTS = ('baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_st', 'crf_mt_ls', 'crf_st3',
-                  'crf_ctx', 'crf_mt_st3')
+                  'crf_ctx', 'crf_mt_st3', 'crf_mt_ctx', 'crf_mr')
 
 
 def variant_name(args):
     """Variant of a run: 'baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_mt_ls', 'crf_st' or
-    'crf_st<N>', 'crf_mt_st<N>', 'crf_ctx' or 'crf_mr', then the tag.
+    'crf_st<N>', 'crf_mt_st<N>', 'crf_ctx', 'crf_mt_ctx' or 'crf_mr', then the tag.
 
     'cw' is --class-weights, 'crf_mt' is --crf --multi-task, 'crf_ls' is --crf
     --label-semantics, 'crf_mt_ls' both, 'crf_st' is --crf --self-train and 'crf_st<N>' that
@@ -1499,7 +1536,7 @@ def variant_name(args):
             if multi_task:
                 name = f'crf_mt_st{teachers}'
         if getattr(args, 'context', 0):
-            name = 'crf_ctx'
+            name = 'crf_mt_ctx' if multi_task else 'crf_ctx'
         if getattr(args, 'augment_mentions', 0):
             name = 'crf_mr'
     else:
@@ -2029,11 +2066,14 @@ def run_multitask(args, out_dir):
         if args.max_train:
             tr = tr[:args.max_train]
         parts = {h: tuple([data[h][i] for i in part] for part in (tr, va, te)) for h in MT_HEADS}
+        contexts = ({h: {name: part_contexts(data[h], part, load_full_texts(h))
+                         for name, part in (('train', tr), ('val', va), ('test', te))}
+                     for h in MT_HEADS} if getattr(args, 'context', 0) else None)
         seed = int(run_id[4:]) if run_id.startswith('seed') else args.seeds[0]
         seed += args.seed_offset
         start = time.time()
         records = train_multitask(seed, parts, labels, args, device, test_index=te,
-                                  descriptions=descriptions)
+                                  descriptions=descriptions, contexts=contexts)
         runtime = round(time.time() - start, 1)
         for head, res in records.items():
             res['run_id'] = run_id
@@ -2321,7 +2361,8 @@ def parse_args(argv=None):
                         help='with --crf: document context (FLERT). Up to N subwords of the '
                              'neighbouring sentences of the same paper, and of the same part '
                              '(train, validation or test), on each side of a sentence in the '
-                             'encoder input; only the sentence is tagged (files tagged _crf_ctx)')
+                             'encoder input; only the sentence is tagged (files tagged _crf_ctx, '
+                             '_crf_mt_ctx with --multi-task)')
     parser.add_argument('--augment-mentions', type=int, default=argparse.SUPPRESS, metavar='K',
                         help='with --crf: mention replacement (Dai and Adel, 2020). K copies '
                              'of each training sentence with an entity, each mention replaced '
@@ -2400,7 +2441,7 @@ def parse_args(argv=None):
             parser.error('--context needs --crf')
         if args.context < 1:
             parser.error('--context: at least 1 subword on each side')
-        for option in ('multi_task', 'label_semantics', 'self_train'):
+        for option in ('label_semantics', 'self_train'):
             if getattr(args, option, None) not in (None, False):
                 parser.error(f"--context is not available with --{option.replace('_', '-')}")
     if hasattr(args, 'augment_mentions'):
