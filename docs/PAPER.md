@@ -42,10 +42,20 @@ gain survives? Splits, scoring and seeds on MaterioMiner".
 
 ## Figures and tables
 
-- Figure 1: F1 on random splits against F1 on unseen papers, per system (C2).
-- Figure 2: seed spread over 10 seeds per split, and the distribution of the
-  3-seed differences over the 120 triples against the 10-seed one (C8).
-- Figure 3: per-type F1 against test support, coarse-grained (C9).
+Figures 1–3 are drawn from the GPU results by `src/graph/paper_figures.py`
+into `docs/figures/` (no training; re-run it when results change):
+- Figure 1 (`fig1_random_vs_unseen.png`): per system with 10 seeds on both
+  protocols, micro F1 on the 5 random splits and on the 4 unseen papers,
+  with 95% CIs and the gap: 28–31 points fine-grained, 17–20 coarse-grained
+  (C2).
+- Figure 2 (`fig2_seeds.png`): the CRF head's SD over 10 seeds per split;
+  the 120 three-seed differences of multi-task training on the random splits
+  (49 of 120 triples pass, against the 10-seed +1.83); and of document
+  context on unseen papers (21 of 120 pass, against the 10-seed +1.14), with
+  the week-6 screen's triple at +2.66 (C8).
+- Figure 3 (`fig3_types.png`): per coarse-grained type, the multi-task
+  vote's F1 against its test support per split on the random splits; SDE,
+  MIP, PRP, MOD and CPR are the low ones (C9).
 - Table 1: the published split (plain MatSciBERT and the CRF head, 10 seeds)
   next to the published numbers, under micro, macro, weighted and strict F1
   (C1, C3, C4).
