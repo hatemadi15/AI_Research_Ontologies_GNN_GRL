@@ -162,3 +162,30 @@ def test_analyse_the_crf_head_on_both_protocols(tmp_path):
     assert out['gap']['fine']['unseen_share'] == {'random_splits': 0.345, 'held_out': 0.812}
     assert out['types']['fine_leave_one_paper_out']['Value']['n_gold_per_run'] == 41.8
     assert out['methods']['fine_leave_one_paper_out'] == {}         # no method, no vote pair
+
+
+def test_document_folds_are_rebuilt():
+    """A run of --document-folds (week 8): its fold's test documents and training sentences."""
+    from types import SimpleNamespace
+
+    from ner_baseline import make_folds
+    data = [(['the', name], ['O', 'B-Alloy'], f'{doc}.conll')
+            for doc, names in (('A', ['Ti64', 'Ti64', 'IN718']), ('B', ['Ti64', '316L']),
+                               ('C', ['IN718', 'IN718']), ('D', ['316L', 'Ti64']))
+            for name in names]
+    folds = make_folds(data, SimpleNamespace(leave_one_paper_out=False, document_folds=2,
+                                             split_seed=0), indices=True)
+    results = {'protocol': 'document_folds', 'config': {'split_seed': 0, 'document_folds': 2},
+               'runs': [{'run_id': name, 'test_index': test,
+                         'test_gold': [' '.join(data[i][1]) for i in test],
+                         'test_pred': [' '.join(data[i][1]) for i in test]}
+                        for name, _, _, test in folds]}
+    counts = nm.run_counts(results, data, 'fine')
+    for name, train, _, test in folds:
+        forms = nm.entity_forms(data, train)
+        unseen = sum(nm.kind_of(data[i][0][1:], 'Alloy', forms) == 'unseen' for i in test)
+        assert counts[name]['gold', 'unseen'] == unseen
+        assert counts[name]['correct', 'seen'] + counts[name]['correct', 'unseen'] == len(test)
+    results['runs'][0]['test_index'] = results['runs'][1]['test_index']
+    with pytest.raises(nm.MentionError, match='test sentences'):
+        nm.run_counts(results, data, 'fine')

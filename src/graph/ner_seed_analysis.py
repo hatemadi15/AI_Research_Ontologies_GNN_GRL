@@ -41,6 +41,11 @@ votes (ner_seedmeans.WEEK5_SYSTEMS) and writes ner_week5_seed_analysis.json next
     method with all 10 seeds on the 4 held-out papers against the CRF head, per entity type:
     the F1 of both, paired by seed offset and paper over the pairs whose test set has the
     type, and their mean difference.
+  - sofc_splits (week 8, part 1; descriptive): SOFC-Exp beyond its official split. Per
+    protocol, its 5 random sentence splits and its 5 article folds (--document-folds 5), the
+    CRF head's 10-seed mean per split under every F1 average, with the mean and 95% CI over
+    the splits; the CRF votes over the seed triples 0-200, 300-500 and 600-800 (the mean of
+    the 3 votes per split); and the gap, random splits minus article folds, per F1 average.
 
 A family or vote family is used only if all its files exist. Usage:
   python src/graph/ner_seed_analysis.py [--results results/gpu] [--out PATH]
@@ -77,6 +82,7 @@ SPLIT_METHODS = ('crf_deberta', 'crf_ctx', 'crf_dc', 'crf_dcr', 'crf_ebv', 'crf_
                  'crf_cdetest')
 # week 7, part 2e: plain MatSciBERT scored on SOFC-Exp's retokenized test articles
 RETOKENIZED_BASELINE = 'cdetest'
+SOFC_PROTOCOLS = ('random_split_vary', 'document_folds')     # week 8, part 1
 VOTED_METHODS = ('crf_mt',)
 
 
@@ -303,6 +309,34 @@ def published_split(directory):
     return out
 
 
+def sofc_splits(directory):
+    """The sofc_splits section (see the module docstring); protocols without all 10 seed files
+    of the CRF head are left out, the votes too without their predictions."""
+    out = {}
+    for protocol in SOFC_PROTOCOLS:
+        files = load_files(directory, [f'ner_results_sofc_{protocol}_crf_m{off}.json'
+                                       for off in WEEK5_OFFSETS])
+        if not files:
+            continue
+        per_split = system_scores(files)
+        entry = {avg: spread([v[avg] for v in per_split.values()]) for avg in F1_AVERAGES}
+        entry['n_splits'] = len(per_split)
+        if all('test_pred' in r for f in files for r in f['runs']):
+            by_id = [{r['run_id']: r for r in f['runs']} for f in files]
+            votes = {i: [ner_ensemble.ensemble_run(i, [by_id[first // 100 + j][i]
+                                                       for j in range(3)])
+                         for first in WEEK5_TRIPLES] for i in per_split}
+            entry['crf_votes'] = {avg: spread([statistics.mean(get(v) for v in votes[i])
+                                               for i in per_split])
+                                  for avg, get in F1_AVERAGES.items()}
+        out[protocol] = entry
+    if len(out) == len(SOFC_PROTOCOLS):
+        out['gap'] = {avg: round(out[SOFC_PROTOCOLS[0]][avg]['mean']
+                                 - out[SOFC_PROTOCOLS[1]][avg]['mean'], 2)
+                      for avg in F1_AVERAGES}
+    return out
+
+
 def analyse(directory):
     """The analyses for every protocol and granularity that has the files."""
     out = {'spread': {}, 'triples': {}, 'types': {}}
@@ -323,6 +357,7 @@ def analyse(directory):
                     out['types'].setdefault(key, {})[system] = type_scores(votes)
     out['published_split'] = published_split(directory)
     out['week6_types'] = week6_type_differences(directory)
+    out['sofc_splits'] = sofc_splits(directory)
     out['errors'] = {}
     for protocol in PROTOCOLS:
         for g in GRANULARITIES:
@@ -361,6 +396,13 @@ def main(argv=None):
             print(f"    plain MatSciBERT on the retokenized test articles: {m['micro']['mean']:.2f} "
                   f"{m['micro']['ci95']}, minus plain MatSciBERT {d['mean_diff']:+.2f} "
                   f"{d['ci95']} over {m['n_pairs']} seeds")
+    for protocol, entry in result['sofc_splits'].items():
+        if protocol != 'gap':
+            print(f"  SOFC-Exp, {protocol}: the CRF head {entry['micro']['mean']:.2f} "
+                  f"{entry['micro']['ci95']} over {entry['n_splits']} splits")
+    if 'gap' in result['sofc_splits']:
+        print(f"  SOFC-Exp, random splits minus article folds: "
+              f"{result['sofc_splits']['gap']['micro']:+.2f} micro F1")
     for g, methods in result['week6_types'].items():
         for method, types in methods.items():
             print(f"  {method}, {g}-grained, per type (minus the CRF head): "

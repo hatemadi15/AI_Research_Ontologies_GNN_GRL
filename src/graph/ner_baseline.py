@@ -113,6 +113,10 @@ the validation sentences (`bias_val`), and with --save-predictions the test pred
 `--leave-two-papers-out` trains on two papers and tests on the other two, for each of the 6
 pairs (folds `<paper>+<paper>`): with --entity-bias, the inner folds that choose the D of a
 held-out paper without its labels.
+`--document-folds K` holds out groups of whole documents (week 8; SOFC-Exp's articles): the
+documents, sorted and shuffled with the split seed, are dealt into K groups, and fold `fold<i>`
+tests on group i and trains and validates on the other documents' sentences, as
+--leave-one-paper-out does.
 
 On a CUDA device a run is deterministic (cuda_determinism) and every run stores its
 `environment` (week-4 protocol: GPU runs are only compared with GPU runs).
@@ -140,6 +144,7 @@ Usage:
       --self-train data/processed/corpus/fatigue_sentences.txt --self-train-sample 0
   python ner_baseline.py --leave-one-paper-out --crf --entity-bias 0.5 1 2 --save-predictions
   python ner_baseline.py --leave-two-papers-out --crf --entity-bias 0.5 1 2   # inner folds
+  python ner_baseline.py --granularity sofc --document-folds 5 --crf --tag m0  # article folds
   python ner_baseline.py --granularity sofc_slot --published-split --crf    # SOFC-Exp slots
   python ner_baseline.py --granularity sofc_both --published-split --crf --multi-task
   python ner_baseline.py --granularity sofc_both --published-split --seeds 0 --crf --multi-task \
@@ -1672,7 +1677,7 @@ F1_AVERAGES = {
 # like the protocol.
 RESULT_FILE = re.compile(r'ner_results_(fine|coarse|sofc_slot|sofc)'
                          r'(?:_(random_split_vary|leave_one_paper_out|leave_two_papers_out|'
-                         r'published_split))?'
+                         r'published_split|document_folds))?'
                          r'(?:_([a-z0-9_]+))?\.json')
 # untagged variants: a tagged variant must not take the name of one (--crf --tag mt: crf_mt)
 PLAIN_VARIANTS = ('baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_st', 'crf_mt_ls', 'crf_st3',
@@ -1937,8 +1942,9 @@ def paper_fold(data, held_out, split_seed, indices=False):
 
 def make_folds(data, args, indices=False, granularity=None):
     """[(name, train, val, test)] for leave-one-paper-out, leave-two-papers-out (a fold per
-    pair of papers, named <paper>+<paper>) and the published split (one fold per model seed,
-    named seed<K>, all with the partition of `granularity`); None for random splits.
+    pair of papers, named <paper>+<paper>), document folds (fold<i>, document_groups) and the
+    published split (one fold per model seed, named seed<K>, all with the partition of
+    `granularity`); None for random splits.
 
     The parts are lists of data tuples, or of their positions in `data` when
     `indices` is set (the test positions go with the stored predictions).
@@ -1957,7 +1963,25 @@ def make_folds(data, args, indices=False, granularity=None):
         docs = sorted({d for _, _, d in data})
         return [('+'.join(pair), *paper_fold(data, pair, args.split_seed, indices))
                 for pair in itertools.combinations(docs, 2)]
+    if getattr(args, 'document_folds', 0):
+        groups = document_groups({d for _, _, d in data}, args.document_folds, args.split_seed)
+        return [(f'fold{i}', *paper_fold(data, group, args.split_seed, indices))
+                for i, group in enumerate(groups)]
     return None
+
+
+DOCUMENT_FOLDS = 'document_folds'
+
+
+def document_groups(docs, k, split_seed):
+    """The k test groups of --document-folds: the documents sorted, shuffled with
+    random.Random(split_seed) and dealt round-robin, so that group i holds the i-th, (i+k)-th,
+    ... document of the shuffle (each group sorted)."""
+    order = sorted(docs)
+    if not 2 <= k <= len(order):
+        raise SystemExit(f'--document-folds {k}: between 2 and the {len(order)} documents')
+    random.Random(split_seed).shuffle(order)
+    return [tuple(sorted(order[i::k])) for i in range(k)]
 
 
 def held_out_papers(docs, papers):
@@ -2038,13 +2062,17 @@ def protocol_name(args):
         return PUBLISHED_SPLIT
     if getattr(args, 'leave_two_papers_out', False):
         return 'leave_two_papers_out'
+    if getattr(args, 'document_folds', 0):
+        return DOCUMENT_FOLDS
     return 'leave_one_paper_out' if args.leave_one_paper_out else (
         'random_split_vary' if args.vary_split else 'random_split_fixed')
 
 
 def held_out_protocol(args):
-    """Whether the test papers are unseen (leave-one- or leave-two-papers-out)."""
-    return args.leave_one_paper_out or getattr(args, 'leave_two_papers_out', False)
+    """Whether the test documents are unseen (leave-one- or leave-two-papers-out, document
+    folds)."""
+    return (args.leave_one_paper_out or getattr(args, 'leave_two_papers_out', False)
+            or bool(getattr(args, 'document_folds', 0)))
 
 
 def results_path(out_dir, granularity, args):
@@ -2551,6 +2579,11 @@ def parse_args(argv=None):
                         help='train on two papers and test on the other two, for each of the 6 '
                              'pairs (folds <paper>+<paper>): the inner folds of --entity-bias '
                              '(ROADMAP §4, week 7)')
+    parser.add_argument('--document-folds', type=int, default=argparse.SUPPRESS, metavar='K',
+                        help='hold out groups of whole documents: the documents, shuffled with '
+                             'the split seed, dealt into K groups, each the test set of one fold '
+                             '(fold<i>); the other documents train and validate, as with '
+                             '--leave-one-paper-out (ROADMAP §4, week 8)')
     parser.add_argument('--published-split', action='store_true', default=argparse.SUPPRESS,
                         help="the train, validation and test sentences, and the tags, of the "
                              "MaterioMiner release (data/raw/dataset/published_split); every "
@@ -2669,6 +2702,14 @@ def parse_args(argv=None):
         for option in ('vary_split', 'leave_one_paper_out', 'published_split'):
             if getattr(args, option, False):
                 parser.error(f"--leave-two-papers-out is a protocol of its own: no "
+                             f"--{option.replace('_', '-')}")
+    if hasattr(args, 'document_folds'):
+        if args.document_folds < 2:
+            parser.error('--document-folds: at least 2 folds')
+        for option in ('vary_split', 'leave_one_paper_out', 'leave_two_papers_out',
+                       'published_split'):
+            if getattr(args, option, False):
+                parser.error(f"--document-folds is a protocol of its own: no "
                              f"--{option.replace('_', '-')}")
     if getattr(args, 'published_split', False):
         for option in ('vary_split', 'leave_one_paper_out', 'multi_task'):

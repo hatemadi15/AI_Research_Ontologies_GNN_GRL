@@ -10,14 +10,17 @@ stored run with predictions (ner_baseline.py --save-predictions) in that way:
   - unseen: they are no entity there.
 The training sentences are the ones the run's model learned from, not its validation
 sentences. The run's split is rebuilt as ner_baseline.py builds it (a random split from the
-run's split seed, a held-out paper's fold, the published split), and its test sentences and
+run's split seed, a held-out paper's fold, a fold of --document-folds, the published split),
+and its test sentences and
 gold tags must be the stored ones. A predicted entity takes a kind in the same way, by its words
 and its predicted type, so that recall, precision and F1 are given per kind; a correct
 prediction has the kind of its gold entity. Votes (<family>_ens3 over the seed triples 0-200,
 300-500 and 600-800) are made again from their members' predictions (ner_ensemble.ensemble_run).
 
 No training and no decision. Output, results/gpu/ner_mentions.json:
-  - systems: per granularity and protocol, for each system whose files are all there, the
+  - systems: per granularity and protocol (MaterioMiner's random splits and held-out papers,
+    SOFC-Exp's random splits and article folds, the published splits), for each system whose
+    files are all there, the
     counts of gold, predicted and correct entities of each kind over all its runs (seeds x
     splits or papers), the recall, precision and F1 they give, and each kind's share of the
     gold entities. A family has its 10 seeds, or the screen's 3 (0, 100, 200) if only those
@@ -27,7 +30,8 @@ No training and no decision. Output, results/gpu/ner_mentions.json:
   - types: for the CRF head on held-out papers and on the published splits, per entity type
     (the most frequent first), its gold entities per run, the share of them that are unseen,
     and the recall on its seen and on its unseen ones;
-  - gap: per granularity, the CRF head's recall on the random splits and on held-out papers,
+  - gap: per granularity, the CRF head's recall on the random splits and on held-out papers
+    (SOFC-Exp: article folds),
     and two counterfactual recalls: held-out papers' recall per kind with the random splits'
     shares of the kinds, and the random splits' recall per kind with held-out papers' shares;
   - methods: on held-out papers and published splits, each method against the CRF head with
@@ -47,10 +51,10 @@ from collections import Counter
 from pathlib import Path
 
 import metrics
-from ner_baseline import granularity_data, paper_fold, published_split, random_split
+from ner_baseline import (DOCUMENT_FOLDS, document_groups, granularity_data, paper_fold,
+                          published_split, random_split)
 from ner_ensemble import ensemble_run, tags_to_spans
-from ner_seedmeans import (GRANULARITIES, LOPO, PROTOCOLS, SCREEN_OFFSETS, WEEK5_OFFSETS,
-                           WEEK5_TRIPLES, seed_family)
+from ner_seedmeans import LOPO, SCREEN_OFFSETS, WEEK5_OFFSETS, WEEK5_TRIPLES, seed_family
 
 RESULTS_DIR = Path(__file__).resolve().parents[2] / 'results' / 'gpu'
 OUT_NAME = 'ner_mentions.json'
@@ -60,6 +64,9 @@ TOP_K = 27                  # the fine-grained types kept, as in every stored ru
 RANDOM = 'random_split_vary'
 PUBLISHED = 'published_split'
 REFERENCE = 'crf'
+# per granularity: the random splits and the protocol of unseen documents (MaterioMiner's
+# held-out papers; SOFC-Exp's article folds, week 8)
+HELD_OUT = {'fine': (RANDOM, LOPO), 'coarse': (RANDOM, LOPO), 'sofc': (RANDOM, DOCUMENT_FOLDS)}
 # families with 10 seeds per split (or the screen's 3) on the random splits and held-out papers
 FAMILIES = ('crf', 'crf_mt', 'crf_ls', 'crf_st3', 'crf_ctx', 'crf_mt_st3', 'crf_mr')
 VOTED = ('crf', 'crf_mt', 'crf_ctx', 'crf_mt_st3', 'crf_mr')
@@ -102,6 +109,10 @@ def run_split(results, run, data, granularity):
         train, _, test = random_split(len(data), split_seed)
     elif protocol == LOPO:
         train, _, test = paper_fold(data, (run_id,), split_seed, indices=True)
+    elif protocol == DOCUMENT_FOLDS:
+        groups = document_groups({d for _, _, d in data}, config['document_folds'], split_seed)
+        train, _, test = paper_fold(data, groups[int(run_id.removeprefix('fold'))], split_seed,
+                                    indices=True)
     elif protocol == PUBLISHED:
         (train, _, test), data = published_split(data, granularity)
     else:
@@ -360,9 +371,9 @@ def analyse(directory):
                      'seen_other': 'they are an entity there, only of other types',
                      'unseen': 'they are no entity there'},
            'systems': {}, 'papers': {}, 'types': {}, 'gap': {}, 'methods': {}}
-    for g in GRANULARITIES:
+    for g, protocols in HELD_OUT.items():
         reference = {}
-        for protocol in PROTOCOLS:
+        for protocol in protocols:
             systems, offsets = held_out_systems(directory, g, protocol)
             if not systems:
                 continue
@@ -373,16 +384,16 @@ def analyse(directory):
             if REFERENCE not in systems:
                 continue
             reference[protocol] = scores(pooled(systems[REFERENCE]))
-            if protocol == LOPO:
-                # a paper's shares of the kinds do not depend on the model: the first seed's
+            if protocol == protocols[1]:
+                # a document's shares of the kinds do not depend on the model: the first seed's
                 out['papers'][g] = {run_id: {'n_gold': s['all']['n_gold'],
                                              **{k: s[k]['share'] for k in KINDS}}
                                     for run_id, s in ((i, scores(c)) for i, c in
                                                       systems[REFERENCE][0].items())}
                 out['types'][key] = type_kinds(pooled(systems[REFERENCE]),
                                                sum(map(len, systems[REFERENCE])))
-        if len(reference) == len(PROTOCOLS):
-            out['gap'][g] = gap(reference[RANDOM], reference[LOPO])
+        if len(reference) == len(protocols):
+            out['gap'][g] = gap(reference[RANDOM], reference[protocols[1]])
     for g in PUBLISHED_SPLITS:
         systems = published_systems(directory, g)
         if not systems:

@@ -630,3 +630,21 @@ def test_week7_retokenized_test_batch(monkeypatch):
         assert (a.granularity, a.seeds) == ('sofc', list(range(0, 1000, 100)))
         assert a.retokenized_test and a.published_split and a.save_predictions
     assert kj.batch_name('w7e') == 'w7e' and 'sofc_corpus_sha256' not in kj.batch_spec('w7e')
+
+
+def test_week8_sofc_splits_batch(monkeypatch):
+    """w8a (week 8, part 1): two repeats, then the CRF head on SOFC-Exp's random splits (lane
+    0) and article folds (lane 1), model seed offsets 0 to 900, one results file each."""
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda report=None: 'x' * 64)
+    lane0, lane1 = _parsed(kj.batch_lanes('w8a'))
+    assert [a.tag for a in lane0[:2]] == ['smokeae', 'smokeaf']
+    assert (lane0[1].granularity, nb.protocol_name(lane0[1])) == ('sofc', 'published_split')
+    for lane, protocol in ((lane0[2:], 'random_split_vary'), (lane1, 'document_folds')):
+        assert [a.tag for a in lane] == [f'm{off}' for off in range(0, 1000, 100)]
+        assert [a.seed_offset for a in lane] == list(range(0, 1000, 100))
+        for a in lane:
+            assert (a.granularity, nb.protocol_name(a), nb.variant_name(a)) == (
+                'sofc', protocol, f'crf_m{a.seed_offset}')
+            assert a.crf and a.save_predictions and a.seeds == [0, 1, 2, 3, 4]
+    assert all(a.document_folds == 5 for a in lane1)
+    assert 'w8a' in kj.BATCHES and 'sofc_corpus_sha256' not in kj.batch_spec('w8a')

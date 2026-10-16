@@ -959,6 +959,7 @@ chance at class level. For a Task C-style result:
 | 5 | Done: NER, P1 "Next, after week 4" item 1, i.e. 10 seeds per split for the CRF reference, multi-task, label semantics and self-training with 3 teachers, on Kaggle T4 GPUs, and the published split (amendment); items 2–7 and a paper outline prepared, and the week-6 options run once each at full size (protocol below). The original week-5 work moves to week 7 | Met. Of the claims re-tested with 10 seeds, fine-grained multi-task on the random splits passes (+1.83 [+0.32, +3.34]); the coarse-grained claims of week 3 and the self-training claim of week 4 do not. The reported system: the multi-task vote coarse-grained on the random splits and fine-grained on unseen papers, `crf_ens3` elsewhere. On the published split, plain MatSciBERT reproduces 69.92 and 72.32 and the CRF head beats both |
 | 6 | In progress: NER, P1 "Next, after week 5", towards a methods paper: methods for unseen papers (DeBERTa-v3-large, document context, multi-task self-training) screened with 3 seeds and decided with 10, and a second dataset (SOFC-Exp, 10 seeds); protocol below. So far (P1, "Week 6 so far"): DeBERTa-v3-large stops at the screen; document context passes the screen but neither 10-seed decision; multi-task self-training passes the screen (+6.06 fine-grained), stage 2 next; on SOFC-Exp the CRF head improves on plain MatSciBERT (S1) | A method whose vote improves on the strongest system on unseen papers under the 10-seed design, and on SOFC-Exp |
 | 7 | In progress: NER, part 1, document-level label consistency for unseen papers, a post-processing rule on the saved predictions (no GPU; protocol below); part 2a, recall calibration (a bias on the CRF head's emissions, chosen on inner folds; done, no claim: the missed entities are not near the threshold); part 2b, mention replacement (screen, then 10 seeds if it passes; protocol below), and later the combinations of the methods that pass week 6, fixed after the week-6 decisions; part 2c, coarse-to-fine completion (done, no claim); part 2d, multi-task training on SOFC-Exp's two levels (protocol below); part 2e, SOFC-Exp's test articles cut into words as its training articles are (protocol below). Then class-level taxonomy (LLM or cross-encoder + arborescence) and a relation annotation pilot | Part 1: the rule improves on the strongest system on unseen papers and on SOFC-Exp's CRF head. Taxonomy: first class-level F1 above chance; relation guidelines |
+| 8 | Prepared: part 1, SOFC-Exp beyond its official split: the CRF head with 10 seeds on 5 random sentence splits and on 5 folds of 9 held-out articles (`--document-folds 5`; protocol below, descriptive) | The gap between random splits and unseen documents measured on a second corpus |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -2167,3 +2168,56 @@ included, understate what the models do on consistently tokenized text.
 
 **Budget:** 20 runs of about 3.3 minutes, 10 per GPU: about 40 minutes of
 one session. It runs on kernel a after part 2b's batches.
+
+### Week 8 protocol, part 1: SOFC-Exp beyond its official split (fixed before any run)
+
+**Why.** Claim C2 (random splits hide a large gap) rests on MaterioMiner's
+4 papers, and every SOFC-Exp result on one split, its official split with 11
+test articles. SOFC-Exp has 45 articles: enough to repeat the comparison of
+random sentence splits with held-out documents on a second corpus. C17 and
+C18 suggest the gap may be smaller there: half of SOFC-Exp's test names are
+unseen, and the CRF head finds 82% of them.
+
+**Design.** SOFC-Exp's entity level (4 types, `--granularity sofc`), all 876
+annotated sentences with the corpus's tags, the CRF head (`--crf`), model
+seed offsets 0 to 900 (`crf_m<N>`), predictions saved:
+- **random splits:** 5 random 65/15/20 sentence splits, split seeds 0 to 4
+  (`--vary-split`), as on MaterioMiner;
+- **article folds:** `--document-folds 5`. The 45 articles, sorted and
+  shuffled with split seed 0, are dealt into 5 groups of 9. Fold i tests on
+  the sentences of group i; the other 36 articles' sentences give the
+  validation set (15%, shuffled with the split seed) and the training set,
+  as `--leave-one-paper-out` does.
+
+That is 100 runs. The option `--document-folds` is committed with this
+protocol; every existing option writes byte-identical results files with
+it (the tiny-model check), and every earlier Kaggle batch is unchanged.
+
+**Reported (descriptive, no decision):**
+1. the CRF head's micro F1 per protocol: the mean over the 5 splits or
+   folds of its 10-seed means, with a 95% CI over them, next to the
+   official split's 83.75; and random splits minus article folds. The
+   protocols test different sentences, so this is not a paired comparison,
+   as C2 is not on MaterioMiner;
+2. the same for the CRF head's votes over the seed triples;
+3. macro, weighted and strict F1 (`ner_seed_analysis.py`, `sofc_splits`);
+4. on both protocols, seen and unseen names (`ner_mentions.py`) and the
+   looser matching criteria (`ner_matching.py`), as for C17 and C18.
+
+**Expected before the runs:** a gap of a few points, far below
+MaterioMiner's 28–31. SOFC-Exp's articles share one topic and one
+annotation scheme, and the CRF head's score on unseen articles (83.75) is
+already close to what in-distribution scores usually are.
+
+**What a result changes.** A small gap would make C2 a finding about
+corpora whose papers differ in topic and annotation conventions, as
+MaterioMiner's do (C18), rather than about random splits alone. A large
+one would make it hold on two corpora.
+
+**Checks.** The session first repeats the CRF run of smoke4 (`smokeae`)
+and session b's SOFC-Exp CRF run of seed 0 (`smokeaf`); both must equal
+their stored runs.
+
+**Budget:** 100 runs of about 3.3 minutes, 10 jobs of 5 runs per GPU:
+about 2.8 hours of one session (`w8a`). It runs after the queued batches of
+weeks 6 and 7, on the next free kernel.

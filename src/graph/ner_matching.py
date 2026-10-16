@@ -14,14 +14,15 @@ largest overlap first (under type, only pairs of the same type). A paired overla
 full match, so F1 is 2 x pairs / (gold entities + predictions). No training and no decision.
 
 Output, results/gpu/ner_matching.json:
-  - systems: per granularity and protocol, for each system whose files are all there (the CRF
+  - systems: per granularity and protocol (MaterioMiner's random splits and held-out papers,
+    SOFC-Exp's random splits and article folds), for each system whose files are all there (the CRF
     head and the multi-task model with their 10 seeds, and their votes over the seed triples,
     made again from the members' predictions; plain MatSciBERT and the CRF head on the published
     splits), each criterion's F1: the mean over the random splits or held-out papers, each the
     mean over the seeds or votes (on a published split, the mean over the seeds), with its 95%
     Student-t CI;
   - gap: per granularity and system, each criterion's mean F1 on the random splits minus that
-    on held-out papers;
+    on held-out papers (SOFC-Exp: article folds);
   - near_misses: per granularity and protocol, the CRF head's predictions over all its runs:
     the shares that are right, of the right span and another type (fine-grained, also the
     share whose type is an MMO ancestor or descendant of the gold one), inside a longer gold
@@ -42,8 +43,8 @@ import os
 from pathlib import Path
 
 from ner_ensemble import tags_to_spans
-from ner_mentions import corpus, family_files, load, votes
-from ner_seedmeans import GRANULARITIES, LOPO, PROTOCOLS, spread
+from ner_mentions import HELD_OUT, corpus, family_files, load, votes
+from ner_seedmeans import GRANULARITIES, spread
 
 RESULTS_DIR = Path(__file__).resolve().parents[2] / 'results' / 'gpu'
 OUT_NAME = 'ner_matching.json'
@@ -195,9 +196,9 @@ def analyse(directory):
                         'type': 'overlapping span, same type',
                         'overlap': 'overlapping span, any type'},
            'systems': {}, 'gap': {}, 'near_misses': {}}
-    for g in GRANULARITIES:
+    for g, protocols in HELD_OUT.items():
         found = {}
-        for protocol in PROTOCOLS:
+        for protocol in protocols:
             systems = held_out_systems(directory, g, protocol)
             if systems:
                 found[protocol] = systems
@@ -206,12 +207,13 @@ def analyse(directory):
             if crf:
                 out['near_misses'][f'{g}_{protocol}'] = near_misses(
                     crf, mmo_related if g == 'fine' else None)
-        if len(found) == len(PROTOCOLS):
+        if len(found) == len(protocols):
+            unseen = protocols[1]
             out['gap'][g] = {
                 s: {c: round(out['systems'][f'{g}_{RANDOM}'][s][c]['mean']
-                             - out['systems'][f'{g}_{LOPO}'][s][c]['mean'], 2)
+                             - out['systems'][f'{g}_{unseen}'][s][c]['mean'], 2)
                     for c in CRITERIA}
-                for s in found[RANDOM] if s in found[LOPO]}
+                for s in found[RANDOM] if s in found[unseen]}
     for g in GRANULARITIES:
         out.setdefault('conventions', {})[g] = conventions(
             corpus(g), mmo_related if g == 'fine' else None)

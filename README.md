@@ -656,7 +656,10 @@ stands (ROADMAP §4, weeks 6 and 7):
    week 7) lets multi-task training be repeated there (part 2d, next). Its
    test articles turn out to be cut into words differently from its
    training articles (ChemDataExtractor for training, Java's BreakIterator
-   for test); part 2e measures what that costs.
+   for test); part 2e measures what that costs Week 8, part 1 (prepared, descriptive)
+   runs the CRF head on SOFC-Exp's random sentence splits and on folds of
+   held-out articles, to measure on a second corpus the gap that random
+   splits hide on MaterioMiner.
 3. Week 7: document-level label consistency and coarse-to-fine completion
    give no claim (the first hurts on SOFC-Exp). Recall calibration (a bias
    on the CRF head's emissions, chosen on inner folds) gives no claim

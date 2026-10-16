@@ -267,3 +267,30 @@ def test_error_kinds_of_the_crf_head():
     # gold: A(0,2) correct, B(3,4) wrong type, A(5,6) missed, B(7,9) boundary, A(10,11) missed
     assert out == {'n_gold': 5, 'n_pred': 4, 'correct': 0.2, 'missed': 0.4, 'wrong_type': 0.2,
                    'boundary': 0.2, 'boundary_and_type': 0.0, 'spurious': 0.25}
+
+
+@pytest.mark.filterwarnings('ignore:Precision is ill-defined')      # a vote of all O
+@pytest.mark.filterwarnings('ignore:Recall is ill-defined')
+def test_sofc_splits_random_against_article_folds(tmp_path):
+    """Week 8, part 1: the CRF head's 10-seed means per split on both protocols, its votes,
+    and the gap. Seeds with an even index tag the entity, odd ones miss it."""
+    pytest.importorskip('scipy')
+    for protocol, base, name in (('random_split_vary', 85, 'seed'),
+                                 ('document_folds', 80, 'fold')):
+        for j, off in enumerate(range(0, 1000, 100)):
+            runs = []
+            for k in range(5):
+                run = _run(f'{name}{k}', base + k + j / 10)
+                run.update({'test_index': [0], 'test_gold': ['B-MAT O'],
+                            'test_pred': ['B-MAT O' if j % 2 == 0 else 'O O']})
+                runs.append(run)
+            (tmp_path / f'ner_results_sofc_{protocol}_crf_m{off}.json').write_text(
+                json.dumps({'runs': runs}))
+    out = sa.sofc_splits(tmp_path)
+    assert out['random_split_vary']['micro']['mean'] == 87.45     # 85 + 2 + 0.45
+    assert out['document_folds']['micro']['mean'] == 82.45 and out['gap']['micro'] == 5.0
+    assert out['document_folds']['n_splits'] == 5
+    # triples 0-200 and 600-800 have 2 seeds that tag it, 300-500 one: votes 100, 0, 100
+    assert out['random_split_vary']['crf_votes']['micro']['mean'] == pytest.approx(66.67)
+    (tmp_path / 'ner_results_sofc_document_folds_crf_m900.json').unlink()
+    assert set(sa.sofc_splits(tmp_path)) == {'random_split_vary'}

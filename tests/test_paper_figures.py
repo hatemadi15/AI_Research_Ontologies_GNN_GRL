@@ -129,7 +129,7 @@ def test_mention_data_and_figure5(tmp_path):
                     'crf_unknown': {'seeds': [0], 'seen': diff(0), 'unseen': diff(0)}}}}
     settings, methods = pf.mention_data(mentions)
     assert [s[0] for s in settings] == ['fine, random splits', 'fine, unseen papers',
-                                        'SOFC-Exp, unseen articles']
+                                        'SOFC-Exp, official split']
     assert settings[1][1] == {'seen': 0.17, 'seen_other': 0.02, 'unseen': 0.81}
     assert settings[1][2] == (71, 35)
     assert methods == [('multi-task', (3, 2, 4), (4, 3, 5)),

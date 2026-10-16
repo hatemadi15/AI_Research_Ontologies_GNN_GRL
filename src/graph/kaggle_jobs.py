@@ -100,6 +100,11 @@ Week 7, part 2e (SOFC-Exp's test tokens):
           (smokead); then the CRF head (lane 0) and plain MatSciBERT (lane 1) on the official
           split, model seeds 0 to 900, scored on the test articles cut into words as the
           training articles are (--retokenized-test, variants crf_cdetest and cdetest)
+Week 8, part 1 (SOFC-Exp beyond its official split):
+  w8a     the CRF run of smoke4 again (smokeae) and session b's SOFC-Exp CRF run of seed 0
+          (smokeaf); then the CRF head on SOFC-Exp, model seed offsets 0 to 900 (crf_m<N>),
+          on its 5 random sentence splits (lane 0) and its 5 article folds (lane 1,
+          --document-folds 5)
 
 Usage:
   python src/graph/kaggle_jobs.py quota
@@ -178,6 +183,9 @@ METHOD_FLAGS = {'deberta': ('--model', DEBERTA), 'ctx': ('--context', '64'),
 STAGE2 = ('deberta', 'ctx', 'mtst', 'sofc-deberta', 'sofc-ctx', 'sofc-mtst')
 # the two lanes of sofc-mtst: each trains the 3 teachers and half of the 10 students
 SOFC_MTST_LANES = (OFFSETS_PUBLISHED[:5], OFFSETS_PUBLISHED[5:])
+# week 8, part 1: SOFC-Exp's random sentence splits and article folds (not in PROTOCOL_FLAGS,
+# whose protocols the MaterioMiner families run)
+SOFC_SPLITS = {'random_split_vary': ('--vary-split',), 'document_folds': ('--document-folds', '5')}
 
 
 # ---------------------------------------------------------------------------
@@ -245,6 +253,14 @@ def sofc_mtst_job(student_offsets):
             '--multi-task', '--self-train', SOFC_CORPUS, '--teachers', '3', '--students', '10',
             '--student-offsets', *(str(o) for o in student_offsets), '--self-train-sample', '0',
             '--save-predictions', '--threads', str(THREADS)]
+
+
+def sofc_split_job(protocol, offset):
+    """The CRF head on SOFC-Exp's random splits or article folds (week 8, part 1), with the
+    model seeds of offset `offset` (crf_m<offset>)."""
+    return ['--granularity', 'sofc', *SOFC_SPLITS[protocol], '--crf', '--tag', f'm{offset}',
+            *(('--seed-offset', str(offset)) if offset else ()), '--save-predictions',
+            '--threads', str(THREADS)]
 
 
 def stage2_methods(name):
@@ -440,6 +456,15 @@ def batch_lanes(name):
         return [[repeat + ['--tag', 'smokeac'], sofc_repeat,
                  published_job('sofc', '--crf', *retokenized)],
                 [published_job('sofc', *retokenized)]]
+    if name == 'w8a':
+        # week 8, part 1: SOFC-Exp's random splits (lane 0) and article folds (lane 1), the
+        # CRF head with 10 model seeds; first the repeats of the CRF run of smoke4 and of
+        # session b's SOFC-Exp CRF run of seed 0
+        sofc_repeat = ['--granularity', 'sofc', '--published-split', '--seeds', '0', '--crf',
+                       '--tag', 'smokeaf', '--save-predictions', '--threads', str(THREADS)]
+        return [[repeat + ['--tag', 'smokeae'], sofc_repeat,
+                 *(sofc_split_job('random_split_vary', off) for off in OFFSETS_PUBLISHED)],
+                [sofc_split_job('document_folds', off) for off in OFFSETS_PUBLISHED]]
     if name == 'w7a':
         # week 7, part 2a: recall calibration. An inner job is the 6 folds of a seed, each
         # trained on two papers (about 4 CRF runs); no predictions, the counts suffice
@@ -460,7 +485,7 @@ def batch_lanes(name):
 
 BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'item3r',
            'smoke4', 'w5a', 'w5b', 'w5c', 'smoke5', 'smoke6', 'w6a', 'w6b', 'w7a', 'w7b',
-           'w7c', 'w7d', 'w7e')
+           'w7c', 'w7d', 'w7e', 'w8a')
 
 
 def batch_extras(name):
