@@ -1777,6 +1777,23 @@ go beyond MaterioMiner, where the coarse-grained gain did not hold.
 SOFC corpus. Recall calibration of the multi-task model needs part 2a's
 outcome first.
 
+*Notes for an SOFC corpus (exploratory, 16 October; nothing downloaded
+beyond a search):*
+- Europe PMC has 377 open-access full texts with "solid oxide" or SOFC in
+  the title, 29 of them SOFC-Exp's own articles (which a corpus would
+  leave out, with any sentence sharing an 8-gram with SOFC-Exp).
+- SOFC-Exp was tokenised with Stanford CoreNLP. `corpus_words`, made for
+  MaterioMiner, cuts 4,526 of SOFC-Exp's 9,466 article sentences (48%) the
+  same way. The differences are dashes, which CoreNLP keeps as they are
+  (–, −); abbreviations it keeps with their period (Fig., al., e.g.);
+  hyphenated materials it splits (Ni-YSZ); and charges and oxygen
+  deficiencies it keeps on the formula (O3−δ, Fe3+). Silver sentences
+  would need a splitter closer to CoreNLP's.
+- SOFC-Exp annotates only sentences that describe experiments, and its
+  slots are roles in them (an anode material of the reported cell). A
+  general SOFC sentence names materials in other roles, so slot-level
+  silver data would be noisier than MaterioMiner's.
+
 **Budget:** about 1.2 hours of one session's two GPUs. Lane 0 runs two
 repeats, then plain MatSciBERT and the CRF head on the slots, about 70
 minutes; lane 1 runs the multi-task repeat and the multi-task runs, about
