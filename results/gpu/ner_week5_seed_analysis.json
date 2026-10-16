@@ -3985,5 +3985,47 @@
       }
     }
   },
-  "week6_types": {}
+  "week6_types": {},
+  "errors": {
+    "fine_random_split_vary": {
+      "n_gold": 13660,
+      "n_pred": 13804,
+      "correct": 0.778,
+      "missed": 0.096,
+      "wrong_type": 0.037,
+      "boundary": 0.068,
+      "boundary_and_type": 0.02,
+      "spurious": 0.104
+    },
+    "coarse_random_split_vary": {
+      "n_gold": 22130,
+      "n_pred": 22599,
+      "correct": 0.777,
+      "missed": 0.038,
+      "wrong_type": 0.071,
+      "boundary": 0.079,
+      "boundary_and_type": 0.035,
+      "spurious": 0.056
+    },
+    "fine_leave_one_paper_out": {
+      "n_gold": 13280,
+      "n_pred": 10026,
+      "correct": 0.406,
+      "missed": 0.365,
+      "wrong_type": 0.096,
+      "boundary": 0.078,
+      "boundary_and_type": 0.056,
+      "spurious": 0.156
+    },
+    "coarse_leave_one_paper_out": {
+      "n_gold": 21940,
+      "n_pred": 21963,
+      "correct": 0.574,
+      "missed": 0.058,
+      "wrong_type": 0.16,
+      "boundary": 0.108,
+      "boundary_and_type": 0.1,
+      "spurious": 0.061
+    }
+  }
 }

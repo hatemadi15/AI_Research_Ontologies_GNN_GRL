@@ -189,3 +189,15 @@ def test_week6_type_differences_pair_seeds_and_papers(tmp_path, capsys):
                    'support_per_split': 2.0}
     assert sa.main(['--results', str(tmp_path)])['week6_types'] == out
     assert 'crf_ctx, fine-grained, per type' in capsys.readouterr().out
+
+
+def test_error_kinds_of_the_crf_head():
+    """Each gold entity is correct, missed (no overlapping prediction), of the right span and
+    the wrong type, or a boundary error (of the right or of another type); each prediction
+    without any overlapping gold entity is spurious."""
+    gold = ['B-A I-A O B-B O B-A O B-B I-B O B-A', 'O O']
+    pred = ['B-A I-A O B-A O O O B-B O O O', 'B-A O']
+    out = sa.error_kinds([{'runs': [{'test_gold': gold, 'test_pred': pred}]}])
+    # gold: A(0,2) correct, B(3,4) wrong type, A(5,6) missed, B(7,9) boundary, A(10,11) missed
+    assert out == {'n_gold': 5, 'n_pred': 4, 'correct': 0.2, 'missed': 0.4, 'wrong_type': 0.2,
+                   'boundary': 0.2, 'boundary_and_type': 0.0, 'spurious': 0.25}

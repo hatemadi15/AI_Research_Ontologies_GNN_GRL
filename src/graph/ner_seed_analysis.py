@@ -25,6 +25,11 @@ votes (ner_seedmeans.WEEK5_SYSTEMS) and writes ner_week5_seed_analysis.json next
     (SPLIT_METHODS): their scores and their difference from the CRF head, paired by seed
     (SOFC-Exp's S1 and S2 of the week-6 protocol). Week 7 adds the consistency rule on the
     CRF head (crf_dc, and crf_dcr with retyping) in the same way.
+  - errors (exploratory; cited by the week-7 protocol, part 1): per protocol and
+    granularity, the kinds of error of the CRF head over its 10 seeds: the share of gold
+    entities that are correct, missed (no overlapping prediction), of the right span and
+    the wrong type, or boundary errors (of the right type, or of another type), and the
+    share of predictions that overlap no gold entity (spurious).
   - week6_types (week 6, reported alongside its decisions): per granularity, each week-6
     method with all 10 seeds on the 4 held-out papers against the CRF head, per entity type:
     the F1 of both, paired by seed offset and paper over the pairs whose test set has the
@@ -171,6 +176,32 @@ def type_differences(method_files, crf_files):
     return out
 
 
+def error_kinds(files):
+    """The kinds of error over every run of the parsed results files (their test_gold and
+    test_pred): shares of the gold entities and, for 'spurious', of the predictions."""
+    counts = dict.fromkeys(('correct', 'missed', 'wrong_type', 'boundary',
+                            'boundary_and_type', 'spurious'), 0)
+    n_gold = n_pred = 0
+    for f in files:
+        for run in f['runs']:
+            for gold_tags, pred_tags in zip(run['test_gold'], run['test_pred'], strict=True):
+                gold = set(ner_ensemble.tags_to_spans(gold_tags.split())[0])
+                pred = set(ner_ensemble.tags_to_spans(pred_tags.split())[0])
+                n_gold, n_pred = n_gold + len(gold), n_pred + len(pred)
+                for g in gold:
+                    over = [p for p in pred if p[0] < g[1] and g[0] < p[1]]
+                    kind = ('correct' if g in pred else 'missed' if not over
+                            else 'wrong_type' if any(p[:2] == g[:2] for p in over)
+                            else 'boundary' if any(p[2] == g[2] for p in over)
+                            else 'boundary_and_type')
+                    counts[kind] += 1
+                counts['spurious'] += sum(not any(g[0] < p[1] and p[0] < g[1] for g in gold)
+                                          for p in pred)
+    return {'n_gold': n_gold, 'n_pred': n_pred,
+            **{k: round(v / (n_pred if k == 'spurious' else n_gold), 3) if v else 0.0
+               for k, v in counts.items()}}
+
+
 def week6_type_differences(directory):
     """{granularity: {method: type_differences}} on the 4 held-out papers, for the week-6
     methods whose 10 seeds and the CRF head's are all there."""
@@ -252,6 +283,12 @@ def analyse(directory):
                     out['types'].setdefault(key, {})[system] = type_scores(votes)
     out['published_split'] = published_split(directory)
     out['week6_types'] = week6_type_differences(directory)
+    out['errors'] = {}
+    for protocol in PROTOCOLS:
+        for g in GRANULARITIES:
+            crf = load_files(directory, file_names(g, protocol, 'crf', WEEK5_SYSTEMS))
+            if crf and all('test_pred' in r for f in crf for r in f['runs']):
+                out['errors'][f'{g}_{protocol}'] = error_kinds(crf)
     return out
 
 
