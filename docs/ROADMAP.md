@@ -1548,3 +1548,27 @@ larger than is best for the models trained on three.
 
 **Budget:** about 1.5 hours of one session's two GPUs (week 5's CRF jobs
 took about 1.2 minutes per run).
+
+**A candidate for part 2b, from the gold annotations only (no protocol
+yet): coarse-to-fine completion.** On the held-out papers the CRF head
+misses 36% of the fine-grained entities but only 6% of the coarse-grained
+ones (exploratory, above). The two levels nest: 1,262 of the 1,265
+fine-grained entities are coarse-grained entities with the same span, and
+each fine-grained type has a single coarse-grained parent. The reverse holds
+only for some coarse-grained types, so a fold would have to learn it from
+its training papers:
+- VAL, STD and MAC spans are fine-grained entities of a single type (Value,
+  StateDescriptor, MaterialClass) in every paper (97–100%), and MAT spans
+  mostly are (Alloy, 50–100% by paper).
+- EQU, CHP, MFP, DAM and LOC spans are fine-grained O in some papers and a
+  fine-grained type in others, as their subclasses fall in or outside the
+  top-27 fine-grained classes.
+
+A rule could add a fine-grained entity where the coarse-grained prediction
+has an entity of a type that maps to one fine-grained type in the training
+papers (say 90% of at least 10 spans), and the fine-grained prediction has
+only O. It would take the saved predictions of both granularities (two CRF
+heads of the same seed, or the two heads of a multi-task run), so it needs
+no GPU. SOFC-Exp has one level of types, so a gain could not be repeated
+there; under the week-6 rule for a claim, this would be a result on
+MaterioMiner only.
