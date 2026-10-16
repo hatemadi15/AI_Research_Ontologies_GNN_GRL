@@ -1073,25 +1073,37 @@ def test_sofc_row_and_bullet(tmp_path):
                    '| published MatSciBERT-CRF 84.77 micro, 82.39 macro (Gupta et al. 2022): '
                    "within the CRF head's 95% CI (over seeds only) |")
     spread = {'mean': 84.8, 'ci95': [84.3, 85.3]}
+
+    def diff(mean, lo, hi, n=10):
+        return {'mean_diff': mean, 'ci95': [lo, hi], 'per_run': [mean] * n}
     analysis = {'published_split': {'sofc': {
         'published': 84.77, 'published_macro': 82.39,
         'baseline': {'micro': {'mean': 80.5, 'ci95': [79.9, 81.1]}},
         'crf': {'micro': spread, 'macro': {'mean': 82.8, 'ci95': [82.0, 83.6]}},
-        'crf_minus_baseline': {'micro': {'mean_diff': 4.3, 'ci95': [3.5, 5.1]},
-                               'micro_strict': {'mean_diff': 2.0, 'ci95': [1.0, 3.0]}},
-        'methods': {'crf_deberta': {'micro': {'mean': 85.6, 'ci95': [85.0, 86.2]},
-                                    'minus_crf': {'micro': {'mean_diff': 0.8,
-                                                            'ci95': [0.1, 1.5]}},
-                                    'n_pairs': 10}}}}}
+        'crf_minus_baseline': {'micro': diff(4.3, 3.5, 5.1), 'micro_strict': diff(2.0, 1.0, 3.0)},
+        'crf_votes': {'micro': {'mean': 85.21, 'ci95': [84.0, 86.4]}},
+        'methods': {'crf_deberta': {'micro': {'mean': 84.4, 'ci95': [83.8, 85.0]},
+                                    'minus_crf': {'micro': diff(-0.4, -1.1, 0.3),
+                                                  'micro_strict': diff(-0.2, -0.9, 0.5)},
+                                    'n_pairs': 10},
+                    # an incomplete method (a session that stopped): reported, no verdict
+                    'crf_ctx': {'micro': {'mean': 86.0, 'ci95': [85.0, 87.0]},
+                                'minus_crf': {'micro': diff(1.2, 0.2, 2.2, 4),
+                                              'micro_strict': diff(1.0, 0.1, 1.9, 4)},
+                                'n_pairs': 4}}}}}
     (ws.results / 'gpu' / rr.WEEK5_ANALYSIS).write_text(json.dumps(analysis))
     readme, _ = ws.generate()
     assert ('* NER on SOFC-Exp (week 6; its official split, 26 training, 8 development and 11 '
             'test articles; 10 model seeds, GPU runs; the 95% CIs are over seeds): plain '
             'MatSciBERT 80.50 [79.90, 81.10], the CRF head 84.80 [84.30, 85.30] (macro 82.80), '
-            'against the published MatSciBERT-CRF 84.77 micro and 82.39 macro. The CRF head minus '
-            'plain MatSciBERT, paired by seed (S1): +4.30 [+3.50, +5.10], strict IOB2 +2.00 '
-            '[+1.00, +3.00]. DeBERTa-v3-large (S2): 85.60 [85.00, 86.20], minus the CRF head '
-            '+0.80 [+0.10, +1.50] over 10 seeds.\n') in readme
+            'against the published MatSciBERT-CRF 84.77 micro and 82.39 macro. S1, the CRF head '
+            'against plain MatSciBERT, paired by seed: improves (+4.30, 95% CI [+3.50, +5.10]; '
+            'strict IOB2 +2.00 [+1.00, +3.00]); the CRF votes over the 3 seed triples score '
+            '85.21. S2, DeBERTa-v3-large against the CRF head, paired by seed: 84.40 [83.80, '
+            '85.00], no significant change (-0.40, 95% CI [-1.10, +0.30]; strict IOB2 -0.20 '
+            '[-0.90, +0.50]). S2, document context against the CRF head, paired by seed: 86.00 '
+            '[85.00, 87.00], +1.20, 95% CI [+0.20, +2.20]; strict IOB2 +1.00 [+0.10, +1.90] over '
+            '4 of the 10 seeds (reported; no decision).\n') in readme
 
 
 def test_a_week3_file_that_is_not_an_object_is_reported(tmp_path, capsys):

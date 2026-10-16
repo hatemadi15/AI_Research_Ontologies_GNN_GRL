@@ -187,6 +187,8 @@ PROTOCOL_PHRASES = {'random_split_vary': 'over the 5 random splits',
 PUBLISHED_F1 = {'fine': 69.92, 'coarse': 72.32}
 # SOFC-Exp: MatSciBERT with a CRF on the official split (Gupta et al. 2022)
 SOFC_PUBLISHED = {'micro': 84.77, 'macro': 82.39}
+# model seeds of a published-split comparison (0 to 900), all needed for its decision
+PUBLISHED_SEEDS = 10
 # `role` of a week-3 to week-5 comparison, as the verdict bullets word it
 ROLE_WORDS = {'decision': 'the pre-registered decision', 'reported': 'reported, no decision',
               'screen': 'the screen'}
@@ -949,23 +951,36 @@ def week6_verdict_line(comps, variant, reference, design):
 
 def sofc_note(analysis):
     """Bullet on SOFC-Exp's official split (week 6, S1 and S2) from the week-5 analyses
-    file; '' without it."""
+    file; '' without it. S1 and S2 are decisions under the week-6 rule, over the 10 model
+    seeds (seed_decision)."""
     e = dig(analysis, 'published_split', 'sofc')
     if not e:
         return ''
     base, crf = e['baseline'], e['crf']
-    d = e['crf_minus_baseline']['micro']
     line = ("* NER on SOFC-Exp (week 6; its official split, 26 training, 8 development and 11 "
             "test articles; 10 model seeds, GPU runs; the 95% CIs are over seeds): plain "
             f"MatSciBERT {interval(base['micro'])}, the CRF head {interval(crf['micro'])} "
             f"(macro {crf['macro']['mean']:.2f}), against the published MatSciBERT-CRF "
-            f"{e['published']:.2f} micro and {e.get('published_macro', 0):.2f} macro. The CRF "
-            f"head minus plain MatSciBERT, paired by seed (S1): {interval(d, signed=True)}, "
-            f"strict IOB2 {interval(e['crf_minus_baseline']['micro_strict'], signed=True)}")
+            f"{e['published']:.2f} micro and {e.get('published_macro', 0):.2f} macro. S1, the "
+            "CRF head against plain MatSciBERT, paired by seed: "
+            + seed_decision(e['crf_minus_baseline']))
+    if 'crf_votes' in e:
+        line += (f"; the CRF votes over the 3 seed triples score "
+                 f"{e['crf_votes']['micro']['mean']:.2f}")
     for method, m in e.get('methods', {}).items():
-        line += (f". {WEEK6_NAMES[method]} (S2): {interval(m['micro'])}, minus the CRF head "
-                 f"{interval(m['minus_crf']['micro'], signed=True)} over {m['n_pairs']} seeds")
+        line += (f". S2, {WEEK6_NAMES[method]} against the CRF head, paired by seed: "
+                 f"{interval(m['micro'])}, " + seed_decision(m['minus_crf']))
     return line + ".\n"
+
+
+def seed_decision(c):
+    """A paired difference over the model seeds of one split, worded as its decision (week-6
+    rule) when it has all PUBLISHED_SEEDS seeds; otherwise its numbers, reported only."""
+    word, numbers = paired_verdict(c)
+    n = len(c['micro']['per_run'])
+    if n == PUBLISHED_SEEDS:
+        return f"{word} ({numbers})"
+    return f"{numbers} over {n} of the {PUBLISHED_SEEDS} seeds (reported; no decision)"
 
 
 def published_split_note(analysis):
