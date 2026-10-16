@@ -100,6 +100,17 @@ neighbouring sentences of the same paper and part on each side (FLERT) and tags 
 sentence; SOFC-Exp takes them from its article texts (`context.json`). With `--multi-task`,
 both heads read that input (files `_crf_mt_ctx`).
 
+`--entity-bias D [D ...]` (with `--crf`; ROADMAP §4, week 7) decodes the test and
+validation sentences again with D added to the emission of every tag but O, for each D
+(recall calibration: the F1-optimal threshold of a calibrated model is half its F1, below
+the 0.5 that a Viterbi decode applies). The run's own scores are those of D = 0. Per D it
+stores the entity counts [correct, predicted, gold] of each test paper (`bias_test`) and of
+the validation sentences (`bias_val`), and with --save-predictions the test predictions
+(`test_pred_bias`); ner_bias.py chooses a D per held-out paper (files `_crf_bias`).
+`--leave-two-papers-out` trains on two papers and tests on the other two, for each of the 6
+pairs (folds `<paper>+<paper>`): with --entity-bias, the inner folds that choose the D of a
+held-out paper without its labels.
+
 On a CUDA device a run is deterministic (cuda_determinism) and every run stores its
 `environment` (week-4 protocol: GPU runs are only compared with GPU runs).
 
@@ -124,10 +135,13 @@ Usage:
   python ner_baseline.py --leave-one-paper-out --crf --multi-task --context 64 --tag m0
   python ner_baseline.py --leave-one-paper-out --crf --multi-task --teachers 3 --students 10 \\
       --self-train data/processed/corpus/fatigue_sentences.txt --self-train-sample 0
+  python ner_baseline.py --leave-one-paper-out --crf --entity-bias 0.5 1 2 --save-predictions
+  python ner_baseline.py --leave-two-papers-out --crf --entity-bias 0.5 1 2   # inner folds
   python ner_baseline.py --compare                                        # paired comparison
 """
 
 import argparse
+import itertools
 import json
 import os
 import random
@@ -447,6 +461,66 @@ def predict(model, features, batch_size, pad_id, id2label, device, crf=None):
                 for i, path in zip(idx, crf.decode(emissions, word_mask)):
                     preds[i] = [id2label[p] for p in path]
     return preds
+
+
+def entity_biases(args):
+    """The biases a run decodes (--entity-bias): 0 and the given ones, sorted; [] without it."""
+    if not hasattr(args, 'entity_bias'):
+        return []
+    return sorted({0.0, *(float(b) + 0.0 for b in args.entity_bias)})   # + 0.0: no -0.0
+
+
+def bias_key(bias):
+    """The key of a bias in the run fields of --entity-bias ('0', '0.5', '-1')."""
+    return f'{bias:g}'
+
+
+def biased_decodes(model, features, batch_size, pad_id, id2label, device, crf, biases):
+    """{bias: word-level predicted tags per sentence} (--entity-bias): the CRF's Viterbi
+    paths after adding `bias` to the emission of every tag but O, the encoder run once per
+    batch. Bias 0 adds nothing, so its paths are predict()'s."""
+    import torch
+    model.eval()
+    preds = {b: [None] * len(features) for b in biases}
+    shift = torch.tensor([0.0 if id2label[i] == 'O' else 1.0 for i in range(len(id2label))])
+    with torch.no_grad():
+        for ids, mask, labels, idx in batches(features, batch_size, pad_id):
+            logits = model(input_ids=ids.to(device), attention_mask=mask.to(device)).logits
+            emissions, _, word_mask = word_view(logits, labels)
+            step = shift.to(device=emissions.device, dtype=emissions.dtype)
+            for b in biases:
+                for i, path in zip(idx, crf.decode(emissions + b * step, word_mask)):
+                    preds[b][i] = [id2label[p] for p in path]
+    return preds
+
+
+def entity_counts(gold_tags, pred_tags):
+    """[correct, predicted, gold] entities of tag sequences, counted as seqeval's default
+    mode counts them for micro F1 (score): F1 = 200 * correct / (predicted + gold)."""
+    from seqeval.metrics.sequence_labeling import get_entities
+    gold, pred = set(get_entities(gold_tags)), set(get_entities(pred_tags))
+    return [len(gold & pred), len(pred), len(gold)]
+
+
+def bias_fields(biases, test, test_preds, val, val_preds, save_predictions=False):
+    """The fields --entity-bias adds to a run, per bias (bias_key): the entity counts of each
+    test document (bias_test: {bias: {doc: counts}}) and of the validation sentences together
+    (bias_val: {bias: counts}); with save_predictions the test predictions (test_pred_bias:
+    {bias: space-joined tags per test sentence, in test order}). test and val are lists of
+    (tokens, tags, doc); test_preds and val_preds are biased_decodes' results for them."""
+    docs = list(dict.fromkeys(d for _, _, d in test))
+    fields = {'bias_test': {}, 'bias_val': {}}
+    for b in biases:
+        key = bias_key(b)
+        fields['bias_test'][key] = {
+            doc: entity_counts([g for _, g, d in test if d == doc],
+                               [p for (_, _, d), p in zip(test, test_preds[b]) if d == doc])
+            for doc in docs}
+        fields['bias_val'][key] = entity_counts([g for _, g, _ in val], val_preds[b])
+    if save_predictions:
+        fields['test_pred_bias'] = {bias_key(b): [' '.join(p) for p in test_preds[b]]
+                                    for b in biases}
+    return fields
 
 
 def score(gold_tags, pred_tags):
@@ -939,13 +1013,24 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
     model.load_state_dict(best[1][0])
     if crf is not None:
         crf.load_state_dict(best[1][1])
-    test_pred = predict(model, f_test, args.batch_size, pad_id, id2label, device, crf)
+    biases = entity_biases(args)
+    if biases:
+        decodes = biased_decodes(model, f_test, args.batch_size, pad_id, id2label, device, crf,
+                                 biases)
+        test_pred = decodes[0.0]
+    else:
+        test_pred = predict(model, f_test, args.batch_size, pad_id, id2label, device, crf)
     result = score([g for _, g, _ in test], test_pred)
     result.update({'seed': seed, 'best_epoch': best[2], 'val_f1': best[0],
                    'n_train': len(train), 'n_val': len(val), 'n_test': len(test),
                    'history': history})
     if getattr(args, 'save_predictions', False):
         result.update(prediction_fields(test_index, test, test_pred))
+    if biases:
+        result.update(bias_fields(
+            biases, test, decodes, val,
+            biased_decodes(model, f_val, args.batch_size, pad_id, id2label, device, crf, biases),
+            getattr(args, 'save_predictions', False)))
     if keep_tagger:
         return result, SimpleNamespace(model=model, crf=crf, tokenizer=tokenizer,
                                        label2id=label2id, id2label=id2label)
@@ -1354,11 +1439,17 @@ def train_multitask(seed, parts, labels, args, device, test_index=None, descript
 
     n_split = sum(1 for _, tags in examples if None in tags.values())
     records = {}
+    biases = entity_biases(args)
     for h in MT_HEADS:
         model.load_state_dict(best[h][1])
         train, val, test = parts[h]
-        test_pred = predict(HeadView(model, h), f_test[h], args.batch_size, pad_id, id2label[h],
-                            device, model.crfs[h])
+        if biases:
+            decodes = biased_decodes(HeadView(model, h), f_test[h], args.batch_size, pad_id,
+                                     id2label[h], device, model.crfs[h], biases)
+            test_pred = decodes[0.0]
+        else:
+            test_pred = predict(HeadView(model, h), f_test[h], args.batch_size, pad_id,
+                                id2label[h], device, model.crfs[h])
         result = score([g for _, g, _ in test], test_pred)
         other = [o for o in MT_HEADS if o != h][0]
         result.update({'seed': seed, 'best_epoch': best[h][2], 'val_f1': best[h][0],
@@ -1368,6 +1459,12 @@ def train_multitask(seed, parts, labels, args, device, test_index=None, descript
                                       'other_best_epoch': best[other][2]}})
         if getattr(args, 'save_predictions', False):
             result.update(prediction_fields(test_index, test, test_pred))
+        if biases:
+            result.update(bias_fields(
+                biases, test, decodes, val,
+                biased_decodes(HeadView(model, h), f_val[h], args.batch_size, pad_id,
+                               id2label[h], device, model.crfs[h], biases),
+                getattr(args, 'save_predictions', False)))
         records[h] = result
     if keep_tagger:
         return records, SimpleNamespace(model=model, tokenizer=tokenizer, label2id=label2id,
@@ -1509,16 +1606,20 @@ F1_AVERAGES = {
 # is tried first, so the baseline file of a protocol never reads as a variant named
 # like the protocol.
 RESULT_FILE = re.compile(r'ner_results_(fine|coarse|sofc)'
-                         r'(?:_(random_split_vary|leave_one_paper_out|published_split))?'
+                         r'(?:_(random_split_vary|leave_one_paper_out|leave_two_papers_out|'
+                         r'published_split))?'
                          r'(?:_([a-z0-9_]+))?\.json')
 # untagged variants: a tagged variant must not take the name of one (--crf --tag mt: crf_mt)
 PLAIN_VARIANTS = ('baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_st', 'crf_mt_ls', 'crf_st3',
-                  'crf_ctx', 'crf_mt_st3', 'crf_mt_ctx', 'crf_mr')
+                  'crf_ctx', 'crf_mt_st3', 'crf_mt_ctx', 'crf_mr', 'crf_bias', 'crf_mt_bias',
+                  'crf_ls_bias', 'crf_mt_ls_bias', 'crf_ctx_bias', 'crf_mt_ctx_bias',
+                  'crf_mr_bias', 'crf_eb', 'crf_ebv')
 
 
 def variant_name(args):
     """Variant of a run: 'baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_mt_ls', 'crf_st' or
-    'crf_st<N>', 'crf_mt_st<N>', 'crf_ctx', 'crf_mt_ctx' or 'crf_mr', then the tag.
+    'crf_st<N>', 'crf_mt_st<N>', 'crf_ctx', 'crf_mt_ctx' or 'crf_mr', with _bias for
+    --entity-bias (crf_bias, crf_ctx_bias), then the tag.
 
     'cw' is --class-weights, 'crf_mt' is --crf --multi-task, 'crf_ls' is --crf
     --label-semantics, 'crf_mt_ls' both, 'crf_st' is --crf --self-train and 'crf_st<N>' that
@@ -1539,6 +1640,8 @@ def variant_name(args):
             name = 'crf_mt_ctx' if multi_task else 'crf_ctx'
         if getattr(args, 'augment_mentions', 0):
             name = 'crf_mr'
+        if hasattr(args, 'entity_bias'):
+            name += '_bias'
     else:
         name = 'cw' if args.class_weights else 'baseline'
     tag = getattr(args, 'tag', None)
@@ -1752,10 +1855,25 @@ def compare_all(directory):
     return comparisons
 
 
+def paper_fold(data, held_out, split_seed, indices=False):
+    """(train, val, test) when the papers `held_out` are the test set: the other papers'
+    sentences, shuffled with random.Random(split_seed), 15% of them for validation."""
+    rest = [i for i, x in enumerate(data) if x[2] not in held_out]
+    order = list(range(len(rest)))
+    random.Random(split_seed).shuffle(order)
+    n_val = round(0.15 * len(rest))
+    val = [rest[i] for i in order[:n_val]]
+    train = [rest[i] for i in order[n_val:]]
+    test = [i for i, x in enumerate(data) if x[2] in held_out]
+    if not indices:
+        train, val, test = ([data[i] for i in part] for part in (train, val, test))
+    return train, val, test
+
+
 def make_folds(data, args, indices=False, granularity=None):
-    """[(name, train, val, test)] for leave-one-paper-out and the published split (one fold
-    per model seed, named seed<K>, all with the partition of `granularity`); None for
-    random splits.
+    """[(name, train, val, test)] for leave-one-paper-out, leave-two-papers-out (a fold per
+    pair of papers, named <paper>+<paper>) and the published split (one fold per model seed,
+    named seed<K>, all with the partition of `granularity`); None for random splits.
 
     The parts are lists of data tuples, or of their positions in `data` when
     `indices` is set (the test positions go with the stored predictions).
@@ -1768,20 +1886,12 @@ def make_folds(data, args, indices=False, granularity=None):
     if args.leave_one_paper_out:
         docs = sorted({d for _, _, d in data})
         keep = held_out_papers(docs, getattr(args, 'papers', None))
-        folds = []
-        for doc in docs:
-            rest = [i for i, x in enumerate(data) if x[2] != doc]
-            order = list(range(len(rest)))
-            random.Random(args.split_seed).shuffle(order)
-            n_val = round(0.15 * len(rest))
-            val = [rest[i] for i in order[:n_val]]
-            train = [rest[i] for i in order[n_val:]]
-            test = [i for i, x in enumerate(data) if x[2] == doc]
-            if not indices:
-                train, val, test = ([data[i] for i in part] for part in (train, val, test))
-            if doc in keep:
-                folds.append((doc, train, val, test))
-        return folds
+        return [(doc, *paper_fold(data, (doc,), args.split_seed, indices))
+                for doc in docs if doc in keep]
+    if getattr(args, 'leave_two_papers_out', False):
+        docs = sorted({d for _, _, d in data})
+        return [('+'.join(pair), *paper_fold(data, pair, args.split_seed, indices))
+                for pair in itertools.combinations(docs, 2)]
     return None
 
 
@@ -1818,8 +1928,15 @@ def granularity_data(granularity, args):
 def protocol_name(args):
     if getattr(args, 'published_split', False):
         return PUBLISHED_SPLIT
+    if getattr(args, 'leave_two_papers_out', False):
+        return 'leave_two_papers_out'
     return 'leave_one_paper_out' if args.leave_one_paper_out else (
         'random_split_vary' if args.vary_split else 'random_split_fixed')
+
+
+def held_out_protocol(args):
+    """Whether the test papers are unseen (leave-one- or leave-two-papers-out)."""
+    return args.leave_one_paper_out or getattr(args, 'leave_two_papers_out', False)
 
 
 def results_path(out_dir, granularity, args):
@@ -1985,7 +2102,7 @@ def run(args):
             with open(out_path, 'w') as f:
                 json.dump(results, f, indent=2)
             # the published numbers are in-distribution; no reference for held-out papers
-            ref = ('' if args.leave_one_paper_out or PAPER_F1[granularity] is None
+            ref = ('' if held_out_protocol(args) or PAPER_F1[granularity] is None
                    else f" (paper {PAPER_F1[granularity]})")
             print(f"  {run_id}: test F1 {res['f1']:.2f} (strict {res['f1_strict']:.2f}), "
                   f"best epoch {res['best_epoch']}, {res['runtime_sec']:.0f}s; "
@@ -2058,7 +2175,7 @@ def run_multitask(args, out_dir):
             split_seed = seed if args.vary_split else args.split_seed
             folds.append((f'seed{seed}', *random_split(len(data['fine']), split_seed)))
     # the published numbers are in-distribution; no reference for held-out papers
-    ref = {h: '' if args.leave_one_paper_out else f" (paper {PAPER_F1[h]})" for h in MT_HEADS}
+    ref = {h: '' if held_out_protocol(args) else f" (paper {PAPER_F1[h]})" for h in MT_HEADS}
     for run_id, tr, va, te in folds:
         if run_id in done:
             print(f"  {run_id}: already done, skipping")
@@ -2310,6 +2427,11 @@ def parse_args(argv=None):
     parser.add_argument('--vary-split', action='store_true',
                         help='new random split per seed')
     parser.add_argument('--leave-one-paper-out', action='store_true')
+    parser.add_argument('--leave-two-papers-out', action='store_true',
+                        default=argparse.SUPPRESS,
+                        help='train on two papers and test on the other two, for each of the 6 '
+                             'pairs (folds <paper>+<paper>): the inner folds of --entity-bias '
+                             '(ROADMAP §4, week 7)')
     parser.add_argument('--published-split', action='store_true', default=argparse.SUPPRESS,
                         help="the train, validation and test sentences, and the tags, of the "
                              "MaterioMiner release (data/raw/dataset/published_split); every "
@@ -2368,6 +2490,14 @@ def parse_args(argv=None):
                              'of each training sentence with an entity, each mention replaced '
                              f'with probability {MR_P} by a training mention of its type '
                              '(files tagged _crf_mr)')
+    parser.add_argument('--entity-bias', type=float, nargs='+', default=argparse.SUPPRESS,
+                        metavar='D',
+                        help='with --crf: decode the test and validation sentences again with D '
+                             'added to the emission of every tag but O, for each D (the run\'s '
+                             'scores stay those of D = 0); per D the run stores the entity counts '
+                             'of each test paper and of the validation set, and with '
+                             '--save-predictions the test predictions (files tagged _bias; '
+                             'ner_bias.py chooses a D)')
     parser.add_argument('--students', type=int, default=argparse.SUPPRESS, metavar='N',
                         help='with --teachers: N students, one per seed offset 0, 100, ..., '
                              '100 (N - 1), at least as many as the teachers, which keep the '
@@ -2404,6 +2534,11 @@ def parse_args(argv=None):
     args = parser.parse_args(argv)
     if args.seed_offset and not args.tag:
         parser.error('--seed-offset needs --tag, so that offset runs get their own results file')
+    if getattr(args, 'leave_two_papers_out', False):
+        for option in ('vary_split', 'leave_one_paper_out', 'published_split'):
+            if getattr(args, option, False):
+                parser.error(f"--leave-two-papers-out is a protocol of its own: no "
+                             f"--{option.replace('_', '-')}")
     if getattr(args, 'published_split', False):
         for option in ('vary_split', 'leave_one_paper_out', 'multi_task'):
             if getattr(args, option, False):
@@ -2453,6 +2588,12 @@ def parse_args(argv=None):
             if getattr(args, option, None) not in (None, False):
                 parser.error(f"--augment-mentions is not available with "
                              f"--{option.replace('_', '-')}")
+    if hasattr(args, 'entity_bias'):
+        if not args.crf:
+            parser.error('--entity-bias needs --crf (it shifts the emissions of the Viterbi '
+                         'decode)')
+        if getattr(args, 'self_train', None) is not None:
+            parser.error('--entity-bias is not available with --self-train')
     if hasattr(args, 'students'):
         if not hasattr(args, 'teachers'):
             parser.error('--students needs --teachers')

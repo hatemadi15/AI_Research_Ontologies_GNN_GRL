@@ -1413,3 +1413,34 @@ on SOFC-Exp, `crf_dcr` against the CRF head (paired by seed, 10 seeds) is
 a decision, alongside `crf_dc`. That makes 6 comparisons in part 1, about
 0.15 false passes if neither rule does anything. The MaterioMiner results
 of retyping stay reported, as fixed above.
+
+**Prepared for part 2 (tools and tests only; not a protocol yet): recall
+calibration.** On the held-out papers the CRF head predicts too few
+entities fine-grained: precision 52.7 and recall 42.8 (10 seeds, the 4
+papers; recall below precision on 3 of them), against 77.2 and 77.9 on the
+random splits. Coarse-grained the two are equal (58.4 and 58.8). For a
+calibrated model the F1-optimal threshold is half the attainable F1 (Lipton
+et al., 2014). Here that is about 0.25–0.30, while a Viterbi decode tags an
+entity only when it is the most probable reading. So a bias D added to the
+emission of every tag but O before decoding may raise F1 on unseen papers at
+both granularities, more where F1 is lower. The tools:
+- `ner_baseline.py --entity-bias D ...` decodes the test and validation
+  sentences again for each D. A run's own scores stay those of D = 0. Per D
+  it stores the entity counts of each test paper and of the validation set,
+  and with `--save-predictions` the test predictions.
+- `--leave-two-papers-out` trains on two papers and tests on the other two,
+  for each of the 6 pairs.
+- `ner_bias.py --choose inner` gives the held-out paper P the D with the
+  highest mean F1 on the inner folds that hold out P and another paper Q,
+  scored on Q: models trained on two of P's three training papers. P's own
+  labels are never read.
+- `ner_bias.py --choose val` takes each run's best D on its validation set
+  (SOFC-Exp's validation articles are unseen articles; MaterioMiner's
+  validation sentences come from the training papers).
+
+The output (`crf_eb_m<N>`) pairs with the CRF head by seed. Its D = 0 scores
+must equal the committed `crf_m<N>` runs, which checks determinism. Rough
+cost: 36 inner runs on two papers (3 seeds, 6 pairs, 2 granularities) and
+the CRF head again with the grid (80 runs), about 5 GPU-hours; a 3-seed
+screen first takes about 2.5. Whether it enters part 2, and its decisions,
+are fixed with part 2's protocol after the week-6 decisions.
