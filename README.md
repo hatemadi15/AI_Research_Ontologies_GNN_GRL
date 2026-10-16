@@ -355,6 +355,19 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
 | document-context vote vs 3-model seed ensemble | fine | 4 | 51.38 [45.60, 57.16] | +2.92 [+0.02, +5.83] | +4.08 [-1.05, +9.21] | reported |
 | document-context vote vs 3-model seed ensemble | coarse | 4 | 61.59 [54.24, 68.94] | +0.29 [-4.64, +5.22] | -0.20 [-8.28, +7.87] | reported |
 
+#### NER week-6 comparisons (10-seed means, held-out papers, GPU runs)
+
+Δ = method − reference on the same held-out paper, GPU runs only, with 10 model seeds per paper: a model scores the mean of its 10 runs, a vote the mean of its votes over 3 disjoint seed triples. Pre-registered rule (week-6 protocol): a change improves on its reference only if the 95% Student-t CI of the mean micro-F1 difference lies entirely above 0. Decisions: each method against the CRF head, and each method's vote against the strongest system on unseen papers (the multi-task vote fine-grained, the 3-model seed ensemble coarse-grained).
+
+| Comparison | Granularity | Pairs | Variant micro F1 [95% CI] | Δ micro [95% CI] | Δ macro [95% CI] | Role |
+|---|---|---|---|---|---|---|
+| document context vs CRF head | fine | 4 | 47.59 [39.86, 55.33] | +1.14 [-0.94, +3.22] | +1.82 [-3.39, +7.04] | decision |
+| document context vs CRF head | coarse | 4 | 58.72 [52.23, 65.22] | +0.12 [-2.03, +2.27] | -1.05 [-3.28, +1.17] | decision |
+| document-context vote vs multi-task vote | fine | 4 | 51.02 [42.70, 59.35] | -1.44 [-3.80, +0.91] | -1.46 [-6.72, +3.80] | decision |
+| document-context vote vs multi-task vote | coarse | 4 | 61.86 [54.85, 68.87] | +1.07 [-1.23, +3.38] | +0.44 [-2.53, +3.41] | reported |
+| document-context vote vs 3-model seed ensemble | fine | 4 | 51.02 [42.70, 59.35] | +2.21 [+0.01, +4.41] | +3.13 [-2.08, +8.33] | reported |
+| document-context vote vs 3-model seed ensemble | coarse | 4 | 61.86 [54.85, 68.87] | +0.76 [-1.79, +3.31] | -0.76 [-3.29, +1.77] | decision |
+
 #### NER week-7 comparisons, part 1 (the consistency rule, 10-seed means, GPU runs)
 
 Δ = with the rule − without it, on the same split, GPU runs only, 10 model seeds: a model scores the mean of its 10 runs, a vote the mean of its votes over 3 disjoint seed triples. Week-7 protocol, part 1: the consistency rule (`ner_consistency.py`, fixed before it was applied) on the saved test predictions. Pre-registered rule: a change improves on its reference only if the 95% Student-t CI of the mean micro-F1 difference lies entirely above 0. Decisions, on the 4 held-out papers: the rule on the CRF head, and on the strongest system on unseen papers (the multi-task vote fine-grained, the 3-model seed ensemble coarse-grained). The other rows are reported without a decision.
@@ -377,6 +390,10 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
 | multi-task vote + the consistency rule with retyping vs multi-task vote | leave one paper out | coarse | 4 | 61.38 [56.18, 66.59] | +0.60 [-0.20, +1.39] | +0.42 [-0.36, +1.20] | reported |
 | 3-model seed ensemble + the consistency rule with retyping vs 3-model seed ensemble | leave one paper out | fine | 4 | 49.38 [41.66, 57.09] | +0.56 [-2.03, +3.16] | -0.03 [-1.54, +1.48] | reported |
 | 3-model seed ensemble + the consistency rule with retyping vs 3-model seed ensemble | leave one paper out | coarse | 4 | 61.93 [56.90, 66.96] | +0.83 [+0.32, +1.34] | +0.60 [-0.11, +1.31] | reported |
+| document context + the consistency rule vs document context | leave one paper out | fine | 4 | 47.70 [39.45, 55.95] | +0.10 [-0.67, +0.88] | -0.03 [-0.56, +0.49] | reported |
+| document context + the consistency rule vs document context | leave one paper out | coarse | 4 | 58.78 [52.16, 65.41] | +0.06 [-0.09, +0.21] | +0.05 [-0.06, +0.17] | reported |
+| document-context vote + the consistency rule vs document-context vote | leave one paper out | fine | 4 | 51.47 [42.68, 60.26] | +0.45 [-0.46, +1.36] | +0.12 [-0.36, +0.59] | reported |
+| document-context vote + the consistency rule vs document-context vote | leave one paper out | coarse | 4 | 61.91 [54.91, 68.90] | +0.04 [-0.19, +0.28] | -0.08 [-0.33, +0.18] | reported |
 
 **Reading the numbers**
 * The old "Term F1 0.91" corresponds to *0.12* pairwise alignment F1. The
@@ -432,6 +449,9 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
 * NER, the coarse-grained types that keep macro F1 down (week 5, exploratory; the 3 votes of the reported system `crf_mt_ens3` over the 5 random splits, F1 and test entities per split): SDE 17.7 (3.0), MIP 17.7 (5.2), PRP 39.9 (8.0), MOD 41.7 (1.8), CPR 41.7 (2.0). Macro F1 counts each type alike: without SDE alone it would be 73.11 instead of 71.02 on the splits that have it.
 * NER week 6, the screen (GPU runs, seeds 0, 100 and 200, leaving one paper out; mean paired micro-F1 difference [95% CI]; it decides only which methods get 10 seeds): DeBERTa-v3-large stops; against the CRF head fine-grained -4.38 [-7.32, -1.45], coarse-grained -8.01 [-11.72, -4.30]; its vote against the 3-model seed ensemble fine-grained -2.17 [-5.12, +0.78], coarse-grained -6.47 [-10.54, -2.39].
 * NER week 6, the screen (GPU runs, seeds 0, 100 and 200, leaving one paper out; mean paired micro-F1 difference [95% CI]; it decides only which methods get 10 seeds): document context goes to stage 2; against the CRF head fine-grained +2.66 [+0.91, +4.40], coarse-grained -0.50 [-3.82, +2.83]; its vote against the 3-model seed ensemble fine-grained +2.92 [+0.02, +5.83], coarse-grained +0.29 [-4.64, +5.22].
+* NER week 6 (GPU runs, 10 seeds), document context vs the CRF head (paired micro-F1 difference, leaving one paper out): fine-grained no significant change (+1.14, 95% CI [-0.94, +3.22]; strict IOB2 +1.14 [-0.94, +3.22]; the pre-registered decision); coarse-grained no significant change (+0.12, 95% CI [-2.03, +2.27]; strict IOB2 +0.12 [-2.03, +2.27]; the pre-registered decision).
+* NER week 6 (GPU runs, 10 seeds), document-context vote vs the multi-task vote (paired micro-F1 difference, leaving one paper out): fine-grained no significant change (-1.44, 95% CI [-3.80, +0.91]; strict IOB2 -1.44 [-3.80, +0.91]; the pre-registered decision); coarse-grained no significant change (+1.07, 95% CI [-1.23, +3.38]; strict IOB2 +1.07 [-1.23, +3.38]; reported, no decision).
+* NER week 6 (GPU runs, 10 seeds), document-context vote vs the 3-model seed ensemble (paired micro-F1 difference, leaving one paper out): fine-grained improves (+2.21, 95% CI [+0.01, +4.41]; strict IOB2 +2.21 [+0.01, +4.41]; reported, no decision); coarse-grained no significant change (+0.76, 95% CI [-1.79, +3.31]; strict IOB2 +0.76 [-1.79, +3.31]; the pre-registered decision).
 * NER week 7, part 1 (GPU runs; the consistency rule on the saved predictions of 10 seeds), CRF head + the consistency rule vs the CRF head (paired micro-F1 difference, leaving one paper out): fine-grained no significant change (+0.30, 95% CI [-0.35, +0.95]; strict IOB2 +0.30 [-0.35, +0.95]; the pre-registered decision); coarse-grained improves (+0.12, 95% CI [+0.01, +0.24]; strict IOB2 +0.12 [+0.01, +0.24]; the pre-registered decision).
 * NER week 7, part 1 (GPU runs; the consistency rule on the saved predictions of 10 seeds), multi-task vote + the consistency rule vs the multi-task vote (paired micro-F1 difference, leaving one paper out): fine-grained no significant change (+0.33, 95% CI [-0.74, +1.40]; strict IOB2 +0.33 [-0.74, +1.40]; the pre-registered decision); coarse-grained no significant change (+0.17, 95% CI [-0.22, +0.57]; strict IOB2 +0.17 [-0.22, +0.57]; reported, no decision).
 * NER week 7, part 1 (GPU runs; the consistency rule on the saved predictions of 10 seeds), 3-model seed ensemble + the consistency rule vs the 3-model seed ensemble (paired micro-F1 difference, leaving one paper out): fine-grained no significant change (+0.62, 95% CI [-0.64, +1.89]; strict IOB2 +0.62 [-0.64, +1.89]; reported, no decision); coarse-grained no significant change (+0.20, 95% CI [-0.15, +0.55]; strict IOB2 +0.20 [-0.15, +0.55]; the pre-registered decision).

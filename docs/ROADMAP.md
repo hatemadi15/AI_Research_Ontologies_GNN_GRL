@@ -249,6 +249,43 @@ granularity) score exactly as the separately trained CRF runs. Week 5 used
     84.98 and macro 82.31, against the published 84.77 and 82.39 (Gupta et
     al., 2022): the converted corpus behaves like the original.
 
+**Week 6 so far** (§4; GPU runs on the 4 held-out papers; the multi-task
+self-training screen and SOFC-Exp's S1 are still running):
+- **The screen** (seeds 0, 100 and 200, 3-seed means against the CRF head).
+  DeBERTa-v3-large stops: −4.38 [−7.32, −1.45] fine-grained, −8.01
+  [−11.72, −4.30] coarse-grained, with similar validation scores on the
+  training papers. Document context goes to stage 2: +2.66 [+0.91, +4.40]
+  fine-grained, −0.50 [−3.82, +2.83] coarse-grained.
+- **Document context with 10 seeds (stage 2)** passes neither decision.
+  - Decision 1, against the CRF head: +1.14 [−0.94, +3.22] fine-grained
+    and +0.12 [−2.03, +2.27] coarse-grained.
+  - Decision 2, its vote against the strongest system on unseen papers:
+    −1.44 [−3.80, +0.91] against the multi-task vote (fine-grained) and
+    +0.76 [−1.79, +3.31] against the seed vote (coarse-grained).
+  - Reported only: its vote against the seed vote fine-grained, +2.21
+    [+0.01, +4.41].
+- **The screen was optimistic, as week 5 predicted.** On the 7 seeds the
+  screen did not use (300 to 900), context gains +0.49 [−3.10, +4.07]
+  fine-grained, against +2.66 on the screen's 3. One paper
+  (10.1038_ncomms7164) goes from +4.29 to −2.59. A screen that lets a
+  method through on a noisy 3-seed estimate picks the methods that drew
+  lucky seeds; the 10-seed decision is what corrects this.
+- **SOFC-Exp, S2 for DeBERTa-v3-large did not run.** It ran out of the T4's
+  15 GB within 31 seconds: batch size 16 on SOFC-Exp's long sentences
+  (session a, `w6c:ctx,sofc-deberta`). This is a deviation from the
+  protocol, which planned S2 for DeBERTa whether or not it reached stage 2.
+  Since DeBERTa stopped at the screen, it has not been run again (doing so
+  would need gradient accumulation or a smaller batch, i.e. an amendment).
+- **Checks.** Session a's repeat of the week-4 run is identical (micro F1
+  77.95). The week-7 consistency rule on document context, reported only:
+  +0.10 [−0.67, +0.88] fine-grained and +0.06 [−0.09, +0.21]
+  coarse-grained, and +0.45 [−0.46, +1.36] and +0.04 [−0.19, +0.28] on
+  its votes.
+- **Per type** (exploratory, 10 seeds × 4 papers): context's largest
+  changes are on rare types, which a few entities swing (fine-grained
+  MicrostructureEntity +18.9 and StrainRate −18.3; coarse-grained ODE −19.1
+  and CPR −17.8).
+
 Next, after week 5, in this order. The aim is a methods paper (§4, week 6),
 with an evaluation paper if every option fails:
 1. **Methods for unseen papers: screen, then decide with 10 seeds.**
@@ -834,7 +871,7 @@ chance at class level. For a Task C-style result:
 | 3 | Done: NER, P1 "Next, after week 2" items 1–5: comparisons of 3-seed means, a mixed-backbone ensemble, label semantics and self-training for unseen papers, multi-task again, in-domain pre-training (protocol below) | Met for two changes, both coarse-grained: multi-task on the random splits (+0.75 [+0.10, +1.39]) and label semantics on unseen papers (+1.17 [+0.94, +1.41]). The mixed-backbone vote, self-training and in-domain pre-training do not pass; the reported system stays `crf_ens3` |
 | 4 | Done for NER: P1 "Next, after week 3" items 1, 2, 3 and 5, i.e. votes over the week-3 changes that help, label semantics on the multi-task model, self-training at scale, on Kaggle T4 GPUs (protocol below). Not started: context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | Met for NER by two changes, both on unseen papers. Coarse-grained, the label-semantics vote improves on `crf_ens3` on the CPU (+1.63 [+0.11, +3.16]); the GPU repeat does not confirm it (+0.40 [−1.36, +2.16]). Fine-grained, self-training with 3 teachers improves on the CRF head (GPU, +1.07 [+0.33, +1.80]; +1.22 [+0.60, +1.84] on the random splits, reported). The multi-task vote and label semantics on the multi-task model do not pass. Typing: not started |
 | 5 | Done: NER, P1 "Next, after week 4" item 1, i.e. 10 seeds per split for the CRF reference, multi-task, label semantics and self-training with 3 teachers, on Kaggle T4 GPUs, and the published split (amendment); items 2–7 and a paper outline prepared, and the week-6 options run once each at full size (protocol below). The original week-5 work moves to week 7 | Met. Of the claims re-tested with 10 seeds, fine-grained multi-task on the random splits passes (+1.83 [+0.32, +3.34]); the coarse-grained claims of week 3 and the self-training claim of week 4 do not. The reported system: the multi-task vote coarse-grained on the random splits and fine-grained on unseen papers, `crf_ens3` elsewhere. On the published split, plain MatSciBERT reproduces 69.92 and 72.32 and the CRF head beats both |
-| 6 | In progress: NER, P1 "Next, after week 5", towards a methods paper: methods for unseen papers (DeBERTa-v3-large, document context, multi-task self-training) screened with 3 seeds and decided with 10, and a second dataset (SOFC-Exp, 10 seeds); protocol below | A method whose vote improves on the strongest system on unseen papers under the 10-seed design, and on SOFC-Exp |
+| 6 | In progress: NER, P1 "Next, after week 5", towards a methods paper: methods for unseen papers (DeBERTa-v3-large, document context, multi-task self-training) screened with 3 seeds and decided with 10, and a second dataset (SOFC-Exp, 10 seeds); protocol below. So far: DeBERTa-v3-large stops at the screen; document context passes the screen but neither 10-seed decision (P1, "Week 6 so far"); the multi-task self-training screen and SOFC-Exp are running | A method whose vote improves on the strongest system on unseen papers under the 10-seed design, and on SOFC-Exp |
 | 7 | In progress: NER, part 1, document-level label consistency for unseen papers, a post-processing rule on the saved predictions (no GPU; protocol below); part 2a, recall calibration (a bias on the CRF head's emissions, chosen on inner folds; protocol below); part 2b, combinations of the methods that pass week 6 and mention replacement, fixed after the week-6 decisions. Then class-level taxonomy (LLM or cross-encoder + arborescence) and a relation annotation pilot | Part 1: the rule improves on the strongest system on unseen papers and on SOFC-Exp's CRF head. Taxonomy: first class-level F1 above chance; relation guidelines |
 
 ### Week 2 protocol (fixed before any run)
@@ -1437,6 +1474,11 @@ both granularities, more where F1 is lower. The tools:
 - `ner_bias.py --choose val` takes each run's best D on its validation set
   (SOFC-Exp's validation articles are unseen articles; MaterioMiner's
   validation sentences come from the training papers).
+
+Prior work, found after the protocol below was fixed: Minkov et al. (2006)
+already traded precision for recall in a CRF extractor with a single weight
+on the O label. What this protocol adds is the choice of that weight for
+unseen documents on inner folds, and its test under the 10-seed design.
 
 The output (`crf_eb_m<N>`) pairs with the CRF head by seed. Its D = 0 scores
 must equal the committed `crf_m<N>` runs, which checks determinism. Rough

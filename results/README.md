@@ -93,14 +93,18 @@ CRF head and the methods, model seeds 0 to 900). `gpu/ner_week6_screen.json`
 200, and `gpu/ner_week6_comparisons.json` (without `--screen`) the 10-seed
 decisions. `gpu/ner_week5_seed_analysis.json` adds SOFC-Exp to the published
 splits, the per-type F1 of each week-6 method against the CRF head
-(`week6_types`) and the CRF head's kinds of error (`errors`).
+(`week6_types`) and the CRF head's kinds of error (`errors`). Document
+context has all 10 seeds (stage 2, session a of 16 October); DeBERTa-v3-large
+has only the screen's seeds 0 to 200, since it stopped there, and no SOFC-Exp
+file (its S2 ran out of GPU memory).
 
 Week 7, part 1 (week-7 protocol) applies the consistency rule
 (`ner_consistency.py`) to saved predictions; it trains nothing. `_dc` marks
 its output and `_dcr` its output with retyping, before the seed tag:
 `gpu/ner_results_<granularity>_<protocol>_crf_dc_m<N>.json` for the CRF head
 on both protocols, and `_crf_ens3_dc*` and `_crf_mt_ens3_dc*` for the votes
-on the held-out papers. The votes were made again with `ner_ensemble.py
+on the held-out papers, and `_crf_ctx_dc_m<N>` and `_crf_ctx_ens3_dc*` for
+document context (reported). The votes were made again with `ner_ensemble.py
 --save-predictions` (their scores equal the stored votes) before the rule was
 applied. The output files keep the scores, the number of entities added and
 retyped, and the input's F1 (`input_f1`), but not the predictions, which the
