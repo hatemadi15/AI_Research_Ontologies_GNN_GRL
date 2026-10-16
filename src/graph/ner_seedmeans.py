@@ -88,6 +88,9 @@ Part 2a (the same file) tests recall calibration (ner_bias.py: crf_eb, its bias 
 inner folds; crf_ebv, on the validation sentences):
   - Decisions: crf_eb vs crf on the held-out papers, and its vote crf_eb_ens3 vs
     UNSEEN_BEST per granularity. Reported: crf_ebv vs crf.
+Part 2c (the same file) tests coarse-to-fine completion (ner_coarse_to_fine.py, _cf):
+  - Decisions, fine-grained on the held-out papers: crf_cf vs crf and crf_mt_ens3_cf vs
+    crf_mt_ens3. Reported: crf_mt_cf vs crf_mt.
 
 Usage:
   python src/graph/ner_seedmeans.py [--results results] [--out results/ner_week3_comparisons.json]
@@ -273,6 +276,10 @@ WEEK7_SYSTEMS = {
     'crf_eb': seed_family('crf_eb'),
     'crf_ebv': seed_family('crf_ebv'),
     'crf_eb_ens3': vote_family('crf_eb'),
+    # part 2c: coarse-to-fine completion (ner_coarse_to_fine.py), fine-grained only
+    'crf_cf': dc_family(WEEK6_SYSTEMS['crf'], '_cf'),
+    'crf_mt_cf': dc_family(WEEK6_SYSTEMS['crf_mt'], '_cf'),
+    'crf_mt_ens3_cf': dc_family(WEEK6_SYSTEMS['crf_mt_ens3'], '_cf'),
 }
 WEEK7_COMPARISONS = (
     # decision 1: the rule on the CRF head (held-out papers; random splits reported)
@@ -290,6 +297,11 @@ WEEK7_COMPARISONS = (
     *(('crf_eb_ens3', ref, {g: LOPO}) for g, ref in UNSEEN_BEST.items()),
     # reported: the bias chosen on the validation sentences (from the training papers)
     ('crf_ebv', 'crf', None),
+    # part 2c, decisions (fine-grained, held-out papers): coarse-to-fine completion on the
+    # CRF head and on the multi-task vote; reported: on the multi-task model
+    ('crf_cf', 'crf', {'fine': LOPO}),
+    ('crf_mt_ens3_cf', 'crf_mt_ens3', {'fine': LOPO}),
+    ('crf_mt_cf', 'crf_mt', None),
 )
 
 

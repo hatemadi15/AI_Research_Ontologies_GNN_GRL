@@ -104,7 +104,11 @@ its output and `_dcr` its output with retyping, before the seed tag:
 `gpu/ner_results_<granularity>_<protocol>_crf_dc_m<N>.json` for the CRF head
 on both protocols, and `_crf_ens3_dc*` and `_crf_mt_ens3_dc*` for the votes
 on the held-out papers, and `_crf_ctx_dc_m<N>` and `_crf_ctx_ens3_dc*` for
-document context (reported). The votes were made again with `ner_ensemble.py
+document context (reported). Part 2c (coarse-to-fine completion,
+`ner_coarse_to_fine.py`) writes `_cf` the same way, fine-grained only:
+`_crf_cf_m<N>`, `_crf_mt_cf*` and `_crf_mt_ens3_cf*`, each run with the
+fold's type mapping (`mapping`), the entities added and the test sentences
+it could not align (`n_unaligned`). The votes were made again with `ner_ensemble.py
 --save-predictions` (their scores equal the stored votes) before the rule was
 applied. The output files keep the scores, the number of entities added and
 retyped, and the input's F1 (`input_f1`), but not the predictions, which the

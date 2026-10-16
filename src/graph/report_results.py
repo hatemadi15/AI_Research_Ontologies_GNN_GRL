@@ -193,13 +193,20 @@ WEEK7_DECISIONS = WEEK7_COMPARISONS[:3]
 WEEK7A_COMPARISONS = (('crf_eb', 'crf'), *(('crf_eb_ens3', ref) for ref in UNSEEN_BEST.values()),
                       ('crf_ebv', 'crf'))
 WEEK7A_DECISIONS = WEEK7A_COMPARISONS[:3]
+# Week 7, part 2c: coarse-to-fine completion (ner_coarse_to_fine.py), fine-grained only; the
+# first two decide, on the held-out papers
+WEEK7C_COMPARISONS = (('crf_cf', 'crf'), ('crf_mt_ens3_cf', 'crf_mt_ens3'),
+                      ('crf_mt_cf', 'crf_mt'))
+WEEK7C_DECISIONS = WEEK7C_COMPARISONS[:2]
 WEEK7_SYSTEM_NAMES = {**WEEK6_NAMES, **{
     f'{stem}{rule}': f'{WEEK6_NAMES[stem]} + {WEEK7_NAMES["crf" + rule]}'
     for stem in ('crf', 'crf_ens3', 'crf_mt_ens3', 'crf_ctx', 'crf_ctx_ens3')
     for rule in ('_dc', '_dcr')},
     'crf_eb': 'CRF head + recall calibration',
     'crf_ebv': 'CRF head + recall calibration chosen on validation',
-    'crf_eb_ens3': 'vote of the CRF head + recall calibration'}
+    'crf_eb_ens3': 'vote of the CRF head + recall calibration',
+    **{v: f'{WEEK6_NAMES[ref]} + coarse-to-fine completion'
+       for v, ref in WEEK7C_COMPARISONS}}
 # the label of a week-7 method in the SOFC-Exp bullet (both parts decide on SOFC-Exp)
 WEEK7_SOFC_LABELS = {**{m: f"Week 7, {name} on the CRF head's predictions"
                         for m, name in WEEK7_NAMES.items()},
@@ -769,6 +776,19 @@ WEEK7A_INTRO = (
     "3-model seed ensemble coarse-grained). The other rows are reported without a decision.\n")
 
 
+WEEK7C_INTRO = (
+    "Δ = with the rule − without it, fine-grained, on the same held-out paper, GPU runs only, "
+    "10 model seeds: a model scores the mean of its 10 runs, a vote the mean of its votes over "
+    "3 disjoint seed triples. Week-7 protocol, part 2c: coarse-to-fine completion "
+    "(`ner_coarse_to_fine.py`, fixed before it was applied): a coarse-grained predicted entity "
+    "of a type that maps to one fine-grained type in the fold's training papers becomes a "
+    "fine-grained entity where the fine level predicts only O. Pre-registered rule: a change "
+    "improves on its reference only if the 95% Student-t CI of the mean micro-F1 difference "
+    "lies entirely above 0. Decisions: the rule on the CRF head and on the multi-task vote; "
+    "the multi-task model is reported. SOFC-Exp has one level of types, so this is a result "
+    "on MaterioMiner only.\n")
+
+
 def ner_week7_table(res, comparisons=WEEK7_COMPARISONS,
                     title='part 1 (the consistency rule, 10-seed means, GPU runs)',
                     intro=WEEK7_INTRO):
@@ -805,7 +825,10 @@ def build_tables(res):
            + ner_week7_table(res)
            + ner_week7_table(res, WEEK7A_COMPARISONS,
                              'part 2a (recall calibration, 10-seed means, GPU runs)',
-                             WEEK7A_INTRO))
+                             WEEK7A_INTRO)
+           + ner_week7_table(res, WEEK7C_COMPARISONS,
+                             'part 2c (coarse-to-fine completion, 10-seed means, GPU runs)',
+                             WEEK7C_INTRO))
     return '\n'.join(out).strip()
 
 
@@ -992,6 +1015,10 @@ def ner_notes(res):
         note += week6_verdict_line(week7, variant, reference,
                                    'recall calibration, its bias chosen on inner folds, 10 seeds',
                                    week='7, part 2a', names=WEEK7_SYSTEM_NAMES)
+    for variant, reference in WEEK7C_DECISIONS:
+        note += week6_verdict_line(week7, variant, reference,
+                                   'coarse-to-fine completion on the saved predictions of 10 '
+                                   'seeds', week='7, part 2c', names=WEEK7_SYSTEM_NAMES)
     return note + sofc_note(analysis)
 
 

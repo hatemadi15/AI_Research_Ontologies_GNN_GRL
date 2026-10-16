@@ -1660,3 +1660,17 @@ they are. Each run stores how many test sentences this concerns
 (`n_unaligned`).
 
 **Budget:** no GPU; seconds per file.
+
+**Outcome of part 2c: no significant change, no claim.** The folds mapped
+VAL, STD and MAC everywhere, MAT where the training papers reached 90%, and
+ETP when the paper holding all of it was a training paper. Fine-grained, on
+the 4 held-out papers:
+- on the CRF head, +0.34 [−0.91, +1.59] (decision 1);
+- on the multi-task vote, +0.12 [−1.76, +2.01] (decision 2);
+- on the multi-task model, +0.07 [−1.40, +1.54] (reported).
+
+The rule adds 539 entities over the CRF head's 40 runs (about 13 per run),
+and 39% of them are right; on the multi-task model 457, 35% right. That is
+above the break-even precision of about F1/2, so they help a little, but
+too few to show over 4 papers. The fine-grained misses are mostly not of
+the types the coarse level can vouch for.
