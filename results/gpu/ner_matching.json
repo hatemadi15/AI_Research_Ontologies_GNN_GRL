@@ -1500,5 +1500,323 @@
       "crossing": 0.004,
       "spurious": 0.061
     }
+  },
+  "conventions": {
+    "fine": {
+      "n_shared": 35,
+      "n_retyped": 7,
+      "retyped": {
+        "data": {
+          "10.1007_s11340-021-00758-x.conll": [
+            "DataSet"
+          ],
+          "10.1038_ncomms7164.conll": [
+            "DataSet"
+          ],
+          "10.1038_s41467-020-19071-7.conll": [
+            "DataSet"
+          ],
+          "10.3390_met10111458.conll": [
+            "MechanicalTestDataSet"
+          ]
+        },
+        "fatigue": {
+          "10.1007_s11340-021-00758-x.conll": [
+            "FatigueTest"
+          ],
+          "10.1038_s41467-020-19071-7.conll": [
+            "FatigueTest",
+            "Mechanism"
+          ],
+          "10.3390_met10111458.conll": [
+            "LoadingType",
+            "Mechanism"
+          ]
+        },
+        "results": {
+          "10.1038_ncomms7164.conll": [
+            "DataSet"
+          ],
+          "10.1038_s41467-020-19071-7.conll": [
+            "MechanicalTestDataSet"
+          ],
+          "10.3390_met10111458.conll": [
+            "MechanicalTestDataSet"
+          ]
+        },
+        "sample": {
+          "10.1038_ncomms7164.conll": [
+            "TestSpecimen"
+          ],
+          "10.1038_s41467-020-19071-7.conll": [
+            "FatigueTestSpecimen"
+          ]
+        },
+        "samples": {
+          "10.1038_ncomms7164.conll": [
+            "FatigueTestSpecimen",
+            "TestSpecimen"
+          ],
+          "10.1038_s41467-020-19071-7.conll": [
+            "FatigueTestSpecimen",
+            "TestSpecimen"
+          ]
+        },
+        "specimens": {
+          "10.1038_ncomms7164.conll": [
+            "TestSpecimen"
+          ],
+          "10.3390_met10111458.conll": [
+            "FatigueTestSpecimen",
+            "TestSpecimen"
+          ]
+        },
+        "strength": {
+          "10.1038_s41467-020-19071-7.conll": [
+            "MechanicalProperty",
+            "TensileYieldStrength"
+          ],
+          "10.3390_met10111458.conll": [
+            "MechanicalProperty",
+            "TensileYieldStrength"
+          ]
+        }
+      },
+      "n_retyped_related": 6,
+      "span_length": {
+        "DataSet": {
+          "10.1007_s11340-021-00758-x.conll": 1.91,
+          "10.1038_ncomms7164.conll": 1.1,
+          "10.1038_s41467-020-19071-7.conll": 1.0
+        },
+        "MaterialClass": {
+          "10.1038_ncomms7164.conll": 2.31,
+          "10.1038_s41467-020-19071-7.conll": 2.04,
+          "10.3390_met10111458.conll": 2.14
+        },
+        "Mechanism": {
+          "10.1038_ncomms7164.conll": 1.57,
+          "10.1038_s41467-020-19071-7.conll": 1.97,
+          "10.3390_met10111458.conll": 2.33
+        },
+        "Value": {
+          "10.1007_s11340-021-00758-x.conll": 2.64,
+          "10.1038_ncomms7164.conll": 1.91,
+          "10.1038_s41467-020-19071-7.conll": 2.7,
+          "10.3390_met10111458.conll": 2.43
+        }
+      }
+    },
+    "coarse": {
+      "n_shared": 83,
+      "n_retyped": 15,
+      "retyped": {
+        "HCF": {
+          "10.1007_s11340-021-00758-x.conll": [
+            "MEC"
+          ],
+          "10.1038_s41467-020-19071-7.conll": [
+            "CHP",
+            "MEC"
+          ],
+          "10.3390_met10111458.conll": [
+            "MEC"
+          ]
+        },
+        "SEM": {
+          "10.1007_s11340-021-00758-x.conll": [
+            "CHP",
+            "EQU"
+          ],
+          "10.1038_ncomms7164.conll": [
+            "CHP",
+            "EQU"
+          ]
+        },
+        "air": {
+          "10.1038_s41467-020-19071-7.conll": [
+            "PRP"
+          ],
+          "10.3390_met10111458.conll": [
+            "ETP"
+          ]
+        },
+        "concentration": {
+          "10.1038_s41467-020-19071-7.conll": [
+            "PRO"
+          ],
+          "10.3390_met10111458.conll": [
+            "PQT"
+          ]
+        },
+        "cyclic loading": {
+          "10.1038_ncomms7164.conll": [
+            "MTP"
+          ],
+          "10.1038_s41467-020-19071-7.conll": [
+            "MTP"
+          ],
+          "10.3390_met10111458.conll": [
+            "CHP",
+            "MTP"
+          ]
+        },
+        "diameter": {
+          "10.1007_s11340-021-00758-x.conll": [
+            "MIP",
+            "PRO"
+          ],
+          "10.1038_s41467-020-19071-7.conll": [
+            "PRO"
+          ]
+        },
+        "disks": {
+          "10.1007_s11340-021-00758-x.conll": [
+            "SDE"
+          ],
+          "10.1038_s41467-020-19071-7.conll": [
+            "OBJ",
+            "SDE"
+          ]
+        },
+        "energy": {
+          "10.1038_ncomms7164.conll": [
+            "MIP"
+          ],
+          "10.3390_met10111458.conll": [
+            "MEP",
+            "PQT"
+          ]
+        },
+        "fatigue": {
+          "10.1007_s11340-021-00758-x.conll": [
+            "CHP"
+          ],
+          "10.1038_s41467-020-19071-7.conll": [
+            "CHP",
+            "MEC",
+            "MEP"
+          ],
+          "10.3390_met10111458.conll": [
+            "MEC",
+            "MTP"
+          ]
+        },
+        "frequency": {
+          "10.1038_s41467-020-19071-7.conll": [
+            "MTP"
+          ],
+          "10.3390_met10111458.conll": [
+            "MEC",
+            "MTP"
+          ]
+        },
+        "high cycle fatigue": {
+          "10.1038_s41467-020-19071-7.conll": [
+            "CHP",
+            "MEC"
+          ],
+          "10.3390_met10111458.conll": [
+            "MEC"
+          ]
+        },
+        "plasticity": {
+          "10.1038_s41467-020-19071-7.conll": [
+            "DAM"
+          ],
+          "10.3390_met10111458.conll": [
+            "MEC"
+          ]
+        },
+        "size": {
+          "10.1038_s41467-020-19071-7.conll": [
+            "MIP",
+            "PRO"
+          ],
+          "10.3390_met10111458.conll": [
+            "PRO"
+          ]
+        },
+        "steel": {
+          "10.1007_s11340-021-00758-x.conll": [
+            "MAT"
+          ],
+          "10.1038_ncomms7164.conll": [
+            "MAC"
+          ],
+          "10.1038_s41467-020-19071-7.conll": [
+            "MAC"
+          ],
+          "10.3390_met10111458.conll": [
+            "MAC"
+          ]
+        },
+        "tensile stress": {
+          "10.1038_s41467-020-19071-7.conll": [
+            "MEP"
+          ],
+          "10.3390_met10111458.conll": [
+            "PQT"
+          ]
+        }
+      },
+      "span_length": {
+        "CHP": {
+          "10.1007_s11340-021-00758-x.conll": 1.76,
+          "10.1038_ncomms7164.conll": 1.92,
+          "10.1038_s41467-020-19071-7.conll": 2.17,
+          "10.3390_met10111458.conll": 2.04
+        },
+        "DAM": {
+          "10.1007_s11340-021-00758-x.conll": 1.65,
+          "10.1038_ncomms7164.conll": 1.94,
+          "10.1038_s41467-020-19071-7.conll": 1.63,
+          "10.3390_met10111458.conll": 1.31
+        },
+        "DAT": {
+          "10.1007_s11340-021-00758-x.conll": 1.91,
+          "10.1038_ncomms7164.conll": 1.1,
+          "10.1038_s41467-020-19071-7.conll": 1.24,
+          "10.3390_met10111458.conll": 2.17
+        },
+        "DEF": {
+          "10.1038_ncomms7164.conll": 1.73,
+          "10.1038_s41467-020-19071-7.conll": 1.38,
+          "10.3390_met10111458.conll": 1.18
+        },
+        "LOC": {
+          "10.1038_ncomms7164.conll": 1.17,
+          "10.1038_s41467-020-19071-7.conll": 1.39,
+          "10.3390_met10111458.conll": 1.17
+        },
+        "MAC": {
+          "10.1038_ncomms7164.conll": 2.31,
+          "10.1038_s41467-020-19071-7.conll": 2.04,
+          "10.3390_met10111458.conll": 2.14
+        },
+        "MEC": {
+          "10.1007_s11340-021-00758-x.conll": 1.73,
+          "10.1038_ncomms7164.conll": 1.65,
+          "10.1038_s41467-020-19071-7.conll": 2.04,
+          "10.3390_met10111458.conll": 2.22
+        },
+        "OBJ": {
+          "10.1038_ncomms7164.conll": 1.0,
+          "10.1038_s41467-020-19071-7.conll": 1.52,
+          "10.3390_met10111458.conll": 1.29
+        },
+        "PRO": {
+          "10.1007_s11340-021-00758-x.conll": 2.3,
+          "10.1038_s41467-020-19071-7.conll": 1.6,
+          "10.3390_met10111458.conll": 1.94
+        },
+        "VAL": {
+          "10.1007_s11340-021-00758-x.conll": 2.64,
+          "10.1038_ncomms7164.conll": 1.97,
+          "10.1038_s41467-020-19071-7.conll": 2.74,
+          "10.3390_met10111458.conll": 2.43
+        }
+      }
+    }
   }
 }

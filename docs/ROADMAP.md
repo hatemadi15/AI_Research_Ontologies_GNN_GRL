@@ -363,6 +363,12 @@ once.
   ancestor or descendant of the gold type ("samples" as TestSpecimen or
   FatigueTestSpecimen, by paper).
 - **SOFC-Exp:** 83.75 strict, 88.80 under overlap.
+- **In the gold annotations** (`conventions`): 35 fine-grained names are
+  entities in two or more papers; 7 take different types, 6 of them a class
+  and its MMO subclass (DataSet/MechanicalTestDataSet,
+  TestSpecimen/FatigueTestSpecimen, MechanicalProperty/TensileYieldStrength).
+  Coarse-grained, 15 of 83. DataSet spans average 1.9 words in one paper,
+  1.0–1.1 in the others.
 - Strict F1 stays the decision metric; the looser criteria are reported
   alongside, as SemEval-2013 did.
 

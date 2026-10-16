@@ -173,4 +173,6 @@ CRF head on the published splits; `gap` the random-split minus held-out
 difference per criterion; `near_misses` the shares of the CRF head's
 predictions that are right, of another type (fine-grained, also of an MMO
 ancestor or descendant type), inside a longer gold entity, around a shorter
-one, crossing one, or spurious.
+one, crossing one, or spurious; `conventions` what the gold annotations alone
+show: the names that are entities in two or more papers, those with
+different types, and the mean span length of each type per paper.

@@ -25,7 +25,12 @@ Output, results/gpu/ner_matching.json:
   - near_misses: per granularity and protocol, the CRF head's predictions over all its runs:
     the shares that are right, of the right span and another type (fine-grained, also the
     share whose type is an MMO ancestor or descendant of the gold one), inside a longer gold
-    entity, around a shorter one, crossing one, or overlapping none (spurious).
+    entity, around a shorter one, crossing one, or overlapping none (spurious);
+  - conventions: per MaterioMiner granularity, from the gold annotations alone, the names
+    (exact words) that are entities in two or more papers, those that take different types
+    (in different papers, or within one), and of those, fine-grained, the ones whose types are
+    pairwise MMO ancestors or descendants of each other; and per type with at least 10
+    entities in each of at least 3 papers, its mean span length in words per paper.
 
 Usage:
   python src/graph/ner_matching.py [--results results/gpu] [--out PATH]
@@ -37,7 +42,7 @@ import os
 from pathlib import Path
 
 from ner_ensemble import tags_to_spans
-from ner_mentions import family_files, load, votes
+from ner_mentions import corpus, family_files, load, votes
 from ner_seedmeans import GRANULARITIES, LOPO, PROTOCOLS, spread
 
 RESULTS_DIR = Path(__file__).resolve().parents[2] / 'results' / 'gpu'
@@ -149,6 +154,30 @@ def near_misses(files, related=None):
     return out
 
 
+def conventions(data, related=None, min_entities=10, min_papers=3):
+    """The conventions section for one granularity's data [(words, tags, paper)]."""
+    types, lengths = {}, {}
+    for words, tags, paper in data:
+        for start, end, kind in tags_to_spans(tags)[0]:
+            types.setdefault(tuple(words[start:end]), {}).setdefault(paper, set()).add(kind)
+            lengths.setdefault(kind, {}).setdefault(paper, []).append(end - start)
+    shared = {name: papers for name, papers in types.items() if len(papers) >= 2}
+    retyped = {' '.join(name): {paper: sorted(t) for paper, t in sorted(papers.items())}
+               for name, papers in sorted(shared.items())
+               if len(set().union(*papers.values())) > 1}
+    out = {'n_shared': len(shared), 'n_retyped': len(retyped), 'retyped': retyped}
+    if related is not None:
+        out['n_retyped_related'] = sum(
+            all(related(a, b) for a in kinds for b in kinds if a != b)
+            for kinds in (set().union(*papers.values()) for papers in retyped.values()))
+    out['span_length'] = {
+        kind: {paper: round(sum(v) / len(v), 2) for paper, v in sorted(per_paper.items())
+               if len(v) >= min_entities}
+        for kind, per_paper in sorted(lengths.items())
+        if sum(len(v) >= min_entities for v in per_paper.values()) >= min_papers}
+    return out
+
+
 def held_out_systems(directory, granularity, protocol):
     """{system: per-pair F1} of the families with all 10 seeds and of their votes."""
     out = {}
@@ -183,6 +212,9 @@ def analyse(directory):
                              - out['systems'][f'{g}_{LOPO}'][s][c]['mean'], 2)
                     for c in CRITERIA}
                 for s in found[RANDOM] if s in found[LOPO]}
+    for g in GRANULARITIES:
+        out.setdefault('conventions', {})[g] = conventions(
+            corpus(g), mmo_related if g == 'fine' else None)
     for g in PUBLISHED_SPLITS:
         systems = {}
         for system, suffix in PUBLISHED_SYSTEMS.items():
@@ -208,6 +240,11 @@ def main(argv=None):
     for key, shares in result['near_misses'].items():
         print(f'  {key}, the CRF head\'s predictions: ' + ', '.join(
             f'{k} {100 * v:.1f}%' for k, v in shares.items() if k != 'n_pred'))
+    for g, c in result['conventions'].items():
+        related = (f", {c['n_retyped_related']} of them MMO-related"
+                   if 'n_retyped_related' in c else '')
+        print(f"  {g}-grained gold: {c['n_shared']} names are entities in 2 or more papers, "
+              f"{c['n_retyped']} of them with different types{related}")
     for g, systems in result['gap'].items():
         for system, gaps in systems.items():
             print(f'  {g}-grained {system}, random splits minus held-out papers: '

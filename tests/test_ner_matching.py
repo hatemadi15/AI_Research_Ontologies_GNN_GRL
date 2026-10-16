@@ -81,3 +81,24 @@ def test_analyse_the_crf_head_on_both_protocols(tmp_path):
     assert gap['strict'] > gap['exact'] > gap['overlap'] > 0
     assert set(out['near_misses']) == {'coarse_random_split_vary', 'coarse_leave_one_paper_out'}
     assert 'wrong_type_related' not in out['near_misses']['coarse_leave_one_paper_out']
+
+
+def test_conventions_of_the_gold_annotations():
+    data = [(['the', 'samples'], ['O', 'B-TestSpecimen'], 'p1'),
+            (['the', 'samples'], ['O', 'B-FatigueTestSpecimen'], 'p2'),
+            (['fatigue'], ['B-Mechanism'], 'p1'),
+            (['fatigue'], ['B-FatigueTest'], 'p2'),
+            (['EBSD', 'data'], ['B-DataSet', 'I-DataSet'], 'p1'),
+            (['data'], ['B-DataSet'], 'p2'),
+            (['data'], ['B-DataSet'], 'p3'),
+            (['crack'], ['B-Crack'], 'p1')]
+    related = {frozenset({'TestSpecimen', 'FatigueTestSpecimen'})}
+    out = nm.conventions(data, related=lambda a, b: frozenset({a, b}) in related,
+                         min_entities=1, min_papers=2)
+    assert (out['n_shared'], out['n_retyped'], out['n_retyped_related']) == (3, 2, 1)
+    assert out['retyped'] == {'fatigue': {'p1': ['Mechanism'], 'p2': ['FatigueTest']},
+                              'samples': {'p1': ['TestSpecimen'],
+                                          'p2': ['FatigueTestSpecimen']}}
+    assert out['span_length']['DataSet'] == {'p1': 2.0, 'p2': 1.0, 'p3': 1.0}
+    assert 'Crack' not in out['span_length']                 # one paper only
+    assert 'n_retyped_related' not in nm.conventions(data)

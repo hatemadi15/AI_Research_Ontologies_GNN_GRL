@@ -316,6 +316,12 @@ each gold entity matched at most once and an overlap counted in full
   another.
 - **SOFC-Exp:** 83.75 strict and 88.80 under overlap; types are almost
   never confused there (84.06 when only the span must match).
+- **The gold annotations agree.** Only 35 fine-grained names are entities
+  in two or more papers. 7 of them take different types, 6 of these a class
+  and its MMO subclass (DataSet and MechanicalTestDataSet, TestSpecimen and
+  FatigueTestSpecimen, MechanicalProperty and TensileYieldStrength).
+  DataSet entities are 1.9 words long on average in one paper and 1.0–1.1
+  in the others.
 
 Part of what looks like a failure to generalise is a difference in
 annotation conventions between papers, which a model trained on other
