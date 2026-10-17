@@ -548,7 +548,11 @@ MatSciBERT (gupta2022matscibert) is pre-trained on materials papers;
 Trewartha et al. (trewartha2022quantifying) compare general, scientific
 and materials pre-training on materials NER tasks, and MatSci-NLP
 (song2023matscinlp) gathers materials NLP tasks, NER among them, into one
-benchmark. SOFC-Exp (friedrich2020sofc) holds out whole articles in its
+benchmark. MuLMS (schrader2023mulms) annotates 50 articles from seven
+materials subfields; training one encoder with a head per corpus on it,
+SOFC-Exp and a synthesis-procedure corpus did not improve NER on any of
+them, which agrees with our multi-task result on SOFC-Exp's two levels
+(Section 6.4). SOFC-Exp (friedrich2020sofc) holds out whole articles in its
 official split, and its test articles are cut into words differently from
 its training articles (Section 2; swain2016chemdataextractor). MaterioMiner
 (durmaz2024materiominer) types its entities with the classes of an

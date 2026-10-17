@@ -2615,3 +2615,36 @@ decision and the reported comparison of 10 articles against all 26. On a
 tiny random model every existing option writes byte-identical results
 files, and every earlier batch is unchanged. Part 1 runs from the
 protocol's commit, part 2 from this one.
+
+### Candidates for week 10 (17 October; not a protocol)
+
+Written down before any run of week 9, so the choice made after its
+decisions can be checked against this list. None is fixed yet.
+1. **Extra corpora, each with its own head.** C19 makes more papers the
+   strongest lever, but outside evidence is against this way of adding
+   them: in MuLMS (Schrader et al., 2023, Table 11), one MatSciBERT with
+   a head per corpus, trained on MuLMS together with SOFC-Exp or a
+   synthesis-procedure corpus (MSPT), changes micro F1 by −0.1 to −1.5 on
+   each corpus's own test set. Those test sets are in distribution, with
+   thousands of training sentences; ours are unseen papers with three
+   training papers. A screen at most, and only if the others fail.
+2. **MuLMS as a third corpus.** 50 CC-BY articles from 7 subfields
+   (electrolysis, graphene, PEMFC, SOFC, polymers, semiconductors, steel),
+   split 36/7/7 by document; 10,186 sentences and 46,351 entities of 13
+   types; its MatSciBERT-CRF tagger scores 79.6 micro F1 on the test
+   documents. Leaving one subfield out would test C2 across topics, and
+   draws of a MaterioMiner-sized training set would test mention
+   replacement at small size, as week 9, part 2 does on SOFC-Exp. Its
+   entities nest, so a flat version must be chosen and checked first, and
+   the corpus files' licence read.
+3. **A vote across methods.** Coarse-grained, multi-task training and
+   mention replacement change different types (per-type correlation
+   −0.72, above). A vote whose members come from different methods (the
+   multi-task model, mention replacement and, after week 9, the two
+   together) needs no training, since every member saved its predictions.
+   It would be decided against the strongest system like any vote. The
+   mixed-backbone vote of week 3 (three encoders) did not pass.
+4. **Mention replacement with names from outside the training papers:**
+   the silver names the teachers tag in the 40,000 corpus sentences, so
+   that the copies hold more names than three papers do. It needs the
+   teachers of each fold, as self-training does.
