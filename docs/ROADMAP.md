@@ -2873,6 +2873,11 @@ this on the GPU. Nothing else in the design changes.
   random model, trained on the real MuLMS folds and splits on the CPU,
   goes through the seed analysis, the mention and matching analyses, Table
   4 and both figures.
+- *23:01: week 10's 10 mention-replacement jobs done* (19.5–26.3 minutes
+  each, no error in the log). The first CRF job had run 10 minutes without
+  finishing, longer than the cost model's 6: loading the model and scoring
+  the held-out subfield weigh more than training on 340 sentences. The
+  session should end around 00:15–00:40.
 
 **Outcome of part 1: 3 of the 6 decisions pass; the combination's vote is
 the strongest fine-grained system on unseen papers, but S2 fails at both
