@@ -4,11 +4,11 @@
 becomes (`docs/PAPER.md`): a methods paper if a method passes its
 pre-registered decisions and repeats on SOFC-Exp, otherwise an evaluation
 paper. Sections 1–5, 7 and 8 rest on finished, committed results. In
-Section 6 (methods for unseen papers), recall calibration (no gain, C15),
-multi-task training on SOFC-Exp's two levels (no gain, C7) and mention
-replacement (a gain on unseen papers at both granularities, C20) are
-decided. Stage 2 of multi-task self-training waits for its runs (ROADMAP
-§4, week 6). The numbers come from `results/`
+Section 6 (methods for unseen papers), multi-task self-training (no
+decision passes, C6), recall calibration (no gain, C15), multi-task
+training on SOFC-Exp's two levels (no gain, C7) and mention replacement (a
+gain on unseen papers at both granularities, C20) are decided. Mention
+replacement on the multi-task model is next (ROADMAP §4, week 9). The numbers come from `results/`
 through the claims table of `docs/PAPER.md` (C1–C20). References are keys of `docs/references.bib`.
 
 ---
@@ -217,6 +217,9 @@ each of these fails:
 - coarse-grained multi-task training (+0.71 [−0.15, +1.56]);
 - document context (+1.14 [−0.94, +3.22] fine-grained; on SOFC-Exp +0.58
   [−0.26, +1.42]);
+- multi-task self-training (+5.47 [−0.74, +11.68] fine-grained, the
+  largest mean gain, which one of the four papers does not share;
+  Section 6.1);
 - earlier, class weights, domain-adaptive and in-domain pre-training, and
   other backbones.
 
@@ -390,16 +393,24 @@ papers once, at both levels.
   on the validation sentences.
 - *Students:* each student is a multi-task model trained on gold plus
   silver sentences, the silver ones at weight 0.5 (liang2020bond).
-- *Status:* it passed the week-6 screen with +6.06 [+1.05, +11.06]
-  fine-grained against the CRF head; its 10-seed decisions are next.
+- *Screen:* +6.06 [+1.05, +11.06] fine-grained against the CRF head.
+- *Result (10 seeds): no decision passes.* Against the CRF head it gains
+  +5.47 [−0.74, +11.68] fine-grained, the largest mean gain of any method
+  on unseen papers, and +0.90 [−1.18, +2.98] coarse-grained. Three papers
+  gain 4–9 points (+8.86, +8.31, +4.21) and the fourth +0.51, so with 3
+  degrees of freedom the interval reaches below 0. Its votes gain +1.54
+  [−1.73, +4.82] over the multi-task vote and +1.08 [−1.40, +3.57] over
+  the seed vote coarse-grained. On unseen names it gains +6.35 [−0.13,
+  +12.84] fine-grained. Unlike document context's (Section 5.6), its
+  screen held up: about +5.2 on the 7 seeds the screen did not see.
 - *SOFC-Exp:* its two levels (entity and slot types) allow a repeat. The
   corpus is 40,000 sentences of 292 open-access SOFC articles, with
   SOFC-Exp's articles and any sentence sharing an 8-gram with them left out.
   It is cut into words with the tokenizer of SOFC-Exp's training articles.
   As SOFC-Exp annotates only sentences that describe experiments, a corpus
   sentence can be silver only if every teacher tags an experiment in it.
-  This repeat is fixed before the MaterioMiner decisions, and runs if one
-  of them passes.
+  This repeat was fixed before the MaterioMiner decisions, to run if one of
+  them passed; none did, so it did not run.
 
 **6.2 Recall calibration.** On unseen papers the CRF head predicts too
 few entities (Section 5.7), so a bias D is added to the emission score of

@@ -249,8 +249,8 @@ granularity) score exactly as the separately trained CRF runs. Week 5 used
     84.98 and macro 82.31, against the published 84.77 and 82.39 (Gupta et
     al., 2022): the converted corpus behaves like the original.
 
-**Week 6 so far** (§4; GPU runs on the 4 held-out papers; stage 2 of
-multi-task self-training and SOFC-Exp's S2 for document context are next):
+**Week 6** (§4; GPU runs on the 4 held-out papers; done on 17 October: no
+week-6 method passes a decision):
 - **The screen** (seeds 0, 100 and 200, 3-seed means against the CRF head).
   DeBERTa-v3-large stops: −4.38 [−7.32, −1.45] fine-grained, −8.01
   [−11.72, −4.30] coarse-grained, with similar validation scores on the
@@ -270,6 +270,29 @@ multi-task self-training and SOFC-Exp's S2 for document context are next):
     +0.76 [−1.79, +3.31] against the seed vote (coarse-grained).
   - Reported only: its vote against the seed vote fine-grained, +2.21
     [+0.01, +4.41].
+- **Multi-task self-training with 10 seeds (stage 2)** passes none of its
+  4 decisions (session b of 17 October, `w6c:mtst`, from bundle 9e990f0
+  with session b's screen results; 7.2 hours on one lane, since the four
+  papers' jobs extend the same files; the repeat `smokes` is identical at
+  77.95, and the 168 multi-task teacher records it trained again equal the
+  committed multi-task runs).
+  - Decision 1, against the CRF head: fine-grained +5.47 [−0.74, +11.68]
+    and coarse-grained +0.90 [−1.18, +2.98]. Fine-grained, three papers
+    gain 4–9 points (+8.86, +8.31, +4.21), but 10.1038_s41467-020-19071-7
+    gains +0.51. With 3 degrees of freedom the interval reaches −0.74.
+  - Decision 2, its vote against the strongest system on unseen papers:
+    +1.54 [−1.73, +4.82] against the multi-task vote (fine-grained) and
+    +1.08 [−1.40, +3.57] against the seed vote (coarse-grained).
+  - Reported: against multi-task training alone, +1.75 [−2.16, +5.67] and
+    +1.46 [−0.99, +3.91]; its vote against the seed vote fine-grained,
+    +5.20 [−0.59, +10.99]; on unseen names fine-grained, +6.35 [−0.13,
+    +12.84] (seen +3.50 [−5.87, +12.86]).
+  - Unlike document context's, its screen held up: the 7 seeds it did not
+    see gain about +5.2 against +6.06 on the screen's 3. It has the largest
+    mean gain of any method on unseen papers, and it still makes no claim.
+    With 4 papers a gain must be both large and the same on every paper.
+  - S2 on SOFC-Exp (`w6c:sofc-mtst`, the amendment below) does not run:
+    it needed a pass on MaterioMiner.
 - **The screen was optimistic, as week 5 predicted.** On the 7 seeds the
   screen did not use (300 to 900), context gains +0.49 [−3.10, +4.07]
   fine-grained, against +2.66 on the screen's 3. One paper
@@ -988,7 +1011,7 @@ chance at class level. For a Task C-style result:
 | 3 | Done: NER, P1 "Next, after week 2" items 1–5: comparisons of 3-seed means, a mixed-backbone ensemble, label semantics and self-training for unseen papers, multi-task again, in-domain pre-training (protocol below) | Met for two changes, both coarse-grained: multi-task on the random splits (+0.75 [+0.10, +1.39]) and label semantics on unseen papers (+1.17 [+0.94, +1.41]). The mixed-backbone vote, self-training and in-domain pre-training do not pass; the reported system stays `crf_ens3` |
 | 4 | Done for NER: P1 "Next, after week 3" items 1, 2, 3 and 5, i.e. votes over the week-3 changes that help, label semantics on the multi-task model, self-training at scale, on Kaggle T4 GPUs (protocol below). Not started: context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | Met for NER by two changes, both on unseen papers. Coarse-grained, the label-semantics vote improves on `crf_ens3` on the CPU (+1.63 [+0.11, +3.16]); the GPU repeat does not confirm it (+0.40 [−1.36, +2.16]). Fine-grained, self-training with 3 teachers improves on the CRF head (GPU, +1.07 [+0.33, +1.80]; +1.22 [+0.60, +1.84] on the random splits, reported). The multi-task vote and label semantics on the multi-task model do not pass. Typing: not started |
 | 5 | Done: NER, P1 "Next, after week 4" item 1, i.e. 10 seeds per split for the CRF reference, multi-task, label semantics and self-training with 3 teachers, on Kaggle T4 GPUs, and the published split (amendment); items 2–7 and a paper outline prepared, and the week-6 options run once each at full size (protocol below). The original week-5 work moves to week 7 | Met. Of the claims re-tested with 10 seeds, fine-grained multi-task on the random splits passes (+1.83 [+0.32, +3.34]); the coarse-grained claims of week 3 and the self-training claim of week 4 do not. The reported system: the multi-task vote coarse-grained on the random splits and fine-grained on unseen papers, `crf_ens3` elsewhere. On the published split, plain MatSciBERT reproduces 69.92 and 72.32 and the CRF head beats both |
-| 6 | In progress: NER, P1 "Next, after week 5", towards a methods paper: methods for unseen papers (DeBERTa-v3-large, document context, multi-task self-training) screened with 3 seeds and decided with 10, and a second dataset (SOFC-Exp, 10 seeds); protocol below. So far (P1, "Week 6 so far"): DeBERTa-v3-large stops at the screen; document context passes the screen but neither 10-seed decision nor S2 on SOFC-Exp (+0.58 [−0.26, +1.42]); multi-task self-training passes the screen (+6.06 fine-grained), stage 2 next; on SOFC-Exp the CRF head improves on plain MatSciBERT (S1) | A method whose vote improves on the strongest system on unseen papers under the 10-seed design, and on SOFC-Exp |
+| 6 | Done: NER, P1 "Next, after week 5", towards a methods paper: methods for unseen papers (DeBERTa-v3-large, document context, multi-task self-training) screened with 3 seeds and decided with 10, and a second dataset (SOFC-Exp, 10 seeds); protocol below. Done (P1, "Week 6"): DeBERTa-v3-large stops at the screen; document context passes the screen but neither 10-seed decision nor S2 on SOFC-Exp (+0.58 [−0.26, +1.42]); multi-task self-training passes the screen (+6.06 fine-grained) but none of its 4 decisions (+5.47 [−0.74, +11.68] fine-grained against the CRF head), so its S2 on SOFC-Exp does not run; on SOFC-Exp the CRF head improves on plain MatSciBERT (S1) | A method whose vote improves on the strongest system on unseen papers under the 10-seed design, and on SOFC-Exp |
 | 7 | In progress: NER, part 1, document-level label consistency for unseen papers, a post-processing rule on the saved predictions (no GPU; protocol below); part 2a, recall calibration (a bias on the CRF head's emissions, chosen on inner folds; done, no claim: the missed entities are not near the threshold); part 2b, mention replacement (screen, then 10 seeds if it passes; protocol below; done: it improves on the CRF head at both granularities, +2.77 [+1.51, +4.03] fine-grained and +1.28 [+0.06, +2.51] coarse-grained, but its vote does not beat the strongest systems and S2 on SOFC-Exp gives −0.29), and later the combinations of the methods that pass week 6, fixed after the week-6 decisions; part 2c, coarse-to-fine completion (done, no claim); part 2d, multi-task training on SOFC-Exp's two levels (done, no claim: −0.78 [−2.39, +0.84] on the slot level, −0.15 [−1.36, +1.05] on the entity level); part 2e, SOFC-Exp's test articles cut into words as its training articles are (protocol below). Then class-level taxonomy (LLM or cross-encoder + arborescence) and a relation annotation pilot | Part 1: the rule improves on the strongest system on unseen papers and on SOFC-Exp's CRF head. Taxonomy: first class-level F1 above chance; relation guidelines |
 | 8 | Prepared: part 1, SOFC-Exp beyond its official split: the CRF head with 10 seeds on 5 random sentence splits and on 5 folds of 9 held-out articles (`--document-folds 5`; protocol below, descriptive); part 2, more papers or more sentences: three training papers cut to the size of two against two papers (`--two-paper-size`; protocol below) | Part 1: the gap between random splits and unseen documents measured on a second corpus. Part 2: whether a third paper helps at the same number of training sentences |
 
@@ -2243,7 +2266,8 @@ about 0.05 false passes.
 
 **When it runs:** only if multi-task self-training passes at least one of
 its 4 decisions on MaterioMiner. Without one, no claim could follow, and it
-is reported as not run. It also needs part 2d's results (`w7b`) for
+is reported as not run. *Outcome, 17 October: not run.* Multi-task
+self-training passes none of its 4 decisions (P1, "Week 6"). It also needs part 2d's results (`w7b`) for
 decision 1 and for the check of the teachers.
 - Batch: `w6c:sofc-mtst`, from the commit of this amendment.
 - Repeats first: the CRF run of smoke4 (`smokeaa`) and session b's SOFC-Exp

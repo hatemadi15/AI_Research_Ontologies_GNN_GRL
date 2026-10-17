@@ -99,7 +99,11 @@ context has all 10 seeds (stage 2, session a of 16 October), and on SOFC-Exp
 `gpu/ner_results_sofc_published_split_crf_ctx.json` (S2, session a of 17
 October, model seeds 0 to 900); DeBERTa-v3-large
 has only the screen's seeds 0 to 200, since it stopped there, and no SOFC-Exp
-file (its S2 ran out of GPU memory).
+file (its S2 ran out of GPU memory). Multi-task self-training has all 10
+seeds (`_crf_mt_st3_m0` to `_m900`, stage 2 in session b of 17 October:
+3 multi-task teachers and 10 students per held-out paper, each student file
+with its teachers' scores and the silver counts) and its votes; it has no
+SOFC-Exp file, since it passed no decision on MaterioMiner.
 
 Week 7, part 1 (week-7 protocol) applies the consistency rule
 (`ner_consistency.py`) to saved predictions; it trains nothing. `_dc` marks

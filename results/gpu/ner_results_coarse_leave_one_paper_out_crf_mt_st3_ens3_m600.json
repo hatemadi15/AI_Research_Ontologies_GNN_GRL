@@ -1,0 +1,891 @@
+{
+  "granularity": "coarse",
+  "protocol": "leave_one_paper_out",
+  "variant": "crf_mt_st3_ens3_m600",
+  "model": "m3rg-iitd/matscibert",
+  "labels": [
+    "CEL",
+    "CGE",
+    "CHP",
+    "CPR",
+    "DAM",
+    "DAT",
+    "DEF",
+    "EQU",
+    "ETP",
+    "LOC",
+    "MAC",
+    "MAT",
+    "MEC",
+    "MEP",
+    "MFP",
+    "MIC",
+    "MIP",
+    "MOD",
+    "MTP",
+    "OBJ",
+    "ODE",
+    "PQT",
+    "PRO",
+    "PRP",
+    "SDE",
+    "STD",
+    "VAL"
+  ],
+  "label_tie": {},
+  "paper_test_f1": 72.32,
+  "config": {
+    "members": [
+      "ner_results_coarse_leave_one_paper_out_crf_mt_st3_m600.json",
+      "ner_results_coarse_leave_one_paper_out_crf_mt_st3_m700.json",
+      "ner_results_coarse_leave_one_paper_out_crf_mt_st3_m800.json"
+    ],
+    "voting": "entity_strict_majority",
+    "k": 3
+  },
+  "runs": [
+    {
+      "f1": 65.66,
+      "precision": 68.55,
+      "recall": 63.01,
+      "f1_strict": 65.66,
+      "per_class": {
+        "CEL": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 2.0
+        },
+        "CGE": {
+          "precision": 0.625,
+          "recall": 0.625,
+          "f1-score": 0.625,
+          "support": 8.0
+        },
+        "CHP": {
+          "precision": 0.7619,
+          "recall": 0.7619,
+          "f1-score": 0.7619,
+          "support": 21.0
+        },
+        "CPR": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 1.0
+        },
+        "DAM": {
+          "precision": 0.8125,
+          "recall": 0.5652,
+          "f1-score": 0.6667,
+          "support": 23.0
+        },
+        "DAT": {
+          "precision": 0.5,
+          "recall": 0.4545,
+          "f1-score": 0.4762,
+          "support": 11.0
+        },
+        "DEF": {
+          "precision": 0.7273,
+          "recall": 0.8889,
+          "f1-score": 0.8,
+          "support": 9.0
+        },
+        "EQU": {
+          "precision": 0.8571,
+          "recall": 1.0,
+          "f1-score": 0.9231,
+          "support": 6.0
+        },
+        "LOC": {
+          "precision": 0.4286,
+          "recall": 0.4286,
+          "f1-score": 0.4286,
+          "support": 7.0
+        },
+        "MAC": {
+          "precision": 0.6667,
+          "recall": 1.0,
+          "f1-score": 0.8,
+          "support": 2.0
+        },
+        "MAT": {
+          "precision": 1.0,
+          "recall": 0.3333,
+          "f1-score": 0.5,
+          "support": 6.0
+        },
+        "MEC": {
+          "precision": 0.625,
+          "recall": 0.9091,
+          "f1-score": 0.7407,
+          "support": 11.0
+        },
+        "MEP": {
+          "precision": 0.3333,
+          "recall": 1.0,
+          "f1-score": 0.5,
+          "support": 1.0
+        },
+        "MFP": {
+          "precision": 1.0,
+          "recall": 0.7778,
+          "f1-score": 0.875,
+          "support": 9.0
+        },
+        "MIC": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 8.0
+        },
+        "MIP": {
+          "precision": 0.4,
+          "recall": 0.2857,
+          "f1-score": 0.3333,
+          "support": 7.0
+        },
+        "MTP": {
+          "precision": 0.25,
+          "recall": 1.0,
+          "f1-score": 0.4,
+          "support": 1.0
+        },
+        "OBJ": {
+          "precision": 0.6667,
+          "recall": 0.5,
+          "f1-score": 0.5714,
+          "support": 4.0
+        },
+        "ODE": {
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1-score": 0.6667,
+          "support": 1.0
+        },
+        "PRO": {
+          "precision": 0.2222,
+          "recall": 0.2,
+          "f1-score": 0.2105,
+          "support": 10.0
+        },
+        "PRP": {
+          "precision": 1.0,
+          "recall": 0.2857,
+          "f1-score": 0.4444,
+          "support": 7.0
+        },
+        "SDE": {
+          "precision": 1.0,
+          "recall": 0.3333,
+          "f1-score": 0.5,
+          "support": 3.0
+        },
+        "STD": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 1.0
+        },
+        "VAL": {
+          "precision": 0.8462,
+          "recall": 0.7857,
+          "f1-score": 0.8148,
+          "support": 14.0
+        },
+        "micro avg": {
+          "precision": 0.6855,
+          "recall": 0.6301,
+          "f1-score": 0.6566,
+          "support": 173.0
+        },
+        "macro avg": {
+          "precision": 0.6343,
+          "recall": 0.6306,
+          "f1-score": 0.5849,
+          "support": 173.0
+        },
+        "weighted avg": {
+          "precision": 0.7093,
+          "recall": 0.6301,
+          "f1-score": 0.643,
+          "support": 173.0
+        }
+      },
+      "run_id": "10.1007_s11340-021-00758-x.conll",
+      "n_members": 3,
+      "member_f1": [
+        59.28,
+        62.25,
+        64.76
+      ],
+      "member_f1_strict": [
+        59.28,
+        62.25,
+        64.76
+      ],
+      "invalid_i_tags": 0
+    },
+    {
+      "f1": 65.29,
+      "precision": 67.47,
+      "recall": 63.25,
+      "f1_strict": 65.29,
+      "per_class": {
+        "CEL": {
+          "precision": 1.0,
+          "recall": 0.875,
+          "f1-score": 0.9333,
+          "support": 8.0
+        },
+        "CGE": {
+          "precision": 0.6,
+          "recall": 0.6,
+          "f1-score": 0.6,
+          "support": 5.0
+        },
+        "CHP": {
+          "precision": 0.6667,
+          "recall": 0.9231,
+          "f1-score": 0.7742,
+          "support": 13.0
+        },
+        "CPR": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 2.0
+        },
+        "DAM": {
+          "precision": 0.7143,
+          "recall": 0.7692,
+          "f1-score": 0.7407,
+          "support": 52.0
+        },
+        "DAT": {
+          "precision": 0.8,
+          "recall": 0.8,
+          "f1-score": 0.8,
+          "support": 10.0
+        },
+        "DEF": {
+          "precision": 0.8214,
+          "recall": 0.2911,
+          "f1-score": 0.4299,
+          "support": 79.0
+        },
+        "EQU": {
+          "precision": 0.6667,
+          "recall": 0.2222,
+          "f1-score": 0.3333,
+          "support": 9.0
+        },
+        "ETP": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "LOC": {
+          "precision": 0.5,
+          "recall": 0.4167,
+          "f1-score": 0.4545,
+          "support": 12.0
+        },
+        "MAC": {
+          "precision": 0.7333,
+          "recall": 0.8462,
+          "f1-score": 0.7857,
+          "support": 13.0
+        },
+        "MAT": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 6.0
+        },
+        "MEC": {
+          "precision": 0.6129,
+          "recall": 0.7917,
+          "f1-score": 0.6909,
+          "support": 72.0
+        },
+        "MEP": {
+          "precision": 0.5556,
+          "recall": 1.0,
+          "f1-score": 0.7143,
+          "support": 5.0
+        },
+        "MFP": {
+          "precision": 0.6667,
+          "recall": 1.0,
+          "f1-score": 0.8,
+          "support": 4.0
+        },
+        "MIC": {
+          "precision": 0.3846,
+          "recall": 0.9375,
+          "f1-score": 0.5455,
+          "support": 16.0
+        },
+        "MIP": {
+          "precision": 1.0,
+          "recall": 0.1429,
+          "f1-score": 0.25,
+          "support": 14.0
+        },
+        "MOD": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 2.0
+        },
+        "MTP": {
+          "precision": 0.3333,
+          "recall": 0.5,
+          "f1-score": 0.4,
+          "support": 4.0
+        },
+        "OBJ": {
+          "precision": 0.7895,
+          "recall": 0.8333,
+          "f1-score": 0.8108,
+          "support": 18.0
+        },
+        "ODE": {
+          "precision": 0.6,
+          "recall": 0.75,
+          "f1-score": 0.6667,
+          "support": 4.0
+        },
+        "PQT": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 1.0
+        },
+        "PRO": {
+          "precision": 1.0,
+          "recall": 0.8571,
+          "f1-score": 0.9231,
+          "support": 7.0
+        },
+        "PRP": {
+          "precision": 1.0,
+          "recall": 0.3333,
+          "f1-score": 0.5,
+          "support": 3.0
+        },
+        "SDE": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 6.0
+        },
+        "STD": {
+          "precision": 1.0,
+          "recall": 0.75,
+          "f1-score": 0.8571,
+          "support": 4.0
+        },
+        "VAL": {
+          "precision": 0.92,
+          "recall": 0.7419,
+          "f1-score": 0.8214,
+          "support": 31.0
+        },
+        "micro avg": {
+          "precision": 0.6747,
+          "recall": 0.6325,
+          "f1-score": 0.6529,
+          "support": 400.0
+        },
+        "macro avg": {
+          "precision": 0.6061,
+          "recall": 0.5697,
+          "f1-score": 0.5493,
+          "support": 400.0
+        },
+        "weighted avg": {
+          "precision": 0.7186,
+          "recall": 0.6325,
+          "f1-score": 0.6254,
+          "support": 400.0
+        }
+      },
+      "run_id": "10.1038_ncomms7164.conll",
+      "n_members": 3,
+      "member_f1": [
+        63.85,
+        64.14,
+        65.15
+      ],
+      "member_f1_strict": [
+        63.85,
+        64.14,
+        65.15
+      ],
+      "invalid_i_tags": 0
+    },
+    {
+      "f1": 58.01,
+      "precision": 61.42,
+      "recall": 54.95,
+      "f1_strict": 58.01,
+      "per_class": {
+        "CEL": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 10.0
+        },
+        "CHP": {
+          "precision": 0.6222,
+          "recall": 0.5957,
+          "f1-score": 0.6087,
+          "support": 47.0
+        },
+        "CPR": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "DAM": {
+          "precision": 0.5,
+          "recall": 0.4211,
+          "f1-score": 0.4571,
+          "support": 19.0
+        },
+        "DAT": {
+          "precision": 0.6818,
+          "recall": 0.8824,
+          "f1-score": 0.7692,
+          "support": 17.0
+        },
+        "DEF": {
+          "precision": 0.301,
+          "recall": 0.7381,
+          "f1-score": 0.4276,
+          "support": 42.0
+        },
+        "EQU": {
+          "precision": 0.6471,
+          "recall": 0.5,
+          "f1-score": 0.5641,
+          "support": 22.0
+        },
+        "ETP": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "LOC": {
+          "precision": 0.7778,
+          "recall": 0.3889,
+          "f1-score": 0.5185,
+          "support": 18.0
+        },
+        "MAC": {
+          "precision": 0.68,
+          "recall": 0.6939,
+          "f1-score": 0.6869,
+          "support": 49.0
+        },
+        "MAT": {
+          "precision": 0.8511,
+          "recall": 0.9091,
+          "f1-score": 0.8791,
+          "support": 44.0
+        },
+        "MEC": {
+          "precision": 0.5556,
+          "recall": 0.6757,
+          "f1-score": 0.6098,
+          "support": 111.0
+        },
+        "MEP": {
+          "precision": 0.75,
+          "recall": 0.84,
+          "f1-score": 0.7925,
+          "support": 100.0
+        },
+        "MFP": {
+          "precision": 0.5909,
+          "recall": 0.2766,
+          "f1-score": 0.3768,
+          "support": 47.0
+        },
+        "MIC": {
+          "precision": 0.6154,
+          "recall": 0.2078,
+          "f1-score": 0.3107,
+          "support": 77.0
+        },
+        "MIP": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 6.0
+        },
+        "MTP": {
+          "precision": 0.5263,
+          "recall": 0.4615,
+          "f1-score": 0.4918,
+          "support": 65.0
+        },
+        "OBJ": {
+          "precision": 0.6207,
+          "recall": 0.45,
+          "f1-score": 0.5217,
+          "support": 40.0
+        },
+        "ODE": {
+          "precision": 1.0,
+          "recall": 0.0909,
+          "f1-score": 0.1667,
+          "support": 11.0
+        },
+        "PQT": {
+          "precision": 0.5,
+          "recall": 0.5455,
+          "f1-score": 0.5217,
+          "support": 33.0
+        },
+        "PRO": {
+          "precision": 0.5652,
+          "recall": 0.52,
+          "f1-score": 0.5417,
+          "support": 25.0
+        },
+        "PRP": {
+          "precision": 0.3333,
+          "recall": 0.0588,
+          "f1-score": 0.1,
+          "support": 17.0
+        },
+        "SDE": {
+          "precision": 0.2,
+          "recall": 0.0833,
+          "f1-score": 0.1176,
+          "support": 12.0
+        },
+        "STD": {
+          "precision": 0.9333,
+          "recall": 0.3077,
+          "f1-score": 0.4628,
+          "support": 91.0
+        },
+        "VAL": {
+          "precision": 0.8289,
+          "recall": 0.863,
+          "f1-score": 0.8456,
+          "support": 73.0
+        },
+        "micro avg": {
+          "precision": 0.6142,
+          "recall": 0.5495,
+          "f1-score": 0.5801,
+          "support": 979.0
+        },
+        "macro avg": {
+          "precision": 0.5632,
+          "recall": 0.4604,
+          "f1-score": 0.4708,
+          "support": 979.0
+        },
+        "weighted avg": {
+          "precision": 0.6445,
+          "recall": 0.5495,
+          "f1-score": 0.5581,
+          "support": 979.0
+        }
+      },
+      "run_id": "10.1038_s41467-020-19071-7.conll",
+      "n_members": 3,
+      "member_f1": [
+        54.92,
+        54.57,
+        56.09
+      ],
+      "member_f1_strict": [
+        54.92,
+        54.57,
+        56.09
+      ],
+      "invalid_i_tags": 0
+    },
+    {
+      "f1": 59.41,
+      "precision": 63.16,
+      "recall": 56.07,
+      "f1_strict": 59.41,
+      "per_class": {
+        "CEL": {
+          "precision": 0.7692,
+          "recall": 0.6667,
+          "f1-score": 0.7143,
+          "support": 15.0
+        },
+        "CGE": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 1.0
+        },
+        "CHP": {
+          "precision": 0.3438,
+          "recall": 0.4583,
+          "f1-score": 0.3929,
+          "support": 24.0
+        },
+        "CPR": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 1.0
+        },
+        "DAM": {
+          "precision": 0.92,
+          "recall": 0.7931,
+          "f1-score": 0.8519,
+          "support": 29.0
+        },
+        "DAT": {
+          "precision": 0.3571,
+          "recall": 0.1667,
+          "f1-score": 0.2273,
+          "support": 30.0
+        },
+        "DEF": {
+          "precision": 0.5357,
+          "recall": 0.8824,
+          "f1-score": 0.6667,
+          "support": 17.0
+        },
+        "EQU": {
+          "precision": 0.7576,
+          "recall": 0.7353,
+          "f1-score": 0.7463,
+          "support": 34.0
+        },
+        "ETP": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 30.0
+        },
+        "LOC": {
+          "precision": 0.875,
+          "recall": 0.7778,
+          "f1-score": 0.8235,
+          "support": 18.0
+        },
+        "MAC": {
+          "precision": 0.6111,
+          "recall": 0.7857,
+          "f1-score": 0.6875,
+          "support": 14.0
+        },
+        "MAT": {
+          "precision": 0.8,
+          "recall": 0.2105,
+          "f1-score": 0.3333,
+          "support": 19.0
+        },
+        "MEC": {
+          "precision": 0.6707,
+          "recall": 0.6395,
+          "f1-score": 0.6548,
+          "support": 86.0
+        },
+        "MEP": {
+          "precision": 0.8372,
+          "recall": 0.6923,
+          "f1-score": 0.7579,
+          "support": 52.0
+        },
+        "MFP": {
+          "precision": 0.2857,
+          "recall": 1.0,
+          "f1-score": 0.4444,
+          "support": 2.0
+        },
+        "MIC": {
+          "precision": 0.3333,
+          "recall": 0.6667,
+          "f1-score": 0.4444,
+          "support": 3.0
+        },
+        "MIP": {
+          "precision": 0.0714,
+          "recall": 0.5,
+          "f1-score": 0.125,
+          "support": 2.0
+        },
+        "MOD": {
+          "precision": 1.0,
+          "recall": 0.2,
+          "f1-score": 0.3333,
+          "support": 10.0
+        },
+        "MTP": {
+          "precision": 0.6027,
+          "recall": 0.4944,
+          "f1-score": 0.5432,
+          "support": 89.0
+        },
+        "OBJ": {
+          "precision": 0.7714,
+          "recall": 0.6585,
+          "f1-score": 0.7105,
+          "support": 41.0
+        },
+        "PQT": {
+          "precision": 0.5938,
+          "recall": 0.3585,
+          "f1-score": 0.4471,
+          "support": 53.0
+        },
+        "PRO": {
+          "precision": 0.5385,
+          "recall": 0.4375,
+          "f1-score": 0.4828,
+          "support": 16.0
+        },
+        "PRP": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "STD": {
+          "precision": 0.1429,
+          "recall": 0.1111,
+          "f1-score": 0.125,
+          "support": 9.0
+        },
+        "VAL": {
+          "precision": 0.7931,
+          "recall": 0.9787,
+          "f1-score": 0.8762,
+          "support": 47.0
+        },
+        "micro avg": {
+          "precision": 0.6316,
+          "recall": 0.5607,
+          "f1-score": 0.5941,
+          "support": 642.0
+        },
+        "macro avg": {
+          "precision": 0.5044,
+          "recall": 0.4885,
+          "f1-score": 0.4555,
+          "support": 642.0
+        },
+        "weighted avg": {
+          "precision": 0.6361,
+          "recall": 0.5607,
+          "f1-score": 0.5793,
+          "support": 642.0
+        }
+      },
+      "run_id": "10.3390_met10111458.conll",
+      "n_members": 3,
+      "member_f1": [
+        56.75,
+        58.77,
+        54.0
+      ],
+      "member_f1_strict": [
+        56.75,
+        58.77,
+        54.0
+      ],
+      "invalid_i_tags": 0
+    }
+  ],
+  "test_f1_mean": 62.09,
+  "test_f1_std": 3.42,
+  "test_f1_strict_mean": 62.09,
+  "summary": {
+    "n_runs": 4,
+    "run_ids": [
+      "10.1007_s11340-021-00758-x.conll",
+      "10.1038_ncomms7164.conll",
+      "10.1038_s41467-020-19071-7.conll",
+      "10.3390_met10111458.conll"
+    ],
+    "micro": {
+      "mean": 62.09,
+      "pop_sd": 3.42,
+      "ci95": [
+        55.81,
+        68.38
+      ],
+      "per_run": [
+        65.66,
+        65.29,
+        58.01,
+        59.41
+      ]
+    },
+    "micro_strict": {
+      "mean": 62.09,
+      "pop_sd": 3.42,
+      "ci95": [
+        55.81,
+        68.38
+      ],
+      "per_run": [
+        65.66,
+        65.29,
+        58.01,
+        59.41
+      ]
+    },
+    "macro": {
+      "mean": 51.51,
+      "pop_sd": 5.38,
+      "ci95": [
+        41.64,
+        61.39
+      ],
+      "per_run": [
+        58.49,
+        54.93,
+        47.08,
+        45.55
+      ]
+    },
+    "weighted": {
+      "mean": 60.14,
+      "pop_sd": 3.42,
+      "ci95": [
+        53.87,
+        66.42
+      ],
+      "per_run": [
+        64.3,
+        62.54,
+        55.81,
+        57.93
+      ]
+    },
+    "vs_member_mean": {
+      "mean_diff": 2.55,
+      "ci95": [
+        0.73,
+        4.37
+      ],
+      "per_run": [
+        3.56,
+        0.91,
+        2.82,
+        2.9
+      ]
+    }
+  }
+}

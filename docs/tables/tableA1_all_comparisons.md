@@ -166,10 +166,18 @@ Table A1. Every comparison on MaterioMiner: mean paired difference of micro F1 o
 | 6 | GPU | 3 | coarse | unseen papers | `crf_mt_st3_ens3` vs `crf_ens3` | reported | 4 | +0.24 [−1.45, +1.93] |  |
 | 6 | GPU | 10 | fine | unseen papers | `crf_ctx` vs `crf` | decision | 4 | +1.14 [−0.94, +3.22] | no |
 | 6 | GPU | 10 | coarse | unseen papers | `crf_ctx` vs `crf` | decision | 4 | +0.12 [−2.03, +2.27] | no |
+| 6 | GPU | 10 | fine | unseen papers | `crf_mt_st3` vs `crf` | decision | 4 | +5.47 [−0.74, +11.68] | no |
+| 6 | GPU | 10 | coarse | unseen papers | `crf_mt_st3` vs `crf` | decision | 4 | +0.90 [−1.18, +2.98] | no |
 | 6 | GPU | 10 | fine | unseen papers | `crf_ctx_ens3` vs `crf_mt_ens3` | decision | 4 | −1.44 [−3.80, +0.91] | no |
 | 6 | GPU | 10 | coarse | unseen papers | `crf_ctx_ens3` vs `crf_mt_ens3` | reported | 4 | +1.07 [−1.23, +3.38] |  |
 | 6 | GPU | 10 | fine | unseen papers | `crf_ctx_ens3` vs `crf_ens3` | reported | 4 | +2.21 [+0.01, +4.41] |  |
 | 6 | GPU | 10 | coarse | unseen papers | `crf_ctx_ens3` vs `crf_ens3` | decision | 4 | +0.76 [−1.79, +3.31] | no |
+| 6 | GPU | 10 | fine | unseen papers | `crf_mt_st3_ens3` vs `crf_mt_ens3` | decision | 4 | +1.54 [−1.73, +4.82] | no |
+| 6 | GPU | 10 | coarse | unseen papers | `crf_mt_st3_ens3` vs `crf_mt_ens3` | reported | 4 | +1.40 [−1.69, +4.49] |  |
+| 6 | GPU | 10 | fine | unseen papers | `crf_mt_st3_ens3` vs `crf_ens3` | reported | 4 | +5.20 [−0.59, +10.99] |  |
+| 6 | GPU | 10 | coarse | unseen papers | `crf_mt_st3_ens3` vs `crf_ens3` | decision | 4 | +1.08 [−1.40, +3.57] | no |
+| 6 | GPU | 10 | fine | unseen papers | `crf_mt_st3` vs `crf_mt` | reported | 4 | +1.75 [−2.16, +5.67] |  |
+| 6 | GPU | 10 | coarse | unseen papers | `crf_mt_st3` vs `crf_mt` | reported | 4 | +1.46 [−0.99, +3.91] |  |
 | 7 | GPU | 3 | fine | unseen papers | `crf_mr` vs `crf` | screen | 4 | +3.25 [−2.33, +8.82] | no |
 | 7 | GPU | 3 | coarse | unseen papers | `crf_mr` vs `crf` | screen | 4 | +0.25 [−2.21, +2.72] | no |
 | 7 | GPU | 3 | fine | unseen papers | `crf_mr_ens3` vs `crf_ens3` | reported | 4 | +5.00 [−0.50, +10.51] |  |

@@ -373,10 +373,18 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
 |---|---|---|---|---|---|---|
 | document context vs CRF head | fine | 4 | 47.59 [39.86, 55.33] | +1.14 [-0.94, +3.22] | +1.82 [-3.39, +7.04] | decision |
 | document context vs CRF head | coarse | 4 | 58.72 [52.23, 65.22] | +0.12 [-2.03, +2.27] | -1.05 [-3.28, +1.17] | decision |
+| multi-task self-training vs CRF head | fine | 4 | 51.93 [42.79, 61.06] | +5.47 [-0.74, +11.68] | +6.10 [-3.80, +16.00] | decision |
+| multi-task self-training vs CRF head | coarse | 4 | 59.50 [52.48, 66.53] | +0.90 [-1.18, +2.98] | +1.87 [-0.10, +3.84] | decision |
 | document-context vote vs multi-task vote | fine | 4 | 51.02 [42.70, 59.35] | -1.44 [-3.80, +0.91] | -1.46 [-6.72, +3.80] | decision |
 | document-context vote vs multi-task vote | coarse | 4 | 61.86 [54.85, 68.87] | +1.07 [-1.23, +3.38] | +0.44 [-2.53, +3.41] | reported |
 | document-context vote vs 3-model seed ensemble | fine | 4 | 51.02 [42.70, 59.35] | +2.21 [+0.01, +4.41] | +3.13 [-2.08, +8.33] | reported |
 | document-context vote vs 3-model seed ensemble | coarse | 4 | 61.86 [54.85, 68.87] | +0.76 [-1.79, +3.31] | -0.76 [-3.29, +1.77] | decision |
+| multi-task self-training vote vs multi-task vote | fine | 4 | 54.01 [44.76, 63.27] | +1.54 [-1.73, +4.82] | +1.92 [-2.65, +6.48] | decision |
+| multi-task self-training vote vs multi-task vote | coarse | 4 | 62.19 [55.43, 68.94] | +1.40 [-1.69, +4.49] | +2.66 [-4.37, +9.69] | reported |
+| multi-task self-training vote vs 3-model seed ensemble | fine | 4 | 54.01 [44.76, 63.27] | +5.20 [-0.59, +10.99] | +6.50 [-5.61, +18.60] | reported |
+| multi-task self-training vote vs 3-model seed ensemble | coarse | 4 | 62.19 [55.43, 68.94] | +1.08 [-1.40, +3.57] | +1.46 [-2.07, +4.99] | decision |
+| multi-task self-training vs multi-task (fine + coarse heads) | fine | 4 | 51.93 [42.79, 61.06] | +1.75 [-2.16, +5.67] | +2.34 [-2.15, +6.82] | reported |
+| multi-task self-training vs multi-task (fine + coarse heads) | coarse | 4 | 59.50 [52.48, 66.53] | +1.46 [-0.99, +3.91] | +3.58 [-0.01, +7.18] | reported |
 
 #### NER week-7 comparisons, part 1 (the consistency rule, 10-seed means, GPU runs)
 
@@ -486,8 +494,12 @@ Mean ± population SD over runs, and the 95% Student-t CI of the mean. Micro F1 
 * NER week 6, the screen (GPU runs, seeds 0, 100 and 200, leaving one paper out; mean paired micro-F1 difference [95% CI]; it decides only which methods get 10 seeds): document context goes to stage 2; against the CRF head fine-grained +2.66 [+0.91, +4.40], coarse-grained -0.50 [-3.82, +2.83]; its vote against the 3-model seed ensemble fine-grained +2.92 [+0.02, +5.83], coarse-grained +0.29 [-4.64, +5.22].
 * NER week 6, the screen (GPU runs, seeds 0, 100 and 200, leaving one paper out; mean paired micro-F1 difference [95% CI]; it decides only which methods get 10 seeds): multi-task self-training goes to stage 2; against the CRF head fine-grained +6.06 [+1.05, +11.06], coarse-grained +0.25 [-1.12, +1.62]; its vote against the 3-model seed ensemble fine-grained +5.73 [+0.70, +10.77], coarse-grained +0.24 [-1.45, +1.93]; against multi-task (fine + coarse heads) fine-grained +2.19 [-1.61, +5.98], coarse-grained +0.93 [-2.82, +4.68].
 * NER week 6 (GPU runs, 10 seeds), document context vs the CRF head (paired micro-F1 difference, leaving one paper out): fine-grained no significant change (+1.14, 95% CI [-0.94, +3.22]; strict IOB2 +1.14 [-0.94, +3.22]; the pre-registered decision); coarse-grained no significant change (+0.12, 95% CI [-2.03, +2.27]; strict IOB2 +0.12 [-2.03, +2.27]; the pre-registered decision).
+* NER week 6 (GPU runs, 10 seeds), multi-task self-training vs the CRF head (paired micro-F1 difference, leaving one paper out): fine-grained no significant change (+5.47, 95% CI [-0.74, +11.68]; strict IOB2 +5.47 [-0.74, +11.68]; the pre-registered decision); coarse-grained no significant change (+0.90, 95% CI [-1.18, +2.98]; strict IOB2 +0.90 [-1.18, +2.98]; the pre-registered decision).
 * NER week 6 (GPU runs, 10 seeds), document-context vote vs the multi-task vote (paired micro-F1 difference, leaving one paper out): fine-grained no significant change (-1.44, 95% CI [-3.80, +0.91]; strict IOB2 -1.44 [-3.80, +0.91]; the pre-registered decision); coarse-grained no significant change (+1.07, 95% CI [-1.23, +3.38]; strict IOB2 +1.07 [-1.23, +3.38]; reported, no decision).
 * NER week 6 (GPU runs, 10 seeds), document-context vote vs the 3-model seed ensemble (paired micro-F1 difference, leaving one paper out): fine-grained improves (+2.21, 95% CI [+0.01, +4.41]; strict IOB2 +2.21 [+0.01, +4.41]; reported, no decision); coarse-grained no significant change (+0.76, 95% CI [-1.79, +3.31]; strict IOB2 +0.76 [-1.79, +3.31]; the pre-registered decision).
+* NER week 6 (GPU runs, 10 seeds), multi-task self-training vote vs the multi-task vote (paired micro-F1 difference, leaving one paper out): fine-grained no significant change (+1.54, 95% CI [-1.73, +4.82]; strict IOB2 +1.54 [-1.73, +4.82]; the pre-registered decision); coarse-grained no significant change (+1.40, 95% CI [-1.69, +4.49]; strict IOB2 +1.40 [-1.69, +4.49]; reported, no decision).
+* NER week 6 (GPU runs, 10 seeds), multi-task self-training vote vs the 3-model seed ensemble (paired micro-F1 difference, leaving one paper out): fine-grained no significant change (+5.20, 95% CI [-0.59, +10.99]; strict IOB2 +5.20 [-0.59, +10.99]; reported, no decision); coarse-grained no significant change (+1.08, 95% CI [-1.40, +3.57]; strict IOB2 +1.08 [-1.40, +3.57]; the pre-registered decision).
+* NER week 6 (GPU runs, 10 seeds), multi-task self-training vs the multi-task (fine + coarse heads) (paired micro-F1 difference, leaving one paper out): fine-grained no significant change (+1.75, 95% CI [-2.16, +5.67]; strict IOB2 +1.75 [-2.16, +5.67]; reported, no decision); coarse-grained no significant change (+1.46, 95% CI [-0.99, +3.91]; strict IOB2 +1.46 [-0.99, +3.91]; reported, no decision).
 * NER week 7, part 1 (GPU runs; the consistency rule on the saved predictions of 10 seeds), CRF head + the consistency rule vs the CRF head (paired micro-F1 difference, leaving one paper out): fine-grained no significant change (+0.30, 95% CI [-0.35, +0.95]; strict IOB2 +0.30 [-0.35, +0.95]; the pre-registered decision); coarse-grained improves (+0.12, 95% CI [+0.01, +0.24]; strict IOB2 +0.12 [+0.01, +0.24]; the pre-registered decision).
 * NER week 7, part 1 (GPU runs; the consistency rule on the saved predictions of 10 seeds), multi-task vote + the consistency rule vs the multi-task vote (paired micro-F1 difference, leaving one paper out): fine-grained no significant change (+0.33, 95% CI [-0.74, +1.40]; strict IOB2 +0.33 [-0.74, +1.40]; the pre-registered decision); coarse-grained no significant change (+0.17, 95% CI [-0.22, +0.57]; strict IOB2 +0.17 [-0.22, +0.57]; reported, no decision).
 * NER week 7, part 1 (GPU runs; the consistency rule on the saved predictions of 10 seeds), 3-model seed ensemble + the consistency rule vs the 3-model seed ensemble (paired micro-F1 difference, leaving one paper out): fine-grained no significant change (+0.62, 95% CI [-0.64, +1.89]; strict IOB2 +0.62 [-0.64, +1.89]; reported, no decision); coarse-grained no significant change (+0.20, 95% CI [-0.15, +0.55]; strict IOB2 +0.20 [-0.15, +0.55]; the pre-registered decision).
@@ -656,10 +668,11 @@ stands (ROADMAP §4, weeks 6 and 7):
 1. Methods for unseen papers, screened with 3 seeds and decided with 10.
    DeBERTa-v3-large stopped at the screen. Document context passed the
    screen but neither 10-seed decision, nor its repeat on SOFC-Exp (+0.58
-   [−0.26, +1.42]). Multi-task self-training passed the
-   screen (+6.06 fine-grained) and its 10-seed decisions run next; its repeat
-   on SOFC-Exp is fixed before them (an SOFC corpus of 40,000 sentences, cut
-   into words as SOFC-Exp's training articles are).
+   [−0.26, +1.42]). Multi-task self-training passed the screen (+6.06
+   fine-grained) and has the largest mean gain with 10 seeds, +5.47
+   [−0.74, +11.68] fine-grained against the CRF head, but passes none of
+   its 4 decisions: one of the four papers gains only +0.51. Its repeat on
+   SOFC-Exp, fixed before the decisions, therefore did not run.
 2. SOFC-Exp, the second dataset. The CRF head's gain repeats there (+1.22
    [+0.50, +1.93]). Multi-task training, repeated on its two levels of
    types (17 slot types under 4 entity types, as MaterioMiner's fine level
