@@ -2732,6 +2732,10 @@ this on the GPU. Nothing else in the design changes.
   empty live log a few minutes after the start marks a stuck session.
   Kaggle refunded version 10's time after its cancel (used quota 15.82
   hours at 14:56).
+- *17:14: part 2 runs again* on a new notebook (`ner-gpu-jobs-d`, from the
+  same bundle 9468ae7) after version 18 was cancelled (its output: an empty
+  log, no manifest). Its log showed every setup step within a minute and
+  its first repeat (`smokeaj`) done in 1.2 minutes.
 
 ### Candidates for week 10 (17 October; not a protocol)
 
