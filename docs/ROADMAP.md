@@ -2827,6 +2827,10 @@ this on the GPU. Nothing else in the design changes.
   long wait in the queue is not a hang.
 - *20:49: week 7, part 2e done* (37.6 minutes; outcome under its protocol).
   Its outputs are pulled and collected, and `ner-gpu-jobs-d` is free.
+- *20:57: week 10 pushed* (`w10a`) to `ner-gpu-jobs-d` (version 4), from
+  `ner-gpu-bundle-3` (a08356f), 31 minutes after the bundle was ready. It
+  started at once next to `w8b`. Its log showed every setup step within 1.1
+  minutes and its first job (the repeat `smokeal`) done in 1.3 minutes.
 
 **Outcome of part 1: 3 of the 6 decisions pass; the combination's vote is
 the strongest fine-grained system on unseen papers, but S2 fails at both
