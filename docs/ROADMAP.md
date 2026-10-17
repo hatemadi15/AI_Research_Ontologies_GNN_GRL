@@ -2709,6 +2709,14 @@ both commits, and every existing option writes byte-identical results files
 there (the tiny-model check of 9468ae7). The batch's repeats (`smokeah`, the
 CRF run of smoke4; `smokeai`, the multi-task run of random split 0) check
 this on the GPU. Nothing else in the design changes.
+- *Still no GPU session (13:05).* Part 2 (kernel a, version 18, pushed
+  12:03) and part 1 (`ner-gpu-jobs-c`, pushed 12:30) wait in Kaggle's queue.
+  The pinned Kaggle image is not the cause: this morning's last good session
+  ran it (Python 3.13, torch 2.11, CUDA 12.8, the generation of Kaggle's
+  current default image), and two CPU probe notebooks started and finished
+  within 30 seconds. Since 07:24 every GPU session has either queued or
+  reported "running" without its script starting; queued sessions are not
+  charged.
 
 ### Candidates for week 10 (17 October; not a protocol)
 
