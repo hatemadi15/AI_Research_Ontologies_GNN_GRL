@@ -2712,6 +2712,14 @@ decisions can be checked against this list. None is fixed yet.
    (`B-DEV+U-MAT`). A flat version must therefore be chosen and checked
    first. Under share-alike, a build script with a SHA-256 check, as for
    the fatigue corpus, would keep converted files out of the repository.
+   *Checked on 17 October (revision bc1c97d, no runs):* 50 documents,
+   10,184 sentences and 46,584 entities. Per subfield: electrolysis 4
+   documents, graphene 2, PEMFC 8, polymers 11, semiconductors 11, SOFC 4,
+   steel 10; each has a test document. 43.4% of the entities lie inside
+   another or share its span, mostly NUM or UNIT inside VALUE (5,449 and
+   4,410), MAT inside MAT (5,169) and NUM inside RANGE (1,222); 1,201 pairs
+   cross. Every subfield but graphene could be held out with at least 4
+   documents.
 3. **A vote across methods.** Coarse-grained, multi-task training and
    mention replacement change different types (per-type correlation
    −0.72, above). A vote whose members come from different methods (the
