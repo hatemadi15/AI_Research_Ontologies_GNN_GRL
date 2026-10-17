@@ -59,9 +59,10 @@ FIG6_METHODS = {'crf_ens3': 'seed vote', 'crf_mt': 'multi-task', 'crf_st3': 'sel
                 'crf_ls': 'label semantics', 'crf_deberta': 'DeBERTa-v3-large',
                 'crf_ctx': 'document context', 'crf_mt_st3': 'multi-task self-training',
                 'crf_mr': 'mention replacement', 'crf_dc': 'consistency rule',
-                'crf_cf': 'coarse-to-fine completion', 'crf_eb': 'recall calibration'}
+                'crf_cf': 'coarse-to-fine completion', 'crf_eb': 'recall calibration',
+                'crf_mt_mr': 'multi-task + mention replacement'}
 TEN_SEED_COMPARISONS = ('ner_week5_comparisons.json', 'ner_week6_comparisons.json',
-                        'ner_week7_comparisons.json')
+                        'ner_week7_comparisons.json', 'ner_week9_comparisons.json')
 SCREENS = ('ner_week6_screen.json', 'ner_week7_screen.json')
 # Figure 4: the bias grid of the CRF head (week 7, part 2a)
 SOFC_BIAS = 'ner_results_sofc_published_split_crf_bias.json'
@@ -86,6 +87,8 @@ MENTION_METHODS = {'crf_mt': 'multi-task', 'crf_mt_ens3': 'multi-task vote',
                    'crf_ctx': 'document context', 'crf_ctx_ens3': 'context vote',
                    'crf_mt_st3': 'multi-task self-training', 'crf_mr': 'mention replacement',
                    'crf_mr_ens3': 'mention-replacement vote',
+                   'crf_mt_mr': 'multi-task + mention replacement',
+                   'crf_mt_mr_ens3': 'multi-task + mention-replacement vote',
                    'crf_mt_st3_ens3': 'multi-task self-training vote'}
 
 

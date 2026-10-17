@@ -31,7 +31,9 @@ votes (ner_seedmeans.WEEK5_SYSTEMS) and writes ner_week5_seed_analysis.json next
     are also set against the CRF votes, paired by triple (VOTED_METHODS); part 2b adds
     mention replacement (crf_mr, S2); part 2e the CRF head and plain MatSciBERT scored on
     SOFC-Exp's test articles cut into words as its training articles are (crf_cdetest
-    against the CRF head; cdetest against plain MatSciBERT, baseline_retokenized_test).
+    against the CRF head; cdetest against plain MatSciBERT, baseline_retokenized_test);
+    week 9 mention replacement on the multi-task model on SOFC-Exp's two levels (crf_mt_mr,
+    S2, voted as crf_mt).
     Per entity type of the test set (types), its support and each system's mean F1 over
     its seeds (part 2d reports them on the slot level; not the retokenized runs).
   - errors (exploratory; cited by the week-7 protocol, part 1): per protocol and
@@ -96,11 +98,11 @@ PUBLISHED_SPLITS = ('fine', 'coarse', 'sofc', 'sofc_slot')
 # the week-7 consistency rule on the CRF head's predictions (ner_consistency.py) and
 # recall calibration (ner_bias.py --choose val); multi-task training on SOFC-Exp's levels
 SPLIT_METHODS = ('crf_deberta', 'crf_ctx', 'crf_dc', 'crf_dcr', 'crf_ebv', 'crf_mt', 'crf_mr',
-                 'crf_cdetest')
+                 'crf_cdetest', 'crf_mt_mr')
 # week 7, part 2e: plain MatSciBERT scored on SOFC-Exp's retokenized test articles
 RETOKENIZED_BASELINE = 'cdetest'
 SOFC_PROTOCOLS = ('random_split_vary', 'document_folds')     # week 8, part 1
-VOTED_METHODS = ('crf_mt',)
+VOTED_METHODS = ('crf_mt', 'crf_mt_mr')
 
 
 def load_files(directory, names):

@@ -68,11 +68,11 @@ REFERENCE = 'crf'
 # held-out papers; SOFC-Exp's article folds, week 8)
 HELD_OUT = {'fine': (RANDOM, LOPO), 'coarse': (RANDOM, LOPO), 'sofc': (RANDOM, DOCUMENT_FOLDS)}
 # families with 10 seeds per split (or the screen's 3) on the random splits and held-out papers
-FAMILIES = ('crf', 'crf_mt', 'crf_ls', 'crf_st3', 'crf_ctx', 'crf_mt_st3', 'crf_mr')
-VOTED = ('crf', 'crf_mt', 'crf_ctx', 'crf_mt_st3', 'crf_mr')
+FAMILIES = ('crf', 'crf_mt', 'crf_ls', 'crf_st3', 'crf_ctx', 'crf_mt_st3', 'crf_mr', 'crf_mt_mr')
+VOTED = ('crf', 'crf_mt', 'crf_ctx', 'crf_mt_st3', 'crf_mr', 'crf_mt_mr')
 # a published split's systems: plain MatSciBERT, the CRF head and the methods run on it
 PUBLISHED_SPLITS = ('fine', 'coarse', 'sofc', 'sofc_slot')
-PUBLISHED_METHODS = ('crf_ctx', 'crf_mt', 'crf_mr', 'crf_cdetest')
+PUBLISHED_METHODS = ('crf_ctx', 'crf_mt', 'crf_mr', 'crf_mt_mr', 'crf_cdetest')
 BASELINE = 'baseline'
 RETOKENIZED = ('crf_cdetest', 'cdetest')     # scored on SOFC-Exp's retokenized test articles
 # what a published split's system is set against (the methods: the CRF head)

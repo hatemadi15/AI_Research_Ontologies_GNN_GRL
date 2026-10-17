@@ -96,6 +96,13 @@ methods: a screen with seeds 0-200 (--week 7 --screen, written to ner_week7_scre
 then in the same file as the other parts the decisions crf_mr vs crf on the held-out papers
 and its vote crf_mr_ens3 vs UNSEEN_BEST per granularity.
 
+Week 9 (--week 9 --gpu; week-9 protocol) tests mention replacement on the multi-task model
+(crf_mt_mr, --multi-task --augment-mentions 3), 10 seeds on the held-out papers, written to
+ner_week9_comparisons.json:
+  - Decisions: crf_mt_mr vs crf_mt (does mention replacement add to the multi-task
+    model?) and its vote crf_mt_mr_ens3 vs UNSEEN_BEST per granularity. Reported: the
+    other granularity's vote, crf_mt_mr vs crf and vs crf_mr.
+
 Usage:
   python src/graph/ner_seedmeans.py [--results results] [--out results/ner_week3_comparisons.json]
   python src/graph/ner_seedmeans.py --week 4                            # CPU votes
@@ -103,6 +110,7 @@ Usage:
   python src/graph/ner_seedmeans.py --week 5 --gpu --results results/gpu
   python src/graph/ner_seedmeans.py --week 6 --gpu --results results/gpu [--screen]
   python src/graph/ner_seedmeans.py --week 7 --gpu --results results/gpu [--screen]
+  python src/graph/ner_seedmeans.py --week 9 --gpu --results results/gpu
 """
 
 import argparse
@@ -117,7 +125,8 @@ from ner_baseline import F1_AVERAGES, result_suffix
 RESULTS_DIR = Path(__file__).resolve().parents[2] / 'results'
 OUT_NAME = 'ner_week3_comparisons.json'
 OUT_NAMES = {3: OUT_NAME, 4: 'ner_week4_comparisons.json', 5: 'ner_week5_comparisons.json',
-             6: 'ner_week6_comparisons.json', 7: 'ner_week7_comparisons.json'}
+             6: 'ner_week6_comparisons.json', 7: 'ner_week7_comparisons.json',
+             9: 'ner_week9_comparisons.json'}
 SCREEN_NAMES = {6: 'ner_week6_screen.json', 7: 'ner_week7_screen.json'}
 SCREEN_NAME = SCREEN_NAMES[6]
 
@@ -327,19 +336,37 @@ WEEK7_SCREEN_COMPARISONS = (
     *((f'{m}_ens3', 'crf_ens3', None) for m in WEEK7_METHODS),
 )
 SCREEN_METHODS = {6: WEEK6_METHODS, 7: WEEK7_METHODS}
+# week 9: mention replacement on the multi-task model (--multi-task --augment-mentions 3),
+# 10 seeds on the held-out papers, both granularities from one model
+WEEK9_SYSTEMS = {
+    **WEEK7_SYSTEMS,
+    'crf_mt_mr': seed_family('crf_mt_mr'),
+    'crf_mt_mr_ens3': vote_family('crf_mt_mr'),
+}
+WEEK9_COMPARISONS = (
+    # decision 1: does mention replacement add to the multi-task model? (held-out papers)
+    ('crf_mt_mr', 'crf_mt', LOPO),
+    # decision 2: its vote against the strongest system on unseen papers, per granularity
+    *(('crf_mt_mr_ens3', ref, {g: LOPO}) for g, ref in UNSEEN_BEST.items()),
+    # reported: against the CRF head and against mention replacement alone
+    ('crf_mt_mr', 'crf', None),
+    ('crf_mt_mr', 'crf_mr', None),
+)
 
 
 def comparison_list(week, gpu=False, screen=False):
     """The comparisons of a week's protocol: week 3, week 4 on the CPU or the GPU runs,
-    week 5, week 6 or week 7 (their stage-1 screens with screen=True); GPU runs only from
-    week 5."""
+    week 5, week 6 or week 7 (their stage-1 screens with screen=True) or week 9; GPU runs
+    only from week 5."""
     if week == 3:
         if gpu:
             raise ValueError('the week-3 comparisons are made on the CPU runs only')
         return COMPARISONS
-    if week in (5, 6, 7):
+    if week in (5, 6, 7, 9):
         if not gpu:
             raise ValueError(f'the week-{week} comparisons are made on the GPU runs only')
+        if week == 9:
+            return WEEK9_COMPARISONS
         if week == 7:
             return WEEK7_SCREEN_COMPARISONS if screen else WEEK7_COMPARISONS
         if week == 6:
@@ -350,6 +377,8 @@ def comparison_list(week, gpu=False, screen=False):
 
 def system_list(week, screen=False):
     """The systems (name: the variants of its results files) of a week's protocol."""
+    if week == 9:
+        return WEEK9_SYSTEMS
     if week == 7:
         return WEEK7_SCREEN_SYSTEMS if screen else WEEK7_SYSTEMS
     if week == 6:

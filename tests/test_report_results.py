@@ -1125,6 +1125,28 @@ def test_week7_mention_replacement_screen_and_decisions(tmp_path):
             'fine-grained no significant change') in readme
 
 
+def test_week9_table_and_bullets(tmp_path):
+    """Week 9: mention replacement on the multi-task model, a table of its comparisons and a
+    bullet per decision, from its own file."""
+    ws = Workspace(tmp_path)
+    lopo = 'leave_one_paper_out'
+    for g in ('fine', 'coarse'):
+        ws.week4('crf_mt_mr', 'crf_mt', g, lopo, gpu=True, role='decision',
+                 micro=(1.5, 0.4, 2.6), score=(51.0, 44.0, 58.0), name=rr.WEEK9_FILE)
+        ws.week4('crf_mt_mr', 'crf_mr', g, lopo, gpu=True, micro=(0.5, -0.4, 1.4),
+                 score=(51.0, 44.0, 58.0), name=rr.WEEK9_FILE)
+    ws.week4('crf_mt_mr_ens3', 'crf_mt_ens3', 'fine', lopo, gpu=True, role='decision',
+             micro=(0.9, -1.0, 2.8), score=(53.0, 45.0, 61.0), name=rr.WEEK9_FILE)
+    readme, _ = ws.generate()
+    assert ('* NER week 9 (GPU runs; mention replacement on the multi-task model, 10 seeds), '
+            'multi-task + mention replacement vs the multi-task (fine + coarse heads) (paired '
+            'micro-F1 difference, leaving one paper out): fine-grained improves') in readme
+    assert ('multi-task + mention-replacement vote vs the multi-task vote (paired micro-F1 '
+            'difference, leaving one paper out): fine-grained no significant change') in readme
+    assert '#### NER week-9 comparisons, mention replacement on the multi-task model' in readme
+    assert '| multi-task + mention replacement vs mention replacement |' in readme
+
+
 def test_a_week6_vote_that_passes_takes_the_unseen_slot(tmp_path):
     ws = Workspace(tmp_path)
     lopo = 'leave_one_paper_out'

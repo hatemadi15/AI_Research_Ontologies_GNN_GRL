@@ -210,8 +210,17 @@ WEEK7_SYSTEM_NAMES = {**WEEK6_NAMES, **{
     'crf_ebv': 'CRF head + recall calibration chosen on validation',
     'crf_eb_ens3': 'vote of the CRF head + recall calibration',
     'crf_mr': 'mention replacement', 'crf_mr_ens3': 'mention-replacement vote',
+    'crf_mt_mr': 'multi-task + mention replacement',
+    'crf_mt_mr_ens3': 'multi-task + mention-replacement vote',
     **{v: f'{WEEK6_NAMES[ref]} + coarse-to-fine completion'
        for v, ref in WEEK7C_COMPARISONS}}
+# Week 9 (week-9 protocol): mention replacement on the multi-task model, as in
+# ner_seedmeans.WEEK9_COMPARISONS; the first three decide
+WEEK9_FILE = 'ner_week9_comparisons.json'
+WEEK9_COMPARISONS = (('crf_mt_mr', 'crf_mt'),
+                     *(('crf_mt_mr_ens3', ref) for ref in UNSEEN_BEST.values()),
+                     ('crf_mt_mr', 'crf'), ('crf_mt_mr', 'crf_mr'))
+WEEK9_DECISIONS = WEEK9_COMPARISONS[:3]
 # the label of a week-7 method in the SOFC-Exp bullet (both parts decide on SOFC-Exp)
 WEEK7_SOFC_LABELS = {**{m: f"Week 7, {name} on the CRF head's predictions"
                         for m, name in WEEK7_NAMES.items()},
@@ -219,7 +228,9 @@ WEEK7_SOFC_LABELS = {**{m: f"Week 7, {name} on the CRF head's predictions"
                                 'chosen on the validation articles, against the CRF head',
                      'crf_mt': 'Week 7, part 2d, multi-task training on both levels against the '
                                'CRF head',
-                     'crf_mr': 'Week 7, part 2b, S2, mention replacement against the CRF head'}
+                     'crf_mr': 'Week 7, part 2b, S2, mention replacement against the CRF head',
+                     'crf_mt_mr': 'Week 9, S2, multi-task training with mention replacement on '
+                                  'both levels against the CRF head'}
 LOPO = 'leave_one_paper_out'
 # the exploratory analyses of the week-5 runs (ner_seed_analysis.py), in results/gpu/
 WEEK5_ANALYSIS = 'ner_week5_seed_analysis.json'
@@ -811,17 +822,31 @@ WEEK7C_INTRO = (
     "not yet converted).\n")
 
 
+WEEK9_INTRO = (
+    "Δ = with the change − without it, on the same held-out paper, GPU runs only, 10 model "
+    "seeds: a model scores the mean of its 10 runs, a vote the mean of its votes over 3 "
+    "disjoint seed triples. Week-9 protocol: mention replacement on the multi-task model "
+    "(`--multi-task --augment-mentions 3`; a mention is replaced in both heads' tags by a "
+    "training mention of the same coarse- and fine-grained type). Pre-registered rule: a "
+    "change improves on its reference only if the 95% Student-t CI of the mean micro-F1 "
+    "difference lies entirely above 0. Decisions, on the 4 held-out papers: the combination "
+    "against the multi-task model, and its vote against the strongest system on unseen papers "
+    "(the multi-task vote fine-grained, the 3-model seed ensemble coarse-grained). The other "
+    "rows are reported without a decision.\n")
+
+
 def ner_week7_table(res, comparisons=WEEK7_COMPARISONS,
                     title='part 1 (the consistency rule, 10-seed means, GPU runs)',
-                    intro=WEEK7_INTRO):
-    """Week-7 comparisons of one part ([] if none is complete): the held-out papers first."""
-    comps = res.comparisons(GPU_PREFIX + WEEK7_FILE)
+                    intro=WEEK7_INTRO, file=WEEK7_FILE, week='7'):
+    """Week-7 comparisons of one part ([] if none is complete): the held-out papers first.
+    file and week serve the later weeks."""
+    comps = res.comparisons(GPU_PREFIX + file)
     rows = [c for variant, reference in comparisons
             for protocol in (LOPO, 'random_split_vary') for g in GRANULARITIES
             for c in [find_comparison(comps, g, protocol, variant, reference)] if c]
     if not rows:
         return []
-    out = [f"\n#### NER week-7 comparisons, {title}\n", intro,
+    out = [f"\n#### NER week-{week} comparisons, {title}\n", intro,
            WEEK3_COLUMNS.replace('Δ strict micro', 'Role'), "|---|---|---|---|---|---|---|---|"]
     for c in rows:
         v = dig(c, 'variant_scores', 'micro')
@@ -850,7 +875,10 @@ def build_tables(res):
                              WEEK7A_INTRO)
            + ner_week7_table(res, WEEK7C_COMPARISONS,
                              'part 2c (coarse-to-fine completion, 10-seed means, GPU runs)',
-                             WEEK7C_INTRO))
+                             WEEK7C_INTRO)
+           + ner_week7_table(res, WEEK9_COMPARISONS,
+                             'mention replacement on the multi-task model (10-seed means, GPU '
+                             'runs)', WEEK9_INTRO, file=WEEK9_FILE, week='9'))
     return '\n'.join(out).strip()
 
 
@@ -1046,6 +1074,11 @@ def ner_notes(res):
     for variant, reference in WEEK7B_DECISIONS:
         note += week6_verdict_line(week7, variant, reference, 'mention replacement, 10 seeds',
                                    week='7, part 2b', names=WEEK7_SYSTEM_NAMES)
+    week9 = res.comparisons(GPU_PREFIX + WEEK9_FILE)
+    for variant, reference in WEEK9_DECISIONS:
+        note += week6_verdict_line(week9, variant, reference,
+                                   'mention replacement on the multi-task model, 10 seeds',
+                                   week='9', names=WEEK7_SYSTEM_NAMES)
     return note + sofc_note(analysis)
 
 

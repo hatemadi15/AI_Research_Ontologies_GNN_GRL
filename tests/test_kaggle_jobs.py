@@ -663,3 +663,26 @@ def test_week8_paper_diversity_batch(monkeypatch):
                 granularity, 'leave_one_paper_out', f'crf_p3n2_m{a.seed_offset}')
             assert a.two_paper_size and a.save_predictions
     assert 'w8b' in kj.BATCHES
+
+
+def test_week9_multi_task_mention_replacement_batch(monkeypatch):
+    """w9a (week 9): two repeats (the CRF run of smoke4, the multi-task run of random split 0),
+    then crf_mt_mr_m0 to _m900 on the held-out papers and S2 on SOFC-Exp's two levels."""
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda report=None: 'x' * 64)
+    lane0, lane1 = _parsed(kj.batch_lanes('w9a'))
+    assert lane0[0].tag == 'smokeah' and not _get(lane0[0], 'multi_task')
+    assert lane1[0].tag == 'smokeai' and lane1[0].multi_task and lane1[0].vary_split
+    assert not _get(lane1[0], 'augment_mentions')
+    jobs = lane0[1:] + lane1[1:]
+    sofc = [a for a in jobs if a.granularity == 'sofc_both']
+    held_out = [a for a in jobs if a.granularity != 'sofc_both']
+    assert len(sofc) == 1 and sofc[0].published_split
+    assert sofc[0].seeds == list(range(0, 1000, 100))
+    assert sorted(a.seed_offset for a in held_out) == list(range(0, 1000, 100))
+    for a in jobs:
+        assert a.crf and a.multi_task and a.augment_mentions == 3 and a.save_predictions
+    for a in held_out:
+        assert nb.protocol_name(a) == 'leave_one_paper_out'
+        assert nb.variant_name(a) == f'crf_mt_mr_m{a.seed_offset}'
+    assert nb.variant_name(sofc[0]) == 'crf_mt_mr'
+    assert 'w9a' in kj.BATCHES
