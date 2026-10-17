@@ -2722,6 +2722,13 @@ this on the GPU. Nothing else in the design changes.
   within 30 seconds. Since 07:24 every GPU session has either queued or
   reported "running" without its script starting; queued sessions are not
   charged.
+- *14:51: part 2 runs* (kernel a, version 18). Its live log, which showed
+  week 8, part 1's jobs this morning, now also answers with a server error,
+  so an empty live log no longer tells a stuck session from a working one
+  (week 8, part 2's session is still known to have hung: over 2 hours on a
+  40-minute batch). Sessions are judged by their run time instead; part 2
+  should take about 2 hours. Kaggle also refunded version 10's time after
+  its cancel (used quota 15.82 hours at 14:56).
 
 ### Candidates for week 10 (17 October; not a protocol)
 
