@@ -2785,9 +2785,14 @@ this on the GPU. Nothing else in the design changes.
   a third dataset, `ner-gpu-bundle-3`, so that no dataset a session
   attaches gets a new version. Its BUNDLE.json names a08356f and the 52
   converted MuLMS files with the SHA-256 that `results/mulms_corpus.json`
-  records. `w8b` on `ner-gpu-jobs-c` (version 2) has been queued since
-  18:48, while the two later sessions on `ner-gpu-jobs-d` started at once;
-  it is to be cancelled and pushed again.
+  records. The dataset holds the 1,378 files of the bundle (the 977 files of
+  a08356f, extracted, and 401 others whose sizes match the local bundle),
+  although the CLI's reply to the upload was not JSON.
+- *20:26: week 8, part 2 runs.* `w8b` on `ner-gpu-jobs-c` (version 2)
+  left the queue after 98 minutes, although the two later sessions on
+  `ner-gpu-jobs-d` had started at once. Its log showed every setup step
+  within 1.7 minutes and its first job (the repeat) done in 1.2 minutes. A
+  long wait in the queue is not a hang.
 
 **Outcome of part 1: 3 of the 6 decisions pass; the combination's vote is
 the strongest fine-grained system on unseen papers, but S2 fails at both
