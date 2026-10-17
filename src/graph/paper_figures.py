@@ -7,7 +7,9 @@ No training: reads the 10-seed GPU results (results/gpu) and writes PNG files.
       line, per granularity. A model scores the mean of its 10 runs per split, a vote the
       mean of its votes over the 3 seed triples. A third panel (week 8, part 1;
       ner_week5_seed_analysis.json, sofc_splits) puts SOFC-Exp's CRF head and its votes on
-      the same axis: 5 random sentence splits against 5 folds of 9 held-out articles.
+      the same axis: 5 random sentence splits against 5 folds of 9 held-out articles; a
+      fourth (week 10; mulms) MuLMS's: 5 random splits of a 400-sentence pool against its 7
+      held-out subfields, trained on 400 sentences of the other subfields.
   fig2_seeds.png (C8): (a) the SD of the CRF head's micro F1 over its 10 seeds, per split
       and granularity; (b) the 120 three-seed mean differences of multi-task training
       against the CRF head on the random splits (fine-grained), against the 10-seed
@@ -174,11 +176,34 @@ def sofc_points(analysis):
     return rows
 
 
-def figure1(points, path, sofc=()):
+def mulms_points(analysis):
+    """Figure 1's MuLMS rows from the analysis's mulms section: [(label, (random pool splits
+    mean, lo, hi), (held-out subfields mean, lo, hi))] for the CRF head and, if both
+    protocols have them, its votes; [] without both protocols."""
+    m = analysis.get('mulms', {})
+    pool, held = m.get('random_split_pool'), m.get('leave_one_subfield_out')
+    if not pool or not held:
+        return []
+    pairs = [('CRF head', pool['micro'], held['crf']['micro'])]
+    if 'crf_votes' in pool and 'votes' in held:
+        pairs.append(('CRF vote', pool['crf_votes']['micro'], held['votes']['crf']['micro']))
+    return [(label, *((e['mean'], *e['ci95']) for e in sides)) for label, *sides in pairs]
+
+
+def figure1(points, path, sofc=(), mulms=()):
     import matplotlib.pyplot as plt
     panels = [(points[g], f'{g}-grained') for g in GRANULARITIES]
+    unseen = [('MaterioMiner', '4 papers')]
     if sofc:
         panels.append((sofc, 'SOFC-Exp (entity types)'))
+        unseen.append(('SOFC-Exp', '5 folds of 9 articles'))
+    if mulms:
+        panels.append((mulms, 'MuLMS (outermost entities)'))
+        unseen.append(('MuLMS', '7 subfields'))
+    # the axis of weeks 5-8 (30-90), wider only if a panel's intervals leave it
+    ends = [end for rows, _ in panels for _, *sides in rows for _, lo, hi in sides
+            for end in (lo, hi)]
+    xlim = (30 if min(ends) >= 30 else min(ends) - 2, 90 if max(ends) <= 90 else max(ends) + 2)
     fig, axes = plt.subplots(1, len(panels), figsize=(5.5 * len(panels), 4.2), sharey=False)
     n_rows = max(len(rows) for rows, _ in panels)
     for ax, (rows, title) in zip(axes, panels):
@@ -193,12 +218,13 @@ def figure1(points, path, sofc=()):
             ax.annotate(f'{x - y:.1f}', ((x + y) / 2, k), textcoords='offset points',
                         xytext=(0, 4), fontsize=7, ha='center', color='dimgrey')
         ax.set_yticks(range(top, n_rows), [r[0] for r in rows], fontsize=8)
-        ax.set(xlim=(30, 90), ylim=(-0.5, n_rows - 0.5), title=title, xlabel='micro F1')
+        ax.set(xlim=xlim, ylim=(-0.5, n_rows - 0.5), title=title, xlabel='micro F1')
         ax.grid(alpha=0.3, axis='x')
     handles, labels = axes[0].get_legend_handles_labels()
-    if sofc:
-        labels = [label.replace('4 unseen papers', 'unseen documents (MaterioMiner: 4 papers; '
-                                'SOFC-Exp: 5 folds of 9 articles)') for label in labels]
+    if len(unseen) > 1:
+        documents = '; '.join(f'{corpus}: {held}' for corpus, held in unseen)
+        labels = [label.replace('4 unseen papers', f'unseen documents ({documents})')
+                  for label in labels]
     fig.legend(handles, labels, loc='lower center', ncol=2, fontsize=8)
     fig.suptitle('The same systems on random splits and on unseen documents (10 seeds, 95% '
                  'CIs; the number is the gap)', fontsize=10)
@@ -501,7 +527,7 @@ def main(argv=None):
     analysis = (load(args.results, [ANALYSIS]) or [{}])[0]
     if all(points.values()):
         figure1(points, os.path.join(args.out, 'fig1_random_vs_unseen.png'),
-                sofc_points(analysis))
+                sofc_points(analysis), mulms_points(analysis))
         written.append('fig1_random_vs_unseen.png')
     else:
         print('fig1: no system with both protocols')

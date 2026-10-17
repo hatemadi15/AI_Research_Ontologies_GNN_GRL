@@ -76,8 +76,9 @@ votes (ner_seedmeans.WEEK5_SYSTEMS) and writes ner_week5_seed_analysis.json next
     above 0); then the votes over the seed triples 0-200, 300-500 and 600-800, per subfield
     the mean of its 3 votes, and mention replacement's votes minus the CRF votes (decision
     2). random_split_pool (descriptive): the CRF head on 5 random splits of a 400-sentence
-    pool (the next 20% of the sentences testing), its 10-seed mean per split; and the gap,
-    random splits minus held-out subfields (the CRF head), per F1 average.
+    pool (the next 20% of the sentences testing), its 10-seed mean per split, and its votes
+    over the same seed triples (the mean of the 3 votes per split); and the gap, random
+    splits minus held-out subfields (the CRF head), per F1 average.
   - sofc_splits (week 8, part 1; descriptive): SOFC-Exp beyond its official split. Per
     protocol, its 5 random sentence splits and its 5 article folds (--document-folds 5), the
     CRF head's 10-seed mean per split under every F1 average, with the mean and 95% CI over
@@ -557,9 +558,13 @@ def mulms(directory):
                                   for off in WEEK5_OFFSETS])
     if pool:
         per_split = system_scores(pool)
-        out[MULMS_PROTOCOLS[1]] = {avg: spread([v[avg] for v in per_split.values()])
-                                   for avg in F1_AVERAGES}
-        out[MULMS_PROTOCOLS[1]]['n_splits'] = len(per_split)
+        entry = {avg: spread([v[avg] for v in per_split.values()]) for avg in F1_AVERAGES}
+        entry['n_splits'] = len(per_split)
+        if all('test_pred' in r for f in pool for r in f['runs']):
+            votes = fold_votes(pool)
+            entry['crf_votes'] = {avg: spread([votes[i][avg] for i in per_split])
+                                  for avg in F1_AVERAGES}
+        out[MULMS_PROTOCOLS[1]] = entry
     if all(p in out for p in MULMS_PROTOCOLS):
         out['gap'] = {avg: round(out[MULMS_PROTOCOLS[1]][avg]['mean']
                                  - out[MULMS_PROTOCOLS[0]]['crf'][avg]['mean'], 2)

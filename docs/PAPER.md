@@ -88,7 +88,8 @@ into `docs/figures/` (no training; re-run it when results change):
   with 95% CIs and the gap: 28–31 points fine-grained, 17–20 coarse-grained;
   a third panel puts SOFC-Exp's CRF head and its votes on the same axis, 5
   random sentence splits against 5 folds of 9 held-out articles: 3.5 points
-  (C2).
+  (C2). A fourth panel does the same for MuLMS once week 10 is in: 5 random
+  splits of a 400-sentence pool against its 7 held-out subfields.
 - Figure 2 (`fig2_seeds.png`): the CRF head's SD over 10 seeds per split;
   the 120 three-seed differences of multi-task training on the random splits
   (49 of 120 triples pass, against the 10-seed +1.83); and of document

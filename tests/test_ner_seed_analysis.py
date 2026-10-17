@@ -376,6 +376,9 @@ def test_mulms_held_out_subfields_and_pool_splits(tmp_path):
             (tmp_path / f'ner_results_mulms_leave_one_subfield_out_{system}_m{off}.json'
              ).write_text(json.dumps({'runs': runs}))
         pool = [_run(f'seed{k}', 70 + k + j / 10) for k in range(5)]
+        for run in pool:
+            run.update({'test_index': [0], 'test_gold': ['B-MAT O'],
+                        'test_pred': ['B-MAT O' if j % 2 == 0 else 'O O']})
         (tmp_path / f'ner_results_mulms_random_split_pool_crf_m{off}.json').write_text(
             json.dumps({'runs': pool}))
     out = sa.mulms(tmp_path)
@@ -388,6 +391,7 @@ def test_mulms_held_out_subfields_and_pool_splits(tmp_path):
     assert held['votes']['crf_mr']['micro']['mean'] == 100.0 and held['votes']['passes']
     assert out['random_split_pool']['micro']['mean'] == 72.45
     assert out['random_split_pool']['n_splits'] == 5
+    assert out['random_split_pool']['crf_votes']['micro']['mean'] == pytest.approx(66.67)
     assert out['gap']['micro'] == round(72.45 - held['crf']['micro']['mean'], 2)
     (tmp_path / 'ner_results_mulms_leave_one_subfield_out_crf_mr_m900.json').unlink()
     assert set(sa.mulms(tmp_path)) == {'random_split_pool'}

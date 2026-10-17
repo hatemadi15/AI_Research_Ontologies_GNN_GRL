@@ -55,6 +55,31 @@ def test_sofc_points_need_both_protocols():
     assert pf.sofc_points(analysis) == [] and pf.sofc_points({}) == []
 
 
+def _mulms(pool, held, votes=None):
+    """The analysis's mulms section: the CRF head's micro F1 on the pool splits and held-out
+    subfields, and with votes (pool, held) its votes there."""
+    def micro(m):
+        return {'micro': {'mean': m, 'ci95': [m - 1, m + 1]}}
+    out = {'random_split_pool': micro(pool),
+           'leave_one_subfield_out': {'crf': micro(held), 'crf_mr': micro(held + 1)}}
+    if votes:
+        out['random_split_pool']['crf_votes'] = micro(votes[0])
+        out['leave_one_subfield_out']['votes'] = {'crf': micro(votes[1])}
+    return out
+
+
+def test_mulms_points_need_both_protocols():
+    """Figure 1's MuLMS rows: the CRF head on the random pool splits and the held-out
+    subfields, and its votes if both protocols have them."""
+    analysis = {'mulms': _mulms(62.0, 51.0, votes=(63.0, 53.0))}
+    assert pf.mulms_points(analysis) == [('CRF head', (62.0, 61.0, 63.0), (51.0, 50.0, 52.0)),
+                                         ('CRF vote', (63.0, 62.0, 64.0), (53.0, 52.0, 54.0))]
+    del analysis['mulms']['random_split_pool']['crf_votes']
+    assert [r[0] for r in pf.mulms_points(analysis)] == ['CRF head']
+    del analysis['mulms']['random_split_pool']
+    assert pf.mulms_points(analysis) == [] and pf.mulms_points({}) == []
+
+
 def test_triple_differences(tmp_path):
     pytest.importorskip('scipy')
     _families(tmp_path, gain=lambda off: off / 900)       # seeds with larger offsets gain more
@@ -84,6 +109,7 @@ def test_figures_are_written(tmp_path):
              'crf_votes': {'micro': {'mean': 84.0, 'ci95': [83.0, 85.0]}}}
     (results / pf.ANALYSIS).write_text(json.dumps({
         'sofc_splits': {'random_split_vary': folds, 'document_folds': folds},
+        'mulms': _mulms(62.0, 25.0, votes=(63.0, 27.0)),     # an interval below 30 too
         'spread': {'fine_random_split_vary': {'crf': {'per_split': {'a': 1.5, 'b': 2.0}}}},
         'types': {'coarse_random_split_vary': {'crf_mt_ens3': {
             'SDE': {'f1': 17.7, 'support_per_split': 3.0},
