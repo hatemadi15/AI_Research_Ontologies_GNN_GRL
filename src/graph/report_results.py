@@ -1085,7 +1085,37 @@ def ner_notes(res):
         note += week6_verdict_line(week9, variant, reference,
                                    'mention replacement on the multi-task model, 10 seeds',
                                    week='9', names=WEEK7_SYSTEM_NAMES)
-    return note + sofc_note(analysis)
+    return note + sofc_note(analysis) + mulms_note(analysis)
+
+
+def mulms_note(analysis):
+    """The week-10 bullet (MuLMS, ROADMAP §4) from the week-5 analyses file ('' until the
+    held-out subfields have all their runs): its 2 decisions over the held-out subfields, each
+    the mean of its 10 seeds, and the CRF head on the random pool splits (descriptive)."""
+    m = analysis.get('mulms') or {}
+    held = m.get('leave_one_subfield_out')
+    if not held:
+        return ''
+    word, numbers = paired_verdict(held['crf_mr_minus_crf'])
+    line = ("* NER week 10 (MuLMS, a third corpus: its outermost entities of 13 types; GPU runs, "
+            f"10 model seeds; each of its {held['n_subfields']} materials subfields held out in "
+            "turn, 340 training and 60 validation sentences from the others; the 95% CIs are "
+            f"over the subfields): the CRF head {interval(held['crf']['micro'])}, mention "
+            f"replacement {interval(held['crf_mr']['micro'])}. Decision 1, mention replacement "
+            f"against the CRF head, paired by subfield: {word} ({numbers})")
+    votes = held.get('votes')
+    if votes:
+        word, numbers = paired_verdict(votes['crf_mr_minus_crf'])
+        line += (". Decision 2, its votes over the 3 seed triples against the CRF votes "
+                 f"({interval(votes['crf_mr']['micro'])} against "
+                 f"{interval(votes['crf']['micro'])}), paired by subfield: {word} ({numbers})")
+    pool = m.get('random_split_pool')
+    if pool:
+        line += (f". The CRF head on {pool['n_splits']} random splits of the same size "
+                 f"(descriptive): {interval(pool['micro'])}")
+        if 'gap' in m:
+            line += f", {m['gap']['micro']:.2f} points above the held-out subfields"
+    return line + ".\n"
 
 
 def week6_screen_line(comps, method, week='6', names=WEEK6_NAMES):

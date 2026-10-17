@@ -1312,6 +1312,44 @@ def test_sofc_row_and_bullet(tmp_path):
             '[+1.30, +2.50]; strict IOB2 +1.70 [+1.20, +2.20]).\n') in readme
 
 
+def test_mulms_bullet(tmp_path):
+    """Week 10: the 2 decisions over the held-out subfields and the random pool splits; no
+    bullet until the held-out subfields are complete."""
+    ws = Workspace(tmp_path)
+    (ws.results / 'gpu').mkdir()
+
+    def diff(mean, lo, hi, n=7):
+        return {'mean_diff': mean, 'ci95': [lo, hi], 'per_run': [mean] * n}
+
+    def score(mean, lo, hi):
+        return {'micro': {'mean': mean, 'ci95': [lo, hi]}}
+    analysis = {'mulms': {'random_split_pool': {**score(70.1, 69.0, 71.2), 'n_splits': 5}}}
+    (ws.results / 'gpu' / rr.WEEK5_ANALYSIS).write_text(json.dumps(analysis))
+    readme, _ = ws.generate()
+    assert '* NER week 10' not in readme
+    analysis['mulms'].update({
+        'leave_one_subfield_out': {
+            'crf': score(55.2, 48.0, 62.4), 'crf_mr': score(57.0, 50.1, 63.9), 'n_subfields': 7,
+            'crf_mr_minus_crf': {'micro': diff(1.8, 0.6, 3.0), 'micro_strict': diff(1.7, 0.5, 2.9)},
+            'votes': {'crf': score(56.0, 49.0, 63.0), 'crf_mr': score(57.5, 50.5, 64.5),
+                      'crf_mr_minus_crf': {'micro': diff(1.5, -0.2, 3.2),
+                                           'micro_strict': diff(1.4, -0.3, 3.1)}}},
+        'gap': {'micro': 14.9}})
+    (ws.results / 'gpu' / rr.WEEK5_ANALYSIS).write_text(json.dumps(analysis))
+    readme, _ = ws.generate()
+    assert ('* NER week 10 (MuLMS, a third corpus: its outermost entities of 13 types; GPU runs, '
+            '10 model seeds; each of its 7 materials subfields held out in turn, 340 training and '
+            '60 validation sentences from the others; the 95% CIs are over the subfields): the '
+            'CRF head 55.20 [48.00, 62.40], mention replacement 57.00 [50.10, 63.90]. Decision 1, '
+            'mention replacement against the CRF head, paired by subfield: improves (+1.80, 95% '
+            'CI [+0.60, +3.00]; strict IOB2 +1.70 [+0.50, +2.90]). Decision 2, its votes over the '
+            '3 seed triples against the CRF votes (57.50 [50.50, 64.50] against 56.00 [49.00, '
+            '63.00]), paired by subfield: no significant change (+1.50, 95% CI [-0.20, +3.20]; '
+            'strict IOB2 +1.40 [-0.30, +3.10]). The CRF head on 5 random splits of the same size '
+            '(descriptive): 70.10 [69.00, 71.20], 14.90 points above the held-out '
+            'subfields.\n') in readme
+
+
 def test_a_week3_file_that_is_not_an_object_is_reported(tmp_path, capsys):
     ws = Workspace(tmp_path)
     (ws.results / rr.WEEK3_FILE).write_text('[1, 2]')
