@@ -189,6 +189,21 @@ sentences; the official validation and test articles), with predictions.
 by draw, each the mean of its 10 seeds) and the CRF head on 10 articles
 against all 26 (`ten_minus_all_articles`, paired by seed).
 
+Week 10 (MuLMS, a third corpus; protocol in ROADMAP §4, prepared, no run yet):
+`mulms_corpus.json` is the report of `src/graph/mulms.py`. It records the
+Hugging Face revision of MuLMS, the SHA-256 of its parquet files and of every
+converted file, the flattening rule (the outermost entities), the token rule
+(whitespace-separated pieces, without those a BERT tokenizer erases) and every
+count.
+The converted CoNLL files stay in `data/processed/mulms/`, outside git, and
+`mulms.py` rebuilds them; the Kaggle bundle ships them. The runs will write
+`gpu/ner_results_mulms_leave_one_subfield_out_<variant>.json` (run ids: the
+subfields) and `gpu/ner_results_mulms_random_split_pool_crf_m<N>.json`.
+`gpu/ner_week5_seed_analysis.json` (`mulms`) will hold the decisions. *Licence:*
+MuLMS is CC BY-SA 4.0 (Schrader et al., 2023), so every results file with
+`mulms` in its name, which holds MuLMS's tags (`test_gold`), is CC BY-SA 4.0
+as well, unlike the rest of the repository (Apache 2.0).
+
 Week 7, part 2d (multi-task training on SOFC-Exp's two levels; Kaggle
 session `w7b` of 17 October, model seeds 0 to 900 on the official split):
 `gpu/ner_results_sofc_slot_published_split.json` and `_crf.json` are plain

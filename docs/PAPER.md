@@ -29,7 +29,11 @@ multi-task vote). It gives nothing on SOFC-Exp's official split at either
 level, so by the pre-registered criterion it is a result for few annotated
 papers, not the methods claim. SOFC-Exp's larger training set is not the
 reason: cut to MaterioMiner's size, mention replacement gains +0.50 [−0.47,
-+1.46] there (week 9, part 2). Recall calibration (week 7, part 2a) passed none
++1.46] there (week 9, part 2). Week 10 (pre-registered) tests it on a third
+corpus whose held-out documents differ in topic, as MaterioMiner's papers do:
+MuLMS's seven materials subfields, each held out in turn, with MaterioMiner's
+training size. A pass there would make a methods claim scoped to unseen
+documents of a new topic. Recall calibration (week 7, part 2a) passed none
 of its 5 decisions, and showed why a decoding change cannot close the recall
 gap on unseen papers (C15). Most entities of an unseen paper are names the
 training papers never annotate (81% fine-grained), and every gain that holds

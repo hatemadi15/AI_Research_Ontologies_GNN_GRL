@@ -1,0 +1,172 @@
+{
+  "script": "src/graph/mulms.py",
+  "source": {
+    "dataset": "timo-pierre-schrader/MuLMS",
+    "revision": "bc1c97d63b194e1102ff2e80f1b1bd7379148d6a",
+    "license": "CC BY-SA 4.0",
+    "url": "https://huggingface.co/datasets/timo-pierre-schrader/MuLMS/resolve/bc1c97d63b194e1102ff2e80f1b1bd7379148d6a/<file>",
+    "files": {
+      "MuLMS_Corpus/train-00000-of-00001.parquet": "802e019019c18e5543d9d96cb03f296a30f4ca8def35b368af1028430453add9",
+      "MuLMS_Corpus/validation-00000-of-00001.parquet": "7c94e244ed2c74cf1bae443b4346ab7f9ac1d6807896a5e7e52eb71be886e536",
+      "MuLMS_Corpus/test-00000-of-00001.parquet": "9ad56ac15c74faab3821a01e109abd462718d6d7dcb2dcdc748397dfc04eccf7"
+    }
+  },
+  "rule": {
+    "type_order": [
+      "MEASUREMENT",
+      "VALUE",
+      "RANGE",
+      "SAMPLE",
+      "PROPERTY",
+      "TECHNIQUE",
+      "INSTRUMENT",
+      "DEV",
+      "CITE",
+      "MAT",
+      "FORM",
+      "NUM",
+      "UNIT"
+    ],
+    "description": "per sentence: drop the entities strictly inside another; of equal spans keep the type first in type_order; of crossing entities keep the one that starts first; then IOB2",
+    "tokens": "per token: its whitespace-separated pieces (str.split), without the pieces made only of characters a BERT tokenizer erases (Unicode categories Cc, Cf, Co, Cs and Mn, U+FFFD); an entity moves to the pieces of its tokens and is dropped if they have none",
+    "unicode_version": "14.0.0"
+  },
+  "totals": {
+    "documents": 50,
+    "sentences": 10184,
+    "entities_in": 46584,
+    "entities_kept": 31952,
+    "dropped": {
+      "nested": 13891,
+      "same_span": 721,
+      "crossing": 18,
+      "no_visible_token": 2
+    }
+  },
+  "tokens": {
+    "in": 292686,
+    "out": 292513,
+    "dropped_blank": 203,
+    "dropped_invisible": 15,
+    "split": 31,
+    "trimmed": 27
+  },
+  "kept_per_type": {
+    "CITE": 1704,
+    "DEV": 757,
+    "FORM": 3180,
+    "INSTRUMENT": 370,
+    "MAT": 12647,
+    "MEASUREMENT": 2106,
+    "NUM": 260,
+    "PROPERTY": 3880,
+    "RANGE": 18,
+    "SAMPLE": 1391,
+    "TECHNIQUE": 920,
+    "UNIT": 91,
+    "VALUE": 4628
+  },
+  "subfields": {
+    "electrolysis": {
+      "documents": 4,
+      "sentences": 992,
+      "entities_kept": 3787
+    },
+    "graphene": {
+      "documents": 2,
+      "sentences": 351,
+      "entities_kept": 1549
+    },
+    "pemfc": {
+      "documents": 8,
+      "sentences": 1638,
+      "entities_kept": 7238
+    },
+    "poly": {
+      "documents": 11,
+      "sentences": 2384,
+      "entities_kept": 5430
+    },
+    "semi": {
+      "documents": 11,
+      "sentences": 2040,
+      "entities_kept": 5400
+    },
+    "sofc": {
+      "documents": 4,
+      "sentences": 928,
+      "entities_kept": 3854
+    },
+    "steel": {
+      "documents": 10,
+      "sentences": 1851,
+      "entities_kept": 4694
+    }
+  },
+  "splits": {
+    "dev": 7,
+    "test": 7,
+    "train1": 7,
+    "train2": 7,
+    "train3": 8,
+    "train4": 7,
+    "train5": 7
+  },
+  "output_dir": "data/processed/mulms",
+  "outputs": {
+    "electrolysis_01.conll": "a7e08093bccb809993fff8ab1176ef85915f2c6ee968c7056c113f625e57c10d",
+    "electrolysis_02.conll": "2da108eb762df82294c55a856f558de0527b5e2aa185538566894577f56aac1f",
+    "electrolysis_03.conll": "f9b0715f82797d90c5074696abfb97878dd6ca32b0f85d67b09fb766d1dbfd57",
+    "electrolysis_04.conll": "c0420fcff2aefb6318c651d31d8ce87a73d7534964f436087e2d4fee18341149",
+    "graphene_01.conll": "4f7d1e15b142ebe2f0f7b8e34035448c51fcfeb184c9fa0d0670081678ba408f",
+    "graphene_02.conll": "ede3e23e32cb511cd700c671ed2f87e12359456774f35863249399ae9a98177b",
+    "oastm_01.conll": "56eeed3eb86a5dad529eacb95590e0dc5665be5a9baf2e372e406fcce65b9eba",
+    "oastm_02.conll": "7d163fc317c17c54331404916f8a7740087326babc80eb3278e72c997f666b08",
+    "oastm_03.conll": "d3bd0d94407990897e0b2fd9687d31eb64f70635c264a09df5b6ad88c43e7efc",
+    "oastm_04.conll": "fb61db4635d88defff2889d97b4eb4e3f304033a7f9f387a12e0bae1ea3ea3b1",
+    "oastm_05.conll": "814b9b36475c644c26b4b5b816cf9fa57817e016efd16b96cfa9db2e8776cb51",
+    "oastm_06.conll": "0d6402a99b97622a4f8b559db677ee728c7fd38c060805cb147f74398c65e5ff",
+    "oastm_07.conll": "3bbfb0a5f1afb7337303892a382c9de2148deee311fad476bfbf5823920ebcfa",
+    "oastm_08.conll": "79b5383ed19f94a2a96de0deba4ddde2d384a82297c9e0676d1aafdfece33459",
+    "oastm_09.conll": "67c61db18fce19fedec8edb834e1bac6b48e248b3f3f35fd9c45833ff632b287",
+    "oastm_10.conll": "2f9d2228e4285c2d915c653a557ee3050368806a682e5adb1f6d12a531ece835",
+    "oastm_11.conll": "5c3542423b2827c4d2ab4a3f7defe360ac384efc66acd48ae9ec07dffdc5480e",
+    "pemfc_02.conll": "0651c12ae0794f801f092b0a8dd5cbd8f7652af87648e43772d34450985ab7d6",
+    "pemfc_03.conll": "1f9ab8f9a63505fd174baea7b0a9b3505334a4273c9a01d163bbc5881fd63a99",
+    "pemfc_04.conll": "3c83e1beb128efaab521e51af83a4f563b29cc698360cecce3611bf8c40a0c05",
+    "pemfc_07.conll": "75a84a7ec203e8d0a78f961a979e20b7b418e84a6292b5b6145dfc4149baebf7",
+    "pemfc_08.conll": "56e15ff2dfcfdf5467ddcf64497e56a04d3c403c1252259eaf37843a7154a0f2",
+    "pemfc_10.conll": "9c2a7bfd63bddafc8ee20dee881f71e98bc0ca7ea3332504baa1e3c672e2bc68",
+    "pemfc_13.conll": "c4c242b2c4db5ffb131491e88c2482850571b40c814564f5acc756424c9c38f4",
+    "pemfc_14.conll": "883cd56f9f2f6088f761ad68fc109f58d6fe90dd49e79d55ca89ea9ad94f93de",
+    "poly_01.conll": "7e46bf81d042b7cfd82b0d579af3b093c15741cbe58ae5be2c44cbefe01be4aa",
+    "poly_02.conll": "19647e9ca0d5fd6adf7f1553898e825ead7d87713c20aba1c93ca348a9b3b98c",
+    "poly_04.conll": "4cf46214cdb20ab2404a0b43d75496db43f39d7b202bb32f7cd17a50731af0b9",
+    "poly_05.conll": "bbd56add9fc80cb8921d63d906d8b64476378f0633bb158fa731e29637b2fbaf",
+    "poly_07.conll": "9ff78a1a05df20b6ad12cc2b73d2f22a906ebcaad8e4496c7eb0064742bea6b3",
+    "poly_09.conll": "f91151f8cd0c331a35953ad759bfb61b3806960b338162b5bcaeb978fccac9a7",
+    "poly_11.conll": "0d96d2c1f379b8d9e064478aae0faa48d318f5e1fd2bff45a7dc3a8db9e4206c",
+    "semi_01.conll": "3965d3f42830b231fcf3ab9bce8bf76132de1c36cdd1118a943fd0c258c2aefc",
+    "semi_02.conll": "210c1c84cd8fabd7955186641beecfab07e949200b62c8ccf643e8ac0b7008fb",
+    "semi_03.conll": "e4861c68e88881d8db3e7c5439e3467fbcc4eb13c93caeeae040b11bee2d7ba1",
+    "semi_04.conll": "52d1faa17551c7fe60eefe1804d8d0079ffab7a29d797a9d8591ab1b73e8ba66",
+    "semi_05.conll": "bbd4d5b8128ebd2c3eecba446a41a293729b1d9a850db5cd376d731b6e18801f",
+    "semi_06.conll": "fc2a93761d0d8c4b7a6af560850663f2ad8325a21e537aa4f0d5ac988b60b4c4",
+    "semi_08.conll": "2fa47e67a1eedc4c50a128c83b3d4de6f5cd0b0c07d7bfd40ee788378981f800",
+    "sofc_01.conll": "c650284f3acf1eeedc9fc48033d8ad2bab3eb23f331f617ee455e249b8dc6908",
+    "sofc_02.conll": "535dc988487af42d4f72608a06710b8267674bfb9f3d81921d7b9d7a5ebd6d09",
+    "sofc_03.conll": "cc277c8adf761c70030cde3b5c1a867e760d4295e4559c7e0761ff58c32f1f6c",
+    "sofc_04.conll": "5e5fc36df9e7eaeeed51d463245eda224b6dbab446761079555f52355fe81d88",
+    "split.json": "53d9d52069d3395b1364e794803741b4edcfeb5821b93457f43f9bd1308a78dc",
+    "steel_03.conll": "33e5f5efbfa5d7e61cb69d6d29d4dbd841605fa77c776f31bc175fc461dcc016",
+    "steel_04.conll": "34fc063f37be58265f6425fecdb0fcaa6e8dd7fa2afa26c1cd52f669f52602d9",
+    "steel_05.conll": "608ea7e2273fa6a6d34da749f993af8623d54de98465bd7b8b0a31b864b29c05",
+    "steel_06.conll": "f7db190587f0f40f027a89927b270ef7c12ccdeb984c7373c0d58129d5264cc8",
+    "steel_07.conll": "0003315022972d5e5f4a97f5f8cb457011a0becc3f00b11f23148514da54ae87",
+    "steel_08.conll": "a3b19019f1a29ecff356c61f4a0ff463c351868c4f31d7da21edd02fc3ced420",
+    "steel_11.conll": "fbd47b175f0b61c944a4b2549a5c757b1c0fefc2d3154717b1bfcd52e4512c7f",
+    "subfields.json": "9f907211ba1c4377c75ddd395df84a245b75ce735ed4218fbf2ec71c166a40e2"
+  },
+  "outputs_sha256": "afa79edf48baf5287e5e101405db8a566c74fa4f8959eae2b67201195ec251ce",
+  "outputs_sha256_of": "the lines \"<name> <sha256>\" of outputs, sorted by name, each ending in a newline"
+}

@@ -1023,6 +1023,7 @@ chance at class level. For a Task C-style result:
 | 7 | In progress: NER, part 1, document-level label consistency for unseen papers, a post-processing rule on the saved predictions (no GPU; protocol below); part 2a, recall calibration (a bias on the CRF head's emissions, chosen on inner folds; done, no claim: the missed entities are not near the threshold); part 2b, mention replacement (screen, then 10 seeds if it passes; protocol below; done: it improves on the CRF head at both granularities, +2.77 [+1.51, +4.03] fine-grained and +1.28 [+0.06, +2.51] coarse-grained, but its vote does not beat the strongest systems and S2 on SOFC-Exp gives −0.29), and later the combinations of the methods that pass week 6, fixed after the week-6 decisions; part 2c, coarse-to-fine completion (done, no claim); part 2d, multi-task training on SOFC-Exp's two levels (done, no claim: −0.78 [−2.39, +0.84] on the slot level, −0.15 [−1.36, +1.05] on the entity level); part 2e, SOFC-Exp's test articles cut into words as its training articles are (protocol below). Then class-level taxonomy (LLM or cross-encoder + arborescence) and a relation annotation pilot | Part 1: the rule improves on the strongest system on unseen papers and on SOFC-Exp's CRF head. Taxonomy: first class-level F1 above chance; relation guidelines |
 | 8 | Part 1 done: SOFC-Exp beyond its official split, the CRF head with 10 seeds on 5 random sentence splits and on 5 folds of 9 held-out articles (`--document-folds 5`; protocol below, descriptive): 86.27 against 82.79, a gap of 3.48 points (28–31 on MaterioMiner); part 2 (its first session hung and was cancelled; it runs again after week 9), more papers or more sentences: three training papers cut to the size of two against two papers (`--two-paper-size`; protocol below) | Part 1: the gap between random splits and unseen documents measured on a second corpus. Part 2: whether a third paper helps at the same number of training sentences |
 | 9 | Part 1 done: mention replacement on the multi-task model (`crf_mt_mr`, 10 seeds on the held-out papers, S2 on SOFC-Exp's two levels; protocol below). 3 of 6 decisions pass: against the multi-task model +3.01 [+0.42, +5.60] fine-grained and +2.30 [+0.49, +4.10] coarse-grained, and its vote against the multi-task vote +2.86 [+0.18, +5.54] fine-grained, now the strongest fine-grained system on unseen papers (55.33); coarse-grained its vote does not beat the seed vote, and S2 fails at both levels, so no methods claim (C21). Part 2 done: on SOFC-Exp cut to MaterioMiner's size (10 of its 26 training articles, 5 draws), mention replacement scores +0.50 [−0.47, +1.46] against the CRF head and does not pass, so its MaterioMiner gain is not a matter of training size | Part 1: the combination's vote improves on the strongest system on unseen papers, and on SOFC-Exp. Part 2: mention replacement improves on the CRF head on a MaterioMiner-sized SOFC-Exp |
+| 10 | Prepared: MuLMS as a third corpus (7 materials subfields, its outermost entities; `mulms.py`), mention replacement against the CRF head on held-out subfields with 400 training sentences, 10 seeds, and the CRF head on random splits of the same size; protocol below | Mention replacement improves on the CRF head on held-out subfields (decision 1), and its votes on the CRF votes (decision 2) |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -2919,3 +2920,143 @@ decisions can be checked against this list. None is fixed yet.
    the silver names the teachers tag in the 40,000 corpus sentences, so
    that the copies hold more names than three papers do. It needs the
    teachers of each fold, as self-training does.
+
+### Week 10 protocol: mention replacement on held-out subfields of a third corpus, MuLMS (fixed before any run)
+
+Fixed on 17 October, after both parts of week 9 and before any run on MuLMS.
+Chosen from the candidates above (item 2).
+
+*Why.* Week 9 left mention replacement and its combination with multi-task
+training as results for MaterioMiner. Neither gains on SOFC-Exp, on its
+official split (C20, C21) or with its training set cut to MaterioMiner's size
+(part 2). SOFC-Exp's 45 articles share one topic. 49% of its test names are
+unseen there and the CRF head finds 82% of them, against 81% and 35% on a
+held-out MaterioMiner paper (C17). Mention replacement may help only where
+unseen names are many and hard to find (the post hoc reading of week 9, part
+2). MuLMS (Schrader et al., 2023) covers seven materials subfields, so holding
+one out makes the test documents differ in topic from the training documents,
+as a new MaterioMiner paper does. Multi-task training needs two levels of
+types and MuLMS has one, so only mention replacement is tested.
+
+*Data.* MuLMS from Hugging Face (`timo-pierre-schrader/MuLMS`, revision
+bc1c97d, CC BY-SA 4.0): 50 documents, 10,184 sentences and 46,584 entities of
+13 types, 32.9% of them inside or on the span of another. A flat tagger needs
+one level, so `mulms.py` applies three rules:
+- it keeps the outermost entities, those that no other entity contains;
+- of entities with the same span, it keeps the type that comes first in
+  MEASUREMENT, VALUE, RANGE, SAMPLE, PROPERTY, TECHNIQUE, INSTRUMENT, DEV,
+  CITE, MAT, FORM, NUM, UNIT (the larger unit first: VALUE over NUM);
+- of two that cross, it keeps the one that starts first.
+
+The rules keep 31,952 entities (68.6%). They drop 13,891 as nested, 721 with
+the span of a kept one and 18 that cross a kept one. Kept per type: MAT
+12,647, VALUE 4,628, PROPERTY 3,880, FORM 3,180, MEASUREMENT 2,106, CITE
+1,704, SAMPLE 1,391, TECHNIQUE 920, DEV 757, INSTRUMENT 370, NUM 260, UNIT 91
+and RANGE 18.
+
+A fourth rule repairs the tokens that text extraction damaged:
+- 261 tokens, in 121 sentences of 9 documents, are empty or hold whitespace.
+  They include:
+  - a lone space where a minus or degree sign was lost (`m2 g ' ' 1`,
+    `80 ' ' C`);
+  - non-breaking spaces;
+  - fragments with spaces inside (`The cataly`);
+  - 114 tokens in one garbled document (pemfc_14).
+- 15 more tokens are private-use symbol characters or lone combining marks,
+  which MatSciBERT's tokenizer erases.
+
+A CoNLL line cannot hold whitespace, and a word without a subword cannot be
+tagged, so scoring would stop on it. So each token becomes its
+whitespace-separated pieces, and a piece made only of characters a BERT
+tokenizer erases is dropped (Unicode categories Cc, Cf, Co, Cs and Mn). This
+drops 218 tokens (203 blank, 15 invisible), splits 31 into pieces and trims
+the surrounding whitespace of 27. 2 entities are left without tokens and are
+dropped. All 10,184 sentences stay, with 292,513 words. Read back as
+`ner_baseline.py` reads them, every word gets a MatSciBERT subword, and the
+longest sentence needs 309 subwords (the limit is 512).
+
+| Subfield | Documents | Sentences | Kept entities |
+|---|---|---|---|
+| electrolysis | 4 | 992 | 3,787 |
+| graphene | 2 | 351 | 1,549 |
+| pemfc | 8 | 1,638 | 7,238 |
+| poly | 11 | 2,384 | 5,430 |
+| semi | 11 | 2,040 | 5,400 |
+| sofc | 4 | 928 | 3,854 |
+| steel | 10 | 1,851 | 4,694 |
+
+The converted files stay out of the repository (share-alike).
+`results/mulms_corpus.json` records the input and output SHA-256 (the outputs
+combined: afa79ed) and every count. The published MatSciBERT-CRF (79.6 micro F1) tags the nested entities
+with stacked labels and is scored on all of them, so these scores cannot be
+compared with it.
+
+*Protocols* (`--granularity mulms`, about MaterioMiner's training size: 234–370
+training sentences per held-out paper):
+- *held-out subfields* (`--leave-one-subfield-out --train-pool 400`): 7
+  folds, one per subfield, whose documents are the test set (351–2,384
+  sentences). The other documents are sorted and shuffled with split seed 0
+  plus the fold's index, then taken in that order until they hold 400
+  sentences, the last one cut to its first sentences (about two documents).
+  Of the 400, 15% validate (60) and 340 train;
+- *random pool splits* (`--vary-split --train-pool 400`, descriptive): 5
+  splits (split seeds 0–4). 340 training and 60 validation sentences are
+  drawn from the whole corpus, and the next 20% of the sentences (2,037)
+  test.
+
+*Runs* (batch `w10a`, one Kaggle session from this protocol's commit; GPU,
+deterministic): first the repeat of smoke4's CRF run (`smokeal`). Then, with
+model seeds 0 to 900 (seed offsets) and predictions:
+- on the held-out subfields, the CRF head (`crf_m<N>`) and mention
+  replacement (`crf_mr_m<N>`, `--augment-mentions 3`, as in week 7);
+- on the random pool splits, the CRF head.
+
+The votes cover the 3 seed triples.
+
+*Decisions* (the week-6 rule). The pairs are the 7 held-out subfields, each
+the mean of its 10 seeds (6 degrees of freedom):
+1. mention replacement against the CRF head;
+2. its votes against the CRF votes, per subfield the mean of its 3 triples.
+
+With 2 decisions, about 0.05 false passes are expected if mention
+replacement does nothing.
+
+*What a pass means.* If decision 1 passes, mention replacement's gain on
+unseen documents holds on two corpora whose held-out documents differ in
+topic (MaterioMiner's papers, MuLMS's subfields). It holds on none whose
+articles share a topic (SOFC-Exp). That is a methods claim scoped to that
+setting, reported together with SOFC-Exp's results. If decision 1 fails, C20
+and C21 stay results for MaterioMiner.
+
+*Reported:*
+- the scores per subfield;
+- macro, weighted and strict F1;
+- the CRF head on the random pool splits against the held-out subfields (the
+  gap of C2, on a third corpus);
+- unseen names per setting and the gains on them (`ner_mentions.py`, once it
+  reads MuLMS; no training);
+- the number of copies per run.
+
+*Expected.* On a held-out subfield most test names should be unseen, as on a
+held-out MaterioMiner paper. If the reading of week 9, part 2 holds, mention
+replacement gains there. MuLMS's most frequent kept types are materials and
+values, whose patterned names transfer best on MaterioMiner (C17), so a
+smaller gain than MaterioMiner's is plausible.
+
+*Budget:* 20 jobs of 7 runs and 10 jobs of 5 runs, each on 340 training
+sentences (mention replacement on about 4 times as many). That is about 3.5
+hours of one session on two lanes. The session is pushed once its bundle has
+been ready for 30 minutes (session notes of week 9). MuLMS runs' results
+files hold MuLMS's tags (`test_gold`) and are CC BY-SA 4.0
+(`results/README.md`).
+
+*Prepared (17 October, tests only, before any run):*
+- `mulms.py`;
+- `ner_baseline.py --granularity mulms`, with `--leave-one-subfield-out
+  --train-pool N` and `--vary-split --train-pool N` (protocols
+  `leave_one_subfield_out` and `random_split_pool`). On a tiny random model
+  every existing option writes byte-identical results files;
+- `ner_seed_analysis.py` (`mulms`: both decisions, the votes and the gap);
+- `kaggle_jobs.py`: batch `w10a`; the bundle ships the converted files as
+  `mulms__<name>`, each checked against its recorded SHA-256 on Kaggle. Every
+  earlier batch is unchanged.
