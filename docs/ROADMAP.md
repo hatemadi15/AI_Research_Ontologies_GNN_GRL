@@ -293,6 +293,14 @@ week-6 method passes a decision):
     With 4 papers a gain must be both large and the same on every paper.
   - S2 on SOFC-Exp (`w6c:sofc-mtst`, the amendment below) does not run:
     it needed a pass on MaterioMiner.
+  - *Why one paper gains little (exploratory, `ner_mentions.py`,
+    `corpus_coverage`).* About half of a held-out paper's unseen names occur
+    verbatim in the 40,000 corpus sentences that self-training tags: 49–62%
+    of the unseen fine-grained mentions, 49–65% coarse-grained. The premise
+    of self-training holds. But the paper that gains least,
+    10.1038_s41467-020-19071-7, has the highest share (62.4%; the others
+    49.5–58.4%). So the corpus's coverage of a paper's names does not
+    explain the gain, at least over 4 papers.
 - **The screen was optimistic, as week 5 predicted.** On the 7 seeds the
   screen did not use (300 to 900), context gains +0.49 [−3.10, +4.07]
   fine-grained, against +2.66 on the screen's 3. One paper

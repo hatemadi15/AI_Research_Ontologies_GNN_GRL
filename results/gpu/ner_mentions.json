@@ -4563,5 +4563,55 @@
         }
       }
     }
+  },
+  "corpus_coverage": {
+    "fine": {
+      "10.1007_s11340-021-00758-x.conll": {
+        "n_unseen": 43,
+        "in_corpus": 0.512,
+        "distinct_in_corpus": 0.488
+      },
+      "10.1038_ncomms7164.conll": {
+        "n_unseen": 204,
+        "in_corpus": 0.495,
+        "distinct_in_corpus": 0.441
+      },
+      "10.1038_s41467-020-19071-7.conll": {
+        "n_unseen": 510,
+        "in_corpus": 0.624,
+        "distinct_in_corpus": 0.518
+      },
+      "10.3390_met10111458.conll": {
+        "n_unseen": 322,
+        "in_corpus": 0.584,
+        "distinct_in_corpus": 0.466
+      }
+    },
+    "coarse": {
+      "10.1007_s11340-021-00758-x.conll": {
+        "n_unseen": 127,
+        "in_corpus": 0.488,
+        "distinct_in_corpus": 0.483
+      },
+      "10.1038_ncomms7164.conll": {
+        "n_unseen": 296,
+        "in_corpus": 0.53,
+        "distinct_in_corpus": 0.486
+      },
+      "10.1038_s41467-020-19071-7.conll": {
+        "n_unseen": 794,
+        "in_corpus": 0.647,
+        "distinct_in_corpus": 0.578
+      },
+      "10.3390_met10111458.conll": {
+        "n_unseen": 512,
+        "in_corpus": 0.645,
+        "distinct_in_corpus": 0.552
+      }
+    },
+    "corpus": {
+      "sentences": 40000,
+      "sha256": "7eaf1e79f7d43e52d7ef96c8afbeddede0c9b8ca71a3b1e9cf7a64d59eea3162"
+    }
   }
 }

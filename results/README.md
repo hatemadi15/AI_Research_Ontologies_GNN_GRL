@@ -197,6 +197,11 @@ recall, precision and F1 are given per kind (pooled over seeds and splits):
 - `methods`: each method against the CRF head (a vote against its vote),
   F1 per kind, paired over splits, papers or seeds, mean and 95% CI (no
   decision). Its F1 over all kinds equals the stored micro F1 of every run.
+- `corpus_coverage`: per granularity and held-out paper, the unseen gold test
+  mentions and the share of them, and of their distinct names, that occur in
+  a sentence of the fatigue corpus of self-training (cut into words as
+  self-training cuts it), with the corpus's SHA-256; written only where the
+  corpus (not versioned) is present.
 
 Figure 5 of the paper plan (`docs/figures/fig5_mentions.png`,
 `paper_figures.py`) draws it.

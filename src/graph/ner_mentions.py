@@ -38,26 +38,34 @@ No training and no decision. Output, results/gpu/ner_mentions.json:
     the same seeds (and each vote against the CRF head's vote of the same triple), for the
     seen and unseen kinds and all entities: F1 per pair (held-out paper, 10-seed mean; or
     model seed on a published split) and the mean paired difference with its 95% Student-t CI,
-    the rule of the decisions, here without a decision.
+    the rule of the decisions, here without a decision;
+  - corpus_coverage (if the fatigue corpus of self-training is there): per granularity and
+    held-out paper, the unseen gold test mentions (of the CRF head's training sentences, its
+    seed-0 run) and the share of them, and of their distinct names, whose words occur in a
+    sentence of the corpus cut into words as self-training cuts it; the corpus's SHA-256.
 
 Usage:
   python src/graph/ner_mentions.py [--results results/gpu] [--out PATH]
 """
 
 import argparse
+import hashlib
 import json
 import os
 from collections import Counter
 from pathlib import Path
 
 import metrics
-from ner_baseline import (DOCUMENT_FOLDS, document_groups, granularity_data, paper_fold,
-                          published_split, random_split)
+from ner_baseline import (DOCUMENT_FOLDS, corpus_words, document_groups, granularity_data,
+                          paper_fold, published_split, random_split)
 from ner_ensemble import ensemble_run, tags_to_spans
-from ner_seedmeans import LOPO, SCREEN_OFFSETS, WEEK5_OFFSETS, WEEK5_TRIPLES, seed_family
+from ner_seedmeans import (GRANULARITIES, LOPO, SCREEN_OFFSETS, WEEK5_OFFSETS, WEEK5_TRIPLES,
+                           seed_family)
 
 RESULTS_DIR = Path(__file__).resolve().parents[2] / 'results' / 'gpu'
 OUT_NAME = 'ner_mentions.json'
+# the corpus that self-training tags (not versioned; build_fatigue_corpus.py rebuilds it)
+CORPUS = Path(__file__).resolve().parents[2] / 'data' / 'processed' / 'corpus' / 'fatigue_sentences.txt'
 KINDS = ('seen', 'seen_other', 'unseen')
 COMPARED = ('seen', 'unseen', 'all')
 TOP_K = 27                  # the fine-grained types kept, as in every stored run
@@ -364,7 +372,45 @@ def held_out_comparisons(directory, granularity, protocol, systems, offsets):
     return comparisons
 
 
-def analyse(directory):
+def corpus_coverage(directory, path=CORPUS):
+    """The corpus_coverage section (module docstring), {} without the corpus or the CRF
+    head's seed-0 files on the held-out papers."""
+    if not os.path.exists(path):
+        return {}
+    with open(path, 'rb') as f:
+        raw = f.read()
+    sentences = [corpus_words(line) for line in raw.decode('utf-8').splitlines()]
+    index = {}
+
+    def in_corpus(name):
+        n = len(name)
+        if n not in index:
+            index[n] = {tuple(w[i:i + n]) for w in sentences for i in range(len(w) - n + 1)}
+        return name in index[n]
+    out = {}
+    for g in GRANULARITIES:
+        files = load(directory, [f'ner_results_{g}_{LOPO}_{REFERENCE}_m0.json'])
+        if not files:
+            continue
+        data = corpus(g)
+        for run in files[0]['runs']:
+            split_data, train, test = run_split(files[0], run, data, g)
+            forms = entity_forms(split_data, train)
+            unseen = [tuple(words[start:end]) for words, tags, _ in (split_data[i] for i in test)
+                      for start, end, kind in tags_to_spans(tags)[0]
+                      if kind_of(words[start:end], kind, forms) == 'unseen']
+            names = set(unseen)
+            out.setdefault(g, {})[run['run_id']] = {
+                'n_unseen': len(unseen),
+                'in_corpus': round(sum(map(in_corpus, unseen)) / len(unseen), 3),
+                'distinct_in_corpus': round(sum(map(in_corpus, names)) / len(names), 3)}
+    if out:
+        out['corpus'] = {'sentences': len(sentences),
+                         'sha256': hashlib.sha256(raw).hexdigest()}
+    return out
+
+
+def analyse(directory, corpus_path=CORPUS):
     """The analyses of every granularity and protocol that has the files (module docstring)."""
     out = {'kinds': {'seen': 'its words are an entity of the same type in the training '
                              'sentences',
@@ -410,6 +456,7 @@ def analyse(directory):
                 comparisons[system] = {'reference': reference,
                                        **paired(members, systems[reference])}
         out['methods'][key] = comparisons
+    out['corpus_coverage'] = corpus_coverage(directory, corpus_path)
     return out
 
 
@@ -436,6 +483,10 @@ def main(argv=None):
         for system, m in methods.items():
             print(f"  {key} {system} minus the reference, F1: "
                   + ', '.join(f"{k} {m[k]['mean_diff']:+.2f} {m[k]['ci95']}" for k in COMPARED))
+    for g, papers in result['corpus_coverage'].items():
+        if g != 'corpus':
+            print(f'  {g}-grained, unseen test names in the self-training corpus: ' + ', '.join(
+                f"{paper[:20]} {100 * c['in_corpus']:.1f}%" for paper, c in papers.items()))
     out = args.out or os.path.join(args.results, OUT_NAME)
     with open(out, 'w') as f:
         json.dump(result, f, indent=2)

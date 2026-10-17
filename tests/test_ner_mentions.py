@@ -152,7 +152,8 @@ def test_analyse_the_crf_head_on_both_protocols(tmp_path):
         for k in range(0, 1000, 100):
             name = f'ner_results_fine_{protocol}_crf_m{k}.json'
             shutil.copy(os.path.join(GPU, name), tmp_path / name)
-    out = nm.analyse(str(tmp_path))
+    out = nm.analyse(str(tmp_path), corpus_path=tmp_path / 'no_corpus.txt')
+    assert out['corpus_coverage'] == {}
     assert set(out['systems']) == {'fine_random_split_vary', 'fine_leave_one_paper_out'}
     assert set(out['systems']['fine_leave_one_paper_out']) == {'crf', 'crf_ens3'}
     held_out = out['systems']['fine_leave_one_paper_out']['crf']
@@ -162,6 +163,23 @@ def test_analyse_the_crf_head_on_both_protocols(tmp_path):
     assert out['gap']['fine']['unseen_share'] == {'random_splits': 0.345, 'held_out': 0.812}
     assert out['types']['fine_leave_one_paper_out']['Value']['n_gold_per_run'] == 41.8
     assert out['methods']['fine_leave_one_paper_out'] == {}         # no method, no vote pair
+
+
+def test_corpus_coverage_of_the_unseen_names(tmp_path, monkeypatch):
+    """The unseen gold names of a held-out paper (316L, 300 MPa), the share of them that the
+    self-training corpus holds (316L), cut into words as self-training cuts it."""
+    monkeypatch.setattr(nm, 'corpus', lambda granularity, retokenized_test=False: TOY)
+    results = _toy_results(PREDS)
+    (tmp_path / 'ner_results_fine_leave_one_paper_out_crf_m0.json').write_text(
+        json.dumps(results))
+    path = tmp_path / 'corpus.txt'
+    path.write_text('The 316L steel was tested.\nNo name here.\n')
+    out = nm.corpus_coverage(str(tmp_path), path)
+    assert out['fine'] == {'B.conll': {'n_unseen': 2, 'in_corpus': 0.5,
+                                       'distinct_in_corpus': 0.5}}
+    assert out['corpus']['sentences'] == 2 and len(out['corpus']['sha256']) == 64
+    assert 'coarse' not in out
+    assert nm.corpus_coverage(str(tmp_path), tmp_path / 'missing.txt') == {}
 
 
 def test_document_folds_are_rebuilt():
