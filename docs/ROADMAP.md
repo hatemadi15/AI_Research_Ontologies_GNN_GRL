@@ -1014,6 +1014,7 @@ chance at class level. For a Task C-style result:
 | 6 | Done: NER, P1 "Next, after week 5", towards a methods paper: methods for unseen papers (DeBERTa-v3-large, document context, multi-task self-training) screened with 3 seeds and decided with 10, and a second dataset (SOFC-Exp, 10 seeds); protocol below. Done (P1, "Week 6"): DeBERTa-v3-large stops at the screen; document context passes the screen but neither 10-seed decision nor S2 on SOFC-Exp (+0.58 [−0.26, +1.42]); multi-task self-training passes the screen (+6.06 fine-grained) but none of its 4 decisions (+5.47 [−0.74, +11.68] fine-grained against the CRF head), so its S2 on SOFC-Exp does not run; on SOFC-Exp the CRF head improves on plain MatSciBERT (S1) | A method whose vote improves on the strongest system on unseen papers under the 10-seed design, and on SOFC-Exp |
 | 7 | In progress: NER, part 1, document-level label consistency for unseen papers, a post-processing rule on the saved predictions (no GPU; protocol below); part 2a, recall calibration (a bias on the CRF head's emissions, chosen on inner folds; done, no claim: the missed entities are not near the threshold); part 2b, mention replacement (screen, then 10 seeds if it passes; protocol below; done: it improves on the CRF head at both granularities, +2.77 [+1.51, +4.03] fine-grained and +1.28 [+0.06, +2.51] coarse-grained, but its vote does not beat the strongest systems and S2 on SOFC-Exp gives −0.29), and later the combinations of the methods that pass week 6, fixed after the week-6 decisions; part 2c, coarse-to-fine completion (done, no claim); part 2d, multi-task training on SOFC-Exp's two levels (done, no claim: −0.78 [−2.39, +0.84] on the slot level, −0.15 [−1.36, +1.05] on the entity level); part 2e, SOFC-Exp's test articles cut into words as its training articles are (protocol below). Then class-level taxonomy (LLM or cross-encoder + arborescence) and a relation annotation pilot | Part 1: the rule improves on the strongest system on unseen papers and on SOFC-Exp's CRF head. Taxonomy: first class-level F1 above chance; relation guidelines |
 | 8 | Prepared: part 1, SOFC-Exp beyond its official split: the CRF head with 10 seeds on 5 random sentence splits and on 5 folds of 9 held-out articles (`--document-folds 5`; protocol below, descriptive); part 2, more papers or more sentences: three training papers cut to the size of two against two papers (`--two-paper-size`; protocol below) | Part 1: the gap between random splits and unseen documents measured on a second corpus. Part 2: whether a third paper helps at the same number of training sentences |
+| 9 | Prepared: mention replacement on the multi-task model (`crf_mt_mr`, part 1: 10 seeds on the held-out papers, S2 on SOFC-Exp's two levels) and mention replacement on SOFC-Exp with training cut to MaterioMiner's size (part 2: 5 draws of 10 training articles); protocol below | Part 1: the combination's vote improves on the strongest system on unseen papers, and on SOFC-Exp. Part 2: mention replacement improves on the CRF head on a MaterioMiner-sized SOFC-Exp |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -2454,3 +2455,116 @@ the commit that adds part 2 (`04352cd`), one bundle for both. Part 1's runs
 execute the same code there as at its own commit (`c06fc5e`):
 `--two-paper-size` is off unless given, and every other option writes
 byte-identical results files (the tiny-model check).
+
+### Week 9 protocol: mention replacement on the multi-task model, and on a smaller SOFC-Exp (fixed before any run)
+
+Fixed on 17 October, after the decisions of weeks 6 and 7 and before any
+run of week 9. Week 6 left no method with a claim, and in week 7 mention
+replacement passed decision 1 at both granularities (C20). Two questions
+follow.
+
+**Part 1: does mention replacement add to the multi-task model?**
+
+*Why.* Mention replacement improves on the CRF head on unseen papers at
+both granularities: +2.77 [+1.51, +4.03] fine-grained and +1.28 [+0.06,
++2.51] coarse-grained over 10 seeds. Its vote does not beat the strongest
+systems, though: fine-grained it ties the multi-task vote (−0.04 [−2.09,
++2.01]). Multi-task training also improves on the CRF head fine-grained on
+unseen papers (+3.72 [+0.57, +6.87], reported in week 5), and its vote is
+the strongest fine-grained system. Multi-task self-training, which builds
+on it, passed no decision (week 6). The two change different things.
+Mention replacement shows the model each type's contexts with other names,
+and multi-task training adds the second level of types. If their gains add
+up, the combination's vote beats the multi-task vote.
+
+*Method* (prepared and tested on 17 October, commits 205cf96 and 1f021a7):
+`--multi-task --augment-mentions 3`, variant `crf_mt_mr`. A copy replaces
+each coarse-grained mention, with probability 0.5, in both heads' tags at
+once, by a training mention of the same coarse- and fine-grained type.
+Week 7's settings are kept: 3 copies and p = 0.5.
+
+*Runs* (batch `w9a`, one Kaggle session from this protocol's commit; GPU,
+deterministic):
+- two repeats first, each of which must equal its stored run or the batch
+  is not used: the CRF run of smoke4 (`smokeah`) and the multi-task run of
+  random split 0 (`smokeai`), since the multi-task code gained mention
+  replacement;
+- seed offsets 0 to 900 on the 4 held-out papers (`crf_mt_mr_m<N>`, one
+  model per seed for both granularities), and the votes over the 3
+  disjoint seed triples;
+- SOFC-Exp's official split, model seeds 0 to 900, both levels
+  (`--granularity sofc_both`).
+
+*Decisions.* The week-6 rule applies: the 95% Student-t CI of the mean
+paired micro-F1 difference must lie above 0. On MaterioMiner the pairs are
+the 4 held-out papers (3 degrees of freedom):
+1. `crf_mt_mr` against `crf_mt`, per granularity: does mention replacement
+   add to the multi-task model?
+2. its vote against the strongest system on unseen papers: the multi-task
+   vote fine-grained, the seed vote coarse-grained.
+
+S2 on SOFC-Exp, paired by the 10 seeds: `crf_mt_mr` against the CRF head on
+each level (slot types: `crf` on `sofc_slot`; entity types: `crf` on
+`sofc`).
+
+That is 6 decisions, so about 0.15 false passes are expected if the
+combination does nothing. A methods claim needs decision 2 at a
+granularity and S2 at the matching level: fine-grained with the slot
+level, coarse-grained with the entity level.
+
+*Reported (no decision):*
+- against the CRF head and against mention replacement alone, on the
+  held-out papers;
+- the votes against the seed vote;
+- strict IOB2, macro and weighted F1;
+- unseen names (`ner_mentions.py`);
+- the number of copies per run.
+
+*Expected.* On SOFC-Exp's official split neither part helps alone:
+multi-task training scores −0.78 (slot level) and −0.15 (entity level),
+mention replacement −0.29. So S2 is unlikely to pass, and a pass on
+MaterioMiner alone would be a result for few annotated papers, not a
+methods claim. Part 2 asks whether training size explains this.
+
+*Budget:* about 3.5 hours of one session. The 10 held-out jobs take about
+17 minutes each, the SOFC-Exp job about 3 hours, balanced over the lanes.
+
+**Part 2: is mention replacement's gain a matter of training size?**
+
+*Why.* On MaterioMiner a held-out paper's model trains on 234–370
+sentences with 606–1,078 fine-grained entities. SOFC-Exp's official split
+trains on 568 sentences of 26 articles, with 2,962 entities: 40 words and
+5.2 entities per sentence, against 25.5 and 2.8. Dai and Adel
+found mention replacement's gains for transformers to shrink as training
+data grows (+2.4 F1 with 50 sentences of MaSciP, +0.6 with 150, −0.6 with
+500). Mention replacement's S2 on SOFC-Exp (−0.29 [−1.04, +0.47]) is
+therefore no test of it with a MaterioMiner-sized training set. Part 2
+gives SOFC-Exp that size.
+
+*Design.* SOFC-Exp's entity level. From the 26 official training articles,
+5 draws of 10 articles each, sorted and shuffled with split seeds 0 to 4:
+156–248 training sentences and 820–1,276 entities per draw, as many
+entities as on MaterioMiner. The
+official 8 development articles validate and the 11 test articles test,
+unchanged. On each draw, model seeds 0 to 900:
+- the CRF head;
+- mention replacement (`--augment-mentions 3`).
+
+*Decision* (the week-6 rule; the pairs are the 5 draws, each the mean of
+its 10 seeds, 4 degrees of freedom): mention replacement against the CRF
+head. 1 decision.
+
+*Reported:* the CRF head on 10 articles against the CRF head on all 26
+(the official split, the same seeds): what 16 more training articles are
+worth on SOFC-Exp's test articles.
+
+*Expected.* Mention replacement improves on the CRF head at this size, as
+on MaterioMiner. If it does not, its MaterioMiner gain belongs to that
+corpus, not to small training sets.
+
+*Code.* A new option draws the training articles. It is prepared and
+checked (the tiny-model identity check; every earlier batch unchanged)
+before part 2 runs, and nothing in this design changes after part 1's
+results. *Budget:* 100 runs on 156–248 training sentences; the mention
+replacement runs train on about 4 times as many. About 2 hours of one
+session on two lanes.
