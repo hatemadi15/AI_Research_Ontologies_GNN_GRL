@@ -2487,6 +2487,25 @@ execute the same code there as at its own commit (`c06fc5e`):
 `--two-paper-size` is off unless given, and every other option writes
 byte-identical results files (the tiny-model check).
 
+*Session note (17 October, 09:35; operations, not a deviation from the
+design).* Part 2's session (`w8b`, kernel b, pushed 07:24, expected to take
+about 40 minutes) still reported "running" after two hours. Its live log
+(`kaggle kernels logs --follow`) held nothing, not even the model download
+that every session prints during setup, and later answered with a server
+error. Part 1's session on kernel a, from the same bundle, logged its setup
+and 17 of its 22 jobs. The GPU quota rose by 2 hours per hour, so the stuck
+session was being charged. It stopped before the first output line, in
+`nvidia-smi`, `pip install` or the unpacking, none of which had a time
+limit. The Kaggle API can cancel a session only by an ID that none of its
+endpoints returns, so stopping it takes the Kaggle website or deleting the
+kernel. The runner now limits `nvidia-smi` (2 minutes), `pip` (30 minutes)
+and the environment's commands (5 minutes), stops a job still running 1.25
+hours after the deadline, and prints a line after each setup step. A stuck
+session therefore ends within minutes, and its live log shows where it
+stopped. The runner is written at push time and does not touch the
+training code, so every bundle's results are unchanged. Part 2 runs again
+once kernel b is free.
+
 ### Week 9 protocol: mention replacement on the multi-task model, and on a smaller SOFC-Exp (fixed before any run)
 
 Fixed on 17 October, after the decisions of weeks 6 and 7 and before any

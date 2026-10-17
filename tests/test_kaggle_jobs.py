@@ -4,7 +4,10 @@ import argparse
 import importlib.util
 import io
 import json
+import subprocess
+import sys
 import tarfile
+import time
 from types import SimpleNamespace
 from pathlib import Path
 
@@ -534,6 +537,42 @@ def test_run_jobs_gpu_check_and_job_environment():
 # ---------------------------------------------------------------------------
 # ner_baseline.py on a CPU: unchanged
 # ---------------------------------------------------------------------------
+def test_run_jobs_stops_a_job_at_the_time_limit(tmp_path, monkeypatch, capsys):
+    """A job still running at the stop time is stopped and recorded as such; the lane goes
+    on, and no job starts after the deadline."""
+    rj = _run_jobs()
+    monkeypatch.setattr(rj, 'REPO', tmp_path)
+    monkeypatch.setattr(rj, 'MIN_JOB_SECONDS', 0.5)
+    monkeypatch.setattr(rj, 'job_command', lambda job: [sys.executable, '-c', job[0]])
+    manifest = rj.Manifest(tmp_path / 'manifest.json', {'jobs': []})
+    now = time.time()
+    rj.run_lane(0, [['import time; time.sleep(30)'], ['pass']], manifest, deadline=now + 60,
+                logs=tmp_path, processed=tmp_path, stop_at=now + 1)
+    first, second = manifest.data['jobs']
+    assert first['status'] == 'stopped: time limit' and first['exit_code'] is None
+    assert first['minutes'] < 0.25
+    assert second['status'] == 'done' and second['exit_code'] == 0
+    rj.run_lane(1, [['pass']], manifest, deadline=now - 1, logs=tmp_path, processed=tmp_path)
+    assert manifest.data['jobs'][-1]['status'] == 'not started: deadline'
+    assert 'lane 0 job 0: stopped: time limit' in capsys.readouterr().out
+
+
+def test_run_jobs_limits_the_setup_commands(monkeypatch, capsys):
+    """nvidia-smi runs with a time limit, so a hung driver ends the session's setup, and
+    each setup step prints a line for the live log."""
+    rj = _run_jobs()
+    calls = []
+
+    def fake_run(cmd, **kwargs):
+        calls.append((cmd[0], kwargs.get('timeout')))
+        return subprocess.CompletedProcess(cmd, 0, stdout='Tesla T4\nTesla T4\n', stderr='')
+    monkeypatch.setattr(rj.subprocess, 'run', fake_run)
+    assert rj.gpu_names() == ['Tesla T4', 'Tesla T4']
+    assert calls == [('nvidia-smi', rj.TIMEOUTS['nvidia_smi'])]
+    rj.setup_step(time.time() - 90, 'pip install')
+    assert capsys.readouterr().out == 'setup: pip install (1.5 min)\n'
+
+
 def test_cpu_runs_record_no_environment():
     assert nb.run_environment('cpu') is None
 

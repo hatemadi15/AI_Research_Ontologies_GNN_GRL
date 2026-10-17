@@ -22,6 +22,12 @@ of a frozen commit, the fatigue corpus and the GPU results so far). On Kaggle it
      downloads only new files), logs/ (one log per job) and manifest.json (the bundle, the
      environment, and per job its command, exit code and times), rewritten after every job.
 
+Nothing may hang (TIMEOUTS): nvidia-smi, pip and the environment's commands have time
+limits, and a job still running `JOB_GRACE_HOURS` after `deadline_hours` is stopped, so
+that a stuck session ends within minutes rather than at Kaggle's 12-hour limit. Each setup
+step prints a line ("setup: ..."), so the live log (`kaggle kernels logs --follow`) shows
+where a session is (a session of 17 October printed nothing for hours; ROADMAP §4, week 8).
+
 It never exits with an error, so that Kaggle keeps the outputs of the jobs that ran.
 Standard library only.
 """
@@ -46,6 +52,9 @@ REPO = Path('/tmp/repo')
 CORPUS = Path('data/processed/corpus/fatigue_sentences.txt')   # in the repository
 SOFC_CORPUS = Path('data/processed/corpus/sofc_sentences.txt')  # with sofc_corpus_sha256
 ENV_KEYS = ('KAGGLE_KERNEL_RUN_TYPE', 'KAGGLE_DOCKER_IMAGE', 'KAGGLE_CONTAINER_NAME')
+TIMEOUTS = {'nvidia_smi': 120, 'pip': 1800, 'environment': 300}   # seconds
+JOB_GRACE_HOURS = 1.25   # kaggle_jobs.py pushes with a limit of deadline_hours + 1.5
+MIN_JOB_SECONDS = 60     # a job started just before the stop still gets this long
 
 
 def file_sha256(path):
@@ -136,7 +145,7 @@ def drop_unchanged(root, dest, names):
 
 def gpu_names():
     out = subprocess.run(['nvidia-smi', '--query-gpu=name', '--format=csv,noheader'],
-                         capture_output=True, text=True)
+                         capture_output=True, text=True, timeout=TIMEOUTS['nvidia_smi'])
     return [line.strip() for line in out.stdout.splitlines() if line.strip()]
 
 
@@ -197,7 +206,26 @@ class Manifest:
         tmp.replace(self.path)
 
 
-def run_lane(lane, jobs, manifest, deadline, logs, processed):
+def setup_step(started, step):
+    """Print that a setup step is done, with the minutes since the start."""
+    print(f'setup: {step} ({(time.time() - started) / 60:.1f} min)', flush=True)
+
+
+def run_job(job, lane, processed, log, stop_at):
+    """Run one job into `log`; its exit code, or None if it was stopped at `stop_at`."""
+    with open(log, 'w') as out:
+        try:
+            return subprocess.run(job_command(job), cwd=REPO, env=job_env(lane, processed),
+                                  stdout=out, stderr=subprocess.STDOUT,
+                                  timeout=max(MIN_JOB_SECONDS, stop_at - time.time())).returncode
+        except subprocess.TimeoutExpired:
+            return None
+
+
+def run_lane(lane, jobs, manifest, deadline, logs, processed, stop_at=None):
+    """The jobs of a lane one after the other: none starts after `deadline`, and one still
+    running at `stop_at` (default: JOB_GRACE_HOURS after the deadline) is stopped."""
+    stop_at = deadline + 3600 * JOB_GRACE_HOURS if stop_at is None else stop_at
     for k, job in enumerate(jobs):
         record = {'lane': lane, 'index': k, 'args': job}
         if time.time() > deadline:
@@ -207,18 +235,21 @@ def run_lane(lane, jobs, manifest, deadline, logs, processed):
         log = logs / f'lane{lane}_job{k:02d}.log'
         record.update({'log': log.name, 'start': time.strftime('%Y-%m-%dT%H:%M:%S')})
         begin = time.time()
-        with open(log, 'w') as out:
-            proc = subprocess.run(job_command(job), cwd=REPO, env=job_env(lane, processed),
-                                  stdout=out, stderr=subprocess.STDOUT)
-        record.update({'exit_code': proc.returncode, 'minutes': round((time.time() - begin) / 60, 2),
-                       'status': 'done' if proc.returncode == 0 else 'failed'})
+        code = run_job(job, lane, processed, log, stop_at)
+        record.update({'exit_code': code, 'minutes': round((time.time() - begin) / 60, 2),
+                       'status': ('stopped: time limit' if code is None
+                                  else 'done' if code == 0 else 'failed')})
         manifest.update(lambda d, r=record: d['jobs'].append(r))
         print(f'lane {lane} job {k}: {record["status"]} in {record["minutes"]} min', flush=True)
 
 
 def environment():
     def run(cmd):
-        out = subprocess.run(cmd, capture_output=True, text=True)
+        try:
+            out = subprocess.run(cmd, capture_output=True, text=True,
+                                 timeout=TIMEOUTS['environment'])
+        except subprocess.TimeoutExpired:
+            return 'timed out'
         return out.stdout.strip()
     torch_info = run([sys.executable, '-c',
                       'import torch, transformers; print(torch.__version__, torch.version.cuda, '
@@ -234,21 +265,25 @@ def main(spec):
     logs, processed = WORK / 'logs', WORK / 'processed'
     logs.mkdir(parents=True, exist_ok=True)
     manifest = Manifest(WORK / 'manifest.json', {'spec': spec, 'jobs': [], 'setup': {}})
+    setup_step(started, 'started')
     try:
         names = gpu_names()
         manifest.update(lambda d: d['setup'].update({'gpus': names}))
         error = check_gpus(names, len(spec['lanes']), spec.get('gpu'))
         if error:
             raise RuntimeError(error)
+        setup_step(started, f'GPUs {names}')
         wheels = [find(INPUT, name) for name in spec.get('wheels', [])]
         if None in wheels:
             raise FileNotFoundError(f"wheels {spec.get('wheels')} not all under {INPUT}")
         pip = subprocess.run([sys.executable, '-m', 'pip', 'install', '-q', *spec['pip'],
-                              *map(str, wheels)], capture_output=True, text=True)
+                              *map(str, wheels)], capture_output=True, text=True,
+                             timeout=TIMEOUTS['pip'])
         manifest.update(lambda d: d['setup'].update({'pip': pip.returncode,
                                                      'pip_output': (pip.stdout + pip.stderr)[-12000:]}))
         if pip.returncode:
             raise RuntimeError('pip install failed')
+        setup_step(started, 'pip install')
         how = unpack(INPUT, 'code.tar.gz', 'src/graph/ner_baseline.py', REPO)
         bundle = json.loads(find(INPUT, 'BUNDLE.json').read_text())
         corpus = find(INPUT, 'fatigue_sentences.txt')
@@ -259,12 +294,15 @@ def main(spec):
         shutil.copy2(corpus, REPO / CORPUS)
         sofc_digest = place_sofc_corpus(spec, INPUT, REPO)
         restored = restore_results(INPUT, processed / 'ner')
+        setup_step(started, f'code, corpora and {len(restored)} results files in place')
         pinned = pin_models(spec['models'])
+        setup_step(started, 'models pinned')
         manifest.update(lambda d: d['setup'].update({
             'code': how, 'bundle': bundle, 'corpus_sha256': digest,
             **({'sofc_corpus_sha256': sofc_digest} if sofc_digest else {}), 'restored': restored,
             'models': pinned, 'environment': environment(),
             'setup_minutes': round((time.time() - started) / 60, 2)}))
+        setup_step(started, 'environment recorded; the lanes start')
         deadline = started + 3600 * spec.get('deadline_hours', 10)
         threads = [threading.Thread(target=run_lane,
                                     args=(lane, jobs, manifest, deadline, logs, processed))
