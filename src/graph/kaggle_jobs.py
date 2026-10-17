@@ -123,6 +123,8 @@ Usage:
   python src/graph/kaggle_jobs.py quota
   python src/graph/kaggle_jobs.py bundle --commit HEAD
   python src/graph/kaggle_jobs.py push --batch smoke1
+  python src/graph/kaggle_jobs.py --dataset ner-gpu-bundle-2 bundle --commit HEAD   # a second
+  python src/graph/kaggle_jobs.py --dataset ner-gpu-bundle-2 --kernel ner-gpu-jobs-b push ...
   python src/graph/kaggle_jobs.py status
   python src/graph/kaggle_jobs.py pull
   python src/graph/kaggle_jobs.py collect data/processed/kaggle/ner-gpu-jobs/<time>
@@ -774,10 +776,11 @@ def cmd_bundle(args):
     user = username(args)
     folder = WORK_DIR / 'bundle'
     info = build_bundle(args.commit, folder, wheels=build_wheels())
-    (folder / 'dataset-metadata.json').write_text(json.dumps(dataset_metadata(user), indent=2))
+    (folder / 'dataset-metadata.json').write_text(
+        json.dumps(dataset_metadata(user, args.dataset), indent=2))
     print(f"bundle: commit {info['commit'][:12]}, corpus {info['corpus_sha256'][:12]}, "
           f"{len(info['results'])} GPU results files")
-    ref = f'{user}/{DATASET}'
+    ref = f'{user}/{args.dataset}'
     exists = 'ready' in kaggle('datasets', 'status', ref, check=False).lower()
     if exists:
         print(kaggle('datasets', 'version', '-p', str(folder), '-m',
@@ -799,7 +802,7 @@ def cmd_push(args):
     with tempfile.TemporaryDirectory() as folder:
         Path(folder, 'run_jobs.py').write_text(render_script(spec))
         Path(folder, 'kernel-metadata.json').write_text(
-            json.dumps(kernel_metadata(user, args.kernel), indent=2))
+            json.dumps(kernel_metadata(user, args.kernel, args.dataset), indent=2))
         timeout = str(int(3600 * (DEADLINE_HOURS + 1.5)))
         out = kaggle('kernels', 'push', '-p', folder, '-t', timeout)
         print(out)
@@ -852,6 +855,10 @@ def main(argv=None):
     parser.add_argument('--kernel', default=KERNEL,
                         help=f'the job kernel (default: {KERNEL}); another one runs a second '
                              'session at the same time')
+    parser.add_argument('--dataset', default=DATASET,
+                        help=f'the bundle dataset (default: {DATASET}); another one holds a '
+                             'second bundle, so that sessions from two commits can be queued '
+                             'at the same time')
     sub = parser.add_subparsers(dest='command', required=True)
     p = sub.add_parser('bundle', help='build and upload the bundle dataset')
     p.add_argument('--commit', default='HEAD', help='the frozen commit (default: HEAD)')

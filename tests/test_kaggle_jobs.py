@@ -335,10 +335,42 @@ def test_a_refused_push_stops(monkeypatch, capsys):
     monkeypatch.setattr(kj, 'corpus_sha256', lambda: 'x' * 64)
     monkeypatch.setattr(kj, 'kaggle', lambda *a, **k: 'Kernel push error: Maximum batch GPU '
                                                        'session count of 2 reached.')
-    args = SimpleNamespace(batch='w5c', kernel=kj.KERNEL, user='someone')
+    args = SimpleNamespace(batch='w5c', kernel=kj.KERNEL, dataset=kj.DATASET, user='someone')
     with pytest.raises(SystemExit, match='not pushed'):
         kj.cmd_push(args)
     assert 'lane 0' not in capsys.readouterr().out
+
+
+def test_bundle_and_push_use_the_chosen_dataset(monkeypatch, tmp_path):
+    """--dataset names the bundle dataset that bundle versions and push attaches, so that a
+    second bundle can wait in its own dataset while a queued session needs the first."""
+    calls, pushed = [], {}
+
+    def kaggle(*args, check=True):
+        calls.append(args)
+        if args[:2] == ('kernels', 'push'):
+            pushed.update(json.loads(Path(args[3], 'kernel-metadata.json').read_text()))
+            return 'Kernel version 1 successfully pushed.'
+        return 'ready'
+
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda: 'x' * 64)
+    monkeypatch.setattr(kj, 'kaggle', kaggle)
+    monkeypatch.setattr(kj, 'WORK_DIR', tmp_path)
+    monkeypatch.setattr(kj, 'build_wheels', lambda: [])
+    monkeypatch.setattr(kj, 'build_bundle', lambda commit, folder, wheels: (
+        folder.mkdir(parents=True, exist_ok=True),
+        {'commit': 'c' * 40, 'corpus_sha256': 'x' * 64, 'results': []})[1])
+    monkeypatch.setattr(kj.time, 'sleep', lambda seconds: None)
+    kj.main(['--user', 'someone', '--dataset', 'ner-gpu-bundle-2', 'bundle', '--commit', 'HEAD'])
+    meta = json.loads((tmp_path / 'bundle' / 'dataset-metadata.json').read_text())
+    assert meta['id'] == 'someone/ner-gpu-bundle-2'
+    assert ('datasets', 'status', 'someone/ner-gpu-bundle-2') in calls
+    kj.main(['--user', 'someone', '--dataset', 'ner-gpu-bundle-2', '--kernel', 'k', 'push',
+             '--batch', 'w5c'])
+    assert pushed['id'] == 'someone/k'
+    assert pushed['dataset_sources'] == ['someone/ner-gpu-bundle-2']
+    kj.main(['--user', 'someone', 'push', '--batch', 'w5c'])
+    assert pushed['dataset_sources'] == ['someone/ner-gpu-bundle']
 
 
 def test_balance_takes_the_longest_job_first_to_the_least_loaded_lane():
