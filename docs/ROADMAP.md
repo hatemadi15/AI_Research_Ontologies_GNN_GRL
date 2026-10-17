@@ -2630,9 +2630,7 @@ up to C19's +7.36 and +8.90. Diversity accounts for about a sixth of the
 third paper's gain fine-grained and two fifths coarse-grained. Every paper
 gains from both at both levels. For a materials-NER corpus, a new paper is
 worth more than the same number of sentences from the papers at hand, but
-most of what a paper brings is its sentences. The fine-grained types gain
-little from diversity, plausibly because many of them occur in only one or
-two papers.
+most of what a paper brings is its sentences.
 
 ### Week 9 protocol: mention replacement on the multi-task model, and on a smaller SOFC-Exp (fixed before any run)
 
