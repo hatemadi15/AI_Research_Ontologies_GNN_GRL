@@ -2742,6 +2742,16 @@ this on the GPU. Nothing else in the design changes.
   live log is still empty after 5 minutes, while part 2's log on
   `ner-gpu-jobs-d` streams. It is to be cancelled on the website and pushed
   again. A new notebook does not prevent a hang.
+- *18:48: week 8, part 2 pushed again*, to `ner-gpu-jobs-c` (version 2,
+  after version 1's outputs were pulled), once version 1 of
+  `ner-gpu-jobs-e` was cancelled; Kaggle queued it.
+- *19:40: week 7, part 2e pushed* to `ner-gpu-jobs-d` (version 2, after
+  part 2's outputs were pulled), from its own bundle 4f5dbda in a second
+  dataset (`ner-gpu-bundle-2`; `kaggle_jobs.py --dataset`, e970571). A new
+  version of the one bundle dataset would have had to wait until the queued
+  week-8 session had logged its inputs in place. Its BUNDLE.json names
+  4f5dbda, and its batch is the same at 4f5dbda and now. Kaggle queued it
+  too.
 
 **Outcome of part 1: 3 of the 6 decisions pass; the combination's vote is
 the strongest fine-grained system on unseen papers, but S2 fails at both
