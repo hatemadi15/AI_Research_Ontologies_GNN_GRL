@@ -2859,6 +2859,11 @@ this on the GPU. Nothing else in the design changes.
   minutes and its first job (the repeat `smokeal`) done in 1.3 minutes.
 - *21:07: week 8, part 2 done* (40.0 minutes; outcome under its protocol).
   Its outputs are pulled and collected; week 10 runs alone.
+- *21:37: week 10's first mention-replacement jobs done* (each the 7
+  held-out subfields of one seed): 22.4 minutes on lane 1 and 21.8 on
+  lane 0, with no error in the log. The cost model allowed about 29
+  minutes, so the session should end around 23:45–00:00 rather than
+  00:30–01:00.
 
 **Outcome of part 1: 3 of the 6 decisions pass; the combination's vote is
 the strongest fine-grained system on unseen papers, but S2 fails at both
