@@ -202,7 +202,8 @@ each of these fails:
 - self-training with 3 teachers on unseen papers (+1.74 [−1.16, +4.64]
   fine-grained);
 - coarse-grained multi-task training (+0.71 [−0.15, +1.56]);
-- document context (+1.14 [−0.94, +3.22] fine-grained);
+- document context (+1.14 [−0.94, +3.22] fine-grained; on SOFC-Exp +0.58
+  [−0.26, +1.42]);
 - earlier, class weights, domain-adaptive and in-domain pre-training, and
   other backbones.
 
