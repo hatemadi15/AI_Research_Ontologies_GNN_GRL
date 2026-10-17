@@ -2864,6 +2864,15 @@ this on the GPU. Nothing else in the design changes.
   lane 0, with no error in the log. The cost model allowed about 29
   minutes, so the session should end around 23:45–00:00 rather than
   00:30–01:00.
+- *21:55: week 10's post-processing checked before its results.*
+  `ner_matching.py` keyed its random-against-unseen gap on MaterioMiner's
+  protocol name, so it would have stopped on MuLMS; each corpus now uses its
+  own two protocols (a test fails without the fix). Table 4 and Figures 1
+  and 5 gain MuLMS's settings, and the seed analysis adds the CRF votes on
+  the random pool splits (descriptive). A dry run on files from a tiny
+  random model, trained on the real MuLMS folds and splits on the CPU,
+  goes through the seed analysis, the mention and matching analyses, Table
+  4 and both figures.
 
 **Outcome of part 1: 3 of the 6 decisions pass; the combination's vote is
 the strongest fine-grained system on unseen papers, but S2 fails at both
