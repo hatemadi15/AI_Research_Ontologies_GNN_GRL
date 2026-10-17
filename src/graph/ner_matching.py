@@ -15,14 +15,16 @@ full match, so F1 is 2 x pairs / (gold entities + predictions). No training and 
 
 Output, results/gpu/ner_matching.json:
   - systems: per granularity and protocol (MaterioMiner's random splits and held-out papers,
-    SOFC-Exp's random splits and article folds), for each system whose files are all there (the CRF
+    SOFC-Exp's random splits and article folds, MuLMS's random pool splits and held-out
+    subfields), for each system whose files are all there (the CRF
     head and the multi-task model with their 10 seeds, and their votes over the seed triples,
     made again from the members' predictions; plain MatSciBERT and the CRF head on the published
     splits), each criterion's F1: the mean over the random splits or held-out papers, each the
     mean over the seeds or votes (on a published split, the mean over the seeds), with its 95%
     Student-t CI;
   - gap: per granularity and system, each criterion's mean F1 on the random splits minus that
-    on held-out papers (SOFC-Exp: article folds);
+    on held-out papers (SOFC-Exp: article folds; MuLMS: the random pool splits minus the
+    held-out subfields);
   - near_misses: per granularity and protocol (the published splits too), the CRF head's
     predictions over all its runs: the shares that are right, of the right span and another
     type (fine-grained, also the share whose type is an MMO ancestor or descendant of the gold
@@ -51,7 +53,6 @@ from ner_seedmeans import GRANULARITIES, spread
 RESULTS_DIR = Path(__file__).resolve().parents[2] / 'results' / 'gpu'
 OUT_NAME = 'ner_matching.json'
 CRITERIA = ('strict', 'exact', 'type', 'overlap')
-RANDOM = 'random_split_vary'
 PUBLISHED = 'published_split'
 FAMILIES = ('crf', 'crf_mt')                 # 10 seeds on both protocols; and their votes
 PUBLISHED_SPLITS = ('fine', 'coarse', 'sofc', 'sofc_slot')
@@ -217,12 +218,12 @@ def analyse(directory):
                 out['near_misses'][f'{g}_{protocol}'] = near_misses(
                     crf, mmo_related if g == 'fine' else None)
         if len(found) == len(protocols):
-            unseen = protocols[1]
+            random, unseen = protocols
             out['gap'][g] = {
-                s: {c: round(out['systems'][f'{g}_{RANDOM}'][s][c]['mean']
+                s: {c: round(out['systems'][f'{g}_{random}'][s][c]['mean']
                              - out['systems'][f'{g}_{unseen}'][s][c]['mean'], 2)
                     for c in CRITERIA}
-                for s in found[RANDOM] if s in found[unseen]}
+                for s in found[random] if s in found[unseen]}
     for g in GRANULARITIES:
         out.setdefault('conventions', {})[g] = conventions(
             corpus(g), mmo_related if g == 'fine' else None)

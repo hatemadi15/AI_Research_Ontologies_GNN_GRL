@@ -87,6 +87,25 @@ def test_analyse_the_crf_head_on_both_protocols(tmp_path):
     assert 'wrong_type_related' not in out['near_misses']['coarse_leave_one_paper_out']
 
 
+def test_the_mulms_gap_is_its_pool_splits_minus_its_held_out_subfields(tmp_path):
+    """MuLMS's two protocols are its random pool splits and held-out subfields (the coarse
+    CRF files stand in for its files)."""
+    pytest.importorskip('scipy')
+    pytest.importorskip('rdflib')
+    for source, protocol in (('random_split_vary', 'random_split_pool'),
+                             ('leave_one_paper_out', 'leave_one_subfield_out')):
+        for k in range(0, 1000, 100):
+            shutil.copy(os.path.join(GPU, f'ner_results_coarse_{source}_crf_m{k}.json'),
+                        tmp_path / f'ner_results_mulms_{protocol}_crf_m{k}.json')
+    out = nm.analyse(str(tmp_path))
+    assert set(out['systems']) == {'mulms_random_split_pool', 'mulms_leave_one_subfield_out'}
+    pool, held = (out['systems'][f'mulms_{p}']['crf']
+                  for p in ('random_split_pool', 'leave_one_subfield_out'))
+    assert out['gap']['mulms']['crf'] == {
+        c: round(pool[c]['mean'] - held[c]['mean'], 2) for c in nm.CRITERIA}
+    assert set(out['near_misses']) == set(out['systems'])
+
+
 def test_conventions_of_the_gold_annotations():
     data = [(['the', 'samples'], ['O', 'B-TestSpecimen'], 'p1'),
             (['the', 'samples'], ['O', 'B-FatigueTestSpecimen'], 'p2'),

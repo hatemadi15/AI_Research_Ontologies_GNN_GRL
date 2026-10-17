@@ -66,11 +66,14 @@ def test_table3_and_table4():
            '+3.00 [+2.00, +4.00] |' in t3
     kinds = {k: {'share': s, 'recall': r} for k, s, r in (('seen', 0.2, 71.4),
                                                           ('unseen', 0.81, 35.0))}
-    mentions = {'systems': {'fine_leave_one_paper_out': {'crf': kinds}}}
-    matching = {'systems': {'fine_leave_one_paper_out': {'crf': {
-        c: {'mean': m} for c, m in zip(pt.CRITERIA, (46.46, 56.1, 56.36, 70.58))}}}}
+    mentions = {'systems': {key: {'crf': kinds} for key in ('fine_leave_one_paper_out',
+                                                             'mulms_leave_one_subfield_out')}}
+    matching = {'systems': {key: {'crf': {
+        c: {'mean': m} for c, m in zip(pt.CRITERIA, (46.46, 56.1, 56.36, 70.58))}}
+        for key in ('fine_leave_one_paper_out', 'mulms_leave_one_subfield_out')}}
     t4 = pt.table4(mentions, matching)
     assert '| fine, unseen papers | 81.0 | 71.4 | 35.0 | 46.46 | 56.10 | 56.36 | 70.58 |' in t4
+    assert t4.splitlines()[-1].startswith('| MuLMS, held-out subfields | 81.0 |')
     assert 'random splits' not in t4.split('\n\n', 1)[1]     # settings without results left out
 
 

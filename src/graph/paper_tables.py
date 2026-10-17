@@ -56,7 +56,9 @@ UNSEEN_SETTINGS = (('fine_random_split_vary', 'fine, random splits'),
                    ('sofc_random_split_vary', 'SOFC-Exp, random splits'),
                    ('sofc_document_folds', 'SOFC-Exp, article folds'),
                    ('sofc_published_split', 'SOFC-Exp, official split'),
-                   ('sofc_slot_published_split', 'SOFC-Exp slot types, official split'))
+                   ('sofc_slot_published_split', 'SOFC-Exp slot types, official split'),
+                   ('mulms_random_split_pool', 'MuLMS, random splits'),
+                   ('mulms_leave_one_subfield_out', 'MuLMS, held-out subfields'))
 CRITERIA = ('strict', 'exact', 'type', 'overlap')
 
 
@@ -163,7 +165,8 @@ def table4(mentions, matching):
     return ('Table 4. The CRF head (10 model seeds): the share of gold test entities whose '
             'words are no entity of their type in the training sentences, recall on seen and '
             'unseen names (pooled), and F1 under the matching criteria of SemEval-2013 Task '
-            '9.1 (mean over splits, papers or seeds).\n\n' + markdown(header, rows))
+            '9.1 (mean over splits, papers, subfields or seeds).\n\n'
+            + markdown(header, rows))
 
 
 def load(path):

@@ -1,4 +1,4 @@
-Table 4. The CRF head (10 model seeds): the share of gold test entities whose words are no entity of their type in the training sentences, recall on seen and unseen names (pooled), and F1 under the matching criteria of SemEval-2013 Task 9.1 (mean over splits, papers or seeds).
+Table 4. The CRF head (10 model seeds): the share of gold test entities whose words are no entity of their type in the training sentences, recall on seen and unseen names (pooled), and F1 under the matching criteria of SemEval-2013 Task 9.1 (mean over splits, papers, subfields or seeds).
 
 | setting | unseen names (%) | recall, seen | recall, unseen | F1, strict | F1, exact | F1, type | F1, overlap |
 |---|---|---|---|---|---|---|---|
