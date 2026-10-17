@@ -25,6 +25,11 @@ No training: reads the 10-seed GPU results (results/gpu) and writes PNG files.
       recall on the seen and the unseen ones; (c) on the held-out papers, fine-grained, each
       method's F1 minus the CRF head's on seen and on unseen entities, with 95% CIs over the
       4 papers (votes against the CRF head's vote).
+  fig6_gains.png (C5-C8, C19): on the 4 held-out papers, per granularity, each method's
+      mean paired micro-F1 difference from the CRF head with its 95% CI over the papers:
+      the 10-seed comparison where there is one (weeks 5-7), else the 3-seed screen (hollow
+      markers); and a third training paper, the CRF head trained on three papers minus on
+      two (paper_count, seeds 0-200).
 A figure whose results are missing is skipped (and named on stdout).
 
 Usage:
@@ -48,6 +53,16 @@ FIG1_SYSTEMS = {'crf': 'CRF head', 'crf_mt': 'multi-task', 'crf_ls': 'label sema
                 'crf_mt_ens3': 'multi-task vote', 'crf_ls_ens3': 'label-semantics vote',
                 'crf_st3_ens3': 'self-training vote'}
 SEED_OFFSETS = tuple(range(0, 1000, 100))
+# Figure 6: the methods against the CRF head on the held-out papers, in this order; the
+# 10-seed comparisons first, the screens if a method has no 10-seed comparison
+FIG6_METHODS = {'crf_ens3': 'seed vote', 'crf_mt': 'multi-task', 'crf_st3': 'self-training',
+                'crf_ls': 'label semantics', 'crf_deberta': 'DeBERTa-v3-large',
+                'crf_ctx': 'document context', 'crf_mt_st3': 'multi-task self-training',
+                'crf_mr': 'mention replacement', 'crf_dc': 'consistency rule',
+                'crf_cf': 'coarse-to-fine completion', 'crf_eb': 'recall calibration'}
+TEN_SEED_COMPARISONS = ('ner_week5_comparisons.json', 'ner_week6_comparisons.json',
+                        'ner_week7_comparisons.json')
+SCREENS = ('ner_week6_screen.json', 'ner_week7_screen.json')
 # Figure 4: the bias grid of the CRF head (week 7, part 2a)
 SOFC_BIAS = 'ner_results_sofc_published_split_crf_bias.json'
 SHORT_PAPER = {'10.1007_s11340-021-00758-x': 's11340', '10.1038_ncomms7164': 'ncomms7164',
@@ -385,6 +400,65 @@ def figure5(settings, methods, path):
     plt.close(fig)
 
 
+def gain_data(directory, analysis):
+    """{granularity: [(label, mean, CI low, CI high, kind)]} for Figure 6, kind 'ten' (10
+    seeds), 'screen' (3 seeds) or 'papers' (a third training paper); methods without a
+    comparison on the held-out papers are left out."""
+    def entries(names):
+        out = []
+        for name in names:
+            found = load(directory, [name])
+            if found:
+                out += [e for e in found[0].values() if e['protocol'] == LOPO
+                        and e['reference'] == 'crf']
+        return out
+    ten, screen = entries(TEN_SEED_COMPARISONS), entries(SCREENS)
+    out = {}
+    for g in GRANULARITIES:
+        rows = []
+        for variant, label in FIG6_METHODS.items():
+            for kind, found in (('ten', ten), ('screen', screen)):
+                hit = [e for e in found if e['granularity'] == g and e['variant'] == variant]
+                if hit:
+                    m = hit[0]['micro']
+                    rows.append((label, m['mean_diff'], *m['ci95'], kind))
+                    break
+        papers = analysis.get('paper_count', {}).get(g, {}).get('three_minus_two')
+        if papers:
+            rows.append(('a third training paper', papers['mean_diff'], *papers['ci95'],
+                         'papers'))
+        if rows:
+            out[g] = rows
+    return out
+
+
+def figure6(gains, path):
+    import matplotlib.pyplot as plt
+    fig, axes = plt.subplots(1, len(gains), figsize=(6.2 * len(gains), 5.2), sharey=False,
+                             squeeze=False)
+    styles = {'ten': ('o', 'tab:blue', 'tab:blue', 'method, 10 seeds'),
+              'screen': ('o', 'white', 'tab:blue', 'method, 3-seed screen'),
+              'papers': ('D', 'tab:green', 'tab:green', 'a third training paper (3 seeds)')}
+    for ax, (g, rows) in zip(axes[0], gains.items()):
+        rows = rows[::-1]
+        seen = set()
+        for k, (label, mean, lo, hi, kind) in enumerate(rows):
+            marker, face, edge, name = styles[kind]
+            ax.errorbar(mean, k, xerr=[[mean - lo], [hi - mean]], fmt=marker, ms=6,
+                        mfc=face, mec=edge, color=edge, capsize=2,
+                        label=None if kind in seen else name)
+            seen.add(kind)
+        ax.axvline(0, color='grey', lw=0.8)
+        ax.set_yticks(range(len(rows)), [r[0] for r in rows], fontsize=8)
+        ax.set(xlabel='micro F1 minus the CRF head (95% CI over the 4 papers)',
+               title=f'{g}-grained, unseen papers')
+        ax.grid(alpha=0.3, axis='x')
+        ax.legend(fontsize=7, loc='upper center', bbox_to_anchor=(0.5, -0.13), ncol=2)
+    fig.tight_layout()
+    fig.savefig(path, dpi=160, bbox_inches='tight')
+    plt.close(fig)
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description='The figures of the paper plan')
     parser.add_argument('--results', default=os.path.join(
@@ -434,6 +508,12 @@ def main(argv=None):
         written.append('fig5_mentions.png')
     else:
         print('fig5: no mention analysis')
+    gains = gain_data(args.results, analysis)
+    if gains:
+        figure6(gains, os.path.join(args.out, 'fig6_gains.png'))
+        written.append('fig6_gains.png')
+    else:
+        print('fig6: no comparisons on the held-out papers')
     print(f"wrote {', '.join(written) or 'nothing'} to {args.out}")
     return written
 

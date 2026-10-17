@@ -347,7 +347,7 @@ annotation conventions between papers, which a model trained on other
 papers cannot learn. We report strict F1 for comparison with published
 numbers and the looser criteria alongside.
 
-**5.10 What one more paper is worth (C19).** The inner folds of Section
+**5.10 What one more paper is worth (C19; Figure 6).** The inner folds of Section
 6.2 train the CRF head on two papers. On each held-out paper, training on
 all three other papers instead adds +7.36 [+1.98, +12.74] F1 fine-grained
 (39.02 to 46.38) and +8.90 [+5.90, +11.90] coarse-grained (50.37 to 59.27),

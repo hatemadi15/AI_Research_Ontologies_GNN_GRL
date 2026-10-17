@@ -66,7 +66,7 @@ A draft of the sections that hold for either paper type is in
 
 ## Figures and tables
 
-Figures 1–5 are drawn from the GPU results by `src/graph/paper_figures.py`
+Figures 1–6 are drawn from the GPU results by `src/graph/paper_figures.py`
 into `docs/figures/` (no training; re-run it when results change):
 - Figure 1 (`fig1_random_vs_unseen.png`): per system with 10 seeds on both
   protocols, micro F1 on the 5 random splits and on the 4 unseen papers,
@@ -95,6 +95,14 @@ into `docs/figures/` (no training; re-run it when results change):
   fine-grained, each method's F1 minus the CRF head's (a vote minus the
   seed vote) on seen and on unseen names, with 95% CIs over the 4 papers
   (C17).
+- Figure 6 (`fig6_gains.png`): on the 4 held-out papers, per granularity,
+  each method's micro-F1 difference from the CRF head with its 95% CI over
+  the papers: the 10-seed comparison where there is one, else the 3-seed
+  screen (hollow markers); and, last, a third training paper (+7.36
+  fine-grained, +8.90 coarse-grained; C19). Only the seed vote, multi-task
+  training fine-grained (+3.72 [+0.57, +6.87], reported) and the consistency
+  rule coarse-grained (+0.12) lie above 0 with 10 seeds; a third paper lies
+  above every method (C5–C8, C19).
 Tables 1–4 are generated into `docs/tables/` by `src/graph/paper_tables.py`
 from the committed results (no training; re-run it when results change):
 - Table 1 (`table1_published_split.md`): the published splits, MaterioMiner's

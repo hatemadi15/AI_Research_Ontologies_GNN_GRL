@@ -139,3 +139,35 @@ def test_mention_data_and_figure5(tmp_path):
     pytest.importorskip('matplotlib')
     pf.figure5(settings, methods, tmp_path / 'fig5.png')
     assert (tmp_path / 'fig5.png').stat().st_size > 10000
+
+
+def test_gain_data_and_figure6(tmp_path):
+    """Figure 6: a method's 10-seed comparison on the held-out papers, else its screen, in
+    FIG6_METHODS order, and the third paper last; comparisons against another reference or
+    on the random splits are left out."""
+    def entry(g, variant, mean, reference='crf', protocol='leave_one_paper_out'):
+        return {'granularity': g, 'protocol': protocol, 'variant': variant,
+                'reference': reference, 'micro': {'mean_diff': mean,
+                                                  'ci95': [mean - 1, mean + 1]}}
+    (tmp_path / 'ner_week5_comparisons.json').write_text(json.dumps({
+        'a': entry('fine', 'crf_mt', 3.7), 'b': entry('fine', 'crf_ens3', 2.4),
+        'c': entry('fine', 'crf_mt_ens3', 3.6, reference='crf_ens3'),
+        'd': entry('fine', 'crf_ls', 9.9, protocol='random_split_vary')}))
+    (tmp_path / 'ner_week7_screen.json').write_text(json.dumps({
+        'a': entry('fine', 'crf_mr', 3.25), 'b': entry('coarse', 'crf_mr', 0.25)}))
+    (tmp_path / 'ner_week7_comparisons.json').write_text(json.dumps({
+        'a': entry('coarse', 'crf_mr', 0.5)}))
+    analysis = {'paper_count': {'fine': {'three_minus_two': {'mean_diff': 7.36,
+                                                             'ci95': [1.98, 12.74]}}}}
+    gains = pf.gain_data(tmp_path, analysis)
+    assert gains['fine'] == [('seed vote', 2.4, 1.4, 3.4, 'ten'),
+                             ('multi-task', 3.7, 2.7, 4.7, 'ten'),
+                             ('mention replacement', 3.25, 2.25, 4.25, 'screen'),
+                             ('a third training paper', 7.36, 1.98, 12.74, 'papers')]
+    assert gains['coarse'] == [('mention replacement', 0.5, -0.5, 1.5, 'ten')]
+    assert pf.gain_data(tmp_path / 'missing', {}) == {}
+    pytest.importorskip('matplotlib')
+    import matplotlib
+    matplotlib.use('Agg')
+    pf.figure6(gains, tmp_path / 'fig6.png')
+    assert (tmp_path / 'fig6.png').stat().st_size > 0
