@@ -23,14 +23,16 @@ carry either way:
 - a 3-seed design passes a real 1.8-point gain in 41% of seed triples, and
   let through a 2.7-point gain that 10 seeds shrank to 1.1;
 - the entities a model misses on unseen papers lie far below its decision
-  threshold, so shifting the threshold does not recover them.
+  threshold, so shifting the threshold does not recover them;
 - 81% of a new paper's fine-grained entities are names that no training
   paper annotates (35% on random splits), the model finds 35% of them, and
-  every gain that holds on unseen papers is a gain on these names.
+  every gain that holds on unseen papers is a gain on these names;
 - coarse-grained, the model finds almost every entity of a new paper (90.7
   F1 when any overlap counts, 93.4 on random splits); most of the strict
   gap lies in span boundaries and types that the papers' annotators set
-  differently.
+  differently;
+- a third training paper adds 7–9 F1 points on an unseen paper, as much as
+  the best method.
 
 ## 1 Introduction
 
@@ -46,13 +48,15 @@ terms between training and test (babl2025random; augenstein2017generalisation),
 and the dataset paper notes that four publications cannot estimate
 out-of-distribution performance.
 
-We ask four questions on MaterioMiner, with a second dataset, SOFC-Exp
+We ask five questions on MaterioMiner, with a second dataset, SOFC-Exp
 (friedrich2020sofc), where possible:
 1. Do the published numbers reproduce, and on which split and scoring?
 2. How much is lost on a paper the model has never seen?
-3. Which common additions improve materials NER on unseen papers once
+3. Where is it lost: on names the training papers lack, on annotation
+   conventions that differ between papers, or for want of training papers?
+4. Which common additions improve materials NER on unseen papers once
    seeds are accounted for?
-4. How far does a small-seed design mislead?
+5. How far does a small-seed design mislead?
 
 Every comparison was fixed in a protocol committed before its runs
 (vanmiltenburg2021preregistering). It is decided by the 95% Student-t
