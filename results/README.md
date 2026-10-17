@@ -149,8 +149,12 @@ entity, each mention swapped with probability 0.5 for a training mention of
 the same type (seeds 0 to 200 for the screen; each run stores its number of
 copies, `n_augmented`), and `_crf_mr_ens3` their vote.
 `gpu/ner_week7_screen.json` (`ner_seedmeans.py --week 7 --gpu --screen`)
-holds the screen. Stage 2 (`w7d`) adds the seeds 300 to 900 and SOFC-Exp's
-official split.
+holds the screen. Stage 2 (`w7d`, the same day) adds the seeds 300 to 900
+(`_crf_mr_m300` to `_m900`; the votes `_crf_mr_ens3`, `_ens3_m300` and
+`_ens3_m600`) and SOFC-Exp's official split with model seeds 0 to 900
+(`gpu/ner_results_sofc_published_split_crf_mr.json`). Its decisions are in
+`gpu/ner_week7_comparisons.json` and, for SOFC-Exp, in
+`gpu/ner_week5_seed_analysis.json` (`published_split`, `sofc`, `crf_mr`).
 
 Week 7, part 2d (multi-task training on SOFC-Exp's two levels; Kaggle
 session `w7b` of 17 October, model seeds 0 to 900 on the official split):

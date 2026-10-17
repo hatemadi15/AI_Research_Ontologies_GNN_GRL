@@ -4,11 +4,12 @@
 becomes (`docs/PAPER.md`): a methods paper if a method passes its
 pre-registered decisions and repeats on SOFC-Exp, otherwise an evaluation
 paper. Sections 1–5, 7 and 8 rest on finished, committed results. In
-Section 6 (methods for unseen papers), recall calibration (no gain, C15)
-and multi-task training on SOFC-Exp's two levels (no gain, C7) are decided.
-The others wait for their runs: stage 2 of multi-task self-training and
-mention replacement (ROADMAP §4, weeks 6 and 7). The numbers come from `results/`
-through the claims table of `docs/PAPER.md` (C1–C19). References are keys of `docs/references.bib`.
+Section 6 (methods for unseen papers), recall calibration (no gain, C15),
+multi-task training on SOFC-Exp's two levels (no gain, C7) and mention
+replacement (a gain on unseen papers at both granularities, C20) are
+decided. Stage 2 of multi-task self-training waits for its runs (ROADMAP
+§4, week 6). The numbers come from `results/`
+through the claims table of `docs/PAPER.md` (C1–C20). References are keys of `docs/references.bib`.
 
 ---
 
@@ -21,6 +22,10 @@ carry either way:
 - of the additions tested under a pre-registered 10-seed design, only the
   CRF head, seed votes and multi-task training hold, and multi-task
   training only on MaterioMiner: on SOFC-Exp's two levels it gains nothing;
+- mention replacement is the one method that improves a single model on
+  unseen papers at both granularities (+2.77 and +1.28 F1), all of it on
+  names the training papers lack; on SOFC-Exp's larger training set it
+  gives nothing;
 - a 3-seed design passes a real 1.8-point gain in 41% of seed triples, and
   let through a 2.7-point gain that 10 seeds shrank to 1.1;
 - the entities a model misses on unseen papers lie far below its decision
@@ -454,6 +459,25 @@ screened with 3 seeds and decided with 10 only if the screen passes.
   vote. The fine-grained gain lies on unseen names (+3.48 [−0.18, +7.15]).
   It goes to the 10-seed decisions, on MaterioMiner and on SOFC-Exp;
   screens are optimistic (Section 5.6).
+- *Result (C20): a gain on unseen papers at both granularities.* With 10
+  seeds it improves on the CRF head by +2.77 [+1.51, +4.03] fine-grained
+  and +1.28 [+0.06, +2.51] coarse-grained, and every held-out paper gains
+  (+1.69 to +3.48 and +0.29 to +2.10). It is the only method of Section 6
+  to pass this decision at both granularities.
+- *Where the gain is:* on unseen names, +3.19 [+1.66, +4.72] fine-grained
+  (seen +1.49 [−1.31, +4.30]); coarse-grained +1.58 [−0.02, +3.17].
+- *Its vote* gains +3.61 [+1.71, +5.52] over the seed vote fine-grained, as
+  much as the multi-task vote, but it does not beat the strongest systems:
+  −0.04 [−2.09, +2.01] against the multi-task vote fine-grained, +2.26
+  [−0.12, +4.64] against the seed vote coarse-grained.
+- *SOFC-Exp:* −0.29 [−1.04, +0.47] against the CRF head, paired by seed.
+  Its 568 training sentences are longer and hold more entities, and the
+  original study's gains for transformers shrank as the training set grew.
+
+  Mention replacement and multi-task training each improve a single model
+  on unseen papers fine-grained, in different ways: one shows the model
+  names in new contexts, the other a second level of types. Whether the
+  two add up is the next pre-registered test.
 
 **6.4 Multi-task training on SOFC-Exp's two levels.** Not a new method:
 the repeat of C7 on the second dataset, where the slot types stand to the

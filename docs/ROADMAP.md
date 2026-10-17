@@ -989,7 +989,7 @@ chance at class level. For a Task C-style result:
 | 4 | Done for NER: P1 "Next, after week 3" items 1, 2, 3 and 5, i.e. votes over the week-3 changes that help, label semantics on the multi-task model, self-training at scale, on Kaggle T4 GPUs (protocol below). Not started: context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | Met for NER by two changes, both on unseen papers. Coarse-grained, the label-semantics vote improves on `crf_ens3` on the CPU (+1.63 [+0.11, +3.16]); the GPU repeat does not confirm it (+0.40 [−1.36, +2.16]). Fine-grained, self-training with 3 teachers improves on the CRF head (GPU, +1.07 [+0.33, +1.80]; +1.22 [+0.60, +1.84] on the random splits, reported). The multi-task vote and label semantics on the multi-task model do not pass. Typing: not started |
 | 5 | Done: NER, P1 "Next, after week 4" item 1, i.e. 10 seeds per split for the CRF reference, multi-task, label semantics and self-training with 3 teachers, on Kaggle T4 GPUs, and the published split (amendment); items 2–7 and a paper outline prepared, and the week-6 options run once each at full size (protocol below). The original week-5 work moves to week 7 | Met. Of the claims re-tested with 10 seeds, fine-grained multi-task on the random splits passes (+1.83 [+0.32, +3.34]); the coarse-grained claims of week 3 and the self-training claim of week 4 do not. The reported system: the multi-task vote coarse-grained on the random splits and fine-grained on unseen papers, `crf_ens3` elsewhere. On the published split, plain MatSciBERT reproduces 69.92 and 72.32 and the CRF head beats both |
 | 6 | In progress: NER, P1 "Next, after week 5", towards a methods paper: methods for unseen papers (DeBERTa-v3-large, document context, multi-task self-training) screened with 3 seeds and decided with 10, and a second dataset (SOFC-Exp, 10 seeds); protocol below. So far (P1, "Week 6 so far"): DeBERTa-v3-large stops at the screen; document context passes the screen but neither 10-seed decision nor S2 on SOFC-Exp (+0.58 [−0.26, +1.42]); multi-task self-training passes the screen (+6.06 fine-grained), stage 2 next; on SOFC-Exp the CRF head improves on plain MatSciBERT (S1) | A method whose vote improves on the strongest system on unseen papers under the 10-seed design, and on SOFC-Exp |
-| 7 | In progress: NER, part 1, document-level label consistency for unseen papers, a post-processing rule on the saved predictions (no GPU; protocol below); part 2a, recall calibration (a bias on the CRF head's emissions, chosen on inner folds; done, no claim: the missed entities are not near the threshold); part 2b, mention replacement (screen, then 10 seeds if it passes; protocol below; the screen passed fine-grained, +3.25 [−2.33, +8.82], and stage 2 runs), and later the combinations of the methods that pass week 6, fixed after the week-6 decisions; part 2c, coarse-to-fine completion (done, no claim); part 2d, multi-task training on SOFC-Exp's two levels (done, no claim: −0.78 [−2.39, +0.84] on the slot level, −0.15 [−1.36, +1.05] on the entity level); part 2e, SOFC-Exp's test articles cut into words as its training articles are (protocol below). Then class-level taxonomy (LLM or cross-encoder + arborescence) and a relation annotation pilot | Part 1: the rule improves on the strongest system on unseen papers and on SOFC-Exp's CRF head. Taxonomy: first class-level F1 above chance; relation guidelines |
+| 7 | In progress: NER, part 1, document-level label consistency for unseen papers, a post-processing rule on the saved predictions (no GPU; protocol below); part 2a, recall calibration (a bias on the CRF head's emissions, chosen on inner folds; done, no claim: the missed entities are not near the threshold); part 2b, mention replacement (screen, then 10 seeds if it passes; protocol below; done: it improves on the CRF head at both granularities, +2.77 [+1.51, +4.03] fine-grained and +1.28 [+0.06, +2.51] coarse-grained, but its vote does not beat the strongest systems and S2 on SOFC-Exp gives −0.29), and later the combinations of the methods that pass week 6, fixed after the week-6 decisions; part 2c, coarse-to-fine completion (done, no claim); part 2d, multi-task training on SOFC-Exp's two levels (done, no claim: −0.78 [−2.39, +0.84] on the slot level, −0.15 [−1.36, +1.05] on the entity level); part 2e, SOFC-Exp's test articles cut into words as its training articles are (protocol below). Then class-level taxonomy (LLM or cross-encoder + arborescence) and a relation annotation pilot | Part 1: the rule improves on the strongest system on unseen papers and on SOFC-Exp's CRF head. Taxonomy: first class-level F1 above chance; relation guidelines |
 | 8 | Prepared: part 1, SOFC-Exp beyond its official split: the CRF head with 10 seeds on 5 random sentence splits and on 5 folds of 9 held-out articles (`--document-folds 5`; protocol below, descriptive); part 2, more papers or more sentences: three training papers cut to the size of two against two papers (`--two-paper-size`; protocol below) | Part 1: the gap between random splits and unseen documents measured on a second corpus. Part 2: whether a third paper helps at the same number of training sentences |
 
 ### Week 2 protocol (fixed before any run)
@@ -2102,6 +2102,48 @@ the CRF head, 3-seed means over the 4 held-out papers:
 A 3-seed screen is optimistic (C8): document context passed with +2.66 and
 gained +1.14 with 10 seeds. Stage 2 adds the seeds 300 to 900 and SOFC-Exp's
 S2, and decides.
+
+**Outcome of stage 2: decision 1 passes at both granularities; decision 2
+and S2 do not.** Session a of 17 October (`w7d`, from the protocol's
+commit 494cac1; the repeat `smokez` is identical at 77.95; 2.5 hours).
+10 seeds on the 4 held-out papers:
+- decision 1, against the CRF head: **fine-grained +2.77 [+1.51, +4.03]**
+  (every paper gains: +3.48, +3.24, +1.69, +2.69) and **coarse-grained
+  +1.28 [+0.06, +2.51]** (+1.61, +2.10, +0.29, +1.14). Both pass;
+- decision 2, its vote against the strongest system on unseen papers:
+  fine-grained −0.04 [−2.09, +2.01] against the multi-task vote,
+  coarse-grained +2.26 [−0.12, +4.64] against the seed vote. Neither
+  passes;
+- S2 on SOFC-Exp's official split: 83.46 [83.08, 83.85] against the CRF
+  head's 83.75, −0.29 [−1.04, +0.47] paired by seed. It does not pass.
+
+2 of the 5 decisions pass, where about 0.13 would pass if mention
+replacement did nothing. It is the first method to improve on the CRF
+head on unseen papers at both granularities (the consistency rule passed
+coarse-grained only, +0.12). It does not improve on the strongest system,
+and it does not repeat on SOFC-Exp, so it is not the methods claim on its
+own.
+
+Reported:
+- its vote against the seed vote: fine-grained +3.61 [+1.71, +5.52], about
+  as much as the multi-task vote (+3.65); against the multi-task vote,
+  coarse-grained +2.57 [−0.19, +5.34];
+- strict IOB2 equals the default scoring (the CRF head's tags are valid);
+  macro F1 +2.34 [−0.99, +5.66] fine-grained and +2.79 [+0.04, +5.55]
+  coarse-grained, weighted +3.62 [+1.63, +5.62] and +1.86 [+0.17, +3.55];
+- on unseen names (`ner_mentions.py`): fine-grained +3.19 [+1.66, +4.72],
+  seen names +1.49 [−1.31, +4.30]; coarse-grained +1.58 [−0.02, +3.17]
+  and +0.12 [−0.83, +1.06]. The gain lies on the names the training
+  papers lack, as C17 predicts;
+- copies per run: 414–760 fine-grained (mean 580) and 588–979
+  coarse-grained (788), on 234–370 training sentences; on SOFC-Exp
+  1,551–1,586 on 568.
+
+On SOFC-Exp's 568 longer training sentences it gives nothing, in line with
+Dai and Adel, whose gains for transformers shrank as the training set grew.
+On MaterioMiner it adds names in new contexts, the multi-task model adds a
+second level of types, and each improves a single model on unseen papers
+fine-grained. The combination prepared below tests whether the two add up.
 
 *Prepared for a combination (17 October, tests only, no runs).* Mention
 replacement on the multi-task model (`--multi-task --augment-mentions K`,
