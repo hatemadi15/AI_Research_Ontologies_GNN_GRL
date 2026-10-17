@@ -118,6 +118,25 @@ therefore measures unseen documents.
   head) and +1.91 [+1.33, +2.49] (plain MatSciBERT) over 10 seeds, mostly
   on unseen names (week 7, part 2e; both pre-registered decisions pass).
 
+**MuLMS** (schrader2023mulms): 50 articles from seven materials subfields
+(in the release: electrolysis, graphene, pemfc, poly, semi, sofc and
+steel; 2–11 articles each), 10,184 sentences and 46,584 entities of 13
+types (CC BY-SA 4.0). Used in Section 6.6 only.
+- 32.9% of the entities lie inside or on the span of another. A flat
+  tagger needs one level, so we keep the outermost ones: 31,952 (68.6%).
+  Of entities with the same span we keep the type first in a fixed order
+  (the larger unit first: VALUE over NUM); of two that cross, the one
+  that starts first. Most kept entities are materials (12,647) and values
+  (4,628).
+- Text extraction damaged 276 tokens: 261 are empty or hold whitespace,
+  and 15 are private-use symbols or lone combining marks, which a BERT
+  tokenizer erases. Each token becomes its whitespace-separated pieces,
+  without the pieces a BERT tokenizer erases; 2 entities are left without
+  tokens and dropped.
+- The published MatSciBERT-CRF (79.6 micro F1) tags the nested entities
+  with stacked labels and is scored on all of them, so our scores cannot
+  be compared with it.
+
 ## 3 Evaluation protocol
 
 **Splits.**
@@ -597,6 +616,31 @@ Multi-task training is therefore a MaterioMiner result. One possible
 reason, not tested: a material slot is a role in the reported cell, which
 the entity level does not encode, so the entity head has little to add
 where the slot head errs (Section 5.9).
+
+**6.6 Mention replacement on held-out subfields of a third corpus.**
+Neither mention replacement nor its combination with multi-task training
+gains on SOFC-Exp (Sections 6.3 and 6.4), whose 45 articles share one
+topic. On its official split's test articles 49% of the names are unseen
+and the CRF head finds 82% of them; on a held-out MaterioMiner paper 81%
+are unseen and it finds 35% (Section 5.8). Mention replacement may help
+only where unseen names are many and hard to find, a reading made after
+SOFC-Exp's results. MuLMS (Section 2) tests it: a held-out subfield
+differs in topic from the training documents, as a new MaterioMiner paper
+does. MuLMS has one level of types, so only mention replacement is tested,
+with the settings of Section 6.3.
+- *Design:* each of the 7 subfields is held out in turn, and its documents
+  are the test set (351–2,384 sentences). The model trains on 340
+  sentences of the other subfields' documents and validates on 60, about
+  MaterioMiner's training size (234–370 sentences per held-out paper). As
+  a reference, the CRF head also runs on 5 random splits of the same size,
+  testing on 2,037 sentences.
+- *Decisions,* over the 7 subfields, each the mean of its 10 seeds (6
+  degrees of freedom): mention replacement against the CRF head, and its
+  votes against the CRF votes. If the first passes, mention replacement's
+  gain on unseen documents holds on two corpora whose held-out documents
+  differ in topic and on none whose articles share one: a methods claim
+  scoped to that setting.
+- *Result:* pending (the session of 17 October).
 
 ## 7 Limitations
 
