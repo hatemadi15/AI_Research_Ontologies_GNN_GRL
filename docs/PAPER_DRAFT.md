@@ -19,6 +19,9 @@ To be written once Section 6 is decided. The evaluation findings it will
 carry either way:
 - the published MaterioMiner numbers reproduce on the released split;
 - a model trained on three papers loses 18–31 F1 points on the fourth;
+  on SOFC-Exp, whose 45 articles share one topic and one annotation
+  scheme, held-out articles cost 3.5 points, so the gap grows with how
+  much the papers differ;
 - of the additions tested under a pre-registered 10-seed design, only the
   CRF head, seed votes and multi-task training hold, and multi-task
   training only on MaterioMiner: on SOFC-Exp's two levels it gains nothing;
