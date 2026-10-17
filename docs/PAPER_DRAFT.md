@@ -48,7 +48,9 @@ carry either way:
   gap lies in span boundaries and types that the papers' annotators set
   differently;
 - a third training paper adds 7–9 F1 points on an unseen paper, as much as
-  the best method.
+  the best method. At the same number of training sentences it still adds
+  1.2 (fine-grained) and 3.6 (coarse-grained) points, so most of a paper's
+  value is its sentences.
 
 ## 1 Introduction
 
@@ -392,9 +394,13 @@ numbers and the looser criteria alongside.
 all three other papers instead adds +7.36 [+1.98, +12.74] F1 fine-grained
 (39.02 to 46.38) and +8.90 [+5.90, +11.90] coarse-grained (50.37 to 59.27),
 over 4 papers and seeds 0–200; every paper gains, from +3.2 to +11.6. A
-third paper also brings more sentences, so this is the value of a paper
-with its sentences; a pre-registered run (week 8, part 2) trains on three
-papers cut to the size of two to separate the two. It matches the largest method gain measured on unseen
+third paper also brings more sentences. A pre-registered run (week 8,
+part 2) separates the two by training on three papers cut to the size of
+two. At the same number of sentences, the third paper adds +1.18 [+0.22,
++2.15] fine-grained (39.02 to 40.20) and +3.59 [+1.59, +5.58]
+coarse-grained (50.37 to 53.96), and every paper gains. Its own sentences
+add +6.17 [+1.10, +11.24] and +5.31 [+4.13, +6.50]. Diversity is thus about
+a sixth of the gain fine-grained and two fifths coarse-grained. It matches the largest method gain measured on unseen
 papers (multi-task self-training's screen, +6.06 fine-grained): for
 materials NER on new papers, annotating more papers is the lever to beat.
 An outside result points the same way. Potu et al. (potu2025ontology,

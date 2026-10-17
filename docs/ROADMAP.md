@@ -1021,7 +1021,7 @@ chance at class level. For a Task C-style result:
 | 5 | Done: NER, P1 "Next, after week 4" item 1, i.e. 10 seeds per split for the CRF reference, multi-task, label semantics and self-training with 3 teachers, on Kaggle T4 GPUs, and the published split (amendment); items 2–7 and a paper outline prepared, and the week-6 options run once each at full size (protocol below). The original week-5 work moves to week 7 | Met. Of the claims re-tested with 10 seeds, fine-grained multi-task on the random splits passes (+1.83 [+0.32, +3.34]); the coarse-grained claims of week 3 and the self-training claim of week 4 do not. The reported system: the multi-task vote coarse-grained on the random splits and fine-grained on unseen papers, `crf_ens3` elsewhere. On the published split, plain MatSciBERT reproduces 69.92 and 72.32 and the CRF head beats both |
 | 6 | Done: NER, P1 "Next, after week 5", towards a methods paper: methods for unseen papers (DeBERTa-v3-large, document context, multi-task self-training) screened with 3 seeds and decided with 10, and a second dataset (SOFC-Exp, 10 seeds); protocol below. Done (P1, "Week 6"): DeBERTa-v3-large stops at the screen; document context passes the screen but neither 10-seed decision nor S2 on SOFC-Exp (+0.58 [−0.26, +1.42]); multi-task self-training passes the screen (+6.06 fine-grained) but none of its 4 decisions (+5.47 [−0.74, +11.68] fine-grained against the CRF head), so its S2 on SOFC-Exp does not run; on SOFC-Exp the CRF head improves on plain MatSciBERT (S1) | A method whose vote improves on the strongest system on unseen papers under the 10-seed design, and on SOFC-Exp |
 | 7 | In progress: NER, part 1, document-level label consistency for unseen papers, a post-processing rule on the saved predictions (no GPU; protocol below); part 2a, recall calibration (a bias on the CRF head's emissions, chosen on inner folds; done, no claim: the missed entities are not near the threshold); part 2b, mention replacement (screen, then 10 seeds if it passes; protocol below; done: it improves on the CRF head at both granularities, +2.77 [+1.51, +4.03] fine-grained and +1.28 [+0.06, +2.51] coarse-grained, but its vote does not beat the strongest systems and S2 on SOFC-Exp gives −0.29), and later the combinations of the methods that pass week 6, fixed after the week-6 decisions; part 2c, coarse-to-fine completion (done, no claim); part 2d, multi-task training on SOFC-Exp's two levels (done, no claim: −0.78 [−2.39, +0.84] on the slot level, −0.15 [−1.36, +1.05] on the entity level); part 2e, SOFC-Exp's test articles cut into words as its training articles are (protocol below; done: both decisions pass, the shift costs the CRF head +0.86 [+0.39, +1.33] and plain MatSciBERT +1.91 [+1.33, +2.49], the CRF head then scores 84.61 [83.89, 85.34], which covers the published MatSciBERT-CRF's 84.77, and its gain over plain MatSciBERT falls to +0.17 [−0.37, +0.70]). Then class-level taxonomy (LLM or cross-encoder + arborescence) and a relation annotation pilot | Part 1: the rule improves on the strongest system on unseen papers and on SOFC-Exp's CRF head. Taxonomy: first class-level F1 above chance; relation guidelines |
-| 8 | Part 1 done: SOFC-Exp beyond its official split, the CRF head with 10 seeds on 5 random sentence splits and on 5 folds of 9 held-out articles (`--document-folds 5`; protocol below, descriptive): 86.27 against 82.79, a gap of 3.48 points (28–31 on MaterioMiner); part 2 (its first session hung and was cancelled; it runs again after week 9), more papers or more sentences: three training papers cut to the size of two against two papers (`--two-paper-size`; protocol below) | Part 1: the gap between random splits and unseen documents measured on a second corpus. Part 2: whether a third paper helps at the same number of training sentences |
+| 8 | Part 1 done: SOFC-Exp beyond its official split, the CRF head with 10 seeds on 5 random sentence splits and on 5 folds of 9 held-out articles (`--document-folds 5`; protocol below, descriptive): 86.27 against 82.79, a gap of 3.48 points (28–31 on MaterioMiner); part 2 done (its first session hung and was cancelled; it ran after week 9), more papers or more sentences: three training papers cut to the size of two against two papers (`--two-paper-size`; protocol below). Both decisions pass: at the size of two papers, a third paper adds +1.18 [+0.22, +2.15] fine-grained and +3.59 [+1.59, +5.58] coarse-grained, and its sentences add +6.17 and +5.31 more | Part 1: the gap between random splits and unseen documents measured on a second corpus. Part 2: whether a third paper helps at the same number of training sentences |
 | 9 | Part 1 done: mention replacement on the multi-task model (`crf_mt_mr`, 10 seeds on the held-out papers, S2 on SOFC-Exp's two levels; protocol below). 3 of 6 decisions pass: against the multi-task model +3.01 [+0.42, +5.60] fine-grained and +2.30 [+0.49, +4.10] coarse-grained, and its vote against the multi-task vote +2.86 [+0.18, +5.54] fine-grained, now the strongest fine-grained system on unseen papers (55.33); coarse-grained its vote does not beat the seed vote, and S2 fails at both levels, so no methods claim (C21). Part 2 done: on SOFC-Exp cut to MaterioMiner's size (10 of its 26 training articles, 5 draws), mention replacement scores +0.50 [−0.47, +1.46] against the CRF head and does not pass, so its MaterioMiner gain is not a matter of training size | Part 1: the combination's vote improves on the strongest system on unseen papers, and on SOFC-Exp. Part 2: mention replacement improves on the CRF head on a MaterioMiner-sized SOFC-Exp |
 | 10 | Protocol committed before any run (a08356f; the batch `w10a` runs from that commit): MuLMS as a third corpus (7 materials subfields, its outermost entities; `mulms.py`), mention replacement against the CRF head on held-out subfields with 400 training sentences, 10 seeds, and the CRF head on random splits of the same size; protocol below | Mention replacement improves on the CRF head on held-out subfields (decision 1), and its votes on the CRF votes (decision 2) |
 
@@ -2606,6 +2606,34 @@ training code, so every bundle's results are unchanged.
   bundle (9468ae7) was uploaded after version 10 had run for seven minutes,
   well past its setup, and part 2 went to kernel a at 12:03.
 
+**Outcome of part 2: both decisions pass. A third paper helps at the same
+number of training sentences, but most of its gain is its sentences.**
+Session `w8b` on `ner-gpu-jobs-c` (version 2, bundle 04352cd; 40.0 minutes
+from 20:26 on 17 October). The repeat is identical (`smokeag` 77.95).
+Means over the 4 held-out papers, each the mean over its 3 pairs and seeds
+0–200:
+
+| | Two papers | Three at the size of two | Three papers |
+|---|---|---|---|
+| Fine-grained | 39.02 | 40.20 | 46.38 |
+| Coarse-grained | 50.37 | 53.96 | 59.27 |
+
+- decision 1, fine-grained diversity: **+1.18 [+0.22, +2.15]** (per paper
+  +1.16, +0.57, +0.99, +2.01). It passes;
+- decision 2, coarse-grained diversity: **+3.59 [+1.59, +5.58]** (+2.72,
+  +2.52, +3.88, +5.24). It passes.
+
+Reported, size (all three papers minus three at the size of two): +6.17
+[+1.10, +11.24] fine-grained (+2.09, +5.40, +9.41, +7.81) and +5.31 [+4.13,
++6.50] coarse-grained (+4.76, +5.26, +4.85, +6.38). Diversity and size add
+up to C19's +7.36 and +8.90. Diversity accounts for about a sixth of the
+third paper's gain fine-grained and two fifths coarse-grained. Every paper
+gains from both at both levels. For a materials-NER corpus, a new paper is
+worth more than the same number of sentences from the papers at hand, but
+most of what a paper brings is its sentences. The fine-grained types gain
+little from diversity, plausibly because many of them occur in only one or
+two papers.
+
 ### Week 9 protocol: mention replacement on the multi-task model, and on a smaller SOFC-Exp (fixed before any run)
 
 Fixed on 17 October, after the decisions of weeks 6 and 7 and before any
@@ -2831,6 +2859,8 @@ this on the GPU. Nothing else in the design changes.
   `ner-gpu-bundle-3` (a08356f), 31 minutes after the bundle was ready. It
   started at once next to `w8b`. Its log showed every setup step within 1.1
   minutes and its first job (the repeat `smokeal`) done in 1.3 minutes.
+- *21:07: week 8, part 2 done* (40.0 minutes; outcome under its protocol).
+  Its outputs are pulled and collected; week 10 runs alone.
 
 **Outcome of part 1: 3 of the 6 decisions pass; the combination's vote is
 the strongest fine-grained system on unseen papers, but S2 fails at both

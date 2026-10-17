@@ -239,6 +239,16 @@ every F1 average, the CRF votes over the seed triples, and the gap (random
 splits minus article folds, +3.48 micro). `gpu/ner_mentions.json` and
 `gpu/ner_matching.json` hold both protocols as SOFC-Exp settings.
 
+Week 8, part 2 (more papers or more sentences; Kaggle session `w8b` of 17
+October, `ner-gpu-jobs-c` version 2, bundle 04352cd):
+`gpu/ner_results_{fine,coarse}_leave_one_paper_out_crf_p3n2_m{0,100,200}.json`.
+Each held-out paper's leave-one-paper-out fold is trained on all three other
+papers, its training sentences cut to as many as each pair of them gives (run
+ids `P|Q+R`, 12 per granularity), with predictions.
+`gpu/ner_week5_seed_analysis.json` (`paper_diversity`) holds per granularity
+the F1 with two papers, three at the size of two and three papers, the 2
+decisions (diversity) and the size difference, paired over the 4 papers.
+
 Seen and unseen test names (exploratory, no training; claim C17 of
 `docs/PAPER.md`): `gpu/ner_mentions.json` (`ner_mentions.py`) splits the gold
 test entities of every stored run with predictions by whether their exact

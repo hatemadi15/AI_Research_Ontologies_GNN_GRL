@@ -748,7 +748,10 @@ stands (ROADMAP §4, weeks 6 to 9):
    most of the strict gap lies in span boundaries and types that the
    papers' annotators set differently. And a third training paper adds
    +7.4 (fine) and +8.9 (coarse) F1 on an unseen paper, as much as the best
-   method so far.
+   method so far. Week 8, part 2 (pre-registered) separates the paper from
+   its sentences. At the same number of sentences, a third paper still
+   adds +1.18 [+0.22, +2.15] (fine) and +3.59 [+1.59, +5.58] (coarse), and
+   both decisions pass. Its sentences add the rest, +6.17 and +5.31.
 5. Then the combinations of the methods that pass, and the rare
    coarse-grained types that keep macro F1 down.
 
