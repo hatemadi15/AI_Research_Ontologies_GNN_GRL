@@ -2557,6 +2557,16 @@ training code, so every bundle's results are unchanged.
   ... in place").
 - Part 2 runs again from its own bundle (04352cd), on the next free kernel
   after week 9's sessions; nothing in its design changes.
+- *Then a stuck queue.* Week 9, part 1, pushed to kernel b at 09:55, and a
+  5-minute test batch pushed to the idle kernel a at 10:31 both stayed
+  "queued" for an hour; a further push was refused with "Maximum batch GPU
+  session count of 2 reached": queued sessions count towards Kaggle's limit
+  of 2. Both were cancelled on the website at about 11:45 (neither ran, so
+  neither was charged), and week 9, part 1 started at once when pushed
+  again (11:49, kernel b, version 10). Kernel b's live log still answers
+  with a server error, so its setup could not be read there; part 2's
+  bundle (9468ae7) was uploaded after version 10 had run for seven minutes,
+  well past its setup, and part 2 went to kernel a at 12:03.
 
 ### Week 9 protocol: mention replacement on the multi-task model, and on a smaller SOFC-Exp (fixed before any run)
 
