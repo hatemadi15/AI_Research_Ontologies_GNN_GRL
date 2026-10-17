@@ -2634,9 +2634,13 @@ decisions can be checked against this list. None is fixed yet.
    types; its MatSciBERT-CRF tagger scores 79.6 micro F1 on the test
    documents. Leaving one subfield out would test C2 across topics, and
    draws of a MaterioMiner-sized training set would test mention
-   replacement at small size, as week 9, part 2 does on SOFC-Exp. Its
-   entities nest, so a flat version must be chosen and checked first, and
-   the corpus files' licence read.
+   replacement at small size, as week 9, part 2 does on SOFC-Exp. The
+   corpus is on Hugging Face (`timo-pierre-schrader/MuLMS`, CC BY-SA 4.0,
+   parquet): sentences with their tokens, the document's subfield
+   (`category`) and BILOU tags in which nested entities stack on a token
+   (`B-DEV+U-MAT`). A flat version must therefore be chosen and checked
+   first. Under share-alike, a build script with a SHA-256 check, as for
+   the fatigue corpus, would keep converted files out of the repository.
 3. **A vote across methods.** Coarse-grained, multi-task training and
    mention replacement change different types (per-type correlation
    −0.72, above). A vote whose members come from different methods (the
