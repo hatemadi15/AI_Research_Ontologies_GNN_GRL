@@ -2503,8 +2503,19 @@ and the environment's commands (5 minutes), stops a job still running 1.25
 hours after the deadline, and prints a line after each setup step. A stuck
 session therefore ends within minutes, and its live log shows where it
 stopped. The runner is written at push time and does not touch the
-training code, so every bundle's results are unchanged. Part 2 runs again
-once kernel b is free.
+training code, so every bundle's results are unchanged.
+- *Outcome.* The session was cancelled on the Kaggle website at about 09:40.
+  Its output was empty (a log of `[]`, no manifest), so its script never
+  printed a line. Kaggle did not charge it: the used quota fell from 17.15
+  to 15.39 hours after the cancel.
+- *A likely cause.* The next bundle (536cbe7, for week 9) was uploaded at
+  07:28, four minutes after this session was pushed. The session already
+  reported "running", but may still have been mounting its inputs. From now
+  on a new bundle is uploaded only after the running session's live log
+  shows its inputs in place (the runner's line "setup: code, corpora and
+  ... in place").
+- Part 2 runs again from its own bundle (04352cd), on the next free kernel
+  after week 9's sessions; nothing in its design changes.
 
 ### Week 9 protocol: mention replacement on the multi-task model, and on a smaller SOFC-Exp (fixed before any run)
 
