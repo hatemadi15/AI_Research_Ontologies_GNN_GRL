@@ -163,7 +163,8 @@ def test_mention_data_and_figure5(tmp_path):
         return {'mean_diff': mean, 'ci95': [mean - 1, mean + 1]}
     mentions = {'systems': {'fine_random_split_vary': {'crf': kinds(0.65, 0.345, 88, 59)},
                             'fine_leave_one_paper_out': {'crf': kinds(0.17, 0.81, 71, 35)},
-                            'sofc_published_split': {'crf': kinds(0.51, 0.49, 89, 82)}},
+                            'sofc_published_split': {'crf': kinds(0.51, 0.49, 89, 82)},
+                            'mulms_leave_one_subfield_out': {'crf': kinds(0.4, 0.55, 80, 40)}},
                 'methods': {'fine_leave_one_paper_out': {
                     'crf_mt': {'seeds': list(range(0, 1000, 100)), 'seen': diff(3),
                                'unseen': diff(4)},
@@ -172,7 +173,7 @@ def test_mention_data_and_figure5(tmp_path):
                     'crf_unknown': {'seeds': [0], 'seen': diff(0), 'unseen': diff(0)}}}}
     settings, methods = pf.mention_data(mentions)
     assert [s[0] for s in settings] == ['fine, random splits', 'fine, unseen papers',
-                                        'SOFC-Exp, official split']
+                                        'SOFC-Exp, official split', 'MuLMS, held-out subfields']
     assert settings[1][1] == {'seen': 0.17, 'seen_other': 0.02, 'unseen': 0.81}
     assert settings[1][2] == (71, 35)
     assert methods == [('multi-task', (3, 2, 4), (4, 3, 5)),

@@ -23,12 +23,13 @@ No training: reads the 10-seed GPU results (results/gpu) and writes PNG files.
       the share of the entities added between two grid points that are right, against F1's
       break-even rate (F1/2 at D = 0), for both granularities and SOFC-Exp.
   fig5_mentions.png (C17; ner_mentions.json): (a) per setting (MaterioMiner's random splits,
-      published split and held-out papers per granularity, SOFC-Exp's official split), the
-      shares of the gold test entities whose words are an entity of the same type in the
-      training sentences (seen), only of another type, or none (unseen); (b) the CRF head's
-      recall on the seen and the unseen ones; (c) on the held-out papers, fine-grained, each
-      method's F1 minus the CRF head's on seen and on unseen entities, with 95% CIs over the
-      4 papers (votes against the CRF head's vote).
+      published split and held-out papers per granularity, SOFC-Exp's random splits, article
+      folds and official split at both levels, MuLMS's random pool splits and held-out
+      subfields), the shares of the gold test entities whose words are an entity of the same
+      type in the training sentences (seen), only of another type, or none (unseen); (b) the
+      CRF head's recall on the seen and the unseen ones; (c) on the held-out papers,
+      fine-grained, each method's F1 minus the CRF head's on seen and on unseen entities,
+      with 95% CIs over the 4 papers (votes against the CRF head's vote).
   fig6_gains.png (C5-C8, C19): on the 4 held-out papers, per granularity, each method's
       mean paired micro-F1 difference from the CRF head with its 95% CI over the papers:
       the 10-seed comparison where there is one (weeks 5-7), else the 3-seed screen (hollow
@@ -85,7 +86,9 @@ MENTION_SETTINGS = {'fine_random_split_vary': 'fine, random splits',
                     'sofc_random_split_vary': 'SOFC-Exp, random splits',
                     'sofc_document_folds': 'SOFC-Exp, article folds',
                     'sofc_published_split': 'SOFC-Exp, official split',
-                    'sofc_slot_published_split': 'SOFC-Exp slots, official split'}
+                    'sofc_slot_published_split': 'SOFC-Exp slots, official split',
+                    'mulms_random_split_pool': 'MuLMS, random splits',
+                    'mulms_leave_one_subfield_out': 'MuLMS, held-out subfields'}
 MENTION_METHODS = {'crf_mt': 'multi-task', 'crf_mt_ens3': 'multi-task vote',
                    'crf_st3': 'self-training', 'crf_ls': 'label semantics',
                    'crf_ctx': 'document context', 'crf_ctx_ens3': 'context vote',
