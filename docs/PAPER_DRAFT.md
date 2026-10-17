@@ -535,10 +535,12 @@ where the slot head errs (Section 5.9).
 - **Four papers.** The unseen-paper decisions have 3 degrees of freedom,
   so only large, consistent gains pass, and the per-paper results vary
   widely (Figure 1's intervals).
-- **One second dataset with one split.** On SOFC-Exp the intervals are
-  over seeds only. Week 8 (part 1) runs the CRF head on 5 random sentence
-  splits and 5 folds of held-out articles, to measure the gap of Section
-  5.2 on SOFC-Exp; the methods stay on the official split.
+- **One second dataset, and its methods on one split.** The gap of
+  Section 5.2 is measured on SOFC-Exp over 5 random sentence splits and 5
+  folds of held-out articles, but every method on SOFC-Exp is compared on
+  its official split, with intervals over seeds only. The folds alone
+  range over 9 points (79.77 to 88.76), so one split of held-out articles
+  is a noisy estimate of a method's effect on new articles.
 - **Methods tested on MaterioMiner only.** Self-training used a fatigue
   corpus, which fits MaterioMiner's domain only, and coarse-to-fine
   completion was tested before SOFC-Exp's slot level was converted; their
