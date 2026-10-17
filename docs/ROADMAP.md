@@ -2697,6 +2697,19 @@ tiny random model every existing option writes byte-identical results
 files, and every earlier batch is unchanged. Part 1 runs from the
 protocol's commit, part 2 from this one.
 
+*Clarification, made before any result of week 9 (17 October, 12:30).*
+Part 1's session on kernel b (version 10, pushed 11:49) hung before its
+script started, as week 8, part 2's had (version 8): no line in its log
+after 35 minutes, and after the cancel an empty log and no outputs. Part 1
+therefore runs on a new notebook (`ner-gpu-jobs-c`), from part 2's bundle
+(9468ae7), one bundle for both parts as in week 8. Between the protocol's
+commit (536cbe7) and 9468ae7 the training code only gains `--train-articles`
+(with `--draws`), which is off unless given; the batch `w9a` is the same at
+both commits, and every existing option writes byte-identical results files
+there (the tiny-model check of 9468ae7). The batch's repeats (`smokeah`, the
+CRF run of smoke4; `smokeai`, the multi-task run of random split 0) check
+this on the GPU. Nothing else in the design changes.
+
 ### Candidates for week 10 (17 October; not a protocol)
 
 Written down before any run of week 9, so the choice made after its
