@@ -138,7 +138,8 @@ from the committed results (no training; re-run it when results change):
    held-out articles, 10 seeds each.
 2. The authors' confirmation of the split and the scoring (item 6; the email
    is drafted). The reproduction (C1) already matches both numbers.
-3. Related work. `docs/references.bib` holds 34 checked references (verified
+3. Related work. A draft is in `docs/PAPER_DRAFT.md`, Section 8 (17
+   October). `docs/references.bib` holds 34 checked references (verified
    on 16 October against Crossref, publishers, the ACL Anthology and arXiv),
    with notes on their scope:
    - materials NER: MatSciBERT (Gupta et al., 2022); the MaterioMiner dataset

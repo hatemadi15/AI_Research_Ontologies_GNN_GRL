@@ -3,7 +3,7 @@
 **Status.** A working draft of the sections that hold whichever paper this
 becomes (`docs/PAPER.md`): a methods paper if a method passes its
 pre-registered decisions and repeats on SOFC-Exp, otherwise an evaluation
-paper. Sections 1–5 and 7 rest on finished, committed results. In
+paper. Sections 1–5, 7 and 8 rest on finished, committed results. In
 Section 6 (methods for unseen papers), recall calibration (no gain, C15)
 and multi-task training on SOFC-Exp's two levels (no gain, C7) are decided.
 The others wait for their runs: stage 2 of multi-task self-training and
@@ -482,3 +482,62 @@ where the slot head errs (Section 5.9).
   chose differently, which no model trained on the other papers can learn.
   The decisions use strict F1 for comparability; the looser criteria are
   reported, not decided on.
+
+## 8 Related work
+
+**Materials NER.** Weston et al. (weston2019named) trained an NER model
+on annotated materials abstracts and applied it to millions of abstracts.
+MatSciBERT (gupta2022matscibert) is pre-trained on materials papers;
+Trewartha et al. (trewartha2022quantifying) compare general, scientific
+and materials pre-training on materials NER tasks, and MatSci-NLP
+(song2023matscinlp) gathers materials NLP tasks, NER among them, into one
+benchmark. SOFC-Exp (friedrich2020sofc) holds out whole articles in its
+official split, and its test articles are cut into words differently from
+its training articles (Section 2; swain2016chemdataextractor). MaterioMiner
+(durmaz2024materiominer) types its entities with the classes of an
+ontology and ships one split that its paper does not describe. Potu et al. (potu2025ontology) recognise ontology-conformal
+materials entities and study a shift between two fatigue datasets; we
+study the shift to an unseen paper of the same dataset.
+
+**Splits and unseen mentions.** Whether random splits are good enough is
+contested: Gorman and Bedrick (gorman2019standard) argue for several
+random splits over one standard split, and Søgaard et al.
+(sogaard2021random) find that random splits overestimate performance on
+new data. For NER, random splits leak entity names from training into
+test and inflate scores (babl2025random), and performance is far lower on
+mentions unseen in training (augenstein2017generalisation). We measure
+both on a materials corpus by leaving whole papers out (Sections 5.2 and
+5.8). Looser matching criteria, as in SemEval-2013 Task 9.1
+(segurabedmar2013semeval), separate entities that are missed from those
+found with another span or type (Section 5.9).
+
+**Seeds, significance and pre-registration.** Scores of neural taggers
+vary with the random seed enough that a comparison of single runs can
+mislead (reimers2017reporting); in fine-tuning, seeds change both the weight
+initialisation and the data order (dodge2020finetuning), and benchmarks
+should account for such variance (bouthillier2021accounting). We decide
+with paired intervals over splits or papers (dror2018hitchhiker), each
+side the mean of 10 seeds, under protocols committed before the runs
+(vanmiltenburg2021preregistering). Section 5.6 shows what a 3-seed design
+would have concluded on the same runs.
+
+**Methods for unseen documents.** The additions we test come from work on
+low-resource and cross-document NER: CRF output layers
+(lafferty2001conditional; lample2016neural); label names as type
+representations (ma2022label); document context (schweter2020flert);
+label consistency within a document (gale1992one; krishnan2006effective);
+mention replacement (dai2020analysis), whose gains for transformers
+shrink as training data grows; larger encoders (he2023debertav3); and
+self-training with a teacher and a student (liang2020bond). Du et al.
+(du2021selftraining) retrieve unlabeled sentences from the web; our
+self-training uses an in-domain corpus of open-access papers, one per
+dataset, without the dataset's own papers or any sentence that shares a
+word 8-gram with them.
+
+**Decision thresholds.** For a calibrated classifier the F1-optimal
+threshold is half the optimal F1 (lipton2014optimal). A single weight on
+the O label already trades precision for recall in CRF extractors
+(minkov2006ner), and CRFs can be trained for F-score directly
+(suzuki2006training). Calibration degrades under dataset shift
+(ovadia2019trust). Our recall calibration chooses the weight for unseen
+documents on inner folds; Section 6.2 shows why it does not help there.
