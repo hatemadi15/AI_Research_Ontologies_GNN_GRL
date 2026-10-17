@@ -439,7 +439,8 @@ def test_build_bundle(tmp_path):
     out = tmp_path / 'bundle'
     info = kj.build_bundle('HEAD', out, results_dir=results, corpus=corpus,
                            expected_sha256=kj.file_sha256(corpus), wheels=[wheel],
-                           sofc_report=tmp_path / 'no_sofc_corpus.json')
+                           sofc_report=tmp_path / 'no_sofc_corpus.json',
+                           mulms_report=tmp_path / 'no_mulms.json')
     assert sorted(p.name for p in out.iterdir()) == [
         'BUNDLE.json', 'code.tar.gz', 'fatigue_sentences.txt',
         'gpu__ner_results_fine_random_split_vary_crf_m0.json', 'seqeval-1.2.2-py3-none-any.whl']
@@ -451,7 +452,8 @@ def test_build_bundle(tmp_path):
         assert 'src/graph/ner_baseline.py' in tar.getnames()
     with pytest.raises(SystemExit):
         kj.build_bundle('HEAD', out, results_dir=results, corpus=corpus, expected_sha256='0' * 64,
-                        sofc_report=tmp_path / 'no_sofc_corpus.json')
+                        sofc_report=tmp_path / 'no_sofc_corpus.json',
+                           mulms_report=tmp_path / 'no_mulms.json')
 
 
 # ---------------------------------------------------------------------------
@@ -654,22 +656,23 @@ def test_build_bundle_with_the_sofc_corpus(tmp_path):
     out = tmp_path / 'bundle'
     info = kj.build_bundle('HEAD', out, results_dir=tmp_path / 'none', corpus=corpus,
                            expected_sha256=kj.file_sha256(corpus), sofc_corpus=sofc,
-                           sofc_report=report)
+                           sofc_report=report, mulms_report=tmp_path / 'no_mulms.json')
     assert (out / 'sofc_sentences.txt').read_bytes() == sofc.read_bytes()
     assert info['sofc_corpus_sha256'] == kj.file_sha256(sofc)
     report.write_text(json.dumps({'corpus': {'sha256': '0' * 64}}))
     with pytest.raises(SystemExit, match='SHA-256'):
         kj.build_bundle('HEAD', out, results_dir=tmp_path / 'none', corpus=corpus,
                         expected_sha256=kj.file_sha256(corpus), sofc_corpus=sofc,
-                        sofc_report=report)
+                        sofc_report=report, mulms_report=tmp_path / 'no_mulms.json')
     info = kj.build_bundle('HEAD', out, results_dir=tmp_path / 'none', corpus=corpus,
-                           expected_sha256=kj.file_sha256(corpus), sofc_report=tmp_path / 'no')
+                           expected_sha256=kj.file_sha256(corpus), sofc_report=tmp_path / 'no',
+                           mulms_report=tmp_path / 'no_mulms.json')
     assert info['sofc_corpus_sha256'] is None and not (out / 'sofc_sentences.txt').exists()
     report.write_text(json.dumps({'corpus': {'sha256': kj.file_sha256(sofc)}}))
     with pytest.raises(SystemExit, match='build_sofc_corpus'):      # the report, no corpus
         kj.build_bundle('HEAD', out, results_dir=tmp_path / 'none', corpus=corpus,
                         expected_sha256=kj.file_sha256(corpus), sofc_corpus=tmp_path / 'gone',
-                        sofc_report=report)
+                        sofc_report=report, mulms_report=tmp_path / 'no_mulms.json')
 
 
 def test_run_jobs_places_the_sofc_corpus_only_when_asked(tmp_path):
@@ -774,3 +777,74 @@ def test_week9_article_draws_batch(monkeypatch):
         assert (a.granularity, nb.protocol_name(a)) == ('sofc', 'article_draws')
         assert (a.train_articles, a.draws) == (10, 5) and a.crf and a.save_predictions
     assert 'w9b' in kj.BATCHES
+
+
+def test_week10_mulms_batch(monkeypatch, tmp_path):
+    """w10a (week 10): the repeat, then on MuLMS the CRF head and mention replacement on the
+    held-out subfields and the CRF head on the random pool splits, 400 training sentences,
+    seed offsets 0 to 900; the spec lists the MuLMS files with their SHA-256."""
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda report=None: 'x' * 64)
+    report = tmp_path / 'mulms_corpus.json'
+    report.write_text(json.dumps({'outputs': {'a_01.conll': 'a' * 64, 'subfields.json': 'b' * 64}}))
+    monkeypatch.setattr(kj, 'MULMS_REPORT', report)
+    lane0, lane1 = _parsed(kj.batch_lanes('w10a'))
+    assert lane0[0].tag == 'smokeal' and lane0[0].granularity == 'fine'
+    jobs = lane0[1:] + lane1
+    held = [a for a in jobs if nb.protocol_name(a) == 'leave_one_subfield_out']
+    pool = [a for a in jobs if nb.protocol_name(a) == 'random_split_pool']
+    offsets = range(0, 1000, 100)
+    assert sorted(nb.variant_name(a) for a in held) == sorted(
+        [f'crf_m{off}' for off in offsets] + [f'crf_mr_m{off}' for off in offsets])
+    assert sorted(nb.variant_name(a) for a in pool) == sorted(f'crf_m{off}' for off in offsets)
+    assert len(held) + len(pool) == len(jobs) == 30
+    for a in jobs:
+        assert (a.granularity, a.train_pool) == ('mulms', 400) and a.crf and a.save_predictions
+    assert all(a.seeds == [0, 1, 2, 3, 4] and a.vary_split for a in pool)
+    assert all(_get(a, 'augment_mentions') in (None, 3) for a in held)
+    spec = kj.batch_spec('w10a')
+    assert spec['mulms_files'] == {'a_01.conll': 'a' * 64, 'subfields.json': 'b' * 64}
+    assert 'mulms_files' not in kj.batch_spec('w9b')
+    assert 'w10a' in kj.BATCHES
+
+
+def test_build_bundle_with_the_mulms_files(tmp_path):
+    corpus = tmp_path / 'corpus.txt'
+    corpus.write_text('One sentence.\n')
+    mulms = tmp_path / 'mulms'
+    mulms.mkdir()
+    (mulms / 'a_01.conll').write_text('WO3 B-MAT\n\n')
+    (mulms / 'subfields.json').write_text('{"a_01": "alpha"}')
+    report = tmp_path / 'mulms_corpus.json'
+    outputs = {name: kj.file_sha256(mulms / name) for name in ('a_01.conll', 'subfields.json')}
+    report.write_text(json.dumps({'outputs': outputs}))
+    out = tmp_path / 'bundle'
+    info = kj.build_bundle('HEAD', out, results_dir=tmp_path / 'none', corpus=corpus,
+                           expected_sha256=kj.file_sha256(corpus), sofc_report=tmp_path / 'no',
+                           mulms_report=report, mulms_dir=mulms)
+    assert info['mulms_files'] == outputs
+    assert (out / 'mulms__a_01.conll').read_bytes() == (mulms / 'a_01.conll').read_bytes()
+    (mulms / 'a_01.conll').write_text('changed B-MAT\n\n')
+    with pytest.raises(SystemExit, match='mulms.py'):
+        kj.build_bundle('HEAD', out, results_dir=tmp_path / 'none', corpus=corpus,
+                        expected_sha256=kj.file_sha256(corpus), sofc_report=tmp_path / 'no',
+                        mulms_report=report, mulms_dir=mulms)
+    info = kj.build_bundle('HEAD', out, results_dir=tmp_path / 'none', corpus=corpus,
+                           expected_sha256=kj.file_sha256(corpus), sofc_report=tmp_path / 'no',
+                           mulms_report=tmp_path / 'no_mulms.json')
+    assert info['mulms_files'] is None and not list(out.glob('mulms__*'))
+
+
+def test_run_jobs_places_the_mulms_files_only_when_asked(tmp_path):
+    rj = _run_jobs()
+    inputs, repo = tmp_path / 'input', tmp_path / 'repo'
+    (inputs / 'bundle').mkdir(parents=True)
+    conll = inputs / 'bundle' / 'mulms__a_01.conll'
+    conll.write_text('WO3 B-MAT\n\n')
+    assert rj.place_mulms({}, inputs, repo) is None and not repo.exists()
+    digest = rj.file_sha256(conll)
+    assert rj.place_mulms({'mulms_files': {'a_01.conll': digest}}, inputs, repo) == 1
+    assert (repo / rj.MULMS_DIR / 'a_01.conll').read_bytes() == conll.read_bytes()
+    with pytest.raises(RuntimeError, match='SHA-256'):
+        rj.place_mulms({'mulms_files': {'a_01.conll': '0' * 64}}, inputs, repo)
+    with pytest.raises(FileNotFoundError):
+        rj.place_mulms({'mulms_files': {'b_01.conll': digest}}, inputs, repo)

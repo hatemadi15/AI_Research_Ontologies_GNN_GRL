@@ -118,6 +118,12 @@ Week 9 (mention replacement on the multi-task model, --multi-task --augment-ment
           again; then SOFC-Exp's entity level trained on 10 of its 26 training articles
           (--train-articles 10, 5 draws), the CRF head and mention replacement, seed offsets 0
           to 900 (crf_m<N>, crf_mr_m<N>), balanced over the lanes
+Week 10 (MuLMS, a third corpus: mulms.py; its outermost entities):
+  w10a    the CRF run of smoke4 (smokeal); then on MuLMS's 7 held-out subfields
+          (--leave-one-subfield-out) the CRF head and mention replacement, and on its 5
+          random pool splits the CRF head, each trained on 400 sentences (--train-pool 400),
+          seed offsets 0 to 900 (crf_m<N>, crf_mr_m<N>), balanced over the lanes; the bundle
+          holds the converted corpus (its SHA-256, mulms_sha256)
 
 Usage:
   python src/graph/kaggle_jobs.py quota
@@ -205,6 +211,15 @@ SOFC_SPLITS = {'random_split_vary': ('--vary-split',), 'document_folds': ('--doc
 # training sentences per run
 DRAWS = 5
 DRAW_SHARE = 0.35
+# week 10: MuLMS (mulms.py), converted locally into MULMS_DIR (CC BY-SA 4.0, not in git) and
+# shipped in the bundle; its report records the files' SHA-256. A run trains on MULMS_POOL
+# sentences; its 7 held-out subfields test every sentence once per job
+MULMS_DIR = 'data/processed/mulms'
+MULMS_REPORT = ROOT / 'results' / 'mulms_corpus.json'
+MULMS_POOL = 400
+MULMS_SUBFIELDS = 7
+COST['mulms'] = 1.5         # a run on 400 MuLMS sentences of 29 words, and a larger test
+MULMS_PREFIX = 'mulms__'    # the bundle names of the MuLMS files (as in run_jobs.py)
 
 
 # ---------------------------------------------------------------------------
@@ -524,6 +539,25 @@ def batch_lanes(name):
                  for off in OFFSETS_PUBLISHED]
         lanes = balance(draws, loads=[COST['crf'] + COST['sofc'], 0.0])
         return [[repeat + ['--tag', 'smokeaj'], sofc_repeat] + lanes[0], lanes[1]]
+    if name == 'w10a':
+        # week 10: MuLMS, a third corpus; per seed offset one job of the CRF head and one of
+        # mention replacement on the 7 held-out subfields, and one of the CRF head on the 5
+        # random pool splits (a file each); first the repeat of the CRF run of smoke4 (smokeal)
+        held = ('--granularity', 'mulms', '--leave-one-subfield-out', '--train-pool',
+                str(MULMS_POOL))
+        pool = ('--granularity', 'mulms', '--vary-split', '--train-pool', str(MULMS_POOL),
+                '--seeds', *(str(k) for k in range(5)))
+        jobs = [(COST['mulms'] * runs * cost,
+                 [*protocol, '--crf', *flags, '--tag', f'm{off}',
+                  *(('--seed-offset', str(off)) if off else ()), '--save-predictions',
+                  '--threads', str(THREADS)])
+                for protocol, runs, flags, cost in ((held, MULMS_SUBFIELDS, (), 1.0),
+                                                    (held, MULMS_SUBFIELDS,
+                                                     METHOD_FLAGS['mr'], COST['mr']),
+                                                    (pool, 5, (), 1.0))
+                for off in OFFSETS_PUBLISHED]
+        lanes = balance(jobs, loads=[COST['crf'], 0.0])
+        return [[repeat + ['--tag', 'smokeal']] + lanes[0], lanes[1]]
     if name == 'w7a':
         # week 7, part 2a: recall calibration. An inner job is the 6 folds of a seed, each
         # trained on two papers (about 4 CRF runs); no predictions, the counts suffice
@@ -544,7 +578,7 @@ def batch_lanes(name):
 
 BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'item3r',
            'smoke4', 'w5a', 'w5b', 'w5c', 'smoke5', 'smoke6', 'w6a', 'w6b', 'w7a', 'w7b',
-           'w7c', 'w7d', 'w7e', 'w8a', 'w8b', 'w9a', 'w9b')
+           'w7c', 'w7d', 'w7e', 'w8a', 'w8b', 'w9a', 'w9b', 'w10a')
 
 
 def batch_extras(name):
@@ -579,6 +613,9 @@ def batch_spec(name):
             'lanes': lanes}
     if any(SOFC_CORPUS in job for lane in lanes for job in lane):
         spec['sofc_corpus_sha256'] = corpus_sha256(SOFC_CORPUS_REPORT)
+    if any(job[i:i + 2] == ['--granularity', 'mulms'] for lane in lanes for job in lane
+           for i in range(len(job) - 1)):
+        spec['mulms_files'] = mulms_files()
     return spec
 
 
@@ -616,6 +653,15 @@ def file_sha256(path):
     return digest.hexdigest()
 
 
+def mulms_files(report=None):
+    """{name: SHA-256} of the converted MuLMS files, as mulms.py recorded them (outputs) in
+    its report (default MULMS_REPORT)."""
+    report = Path(report) if report is not None else MULMS_REPORT
+    if not report.exists():
+        raise SystemExit(f'{report} is missing (python src/graph/mulms.py)')
+    return dict(json.loads(report.read_text())['outputs'])
+
+
 def corpus_sha256(report=CORPUS_REPORT):
     """The SHA-256 of the fatigue corpus recorded when it was built (week 3), or of the
     corpus of another report (the SOFC corpus: SOFC_CORPUS_REPORT)."""
@@ -629,7 +675,8 @@ def is_gpu_runs_file(path):
 
 
 def build_bundle(commit, out_dir, root=ROOT, results_dir=GPU_RESULTS, corpus=None,
-                 expected_sha256=None, wheels=(), sofc_corpus=None, sofc_report=None):
+                 expected_sha256=None, wheels=(), sofc_corpus=None, sofc_report=None,
+                 mulms_report=None, mulms_dir=None):
     """Write the bundle files to out_dir (emptied first); returns BUNDLE.json's content.
 
     code.tar.gz is `git archive` of `commit` (the frozen code, tracked files only); the
@@ -638,7 +685,9 @@ def build_bundle(commit, out_dir, root=ROOT, results_dir=GPU_RESULTS, corpus=Non
     (BUNDLE.json's sofc_corpus_sha256, else None); the results files of GPU runs go in as
     gpu__<name>.json, those whose every run has an environment (the votes made from GPU
     runs have none and are not needed to resume runs), and the `wheels` (paths) as they
-    are.
+    are. When MuLMS's report (mulms_report, default MULMS_REPORT) exists, its converted
+    files (mulms_dir, default MULMS_DIR) go in as mulms__<name>, each with its recorded
+    SHA-256 (BUNDLE.json's mulms_files, else None).
     """
     out_dir = Path(out_dir)
     if out_dir.exists():
@@ -666,6 +715,15 @@ def build_bundle(commit, out_dir, root=ROOT, results_dir=GPU_RESULTS, corpus=Non
             raise SystemExit(f'{sofc_corpus}: SHA-256 {sofc_digest}, not the recorded '
                              f'{corpus_sha256(sofc_report)}')
         shutil.copy2(sofc_corpus, out_dir / 'sofc_sentences.txt')
+    mulms_report = Path(mulms_report) if mulms_report is not None else MULMS_REPORT
+    mulms = mulms_files(mulms_report) if mulms_report.exists() else None
+    mulms_dir = Path(mulms_dir) if mulms_dir is not None else Path(root) / MULMS_DIR
+    for name, recorded in (mulms or {}).items():
+        path = mulms_dir / name
+        if not path.is_file() or file_sha256(path) != recorded:
+            raise SystemExit(f'{path} is missing or not the recorded file (python '
+                             f'src/graph/mulms.py rebuilds it, with --offline from its cache)')
+        shutil.copy2(path, out_dir / f'{MULMS_PREFIX}{name}')
     results = sorted(p.name for p in Path(results_dir).glob('ner_results_*.json')
                      if is_gpu_runs_file(p)) if Path(results_dir).is_dir() else []
     for name in results:
@@ -673,7 +731,7 @@ def build_bundle(commit, out_dir, root=ROOT, results_dir=GPU_RESULTS, corpus=Non
     for wheel in wheels:
         shutil.copy2(wheel, out_dir / Path(wheel).name)
     info = {'commit': full, 'corpus_sha256': digest, 'sofc_corpus_sha256': sofc_digest,
-            'results': results,
+            'mulms_files': mulms, 'results': results,
             'wheels': sorted(Path(w).name for w in wheels),
             'created': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}
     (out_dir / 'BUNDLE.json').write_text(json.dumps(info, indent=2))

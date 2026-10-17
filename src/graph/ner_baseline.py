@@ -177,11 +177,15 @@ import conll
 import dapt_mlm
 import metrics
 import ner_label_text
-from config import PROCESSED_DIR, RAW_DIR
+from config import DEFAULT_PROCESSED_DIR, PROCESSED_DIR, RAW_DIR
 
 PAPER_F1 = {'fine': 69.92, 'coarse': 72.32,
             'sofc': None,       # SOFC-Exp (--granularity sofc): no published number of this kind
-            'sofc_slot': None}
+            'sofc_slot': None,
+            'mulms': None}      # MuLMS: its published tagger scores the nested entities
+# MuLMS (mulms.py; ROADMAP §4, week 10): its outermost entities as flat CoNLL files, one per
+# document, with subfields.json ({document: subfield}); built locally (CC BY-SA 4.0), not in git
+MULMS_DIR = os.path.join(DEFAULT_PROCESSED_DIR, 'mulms')
 DEFAULT_MODEL = 'm3rg-iitd/matscibert'
 # SOFC-Exp's two levels of types on the same sentences: the 4 entity types ('sofc') and the
 # slot types ('sofc_slot'), of which those that its authors' evaluation scores are kept (the
@@ -201,10 +205,14 @@ GRANULARITY_PAIRS = {'both': ('fine', 'coarse'), 'sofc_both': ('sofc_slot', 'sof
 def load_split_corpus(granularity):
     """[(tokens, tags, doc_id)] for one granularity (files read separately); 'sofc' is the
     SOFC-Exp corpus (data/raw/dataset/sofc_exp, sofc_exp.py), one CoNLL file per article,
-    and 'sofc_slot' its slot tags on the same sentences (data/raw/dataset/sofc_exp_slot)."""
-    folder = {'fine': 'fine_grained_ner', 'coarse': 'coarse_grained_ner',
-              'sofc': 'sofc_exp', 'sofc_slot': 'sofc_exp_slot'}[granularity]
-    datadir = os.path.join(RAW_DIR, folder)
+    'sofc_slot' its slot tags on the same sentences (data/raw/dataset/sofc_exp_slot), and
+    'mulms' the MuLMS corpus (MULMS_DIR, mulms.py), one CoNLL file per document."""
+    if granularity == 'mulms':
+        datadir = MULMS_DIR
+    else:
+        folder = {'fine': 'fine_grained_ner', 'coarse': 'coarse_grained_ner',
+                  'sofc': 'sofc_exp', 'sofc_slot': 'sofc_exp_slot'}[granularity]
+        datadir = os.path.join(RAW_DIR, folder)
     data = []
     for fn in sorted(f for f in os.listdir(datadir) if f.endswith('.conll')):
         for tokens, tags in conll.read_conll_sentences(os.path.join(datadir, fn)):
@@ -1737,9 +1745,10 @@ F1_AVERAGES = {
 # part is absent for the fixed split, the variant part for the baseline. The protocol
 # is tried first, so the baseline file of a protocol never reads as a variant named
 # like the protocol.
-RESULT_FILE = re.compile(r'ner_results_(fine|coarse|sofc_slot|sofc)'
+RESULT_FILE = re.compile(r'ner_results_(fine|coarse|sofc_slot|sofc|mulms)'
                          r'(?:_(random_split_vary|leave_one_paper_out|leave_two_papers_out|'
-                         r'published_split|document_folds|article_draws))?'
+                         r'published_split|document_folds|article_draws|'
+                         r'leave_one_subfield_out|random_split_pool))?'
                          r'(?:_([a-z0-9_]+))?\.json')
 # untagged variants: a tagged variant must not take the name of one (--crf --tag mt: crf_mt)
 PLAIN_VARIANTS = ('baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_st', 'crf_mt_ls', 'crf_st3',
@@ -2006,9 +2015,10 @@ def paper_fold(data, held_out, split_seed, indices=False):
 
 def make_folds(data, args, indices=False, granularity=None):
     """[(name, train, val, test)] for leave-one-paper-out, leave-two-papers-out (a fold per
-    pair of papers, named <paper>+<paper>), document folds (fold<i>, document_groups) and the
+    pair of papers, named <paper>+<paper>), document folds (fold<i>, document_groups), the
     published split (one fold per model seed, named seed<K>, all with the partition of
-    `granularity`); None for random splits.
+    `granularity`), held-out subfields (named by subfield, subfield_folds) and random splits
+    of a training pool (seed<K>, pool_split); None for the other random splits.
 
     The parts are lists of data tuples, or of their positions in `data` when
     `indices` is set (the test positions go with the stored predictions).
@@ -2036,11 +2046,80 @@ def make_folds(data, args, indices=False, granularity=None):
         groups = document_groups({d for _, _, d in data}, args.document_folds, args.split_seed)
         return [(f'fold{i}', *paper_fold(data, group, args.split_seed, indices))
                 for i, group in enumerate(groups)]
+    if getattr(args, 'leave_one_subfield_out', False):
+        return subfield_folds(data, mulms_subfields(), args.split_seed,
+                              getattr(args, 'train_pool', 0), indices)
+    if getattr(args, 'train_pool', 0):
+        folds = [(f'seed{seed}', *pool_split(len(data), seed if args.vary_split
+                                             else args.split_seed, args.train_pool))
+                 for seed in args.seeds]
+        return folds if indices else [(name, *([data[i] for i in part] for part in parts))
+                                      for name, *parts in folds]
     return None
 
 
 DOCUMENT_FOLDS = 'document_folds'
 ARTICLE_DRAWS = 'article_draws'
+SUBFIELDS = 'leave_one_subfield_out'                     # week 10 (MuLMS)
+POOL_SPLITS = 'random_split_pool'                        # week 10 (MuLMS)
+
+
+def mulms_subfields(folder=MULMS_DIR):
+    """{file name: subfield} of the MuLMS documents (subfields.json of mulms.py, keyed by
+    document; the files are <document>.conll)."""
+    path = os.path.join(folder, 'subfields.json')
+    if not os.path.isfile(path):
+        raise SystemExit(f'{path} is missing (python src/graph/mulms.py)')
+    with open(path) as f:
+        return {f'{doc}.conll': name for doc, name in json.load(f).items()}
+
+
+def subfield_folds(data, subfields, split_seed, pool=0, indices=False):
+    """The folds of --leave-one-subfield-out (ROADMAP §4, week 10): one per subfield (sorted;
+    fold i, named after it), whose documents are the test set. The other documents are sorted
+    and shuffled with random.Random(split_seed + i); with --train-pool N they are taken in
+    that order until they hold N sentences, the last one cut to its first sentences, else all
+    of them. Their sentences are shuffled with random.Random(split_seed), 15% of them for
+    validation, as in paper_fold."""
+    docs = sorted({d for _, _, d in data})
+    missing = [d for d in docs if d not in subfields]
+    if missing:
+        raise SystemExit(f'no subfield for {len(missing)} documents, e.g. {missing[:3]}')
+    positions = {d: [] for d in docs}
+    for j, (_, _, d) in enumerate(data):
+        positions[d].append(j)
+    folds = []
+    for i, name in enumerate(sorted({subfields[d] for d in docs})):
+        order = [d for d in docs if subfields[d] != name]
+        random.Random(split_seed + i).shuffle(order)
+        rest = [j for d in order for j in positions[d]]
+        if pool:
+            if len(rest) < pool:
+                raise SystemExit(f'--train-pool {pool}: the documents outside {name} hold only '
+                                 f'{len(rest)} sentences')
+            rest = rest[:pool]
+        shuffled = list(range(len(rest)))
+        random.Random(split_seed).shuffle(shuffled)
+        n_val = round(0.15 * len(rest))
+        val = [rest[k] for k in shuffled[:n_val]]
+        train = [rest[k] for k in shuffled[n_val:]]
+        test = [j for d in docs if subfields[d] == name for j in positions[d]]
+        if not indices:
+            train, val, test = ([data[j] for j in part] for part in (train, val, test))
+        folds.append((name, train, val, test))
+    return folds
+
+
+def pool_split(n, seed, pool):
+    """A random split of a training pool (--vary-split --train-pool N; ROADMAP §4, week 10):
+    the sentences shuffled with random.Random(seed); of the first N, 15% validate and the rest
+    train; the next 20% of all sentences test, as with the 65/15/20 random splits."""
+    if not 0 < pool < n:
+        raise SystemExit(f'--train-pool {pool}: between 1 and the {n - 1} sentences')
+    idx = list(range(n))
+    random.Random(seed).shuffle(idx)
+    n_val = round(0.15 * pool)
+    return idx[:pool - n_val], idx[pool - n_val:pool], idx[pool:pool + round(0.2 * n)]
 
 
 def article_draws(data, parts, k, draws, split_seed, indices=False):
@@ -2174,6 +2253,10 @@ def head_granularities(args):
 
 
 def protocol_name(args):
+    if getattr(args, 'leave_one_subfield_out', False):
+        return SUBFIELDS
+    if getattr(args, 'train_pool', 0):
+        return POOL_SPLITS
     if getattr(args, 'train_articles', 0):
         return ARTICLE_DRAWS
     if getattr(args, 'published_split', False):
@@ -2192,7 +2275,8 @@ def held_out_protocol(args):
     reference applies."""
     return (args.leave_one_paper_out or getattr(args, 'leave_two_papers_out', False)
             or bool(getattr(args, 'document_folds', 0))
-            or bool(getattr(args, 'train_articles', 0)))
+            or bool(getattr(args, 'train_articles', 0))
+            or getattr(args, 'leave_one_subfield_out', False))
 
 
 def results_path(out_dir, granularity, args):
@@ -2690,11 +2774,12 @@ def tag_name(value):
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(description='MatSciBERT NER baseline')
     parser.add_argument('--granularity', choices=['fine', 'coarse', 'both', 'sofc',
-                                                  'sofc_slot', 'sofc_both'],
+                                                  'sofc_slot', 'sofc_both', 'mulms'],
                         default='both',
                         help="MaterioMiner's fine or coarse labels, or both; sofc: the SOFC-Exp "
                              "corpus (sofc_exp.py), its four entity types; sofc_slot: its slot "
-                             "types; sofc_both: both SOFC-Exp levels")
+                             "types; sofc_both: both SOFC-Exp levels; mulms: the MuLMS corpus "
+                             "(mulms.py), its outermost entities")
     parser.add_argument('--seeds', type=int, nargs='+', default=[0, 1, 2, 3, 4])
     parser.add_argument('--split-seed', type=int, default=0)
     parser.add_argument('--vary-split', action='store_true',
@@ -2723,6 +2808,17 @@ def parse_args(argv=None):
                              'week 9)')
     parser.add_argument('--draws', type=int, default=argparse.SUPPRESS, metavar='N',
                         help='with --train-articles: the number of draws (default 5)')
+    parser.add_argument('--leave-one-subfield-out', action='store_true',
+                        default=argparse.SUPPRESS,
+                        help="with --granularity mulms: one fold per subfield, its documents the "
+                             'test set; the other documents train and validate (protocol '
+                             'leave_one_subfield_out; ROADMAP §4, week 10)')
+    parser.add_argument('--train-pool', type=int, default=argparse.SUPPRESS, metavar='N',
+                        help='with --granularity mulms: N training and validation sentences '
+                             '(15%% of them validation). With --leave-one-subfield-out the other '
+                             "documents' first N sentences in a shuffled document order; with "
+                             '--vary-split the first N of the shuffled sentences, the next 20%% '
+                             'testing (protocol random_split_pool; ROADMAP §4, week 10)')
     parser.add_argument('--published-split', action='store_true', default=argparse.SUPPRESS,
                         help="the train, validation and test sentences, and the tags, of the "
                              "MaterioMiner release (data/raw/dataset/published_split); every "
@@ -2887,6 +2983,23 @@ def parse_args(argv=None):
                              if option == 'multi_task' else
                              f"--published-split is a protocol of its own: no "
                              f"--{option.replace('_', '-')}")
+    if args.granularity == 'mulms':
+        if not (getattr(args, 'leave_one_subfield_out', False)
+                or (args.vary_split and hasattr(args, 'train_pool'))):
+            parser.error('--granularity mulms needs --leave-one-subfield-out, or --vary-split '
+                         'with --train-pool')
+        for option in ('leave_one_paper_out', 'leave_two_papers_out', 'document_folds',
+                       'published_split', 'multi_task', 'label_semantics', 'self_train',
+                       'context', 'entity_bias', 'retokenized_test'):
+            if getattr(args, option, None) not in (None, False):
+                parser.error(f"--{option.replace('_', '-')} is not available with "
+                             f"--granularity mulms")
+    elif hasattr(args, 'leave_one_subfield_out') or hasattr(args, 'train_pool'):
+        parser.error('--leave-one-subfield-out and --train-pool are for --granularity mulms')
+    if getattr(args, 'leave_one_subfield_out', False) and args.vary_split:
+        parser.error('--leave-one-subfield-out is a protocol of its own: no --vary-split')
+    if hasattr(args, 'train_pool') and args.train_pool < 1:
+        parser.error('--train-pool: at least 1 sentence')
     if getattr(args, 'papers', None) and not args.leave_one_paper_out:
         parser.error('--papers needs --leave-one-paper-out (it picks held-out papers)')
     if getattr(args, 'label_semantics', False):

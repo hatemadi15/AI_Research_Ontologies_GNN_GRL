@@ -357,6 +357,42 @@ def test_sofc_draws_mention_replacement_on_ten_articles(tmp_path):
     assert sa.sofc_draws(tmp_path) == {}
 
 
+def test_mulms_held_out_subfields_and_pool_splits(tmp_path):
+    """Week 10: per held-out subfield the 10-seed means of the CRF head and mention
+    replacement (decision 1), their votes over the seed triples (decision 2), the CRF head on
+    the random pool splits and the gap. The CRF seeds with an even index tag the entity, odd
+    ones miss it; mention replacement always tags it."""
+    pytest.importorskip('scipy')
+    subfields = ['alpha', 'beta', 'gamma', 'delta', 'eps', 'zeta', 'eta']
+    for j, off in enumerate(range(0, 1000, 100)):
+        for system, gain in (('crf', 0.0), ('crf_mr', 1.0)):
+            runs = []
+            for k, name in enumerate(subfields):
+                run = _run(name, 50 + k + j / 10 + gain + (k % 2) / 2)
+                hit = system == 'crf_mr' or j % 2 == 0
+                run.update({'test_index': [0], 'test_gold': ['B-MAT O'],
+                            'test_pred': ['B-MAT O' if hit else 'O O']})
+                runs.append(run)
+            (tmp_path / f'ner_results_mulms_leave_one_subfield_out_{system}_m{off}.json'
+             ).write_text(json.dumps({'runs': runs}))
+        pool = [_run(f'seed{k}', 70 + k + j / 10) for k in range(5)]
+        (tmp_path / f'ner_results_mulms_random_split_pool_crf_m{off}.json').write_text(
+            json.dumps({'runs': pool}))
+    out = sa.mulms(tmp_path)
+    held = out['leave_one_subfield_out']
+    assert held['n_subfields'] == 7 and held['passes']
+    assert held['crf_mr_minus_crf']['micro']['per_run'] == [1.0] * 7
+    assert held['subfields']['alpha'] == {'crf': 50.45, 'crf_mr': 51.45}
+    # CRF votes: triples 0-200 and 600-800 have 2 seeds that tag it, 300-500 one
+    assert held['votes']['crf']['micro']['mean'] == pytest.approx(66.67)
+    assert held['votes']['crf_mr']['micro']['mean'] == 100.0 and held['votes']['passes']
+    assert out['random_split_pool']['micro']['mean'] == 72.45
+    assert out['random_split_pool']['n_splits'] == 5
+    assert out['gap']['micro'] == round(72.45 - held['crf']['micro']['mean'], 2)
+    (tmp_path / 'ner_results_mulms_leave_one_subfield_out_crf_mr_m900.json').unlink()
+    assert set(sa.mulms(tmp_path)) == {'random_split_pool'}
+
+
 def test_paper_count_compares_two_and_three_training_papers(tmp_path):
     """A third training paper: per held-out paper, F1 trained on 2 papers (the inner folds'
     counts at D = 0) against F1 trained on 3 (leave-one-paper-out), over the 4 papers."""

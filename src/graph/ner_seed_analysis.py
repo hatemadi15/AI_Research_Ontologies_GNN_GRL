@@ -68,6 +68,16 @@ votes (ner_seedmeans.WEEK5_SYSTEMS) and writes ner_week5_seed_analysis.json next
     CRF head with its 95% CI (passes: the CI above 0); reported, the CRF head on 10
     articles minus on all 26 (the official split's run of the same model seed; the mean
     over the draws), paired by seed.
+  - mulms (week 10; its decisions): MuLMS, a third corpus, its outermost entities.
+    leave_one_subfield_out: per held-out subfield (7), trained on 400 sentences of the other
+    subfields' documents (--train-pool 400), the 10-seed means of the CRF head and of
+    mention replacement under every F1 average, and over the 7 subfields their means and
+    mention replacement minus the CRF head with its 95% CI (decision 1, passes: the CI
+    above 0); then the votes over the seed triples 0-200, 300-500 and 600-800, per subfield
+    the mean of its 3 votes, and mention replacement's votes minus the CRF votes (decision
+    2). random_split_pool (descriptive): the CRF head on 5 random splits of a 400-sentence
+    pool (the next 20% of the sentences testing), its 10-seed mean per split; and the gap,
+    random splits minus held-out subfields (the CRF head), per F1 average.
   - sofc_splits (week 8, part 1; descriptive): SOFC-Exp beyond its official split. Per
     protocol, its 5 random sentence splits and its 5 article folds (--document-folds 5), the
     CRF head's 10-seed mean per split under every F1 average, with the mean and 95% CI over
@@ -111,6 +121,7 @@ SPLIT_METHODS = ('crf_deberta', 'crf_ctx', 'crf_dc', 'crf_dcr', 'crf_ebv', 'crf_
 RETOKENIZED_BASELINE = 'cdetest'
 SOFC_PROTOCOLS = ('random_split_vary', 'document_folds')     # week 8, part 1
 ARTICLE_DRAWS = 'article_draws'                               # week 9, part 2
+MULMS_PROTOCOLS = ('leave_one_subfield_out', 'random_split_pool')   # week 10
 VOTED_METHODS = ('crf_mt', 'crf_mt_mr')
 TYPE_METHODS = WEEK6_METHODS + ('crf_mt', 'crf_mr', 'crf_mt_mr')   # week6_types
 
@@ -503,6 +514,59 @@ def sofc_draws(directory):
     return out
 
 
+def fold_votes(files):
+    """{run_id: {F1 average: the mean over the seed triples 0-200, 300-500 and 600-800 of
+    their votes}} of a 10-seed family's files (ordered by seed offset), from the stored
+    predictions."""
+    by_id = [{r['run_id']: r for r in f['runs']} for f in files]
+    votes = {i: [ner_ensemble.ensemble_run(i, [by_id[first // 100 + j][i] for j in range(3)])
+                 for first in WEEK5_TRIPLES] for i in by_id[0]}
+    return {i: {avg: statistics.mean(get(v) for v in vs) for avg, get in F1_AVERAGES.items()}
+            for i, vs in votes.items()}
+
+
+def mulms(directory):
+    """The mulms section (see the module docstring); a part without all 10 seed files of its
+    systems is left out, the votes too without their predictions."""
+    out = {}
+    files = {s: load_files(directory, [f'ner_results_mulms_{MULMS_PROTOCOLS[0]}_{s}_m{off}.json'
+                                       for off in WEEK5_OFFSETS]) for s in ('crf', 'crf_mr')}
+    if all(files.values()):
+        scores = {s: system_scores(f) for s, f in files.items()}
+        ids = [i for i in scores['crf'] if i in scores['crf_mr']]
+        entry = {s: {avg: spread([scores[s][i][avg] for i in ids]) for avg in F1_AVERAGES}
+                 for s in scores}
+        entry['subfields'] = {i: {s: round(scores[s][i]['micro'], 2) for s in scores}
+                              for i in ids}
+        entry['crf_mr_minus_crf'] = {
+            avg: spread([scores['crf_mr'][i][avg] - scores['crf'][i][avg] for i in ids],
+                        'mean_diff') for avg in F1_AVERAGES}
+        entry['n_subfields'] = len(ids)
+        entry['passes'] = entry['crf_mr_minus_crf']['micro']['ci95'][0] > 0
+        if all('test_pred' in r for fs in files.values() for f in fs for r in f['runs']):
+            votes = {s: fold_votes(f) for s, f in files.items()}
+            entry['votes'] = {s: {avg: spread([votes[s][i][avg] for i in ids])
+                                  for avg in F1_AVERAGES} for s in votes}
+            entry['votes']['crf_mr_minus_crf'] = {
+                avg: spread([votes['crf_mr'][i][avg] - votes['crf'][i][avg] for i in ids],
+                            'mean_diff') for avg in F1_AVERAGES}
+            entry['votes']['passes'] = (
+                entry['votes']['crf_mr_minus_crf']['micro']['ci95'][0] > 0)
+        out[MULMS_PROTOCOLS[0]] = entry
+    pool = load_files(directory, [f'ner_results_mulms_{MULMS_PROTOCOLS[1]}_crf_m{off}.json'
+                                  for off in WEEK5_OFFSETS])
+    if pool:
+        per_split = system_scores(pool)
+        out[MULMS_PROTOCOLS[1]] = {avg: spread([v[avg] for v in per_split.values()])
+                                   for avg in F1_AVERAGES}
+        out[MULMS_PROTOCOLS[1]]['n_splits'] = len(per_split)
+    if all(p in out for p in MULMS_PROTOCOLS):
+        out['gap'] = {avg: round(out[MULMS_PROTOCOLS[1]][avg]['mean']
+                                 - out[MULMS_PROTOCOLS[0]]['crf'][avg]['mean'], 2)
+                      for avg in F1_AVERAGES}
+    return out
+
+
 def analyse(directory):
     """The analyses for every protocol and granularity that has the files."""
     out = {'spread': {}, 'triples': {}, 'types': {}}
@@ -525,6 +589,7 @@ def analyse(directory):
     out['week6_types'] = week6_type_differences(directory)
     out['sofc_splits'] = sofc_splits(directory)
     out['sofc_draws'] = sofc_draws(directory)
+    out['mulms'] = mulms(directory)
     out['paper_count'] = paper_count(directory)
     out['paper_diversity'] = paper_diversity(directory)
     out['errors'] = {}
@@ -586,6 +651,22 @@ def main(argv=None):
               f"{e['crf']['micro']['mean']:.2f}, mention replacement "
               f"{e['crf_mr']['micro']['mean']:.2f}, minus the CRF head {d['mean_diff']:+.2f} "
               f"{d['ci95']} ({'passes' if e['passes'] else 'no'})")
+    held = result['mulms'].get(MULMS_PROTOCOLS[0])
+    if held:
+        d = held['crf_mr_minus_crf']['micro']
+        print(f"  MuLMS, held-out subfields ({held['n_subfields']}): the CRF head "
+              f"{held['crf']['micro']['mean']:.2f}, mention replacement "
+              f"{held['crf_mr']['micro']['mean']:.2f}, minus the CRF head {d['mean_diff']:+.2f} "
+              f"{d['ci95']} ({'passes' if held['passes'] else 'no'})")
+        if 'votes' in held:
+            v = held['votes']['crf_mr_minus_crf']['micro']
+            print(f"    votes: the CRF votes {held['votes']['crf']['micro']['mean']:.2f}, "
+                  f"mention replacement's {held['votes']['crf_mr']['micro']['mean']:.2f}, "
+                  f"minus {v['mean_diff']:+.2f} {v['ci95']} "
+                  f"({'passes' if held['votes']['passes'] else 'no'})")
+    if 'gap' in result['mulms']:
+        print(f"  MuLMS, random pool splits minus held-out subfields: "
+              f"{result['mulms']['gap']['micro']:+.2f} micro F1")
     if 'gap' in result['sofc_splits']:
         print(f"  SOFC-Exp, random splits minus article folds: "
               f"{result['sofc_splits']['gap']['micro']:+.2f} micro F1")
