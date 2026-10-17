@@ -1022,7 +1022,7 @@ chance at class level. For a Task C-style result:
 | 6 | Done: NER, P1 "Next, after week 5", towards a methods paper: methods for unseen papers (DeBERTa-v3-large, document context, multi-task self-training) screened with 3 seeds and decided with 10, and a second dataset (SOFC-Exp, 10 seeds); protocol below. Done (P1, "Week 6"): DeBERTa-v3-large stops at the screen; document context passes the screen but neither 10-seed decision nor S2 on SOFC-Exp (+0.58 [−0.26, +1.42]); multi-task self-training passes the screen (+6.06 fine-grained) but none of its 4 decisions (+5.47 [−0.74, +11.68] fine-grained against the CRF head), so its S2 on SOFC-Exp does not run; on SOFC-Exp the CRF head improves on plain MatSciBERT (S1) | A method whose vote improves on the strongest system on unseen papers under the 10-seed design, and on SOFC-Exp |
 | 7 | In progress: NER, part 1, document-level label consistency for unseen papers, a post-processing rule on the saved predictions (no GPU; protocol below); part 2a, recall calibration (a bias on the CRF head's emissions, chosen on inner folds; done, no claim: the missed entities are not near the threshold); part 2b, mention replacement (screen, then 10 seeds if it passes; protocol below; done: it improves on the CRF head at both granularities, +2.77 [+1.51, +4.03] fine-grained and +1.28 [+0.06, +2.51] coarse-grained, but its vote does not beat the strongest systems and S2 on SOFC-Exp gives −0.29), and later the combinations of the methods that pass week 6, fixed after the week-6 decisions; part 2c, coarse-to-fine completion (done, no claim); part 2d, multi-task training on SOFC-Exp's two levels (done, no claim: −0.78 [−2.39, +0.84] on the slot level, −0.15 [−1.36, +1.05] on the entity level); part 2e, SOFC-Exp's test articles cut into words as its training articles are (protocol below). Then class-level taxonomy (LLM or cross-encoder + arborescence) and a relation annotation pilot | Part 1: the rule improves on the strongest system on unseen papers and on SOFC-Exp's CRF head. Taxonomy: first class-level F1 above chance; relation guidelines |
 | 8 | Part 1 done: SOFC-Exp beyond its official split, the CRF head with 10 seeds on 5 random sentence splits and on 5 folds of 9 held-out articles (`--document-folds 5`; protocol below, descriptive): 86.27 against 82.79, a gap of 3.48 points (28–31 on MaterioMiner); part 2 (its first session hung and was cancelled; it runs again after week 9), more papers or more sentences: three training papers cut to the size of two against two papers (`--two-paper-size`; protocol below) | Part 1: the gap between random splits and unseen documents measured on a second corpus. Part 2: whether a third paper helps at the same number of training sentences |
-| 9 | Part 1 done: mention replacement on the multi-task model (`crf_mt_mr`, 10 seeds on the held-out papers, S2 on SOFC-Exp's two levels; protocol below). 3 of 6 decisions pass: against the multi-task model +3.01 [+0.42, +5.60] fine-grained and +2.30 [+0.49, +4.10] coarse-grained, and its vote against the multi-task vote +2.86 [+0.18, +5.54] fine-grained, now the strongest fine-grained system on unseen papers (55.33); coarse-grained its vote does not beat the seed vote, and S2 fails at both levels, so no methods claim (C21). Part 2 (mention replacement on SOFC-Exp with training cut to MaterioMiner's size, 5 draws of 10 training articles) runs | Part 1: the combination's vote improves on the strongest system on unseen papers, and on SOFC-Exp. Part 2: mention replacement improves on the CRF head on a MaterioMiner-sized SOFC-Exp |
+| 9 | Part 1 done: mention replacement on the multi-task model (`crf_mt_mr`, 10 seeds on the held-out papers, S2 on SOFC-Exp's two levels; protocol below). 3 of 6 decisions pass: against the multi-task model +3.01 [+0.42, +5.60] fine-grained and +2.30 [+0.49, +4.10] coarse-grained, and its vote against the multi-task vote +2.86 [+0.18, +5.54] fine-grained, now the strongest fine-grained system on unseen papers (55.33); coarse-grained its vote does not beat the seed vote, and S2 fails at both levels, so no methods claim (C21). Part 2 done: on SOFC-Exp cut to MaterioMiner's size (10 of its 26 training articles, 5 draws), mention replacement scores +0.50 [−0.47, +1.46] against the CRF head and does not pass, so its MaterioMiner gain is not a matter of training size | Part 1: the combination's vote improves on the strongest system on unseen papers, and on SOFC-Exp. Part 2: mention replacement improves on the CRF head on a MaterioMiner-sized SOFC-Exp |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -2809,6 +2809,35 @@ Reported:
   +3.44] against the CRF votes; on unseen names +1.54 [−1.48, +4.57] and
   +0.18 [−1.50, +1.86], on seen names −0.72 [−1.58, +0.13] and −0.47
   [−1.35, +0.41].
+
+**Outcome of part 2: the decision does not pass; mention replacement's
+gain on MaterioMiner is not a matter of training size.** Session d of 17
+October (`w9b` on `ner-gpu-jobs-d`, from bundle 9468ae7; 2.2 hours from
+17:15). The repeats are identical: `smokeaj` at 77.95, and `smokeak`
+(session b's SOFC-Exp CRF run of seed 0) at 84.98. On SOFC-Exp's entity
+types, trained on 10 of the 26 official training articles (5 draws, 156–248
+sentences), 10 seeds per draw:
+- the decision, mention replacement against the CRF head, paired by draw:
+  81.12 [79.85, 82.40] against 80.62 [79.89, 81.36], +0.50 [−0.47, +1.46]
+  (per draw +0.89, −0.42, +1.02, +1.25, −0.26). It does not pass.
+
+Reported:
+- macro F1 +0.58 [−0.17, +1.33] and weighted F1 +0.52 [−0.39, +1.44];
+  strict IOB2 equals the default scoring;
+- the CRF head on 10 articles against all 26 (the official split, the same
+  seeds): −3.13 [−4.04, −2.21], paired by seed. 16 more training articles
+  are worth about 3 points on SOFC-Exp's test articles;
+- copies per run: 418–690 on 156–248 training sentences.
+
+At MaterioMiner's size, mention replacement gains +0.50 on SOFC-Exp,
+against +2.77 fine-grained and +1.28 coarse-grained on MaterioMiner's
+held-out papers, where the protocol expected a gain. Its MaterioMiner gain
+therefore belongs to that corpus, not to small training sets as such, and
+C21 remains a result for MaterioMiner. One difference besides size
+(post hoc, untested): 81% of a held-out paper's fine-grained names are
+unseen and the CRF head finds 35% of them, against 49% unseen on SOFC-Exp's
+official split, of which it finds 82% (C17). Mention replacement may help
+where unseen names are many and hard to find.
 
 ### Candidates for week 10 (17 October; not a protocol)
 

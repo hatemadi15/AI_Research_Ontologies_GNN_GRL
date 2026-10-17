@@ -178,6 +178,17 @@ SOFC-Exp's official split (`--granularity sofc_both`, model seeds 0 to
 `gpu/ner_week5_seed_analysis.json` (`published_split`, `sofc` and
 `sofc_slot`, `crf_mt_mr`), and the per-type changes in its `week6_types`.
 
+Week 9, part 2 (mention replacement on SOFC-Exp at MaterioMiner's size;
+Kaggle session `w9b` of 17 October on `ner-gpu-jobs-d`, from bundle 9468ae7):
+`gpu/ner_results_sofc_article_draws_crf_m<N>.json` and `_crf_mr_m<N>.json`,
+N = 0 to 900, are the CRF head and mention replacement on SOFC-Exp's entity
+types, trained on 10 of the 26 official training articles (`--published-split
+--train-articles 10`; 5 draws, runs `draw0` to `draw4`, 156–248 training
+sentences; the official validation and test articles), with predictions.
+`gpu/ner_week5_seed_analysis.json` (`sofc_draws`) holds the decision (paired
+by draw, each the mean of its 10 seeds) and the CRF head on 10 articles
+against all 26 (`ten_minus_all_articles`, paired by seed).
+
 Week 7, part 2d (multi-task training on SOFC-Exp's two levels; Kaggle
 session `w7b` of 17 October, model seeds 0 to 900 on the official split):
 `gpu/ner_results_sofc_slot_published_split.json` and `_crf.json` are plain

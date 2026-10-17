@@ -10,8 +10,8 @@ training on SOFC-Exp's two levels (no gain, C7) and mention replacement (a
 gain on unseen papers at both granularities, C20) are decided, and so is
 mention replacement on the multi-task model (the strongest fine-grained
 system on unseen papers, but no gain on SOFC-Exp, C21). Mention replacement
-on a SOFC-Exp training set cut to MaterioMiner's size is next (ROADMAP §4,
-week 9, part 2). The numbers come from `results/`
+gives no gain on SOFC-Exp even with its training set cut to MaterioMiner's
+size (ROADMAP §4, week 9, part 2). The numbers come from `results/`
 through the claims table of `docs/PAPER.md` (C1–C21). References are keys of `docs/references.bib`.
 
 ---
@@ -30,8 +30,8 @@ carry either way:
   training only on MaterioMiner: on SOFC-Exp's two levels it gains nothing;
 - mention replacement is the one method that improves a single model on
   unseen papers at both granularities (+2.77 and +1.28 F1), all of it on
-  names the training papers lack; on SOFC-Exp's larger training set it
-  gives nothing;
+  names the training papers lack; on SOFC-Exp it gives nothing, even with
+  its training set cut to MaterioMiner's size;
 - on the multi-task model the two gains add up: +6.73 F1 fine-grained over
   the CRF head, close to what a third training paper adds, and its vote is
   the strongest fine-grained system on unseen papers; on SOFC-Exp the
@@ -517,6 +517,11 @@ screened with 3 seeds and decided with 10 only if the screen passes.
 - *SOFC-Exp:* −0.29 [−1.04, +0.47] against the CRF head, paired by seed.
   Its 568 training sentences are longer and hold more entities, and the
   original study's gains for transformers shrank as the training set grew.
+  Size is not the reason, though: trained on 10 of the 26 training
+  articles (156–248 sentences, as many entities as on MaterioMiner; 5
+  draws, 10 seeds each), it gains +0.50 [−0.47, +1.46] over the CRF head,
+  paired by draw. The 16 other articles are worth 3.13 [2.21, 4.04] points
+  to the CRF head there.
 
   Mention replacement and multi-task training each improve a single model
   on unseen papers fine-grained, in different ways: one shows the model
@@ -557,9 +562,10 @@ levels against the CRF head.
   pre-registered criterion for a methods claim also needed the gain to
   repeat on SOFC-Exp at the matching level, so the combination is a result
   for training sets of a few papers. There it gains about as much as a
-  third annotated paper (+7.36, Section 5.10). Whether mention replacement
-  helps on SOFC-Exp at MaterioMiner's training size is the next
-  pre-registered test (week 9, part 2).
+  third annotated paper (+7.36, Section 5.10). Mention replacement alone
+  does not help on SOFC-Exp at MaterioMiner's training size either
+  (Section 6.3), so the combination's gain is, for now, a MaterioMiner
+  result.
 
 **6.5 Multi-task training on SOFC-Exp's two levels.** Not a new method:
 the repeat of C7 on the second dataset, where the slot types stand to the

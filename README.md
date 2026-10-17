@@ -727,8 +727,10 @@ stands (ROADMAP §4, weeks 6 to 9):
    system on unseen papers. On SOFC-Exp's official split it gives nothing
    at either level (+0.69 on the slot types, −0.19 on the entity types), so
    it is a result for few annotated papers, not a methods claim. Part 2
-   tests mention replacement on SOFC-Exp with training cut to
-   MaterioMiner's size.
+   cut SOFC-Exp's training set to MaterioMiner's size (10 of its 26
+   articles, 5 draws): mention replacement still gains nothing there
+   (+0.50 [−0.47, +1.46]), so its MaterioMiner gain is not a matter of
+   training size.
 4. Why unseen papers are hard (exploratory, no GPU; `ner_mentions.py`):
    81% of a held-out paper's fine-grained entities are names that its
    three training papers never annotate with that type, against 35% on
