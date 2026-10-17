@@ -111,9 +111,10 @@ therefore measures unseen documents.
   1,836 sentences of the 11 test articles. A model trained on `cm−2`,
   `O2−` and `high - temperature` is tested on `cm − 2`, `O2 −` and
   `high-temperature`; every result on the official split, the published
-  ones included, carries this. What it costs is measured by scoring the
-  same models on the test articles cut as the training articles are (week
-  7, part 2e).
+  ones included, carries this. Scored on the test articles cut as the
+  training articles are, the same models gain +0.86 [+0.39, +1.33] (the CRF
+  head) and +1.91 [+1.33, +2.49] (plain MatSciBERT) over 10 seeds, mostly
+  on unseen names (week 7, part 2e; both pre-registered decisions pass).
 
 ## 3 Evaluation protocol
 
@@ -210,7 +211,11 @@ in the worst); the folds differ in recall on seen and unseen names alike
 - **SOFC-Exp:** the CRF head improves on plain MatSciBERT again, +1.22
   [+0.50, +1.93] over 10 seeds (83.75 against 82.53); strict, +0.73
   [−0.04, +1.51]. The published MatSciBERT-CRF score (84.77;
-  gupta2022matscibert) lies above our interval over seeds.
+  gupta2022matscibert) lies above our interval over seeds. On test
+  articles cut into words as the training articles are (Section 2), the CRF
+  head scores 84.61 [83.89, 85.34], an interval that covers the published
+  score, and its gain over plain MatSciBERT falls to +0.17 [−0.37, +0.70]:
+  on SOFC-Exp the CRF head mostly repairs the tokenization shift.
 - **SOFC-Exp's slot types:** +1.68 [−0.12, +3.49] (71.88 against 70.20),
   not significant, and −0.06 [−1.70, +1.58] under strict scoring: plain
   MatSciBERT's invalid tags are mostly wrong entities there, so dropping

@@ -1273,7 +1273,17 @@ def test_sofc_row_and_bullet(tmp_path):
                     'crf_ebv': {'micro': {'mean': 85.0, 'ci95': [84.5, 85.5]},
                                 'minus_crf': {'micro': diff(0.2, -0.1, 0.5),
                                               'micro_strict': diff(0.1, -0.2, 0.4)},
-                                'n_pairs': 10}}}}}
+                                'n_pairs': 10},
+                    # week 7, part 2e: the CRF head on the retokenized test articles
+                    'crf_cdetest': {'micro': {'mean': 85.7, 'ci95': [85.2, 86.2]},
+                                    'minus_crf': {'micro': diff(0.9, 0.4, 1.4),
+                                                  'micro_strict': diff(0.9, 0.4, 1.4)},
+                                    'n_pairs': 10}},
+        # and plain MatSciBERT on them (part 2e, decision 2)
+        'baseline_retokenized_test': {'micro': {'mean': 82.4, 'ci95': [81.9, 82.9]},
+                                      'minus_baseline': {'micro': diff(1.9, 1.3, 2.5),
+                                                         'micro_strict': diff(1.7, 1.2, 2.2)},
+                                      'n_pairs': 10}}}}
     (ws.results / 'gpu' / rr.WEEK5_ANALYSIS).write_text(json.dumps(analysis))
     readme, _ = ws.generate()
     assert ('* NER on SOFC-Exp (week 6; its official split, 26 training, 8 development and 11 '
@@ -1293,7 +1303,13 @@ def test_sofc_row_and_bullet(tmp_path):
             '(+0.40, 95% CI [+0.10, +0.70]; strict IOB2 +0.30 [+0.00, +0.60]). Week 7, part 2a, '
             'recall calibration of the CRF head, its bias chosen on the validation articles, '
             'against the CRF head, paired by seed: 85.00 [84.50, 85.50], no significant change '
-            '(+0.20, 95% CI [-0.10, +0.50]; strict IOB2 +0.10 [-0.20, +0.40]).\n') in readme
+            '(+0.20, 95% CI [-0.10, +0.50]; strict IOB2 +0.10 [-0.20, +0.40]). Week 7, part 2e, '
+            'the CRF head on the test articles cut into words as the training articles are, '
+            'against the CRF head on the released ones, paired by seed: 85.70 [85.20, 86.20], '
+            'improves (+0.90, 95% CI [+0.40, +1.40]; strict IOB2 +0.90 [+0.40, +1.40]). Week 7, '
+            'part 2e, plain MatSciBERT on the retokenized test articles, against plain MatSciBERT '
+            'on the released ones, paired by seed: 82.40 [81.90, 82.90], improves (+1.90, 95% CI '
+            '[+1.30, +2.50]; strict IOB2 +1.70 [+1.20, +2.20]).\n') in readme
 
 
 def test_a_week3_file_that_is_not_an_object_is_reported(tmp_path, capsys):

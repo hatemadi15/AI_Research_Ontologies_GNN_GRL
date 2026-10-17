@@ -230,7 +230,13 @@ WEEK7_SOFC_LABELS = {**{m: f"Week 7, {name} on the CRF head's predictions"
                                'CRF head',
                      'crf_mr': 'Week 7, part 2b, S2, mention replacement against the CRF head',
                      'crf_mt_mr': 'Week 9, S2, multi-task training with mention replacement on '
-                                  'both levels against the CRF head'}
+                                  'both levels against the CRF head',
+                     'crf_cdetest': 'Week 7, part 2e, the CRF head on the test articles cut into '
+                                    'words as the training articles are, against the CRF head on '
+                                    'the released ones'}
+# week 7, part 2e: plain MatSciBERT on the retokenized test articles (its decision 2)
+RETOKENIZED_BASELINE_LABEL = ('Week 7, part 2e, plain MatSciBERT on the retokenized test '
+                              'articles, against plain MatSciBERT on the released ones')
 LOPO = 'leave_one_paper_out'
 # the exploratory analyses of the week-5 runs (ner_seed_analysis.py), in results/gpu/
 WEEK5_ANALYSIS = 'ner_week5_seed_analysis.json'
@@ -1160,6 +1166,10 @@ def sofc_level_note(analysis, g):
             line += (f"; its votes over the 3 seed triples score {m['votes']['micro']['mean']:.2f}"
                      ", against the CRF votes, paired by triple: "
                      + seed_decision(m['votes_minus_crf_votes'], decides=False))
+    if 'baseline_retokenized_test' in e:
+        m = e['baseline_retokenized_test']
+        line += (f". {RETOKENIZED_BASELINE_LABEL}, paired by seed: {interval(m['micro'])}, "
+                 + seed_decision(m['minus_baseline']))
     return line + ".\n"
 
 

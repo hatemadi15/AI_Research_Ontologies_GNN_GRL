@@ -204,6 +204,16 @@ MuLMS is CC BY-SA 4.0 (Schrader et al., 2023), so every results file with
 `mulms` in its name, which holds MuLMS's tags (`test_gold`), is CC BY-SA 4.0
 as well, unlike the rest of the repository (Apache 2.0).
 
+Week 7, part 2e (SOFC-Exp's test articles cut into words as its training
+articles are; Kaggle session `w7e` of 17 October, `ner-gpu-jobs-d` version 3,
+bundle 4f5dbda): `gpu/ner_results_sofc_published_split_cdetest.json` (plain
+MatSciBERT) and `_crf_cdetest.json` (the CRF head), model seeds 0 to 900 on
+the retokenized test articles (`sofc_exp.py --retokenized-test`), with
+predictions. Every run trained exactly as its run in
+`ner_results_sofc_published_split.json` or `_crf.json`, so the pairs by seed
+differ only in the test words. The decisions are in ROADMAP §4 (outcome of
+part 2e), and the seen and unseen names in `gpu/ner_mentions.json`.
+
 Week 7, part 2d (multi-task training on SOFC-Exp's two levels; Kaggle
 session `w7b` of 17 October, model seeds 0 to 900 on the official split):
 `gpu/ner_results_sofc_slot_published_split.json` and `_crf.json` are plain
