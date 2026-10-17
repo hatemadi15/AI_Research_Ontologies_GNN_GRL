@@ -64,10 +64,12 @@ Stand-alone baselines:
 | Path | Content |
 |---|---|
 | `src/graph/` | pipeline stages, evaluators, baselines, `run_pipeline.py`, `run_ablation.py` |
-| `data/raw/dataset/` | MaterioMiner CoNLL files (`fine_grained_ner/`, `coarse_grained_ner/`), the MMO and upper ontologies (`ontologies/`), PubMed sentences |
-| `data/processed/` | outputs of pipeline and baseline runs (not versioned) |
-| `results/` | versioned JSON snapshots behind every number in this README (see [results/README.md](results/README.md)) |
-| `docs/ROADMAP.md` | where the project stands and the prioritised next steps |
+| `data/raw/dataset/` | MaterioMiner CoNLL files (`fine_grained_ner/`, `coarse_grained_ner/`) and the split its release ships (`published_split/`), SOFC-Exp converted (`sofc_exp/`, `sofc_exp_slot/`, `sofc_exp_test_cde/`), the MMO and upper ontologies (`ontologies/`), PubMed sentences |
+| `data/processed/` | outputs of pipeline and baseline runs, corpora, Kaggle bundles and pulls (not versioned) |
+| `results/` | versioned JSON snapshots behind every number in this README (see [results/README.md](results/README.md)); `results/gpu/` holds the GPU runs and their analyses |
+| `docs/ROADMAP.md` | where the project stands, the prioritised next steps, and every week's protocol (§4), fixed before its runs |
+| `docs/PAPER.md`, `docs/PAPER_DRAFT.md` | the paper plan (claims C1–C19 with their evidence) and a draft of its sections |
+| `docs/figures/`, `docs/tables/` | the paper's figures and tables, generated from `results/` by `paper_figures.py` and `paper_tables.py` |
 | `tests/` | unit tests, run by CI |
 
 ## Results
