@@ -219,3 +219,13 @@ Table A1. Every comparison on MaterioMiner: mean paired difference of micro F1 o
 | 7 | GPU | 10 | coarse | unseen papers | `crf_mr_ens3` vs `crf_mt_ens3` | reported | 4 | +2.57 [−0.19, +5.34] |  |
 | 7 | GPU | 10 | fine | unseen papers | `crf_mr_ens3` vs `crf_ens3` | reported | 4 | +3.61 [+1.71, +5.52] |  |
 | 7 | GPU | 10 | coarse | unseen papers | `crf_mr_ens3` vs `crf_ens3` | decision | 4 | +2.26 [−0.12, +4.64] | no |
+| 9 | GPU | 10 | fine | unseen papers | `crf_mt_mr` vs `crf_mt` | decision | 4 | +3.01 [+0.42, +5.60] | passes |
+| 9 | GPU | 10 | coarse | unseen papers | `crf_mt_mr` vs `crf_mt` | decision | 4 | +2.30 [+0.49, +4.10] | passes |
+| 9 | GPU | 10 | fine | unseen papers | `crf_mt_mr_ens3` vs `crf_mt_ens3` | decision | 4 | +2.86 [+0.18, +5.54] | passes |
+| 9 | GPU | 10 | coarse | unseen papers | `crf_mt_mr_ens3` vs `crf_mt_ens3` | reported | 4 | +1.97 [+0.22, +3.72] |  |
+| 9 | GPU | 10 | fine | unseen papers | `crf_mt_mr_ens3` vs `crf_ens3` | reported | 4 | +6.51 [+3.91, +9.12] |  |
+| 9 | GPU | 10 | coarse | unseen papers | `crf_mt_mr_ens3` vs `crf_ens3` | decision | 4 | +1.65 [−0.47, +3.78] | no |
+| 9 | GPU | 10 | fine | unseen papers | `crf_mt_mr` vs `crf` | reported | 4 | +6.73 [+6.03, +7.43] |  |
+| 9 | GPU | 10 | coarse | unseen papers | `crf_mt_mr` vs `crf` | reported | 4 | +1.74 [−0.15, +3.62] |  |
+| 9 | GPU | 10 | fine | unseen papers | `crf_mt_mr` vs `crf_mr` | reported | 4 | +3.96 [+3.31, +4.60] |  |
+| 9 | GPU | 10 | coarse | unseen papers | `crf_mt_mr` vs `crf_mr` | reported | 4 | +0.45 [−0.81, +1.72] |  |

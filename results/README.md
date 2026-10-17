@@ -162,6 +162,22 @@ holds the screen. Stage 2 (`w7d`, the same day) adds the seeds 300 to 900
 `gpu/ner_week7_comparisons.json` and, for SOFC-Exp, in
 `gpu/ner_week5_seed_analysis.json` (`published_split`, `sofc`, `crf_mr`).
 
+Week 9, part 1 (mention replacement on the multi-task model, `--multi-task
+--augment-mentions 3`; Kaggle session `w9a` of 17 October on
+`ner-gpu-jobs-c`, from bundle 9468ae7):
+`gpu/ner_results_<granularity>_leave_one_paper_out_crf_mt_mr_m<N>.json`, N =
+0 to 900, are the multi-task model's fine- and coarse-grained heads (one
+model per seed, a file per head), each run with its number of copies
+(`n_augmented`, one set for both heads), and `_crf_mt_mr_ens3`,
+`_ens3_m300` and `_ens3_m600` their votes over the 3 seed triples.
+`gpu/ner_results_sofc_published_split_crf_mt_mr.json` and
+`gpu/ner_results_sofc_slot_published_split_crf_mt_mr.json` are the same on
+SOFC-Exp's official split (`--granularity sofc_both`, model seeds 0 to
+900). The MaterioMiner decisions are in `gpu/ner_week9_comparisons.json`
+(`ner_seedmeans.py --week 9 --gpu`), S2 in
+`gpu/ner_week5_seed_analysis.json` (`published_split`, `sofc` and
+`sofc_slot`, `crf_mt_mr`), and the per-type changes in its `week6_types`.
+
 Week 7, part 2d (multi-task training on SOFC-Exp's two levels; Kaggle
 session `w7b` of 17 October, model seeds 0 to 900 on the official split):
 `gpu/ner_results_sofc_slot_published_split.json` and `_crf.json` are plain

@@ -1022,7 +1022,7 @@ chance at class level. For a Task C-style result:
 | 6 | Done: NER, P1 "Next, after week 5", towards a methods paper: methods for unseen papers (DeBERTa-v3-large, document context, multi-task self-training) screened with 3 seeds and decided with 10, and a second dataset (SOFC-Exp, 10 seeds); protocol below. Done (P1, "Week 6"): DeBERTa-v3-large stops at the screen; document context passes the screen but neither 10-seed decision nor S2 on SOFC-Exp (+0.58 [−0.26, +1.42]); multi-task self-training passes the screen (+6.06 fine-grained) but none of its 4 decisions (+5.47 [−0.74, +11.68] fine-grained against the CRF head), so its S2 on SOFC-Exp does not run; on SOFC-Exp the CRF head improves on plain MatSciBERT (S1) | A method whose vote improves on the strongest system on unseen papers under the 10-seed design, and on SOFC-Exp |
 | 7 | In progress: NER, part 1, document-level label consistency for unseen papers, a post-processing rule on the saved predictions (no GPU; protocol below); part 2a, recall calibration (a bias on the CRF head's emissions, chosen on inner folds; done, no claim: the missed entities are not near the threshold); part 2b, mention replacement (screen, then 10 seeds if it passes; protocol below; done: it improves on the CRF head at both granularities, +2.77 [+1.51, +4.03] fine-grained and +1.28 [+0.06, +2.51] coarse-grained, but its vote does not beat the strongest systems and S2 on SOFC-Exp gives −0.29), and later the combinations of the methods that pass week 6, fixed after the week-6 decisions; part 2c, coarse-to-fine completion (done, no claim); part 2d, multi-task training on SOFC-Exp's two levels (done, no claim: −0.78 [−2.39, +0.84] on the slot level, −0.15 [−1.36, +1.05] on the entity level); part 2e, SOFC-Exp's test articles cut into words as its training articles are (protocol below). Then class-level taxonomy (LLM or cross-encoder + arborescence) and a relation annotation pilot | Part 1: the rule improves on the strongest system on unseen papers and on SOFC-Exp's CRF head. Taxonomy: first class-level F1 above chance; relation guidelines |
 | 8 | Part 1 done: SOFC-Exp beyond its official split, the CRF head with 10 seeds on 5 random sentence splits and on 5 folds of 9 held-out articles (`--document-folds 5`; protocol below, descriptive): 86.27 against 82.79, a gap of 3.48 points (28–31 on MaterioMiner); part 2 (its first session hung and was cancelled; it runs again after week 9), more papers or more sentences: three training papers cut to the size of two against two papers (`--two-paper-size`; protocol below) | Part 1: the gap between random splits and unseen documents measured on a second corpus. Part 2: whether a third paper helps at the same number of training sentences |
-| 9 | Prepared: mention replacement on the multi-task model (`crf_mt_mr`, part 1: 10 seeds on the held-out papers, S2 on SOFC-Exp's two levels) and mention replacement on SOFC-Exp with training cut to MaterioMiner's size (part 2: 5 draws of 10 training articles); protocol below | Part 1: the combination's vote improves on the strongest system on unseen papers, and on SOFC-Exp. Part 2: mention replacement improves on the CRF head on a MaterioMiner-sized SOFC-Exp |
+| 9 | Part 1 done: mention replacement on the multi-task model (`crf_mt_mr`, 10 seeds on the held-out papers, S2 on SOFC-Exp's two levels; protocol below). 3 of 6 decisions pass: against the multi-task model +3.01 [+0.42, +5.60] fine-grained and +2.30 [+0.49, +4.10] coarse-grained, and its vote against the multi-task vote +2.86 [+0.18, +5.54] fine-grained, now the strongest fine-grained system on unseen papers (55.33); coarse-grained its vote does not beat the seed vote, and S2 fails at both levels, so no methods claim (C21). Part 2 (mention replacement on SOFC-Exp with training cut to MaterioMiner's size, 5 draws of 10 training articles) runs | Part 1: the combination's vote improves on the strongest system on unseen papers, and on SOFC-Exp. Part 2: mention replacement improves on the CRF head on a MaterioMiner-sized SOFC-Exp |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -2736,6 +2736,79 @@ this on the GPU. Nothing else in the design changes.
   same bundle 9468ae7) after version 18 was cancelled (its output: an empty
   log, no manifest). Its log showed every setup step within a minute and
   its first repeat (`smokeaj`) done in 1.2 minutes.
+- *18:39: week 8, part 2 hangs again*, now on a new notebook
+  (`ner-gpu-jobs-e`, from its bundle 04352cd, uploaded at 18:13 after both
+  running sessions had logged their inputs in place): "running", but its
+  live log is still empty after 5 minutes, while part 2's log on
+  `ner-gpu-jobs-d` streams. It is to be cancelled on the website and pushed
+  again. A new notebook does not prevent a hang.
+
+**Outcome of part 1: 3 of the 6 decisions pass; the combination's vote is
+the strongest fine-grained system on unseen papers, but S2 fails at both
+levels, so no methods claim.** Session c of 17 October (`w9a` on
+`ner-gpu-jobs-c`, from bundle 9468ae7; 3.2 hours from 15:26). The repeats
+are identical: `smokeah` at 77.95, and `smokeai` at 78.59 fine-grained and
+79.95 coarse-grained. 10 seeds on the 4 held-out papers:
+- decision 1, against the multi-task model: **fine-grained +3.01 [+0.42,
+  +5.60]** (every paper gains: +0.81, +3.47, +4.71, +3.05) and
+  **coarse-grained +2.30 [+0.49, +4.10]** (+2.12, +2.85, +0.79, +3.42).
+  Both pass;
+- decision 2, its vote against the strongest system on unseen papers:
+  **fine-grained +2.86 [+0.18, +5.54] against the multi-task vote** (+0.83,
+  +4.48, +3.99, +2.16), which passes; coarse-grained +1.65 [−0.47, +3.78]
+  against the seed vote (+1.07, +3.46, +0.34, +1.74), which does not;
+- S2 on SOFC-Exp's official split, paired by seed: on the slot types 72.57
+  [70.83, 74.31] against the CRF head's 71.88, +0.69 [−1.18, +2.57]; on
+  the entity types 83.56 [82.82, 84.30] against 83.75, −0.19 [−1.27,
+  +0.88]. Neither passes.
+
+3 of the 6 decisions pass, where about 0.15 would pass if the combination
+did nothing. On MaterioMiner the two methods add up. Against the CRF head
+the combination gains +6.73 [+6.03, +7.43] fine-grained (every paper +6.25
+to +7.16), against +3.72 for the multi-task model and +2.77 for mention
+replacement alone (sum +6.49); coarse-grained +1.74 [−0.15, +3.62],
+against −0.56 and +1.28. Its vote scores 55.33 fine-grained on unseen
+papers, against 52.47 for the multi-task vote and 48.81 for the seed vote,
+and coarse-grained 62.75 against the seed vote's 61.10. A methods claim
+needed decision 2 and S2 at a matching level (fine-grained with the slot
+types): decision 2 passes fine-grained, but S2 on the slot types does not.
+The combination is therefore a result for few annotated papers (C21), not
+the methods claim. Part 2 asks whether SOFC-Exp's larger training set
+explains the difference. For later protocols, the strongest fine-grained
+system on unseen papers is this vote (`crf_mt_mr_ens3`); coarse-grained it
+remains the seed vote.
+
+Reported:
+- against the CRF head, as above; against mention replacement alone,
+  +3.96 [+3.31, +4.60] fine-grained and +0.45 [−0.81, +1.72]
+  coarse-grained;
+- its vote against the seed vote: fine-grained +6.51 [+3.91, +9.12] (every
+  paper +4.51 to +8.32), against the multi-task vote's +3.65; coarse-grained
+  against the multi-task vote +1.97 [+0.22, +3.72];
+- strict IOB2 equals the default scoring. Against the multi-task model,
+  macro F1 +2.22 [−1.52, +5.97] fine-grained and +4.21 [+2.85, +5.58]
+  coarse-grained, weighted F1 +3.11 [+1.02, +5.20] and +2.80 [+0.85,
+  +4.74];
+- on unseen names (`ner_mentions.py`, against the CRF head): fine-grained
+  +7.10 [+6.43, +7.77], seen names +5.88 [+0.42, +11.34], the first
+  fine-grained gain whose interval on seen names also lies above 0;
+  coarse-grained +1.76 [−0.18, +3.69] and +1.12 [−0.96, +3.19]. The vote
+  against the seed vote: +6.55 [+4.16, +8.93] on unseen names, +6.54
+  [−6.20, +19.27] on seen ones;
+- per type (exploratory, against the CRF head): fine-grained 18 of the 27
+  types gain and 6 lose (TestingMachine −3.81 the most), the largest gains
+  on MicrostructureEntity (+33.18), FatigueLifetime (+14.73),
+  MechanicalTestDataSet (+14.08), Mechanism (+13.27) and StateDescriptor
+  (+10.68). Coarse-grained 21 of the 27 gain. Of the seven types on which
+  multi-task training lost, six now gain (SDE +1.84, MIP +0.07, PRP +2.73,
+  MOD +11.82, CPR +23.70, CGE +5.65) and ODE loses (−1.86);
+- copies per run: 551–914 (mean 734) on 234–370 training sentences, one
+  set of copies for both heads; on SOFC-Exp 1,514–1,547 on 568;
+- SOFC-Exp: the votes over the 3 seed triples score 75.16 on the slot types
+  and 85.44 on the entity types, +0.84 [−3.00, +4.68] and +0.31 [−2.82,
+  +3.44] against the CRF votes; on unseen names +1.54 [−1.48, +4.57] and
+  +0.18 [−1.50, +1.86], on seen names −0.72 [−1.58, +0.13] and −0.47
+  [−1.35, +0.41].
 
 ### Candidates for week 10 (17 October; not a protocol)
 

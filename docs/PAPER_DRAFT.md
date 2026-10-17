@@ -7,9 +7,12 @@ paper. Sections 1–5, 7 and 8 rest on finished, committed results. In
 Section 6 (methods for unseen papers), multi-task self-training (no
 decision passes, C6), recall calibration (no gain, C15), multi-task
 training on SOFC-Exp's two levels (no gain, C7) and mention replacement (a
-gain on unseen papers at both granularities, C20) are decided. Mention
-replacement on the multi-task model is next (ROADMAP §4, week 9). The numbers come from `results/`
-through the claims table of `docs/PAPER.md` (C1–C20). References are keys of `docs/references.bib`.
+gain on unseen papers at both granularities, C20) are decided, and so is
+mention replacement on the multi-task model (the strongest fine-grained
+system on unseen papers, but no gain on SOFC-Exp, C21). Mention replacement
+on a SOFC-Exp training set cut to MaterioMiner's size is next (ROADMAP §4,
+week 9, part 2). The numbers come from `results/`
+through the claims table of `docs/PAPER.md` (C1–C21). References are keys of `docs/references.bib`.
 
 ---
 
@@ -29,6 +32,10 @@ carry either way:
   unseen papers at both granularities (+2.77 and +1.28 F1), all of it on
   names the training papers lack; on SOFC-Exp's larger training set it
   gives nothing;
+- on the multi-task model the two gains add up: +6.73 F1 fine-grained over
+  the CRF head, close to what a third training paper adds, and its vote is
+  the strongest fine-grained system on unseen papers; on SOFC-Exp the
+  combination gives nothing at either level;
 - a 3-seed design passes a real 1.8-point gain in 41% of seed triples, and
   let through a 2.7-point gain that 10 seeds shrank to 1.1;
 - the entities a model misses on unseen papers lie far below its decision
@@ -161,7 +168,8 @@ an earlier run, and every repeat was identical.
   - document context (schweter2020flert);
   - document-level label consistency (gale1992one; krishnan2006effective);
   - coarse-to-fine completion;
-  - multi-task self-training and recall calibration (Section 6).
+  - multi-task self-training, recall calibration, mention replacement and
+    mention replacement on the multi-task model (Section 6).
 
 ## 5 Results
 
@@ -217,7 +225,7 @@ in the worst); the folds differ in recall on seen and unseen names alike
 - **Multi-task training** over both granularities is the one training
   change that holds: +1.83 [+0.32, +3.34] fine-grained on the random
   splits. It does not repeat on SOFC-Exp, where a slot head and an entity
-  head stand to each other as MaterioMiner's two levels (Section 6.4).
+  head stand to each other as MaterioMiner's two levels (Section 6.5).
 - **The multi-task vote** improves on the seed vote coarse-grained on the
   random splits (+0.79 [+0.17, +1.42]) and fine-grained on unseen papers
   (+3.65 [+0.49, +6.82]). That is 2 of 12 vote comparisons, where about 0.3
@@ -325,7 +333,9 @@ splits pooled).
   (fine-grained) and +3.02 [+1.99, +4.05] on SOFC-Exp, against −0.47 and
   −0.52 on seen names. On the random splits, self-training gains +2.61
   [+0.50, +4.73] (fine-grained) and +2.26 [+0.92, +3.60] (coarse-grained)
-  on unseen names and nothing on seen ones.
+  on unseen names and nothing on seen ones. Mention replacement on the
+  multi-task model (Section 6.4) is the one exception: +7.10 [+6.43,
+  +7.77] on unseen and +5.88 [+0.42, +11.34] on seen names.
 
 A method for unseen papers therefore has to raise F1 on names the training
 papers do not contain. That is where 81% of a new paper's entities are, and
@@ -510,10 +520,48 @@ screened with 3 seeds and decided with 10 only if the screen passes.
 
   Mention replacement and multi-task training each improve a single model
   on unseen papers fine-grained, in different ways: one shows the model
-  names in new contexts, the other a second level of types. Whether the
-  two add up is the next pre-registered test.
+  names in new contexts, the other a second level of types. Section 6.4
+  tests whether the two add up.
 
-**6.4 Multi-task training on SOFC-Exp's two levels.** Not a new method:
+**6.4 Mention replacement on the multi-task model.** As in Section 6.3,
+three copies of each training sentence, but a copy replaces a
+coarse-grained mention, in both heads' tags at once, by a training mention
+of the same coarse- and fine-grained type, so both levels' tags stay valid.
+It is decided against the multi-task model (does mention replacement add
+to it?), its vote against the strongest systems, and on SOFC-Exp's two
+levels against the CRF head.
+- *Result (C21): the gains add up on MaterioMiner.* Against the multi-task
+  model it gains +3.01 [+0.42, +5.60] fine-grained and +2.30 [+0.49,
+  +4.10] coarse-grained over 10 seeds, and every held-out paper gains
+  (+0.81 to +4.71 and +0.79 to +3.42). Against the CRF head it gains +6.73
+  [+6.03, +7.43] fine-grained, the sum of its parts (+3.72 and +2.77), and
+  +1.74 [−0.15, +3.62] coarse-grained, where multi-task training alone
+  loses (−0.56).
+- *Its vote* scores 55.33 fine-grained on unseen papers: +2.86 [+0.18,
+  +5.54] over the multi-task vote and +6.51 [+3.91, +9.12] over the seed
+  vote, the strongest fine-grained system on unseen papers. Coarse-grained
+  it scores 62.75, +1.65 [−0.47, +3.78] over the seed vote, which does not
+  pass.
+- *Where the gain is:* fine-grained +7.10 [+6.43, +7.77] on unseen names
+  and +5.88 [+0.42, +11.34] on seen ones, the first gain whose interval on
+  seen names lies above 0. Per type (exploratory), 18 of the 27
+  fine-grained types gain, most MicrostructureEntity (+33.2),
+  FatigueLifetime (+14.7), MechanicalTestDataSet (+14.1) and Mechanism
+  (+13.3); coarse-grained 21 of 27, among them six of the seven rare types
+  on which multi-task training alone lost.
+- *SOFC-Exp:* +0.69 [−1.18, +2.57] on the slot types and −0.19 [−1.27,
+  +0.88] on the entity types against the CRF head, paired by seed. Neither
+  part gained there on its own either.
+
+  3 of its 6 decisions pass, where about 0.15 would by chance. The
+  pre-registered criterion for a methods claim also needed the gain to
+  repeat on SOFC-Exp at the matching level, so the combination is a result
+  for training sets of a few papers. There it gains about as much as a
+  third annotated paper (+7.36, Section 5.10). Whether mention replacement
+  helps on SOFC-Exp at MaterioMiner's training size is the next
+  pre-registered test (week 9, part 2).
+
+**6.5 Multi-task training on SOFC-Exp's two levels.** Not a new method:
 the repeat of C7 on the second dataset, where the slot types stand to the
 entity types as MaterioMiner's fine level to its coarse one.
 - *Result: no gain.* On the official split, over 10 seeds, multi-task
@@ -571,7 +619,7 @@ benchmark. MuLMS (schrader2023mulms) annotates 50 articles from seven
 materials subfields; training one encoder with a head per corpus on it,
 SOFC-Exp and a synthesis-procedure corpus did not improve NER on any of
 them, which agrees with our multi-task result on SOFC-Exp's two levels
-(Section 6.4). SOFC-Exp (friedrich2020sofc) holds out whole articles in its
+(Section 6.5). SOFC-Exp (friedrich2020sofc) holds out whole articles in its
 official split, and its test articles are cut into words differently from
 its training articles (Section 2; swain2016chemdataextractor). MaterioMiner
 (durmaz2024materiominer) types its entities with the classes of an

@@ -5589,6 +5589,263 @@
             }
           },
           "n_pairs": 10
+        },
+        "crf_mt_mr": {
+          "micro": {
+            "mean": 83.56,
+            "ci95": [
+              82.82,
+              84.3
+            ],
+            "per_run": [
+              82.35,
+              84.38,
+              84.73,
+              83.69,
+              83.79,
+              85.15,
+              82.7,
+              83.15,
+              83.68,
+              81.95
+            ]
+          },
+          "micro_strict": {
+            "mean": 83.56,
+            "ci95": [
+              82.82,
+              84.3
+            ],
+            "per_run": [
+              82.35,
+              84.38,
+              84.73,
+              83.69,
+              83.79,
+              85.15,
+              82.7,
+              83.15,
+              83.68,
+              81.95
+            ]
+          },
+          "macro": {
+            "mean": 81.1,
+            "ci95": [
+              80.21,
+              81.99
+            ],
+            "per_run": [
+              79.33,
+              82.28,
+              82.45,
+              81.51,
+              81.5,
+              82.66,
+              79.71,
+              80.86,
+              81.27,
+              79.44
+            ]
+          },
+          "weighted": {
+            "mean": 83.59,
+            "ci95": [
+              82.87,
+              84.31
+            ],
+            "per_run": [
+              82.2,
+              84.49,
+              84.69,
+              83.66,
+              83.89,
+              85.06,
+              82.69,
+              83.27,
+              83.78,
+              82.16
+            ]
+          },
+          "minus_crf": {
+            "micro": {
+              "mean_diff": -0.19,
+              "ci95": [
+                -1.27,
+                0.88
+              ],
+              "per_run": [
+                -2.63,
+                -0.95,
+                -0.6,
+                -0.77,
+                0.2,
+                2.13,
+                0.28,
+                0.62,
+                1.75,
+                -1.97
+              ]
+            },
+            "micro_strict": {
+              "mean_diff": -0.19,
+              "ci95": [
+                -1.27,
+                0.88
+              ],
+              "per_run": [
+                -2.63,
+                -0.95,
+                -0.6,
+                -0.77,
+                0.2,
+                2.13,
+                0.28,
+                0.62,
+                1.75,
+                -1.97
+              ]
+            },
+            "macro": {
+              "mean_diff": -0.01,
+              "ci95": [
+                -1.27,
+                1.26
+              ],
+              "per_run": [
+                -2.98,
+                -0.59,
+                -0.55,
+                -0.71,
+                0.4,
+                2.15,
+                -0.68,
+                1.57,
+                2.86,
+                -1.53
+              ]
+            },
+            "weighted": {
+              "mean_diff": -0.13,
+              "ci95": [
+                -1.24,
+                0.98
+              ],
+              "per_run": [
+                -2.73,
+                -0.81,
+                -0.78,
+                -0.88,
+                0.29,
+                2.05,
+                0.27,
+                0.94,
+                2.07,
+                -1.7
+              ]
+            }
+          },
+          "n_pairs": 10,
+          "votes": {
+            "micro": {
+              "mean": 85.44,
+              "ci95": [
+                83.5,
+                87.38
+              ],
+              "per_run": [
+                85.28,
+                86.29,
+                84.75
+              ]
+            },
+            "micro_strict": {
+              "mean": 85.44,
+              "ci95": [
+                83.5,
+                87.38
+              ],
+              "per_run": [
+                85.28,
+                86.29,
+                84.75
+              ]
+            },
+            "macro": {
+              "mean": 83.24,
+              "ci95": [
+                81.37,
+                85.1
+              ],
+              "per_run": [
+                83.09,
+                84.05,
+                82.57
+              ]
+            },
+            "weighted": {
+              "mean": 85.43,
+              "ci95": [
+                83.57,
+                87.3
+              ],
+              "per_run": [
+                85.25,
+                86.26,
+                84.79
+              ]
+            }
+          },
+          "votes_minus_crf_votes": {
+            "micro": {
+              "mean_diff": 0.31,
+              "ci95": [
+                -2.82,
+                3.44
+              ],
+              "per_run": [
+                -1.14,
+                0.98,
+                1.1
+              ]
+            },
+            "micro_strict": {
+              "mean_diff": 0.31,
+              "ci95": [
+                -2.82,
+                3.44
+              ],
+              "per_run": [
+                -1.14,
+                0.98,
+                1.1
+              ]
+            },
+            "macro": {
+              "mean_diff": 0.75,
+              "ci95": [
+                -2.76,
+                4.25
+              ],
+              "per_run": [
+                -0.81,
+                1.11,
+                1.94
+              ]
+            },
+            "weighted": {
+              "mean_diff": 0.33,
+              "ci95": [
+                -2.99,
+                3.65
+              ],
+              "per_run": [
+                -1.2,
+                0.95,
+                1.25
+              ]
+            }
+          }
         }
       },
       "types": {
@@ -5601,7 +5858,8 @@
           "crf_dcr": 93.36,
           "crf_ebv": 93.26,
           "crf_mt": 94.16,
-          "crf_mr": 92.38
+          "crf_mr": 92.38,
+          "crf_mt_mr": 92.97
         },
         "MATERIAL": {
           "support": 265,
@@ -5612,7 +5870,8 @@
           "crf_dcr": 78.19,
           "crf_ebv": 77.32,
           "crf_mt": 76.09,
-          "crf_mr": 77.06
+          "crf_mr": 77.06,
+          "crf_mt_mr": 77.86
         },
         "EXPERIMENT": {
           "support": 229,
@@ -5623,7 +5882,8 @@
           "crf_dcr": 80.19,
           "crf_ebv": 81.24,
           "crf_mt": 81.8,
-          "crf_mr": 81.62
+          "crf_mr": 81.62,
+          "crf_mt_mr": 80.96
         },
         "DEVICE": {
           "support": 119,
@@ -5634,7 +5894,8 @@
           "crf_dcr": 71.03,
           "crf_ebv": 72.06,
           "crf_mt": 71.21,
-          "crf_mr": 73.64
+          "crf_mr": 73.64,
+          "crf_mt_mr": 72.61
         }
       }
     },
@@ -6184,6 +6445,263 @@
               ]
             }
           }
+        },
+        "crf_mt_mr": {
+          "micro": {
+            "mean": 72.57,
+            "ci95": [
+              70.83,
+              74.31
+            ],
+            "per_run": [
+              68.93,
+              76.05,
+              75.55,
+              73.41,
+              73.59,
+              72.66,
+              68.55,
+              72.77,
+              71.59,
+              72.62
+            ]
+          },
+          "micro_strict": {
+            "mean": 72.57,
+            "ci95": [
+              70.83,
+              74.31
+            ],
+            "per_run": [
+              68.93,
+              76.05,
+              75.55,
+              73.41,
+              73.59,
+              72.66,
+              68.55,
+              72.77,
+              71.59,
+              72.62
+            ]
+          },
+          "macro": {
+            "mean": 63.65,
+            "ci95": [
+              60.71,
+              66.59
+            ],
+            "per_run": [
+              58.8,
+              66.86,
+              67.08,
+              68.16,
+              66.47,
+              60.7,
+              58.91,
+              68.73,
+              60.75,
+              60.03
+            ]
+          },
+          "weighted": {
+            "mean": 72.1,
+            "ci95": [
+              70.13,
+              74.07
+            ],
+            "per_run": [
+              68.42,
+              76.17,
+              75.72,
+              73.41,
+              73.83,
+              70.87,
+              68.1,
+              72.43,
+              70.71,
+              71.33
+            ]
+          },
+          "minus_crf": {
+            "micro": {
+              "mean_diff": 0.69,
+              "ci95": [
+                -1.18,
+                2.57
+              ],
+              "per_run": [
+                -0.84,
+                5.21,
+                3.48,
+                0.99,
+                2.94,
+                -0.57,
+                -3.63,
+                1.25,
+                -0.72,
+                -1.19
+              ]
+            },
+            "micro_strict": {
+              "mean_diff": 0.69,
+              "ci95": [
+                -1.18,
+                2.57
+              ],
+              "per_run": [
+                -0.84,
+                5.21,
+                3.48,
+                0.99,
+                2.94,
+                -0.57,
+                -3.63,
+                1.25,
+                -0.72,
+                -1.19
+              ]
+            },
+            "macro": {
+              "mean_diff": 1.82,
+              "ci95": [
+                -1.78,
+                5.43
+              ],
+              "per_run": [
+                -2.9,
+                6.15,
+                5.02,
+                8.76,
+                4.14,
+                -5.15,
+                -1.81,
+                7.72,
+                -1.75,
+                -1.97
+              ]
+            },
+            "weighted": {
+              "mean_diff": 0.52,
+              "ci95": [
+                -1.49,
+                2.52
+              ],
+              "per_run": [
+                -0.98,
+                4.71,
+                3.05,
+                0.85,
+                4.02,
+                -1.88,
+                -3.8,
+                0.63,
+                0.79,
+                -2.24
+              ]
+            }
+          },
+          "n_pairs": 10,
+          "votes": {
+            "micro": {
+              "mean": 75.16,
+              "ci95": [
+                72.55,
+                77.77
+              ],
+              "per_run": [
+                76.22,
+                75.13,
+                74.12
+              ]
+            },
+            "micro_strict": {
+              "mean": 75.16,
+              "ci95": [
+                72.55,
+                77.77
+              ],
+              "per_run": [
+                76.22,
+                75.13,
+                74.12
+              ]
+            },
+            "macro": {
+              "mean": 65.33,
+              "ci95": [
+                57.02,
+                73.65
+              ],
+              "per_run": [
+                69.07,
+                64.32,
+                62.61
+              ]
+            },
+            "weighted": {
+              "mean": 74.15,
+              "ci95": [
+                70.61,
+                77.7
+              ],
+              "per_run": [
+                75.44,
+                74.4,
+                72.62
+              ]
+            }
+          },
+          "votes_minus_crf_votes": {
+            "micro": {
+              "mean_diff": 0.84,
+              "ci95": [
+                -3.0,
+                4.68
+              ],
+              "per_run": [
+                2.46,
+                0.68,
+                -0.62
+              ]
+            },
+            "micro_strict": {
+              "mean_diff": 0.84,
+              "ci95": [
+                -3.0,
+                4.68
+              ],
+              "per_run": [
+                2.46,
+                0.68,
+                -0.62
+              ]
+            },
+            "macro": {
+              "mean_diff": 1.34,
+              "ci95": [
+                -7.51,
+                10.19
+              ],
+              "per_run": [
+                5.4,
+                -1.27,
+                -0.11
+              ]
+            },
+            "weighted": {
+              "mean_diff": 0.83,
+              "ci95": [
+                -2.9,
+                4.56
+              ],
+              "per_run": [
+                2.28,
+                0.92,
+                -0.72
+              ]
+            }
+          }
         }
       },
       "types": {
@@ -6191,103 +6709,120 @@
           "support": 138,
           "baseline": 92.12,
           "crf": 94.23,
-          "crf_mt": 94.26
+          "crf_mt": 94.26,
+          "crf_mt_mr": 94.67
         },
         "electrolyte_material": {
           "support": 120,
           "baseline": 49.69,
           "crf": 47.92,
-          "crf_mt": 46.58
+          "crf_mt": 46.58,
+          "crf_mt_mr": 53.78
         },
         "device": {
           "support": 109,
           "baseline": 71.11,
           "crf": 70.63,
-          "crf_mt": 70.5
+          "crf_mt": 70.5,
+          "crf_mt_mr": 69.97
         },
         "power_density": {
           "support": 70,
           "baseline": 92.81,
           "crf": 91.68,
-          "crf_mt": 90.43
+          "crf_mt": 90.43,
+          "crf_mt_mr": 92.1
         },
         "resistance": {
           "support": 57,
           "baseline": 92.73,
           "crf": 93.11,
-          "crf_mt": 91.78
+          "crf_mt": 91.78,
+          "crf_mt_mr": 88.54
         },
         "fuel_used": {
           "support": 40,
           "baseline": 56.95,
           "crf": 64.65,
-          "crf_mt": 64.09
+          "crf_mt": 64.09,
+          "crf_mt_mr": 59.44
         },
         "cathode_material": {
           "support": 37,
           "baseline": 18.74,
           "crf": 27.87,
-          "crf_mt": 22.63
+          "crf_mt": 22.63,
+          "crf_mt_mr": 28.92
         },
         "anode_material": {
           "support": 26,
           "baseline": 20.55,
           "crf": 32.39,
-          "crf_mt": 20.28
+          "crf_mt": 20.28,
+          "crf_mt_mr": 29.39
         },
         "open_circuit_voltage": {
           "support": 25,
           "baseline": 82.28,
           "crf": 77.89,
-          "crf_mt": 71.89
+          "crf_mt": 71.89,
+          "crf_mt_mr": 74.27
         },
         "conductivity": {
           "support": 23,
           "baseline": 88.71,
           "crf": 83.87,
-          "crf_mt": 84.54
+          "crf_mt": 84.54,
+          "crf_mt_mr": 87.38
         },
         "current_density": {
           "support": 17,
           "baseline": 95.22,
           "crf": 72.55,
-          "crf_mt": 74.55
+          "crf_mt": 74.55,
+          "crf_mt_mr": 79.9
         },
         "voltage": {
           "support": 14,
           "baseline": 64.1,
           "crf": 60.77,
-          "crf_mt": 54.69
+          "crf_mt": 54.69,
+          "crf_mt_mr": 59.2
         },
         "time_of_operation": {
           "support": 12,
           "baseline": 88.8,
           "crf": 88.8,
-          "crf_mt": 92.0
+          "crf_mt": 92.0,
+          "crf_mt_mr": 90.2
         },
         "interlayer_material": {
           "support": 6,
           "baseline": 0.0,
           "crf": 0.0,
-          "crf_mt": 0.0
+          "crf_mt": 0.0,
+          "crf_mt_mr": 6.43
         },
         "thickness": {
           "support": 5,
           "baseline": 89.72,
           "crf": 100.0,
-          "crf_mt": 89.88
+          "crf_mt": 89.88,
+          "crf_mt_mr": 91.08
         },
         "support_material": {
           "support": 2,
           "baseline": 48.09,
           "crf": 44.74,
-          "crf_mt": 53.02
+          "crf_mt": 53.02,
+          "crf_mt_mr": 56.78
         },
         "degradation_rate": {
           "support": 1,
           "baseline": 0.0,
           "crf": 0.0,
-          "crf_mt": 10.0
+          "crf_mt": 10.0,
+          "crf_mt_mr": 20.0
         }
       }
     }
@@ -7057,6 +7592,197 @@
           "n_splits": 4,
           "support_per_split": 7.8
         }
+      },
+      "crf_mt_mr": {
+        "Value": {
+          "crf": 71.42,
+          "method": 77.67,
+          "diff": 6.25,
+          "n_splits": 4,
+          "support_per_split": 41.8
+        },
+        "Mechanism": {
+          "crf": 35.5,
+          "method": 48.77,
+          "diff": 13.27,
+          "n_splits": 4,
+          "support_per_split": 35.8
+        },
+        "TestingMedium": {
+          "crf": 0.0,
+          "method": 0.0,
+          "diff": 0.0,
+          "n_splits": 1,
+          "support_per_split": 29.0
+        },
+        "StateDescriptor": {
+          "crf": 29.26,
+          "method": 39.94,
+          "diff": 10.68,
+          "n_splits": 4,
+          "support_per_split": 26.5
+        },
+        "TwinBoundary": {
+          "crf": 0.0,
+          "method": 0.0,
+          "diff": 0.0,
+          "n_splits": 1,
+          "support_per_split": 26.0
+        },
+        "MaterialClass": {
+          "crf": 71.19,
+          "method": 71.94,
+          "diff": 0.76,
+          "n_splits": 4,
+          "support_per_split": 19.5
+        },
+        "TestingMachine": {
+          "crf": 17.72,
+          "method": 13.91,
+          "diff": -3.81,
+          "n_splits": 2,
+          "support_per_split": 19.0
+        },
+        "Crack": {
+          "crf": 65.26,
+          "method": 71.31,
+          "diff": 6.05,
+          "n_splits": 4,
+          "support_per_split": 18.0
+        },
+        "Alloy": {
+          "crf": 70.58,
+          "method": 72.5,
+          "diff": 1.92,
+          "n_splits": 4,
+          "support_per_split": 17.8
+        },
+        "MicrostructureEntity": {
+          "crf": 12.22,
+          "method": 45.4,
+          "diff": 33.18,
+          "n_splits": 3,
+          "support_per_split": 16.7
+        },
+        "GrainBoundary": {
+          "crf": 28.16,
+          "method": 35.78,
+          "diff": 7.62,
+          "n_splits": 3,
+          "support_per_split": 16.3
+        },
+        "MechanicalTreatment": {
+          "crf": 0.0,
+          "method": 0.0,
+          "diff": 0.0,
+          "n_splits": 2,
+          "support_per_split": 16.0
+        },
+        "StrainRate": {
+          "crf": 31.67,
+          "method": 30.0,
+          "diff": -1.67,
+          "n_splits": 2,
+          "support_per_split": 13.5
+        },
+        "MechanicalProperty": {
+          "crf": 39.84,
+          "method": 42.37,
+          "diff": 2.53,
+          "n_splits": 3,
+          "support_per_split": 13.0
+        },
+        "MechanicalTestDataSet": {
+          "crf": 5.01,
+          "method": 19.09,
+          "diff": 14.08,
+          "n_splits": 2,
+          "support_per_split": 13.0
+        },
+        "TensileUltimateStrength": {
+          "crf": 67.04,
+          "method": 72.61,
+          "diff": 5.57,
+          "n_splits": 2,
+          "support_per_split": 12.5
+        },
+        "FatigueTestSpecimen": {
+          "crf": 23.1,
+          "method": 31.89,
+          "diff": 8.79,
+          "n_splits": 4,
+          "support_per_split": 12.2
+        },
+        "TensileYieldStrength": {
+          "crf": 47.65,
+          "method": 52.1,
+          "diff": 4.45,
+          "n_splits": 2,
+          "support_per_split": 12.0
+        },
+        "FatigueTest": {
+          "crf": 47.82,
+          "method": 47.16,
+          "diff": -0.66,
+          "n_splits": 3,
+          "support_per_split": 11.0
+        },
+        "TestSpecimen": {
+          "crf": 20.19,
+          "method": 17.68,
+          "diff": -2.51,
+          "n_splits": 3,
+          "support_per_split": 10.0
+        },
+        "DataSet": {
+          "crf": 43.15,
+          "method": 40.94,
+          "diff": -2.21,
+          "n_splits": 4,
+          "support_per_split": 9.5
+        },
+        "Microstructure": {
+          "crf": 60.63,
+          "method": 69.05,
+          "diff": 8.41,
+          "n_splits": 4,
+          "support_per_split": 8.8
+        },
+        "FatigueLifetime": {
+          "crf": 58.42,
+          "method": 73.15,
+          "diff": 14.73,
+          "n_splits": 3,
+          "support_per_split": 8.7
+        },
+        "CrackInitation": {
+          "crf": 72.16,
+          "method": 70.68,
+          "diff": -1.48,
+          "n_splits": 4,
+          "support_per_split": 8.5
+        },
+        "StressAmplitude": {
+          "crf": 5.71,
+          "method": 12.99,
+          "diff": 7.28,
+          "n_splits": 3,
+          "support_per_split": 8.3
+        },
+        "LoadingType": {
+          "crf": 8.25,
+          "method": 15.11,
+          "diff": 6.86,
+          "n_splits": 3,
+          "support_per_split": 8.3
+        },
+        "Location": {
+          "crf": 23.0,
+          "method": 32.26,
+          "diff": 9.25,
+          "n_splits": 4,
+          "support_per_split": 7.8
+        }
       }
     },
     "coarse": {
@@ -7820,6 +8546,197 @@
           "crf": 44.17,
           "method": 61.73,
           "diff": 17.57,
+          "n_splits": 4,
+          "support_per_split": 1.8
+        }
+      },
+      "crf_mt_mr": {
+        "MEC": {
+          "crf": 67.09,
+          "method": 68.11,
+          "diff": 1.02,
+          "n_splits": 4,
+          "support_per_split": 70.0
+        },
+        "VAL": {
+          "crf": 74.91,
+          "method": 78.41,
+          "diff": 3.5,
+          "n_splits": 4,
+          "support_per_split": 41.2
+        },
+        "MTP": {
+          "crf": 35.99,
+          "method": 38.8,
+          "diff": 2.81,
+          "n_splits": 4,
+          "support_per_split": 39.8
+        },
+        "MEP": {
+          "crf": 68.23,
+          "method": 71.29,
+          "diff": 3.06,
+          "n_splits": 4,
+          "support_per_split": 39.5
+        },
+        "DEF": {
+          "crf": 59.09,
+          "method": 61.89,
+          "diff": 2.8,
+          "n_splits": 4,
+          "support_per_split": 36.8
+        },
+        "DAM": {
+          "crf": 62.26,
+          "method": 63.54,
+          "diff": 1.27,
+          "n_splits": 4,
+          "support_per_split": 30.8
+        },
+        "ETP": {
+          "crf": 0.0,
+          "method": 0.0,
+          "diff": 0.0,
+          "n_splits": 1,
+          "support_per_split": 30.0
+        },
+        "PQT": {
+          "crf": 26.7,
+          "method": 36.87,
+          "diff": 10.17,
+          "n_splits": 3,
+          "support_per_split": 29.0
+        },
+        "CHP": {
+          "crf": 57.58,
+          "method": 58.39,
+          "diff": 0.81,
+          "n_splits": 4,
+          "support_per_split": 26.2
+        },
+        "STD": {
+          "crf": 43.81,
+          "method": 44.33,
+          "diff": 0.52,
+          "n_splits": 4,
+          "support_per_split": 26.2
+        },
+        "MIC": {
+          "crf": 55.13,
+          "method": 58.81,
+          "diff": 3.69,
+          "n_splits": 4,
+          "support_per_split": 26.0
+        },
+        "OBJ": {
+          "crf": 61.16,
+          "method": 58.78,
+          "diff": -2.38,
+          "n_splits": 4,
+          "support_per_split": 25.8
+        },
+        "MAC": {
+          "crf": 68.31,
+          "method": 71.03,
+          "diff": 2.72,
+          "n_splits": 4,
+          "support_per_split": 19.5
+        },
+        "MAT": {
+          "crf": 69.88,
+          "method": 69.57,
+          "diff": -0.31,
+          "n_splits": 4,
+          "support_per_split": 18.8
+        },
+        "EQU": {
+          "crf": 65.19,
+          "method": 61.75,
+          "diff": -3.44,
+          "n_splits": 4,
+          "support_per_split": 17.8
+        },
+        "DAT": {
+          "crf": 48.89,
+          "method": 57.26,
+          "diff": 8.37,
+          "n_splits": 4,
+          "support_per_split": 17.0
+        },
+        "MFP": {
+          "crf": 54.21,
+          "method": 56.5,
+          "diff": 2.29,
+          "n_splits": 4,
+          "support_per_split": 15.5
+        },
+        "PRO": {
+          "crf": 54.73,
+          "method": 53.79,
+          "diff": -0.95,
+          "n_splits": 4,
+          "support_per_split": 14.5
+        },
+        "LOC": {
+          "crf": 49.27,
+          "method": 51.51,
+          "diff": 2.24,
+          "n_splits": 4,
+          "support_per_split": 13.8
+        },
+        "PRP": {
+          "crf": 27.32,
+          "method": 30.05,
+          "diff": 2.73,
+          "n_splits": 3,
+          "support_per_split": 9.0
+        },
+        "CEL": {
+          "crf": 38.54,
+          "method": 41.82,
+          "diff": 3.28,
+          "n_splits": 4,
+          "support_per_split": 8.8
+        },
+        "MIP": {
+          "crf": 18.45,
+          "method": 18.52,
+          "diff": 0.07,
+          "n_splits": 4,
+          "support_per_split": 7.2
+        },
+        "SDE": {
+          "crf": 25.24,
+          "method": 27.09,
+          "diff": 1.84,
+          "n_splits": 3,
+          "support_per_split": 7.0
+        },
+        "MOD": {
+          "crf": 15.0,
+          "method": 26.82,
+          "diff": 11.82,
+          "n_splits": 2,
+          "support_per_split": 6.0
+        },
+        "ODE": {
+          "crf": 35.56,
+          "method": 33.69,
+          "diff": -1.86,
+          "n_splits": 3,
+          "support_per_split": 5.3
+        },
+        "CGE": {
+          "crf": 28.74,
+          "method": 34.39,
+          "diff": 5.65,
+          "n_splits": 3,
+          "support_per_split": 4.7
+        },
+        "CPR": {
+          "crf": 44.17,
+          "method": 67.87,
+          "diff": 23.7,
           "n_splits": 4,
           "support_per_split": 1.8
         }
