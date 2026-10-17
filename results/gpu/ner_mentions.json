@@ -1736,6 +1736,164 @@
           "f1": 84.33,
           "share": 1.0
         }
+      },
+      "crf_mt": {
+        "n_runs": 10,
+        "seen": {
+          "n_gold": 4960,
+          "n_pred": 5184,
+          "n_correct": 4382,
+          "recall": 88.35,
+          "precision": 84.53,
+          "f1": 86.4,
+          "share": 0.507
+        },
+        "seen_other": {
+          "n_gold": 0,
+          "n_pred": 0,
+          "n_correct": 0,
+          "recall": 0.0,
+          "precision": 0.0,
+          "f1": 0.0,
+          "share": 0.0
+        },
+        "unseen": {
+          "n_gold": 4820,
+          "n_pred": 4906,
+          "n_correct": 3924,
+          "recall": 81.41,
+          "precision": 79.98,
+          "f1": 80.69,
+          "share": 0.493
+        },
+        "all": {
+          "n_gold": 9780,
+          "n_pred": 10090,
+          "n_correct": 8306,
+          "recall": 84.93,
+          "precision": 82.32,
+          "f1": 83.6,
+          "share": 1.0
+        }
+      }
+    },
+    "sofc_slot_published_split": {
+      "baseline": {
+        "n_runs": 10,
+        "seen": {
+          "n_gold": 2730,
+          "n_pred": 3015,
+          "n_correct": 2454,
+          "recall": 89.89,
+          "precision": 81.39,
+          "f1": 85.43,
+          "share": 0.389
+        },
+        "seen_other": {
+          "n_gold": 150,
+          "n_pred": 138,
+          "n_correct": 56,
+          "recall": 37.33,
+          "precision": 40.58,
+          "f1": 38.89,
+          "share": 0.021
+        },
+        "unseen": {
+          "n_gold": 4140,
+          "n_pred": 4304,
+          "n_correct": 2569,
+          "recall": 62.05,
+          "precision": 59.69,
+          "f1": 60.85,
+          "share": 0.59
+        },
+        "all": {
+          "n_gold": 7020,
+          "n_pred": 7457,
+          "n_correct": 5079,
+          "recall": 72.35,
+          "precision": 68.11,
+          "f1": 70.17,
+          "share": 1.0
+        }
+      },
+      "crf": {
+        "n_runs": 10,
+        "seen": {
+          "n_gold": 2730,
+          "n_pred": 2871,
+          "n_correct": 2387,
+          "recall": 87.44,
+          "precision": 83.14,
+          "f1": 85.23,
+          "share": 0.389
+        },
+        "seen_other": {
+          "n_gold": 150,
+          "n_pred": 84,
+          "n_correct": 39,
+          "recall": 26.0,
+          "precision": 46.43,
+          "f1": 33.33,
+          "share": 0.021
+        },
+        "unseen": {
+          "n_gold": 4140,
+          "n_pred": 3898,
+          "n_correct": 2560,
+          "recall": 61.84,
+          "precision": 65.67,
+          "f1": 63.7,
+          "share": 0.59
+        },
+        "all": {
+          "n_gold": 7020,
+          "n_pred": 6853,
+          "n_correct": 4986,
+          "recall": 71.03,
+          "precision": 72.76,
+          "f1": 71.88,
+          "share": 1.0
+        }
+      },
+      "crf_mt": {
+        "n_runs": 10,
+        "seen": {
+          "n_gold": 2730,
+          "n_pred": 2844,
+          "n_correct": 2378,
+          "recall": 87.11,
+          "precision": 83.61,
+          "f1": 85.32,
+          "share": 0.389
+        },
+        "seen_other": {
+          "n_gold": 150,
+          "n_pred": 74,
+          "n_correct": 36,
+          "recall": 24.0,
+          "precision": 48.65,
+          "f1": 32.14,
+          "share": 0.021
+        },
+        "unseen": {
+          "n_gold": 4140,
+          "n_pred": 3756,
+          "n_correct": 2457,
+          "recall": 59.35,
+          "precision": 65.42,
+          "f1": 62.23,
+          "share": 0.59
+        },
+        "all": {
+          "n_gold": 7020,
+          "n_pred": 6674,
+          "n_correct": 4871,
+          "recall": 69.39,
+          "precision": 72.98,
+          "f1": 71.14,
+          "share": 1.0
+        }
       }
     }
   },
@@ -2474,6 +2632,110 @@
         "unseen_share": 0.235,
         "recall_seen": 82.97,
         "recall_unseen": 45.71
+      }
+    },
+    "sofc_slot_published_split": {
+      "working_temperature": {
+        "n_gold_per_run": 138.0,
+        "unseen_share": 0.145,
+        "recall_seen": 98.46,
+        "recall_unseen": 89.0
+      },
+      "electrolyte_material": {
+        "n_gold_per_run": 120.0,
+        "unseen_share": 0.658,
+        "recall_seen": 67.35,
+        "recall_unseen": 25.44
+      },
+      "device": {
+        "n_gold_per_run": 109.0,
+        "unseen_share": 0.266,
+        "recall_seen": 83.5,
+        "recall_unseen": 34.83
+      },
+      "power_density": {
+        "n_gold_per_run": 70.0,
+        "unseen_share": 0.957,
+        "recall_seen": 100.0,
+        "recall_unseen": 97.31
+      },
+      "resistance": {
+        "n_gold_per_run": 57.0,
+        "unseen_share": 0.947,
+        "recall_seen": 100.0,
+        "recall_unseen": 91.85
+      },
+      "fuel_used": {
+        "n_gold_per_run": 40.0,
+        "unseen_share": 0.35,
+        "recall_seen": 87.31,
+        "recall_unseen": 7.86
+      },
+      "cathode_material": {
+        "n_gold_per_run": 37.0,
+        "unseen_share": 0.838,
+        "recall_seen": 73.33,
+        "recall_unseen": 41.61
+      },
+      "anode_material": {
+        "n_gold_per_run": 26.0,
+        "unseen_share": 0.885,
+        "recall_seen": 25.0,
+        "recall_unseen": 35.65
+      },
+      "open_circuit_voltage": {
+        "n_gold_per_run": 25.0,
+        "unseen_share": 0.96,
+        "recall_seen": 0.0,
+        "recall_unseen": 89.17
+      },
+      "conductivity": {
+        "n_gold_per_run": 23.0,
+        "unseen_share": 1.0,
+        "recall_seen": null,
+        "recall_unseen": 82.61
+      },
+      "current_density": {
+        "n_gold_per_run": 17.0,
+        "unseen_share": 0.941,
+        "recall_seen": null,
+        "recall_unseen": 66.88
+      },
+      "voltage": {
+        "n_gold_per_run": 14.0,
+        "unseen_share": 0.786,
+        "recall_seen": 46.67,
+        "recall_unseen": 47.27
+      },
+      "time_of_operation": {
+        "n_gold_per_run": 12.0,
+        "unseen_share": 0.833,
+        "recall_seen": 100.0,
+        "recall_unseen": 91.0
+      },
+      "interlayer_material": {
+        "n_gold_per_run": 6.0,
+        "unseen_share": 1.0,
+        "recall_seen": null,
+        "recall_unseen": 0.0
+      },
+      "thickness": {
+        "n_gold_per_run": 5.0,
+        "unseen_share": 0.8,
+        "recall_seen": 100.0,
+        "recall_unseen": 100.0
+      },
+      "support_material": {
+        "n_gold_per_run": 2.0,
+        "unseen_share": 1.0,
+        "recall_seen": null,
+        "recall_unseen": 80.0
+      },
+      "degradation_rate": {
+        "n_gold_per_run": 1.0,
+        "unseen_share": 1.0,
+        "recall_seen": null,
+        "recall_unseen": 0.0
       }
     }
   },
@@ -3575,6 +3837,107 @@
           "ci95": [
             -0.26,
             1.42
+          ],
+          "n_pairs": 10
+        }
+      },
+      "crf_mt": {
+        "reference": "crf",
+        "seen": {
+          "method": 86.39,
+          "reference": 86.24,
+          "mean_diff": 0.15,
+          "ci95": [
+            -0.83,
+            1.12
+          ],
+          "n_pairs": 10
+        },
+        "unseen": {
+          "method": 80.69,
+          "reference": 81.14,
+          "mean_diff": -0.45,
+          "ci95": [
+            -2.27,
+            1.37
+          ],
+          "n_pairs": 10
+        },
+        "all": {
+          "method": 83.6,
+          "reference": 83.75,
+          "mean_diff": -0.15,
+          "ci95": [
+            -1.36,
+            1.05
+          ],
+          "n_pairs": 10
+        }
+      }
+    },
+    "sofc_slot_published_split": {
+      "crf": {
+        "reference": "baseline",
+        "seen": {
+          "method": 85.23,
+          "reference": 85.45,
+          "mean_diff": -0.23,
+          "ci95": [
+            -1.69,
+            1.24
+          ],
+          "n_pairs": 10
+        },
+        "unseen": {
+          "method": 63.71,
+          "reference": 60.88,
+          "mean_diff": 2.83,
+          "ci95": [
+            0.56,
+            5.1
+          ],
+          "n_pairs": 10
+        },
+        "all": {
+          "method": 71.88,
+          "reference": 70.2,
+          "mean_diff": 1.68,
+          "ci95": [
+            -0.12,
+            3.49
+          ],
+          "n_pairs": 10
+        }
+      },
+      "crf_mt": {
+        "reference": "crf",
+        "seen": {
+          "method": 85.31,
+          "reference": 85.23,
+          "mean_diff": 0.08,
+          "ci95": [
+            -0.98,
+            1.14
+          ],
+          "n_pairs": 10
+        },
+        "unseen": {
+          "method": 62.19,
+          "reference": 63.71,
+          "mean_diff": -1.52,
+          "ci95": [
+            -3.65,
+            0.62
+          ],
+          "n_pairs": 10
+        },
+        "all": {
+          "method": 71.11,
+          "reference": 71.88,
+          "mean_diff": -0.78,
+          "ci95": [
+            -2.39,
+            0.84
           ],
           "n_pairs": 10
         }

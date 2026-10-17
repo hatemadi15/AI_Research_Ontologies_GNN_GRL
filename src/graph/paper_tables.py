@@ -53,7 +53,8 @@ UNSEEN_SETTINGS = (('fine_random_split_vary', 'fine, random splits'),
                    ('coarse_leave_one_paper_out', 'coarse, unseen papers'),
                    ('sofc_random_split_vary', 'SOFC-Exp, random splits'),
                    ('sofc_document_folds', 'SOFC-Exp, article folds'),
-                   ('sofc_published_split', 'SOFC-Exp, official split'))
+                   ('sofc_published_split', 'SOFC-Exp, official split'),
+                   ('sofc_slot_published_split', 'SOFC-Exp slot types, official split'))
 CRITERIA = ('strict', 'exact', 'type', 'overlap')
 
 

@@ -4,10 +4,10 @@
 becomes (`docs/PAPER.md`): a methods paper if a method passes its
 pre-registered decisions and repeats on SOFC-Exp, otherwise an evaluation
 paper. Sections 1–5 and 7 rest on finished, committed results. In
-Section 6 (methods for unseen papers), recall calibration is decided (no
-gain, C15). The others wait for their runs: stage 2 of multi-task
-self-training, mention replacement and multi-task training on SOFC-Exp's
-two levels (ROADMAP §4, weeks 6 and 7). The numbers come from `results/`
+Section 6 (methods for unseen papers), recall calibration (no gain, C15)
+and multi-task training on SOFC-Exp's two levels (no gain, C7) are decided.
+The others wait for their runs: stage 2 of multi-task self-training and
+mention replacement (ROADMAP §4, weeks 6 and 7). The numbers come from `results/`
 through the claims table of `docs/PAPER.md` (C1–C19). References are keys of `docs/references.bib`.
 
 ---
@@ -19,7 +19,8 @@ carry either way:
 - the published MaterioMiner numbers reproduce on the released split;
 - a model trained on three papers loses 18–31 F1 points on the fourth;
 - of the additions tested under a pre-registered 10-seed design, only the
-  CRF head, seed votes and multi-task training hold;
+  CRF head, seed votes and multi-task training hold, and multi-task
+  training only on MaterioMiner: on SOFC-Exp's two levels it gains nothing;
 - a 3-seed design passes a real 1.8-point gain in 41% of seed triples, and
   let through a 2.7-point gain that 10 seeds shrank to 1.1;
 - the entities a model misses on unseen papers lie far below its decision
@@ -177,9 +178,15 @@ than a few points.
   [+0.21, +3.19] fine-grained and +1.07 [−0.82, +2.97] coarse-grained. Much
   of it comes from predicting only valid spans.
 - **SOFC-Exp:** the CRF head improves on plain MatSciBERT again, +1.22
-  [+0.50, +1.93] over 10 seeds (83.75 against 82.53). The published
-  MatSciBERT-CRF score (84.77; gupta2022matscibert) lies above our interval
-  over seeds.
+  [+0.50, +1.93] over 10 seeds (83.75 against 82.53); strict, +0.73
+  [−0.04, +1.51]. The published MatSciBERT-CRF score (84.77;
+  gupta2022matscibert) lies above our interval over seeds.
+- **SOFC-Exp's slot types:** +1.68 [−0.12, +3.49] (71.88 against 70.20),
+  not significant, and −0.06 [−1.70, +1.58] under strict scoring: plain
+  MatSciBERT's invalid tags are mostly wrong entities there, so dropping
+  them raises its score to 71.94. The published MatSciBERT-CRF score on
+  SOFC-Slot (72.85, over 5 cross-validation splits) lies above our
+  interval; the seed votes score 74.32.
 
 **5.4 Seed votes and multi-task training (C5, C7).**
 - **The seed vote** is the most reliable addition: +2.20 and +1.67 over the
@@ -187,7 +194,8 @@ than a few points.
   papers, every interval above 0.
 - **Multi-task training** over both granularities is the one training
   change that holds: +1.83 [+0.32, +3.34] fine-grained on the random
-  splits.
+  splits. It does not repeat on SOFC-Exp, where a slot head and an entity
+  head stand to each other as MaterioMiner's two levels (Section 6.4).
 - **The multi-task vote** improves on the seed vote coarse-grained on the
   random splits (+0.79 [+0.17, +1.42]) and fine-grained on unseen papers
   (+3.65 [+0.49, +6.82]). That is 2 of 12 vote comparisons, where about 0.3
@@ -320,7 +328,13 @@ each gold entity matched at most once and an overlap counted in full
   "samples" is a TestSpecimen in one paper and a FatigueTestSpecimen in
   another.
 - **SOFC-Exp:** 83.75 strict and 88.80 under overlap; types are almost
-  never confused there (84.06 when only the span must match).
+  never confused there (84.06 when only the span must match). Its slot
+  types often are: 71.88 strict, 83.44 when only the span must match. 11.7% of
+  the CRF head's slot-level predictions have a gold entity's span and
+  another slot, against 0.3% of its entity-level predictions. Most of them
+  give a material the wrong role in the cell: an electrolyte material
+  becomes a cathode material 27 times per seed (of 120), an anode material
+  7 times. The model finds the materials; their role is what it misses.
 - **The gold annotations agree.** Only 35 fine-grained names are entities
   in two or more papers. 7 of them take different types, 6 of these a class
   and its MMO subclass (DataSet and MechanicalTestDataSet, TestSpecimen and
@@ -428,6 +442,22 @@ screened with 3 seeds and decided with 10 only if the screen passes.
 **6.4 Multi-task training on SOFC-Exp's two levels.** Not a new method:
 the repeat of C7 on the second dataset, where the slot types stand to the
 entity types as MaterioMiner's fine level to its coarse one.
+- *Result: no gain.* On the official split, over 10 seeds, multi-task
+  training scores −0.78 [−2.39, +0.84] against the CRF head on the slot
+  types (71.11 against 71.88) and −0.15 [−1.36, +1.05] on the entity types
+  (83.60 against 83.75). Its votes do not differ from the seed votes
+  (−0.86 [−3.67, +1.95] and +0.08 [−2.85, +3.01]).
+- *Unseen names:* −1.52 [−3.65, +0.62] on the slot types, −0.45 [−2.27,
+  +1.37] on the entity types, where on MaterioMiner's held-out papers it
+  gained +4.02 [+1.53, +6.51].
+- *Per slot:* its largest losses are on the anode (32.4 to 20.3, 26 test
+  entities) and cathode materials (27.9 to 22.6, 37) and on open-circuit
+  voltage (77.9 to 71.9, 25).
+
+Multi-task training is therefore a MaterioMiner result. One possible
+reason, not tested: a material slot is a role in the reported cell, which
+the entity level does not encode, so the entity head has little to add
+where the slot head errs (Section 5.9).
 
 ## 7 Limitations
 

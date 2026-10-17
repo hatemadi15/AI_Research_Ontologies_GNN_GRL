@@ -196,10 +196,28 @@ def test_published_split_of_sofc_exp_slots_and_multi_task(tmp_path):
     assert mt['votes']['micro']['mean'] == pytest.approx(66.67, abs=0.01)
     assert mt['votes_minus_crf_votes']['micro']['mean_diff'] == pytest.approx(-33.33, abs=0.01)
     assert len(mt['votes_minus_crf_votes']['micro']['per_run']) == 3
+    # per type, the most frequent first, every system's mean F1 over its seeds
+    assert slot['types'] == {'MAT': {'support': 10, 'baseline': 100.0, 'crf': 100.0,
+                                     'crf_mt': 100.0},
+                             'PRO': {'support': 2, 'baseline': 50.0, 'crf': 50.0,
+                                     'crf_mt': 50.0}}
     # the other methods are not voted
     (tmp_path / 'ner_results_sofc_slot_published_split_crf_ebv.json').write_text(
         json.dumps(runs(2.5, gold)))
     assert 'votes' not in sa.published_split(tmp_path)['sofc_slot']['methods']['crf_ebv']
+
+
+def test_split_types_mean_f1_per_type_and_system():
+    """Per type of a published split: the support and each system's mean F1 over its seeds;
+    a type that only a prediction has (support 0) is left out."""
+    def runs(*f1s):
+        return {f'seed{100 * j}': _run(f'seed{100 * j}', 70, {'MAT': (f, 3), 'PRO': (0.5, 7),
+                                                               'XYZ': (0.0, 0)})
+                for j, f in enumerate(f1s)}
+    types = sa.split_types({'crf': runs(0.6, 0.8), 'crf_mt': runs(0.9, 0.9, 0.6)})
+    assert list(types) == ['PRO', 'MAT']
+    assert types['MAT'] == {'support': 3, 'crf': 70.0, 'crf_mt': 80.0}
+    assert types['PRO'] == {'support': 7, 'crf': 50.0, 'crf_mt': 50.0}
 
 
 def test_retokenized_test_of_sofc_exp(tmp_path):
@@ -225,6 +243,8 @@ def test_retokenized_test_of_sofc_exp(tmp_path):
     assert crf['n_pairs'] == 10 and crf['minus_crf']['micro']['mean_diff'] == 0.5
     plain = sofc['baseline_retokenized_test']
     assert plain['n_pairs'] == 10 and plain['minus_baseline']['micro']['mean_diff'] == 0.25
+    # per type, only the runs on the released test articles
+    assert set(sofc['types']['MAT']) == {'support', 'baseline', 'crf'}
 
 
 def test_week6_type_differences_pair_seeds_and_papers(tmp_path, capsys):

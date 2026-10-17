@@ -978,7 +978,7 @@ chance at class level. For a Task C-style result:
 | 4 | Done for NER: P1 "Next, after week 3" items 1, 2, 3 and 5, i.e. votes over the week-3 changes that help, label semantics on the multi-task model, self-training at scale, on Kaggle T4 GPUs (protocol below). Not started: context-aware bi-encoder/cross-encoder typing + definition kNN in `align.py`; heterogeneous GNN | Met for NER by two changes, both on unseen papers. Coarse-grained, the label-semantics vote improves on `crf_ens3` on the CPU (+1.63 [+0.11, +3.16]); the GPU repeat does not confirm it (+0.40 [−1.36, +2.16]). Fine-grained, self-training with 3 teachers improves on the CRF head (GPU, +1.07 [+0.33, +1.80]; +1.22 [+0.60, +1.84] on the random splits, reported). The multi-task vote and label semantics on the multi-task model do not pass. Typing: not started |
 | 5 | Done: NER, P1 "Next, after week 4" item 1, i.e. 10 seeds per split for the CRF reference, multi-task, label semantics and self-training with 3 teachers, on Kaggle T4 GPUs, and the published split (amendment); items 2–7 and a paper outline prepared, and the week-6 options run once each at full size (protocol below). The original week-5 work moves to week 7 | Met. Of the claims re-tested with 10 seeds, fine-grained multi-task on the random splits passes (+1.83 [+0.32, +3.34]); the coarse-grained claims of week 3 and the self-training claim of week 4 do not. The reported system: the multi-task vote coarse-grained on the random splits and fine-grained on unseen papers, `crf_ens3` elsewhere. On the published split, plain MatSciBERT reproduces 69.92 and 72.32 and the CRF head beats both |
 | 6 | In progress: NER, P1 "Next, after week 5", towards a methods paper: methods for unseen papers (DeBERTa-v3-large, document context, multi-task self-training) screened with 3 seeds and decided with 10, and a second dataset (SOFC-Exp, 10 seeds); protocol below. So far (P1, "Week 6 so far"): DeBERTa-v3-large stops at the screen; document context passes the screen but neither 10-seed decision nor S2 on SOFC-Exp (+0.58 [−0.26, +1.42]); multi-task self-training passes the screen (+6.06 fine-grained), stage 2 next; on SOFC-Exp the CRF head improves on plain MatSciBERT (S1) | A method whose vote improves on the strongest system on unseen papers under the 10-seed design, and on SOFC-Exp |
-| 7 | In progress: NER, part 1, document-level label consistency for unseen papers, a post-processing rule on the saved predictions (no GPU; protocol below); part 2a, recall calibration (a bias on the CRF head's emissions, chosen on inner folds; done, no claim: the missed entities are not near the threshold); part 2b, mention replacement (screen, then 10 seeds if it passes; protocol below), and later the combinations of the methods that pass week 6, fixed after the week-6 decisions; part 2c, coarse-to-fine completion (done, no claim); part 2d, multi-task training on SOFC-Exp's two levels (protocol below); part 2e, SOFC-Exp's test articles cut into words as its training articles are (protocol below). Then class-level taxonomy (LLM or cross-encoder + arborescence) and a relation annotation pilot | Part 1: the rule improves on the strongest system on unseen papers and on SOFC-Exp's CRF head. Taxonomy: first class-level F1 above chance; relation guidelines |
+| 7 | In progress: NER, part 1, document-level label consistency for unseen papers, a post-processing rule on the saved predictions (no GPU; protocol below); part 2a, recall calibration (a bias on the CRF head's emissions, chosen on inner folds; done, no claim: the missed entities are not near the threshold); part 2b, mention replacement (screen, then 10 seeds if it passes; protocol below), and later the combinations of the methods that pass week 6, fixed after the week-6 decisions; part 2c, coarse-to-fine completion (done, no claim); part 2d, multi-task training on SOFC-Exp's two levels (done, no claim: −0.78 [−2.39, +0.84] on the slot level, −0.15 [−1.36, +1.05] on the entity level); part 2e, SOFC-Exp's test articles cut into words as its training articles are (protocol below). Then class-level taxonomy (LLM or cross-encoder + arborescence) and a relation annotation pilot | Part 1: the rule improves on the strongest system on unseen papers and on SOFC-Exp's CRF head. Taxonomy: first class-level F1 above chance; relation guidelines |
 | 8 | Prepared: part 1, SOFC-Exp beyond its official split: the CRF head with 10 seeds on 5 random sentence splits and on 5 folds of 9 held-out articles (`--document-folds 5`; protocol below, descriptive); part 2, more papers or more sentences: three training papers cut to the size of two against two papers (`--two-paper-size`; protocol below) | Part 1: the gap between random splits and unseen documents measured on a second corpus. Part 2: whether a third paper helps at the same number of training sentences |
 
 ### Week 2 protocol (fixed before any run)
@@ -1963,6 +1963,59 @@ repeats, then plain MatSciBERT and the CRF head on the slots, about 70
 minutes; lane 1 runs the multi-task repeat and the multi-task runs, about
 60 minutes. It runs after the weekly quota resets, on the kernel that
 `w6c:sofc-ctx` leaves free.
+
+**Outcome of part 2d: neither decision passes, no claim.** Session a of 17
+October (`w7b`, from the protocol's commit). The three repeats are
+identical: `smokev` 77.95, `smokew` 84.98, `smokex` 78.59 fine-grained and
+79.95 coarse-grained. On the official split, over 10 model seeds:
+- decision 1, slot level: multi-task training 71.11 [69.87, 72.34] against
+  the CRF head's 71.88 [71.01, 72.75], −0.78 [−2.39, +0.84] paired by seed;
+- decision 2, entity level: 83.60 [83.00, 84.19] against 83.75 [82.85,
+  84.65], −0.15 [−1.36, +1.05].
+
+C7's fine-grained gain on MaterioMiner does not repeat on SOFC-Exp's finer
+level. Multi-task training stays a MaterioMiner result.
+
+Reported (no decision):
+- **The votes** do not differ either: −0.86 [−3.67, +1.95] slot level
+  (73.46 against the CRF votes' 74.32) and +0.08 [−2.85, +3.01] entity
+  level (85.21 against 85.13), paired by triple.
+- **S1 on the slot level.** The CRF head against plain MatSciBERT (70.20
+  [68.82, 71.58]): +1.68 [−0.12, +3.49] paired by seed, not significant,
+  unlike the entity level's +1.22 [+0.50, +1.93]. Under strict IOB2 it is
+  −0.06 [−1.70, +1.58]: plain MatSciBERT scores 71.94 strict, more than
+  under the default scoring. Its invalid tags are mostly wrong entities,
+  which strict scoring drops (C4). Macro −0.03 [−1.91, +1.85], weighted
+  +0.45 [−1.49, +2.38].
+- **The published SOFC-Slot numbers** lie above the CRF head's CIs:
+  MatSciBERT-CRF 72.85 micro and 65.35 macro, against 71.88 and 61.83
+  [60.61, 63.04]. Their setup differs (5 cross-validation splits, the
+  experiment word as an 18th type). The CRF votes score 74.32 [73.07,
+  75.57].
+- **Seen and unseen names** (`ner_mentions.py`). 59% of the slot level's
+  test entities are unseen names, against 49% of the entity level's. The
+  CRF head's gain over plain MatSciBERT is on them again: +2.83 [+0.56,
+  +5.10], seen −0.23 [−1.69, +1.24]. Multi-task training gives −1.52
+  [−3.65, +0.62] on the unseen names of the slot level and −0.45 [−2.27,
+  +1.37] on those of the entity level.
+- **Per type** (slot level, mean F1 over the 10 seeds; CRF head, then
+  multi-task; test entities in brackets): the measured slots score high,
+  e.g. working temperature 94.2 and 94.3 (138) and power density 91.7 and
+  90.4 (70). The material roles score low: electrolyte 47.9 and 46.6
+  (120), cathode 27.9 and 22.6 (37), anode 32.4 and 20.3 (26). A material
+  slot names a material's role in the reported cell, which its words
+  alone do not show. Multi-task training loses most on the anode (−12.1)
+  and on open-circuit voltage (77.9 to 71.9, 25 entities). Current density
+  is 95.2 with plain MatSciBERT and 72.6 with the CRF head (17).
+- **Right span, wrong slot** (`ner_matching.py`). 11.7% of the CRF head's
+  slot-level predictions have a gold entity's span and another slot type,
+  against 0.3% at the entity level. Most are roles taken for one another:
+  an electrolyte material tagged as a cathode material 27 times per seed
+  (of 120), as an anode material 7 times, an anode as a cathode 7 times;
+  voltage as open-circuit voltage 7 times. Scored on the span alone (exact
+  matching), the CRF head's slot-level F1 is 83.44 instead of 71.88. On
+  the slot level the model finds the entities; it is their role that it
+  gets wrong.
 
 ### Week 7 protocol, part 2b: mention replacement (fixed before any run)
 

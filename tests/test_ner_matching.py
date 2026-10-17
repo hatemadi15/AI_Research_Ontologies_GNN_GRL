@@ -38,7 +38,11 @@ def test_near_misses():
     out = nm.near_misses([{'runs': [run]}], related=lambda a, b: {a, b} == {'B', 'C'})
     assert out == {'n_pred': 4, 'right': 0.0, 'wrong_type': 0.25, 'wrong_type_related': 0.25,
                    'inside_longer_gold': 0.25, 'around_shorter_gold': 0.25, 'crossing': 0.0,
-                   'spurious': 0.25}
+                   'spurious': 0.25, 'wrong_type_pairs': [['B', 'C', 1.0]]}
+    # the pairs per run, the most frequent first, at most `top`
+    other = {'test_gold': ['B-B O B-D', 'B-B'], 'test_pred': ['B-C O B-E', 'B-C']}
+    pairs = nm.near_misses([{'runs': [run, other]}], top=2)['wrong_type_pairs']
+    assert pairs == [['B', 'C', 1.5], ['D', 'E', 0.5]]
     assert 'wrong_type_related' not in nm.near_misses([{'runs': [run]}])
 
 

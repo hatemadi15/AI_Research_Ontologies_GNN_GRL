@@ -11,3 +11,6 @@ Table 3. Default (conlleval) against strict IOB2 scoring, published splits, 10 m
 | SOFC-Exp | plain MatSciBERT | 82.53 [81.84, 83.23] | 83.02 [82.38, 83.65] |
 | SOFC-Exp | CRF head | 83.75 [82.85, 84.65] | 83.75 [82.85, 84.65] |
 | SOFC-Exp | CRF head − plain | +1.22 [+0.50, +1.93] | +0.73 [−0.04, +1.51] |
+| SOFC-Exp, slot types | plain MatSciBERT | 70.20 [68.82, 71.58] | 71.94 [70.69, 73.19] |
+| SOFC-Exp, slot types | CRF head | 71.88 [71.01, 72.75] | 71.88 [71.01, 72.75] |
+| SOFC-Exp, slot types | CRF head − plain | +1.68 [−0.12, +3.49] | −0.06 [−1.70, +1.58] |

@@ -142,6 +142,19 @@ Week 7, part 2a (recall calibration; Kaggle session `w7a` of 16 October):
   never used to choose).
 - `_crf_eb_ens3*` are the votes over the seed triples.
 
+Week 7, part 2d (multi-task training on SOFC-Exp's two levels; Kaggle
+session `w7b` of 17 October, model seeds 0 to 900 on the official split):
+`gpu/ner_results_sofc_slot_published_split.json` and `_crf.json` are plain
+MatSciBERT and the CRF head on the 17 slot types
+(`data/raw/dataset/sofc_exp_slot/`), and
+`gpu/ner_results_sofc_slot_published_split_crf_mt.json` and
+`gpu/ner_results_sofc_published_split_crf_mt.json` the multi-task model's
+slot and entity heads (`--granularity sofc_both --crf --multi-task`, one
+file per level). `gpu/ner_week5_seed_analysis.json` (`published_split`,
+`sofc_slot` and `sofc`) holds the decisions, the votes over the seed
+triples and, per published split, each system's mean F1 per type over its
+seeds (`types`).
+
 `gpu/ner_week5_seed_analysis.json` also holds `paper_count` (claim C19): per
 held-out paper, the CRF head's F1 trained on two papers (the inner folds'
 counts at D = 0) and on three (leave-one-paper-out), seeds 0 to 200, and
@@ -181,6 +194,8 @@ CRF head on the published splits; `gap` the random-split minus held-out
 difference per criterion; `near_misses` the shares of the CRF head's
 predictions that are right, of another type (fine-grained, also of an MMO
 ancestor or descendant type), inside a longer gold entity, around a shorter
-one, crossing one, or spurious; `conventions` what the gold annotations alone
+one, crossing one, or spurious, on both protocols and the published splits,
+with the most frequent pairs of gold and predicted type among those of the
+right span (`wrong_type_pairs`, per run); `conventions` what the gold annotations alone
 show: the names that are entities in two or more papers, those with
 different types, and the mean span length of each type per paper.

@@ -7,3 +7,4 @@ Table 4. The CRF head (10 model seeds): the share of gold test entities whose wo
 | coarse, random splits | 39.5 | 89.0 | 63.0 | 76.96 | 83.91 | 84.46 | 93.38 |
 | coarse, unseen papers | 78.8 | 82.1 | 51.6 | 58.60 | 74.17 | 68.95 | 90.74 |
 | SOFC-Exp, official split | 49.3 | 88.7 | 82.0 | 83.75 | 84.06 | 88.48 | 88.80 |
+| SOFC-Exp slot types, official split | 59.0 | 87.4 | 61.8 | 71.88 | 83.44 | 75.75 | 89.38 |

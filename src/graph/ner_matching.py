@@ -23,10 +23,12 @@ Output, results/gpu/ner_matching.json:
     Student-t CI;
   - gap: per granularity and system, each criterion's mean F1 on the random splits minus that
     on held-out papers (SOFC-Exp: article folds);
-  - near_misses: per granularity and protocol, the CRF head's predictions over all its runs:
-    the shares that are right, of the right span and another type (fine-grained, also the
-    share whose type is an MMO ancestor or descendant of the gold one), inside a longer gold
-    entity, around a shorter one, crossing one, or overlapping none (spurious);
+  - near_misses: per granularity and protocol (the published splits too), the CRF head's
+    predictions over all its runs: the shares that are right, of the right span and another
+    type (fine-grained, also the share whose type is an MMO ancestor or descendant of the gold
+    one), inside a longer gold entity, around a shorter one, crossing one, or overlapping none
+    (spurious); and the most frequent pairs of gold and predicted type among those of the
+    right span and another type, with their count per run;
   - conventions: per MaterioMiner granularity, from the gold annotations alone, the names
     (exact words) that are entities in two or more papers, those that take different types
     (in different papers, or within one), and of those, fine-grained, the ones whose types are
@@ -123,13 +125,17 @@ NEAR_MISSES = ('right', 'wrong_type', 'wrong_type_related', 'inside_longer_gold'
                'around_shorter_gold', 'crossing', 'spurious')
 
 
-def near_misses(files, related=None):
+def near_misses(files, related=None, top=10):
     """Shares of the predictions of every run of the files (see the module docstring); related(a,
-    b) tells whether two types are related (wrong_type_related is left out without it)."""
+    b) tells whether two types are related (wrong_type_related is left out without it). Also
+    the `top` most frequent [gold type, predicted type, count per run] of the predictions with
+    a gold entity's span and another type."""
     counts = dict.fromkeys(NEAR_MISSES, 0)
-    n = 0
+    pairs = {}
+    n = runs = 0
     for f in files:
         for run in f['runs']:
+            runs += 1
             for gold_tags, pred_tags in zip(run['test_gold'], run['test_pred'], strict=True):
                 gold = set(tags_to_spans(gold_tags.split())[0])
                 for p in tags_to_spans(pred_tags.split())[0]:
@@ -140,6 +146,7 @@ def near_misses(files, related=None):
                         counts['right'] += 1
                     elif same:
                         counts['wrong_type'] += 1
+                        pairs[same[0][2], p[2]] = pairs.get((same[0][2], p[2]), 0) + 1
                         counts['wrong_type_related'] += bool(related and related(p[2],
                                                                                  same[0][2]))
                     elif over:
@@ -152,6 +159,8 @@ def near_misses(files, related=None):
     out = {'n_pred': n, **{k: round(v / n, 3) if n else 0.0 for k, v in counts.items()}}
     if related is None:
         del out['wrong_type_related']
+    out['wrong_type_pairs'] = [[gold, pred, round(k / runs, 1)] for (gold, pred), k in
+                               sorted(pairs.items(), key=lambda kv: (-kv[1], kv[0]))[:top]]
     return out
 
 
@@ -223,6 +232,9 @@ def analyse(directory):
             files = load(directory, [f'ner_results_{g}_{PUBLISHED}{suffix}.json'])
             if files:
                 systems[system] = summary({r['run_id']: run_f1(r) for r in files[0]['runs']})
+                if system == 'crf':
+                    out['near_misses'][f'{g}_{PUBLISHED}'] = near_misses(
+                        files, mmo_related if g == 'fine' else None)
         if systems:
             out['systems'][f'{g}_{PUBLISHED}'] = systems
     return out
@@ -241,7 +253,8 @@ def main(argv=None):
                                                    for c in CRITERIA))
     for key, shares in result['near_misses'].items():
         print(f'  {key}, the CRF head\'s predictions: ' + ', '.join(
-            f'{k} {100 * v:.1f}%' for k, v in shares.items() if k != 'n_pred'))
+            f'{k} {100 * v:.1f}%' for k, v in shares.items()
+            if k not in ('n_pred', 'wrong_type_pairs')))
     for g, c in result['conventions'].items():
         related = (f", {c['n_retyped_related']} of them MMO-related"
                    if 'n_retyped_related' in c else '')

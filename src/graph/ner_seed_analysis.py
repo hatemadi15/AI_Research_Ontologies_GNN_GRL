@@ -32,6 +32,8 @@ votes (ner_seedmeans.WEEK5_SYSTEMS) and writes ner_week5_seed_analysis.json next
     mention replacement (crf_mr, S2); part 2e the CRF head and plain MatSciBERT scored on
     SOFC-Exp's test articles cut into words as its training articles are (crf_cdetest
     against the CRF head; cdetest against plain MatSciBERT, baseline_retokenized_test).
+    Per entity type of the test set (types), its support and each system's mean F1 over
+    its seeds (part 2d reports them on the slot level; not the retokenized runs).
   - errors (exploratory; cited by the week-7 protocol, part 1): per protocol and
     granularity, the kinds of error of the CRF head over its 10 seeds: the share of gold
     entities that are correct, missed (no overlapping prediction), of the right span and
@@ -250,6 +252,22 @@ def week6_type_differences(directory):
     return out
 
 
+def split_types(systems):
+    """Per entity type of a published split's test set, the most frequent first: its support
+    and each system's mean F1 over its seeds ({system: {run_id: run}}). Types that only a
+    prediction has are left out."""
+    rows = {}
+    for name, by_id in systems.items():
+        for run in by_id.values():
+            for t, s in run['per_class'].items():
+                if t not in AVERAGES and s['support']:
+                    row = rows.setdefault(t, {'support': int(s['support'])})
+                    row.setdefault(name, []).append(100 * s['f1-score'])
+    return {t: {k: v if k == 'support' else round(statistics.mean(v), 2)
+                for k, v in row.items()}
+            for t, row in sorted(rows.items(), key=lambda kv: (-kv[1]['support'], kv[0]))}
+
+
 def triple_votes(by_id):
     """The votes of a system's runs {run_id: run} over the seed triples 0-200, 300-500 and
     600-800 of a published split (run ids seed<K>); None unless every member is there."""
@@ -289,11 +307,14 @@ def published_split(directory):
         if crf_votes:
             entry['crf_votes'] = {avg: spread([get(v) for v in crf_votes])
                                   for avg, get in F1_AVERAGES.items()}
+        typed = dict(runs)
         for method in SPLIT_METHODS:
             found = load_files(directory, [f'ner_results_{g}_published_split_{method}.json'])
             if not found:
                 continue
             by_id = {r['run_id']: r for r in found[0]['runs']}
+            if method != f'crf_{RETOKENIZED_BASELINE}':      # another test set's words
+                typed[method] = by_id
             ids = [i for i in runs['crf'] if i in by_id]
             found = entry.setdefault('methods', {})[method] = {
                 **{avg: spread([get(r) for r in by_id.values()])
@@ -320,6 +341,7 @@ def published_split(directory):
                                                 for i in ids], 'mean_diff')
                                    for avg, get in F1_AVERAGES.items()},
                 'n_pairs': len(ids)}
+        entry['types'] = split_types(typed)
         out[g] = entry
     return out
 

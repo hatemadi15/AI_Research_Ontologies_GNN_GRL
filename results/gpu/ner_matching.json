@@ -1405,6 +1405,166 @@
         },
         "n_pairs": 10
       }
+    },
+    "sofc_slot_published_split": {
+      "baseline": {
+        "strict": {
+          "mean": 70.2,
+          "ci95": [
+            68.82,
+            71.58
+          ],
+          "per_run": [
+            71.73,
+            70.67,
+            72.55,
+            68.38,
+            71.26,
+            72.16,
+            69.25,
+            66.75,
+            70.95,
+            68.28
+          ]
+        },
+        "exact": {
+          "mean": 77.52,
+          "ci95": [
+            76.29,
+            78.76
+          ],
+          "per_run": [
+            78.99,
+            75.89,
+            78.53,
+            78.22,
+            79.91,
+            79.12,
+            75.88,
+            76.82,
+            77.38,
+            74.5
+          ]
+        },
+        "type": {
+          "mean": 77.47,
+          "ci95": [
+            76.4,
+            78.54
+          ],
+          "per_run": [
+            77.62,
+            77.05,
+            80.19,
+            76.56,
+            78.5,
+            78.98,
+            76.57,
+            74.89,
+            77.78,
+            76.57
+          ]
+        },
+        "overlap": {
+          "mean": 88.07,
+          "ci95": [
+            87.45,
+            88.7
+          ],
+          "per_run": [
+            88.43,
+            87.18,
+            87.98,
+            89.18,
+            89.85,
+            88.07,
+            87.21,
+            87.67,
+            87.82,
+            87.35
+          ]
+        },
+        "n_pairs": 10
+      },
+      "crf": {
+        "strict": {
+          "mean": 71.88,
+          "ci95": [
+            71.01,
+            72.75
+          ],
+          "per_run": [
+            69.77,
+            70.84,
+            72.07,
+            72.42,
+            70.65,
+            73.23,
+            72.18,
+            71.52,
+            72.31,
+            73.81
+          ]
+        },
+        "exact": {
+          "mean": 83.44,
+          "ci95": [
+            82.82,
+            84.06
+          ],
+          "per_run": [
+            82.63,
+            84.64,
+            83.44,
+            83.93,
+            84.05,
+            83.22,
+            81.74,
+            84.37,
+            83.0,
+            83.36
+          ]
+        },
+        "type": {
+          "mean": 75.75,
+          "ci95": [
+            74.54,
+            76.97
+          ],
+          "per_run": [
+            73.17,
+            73.97,
+            77.06,
+            77.75,
+            74.14,
+            76.36,
+            77.46,
+            75.23,
+            74.83,
+            77.57
+          ]
+        },
+        "overlap": {
+          "mean": 89.38,
+          "ci95": [
+            88.72,
+            90.04
+          ],
+          "per_run": [
+            88.4,
+            89.47,
+            89.95,
+            90.25,
+            89.0,
+            89.04,
+            89.02,
+            91.08,
+            87.9,
+            89.73
+          ]
+        },
+        "n_pairs": 10
+      }
     }
   },
   "gap": {
@@ -1470,7 +1630,59 @@
       "inside_longer_gold": 0.053,
       "around_shorter_gold": 0.035,
       "crossing": 0.001,
-      "spurious": 0.104
+      "spurious": 0.104,
+      "wrong_type_pairs": [
+        [
+          "FatigueTestSpecimen",
+          "TestSpecimen",
+          1.6
+        ],
+        [
+          "TensileYieldStrength",
+          "TensileUltimateStrength",
+          1.0
+        ],
+        [
+          "MaterialClass",
+          "Value",
+          0.8
+        ],
+        [
+          "Microstructure",
+          "MicrostructureEntity",
+          0.6
+        ],
+        [
+          "MechanicalTestDataSet",
+          "FatigueTest",
+          0.6
+        ],
+        [
+          "MechanicalProperty",
+          "TensileYieldStrength",
+          0.4
+        ],
+        [
+          "TwinBoundary",
+          "GrainBoundary",
+          0.4
+        ],
+        [
+          "TestSpecimen",
+          "FatigueTestSpecimen",
+          0.4
+        ],
+        [
+          "TensileYieldStrength",
+          "StressAmplitude",
+          0.3
+        ],
+        [
+          "MechanicalTreatment",
+          "FatigueTest",
+          0.3
+        ]
+      ]
     },
     "fine_leave_one_paper_out": {
       "n_pred": 10026,
@@ -1480,7 +1692,59 @@
       "inside_longer_gold": 0.108,
       "around_shorter_gold": 0.07,
       "crossing": 0.002,
-      "spurious": 0.156
+      "spurious": 0.156,
+      "wrong_type_pairs": [
+        [
+          "FatigueTestSpecimen",
+          "TestSpecimen",
+          3.5
+        ],
+        [
+          "TestSpecimen",
+          "FatigueTestSpecimen",
+          3.1
+        ],
+        [
+          "MicrostructureEntity",
+          "GrainBoundary",
+          2.1
+        ],
+        [
+          "Alloy",
+          "Value",
+          1.8
+        ],
+        [
+          "MechanicalTestDataSet",
+          "DataSet",
+          0.9
+        ],
+        [
+          "StressAmplitude",
+          "Value",
+          0.8
+        ],
+        [
+          "MechanicalTreatment",
+          "FatigueTest",
+          0.8
+        ],
+        [
+          "TensileUltimateStrength",
+          "TensileYieldStrength",
+          0.8
+        ],
+        [
+          "Alloy",
+          "MaterialClass",
+          0.8
+        ],
+        [
+          "LoadingType",
+          "Mechanism",
+          0.8
+        ]
+      ]
     },
     "coarse_random_split_vary": {
       "n_pred": 22599,
@@ -1489,7 +1753,59 @@
       "inside_longer_gold": 0.062,
       "around_shorter_gold": 0.051,
       "crossing": 0.001,
-      "spurious": 0.056
+      "spurious": 0.056,
+      "wrong_type_pairs": [
+        [
+          "PQT",
+          "MTP",
+          2.4
+        ],
+        [
+          "CHP",
+          "MEC",
+          1.2
+        ],
+        [
+          "PRO",
+          "MIP",
+          1.2
+        ],
+        [
+          "MTP",
+          "PQT",
+          1.1
+        ],
+        [
+          "PRP",
+          "PRO",
+          1.1
+        ],
+        [
+          "DAM",
+          "MEC",
+          1.0
+        ],
+        [
+          "PRP",
+          "MTP",
+          1.0
+        ],
+        [
+          "SDE",
+          "OBJ",
+          0.8
+        ],
+        [
+          "MEC",
+          "MFP",
+          0.8
+        ],
+        [
+          "MAC",
+          "VAL",
+          0.8
+        ]
+      ]
     },
     "coarse_leave_one_paper_out": {
       "n_pred": 21963,
@@ -1498,7 +1814,264 @@
       "inside_longer_gold": 0.109,
       "around_shorter_gold": 0.092,
       "crossing": 0.004,
-      "spurious": 0.061
+      "spurious": 0.061,
+      "wrong_type_pairs": [
+        [
+          "MTP",
+          "PQT",
+          3.9
+        ],
+        [
+          "MIC",
+          "DEF",
+          3.6
+        ],
+        [
+          "DEF",
+          "DAM",
+          3.1
+        ],
+        [
+          "DEF",
+          "MIC",
+          3.0
+        ],
+        [
+          "MFP",
+          "CHP",
+          2.9
+        ],
+        [
+          "PQT",
+          "MTP",
+          2.5
+        ],
+        [
+          "ETP",
+          "MTP",
+          2.4
+        ],
+        [
+          "ETP",
+          "EQU",
+          2.0
+        ],
+        [
+          "DAM",
+          "MEC",
+          1.9
+        ],
+        [
+          "EQU",
+          "CHP",
+          1.7
+        ]
+      ]
+    },
+    "fine_published_split": {
+      "n_pred": 2522,
+      "right": 0.741,
+      "wrong_type": 0.033,
+      "wrong_type_related": 0.019,
+      "inside_longer_gold": 0.082,
+      "around_shorter_gold": 0.029,
+      "crossing": 0.0,
+      "spurious": 0.115,
+      "wrong_type_pairs": [
+        [
+          "FatigueTestSpecimen",
+          "TestSpecimen",
+          2.2
+        ],
+        [
+          "MaterialClass",
+          "Value",
+          2.0
+        ],
+        [
+          "Microstructure",
+          "MicrostructureEntity",
+          2.0
+        ],
+        [
+          "DataSet",
+          "MechanicalTestDataSet",
+          0.6
+        ],
+        [
+          "FatigueTest",
+          "MechanicalTestDataSet",
+          0.2
+        ],
+        [
+          "TwinBoundary",
+          "Value",
+          0.2
+        ],
+        [
+          "CrackInitation",
+          "Crack",
+          0.1
+        ],
+        [
+          "FatigueTest",
+          "LoadingType",
+          0.1
+        ],
+        [
+          "Mechanism",
+          "FatigueTest",
+          0.1
+        ],
+        [
+          "Microstructure",
+          "TestSpecimen",
+          0.1
+        ]
+      ]
+    },
+    "coarse_published_split": {
+      "n_pred": 4687,
+      "right": 0.741,
+      "wrong_type": 0.08,
+      "inside_longer_gold": 0.073,
+      "around_shorter_gold": 0.047,
+      "crossing": 0.003,
+      "spurious": 0.056,
+      "wrong_type_pairs": [
+        [
+          "PQT",
+          "MTP",
+          8.4
+        ],
+        [
+          "DEF",
+          "MEC",
+          1.8
+        ],
+        [
+          "EQU",
+          "CHP",
+          1.7
+        ],
+        [
+          "MIP",
+          "PRO",
+          1.7
+        ],
+        [
+          "PRP",
+          "MTP",
+          1.6
+        ],
+        [
+          "CPR",
+          "MEP",
+          1.0
+        ],
+        [
+          "PQT",
+          "MIP",
+          1.0
+        ],
+        [
+          "SDE",
+          "OBJ",
+          1.0
+        ],
+        [
+          "CGE",
+          "MIC",
+          0.9
+        ],
+        [
+          "CHP",
+          "MTP",
+          0.9
+        ]
+      ]
+    },
+    "sofc_published_split": {
+      "n_pred": 10161,
+      "right": 0.822,
+      "wrong_type": 0.003,
+      "inside_longer_gold": 0.041,
+      "around_shorter_gold": 0.018,
+      "crossing": 0.0,
+      "spurious": 0.116,
+      "wrong_type_pairs": [
+        [
+          "DEVICE",
+          "MATERIAL",
+          2.2
+        ],
+        [
+          "VALUE",
+          "MATERIAL",
+          0.9
+        ]
+      ]
+    },
+    "sofc_slot_published_split": {
+      "n_pred": 6853,
+      "right": 0.728,
+      "wrong_type": 0.117,
+      "inside_longer_gold": 0.061,
+      "around_shorter_gold": 0.014,
+      "crossing": 0.0,
+      "spurious": 0.08,
+      "wrong_type_pairs": [
+        [
+          "electrolyte_material",
+          "cathode_material",
+          27.1
+        ],
+        [
+          "anode_material",
+          "cathode_material",
+          7.3
+        ],
+        [
+          "electrolyte_material",
+          "anode_material",
+          7.2
+        ],
+        [
+          "voltage",
+          "open_circuit_voltage",
+          7.0
+        ],
+        [
+          "cathode_material",
+          "anode_material",
+          6.9
+        ],
+        [
+          "current_density",
+          "power_density",
+          5.6
+        ],
+        [
+          "cathode_material",
+          "electrolyte_material",
+          5.1
+        ],
+        [
+          "electrolyte_material",
+          "interlayer_material",
+          1.5
+        ],
+        [
+          "interlayer_material",
+          "anode_material",
+          1.4
+        ],
+        [
+          "conductivity",
+          "power_density",
+          1.2
+        ]
+      ]
     }
   },
   "conventions": {
