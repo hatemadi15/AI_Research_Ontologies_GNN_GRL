@@ -2462,7 +2462,12 @@ identical (`smokeae` 77.95, `smokeaf` 84.98).
    random splits.
 5. **Which articles are held out** matters about as much as the protocol:
    the article folds range over 9 points (79.77 to 88.76), the random
-   splits over 3.
+   splits over 3. *Exploratory (per fold, pooled over the 10 seeds):* the
+   share of unseen names does not explain it. The best fold has 47.8%
+   unseen names and the worst 45.4%; they differ in recall within each
+   kind (seen 92.8 against 86.6, unseen 89.0 against 78.3; over the folds
+   86.6–92.8 and 76.4–89.0). Some articles are harder for the model on
+   every kind of name.
 
 As expected before the runs, the gap is a few points, far below
 MaterioMiner's. What the protocol said this changes: C2 is a finding about
