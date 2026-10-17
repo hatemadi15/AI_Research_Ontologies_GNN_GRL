@@ -317,6 +317,29 @@ def test_sofc_splits_random_against_article_folds(tmp_path):
     assert set(sa.sofc_splits(tmp_path)) == {'random_split_vary'}
 
 
+def test_sofc_draws_mention_replacement_on_ten_articles(tmp_path):
+    """Week 9, part 2: per draw the 10-seed means of the CRF head and mention replacement,
+    their difference over the 5 draws, and the CRF head on 10 articles against all 26."""
+    pytest.importorskip('scipy')
+    for j, off in enumerate(range(0, 1000, 100)):
+        for system, gain in (('crf', 0.0), ('crf_mr', 2.0)):
+            runs = [_run(f'draw{k}', 70 + k + j / 10 + gain + (k % 2) / 2) for k in range(5)]
+            (tmp_path / f'ner_results_sofc_article_draws_{system}_m{off}.json').write_text(
+                json.dumps({'runs': runs}))
+    official = [_run(f'seed{off}', 80 + j / 10) for j, off in enumerate(range(0, 1000, 100))]
+    (tmp_path / 'ner_results_sofc_published_split_crf.json').write_text(
+        json.dumps({'runs': official}))
+    out = sa.sofc_draws(tmp_path)
+    assert out['n_draws'] == 5 and out['passes']
+    assert out['crf']['micro']['mean'] == 72.65                  # 70 + 2 + 0.45 + 0.2
+    assert out['crf_mr_minus_crf']['micro']['mean_diff'] == 2.0
+    assert out['crf_mr_minus_crf']['micro']['per_run'] == [2.0] * 5
+    # per seed: the mean over the draws (72.2 + j / 10) minus the official run (80 + j / 10)
+    assert out['ten_minus_all_articles']['mean_diff'] == -7.8
+    (tmp_path / 'ner_results_sofc_article_draws_crf_mr_m900.json').unlink()
+    assert sa.sofc_draws(tmp_path) == {}
+
+
 def test_paper_count_compares_two_and_three_training_papers(tmp_path):
     """A third training paper: per held-out paper, F1 trained on 2 papers (the inner folds'
     counts at D = 0) against F1 trained on 3 (leave-one-paper-out), over the 4 papers."""

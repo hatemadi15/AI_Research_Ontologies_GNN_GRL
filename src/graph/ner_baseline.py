@@ -119,7 +119,10 @@ tests on group i and trains and validates on the other documents' sentences, as
 --leave-one-paper-out does. `--two-paper-size` (week 8, part 2) runs each held-out paper's
 fold of --leave-one-paper-out once per pair of the other papers, with its training sentences
 cut to the number that the pair alone gives (folds `P|Q+R`, variant `crf_p3n2`): three
-papers at the size of two.
+papers at the size of two. `--train-articles K` (with `--published-split`, SOFC-Exp; week 9,
+part 2) trains on K of the official training articles, `--draws` times (default 5; folds
+`draw<i>`, the articles shuffled with the split seed + i), and validates and tests on the
+official articles (protocol `article_draws`; the model seed comes from `--seed-offset`).
 
 On a CUDA device a run is deterministic (cuda_determinism) and every run stores its
 `environment` (week-4 protocol: GPU runs are only compared with GPU runs).
@@ -1736,7 +1739,7 @@ F1_AVERAGES = {
 # like the protocol.
 RESULT_FILE = re.compile(r'ner_results_(fine|coarse|sofc_slot|sofc)'
                          r'(?:_(random_split_vary|leave_one_paper_out|leave_two_papers_out|'
-                         r'published_split|document_folds))?'
+                         r'published_split|document_folds|article_draws))?'
                          r'(?:_([a-z0-9_]+))?\.json')
 # untagged variants: a tagged variant must not take the name of one (--crf --tag mt: crf_mt)
 PLAIN_VARIANTS = ('baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_st', 'crf_mt_ls', 'crf_st3',
@@ -2012,6 +2015,9 @@ def make_folds(data, args, indices=False, granularity=None):
     """
     if getattr(args, 'published_split', False):
         parts, _ = published_split(data, granularity)
+        if getattr(args, 'train_articles', 0):
+            return article_draws(data, parts, args.train_articles, args.draws,
+                                 args.split_seed, indices)
         if not indices:
             parts = [[data[i] for i in part] for part in parts]
         return [(f'seed{seed}', *parts) for seed in args.seeds]
@@ -2034,6 +2040,30 @@ def make_folds(data, args, indices=False, granularity=None):
 
 
 DOCUMENT_FOLDS = 'document_folds'
+ARTICLE_DRAWS = 'article_draws'
+
+
+def article_draws(data, parts, k, draws, split_seed, indices=False):
+    """The folds of --train-articles K (ROADMAP §4, week 9, part 2): for draw i of `draws`,
+    the official split (parts: train, val, test positions) with its training sentences cut to
+    those of K of its training articles, the articles sorted and shuffled with
+    random.Random(split_seed + i). The validation and test sentences are the official ones.
+    Folds draw<i>."""
+    train, val, test = parts
+    docs = sorted({data[i][2] for i in train})
+    if not 1 <= k <= len(docs):
+        raise SystemExit(f'--train-articles must be between 1 and the {len(docs)} training '
+                         f'articles, not {k}')
+    folds = []
+    for i in range(draws):
+        order = list(docs)
+        random.Random(split_seed + i).shuffle(order)
+        keep = set(order[:k])
+        fold = ([j for j in train if data[j][2] in keep], list(val), list(test))
+        if not indices:
+            fold = tuple([data[j] for j in part] for part in fold)
+        folds.append((f'draw{i}', *fold))
+    return folds
 
 
 def two_paper_size_folds(data, docs, keep, split_seed, indices=False):
@@ -2144,6 +2174,8 @@ def head_granularities(args):
 
 
 def protocol_name(args):
+    if getattr(args, 'train_articles', 0):
+        return ARTICLE_DRAWS
     if getattr(args, 'published_split', False):
         return PUBLISHED_SPLIT
     if getattr(args, 'leave_two_papers_out', False):
@@ -2156,9 +2188,11 @@ def protocol_name(args):
 
 def held_out_protocol(args):
     """Whether the test documents are unseen (leave-one- or leave-two-papers-out, document
-    folds)."""
+    folds) or the training set is not the published one (article draws): no published
+    reference applies."""
     return (args.leave_one_paper_out or getattr(args, 'leave_two_papers_out', False)
-            or bool(getattr(args, 'document_folds', 0)))
+            or bool(getattr(args, 'document_folds', 0))
+            or bool(getattr(args, 'train_articles', 0)))
 
 
 def results_path(out_dir, granularity, args):
@@ -2681,6 +2715,14 @@ def parse_args(argv=None):
                              'the split seed, dealt into K groups, each the test set of one fold '
                              '(fold<i>); the other documents train and validate, as with '
                              '--leave-one-paper-out (ROADMAP §4, week 8)')
+    parser.add_argument('--train-articles', type=int, default=argparse.SUPPRESS, metavar='K',
+                        help="with --published-split on SOFC-Exp's entity or slot level: train on "
+                             'K of the official training articles, drawn --draws times (folds '
+                             'draw<i>, the articles shuffled with split seed + i); the official '
+                             'validation and test articles (protocol article_draws; ROADMAP §4, '
+                             'week 9)')
+    parser.add_argument('--draws', type=int, default=argparse.SUPPRESS, metavar='N',
+                        help='with --train-articles: the number of draws (default 5)')
     parser.add_argument('--published-split', action='store_true', default=argparse.SUPPRESS,
                         help="the train, validation and test sentences, and the tags, of the "
                              "MaterioMiner release (data/raw/dataset/published_split); every "
@@ -2817,6 +2859,22 @@ def parse_args(argv=None):
                        'published_split'):
             if getattr(args, option, False):
                 parser.error(f"--document-folds is a protocol of its own: no "
+                             f"--{option.replace('_', '-')}")
+    if hasattr(args, 'draws') and not hasattr(args, 'train_articles'):
+        parser.error('--draws needs --train-articles')
+    if hasattr(args, 'train_articles'):
+        if not getattr(args, 'published_split', False) or args.granularity not in SOFC:
+            parser.error("--train-articles needs --published-split and SOFC-Exp's entity or "
+                         "slot level (--granularity sofc or sofc_slot)")
+        if args.train_articles < 1:
+            parser.error('--train-articles: at least 1 article')
+        args.draws = getattr(args, 'draws', 5)
+        if args.draws < 1:
+            parser.error('--draws: at least 1 draw')
+        for option in ('multi_task', 'label_semantics', 'self_train', 'context',
+                       'entity_bias', 'retokenized_test'):
+            if getattr(args, option, None) not in (None, False):
+                parser.error(f"--train-articles is not available with "
                              f"--{option.replace('_', '-')}")
     if getattr(args, 'published_split', False):
         for option in ('vary_split', 'leave_one_paper_out', 'multi_task'):

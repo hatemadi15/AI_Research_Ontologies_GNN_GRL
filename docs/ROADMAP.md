@@ -2568,3 +2568,19 @@ before part 2 runs, and nothing in this design changes after part 1's
 results. *Budget:* 100 runs on 156–248 training sentences; the mention
 replacement runs train on about 4 times as many. About 2 hours of one
 session on two lanes.
+
+*Prepared for part 2 (17 October, after the protocol and before any run;
+tests only).* `--train-articles K` with `--published-split` on SOFC-Exp's
+entity or slot level trains on K of the official training articles,
+`--draws` times (default 5, folds `draw<i>`). The articles are sorted and
+shuffled with the split seed + i, and the official validation and test
+articles are kept (protocol `article_draws`; the model seed comes from
+`--seed-offset`). Its 5 draws of 10 articles hold 182, 205, 248, 173 and
+156 training sentences. Batch `w9b` repeats the CRF run of smoke4
+(`smokeaj`) and session b's SOFC-Exp CRF run of seed 0 (`smokeak`), then
+runs the CRF head and mention replacement with seed offsets 0 to 900, one
+job per system and seed. `ner_seed_analysis.py` (`sofc_draws`) makes the
+decision and the reported comparison of 10 articles against all 26. On a
+tiny random model every existing option writes byte-identical results
+files, and every earlier batch is unchanged. Part 1 runs from the
+protocol's commit, part 2 from this one.

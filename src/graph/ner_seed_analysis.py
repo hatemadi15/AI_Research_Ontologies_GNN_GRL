@@ -60,6 +60,13 @@ votes (ner_seedmeans.WEEK5_SYSTEMS) and writes ner_week5_seed_analysis.json next
     papers at the size of two minus two papers (the decision: does a third paper help at
     the same number of training sentences?), and size, three papers minus three papers at
     the size of two.
+  - sofc_draws (week 9, part 2; its decision): SOFC-Exp's entity level trained on 10 of its
+    26 training articles (--train-articles 10, 5 draws, the official validation and test
+    articles). Per draw, the 10-seed means of the CRF head and of mention replacement under
+    every F1 average, and over the 5 draws their means and mention replacement minus the
+    CRF head with its 95% CI (passes: the CI above 0); reported, the CRF head on 10
+    articles minus on all 26 (the official split's run of the same model seed; the mean
+    over the draws), paired by seed.
   - sofc_splits (week 8, part 1; descriptive): SOFC-Exp beyond its official split. Per
     protocol, its 5 random sentence splits and its 5 article folds (--document-folds 5), the
     CRF head's 10-seed mean per split under every F1 average, with the mean and 95% CI over
@@ -102,6 +109,7 @@ SPLIT_METHODS = ('crf_deberta', 'crf_ctx', 'crf_dc', 'crf_dcr', 'crf_ebv', 'crf_
 # week 7, part 2e: plain MatSciBERT scored on SOFC-Exp's retokenized test articles
 RETOKENIZED_BASELINE = 'cdetest'
 SOFC_PROTOCOLS = ('random_split_vary', 'document_folds')     # week 8, part 1
+ARTICLE_DRAWS = 'article_draws'                               # week 9, part 2
 VOTED_METHODS = ('crf_mt', 'crf_mt_mr')
 
 
@@ -467,6 +475,32 @@ def sofc_splits(directory):
     return out
 
 
+def sofc_draws(directory):
+    """The sofc_draws section (see the module docstring); {} without all 10 seed files of
+    both systems."""
+    files = {s: load_files(directory, [f'ner_results_sofc_{ARTICLE_DRAWS}_{s}_m{off}.json'
+                                       for off in WEEK5_OFFSETS]) for s in ('crf', 'crf_mr')}
+    if not all(files.values()):
+        return {}
+    scores = {s: system_scores(f) for s, f in files.items()}
+    ids = [i for i in scores['crf'] if i in scores['crf_mr']]
+    out = {s: {avg: spread([scores[s][i][avg] for i in ids]) for avg in F1_AVERAGES}
+           for s in scores}
+    out['crf_mr_minus_crf'] = {
+        avg: spread([scores['crf_mr'][i][avg] - scores['crf'][i][avg] for i in ids],
+                    'mean_diff') for avg in F1_AVERAGES}
+    out['n_draws'] = len(ids)
+    out['passes'] = out['crf_mr_minus_crf']['micro']['ci95'][0] > 0
+    official = load_files(directory, ['ner_results_sofc_published_split_crf.json'])
+    if official:
+        by_seed = {r['run_id']: r['f1'] for r in official[0]['runs']}
+        pairs = [(statistics.mean(r['f1'] for r in f['runs']), by_seed[f'seed{off}'])
+                 for off, f in zip(WEEK5_OFFSETS, files['crf']) if f'seed{off}' in by_seed]
+        if pairs:
+            out['ten_minus_all_articles'] = spread([a - b for a, b in pairs], 'mean_diff')
+    return out
+
+
 def analyse(directory):
     """The analyses for every protocol and granularity that has the files."""
     out = {'spread': {}, 'triples': {}, 'types': {}}
@@ -488,6 +522,7 @@ def analyse(directory):
     out['published_split'] = published_split(directory)
     out['week6_types'] = week6_type_differences(directory)
     out['sofc_splits'] = sofc_splits(directory)
+    out['sofc_draws'] = sofc_draws(directory)
     out['paper_count'] = paper_count(directory)
     out['paper_diversity'] = paper_diversity(directory)
     out['errors'] = {}
@@ -542,6 +577,13 @@ def main(argv=None):
         if protocol != 'gap':
             print(f"  SOFC-Exp, {protocol}: the CRF head {entry['micro']['mean']:.2f} "
                   f"{entry['micro']['ci95']} over {entry['n_splits']} splits")
+    if result['sofc_draws']:
+        e = result['sofc_draws']
+        d = e['crf_mr_minus_crf']['micro']
+        print(f"  SOFC-Exp on 10 training articles ({e['n_draws']} draws): the CRF head "
+              f"{e['crf']['micro']['mean']:.2f}, mention replacement "
+              f"{e['crf_mr']['micro']['mean']:.2f}, minus the CRF head {d['mean_diff']:+.2f} "
+              f"{d['ci95']} ({'passes' if e['passes'] else 'no'})")
     if 'gap' in result['sofc_splits']:
         print(f"  SOFC-Exp, random splits minus article folds: "
               f"{result['sofc_splits']['gap']['micro']:+.2f} micro F1")

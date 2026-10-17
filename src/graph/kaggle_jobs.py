@@ -114,6 +114,10 @@ Week 9 (mention replacement on the multi-task model, --multi-task --augment-ment
           again; then crf_mt_mr_m<N> on the held-out papers, seed offsets 0 to 900 (both
           granularities from one model), and S2 on SOFC-Exp's two levels (sofc_both, model
           seeds 0 to 900), balanced over the lanes
+  w9b     the CRF run of smoke4 (smokeaj) and session b's SOFC-Exp CRF run of seed 0 (smokeak)
+          again; then SOFC-Exp's entity level trained on 10 of its 26 training articles
+          (--train-articles 10, 5 draws), the CRF head and mention replacement, seed offsets 0
+          to 900 (crf_m<N>, crf_mr_m<N>), balanced over the lanes
 
 Usage:
   python src/graph/kaggle_jobs.py quota
@@ -195,6 +199,10 @@ SOFC_MTST_LANES = (OFFSETS_PUBLISHED[:5], OFFSETS_PUBLISHED[5:])
 # week 8, part 1: SOFC-Exp's random sentence splits and article folds (not in PROTOCOL_FLAGS,
 # whose protocols the MaterioMiner families run)
 SOFC_SPLITS = {'random_split_vary': ('--vary-split',), 'document_folds': ('--document-folds', '5')}
+# week 9, part 2: 5 draws of 10 of SOFC-Exp's 26 training articles, about 0.35 of its official
+# training sentences per run
+DRAWS = 5
+DRAW_SHARE = 0.35
 
 
 # ---------------------------------------------------------------------------
@@ -497,6 +505,23 @@ def batch_lanes(name):
                  published_job('sofc_both', '--crf', '--multi-task', *METHOD_FLAGS['mr']))]
         lanes = balance(held_out + sofc, loads=[COST['crf'], COST['mt']])
         return [[repeat + ['--tag', 'smokeah']] + lanes[0], [mt_repeat] + lanes[1]]
+    if name == 'w9b':
+        # week 9, part 2: SOFC-Exp's entity level trained on 10 of its 26 training articles
+        # (--train-articles 10, 5 draws; the official validation and test articles), the CRF
+        # head and mention replacement, one job per system and seed offset (a file each);
+        # first the repeats of the CRF run of smoke4 (smokeaj) and of session b's SOFC-Exp CRF
+        # run of seed 0 (smokeak: this commit changed how the official split is cut)
+        sofc_repeat = ['--granularity', 'sofc', '--published-split', '--seeds', '0', '--crf',
+                       '--tag', 'smokeak', '--save-predictions', '--threads', str(THREADS)]
+        draws = [(COST['sofc'] * DRAW_SHARE * DRAWS * cost,
+                  ['--granularity', 'sofc', '--published-split', '--train-articles', '10',
+                   '--crf', *flags, '--tag', f'm{off}',
+                   *(('--seed-offset', str(off)) if off else ()), '--save-predictions',
+                   '--threads', str(THREADS)])
+                 for flags, cost in (((), 1.0), (METHOD_FLAGS['mr'], COST['mr']))
+                 for off in OFFSETS_PUBLISHED]
+        lanes = balance(draws, loads=[COST['crf'] + COST['sofc'], 0.0])
+        return [[repeat + ['--tag', 'smokeaj'], sofc_repeat] + lanes[0], lanes[1]]
     if name == 'w7a':
         # week 7, part 2a: recall calibration. An inner job is the 6 folds of a seed, each
         # trained on two papers (about 4 CRF runs); no predictions, the counts suffice
@@ -517,7 +542,7 @@ def batch_lanes(name):
 
 BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'item3r',
            'smoke4', 'w5a', 'w5b', 'w5c', 'smoke5', 'smoke6', 'w6a', 'w6b', 'w7a', 'w7b',
-           'w7c', 'w7d', 'w7e', 'w8a', 'w8b', 'w9a')
+           'w7c', 'w7d', 'w7e', 'w8a', 'w8b', 'w9a', 'w9b')
 
 
 def batch_extras(name):

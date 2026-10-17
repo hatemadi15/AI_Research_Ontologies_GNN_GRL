@@ -686,3 +686,20 @@ def test_week9_multi_task_mention_replacement_batch(monkeypatch):
         assert nb.variant_name(a) == f'crf_mt_mr_m{a.seed_offset}'
     assert nb.variant_name(sofc[0]) == 'crf_mt_mr'
     assert 'w9a' in kj.BATCHES
+
+
+def test_week9_article_draws_batch(monkeypatch):
+    """w9b (week 9, part 2): two repeats, then the CRF head and mention replacement on SOFC-Exp
+    trained on 10 of its training articles, 5 draws, seed offsets 0 to 900."""
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda report=None: 'x' * 64)
+    lane0, lane1 = _parsed(kj.batch_lanes('w9b'))
+    assert [a.tag for a in lane0[:2]] == ['smokeaj', 'smokeak']
+    assert (lane0[1].granularity, nb.protocol_name(lane0[1])) == ('sofc', 'published_split')
+    jobs = lane0[2:] + lane1
+    names = sorted(nb.variant_name(a) for a in jobs)
+    assert names == sorted([f'crf_m{off}' for off in range(0, 1000, 100)]
+                           + [f'crf_mr_m{off}' for off in range(0, 1000, 100)])
+    for a in jobs:
+        assert (a.granularity, nb.protocol_name(a)) == ('sofc', 'article_draws')
+        assert (a.train_articles, a.draws) == (10, 5) and a.crf and a.save_predictions
+    assert 'w9b' in kj.BATCHES
