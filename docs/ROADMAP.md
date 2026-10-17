@@ -1023,7 +1023,7 @@ chance at class level. For a Task C-style result:
 | 7 | In progress: NER, part 1, document-level label consistency for unseen papers, a post-processing rule on the saved predictions (no GPU; protocol below); part 2a, recall calibration (a bias on the CRF head's emissions, chosen on inner folds; done, no claim: the missed entities are not near the threshold); part 2b, mention replacement (screen, then 10 seeds if it passes; protocol below; done: it improves on the CRF head at both granularities, +2.77 [+1.51, +4.03] fine-grained and +1.28 [+0.06, +2.51] coarse-grained, but its vote does not beat the strongest systems and S2 on SOFC-Exp gives −0.29), and later the combinations of the methods that pass week 6, fixed after the week-6 decisions; part 2c, coarse-to-fine completion (done, no claim); part 2d, multi-task training on SOFC-Exp's two levels (done, no claim: −0.78 [−2.39, +0.84] on the slot level, −0.15 [−1.36, +1.05] on the entity level); part 2e, SOFC-Exp's test articles cut into words as its training articles are (protocol below). Then class-level taxonomy (LLM or cross-encoder + arborescence) and a relation annotation pilot | Part 1: the rule improves on the strongest system on unseen papers and on SOFC-Exp's CRF head. Taxonomy: first class-level F1 above chance; relation guidelines |
 | 8 | Part 1 done: SOFC-Exp beyond its official split, the CRF head with 10 seeds on 5 random sentence splits and on 5 folds of 9 held-out articles (`--document-folds 5`; protocol below, descriptive): 86.27 against 82.79, a gap of 3.48 points (28–31 on MaterioMiner); part 2 (its first session hung and was cancelled; it runs again after week 9), more papers or more sentences: three training papers cut to the size of two against two papers (`--two-paper-size`; protocol below) | Part 1: the gap between random splits and unseen documents measured on a second corpus. Part 2: whether a third paper helps at the same number of training sentences |
 | 9 | Part 1 done: mention replacement on the multi-task model (`crf_mt_mr`, 10 seeds on the held-out papers, S2 on SOFC-Exp's two levels; protocol below). 3 of 6 decisions pass: against the multi-task model +3.01 [+0.42, +5.60] fine-grained and +2.30 [+0.49, +4.10] coarse-grained, and its vote against the multi-task vote +2.86 [+0.18, +5.54] fine-grained, now the strongest fine-grained system on unseen papers (55.33); coarse-grained its vote does not beat the seed vote, and S2 fails at both levels, so no methods claim (C21). Part 2 done: on SOFC-Exp cut to MaterioMiner's size (10 of its 26 training articles, 5 draws), mention replacement scores +0.50 [−0.47, +1.46] against the CRF head and does not pass, so its MaterioMiner gain is not a matter of training size | Part 1: the combination's vote improves on the strongest system on unseen papers, and on SOFC-Exp. Part 2: mention replacement improves on the CRF head on a MaterioMiner-sized SOFC-Exp |
-| 10 | Prepared: MuLMS as a third corpus (7 materials subfields, its outermost entities; `mulms.py`), mention replacement against the CRF head on held-out subfields with 400 training sentences, 10 seeds, and the CRF head on random splits of the same size; protocol below | Mention replacement improves on the CRF head on held-out subfields (decision 1), and its votes on the CRF votes (decision 2) |
+| 10 | Protocol committed before any run (a08356f; the batch `w10a` runs from that commit): MuLMS as a third corpus (7 materials subfields, its outermost entities; `mulms.py`), mention replacement against the CRF head on held-out subfields with 400 training sentences, 10 seeds, and the CRF head on random splits of the same size; protocol below | Mention replacement improves on the CRF head on held-out subfields (decision 1), and its votes on the CRF votes (decision 2) |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -2776,6 +2776,18 @@ this on the GPU. Nothing else in the design changes.
   been ready for 30 minutes, and a bundle dataset gets no new version within
   30 minutes after a session that attaches it was pushed. `w8b` on `ner-gpu-jobs-c` (version 2, pushed 28 minutes
   after its bundle was ready) is still queued.
+- *20:10: week 7, part 2e runs.* Version 2 of `ner-gpu-jobs-d` was
+  cancelled (its output: an empty log, no manifest) and part 2e was pushed
+  again as version 3, 30 minutes after its bundle was ready. Its log showed
+  every setup step within 1.2 minutes and its first job (the repeat) done in
+  1.3 minutes: the first session pushed under the 30-minute rule runs.
+- *20:22: week 10's bundle* (a08356f, the protocol's commit) is uploaded to
+  a third dataset, `ner-gpu-bundle-3`, so that no dataset a session
+  attaches gets a new version. Its BUNDLE.json names a08356f and the 52
+  converted MuLMS files with the SHA-256 that `results/mulms_corpus.json`
+  records. `w8b` on `ner-gpu-jobs-c` (version 2) has been queued since
+  18:48, while the two later sessions on `ner-gpu-jobs-d` started at once;
+  it is to be cancelled and pushed again.
 
 **Outcome of part 1: 3 of the 6 decisions pass; the combination's vote is
 the strongest fine-grained system on unseen papers, but S2 fails at both
