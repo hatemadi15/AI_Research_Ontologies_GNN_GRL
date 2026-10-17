@@ -2752,6 +2752,29 @@ this on the GPU. Nothing else in the design changes.
   week-8 session had logged its inputs in place. Its BUNDLE.json names
   4f5dbda, and its batch is the same at 4f5dbda and now. Kaggle queued it
   too.
+- *19:43: week 7, part 2e hangs.* It reports "running" on
+  `ner-gpu-jobs-d` (version 2), but its live log is still empty after 4
+  minutes. It is to be cancelled.
+- *A pattern (a hypothesis, untested).* The times between a session's push
+  and the moment its bundle dataset got a version:
+
+  | Session | Bundle version ready | Outcome |
+  |---|---|---|
+  | `w8a`, kernel a, 06:55 | 1 minute before | ran |
+  | `w8b`, kernel b v8, 07:24 | a new version 4 minutes after | hung |
+  | `w9a`, kernel b v10, 11:49 | a new version 7 minutes after | hung |
+  | `w9b`, kernel a v18, 12:03 | 1 minute before | queued, then hung |
+  | `w9a`, `ner-gpu-jobs-c` v1, 12:30 | 28 minutes before | queued, then ran |
+  | `w9b`, `ner-gpu-jobs-d` v1, 17:14 | 5 hours before | ran |
+  | `w8b`, `ner-gpu-jobs-e` v1, 18:39 | 19 minutes before | hung |
+  | `w7e`, `ner-gpu-jobs-d` v2, 19:40 | under a minute before (a new dataset) | hung |
+
+  Every session pushed within about 20 minutes of a new version of its
+  bundle hung, except the morning's `w8a`; the two pushed 28 minutes or
+  more after ran. From now on a session is pushed only once its bundle has
+  been ready for 30 minutes, and a bundle dataset gets no new version within
+  30 minutes after a session that attaches it was pushed. `w8b` on `ner-gpu-jobs-c` (version 2, pushed 28 minutes
+  after its bundle was ready) is still queued.
 
 **Outcome of part 1: 3 of the 6 decisions pass; the combination's vote is
 the strongest fine-grained system on unseen papers, but S2 fails at both
@@ -2877,11 +2900,14 @@ decisions can be checked against this list. None is fixed yet.
    *Checked on 17 October (revision bc1c97d, no runs):* 50 documents,
    10,184 sentences and 46,584 entities. Per subfield: electrolysis 4
    documents, graphene 2, PEMFC 8, polymers 11, semiconductors 11, SOFC 4,
-   steel 10; each has a test document. 43.4% of the entities lie inside
-   another or share its span, mostly NUM or UNIT inside VALUE (5,449 and
-   4,410), MAT inside MAT (5,169) and NUM inside RANGE (1,222); 1,201 pairs
-   cross. Every subfield but graphene could be held out with at least 4
-   documents.
+   steel 10; each has a test document. 32.9% of the entities lie inside
+   another or share its span, mostly NUM or UNIT inside VALUE (5,461 and
+   4,392), MAT inside MAT (2,035) and NUM inside RANGE (1,258); 769 pairs
+   share a span (NUM and VALUE 481, RANGE and VALUE 165) and 30 pairs
+   cross. *Corrected at 19:50:* the first count compared the character
+   offsets, which the corpus stores as strings, as text (43.4% nested, 1,201
+   crossing pairs); these counts use the token indices. Every subfield but
+   graphene could be held out with at least 4 documents.
 3. **A vote across methods.** Coarse-grained, multi-task training and
    mention replacement change different types (per-type correlation
    −0.72, above). A vote whose members come from different methods (the
