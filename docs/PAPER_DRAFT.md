@@ -357,6 +357,16 @@ with its sentences; a pre-registered run (week 8, part 2) trains on three
 papers cut to the size of two to separate the two. It matches the largest method gain measured on unseen
 papers (multi-task self-training's screen, +6.06 fine-grained): for
 materials NER on new papers, annotating more papers is the lever to beat.
+An outside result points the same way. Potu et al. (potu2025ontology,
+Fig. 2) train MatSciBERT on 47 other fatigue papers, annotated by
+MaterioMiner's curator with the same classes, and report 66.74 F1 on
+MaterioMiner, against 78.56 in distribution. Our models trained on three
+of its papers score 46–52 on the fourth. The setups differ (no CRF, 28
+classes, all 4 papers as the test set), but the gap to unseen papers
+shrinks from 28–31 points with three training papers to about 12 with 47.
+Their corpus cannot be redistributed. A method that makes better use of
+the few annotated papers there are, and of unannotated ones, is what
+remains.
 
 ## 6 Methods for unseen papers (pending)
 

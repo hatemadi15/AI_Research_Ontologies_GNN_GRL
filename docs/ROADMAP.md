@@ -391,6 +391,17 @@ runs with three (seeds 0–200 on both sides):
 - it matches the largest method gain on unseen papers so far (multi-task
   self-training's screen, +6.06 fine-grained).
 - week 8, part 2 separates the papers from the sentences (protocol in §4).
+- *An outside reference point* (17 October, from the article, no runs).
+  Potu et al. (2025, Fig. 2) fine-tune MatSciBERT on 80% of a corpus of 47
+  other fatigue papers, annotated by MaterioMiner's curator with the same
+  28 classes. They test on all of MaterioMiner and report 66.74 F1, against
+  78.56 on their own validation sentences (mean of 5 seeds; GPT-4 in
+  context 49.07 and 58.89). Our models trained on three MaterioMiner
+  papers score 46–52 on the fourth. The setups differ: a token classifier
+  without a CRF, 28 classes instead of 27, and a test set of all 4 papers.
+  So with 47 training papers the gap to unseen papers is still about 12
+  points, against 28–31 with three. Their training corpus is not public:
+  the articles may not be redistributed.
 
 Next, after week 5, in this order. The aim is a methods paper (§4, week 6),
 with an evaluation paper if every option fails:
