@@ -17,8 +17,10 @@ evaluation protocol, in an evaluation paper its results. Document context
 passed the week-6 screen (+2.66 [+0.91, +4.40] fine-grained) but neither of
 its 10-seed decisions (+1.14 [−0.94, +3.22] against the CRF head). The
 candidate left is multi-task self-training (screen +6.06 [+1.05, +11.06]
-fine-grained; 10-seed decisions next on MaterioMiner), with mention
-replacement screened next. Recall calibration (week 7, part 2a) passed none
+fine-grained; 10-seed decisions next on MaterioMiner), and mention
+replacement, which passed its screen (+3.25 [−2.33, +8.82] fine-grained;
+its first vote +5.00 [−0.50, +10.51] over the seed vote, reported) and is
+decided with 10 seeds and on SOFC-Exp next. Recall calibration (week 7, part 2a) passed none
 of its 5 decisions, and showed why a decoding change cannot close the recall
 gap on unseen papers (C15). Most entities of an unseen paper are names the
 training papers never annotate (81% fine-grained), and every gain that holds

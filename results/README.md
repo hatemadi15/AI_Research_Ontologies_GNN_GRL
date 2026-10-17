@@ -142,6 +142,16 @@ Week 7, part 2a (recall calibration; Kaggle session `w7a` of 16 October):
   never used to choose).
 - `_crf_eb_ens3*` are the votes over the seed triples.
 
+Week 7, part 2b (mention replacement, `--augment-mentions 3`; Kaggle session
+`w7c` of 17 October): `gpu/ner_results_<granularity>_leave_one_paper_out_crf_mr_m<N>.json`
+are the CRF head trained with 3 copies of each training sentence with an
+entity, each mention swapped with probability 0.5 for a training mention of
+the same type (seeds 0 to 200 for the screen; each run stores its number of
+copies, `n_augmented`), and `_crf_mr_ens3` their vote.
+`gpu/ner_week7_screen.json` (`ner_seedmeans.py --week 7 --gpu --screen`)
+holds the screen. Stage 2 (`w7d`) adds the seeds 300 to 900 and SOFC-Exp's
+official split.
+
 Week 7, part 2d (multi-task training on SOFC-Exp's two levels; Kaggle
 session `w7b` of 17 October, model seeds 0 to 900 on the official split):
 `gpu/ner_results_sofc_slot_published_split.json` and `_crf.json` are plain

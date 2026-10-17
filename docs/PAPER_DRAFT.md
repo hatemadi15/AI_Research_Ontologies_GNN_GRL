@@ -448,6 +448,12 @@ gains that hold are gains on them (Section 5.8). On a
 materials dataset the original study found gains for transformers mainly
 with 50–150 training sentences, so a large gain is not expected; it is
 screened with 3 seeds and decided with 10 only if the screen passes.
+- *Screen:* +3.25 [−2.33, +8.82] fine-grained (per paper +2.85, +7.95,
+  +2.72, −0.53) and +0.25 [−2.21, +2.72] coarse-grained against the CRF
+  head; its first vote +5.00 [−0.50, +10.51] fine-grained over the seed
+  vote. The fine-grained gain lies on unseen names (+3.48 [−0.18, +7.15]).
+  It goes to the 10-seed decisions, on MaterioMiner and on SOFC-Exp;
+  screens are optimistic (Section 5.6).
 
 **6.4 Multi-task training on SOFC-Exp's two levels.** Not a new method:
 the repeat of C7 on the second dataset, where the slot types stand to the

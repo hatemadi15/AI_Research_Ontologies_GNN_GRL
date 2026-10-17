@@ -52,6 +52,8 @@ Table 2. Pre-registered decisions and screens on MaterioMiner: mean paired diffe
 | 6 | GPU | 10 | coarse | unseen papers | `crf_ctx` vs `crf` | decision | 4 | +0.12 [−2.03, +2.27] | no |
 | 6 | GPU | 10 | fine | unseen papers | `crf_ctx_ens3` vs `crf_mt_ens3` | decision | 4 | −1.44 [−3.80, +0.91] | no |
 | 6 | GPU | 10 | coarse | unseen papers | `crf_ctx_ens3` vs `crf_ens3` | decision | 4 | +0.76 [−1.79, +3.31] | no |
+| 7 | GPU | 3 | fine | unseen papers | `crf_mr` vs `crf` | screen | 4 | +3.25 [−2.33, +8.82] | no |
+| 7 | GPU | 3 | coarse | unseen papers | `crf_mr` vs `crf` | screen | 4 | +0.25 [−2.21, +2.72] | no |
 | 7 | GPU | 10 | fine | unseen papers | `crf_dc` vs `crf` | decision | 4 | +0.30 [−0.35, +0.95] | no |
 | 7 | GPU | 10 | coarse | unseen papers | `crf_dc` vs `crf` | decision | 4 | +0.12 [+0.01, +0.24] | passes |
 | 7 | GPU | 10 | fine | unseen papers | `crf_mt_ens3_dc` vs `crf_mt_ens3` | decision | 4 | +0.33 [−0.74, +1.40] | no |
