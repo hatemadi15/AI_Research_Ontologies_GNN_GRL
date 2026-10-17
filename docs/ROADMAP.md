@@ -2177,6 +2177,29 @@ On MaterioMiner it adds names in new contexts, the multi-task model adds a
 second level of types, and each improves a single model on unseen papers
 fine-grained. The combination prepared below tests whether the two add up.
 
+*Per type (exploratory, 17 October, before any run of week 9;
+`ner_seed_analysis.py`, `week6_types` now also holds `crf_mt` and `crf_mr`;
+10 seeds × 4 held-out papers, against the CRF head).* The two methods
+improve different types.
+- Coarse-grained, their per-type changes run against each other
+  (correlation −0.72 over the 26 types; 17 change in opposite
+  directions). Mention replacement gains on every one of the rare types
+  that pull macro F1 down (week 5): SDE +7.74, MIP +8.13, PRP +11.71, MOD
+  +17.88 and CPR +17.57, and on ODE (+7.13) and CGE (+4.85). Multi-task
+  training loses on all seven (−2.85 to −10.67). This is where mention
+  replacement's macro gain (+2.79) comes from.
+- Fine-grained they overlap more (correlation 0.20; 15 of 25 types gain
+  with both). Mention replacement gains most on Mechanism (+12.53, a
+  frequent descriptive type), MicrostructureEntity (+16.19),
+  MechanicalTestDataSet (+18.09) and StrainRate (+8.33); multi-task
+  training on StateDescriptor (+11.88), MicrostructureEntity (+12.96),
+  FatigueLifetime (+9.19), TestingMachine (+6.75) and Alloy (+5.96), where
+  mention replacement loses on StateDescriptor (−3.43) and TestingMachine
+  (−7.92).
+- Rare types have 2–9 test entities per paper, so each of these numbers is
+  noisy; they carry no decision. They agree with the week-9 premise that
+  the two change different things.
+
 *Prepared for a combination (17 October, tests only, no runs).* Mention
 replacement on the multi-task model (`--multi-task --augment-mentions K`,
 variant `crf_mt_mr`, a file per head). A copy replaces a coarse-grained

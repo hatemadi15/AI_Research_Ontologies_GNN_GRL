@@ -94,7 +94,9 @@ CRF head and the methods, model seeds 0 to 900). `gpu/ner_week6_screen.json`
 200, and `gpu/ner_week6_comparisons.json` (without `--screen`) the 10-seed
 decisions. `gpu/ner_week5_seed_analysis.json` adds SOFC-Exp to the published
 splits, the per-type F1 of each week-6 method against the CRF head
-(`week6_types`) and the CRF head's kinds of error (`errors`). Document
+(`week6_types`; later also multi-task training, mention replacement and,
+from week 9, the two together) and the CRF head's kinds of error
+(`errors`). Document
 context has all 10 seeds (stage 2, session a of 16 October), and on SOFC-Exp
 `gpu/ner_results_sofc_published_split_crf_ctx.json` (S2, session a of 17
 October, model seeds 0 to 900); DeBERTa-v3-large

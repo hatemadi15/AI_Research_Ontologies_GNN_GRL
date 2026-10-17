@@ -477,6 +477,12 @@ screened with 3 seeds and decided with 10 only if the screen passes.
   to pass this decision at both granularities.
 - *Where the gain is:* on unseen names, +3.19 [+1.66, +4.72] fine-grained
   (seen +1.49 [−1.31, +4.30]); coarse-grained +1.58 [−0.02, +3.17].
+- *Per type (exploratory):* coarse-grained, it gains on every rare type
+  that pulls macro F1 down (SDE, MIP, PRP, MOD and CPR, +7.7 to +17.9),
+  where multi-task training loses (−2.9 to −10.7). Over the 26
+  coarse-grained types the two methods' changes correlate at −0.72;
+  fine-grained at 0.20. Rare types have 2–9 test entities per paper, so
+  these are indications, not findings.
 - *Its vote* gains +3.61 [+1.71, +5.52] over the seed vote fine-grained, as
   much as the multi-task vote, but it does not beat the strongest systems:
   −0.04 [−2.09, +2.01] against the multi-task vote fine-grained, +2.26

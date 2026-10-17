@@ -44,7 +44,8 @@ votes (ner_seedmeans.WEEK5_SYSTEMS) and writes ner_week5_seed_analysis.json next
   - week6_types (week 6, reported alongside its decisions): per granularity, each week-6
     method with all 10 seeds on the 4 held-out papers against the CRF head, per entity type:
     the F1 of both, paired by seed offset and paper over the pairs whose test set has the
-    type, and their mean difference.
+    type, and their mean difference. Later weeks add multi-task training (crf_mt), mention
+    replacement (crf_mr, week 7) and the two together (crf_mt_mr, week 9): TYPE_METHODS.
   - paper_count (exploratory): what a third training paper is worth on an unseen paper. Per
     granularity and held-out paper P, the CRF head's F1 on P trained on the 3 other papers
     (crf_m0 to _m200, leave-one-paper-out) and on 2 of them (the inner folds of week 7, part
@@ -111,6 +112,7 @@ RETOKENIZED_BASELINE = 'cdetest'
 SOFC_PROTOCOLS = ('random_split_vary', 'document_folds')     # week 8, part 1
 ARTICLE_DRAWS = 'article_draws'                               # week 9, part 2
 VOTED_METHODS = ('crf_mt', 'crf_mt_mr')
+TYPE_METHODS = WEEK6_METHODS + ('crf_mt', 'crf_mr', 'crf_mt_mr')   # week6_types
 
 
 def load_files(directory, names):
@@ -249,14 +251,14 @@ def error_kinds(files):
 
 
 def week6_type_differences(directory):
-    """{granularity: {method: type_differences}} on the 4 held-out papers, for the week-6
-    methods whose 10 seeds and the CRF head's are all there."""
+    """{granularity: {method: type_differences}} on the 4 held-out papers, for the methods of
+    TYPE_METHODS whose 10 seeds and the CRF head's are all there."""
     out = {}
     for g in GRANULARITIES:
         crf = load_files(directory, file_names(g, LOPO, 'crf', WEEK5_SYSTEMS))
-        for method in WEEK6_METHODS:
-            files = load_files(directory, file_names(g, LOPO, method,
-                                                     {method: seed_family(method)}))
+        for method in TYPE_METHODS:
+            family = WEEK5_SYSTEMS.get(method) or seed_family(method)
+            files = load_files(directory, file_names(g, LOPO, method, {method: family}))
             if crf and files:
                 out.setdefault(g, {})[method] = type_differences(files, crf)
     return out

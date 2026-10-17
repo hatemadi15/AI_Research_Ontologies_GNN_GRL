@@ -278,6 +278,23 @@ def test_week6_type_differences_pair_seeds_and_papers(tmp_path, capsys):
     assert 'crf_ctx, fine-grained, per type' in capsys.readouterr().out
 
 
+def test_type_differences_cover_multi_task_and_mention_replacement(tmp_path):
+    """Multi-task training (whose seed 0 has no m0 tag) and mention replacement are compared
+    per type with the CRF head as the week-6 methods are."""
+    pytest.importorskip('scipy')
+
+    def write(system, family, f1):
+        for name in ns.file_names('fine', 'leave_one_paper_out', system, {system: family}):
+            (tmp_path / name).write_text(json.dumps(
+                {'runs': [_run(p, 70, {'MAT': (f1, 10)}) for p in ('p1', 'p2')]}))
+    write('crf', ns.WEEK5_SYSTEMS['crf'], 0.5)
+    write('crf_mt', ns.WEEK5_SYSTEMS['crf_mt'], 0.6)
+    write('crf_mr', ns.seed_family('crf_mr'), 0.75)
+    out = sa.week6_type_differences(tmp_path)['fine']
+    assert list(out) == ['crf_mt', 'crf_mr']
+    assert out['crf_mt']['MAT']['diff'] == 10.0 and out['crf_mr']['MAT']['diff'] == 25.0
+
+
 def test_error_kinds_of_the_crf_head():
     """Each gold entity is correct, missed (no overlapping prediction), of the right span and
     the wrong type, or a boundary error (of the right or of another type); each prediction
