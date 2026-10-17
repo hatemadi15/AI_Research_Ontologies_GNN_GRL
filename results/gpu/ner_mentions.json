@@ -1751,6 +1751,200 @@
         }
       }
     },
+    "sofc_random_split_vary": {
+      "crf": {
+        "seeds": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "n_runs": 50,
+        "seen": {
+          "n_gold": 32330,
+          "n_pred": 34211,
+          "n_correct": 29505,
+          "recall": 91.26,
+          "precision": 86.24,
+          "f1": 88.68,
+          "share": 0.701
+        },
+        "seen_other": {
+          "n_gold": 70,
+          "n_pred": 40,
+          "n_correct": 18,
+          "recall": 25.71,
+          "precision": 45.0,
+          "f1": 32.73,
+          "share": 0.002
+        },
+        "unseen": {
+          "n_gold": 13700,
+          "n_pred": 14142,
+          "n_correct": 11241,
+          "recall": 82.05,
+          "precision": 79.49,
+          "f1": 80.75,
+          "share": 0.297
+        },
+        "all": {
+          "n_gold": 46100,
+          "n_pred": 48393,
+          "n_correct": 40764,
+          "recall": 88.43,
+          "precision": 84.24,
+          "f1": 86.28,
+          "share": 1.0
+        }
+      },
+      "crf_ens3": {
+        "seeds": [
+          0,
+          300,
+          600
+        ],
+        "n_runs": 15,
+        "seen": {
+          "n_gold": 9699,
+          "n_pred": 10303,
+          "n_correct": 8933,
+          "recall": 92.1,
+          "precision": 86.7,
+          "f1": 89.32,
+          "share": 0.701
+        },
+        "seen_other": {
+          "n_gold": 21,
+          "n_pred": 9,
+          "n_correct": 5,
+          "recall": 23.81,
+          "precision": 55.56,
+          "f1": 33.33,
+          "share": 0.002
+        },
+        "unseen": {
+          "n_gold": 4110,
+          "n_pred": 4138,
+          "n_correct": 3391,
+          "recall": 82.51,
+          "precision": 81.95,
+          "f1": 82.23,
+          "share": 0.297
+        },
+        "all": {
+          "n_gold": 13830,
+          "n_pred": 14450,
+          "n_correct": 12329,
+          "recall": 89.15,
+          "precision": 85.32,
+          "f1": 87.19,
+          "share": 1.0
+        }
+      }
+    },
+    "sofc_document_folds": {
+      "crf": {
+        "seeds": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "n_runs": 50,
+        "seen": {
+          "n_gold": 24570,
+          "n_pred": 26312,
+          "n_correct": 21931,
+          "recall": 89.26,
+          "precision": 83.35,
+          "f1": 86.2,
+          "share": 0.535
+        },
+        "seen_other": {
+          "n_gold": 20,
+          "n_pred": 23,
+          "n_correct": 8,
+          "recall": 40.0,
+          "precision": 34.78,
+          "f1": 37.21,
+          "share": 0.0
+        },
+        "unseen": {
+          "n_gold": 21310,
+          "n_pred": 22165,
+          "n_correct": 16982,
+          "recall": 79.69,
+          "precision": 76.62,
+          "f1": 78.12,
+          "share": 0.464
+        },
+        "all": {
+          "n_gold": 45900,
+          "n_pred": 48500,
+          "n_correct": 38921,
+          "recall": 84.8,
+          "precision": 80.25,
+          "f1": 82.46,
+          "share": 1.0
+        }
+      },
+      "crf_ens3": {
+        "seeds": [
+          0,
+          300,
+          600
+        ],
+        "n_runs": 15,
+        "seen": {
+          "n_gold": 7371,
+          "n_pred": 7930,
+          "n_correct": 6645,
+          "recall": 90.15,
+          "precision": 83.8,
+          "f1": 86.86,
+          "share": 0.535
+        },
+        "seen_other": {
+          "n_gold": 6,
+          "n_pred": 5,
+          "n_correct": 3,
+          "recall": 50.0,
+          "precision": 60.0,
+          "f1": 54.55,
+          "share": 0.0
+        },
+        "unseen": {
+          "n_gold": 6393,
+          "n_pred": 6543,
+          "n_correct": 5116,
+          "recall": 80.03,
+          "precision": 78.19,
+          "f1": 79.1,
+          "share": 0.464
+        },
+        "all": {
+          "n_gold": 13770,
+          "n_pred": 14478,
+          "n_correct": 11764,
+          "recall": 85.43,
+          "precision": 81.25,
+          "f1": 83.29,
+          "share": 1.0
+        }
+      }
+    },
     "fine_published_split": {
       "baseline": {
         "n_runs": 10,
@@ -2280,6 +2474,38 @@
         "seen_other": 0.012,
         "unseen": 0.798
       }
+    },
+    "sofc": {
+      "fold0": {
+        "n_gold": 1038,
+        "seen": 0.576,
+        "seen_other": 0.0,
+        "unseen": 0.424
+      },
+      "fold1": {
+        "n_gold": 761,
+        "seen": 0.52,
+        "seen_other": 0.001,
+        "unseen": 0.478
+      },
+      "fold2": {
+        "n_gold": 775,
+        "seen": 0.501,
+        "seen_other": 0.0,
+        "unseen": 0.499
+      },
+      "fold3": {
+        "n_gold": 1204,
+        "seen": 0.545,
+        "seen_other": 0.001,
+        "unseen": 0.454
+      },
+      "fold4": {
+        "n_gold": 812,
+        "seen": 0.516,
+        "seen_other": 0.0,
+        "unseen": 0.484
+      }
     }
   },
   "types": {
@@ -2609,6 +2835,32 @@
         "unseen_share": 0.714,
         "recall_seen": 45.0,
         "recall_unseen": 44.0
+      }
+    },
+    "sofc_document_folds": {
+      "MATERIAL": {
+        "n_gold_per_run": 298.4,
+        "unseen_share": 0.587,
+        "recall_seen": 86.18,
+        "recall_unseen": 73.73
+      },
+      "VALUE": {
+        "n_gold_per_run": 295.0,
+        "unseen_share": 0.655,
+        "recall_seen": 98.62,
+        "recall_unseen": 91.22
+      },
+      "EXPERIMENT": {
+        "n_gold_per_run": 218.0,
+        "unseen_share": 0.155,
+        "recall_seen": 88.77,
+        "recall_unseen": 63.73
+      },
+      "DEVICE": {
+        "n_gold_per_run": 106.6,
+        "unseen_share": 0.225,
+        "recall_seen": 83.39,
+        "recall_unseen": 52.83
       }
     },
     "fine_published_split": {
@@ -3089,6 +3341,16 @@
       "unseen_share": {
         "random_splits": 0.395,
         "held_out": 0.788
+      }
+    },
+    "sofc": {
+      "random_splits_recall": 88.43,
+      "held_out_recall": 84.8,
+      "held_out_recall_with_random_mix": 86.32,
+      "random_recall_with_held_out_mix": 86.9,
+      "unseen_share": {
+        "random_splits": 0.297,
+        "held_out": 0.464
       }
     }
   },
@@ -4291,6 +4553,8 @@
         }
       }
     },
+    "sofc_random_split_vary": {},
+    "sofc_document_folds": {},
     "fine_published_split": {
       "crf": {
         "reference": "baseline",

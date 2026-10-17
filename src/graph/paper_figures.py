@@ -5,7 +5,9 @@ No training: reads the 10-seed GPU results (results/gpu) and writes PNG files.
   fig1_random_vs_unseen.png (C2): per system with 10 seeds on both protocols, its mean micro
       F1 over the 5 random splits and over the 4 held-out papers, with 95% CIs, joined by a
       line, per granularity. A model scores the mean of its 10 runs per split, a vote the
-      mean of its votes over the 3 seed triples.
+      mean of its votes over the 3 seed triples. A third panel (week 8, part 1;
+      ner_week5_seed_analysis.json, sofc_splits) puts SOFC-Exp's CRF head and its votes on
+      the same axis: 5 random sentence splits against 5 folds of 9 held-out articles.
   fig2_seeds.png (C8): (a) the SD of the CRF head's micro F1 over its 10 seeds, per split
       and granularity; (b) the 120 three-seed mean differences of multi-task training
       against the CRF head on the random splits (fine-grained), against the 10-seed
@@ -158,12 +160,31 @@ def triple_differences(variant_files, reference_files):
     return means, passes, statistics.mean(diffs(range(len(SEED_OFFSETS))))
 
 
-def figure1(points, path):
+def sofc_points(analysis):
+    """Figure 1's SOFC-Exp rows from the analysis's sofc_splits: [(label, (random mean, lo,
+    hi), (article folds mean, lo, hi))] for the CRF head and its votes; [] without both."""
+    splits = analysis.get('sofc_splits', {})
+    if not all(p in splits for p in (RANDOM, 'document_folds')):
+        return []
+    rows = []
+    for label, pick in (('CRF head', lambda e: e['micro']),
+                        ('CRF vote', lambda e: e['crf_votes']['micro'])):
+        sides = [pick(splits[p]) for p in (RANDOM, 'document_folds')]
+        rows.append((label, *((m['mean'], *m['ci95']) for m in sides)))
+    return rows
+
+
+def figure1(points, path, sofc=()):
     import matplotlib.pyplot as plt
-    fig, axes = plt.subplots(1, 2, figsize=(11, 4.2), sharey=True)
-    for ax, g in zip(axes, GRANULARITIES):
-        rows = points[g][::-1]                       # the first system on top
-        for k, (label, (x, xlo, xhi), (y, ylo, yhi)) in enumerate(rows):
+    panels = [(points[g], f'{g}-grained') for g in GRANULARITIES]
+    if sofc:
+        panels.append((sofc, 'SOFC-Exp (entity types)'))
+    fig, axes = plt.subplots(1, len(panels), figsize=(5.5 * len(panels), 4.2), sharey=False)
+    n_rows = max(len(rows) for rows, _ in panels)
+    for ax, (rows, title) in zip(axes, panels):
+        rows = rows[::-1]                            # the first system on top
+        top = n_rows - len(rows)                     # a shorter panel's rows at the top
+        for k, (label, (x, xlo, xhi), (y, ylo, yhi)) in enumerate(rows, start=top):
             ax.plot([y, x], [k, k], color='lightgrey', lw=2, zorder=1)
             ax.errorbar(x, k, xerr=[[x - xlo], [xhi - x]], fmt='o', color='tab:blue', ms=5,
                         capsize=2, label='5 random splits' if k == 0 else None)
@@ -171,13 +192,16 @@ def figure1(points, path):
                         capsize=2, label='4 unseen papers' if k == 0 else None)
             ax.annotate(f'{x - y:.1f}', ((x + y) / 2, k), textcoords='offset points',
                         xytext=(0, 4), fontsize=7, ha='center', color='dimgrey')
-        ax.set_yticks(range(len(rows)), [r[0] for r in rows], fontsize=8)
-        ax.set(xlim=(30, 90), title=f'{g}-grained', xlabel='micro F1')
+        ax.set_yticks(range(top, n_rows), [r[0] for r in rows], fontsize=8)
+        ax.set(xlim=(30, 90), ylim=(-0.5, n_rows - 0.5), title=title, xlabel='micro F1')
         ax.grid(alpha=0.3, axis='x')
     handles, labels = axes[0].get_legend_handles_labels()
+    if sofc:
+        labels = [label.replace('4 unseen papers', 'unseen documents (MaterioMiner: 4 papers; '
+                                'SOFC-Exp: 5 folds of 9 articles)') for label in labels]
     fig.legend(handles, labels, loc='lower center', ncol=2, fontsize=8)
-    fig.suptitle('The same systems on random splits and on unseen papers (10 seeds, 95% CIs; '
-                 'the number is the gap)', fontsize=10)
+    fig.suptitle('The same systems on random splits and on unseen documents (10 seeds, 95% '
+                 'CIs; the number is the gap)', fontsize=10)
     fig.tight_layout(rect=(0, 0.06, 1, 1))
     fig.savefig(path, dpi=160)
     plt.close(fig)
@@ -474,12 +498,13 @@ def main(argv=None):
     os.makedirs(args.out, exist_ok=True)
     written = []
     points = protocol_points(args.results)
+    analysis = (load(args.results, [ANALYSIS]) or [{}])[0]
     if all(points.values()):
-        figure1(points, os.path.join(args.out, 'fig1_random_vs_unseen.png'))
+        figure1(points, os.path.join(args.out, 'fig1_random_vs_unseen.png'),
+                sofc_points(analysis))
         written.append('fig1_random_vs_unseen.png')
     else:
         print('fig1: no system with both protocols')
-    analysis = (load(args.results, [ANALYSIS]) or [{}])[0]
     spread = {key: list(entry['crf']['per_split'].values())
               for key, entry in analysis.get('spread', {}).items() if 'crf' in entry}
 

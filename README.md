@@ -683,10 +683,11 @@ stands (ROADMAP §4, weeks 6 and 7):
    71.88 F1, 83.44 when only the span must match. Its
    test articles turn out to be cut into words differently from its
    training articles (ChemDataExtractor for training, Java's BreakIterator
-   for test); part 2e measures what that costs. Week 8, part 1 (prepared, descriptive)
-   runs the CRF head on SOFC-Exp's random sentence splits and on folds of
-   held-out articles, to measure on a second corpus the gap that random
-   splits hide on MaterioMiner.
+   for test); part 2e measures what that costs. Week 8, part 1 (descriptive)
+   ran the CRF head on SOFC-Exp's random sentence splits and on folds of
+   held-out articles: 86.27 against 82.79, a gap of 3.48 points, against
+   28–31 on MaterioMiner. On a corpus whose articles share one topic,
+   random splits overstate the score on new articles far less.
 3. Week 7: document-level label consistency and coarse-to-fine completion
    give no claim (the first hurts on SOFC-Exp). Recall calibration (a bias
    on the CRF head's emissions, chosen on inner folds) gives no claim

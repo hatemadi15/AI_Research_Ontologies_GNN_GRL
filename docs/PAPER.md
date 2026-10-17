@@ -44,7 +44,7 @@ gain survives? Splits, scoring and seeds on MaterioMiner".
 | # | Claim | Evidence | Status |
 |---|---|---|---|
 | C1 | The published numbers are reproduced on the split the release ships (323 / 57 / 96 sentences, a different partition per granularity, not described in the paper), scored like its code (micro F1, seqeval's default mode): plain MatSciBERT scores 70.19 [69.03, 71.35] fine-grained and 72.52 [71.88, 73.16] coarse-grained over 10 seeds, against 69.92 and 72.32. Single runs of plain MatSciBERT range over 4.6 points fine-grained (68.0–72.7) and 3.6 coarse-grained (70.4–74.1). | `results/gpu/ner_results_*_published_split.json`; README, the published-split rows | Done (GPU, 10 seeds); the authors are asked to confirm split and scoring (ROADMAP item 6) |
-| C2 | Random splits hide a large gap (the paper says the out-of-distribution generalisation "can not be estimated" from four publications; leaving one paper out estimates it). The seed vote `crf_ens3` scores 79.68 fine-grained and 78.63 coarse-grained over 5 random splits, but 48.81 and 61.10 on a paper the model has never seen: 18–31 points lower. | `results/gpu/ner_week5_comparisons.json` (`crf_ens3` vs `crf`) | Done (GPU, 10 seeds) |
+| C2 | Random splits hide a large gap (the paper says the out-of-distribution generalisation "can not be estimated" from four publications; leaving one paper out estimates it). The seed vote `crf_ens3` scores 79.68 fine-grained and 78.63 coarse-grained over 5 random splits, but 48.81 and 61.10 on a paper the model has never seen: 18–31 points lower. The size of the gap depends on how much the papers differ: on SOFC-Exp, whose 45 articles share one topic and one annotation scheme, the CRF head scores 86.27 [84.82, 87.71] over 5 random sentence splits and 82.79 [78.33, 87.24] over 5 folds of 9 held-out articles, a gap of 3.48 (votes 87.18 and 83.62); 30% of its test names are unseen on random splits, 46% on held-out articles (81% on a held-out MaterioMiner paper, fine-grained). | `results/gpu/ner_week5_comparisons.json` (`crf_ens3` vs `crf`); SOFC-Exp: `gpu/ner_week5_seed_analysis.json` (`sofc_splits`), `gpu/ner_mentions.json` | Done (GPU, 10 seeds); SOFC-Exp: week 8, part 1 (descriptive) |
 | C3 | A CRF head with IOB2 constraints beats the published numbers. On the published split it scores 73.31 [72.28, 74.35] and 75.48 [74.23, 76.72], +3.12 and +2.96 over plain MatSciBERT, paired by seed. Over 5 random splits, the reported system beats them fine-grained under micro, macro and weighted F1, and coarse-grained under micro and weighted F1 but not macro (70.83 [64.49, 77.17]). | README, the published-split and reported-system rows | Done (GPU, 10 seeds) |
 | C4 | Much of the CRF head's gain is span validity. Under strict IOB2 scoring its gain on the published split shrinks from +3.12 to +1.70 [+0.21, +3.19] fine-grained and from +2.96 to +1.07 [−0.82, +2.97] coarse-grained. Over the random splits (CPU, 5 seeds) the fine-grained gain vanishes under strict scoring (+0.10 [−2.08, +2.29]), and dropping invalid tags from the baseline's output gives the same; coarse-grained, +1.91 [+1.17, +2.65] survives. On SOFC-Exp's official split strict scoring shrinks the gain from +1.22 to +0.73 [−0.04, +1.51] on the entity types and from +1.68 to −0.06 [−1.70, +1.58] on the slot types, where plain MatSciBERT scores higher strict (71.94) than under the default scoring (70.20). | README, "Why the CRF helps"; `ner_week5_seed_analysis.json` (`published_split`) | Done |
 | C5 | A vote over 3 seeds is the most reliable addition: +2.20 and +1.67 over the mean of single CRF runs on the random splits, +2.36 and +2.50 on unseen papers, every CI above 0. | `ner_week5_comparisons.json` (`crf_ens3` vs `crf`) | Done (GPU, 10 seeds) |
@@ -73,7 +73,9 @@ Figures 1–6 are drawn from the GPU results by `src/graph/paper_figures.py`
 into `docs/figures/` (no training; re-run it when results change):
 - Figure 1 (`fig1_random_vs_unseen.png`): per system with 10 seeds on both
   protocols, micro F1 on the 5 random splits and on the 4 unseen papers,
-  with 95% CIs and the gap: 28–31 points fine-grained, 17–20 coarse-grained
+  with 95% CIs and the gap: 28–31 points fine-grained, 17–20 coarse-grained;
+  a third panel puts SOFC-Exp's CRF head and its votes on the same axis, 5
+  random sentence splits against 5 folds of 9 held-out articles: 3.5 points
   (C2).
 - Figure 2 (`fig2_seeds.png`): the CRF head's SD over 10 seeds per split;
   the 120 three-seed differences of multi-task training on the random splits
@@ -150,8 +152,9 @@ from the committed results (no training; re-run it when results change):
    split with one seed, against the published 84.77 and 82.39. Its main
    comparisons need 10 seeds per split, on random splits and on folds
    grouped by article. Week 8, part 1 (ROADMAP §4, fixed before its runs)
-   runs the CRF head that way: 5 random sentence splits and 5 folds of 9
-   held-out articles, 10 seeds each.
+   ran the CRF head that way, 5 random sentence splits and 5 folds of 9
+   held-out articles with 10 seeds each: 86.27 against 82.79, a gap of
+   3.48 points (C2).
 2. The authors' confirmation of the split and the scoring (item 6; the email
    is drafted). The reproduction (C1) already matches both numbers.
 3. Related work. A draft is in `docs/PAPER_DRAFT.md`, Section 8 (17

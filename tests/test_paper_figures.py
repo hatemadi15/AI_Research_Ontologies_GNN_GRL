@@ -41,6 +41,20 @@ def test_protocol_points_need_both_protocols(tmp_path):
     assert mt_random[0] == pytest.approx(78 + 0.9 + 1.0 + 0.2)
 
 
+def test_sofc_points_need_both_protocols():
+    """Figure 1's SOFC-Exp rows: the CRF head and its votes on random splits and article
+    folds, from the analysis's sofc_splits; none unless both protocols are there."""
+    def entry(m, v):
+        return {'micro': {'mean': m, 'ci95': [m - 1, m + 1]},
+                'crf_votes': {'micro': {'mean': v, 'ci95': [v - 1, v + 1]}}}
+    analysis = {'sofc_splits': {'random_split_vary': entry(86.0, 87.0),
+                                'document_folds': entry(83.0, 84.0), 'gap': {'micro': 3.0}}}
+    assert pf.sofc_points(analysis) == [('CRF head', (86.0, 85.0, 87.0), (83.0, 82.0, 84.0)),
+                                        ('CRF vote', (87.0, 86.0, 88.0), (84.0, 83.0, 85.0))]
+    del analysis['sofc_splits']['document_folds']
+    assert pf.sofc_points(analysis) == [] and pf.sofc_points({}) == []
+
+
 def test_triple_differences(tmp_path):
     pytest.importorskip('scipy')
     _families(tmp_path, gain=lambda off: off / 900)       # seeds with larger offsets gain more
@@ -66,7 +80,10 @@ def test_figures_are_written(tmp_path):
                 src = results / f'ner_results_{g}_{protocol}_crf_m{off}.json'
                 (results / f'ner_results_{g}_{protocol}_crf_ctx_m{off}.json').write_text(
                     src.read_text())
+    folds = {'micro': {'mean': 83.0, 'ci95': [82.0, 84.0]},
+             'crf_votes': {'micro': {'mean': 84.0, 'ci95': [83.0, 85.0]}}}
     (results / pf.ANALYSIS).write_text(json.dumps({
+        'sofc_splits': {'random_split_vary': folds, 'document_folds': folds},
         'spread': {'fine_random_split_vary': {'crf': {'per_split': {'a': 1.5, 'b': 2.0}}}},
         'types': {'coarse_random_split_vary': {'crf_mt_ens3': {
             'SDE': {'f1': 17.7, 'support_per_split': 3.0},

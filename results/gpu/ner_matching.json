@@ -926,6 +926,246 @@
         "n_pairs": 4
       }
     },
+    "sofc_random_split_vary": {
+      "crf": {
+        "strict": {
+          "mean": 86.27,
+          "ci95": [
+            84.82,
+            87.71
+          ],
+          "per_run": [
+            86.65,
+            84.81,
+            86.7,
+            85.41,
+            87.76
+          ]
+        },
+        "exact": {
+          "mean": 86.4,
+          "ci95": [
+            84.96,
+            87.84
+          ],
+          "per_run": [
+            86.91,
+            84.88,
+            86.83,
+            85.57,
+            87.8
+          ]
+        },
+        "type": {
+          "mean": 89.95,
+          "ci95": [
+            88.87,
+            91.02
+          ],
+          "per_run": [
+            90.16,
+            89.78,
+            90.86,
+            88.56,
+            90.36
+          ]
+        },
+        "overlap": {
+          "mean": 90.16,
+          "ci95": [
+            89.18,
+            91.15
+          ],
+          "per_run": [
+            90.48,
+            89.97,
+            90.99,
+            88.9,
+            90.49
+          ]
+        },
+        "n_pairs": 5
+      },
+      "crf_ens3": {
+        "strict": {
+          "mean": 87.18,
+          "ci95": [
+            85.79,
+            88.57
+          ],
+          "per_run": [
+            87.63,
+            85.81,
+            87.73,
+            86.23,
+            88.49
+          ]
+        },
+        "exact": {
+          "mean": 87.27,
+          "ci95": [
+            85.87,
+            88.67
+          ],
+          "per_run": [
+            87.88,
+            85.81,
+            87.8,
+            86.37,
+            88.49
+          ]
+        },
+        "type": {
+          "mean": 90.48,
+          "ci95": [
+            89.48,
+            91.47
+          ],
+          "per_run": [
+            90.75,
+            90.26,
+            91.24,
+            89.19,
+            90.94
+          ]
+        },
+        "overlap": {
+          "mean": 90.63,
+          "ci95": [
+            89.74,
+            91.53
+          ],
+          "per_run": [
+            91.0,
+            90.33,
+            91.31,
+            89.51,
+            91.01
+          ]
+        },
+        "n_pairs": 5
+      }
+    },
+    "sofc_document_folds": {
+      "crf": {
+        "strict": {
+          "mean": 82.79,
+          "ci95": [
+            78.33,
+            87.24
+          ],
+          "per_run": [
+            82.85,
+            88.76,
+            82.28,
+            79.77,
+            80.27
+          ]
+        },
+        "exact": {
+          "mean": 82.94,
+          "ci95": [
+            78.54,
+            87.33
+          ],
+          "per_run": [
+            83.04,
+            88.79,
+            82.56,
+            79.9,
+            80.39
+          ]
+        },
+        "type": {
+          "mean": 88.54,
+          "ci95": [
+            85.82,
+            91.26
+          ],
+          "per_run": [
+            87.89,
+            92.14,
+            88.13,
+            86.16,
+            88.36
+          ]
+        },
+        "overlap": {
+          "mean": 88.81,
+          "ci95": [
+            86.31,
+            91.32
+          ],
+          "per_run": [
+            88.31,
+            92.16,
+            88.42,
+            86.68,
+            88.5
+          ]
+        },
+        "n_pairs": 5
+      },
+      "crf_ens3": {
+        "strict": {
+          "mean": 83.62,
+          "ci95": [
+            79.1,
+            88.14
+          ],
+          "per_run": [
+            83.81,
+            89.62,
+            83.17,
+            80.48,
+            81.01
+          ]
+        },
+        "exact": {
+          "mean": 83.74,
+          "ci95": [
+            79.27,
+            88.21
+          ],
+          "per_run": [
+            84.0,
+            89.62,
+            83.43,
+            80.53,
+            81.13
+          ]
+        },
+        "type": {
+          "mean": 89.09,
+          "ci95": [
+            86.25,
+            91.94
+          ],
+          "per_run": [
+            88.68,
+            92.88,
+            88.67,
+            86.64,
+            88.61
+          ]
+        },
+        "overlap": {
+          "mean": 89.33,
+          "ci95": [
+            86.68,
+            91.98
+          ],
+          "per_run": [
+            89.01,
+            92.88,
+            88.93,
+            87.09,
+            88.73
+          ]
+        },
+        "n_pairs": 5
+      }
+    },
     "fine_published_split": {
       "baseline": {
         "strict": {
@@ -1619,6 +1859,20 @@
         "type": 15.54,
         "overlap": 4.46
       }
+    },
+    "sofc": {
+      "crf": {
+        "strict": 3.48,
+        "exact": 3.46,
+        "type": 1.41,
+        "overlap": 1.35
+      },
+      "crf_ens3": {
+        "strict": 3.56,
+        "exact": 3.53,
+        "type": 1.39,
+        "overlap": 1.3
+      }
     }
   },
   "near_misses": {
@@ -1865,6 +2119,88 @@
           "EQU",
           "CHP",
           1.7
+        ]
+      ]
+    },
+    "sofc_random_split_vary": {
+      "n_pred": 48393,
+      "right": 0.842,
+      "wrong_type": 0.001,
+      "inside_longer_gold": 0.027,
+      "around_shorter_gold": 0.016,
+      "crossing": 0.0,
+      "spurious": 0.114,
+      "wrong_type_pairs": [
+        [
+          "MATERIAL",
+          "DEVICE",
+          0.4
+        ],
+        [
+          "DEVICE",
+          "MATERIAL",
+          0.3
+        ],
+        [
+          "VALUE",
+          "MATERIAL",
+          0.2
+        ],
+        [
+          "MATERIAL",
+          "EXPERIMENT",
+          0.2
+        ],
+        [
+          "EXPERIMENT",
+          "MATERIAL",
+          0.1
+        ],
+        [
+          "MATERIAL",
+          "VALUE",
+          0.1
+        ]
+      ]
+    },
+    "sofc_document_folds": {
+      "n_pred": 48500,
+      "right": 0.802,
+      "wrong_type": 0.001,
+      "inside_longer_gold": 0.052,
+      "around_shorter_gold": 0.021,
+      "crossing": 0.0,
+      "spurious": 0.123,
+      "wrong_type_pairs": [
+        [
+          "DEVICE",
+          "MATERIAL",
+          0.6
+        ],
+        [
+          "MATERIAL",
+          "DEVICE",
+          0.3
+        ],
+        [
+          "VALUE",
+          "MATERIAL",
+          0.2
+        ],
+        [
+          "MATERIAL",
+          "VALUE",
+          0.2
+        ],
+        [
+          "EXPERIMENT",
+          "MATERIAL",
+          0.1
+        ],
+        [
+          "MATERIAL",
+          "EXPERIMENT",
+          0.0
         ]
       ]
     },

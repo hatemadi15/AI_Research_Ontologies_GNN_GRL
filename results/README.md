@@ -178,8 +178,14 @@ seeds (`types`).
 `gpu/ner_week5_seed_analysis.json` also holds `paper_count` (claim C19): per
 held-out paper, the CRF head's F1 trained on two papers (the inner folds'
 counts at D = 0) and on three (leave-one-paper-out), seeds 0 to 200, and
-their difference over the 4 papers; and `sofc_splits` (week 8, part 1), empty
-until its runs come in.
+their difference over the 4 papers; and `sofc_splits` (week 8, part 1): the CRF
+head on SOFC-Exp's 5 random sentence splits
+(`gpu/ner_results_sofc_random_split_vary_crf_m<N>.json`) and 5 folds of 9
+held-out articles (`gpu/ner_results_sofc_document_folds_crf_m<N>.json`), N =
+0 to 900, with predictions: per protocol the mean and CI over the splits of
+every F1 average, the CRF votes over the seed triples, and the gap (random
+splits minus article folds, +3.48 micro). `gpu/ner_mentions.json` and
+`gpu/ner_matching.json` hold both protocols as SOFC-Exp settings.
 
 Seen and unseen test names (exploratory, no training; claim C17 of
 `docs/PAPER.md`): `gpu/ner_mentions.json` (`ner_mentions.py`) splits the gold

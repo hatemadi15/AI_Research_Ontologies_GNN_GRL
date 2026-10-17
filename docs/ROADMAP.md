@@ -1021,7 +1021,7 @@ chance at class level. For a Task C-style result:
 | 5 | Done: NER, P1 "Next, after week 4" item 1, i.e. 10 seeds per split for the CRF reference, multi-task, label semantics and self-training with 3 teachers, on Kaggle T4 GPUs, and the published split (amendment); items 2–7 and a paper outline prepared, and the week-6 options run once each at full size (protocol below). The original week-5 work moves to week 7 | Met. Of the claims re-tested with 10 seeds, fine-grained multi-task on the random splits passes (+1.83 [+0.32, +3.34]); the coarse-grained claims of week 3 and the self-training claim of week 4 do not. The reported system: the multi-task vote coarse-grained on the random splits and fine-grained on unseen papers, `crf_ens3` elsewhere. On the published split, plain MatSciBERT reproduces 69.92 and 72.32 and the CRF head beats both |
 | 6 | Done: NER, P1 "Next, after week 5", towards a methods paper: methods for unseen papers (DeBERTa-v3-large, document context, multi-task self-training) screened with 3 seeds and decided with 10, and a second dataset (SOFC-Exp, 10 seeds); protocol below. Done (P1, "Week 6"): DeBERTa-v3-large stops at the screen; document context passes the screen but neither 10-seed decision nor S2 on SOFC-Exp (+0.58 [−0.26, +1.42]); multi-task self-training passes the screen (+6.06 fine-grained) but none of its 4 decisions (+5.47 [−0.74, +11.68] fine-grained against the CRF head), so its S2 on SOFC-Exp does not run; on SOFC-Exp the CRF head improves on plain MatSciBERT (S1) | A method whose vote improves on the strongest system on unseen papers under the 10-seed design, and on SOFC-Exp |
 | 7 | In progress: NER, part 1, document-level label consistency for unseen papers, a post-processing rule on the saved predictions (no GPU; protocol below); part 2a, recall calibration (a bias on the CRF head's emissions, chosen on inner folds; done, no claim: the missed entities are not near the threshold); part 2b, mention replacement (screen, then 10 seeds if it passes; protocol below; done: it improves on the CRF head at both granularities, +2.77 [+1.51, +4.03] fine-grained and +1.28 [+0.06, +2.51] coarse-grained, but its vote does not beat the strongest systems and S2 on SOFC-Exp gives −0.29), and later the combinations of the methods that pass week 6, fixed after the week-6 decisions; part 2c, coarse-to-fine completion (done, no claim); part 2d, multi-task training on SOFC-Exp's two levels (done, no claim: −0.78 [−2.39, +0.84] on the slot level, −0.15 [−1.36, +1.05] on the entity level); part 2e, SOFC-Exp's test articles cut into words as its training articles are (protocol below). Then class-level taxonomy (LLM or cross-encoder + arborescence) and a relation annotation pilot | Part 1: the rule improves on the strongest system on unseen papers and on SOFC-Exp's CRF head. Taxonomy: first class-level F1 above chance; relation guidelines |
-| 8 | Prepared: part 1, SOFC-Exp beyond its official split: the CRF head with 10 seeds on 5 random sentence splits and on 5 folds of 9 held-out articles (`--document-folds 5`; protocol below, descriptive); part 2, more papers or more sentences: three training papers cut to the size of two against two papers (`--two-paper-size`; protocol below) | Part 1: the gap between random splits and unseen documents measured on a second corpus. Part 2: whether a third paper helps at the same number of training sentences |
+| 8 | Part 1 done: SOFC-Exp beyond its official split, the CRF head with 10 seeds on 5 random sentence splits and on 5 folds of 9 held-out articles (`--document-folds 5`; protocol below, descriptive): 86.27 against 82.79, a gap of 3.48 points (28–31 on MaterioMiner); part 2 (its first session hung and was cancelled; it runs again after week 9), more papers or more sentences: three training papers cut to the size of two against two papers (`--two-paper-size`; protocol below) | Part 1: the gap between random splits and unseen documents measured on a second corpus. Part 2: whether a third paper helps at the same number of training sentences |
 | 9 | Prepared: mention replacement on the multi-task model (`crf_mt_mr`, part 1: 10 seeds on the held-out papers, S2 on SOFC-Exp's two levels) and mention replacement on SOFC-Exp with training cut to MaterioMiner's size (part 2: 5 draws of 10 training articles); protocol below | Part 1: the combination's vote improves on the strongest system on unseen papers, and on SOFC-Exp. Part 2: mention replacement improves on the CRF head on a MaterioMiner-sized SOFC-Exp |
 
 ### Week 2 protocol (fixed before any run)
@@ -2435,6 +2435,47 @@ their stored runs.
 **Budget:** 100 runs of about 3.3 minutes, 10 jobs of 5 runs per GPU:
 about 2.8 hours of one session (`w8a`). It runs after the queued batches of
 weeks 6 and 7, on the next free kernel.
+
+**Outcome of part 1 (descriptive): random splits score 3.5 points above
+held-out articles on SOFC-Exp, against 28–31 on MaterioMiner.** Session a of
+17 October (`w8a`, bundle 04352cd, 06:55 to 10:05); both repeats are
+identical (`smokeae` 77.95, `smokeaf` 84.98).
+1. **The CRF head** (micro F1, the mean over 5 splits or folds of their
+   10-seed means, 95% CI over them): 86.27 [84.82, 87.71] on random
+   sentence splits (84.81 to 87.76 per split) and 82.79 [78.33, 87.24] on
+   article folds (79.77 to 88.76 per fold), against 83.75 on the official
+   split. Random splits minus article folds: +3.48 micro, +3.04 macro,
+   +3.50 weighted; strict IOB2 equals the default scoring.
+2. **Its votes** over the seed triples: 87.18 against 83.62 (+3.56).
+3. **Seen and unseen names** (`ner_mentions.py`): 29.7% of the test names
+   are unseen on random splits, 46.4% on article folds (49.3% on the
+   official split). Recall is 91.3 on seen and 82.0 on unseen names on
+   random splits, and 89.3 and 79.7 on article folds. Of the 3.6-point
+   recall gap (88.4 against 84.8), the mix of names accounts for about 1.5
+   points in either order of the decomposition (86.9 and 86.3), and the
+   lower recall within each kind for the rest.
+4. **Looser matching** (`ner_matching.py`): the 3.48-point strict gap is
+   3.46 when only the span must match, 1.41 when an overlap of the same
+   type counts, and 1.35 under any overlap (90.16 against 88.81). About
+   two of the three and a half points are boundaries: 5.2% of the
+   predictions on article folds lie inside a longer gold entity, 2.7% on
+   random splits.
+5. **Which articles are held out** matters about as much as the protocol:
+   the article folds range over 9 points (79.77 to 88.76), the random
+   splits over 3.
+
+As expected before the runs, the gap is a few points, far below
+MaterioMiner's. What the protocol said this changes: C2 is a finding about
+corpora whose papers differ in topic and annotation conventions, as
+MaterioMiner's do (C18), not about random splits alone. Random splits still
+overstate SOFC-Exp's score on new articles, by 3.5 points; there a new
+article brings fewer new names (46% against 81% fine-grained on
+MaterioMiner), and the CRF head finds 80% of them (35% on MaterioMiner).
+Files: `gpu/ner_results_sofc_random_split_vary_crf_m<N>.json` and
+`gpu/ner_results_sofc_document_folds_crf_m<N>.json` (N = 0 to 900, with
+predictions); `sofc_splits` in `gpu/ner_week5_seed_analysis.json`, the
+SOFC-Exp settings of `gpu/ner_mentions.json` and `gpu/ner_matching.json`,
+Table 4 and Figure 1's third panel.
 
 ### Week 8 protocol, part 2: more papers or more sentences? (fixed before any run)
 

@@ -176,6 +176,17 @@ on both protocols loses 28–31 points fine-grained and 17–20 coarse-grained.
 Figure 1 shows the gap system by system; no addition narrows it by more
 than a few points.
 
+The gap depends on how much the papers differ. SOFC-Exp's 45 articles share
+one topic and one annotation scheme. There the CRF head scores 86.27
+[84.82, 87.71] over 5 random sentence splits and 82.79 [78.33, 87.24] over
+5 folds of 9 held-out articles (10 seeds each; Figure 1, third panel): a
+gap of 3.48 points, against 28–31 on MaterioMiner. A held-out SOFC-Exp
+article brings fewer new names (46% of its test names are unseen, 30% on
+random splits; 81% on a held-out MaterioMiner paper, fine-grained), and the
+CRF head finds 80% of them. About two of the three and a half points are
+boundaries: under any overlap the gap is 1.35. Which articles are held out
+matters as much as the protocol: the folds range from 79.77 to 88.76.
+
 **5.3 The CRF head, and a second dataset (C3, C4, C13).**
 - **Published split:** the CRF head scores 73.31 [72.28, 74.35] and 75.48
   [74.23, 76.72], +3.12 and +2.96 over plain MatSciBERT, paired by seed.
