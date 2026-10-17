@@ -10,8 +10,8 @@ stored run with predictions (ner_baseline.py --save-predictions) in that way:
   - unseen: they are no entity there.
 The training sentences are the ones the run's model learned from, not its validation
 sentences. The run's split is rebuilt as ner_baseline.py builds it (a random split from the
-run's split seed, a held-out paper's fold, a fold of --document-folds, the published split),
-and its test sentences and
+run's split seed, a held-out paper's fold, a fold of --document-folds, the published split,
+MuLMS's held-out subfields and random pool splits), and its test sentences and
 gold tags must be the stored ones. A predicted entity takes a kind in the same way, by its words
 and its predicted type, so that recall, precision and F1 are given per kind; a correct
 prediction has the kind of its gold entity. Votes (<family>_ens3 over the seed triples 0-200,
@@ -19,7 +19,8 @@ prediction has the kind of its gold entity. Votes (<family>_ens3 over the seed t
 
 No training and no decision. Output, results/gpu/ner_mentions.json:
   - systems: per granularity and protocol (MaterioMiner's random splits and held-out papers,
-    SOFC-Exp's random splits and article folds, the published splits), for each system whose
+    SOFC-Exp's random splits and article folds, MuLMS's random pool splits and held-out
+    subfields, the published splits), for each system whose
     files are all there, the
     counts of gold, predicted and correct entities of each kind over all its runs (seeds x
     splits or papers), the recall, precision and F1 they give, and each kind's share of the
@@ -31,7 +32,7 @@ No training and no decision. Output, results/gpu/ner_mentions.json:
     (the most frequent first), its gold entities per run, the share of them that are unseen,
     and the recall on its seen and on its unseen ones;
   - gap: per granularity, the CRF head's recall on the random splits and on held-out papers
-    (SOFC-Exp: article folds),
+    (SOFC-Exp: article folds; MuLMS: random pool splits and held-out subfields),
     and two counterfactual recalls: held-out papers' recall per kind with the random splits'
     shares of the kinds, and the random splits' recall per kind with held-out papers' shares;
   - methods: on held-out papers and published splits, each method against the CRF head with
@@ -56,8 +57,9 @@ from collections import Counter
 from pathlib import Path
 
 import metrics
-from ner_baseline import (DOCUMENT_FOLDS, corpus_words, document_groups, granularity_data,
-                          paper_fold, published_split, random_split)
+from ner_baseline import (DOCUMENT_FOLDS, POOL_SPLITS, SUBFIELDS, corpus_words,
+                          document_groups, granularity_data, mulms_subfields, paper_fold,
+                          pool_split, published_split, random_split, subfield_folds)
 from ner_ensemble import ensemble_run, tags_to_spans
 from ner_seedmeans import (GRANULARITIES, LOPO, SCREEN_OFFSETS, WEEK5_OFFSETS, WEEK5_TRIPLES,
                            seed_family)
@@ -73,8 +75,9 @@ RANDOM = 'random_split_vary'
 PUBLISHED = 'published_split'
 REFERENCE = 'crf'
 # per granularity: the random splits and the protocol of unseen documents (MaterioMiner's
-# held-out papers; SOFC-Exp's article folds, week 8)
-HELD_OUT = {'fine': (RANDOM, LOPO), 'coarse': (RANDOM, LOPO), 'sofc': (RANDOM, DOCUMENT_FOLDS)}
+# held-out papers; SOFC-Exp's article folds, week 8; MuLMS's held-out subfields, week 10)
+HELD_OUT = {'fine': (RANDOM, LOPO), 'coarse': (RANDOM, LOPO), 'sofc': (RANDOM, DOCUMENT_FOLDS),
+            'mulms': (POOL_SPLITS, SUBFIELDS)}
 # families with 10 seeds per split (or the screen's 3) on the random splits and held-out papers
 FAMILIES = ('crf', 'crf_mt', 'crf_ls', 'crf_st3', 'crf_ctx', 'crf_mt_st3', 'crf_mr', 'crf_mt_mr')
 VOTED = ('crf', 'crf_mt', 'crf_ctx', 'crf_mt_st3', 'crf_mr', 'crf_mt_mr')
@@ -123,6 +126,13 @@ def run_split(results, run, data, granularity):
                                     indices=True)
     elif protocol == PUBLISHED:
         (train, _, test), data = published_split(data, granularity)
+    elif protocol == POOL_SPLITS:
+        train, _, test = pool_split(len(data), int(run_id.removeprefix('seed')),
+                                    config['train_pool'])
+    elif protocol == SUBFIELDS:
+        folds = {name: (tr, te) for name, tr, _, te in subfield_folds(
+            data, mulms_subfields(), split_seed, config.get('train_pool', 0), indices=True)}
+        train, test = folds[run_id]
     else:
         raise MentionError(f'run {run_id}: no split for protocol {protocol}')
     if config.get('max_train'):
@@ -302,13 +312,14 @@ def paired(method, reference):
 
 def held_out_systems(directory, granularity, protocol):
     """{system: [{run_id: Counter}]} of the families and votes of one protocol, each family with
-    its 10 seeds or, failing that, the screen's 3; and {system: offsets}."""
-    data = corpus(granularity)
+    its 10 seeds or, failing that, the screen's 3; and {system: offsets}. The corpus is read
+    only when there are files (MuLMS's is built locally, mulms.py)."""
     systems, offsets = {}, {}
     for family in FAMILIES:
         for seeds in (WEEK5_OFFSETS, SCREEN_OFFSETS):
             files = family_files(directory, granularity, protocol, family, seeds)
             if files:
+                data = corpus(granularity)
                 systems[family] = family_counts(files, data, granularity)
                 offsets[family] = seeds
                 if family in VOTED and seeds == WEEK5_OFFSETS:
@@ -439,7 +450,7 @@ def analyse(directory, corpus_path=CORPUS):
                 out['types'][key] = type_kinds(pooled(systems[REFERENCE]),
                                                sum(map(len, systems[REFERENCE])))
         if len(reference) == len(protocols):
-            out['gap'][g] = gap(reference[RANDOM], reference[protocols[1]])
+            out['gap'][g] = gap(reference[protocols[0]], reference[protocols[1]])
     for g in PUBLISHED_SPLITS:
         systems = published_systems(directory, g)
         if not systems:

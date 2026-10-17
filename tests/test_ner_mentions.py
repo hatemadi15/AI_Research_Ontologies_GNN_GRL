@@ -82,6 +82,25 @@ def test_a_run_must_match_its_rebuilt_split():
         nm.run_counts(bad, TOY, 'fine')
 
 
+def test_mulms_splits_are_rebuilt(monkeypatch):
+    """Week 10: a held-out subfield's run (its fold rebuilt from subfields.json and the training
+    pool) and a random pool split's run."""
+    subfields = {'A.conll': 'alpha', 'B.conll': 'beta'}
+    monkeypatch.setattr(nm, 'mulms_subfields', lambda: subfields)
+    from ner_baseline import pool_split, subfield_folds
+    name, train, _, test = subfield_folds(TOY, subfields, 0, 2, indices=True)[1]
+    run = {'run_id': name, 'test_index': test}
+    results = {'protocol': 'leave_one_subfield_out',
+               'config': {'split_seed': 0, 'train_pool': 2}}
+    assert nm.run_split(results, run, TOY, 'mulms') == (TOY, train, test)
+    tr, _, te = pool_split(len(TOY), 1, 5)
+    results = {'protocol': 'random_split_pool', 'config': {'train_pool': 5}}
+    assert nm.run_split(results, {'run_id': 'seed1', 'test_index': te}, TOY, 'mulms') == (
+        TOY, tr, te)
+    with pytest.raises(nm.MentionError, match='test sentences'):
+        nm.run_split(results, {'run_id': 'seed2', 'test_index': te}, TOY, 'mulms')
+
+
 @pytest.mark.parametrize('name, granularity', [
     ('ner_results_fine_leave_one_paper_out_crf_m0.json', 'fine'),
     ('ner_results_coarse_random_split_vary_crf_m300.json', 'coarse'),
