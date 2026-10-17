@@ -2103,6 +2103,18 @@ A 3-seed screen is optimistic (C8): document context passed with +2.66 and
 gained +1.14 with 10 seeds. Stage 2 adds the seeds 300 to 900 and SOFC-Exp's
 S2, and decides.
 
+*Prepared for a combination (17 October, tests only, no runs).* Mention
+replacement on the multi-task model (`--multi-task --augment-mentions K`,
+variant `crf_mt_mr`, a file per head). A copy replaces a coarse-grained
+mention, in both heads' tags at once, by a training mention of the same
+coarse-grained and fine-grained type (the type of the fine-grained entity
+with its span, or none). The levels nest, so this keeps both tag sequences
+valid. Examples labelled for one head only (the 15 sentences tokenised
+differently) are left alone. Each run stores its number of copies. On a
+tiny random model, every existing option writes byte-identical results
+files (`runtime_sec` aside), single-task mention replacement included.
+Whether it runs is fixed in a protocol after stage 2's decisions.
+
 ### Week 6 amendment, before stage 2's results: multi-task self-training on SOFC-Exp (fixed before any run)
 
 The week-6 protocol left multi-task self-training out of SOFC-Exp for two

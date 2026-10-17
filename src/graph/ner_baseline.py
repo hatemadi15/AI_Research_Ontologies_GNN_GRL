@@ -359,6 +359,53 @@ def mention_replacements(sentences, k, seed, p=MR_P):
     return out
 
 
+def mention_replacements_multitask(examples, k, seed, p=MR_P):
+    """mention_replacements for the multi-task model (--multi-task --augment-mentions): per
+    training example (multitask_examples) with both heads' tags and an entity, k copies in
+    which each coarse-grained mention is replaced, with probability p, by a mention of the
+    same coarse-grained type and the same fine-grained type (that of the fine-grained entity
+    with its span, or none) drawn from all such mentions of `examples`, in both tag
+    sequences at once. Examples labelled for one head only, or with a fine-grained entity
+    whose span is no coarse-grained entity's, are neither replaced nor drawn from. Copies
+    that change nothing are dropped. Returns [(words, {head: tags})].
+    """
+    rng = random.Random(seed)
+    usable = []
+    for words, tags in examples:
+        if tags['fine'] is None or tags['coarse'] is None:
+            continue
+        fine = {(start, end): kind for start, end, kind in entity_spans(tags['fine'])}
+        coarse = entity_spans(tags['coarse'])
+        if set(fine) <= {(start, end) for start, end, _ in coarse}:
+            usable.append((words, tags, [(start, end, (kind, fine.get((start, end))))
+                                         for start, end, kind in coarse]))
+    pool = {}
+    for words, _, spans in usable:
+        for start, end, key in spans:
+            pool.setdefault(key, []).append(tuple(words[start:end]))
+    out = []
+    for words, tags, spans in usable:
+        if not spans:
+            continue
+        for _ in range(k):
+            new_words, new_tags, last, changed = [], {h: [] for h in MT_HEADS}, 0, False
+            for start, end, key in spans:
+                mention = tuple(words[start:end])
+                if rng.random() < p:
+                    mention = rng.choice(pool[key])
+                    changed |= mention != tuple(words[start:end])
+                new_words += list(words[last:start]) + list(mention)
+                for head, kind in zip(('coarse', 'fine'), key):
+                    new_tags[head] += list(tags[head][last:start]) + (
+                        [f'B-{kind}'] + [f'I-{kind}'] * (len(mention) - 1) if kind
+                        else ['O'] * len(mention))
+                last = end
+            if changed:
+                out.append((new_words + list(words[last:]),
+                            {h: new_tags[h] + list(tags[h][last:]) for h in MT_HEADS}))
+    return out
+
+
 def part_contexts(data, part, full_texts=None):
     """Context sentences for --context: a (left, right) per position of `part`, in its order.
 
@@ -1372,7 +1419,7 @@ def multitask_history(log, head):
 
 
 def train_multitask(seed, parts, labels, args, device, test_index=None, descriptions=None,
-                    silver=None, keep_tagger=False, contexts=None):
+                    silver=None, keep_tagger=False, contexts=None, augmented=None):
     """Fine-tune one encoder with a fine and a coarse CRF head together; test each head.
 
     parts: {head: (train, val, test)}, lists of (tokens, tags, doc) for the same
@@ -1395,7 +1442,9 @@ def train_multitask(seed, parts, labels, args, device, test_index=None, descript
     snapshot of each head's best epoch (`snapshots`; mt_teacher_tags). contexts (--context):
     {head: {'train'|'val'|'test': part_contexts of that part of the head's corpus}}; each
     sentence is encoded with up to args.context subwords of context per side, as in train_one
-    (a training example takes its context as in multitask_contexts).
+    (a training example takes its context as in multitask_contexts). augmented
+    (--augment-mentions): [(words, {head: tags})] trained on as gold examples
+    (mention_replacements_multitask).
     """
     import torch
     from transformers import AutoTokenizer, get_linear_schedule_with_warmup, set_seed
@@ -1426,6 +1475,12 @@ def train_multitask(seed, parts, labels, args, device, test_index=None, descript
             tokenizer, examples, label2id, model.encoder.config.max_position_embeddings,
             multitask_contexts(parts['fine'][0], parts['coarse'][0],
                                {h: contexts[h]['train'] for h in MT_HEADS}), args.context)
+    if augmented:
+        assert contexts is None and not silver, 'augmented examples are gold ones, no context'
+        extra = encode_multitask(tokenizer, augmented, label2id,
+                                 model.encoder.config.max_position_embeddings)
+        for h in MT_HEADS:
+            f_train[h] += extra[h]
     weight = None
     if silver:
         # the gold examples, then the silver ones; multitask_batches shuffles them together
@@ -1687,12 +1742,12 @@ RESULT_FILE = re.compile(r'ner_results_(fine|coarse|sofc_slot|sofc)'
 PLAIN_VARIANTS = ('baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_st', 'crf_mt_ls', 'crf_st3',
                   'crf_ctx', 'crf_mt_st3', 'crf_mt_ctx', 'crf_mr', 'crf_bias', 'crf_mt_bias',
                   'crf_ls_bias', 'crf_mt_ls_bias', 'crf_ctx_bias', 'crf_mt_ctx_bias',
-                  'crf_mr_bias', 'crf_eb', 'crf_ebv', 'crf_p3n2')
+                  'crf_mr_bias', 'crf_eb', 'crf_ebv', 'crf_p3n2', 'crf_mt_mr')
 
 
 def variant_name(args):
     """Variant of a run: 'baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_mt_ls', 'crf_st' or
-    'crf_st<N>', 'crf_mt_st<N>', 'crf_ctx', 'crf_mt_ctx' or 'crf_mr', with _bias for
+    'crf_st<N>', 'crf_mt_st<N>', 'crf_ctx', 'crf_mt_ctx', 'crf_mr' or 'crf_mt_mr', with _bias for
     --entity-bias (crf_bias, crf_ctx_bias), then the tag.
 
     'cw' is --class-weights, 'crf_mt' is --crf --multi-task, 'crf_ls' is --crf
@@ -1713,7 +1768,7 @@ def variant_name(args):
         if getattr(args, 'context', 0):
             name = 'crf_mt_ctx' if multi_task else 'crf_ctx'
         if getattr(args, 'augment_mentions', 0):
-            name = 'crf_mr'
+            name = 'crf_mt_mr' if multi_task else 'crf_mr'
         if getattr(args, 'two_paper_size', False):
             name = 'crf_p3n2'
         if hasattr(args, 'entity_bias'):
@@ -2360,11 +2415,17 @@ def run_multitask(args, out_dir):
                      for h in MT_HEADS} if getattr(args, 'context', 0) else None)
         seed = int(run_id[4:]) if run_id.startswith('seed') else args.seeds[0]
         seed += args.seed_offset
+        augmented = (mention_replacements_multitask(
+            multitask_examples(parts['fine'][0], parts['coarse'][0]), args.augment_mentions,
+            seed) if getattr(args, 'augment_mentions', 0) else None)
         start = time.time()
         records = train_multitask(seed, parts, labels, args, device, test_index=te,
-                                  descriptions=descriptions, contexts=contexts)
+                                  descriptions=descriptions, contexts=contexts,
+                                  augmented=augmented)
         runtime = round(time.time() - start, 1)
         for head, res in records.items():
+            if augmented is not None:
+                res['n_augmented'] = len(augmented)
             res['run_id'] = run_id
             res['runtime_sec'] = runtime      # the shared training time
             if environment:
@@ -2677,7 +2738,9 @@ def parse_args(argv=None):
                         help='with --crf: mention replacement (Dai and Adel, 2020). K copies '
                              'of each training sentence with an entity, each mention replaced '
                              f'with probability {MR_P} by a training mention of its type '
-                             '(files tagged _crf_mr)')
+                             '(files tagged _crf_mr; with --multi-task, _crf_mt_mr, each '
+                             'mention replaced in both heads by one of the same coarse- and '
+                             'fine-grained type)')
     parser.add_argument('--entity-bias', type=float, nargs='+', default=argparse.SUPPRESS,
                         metavar='D',
                         help='with --crf: decode the test and validation sentences again with D '
@@ -2804,7 +2867,7 @@ def parse_args(argv=None):
             parser.error('--augment-mentions needs --crf')
         if args.augment_mentions < 1:
             parser.error('--augment-mentions: at least 1 copy')
-        for option in ('multi_task', 'label_semantics', 'self_train', 'context'):
+        for option in ('label_semantics', 'self_train', 'context'):
             if getattr(args, option, None) not in (None, False):
                 parser.error(f"--augment-mentions is not available with "
                              f"--{option.replace('_', '-')}")

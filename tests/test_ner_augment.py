@@ -49,7 +49,8 @@ def test_augment_parser_and_names(capsys):
     assert nb.variant_name(args) == 'crf_mr_m100' and nb.reference_variant('crf_mr_m100') == 'crf'
     for argv, error in ((['--augment-mentions', '2'], 'needs --crf'),
                         (['--crf', '--augment-mentions', '0'], 'at least 1'),
-                        (['--crf', '--augment-mentions', '2', '--multi-task'], 'not available'),
+                        (['--crf', '--augment-mentions', '2', '--label-semantics'],
+                         'not available'),
                         (['--crf', '--augment-mentions', '2', '--context', '8'], 'not available'),
                         (['--crf', '--tag', 'mr'], 'would overwrite')):
         with pytest.raises(SystemExit):
@@ -57,6 +58,50 @@ def test_augment_parser_and_names(capsys):
         assert error in capsys.readouterr().err
     # the existing options keep their stored configuration
     assert 'augment_mentions' not in vars(nb.parse_args(['--crf']))
+    # with the multi-task model: its own variant, compared with the CRF head
+    args = nb.parse_args(['--crf', '--multi-task', '--augment-mentions', '3', '--tag', 'm0'])
+    assert nb.variant_name(args) == 'crf_mt_mr_m0'
+    assert nb.reference_variant('crf_mt_mr_m0') == 'crf'
+
+
+MT_EXAMPLES = [
+    (['steel', 'alloy', 'was', 'tested'],
+     {'fine': ['B-Alloy', 'I-Alloy', 'O', 'O'], 'coarse': ['B-MAT', 'I-MAT', 'O', 'O']}),
+    (['Ti64', 'fails', 'at', 'room', 'temperature'],
+     {'fine': ['B-Alloy', 'O', 'O', 'O', 'O'], 'coarse': ['B-MAT', 'O', 'O', 'B-COND', 'I-COND']}),
+    (['copper', 'at', '20', 'K', 'and', 'room', 'temperature'],
+     {'fine': ['O', 'O', 'B-Value', 'I-Value', 'O', 'O', 'O'],
+      'coarse': ['B-MAT', 'O', 'B-COND', 'I-COND', 'O', 'B-COND', 'I-COND']}),
+    (['steel', 'cracks'], {'fine': ['B-Alloy', 'O'], 'coarse': None}),       # one head only
+    (['brass', 'bends'], {'fine': ['B-Alloy', 'I-Alloy'], 'coarse': ['B-MAT', 'O']})]  # no nest
+
+
+def test_multitask_mention_replacement_keeps_both_levels():
+    """A mention is replaced in both heads by one of the same coarse- and fine-grained type;
+    examples labelled for one head only, or whose levels do not nest, are left alone."""
+    copies = nb.mention_replacements_multitask(MT_EXAMPLES, 5, seed=0)
+    assert copies == nb.mention_replacements_multitask(MT_EXAMPLES, 5, seed=0)    # seeded
+    assert copies and copies != nb.mention_replacements_multitask(MT_EXAMPLES, 5, seed=1)
+    mentions = {(('MAT', 'Alloy'), ('steel', 'alloy')), (('MAT', 'Alloy'), ('Ti64',)),
+                (('MAT', None), ('copper',)), (('COND', None), ('room', 'temperature')),
+                (('COND', 'Value'), ('20', 'K'))}
+    sources = [[w for w, t in zip(words, tags['coarse']) if t == 'O']
+               for words, tags in MT_EXAMPLES[:3]]
+    for words, tags in copies:
+        assert set(tags) == {'fine', 'coarse'}
+        assert len(words) == len(tags['fine']) == len(tags['coarse'])
+        fine = {(a, b): kind for a, b, kind in nb.entity_spans(tags['fine'])}
+        coarse = nb.entity_spans(tags['coarse'])
+        assert set(fine) <= {(a, b) for a, b, _ in coarse}                 # the levels nest
+        assert all(((kind, fine.get((a, b))), tuple(words[a:b])) in mentions
+                   for a, b, kind in coarse)
+        # the words outside the mentions are those of one of the three usable examples
+        assert [w for w, t in zip(words, tags['coarse']) if t == 'O'] in sources
+    assert nb.mention_replacements_multitask(MT_EXAMPLES, 3, seed=0, p=0.0) == []
+    assert nb.mention_replacements_multitask(MT_EXAMPLES[3:], 3, seed=0, p=1.0) == []
+    # the single-task copies of the coarse level are not those of the multi-task model
+    coarse_only = [(w, t['coarse']) for w, t in MT_EXAMPLES[:3]]
+    assert [(w, t['coarse']) for w, t in copies] != nb.mention_replacements(coarse_only, 5, 0)
 
 
 WORDS = ['steel', 'alloy', 'tensile', 'strength', 'yield', 'room', 'temperature', 'high']
