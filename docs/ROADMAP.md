@@ -2884,6 +2884,10 @@ this on the GPU. Nothing else in the design changes.
   19.5–26.3 minutes per job, the CRF head 10.1–13.3 on the held-out
   subfields and 8.3–10.8 on the pool splits. Its outputs are pulled and
   collected; no session runs.
+- *01:19: week 11's bundle* (427e34c, the protocol's commit) is a new version
+  of `ner-gpu-bundle-3`, ready after the CLI retried four 429 replies.
+  `w11a` goes to `ner-gpu-jobs-d` once the bundle has been ready for 30
+  minutes and its BUNDLE.json names 427e34c. 3.95 GPU hours remain this week.
 
 **Outcome of part 1: 3 of the 6 decisions pass; the combination's vote is
 the strongest fine-grained system on unseen papers, but S2 fails at both

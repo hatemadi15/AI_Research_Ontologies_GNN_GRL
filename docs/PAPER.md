@@ -39,7 +39,10 @@ subfields gaining, which does not pass; its votes improve on the CRF votes
 (+2.71 [+0.22, +5.20]). The methods claim needed the first decision, so
 mention replacement and its combination stay results for MaterioMiner.
 Unless one of the remaining candidates passes (ROADMAP §4), the paper is
-the evaluation paper. Recall calibration (week 7, part 2a) passed none
+the evaluation paper. Week 11 (pre-registered) tests the first of them,
+mention replacement whose pool also holds the names that three CRF teachers
+tag in unlabeled in-domain text, on MuLMS's held-out subfields and
+MaterioMiner's held-out papers. Recall calibration (week 7, part 2a) passed none
 of its 5 decisions, and showed why a decoding change cannot close the recall
 gap on unseen papers (C15). Most entities of an unseen paper are names the
 training papers never annotate (81% fine-grained), and every gain that holds
