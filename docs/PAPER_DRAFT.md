@@ -58,6 +58,10 @@ carry either way:
   F1 when any overlap counts, 93.4 on random splits); most of the strict
   gap lies in span boundaries and types that the papers' annotators set
   differently;
+- whether names from a corpus of the held-out subfield's own topic improve
+  on the CRF head there is the last pre-registered test (ROADMAP §4, week
+  12); if it fails, the methods findings stay MaterioMiner's and the paper
+  is the evaluation paper;
 - a third training paper adds 7–9 F1 points on an unseen paper, as much as
   the best method. At the same number of training sentences it still adds
   1.2 (fine-grained) and 3.6 (coarse-grained) points, so most of a paper's

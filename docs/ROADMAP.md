@@ -3650,6 +3650,13 @@ the CRF head on MuLMS's held-out subfields (weeks 10, 11 and 12), and the
 screen chooses among three variants; the paper reports every attempt and the
 count, and the decision seeds are disjoint from the screen's.
 
+*What the design can detect.* With 7 subfields (6 degrees of freedom), the
+paired differences of weeks 10 and 11 had between-subfield standard
+deviations of 2.6 and 3.1 points, so decision 1 passes only for a mean gain
+of about 2.4–2.9 points or more (the half-width of the 95% CI). A smaller
+true gain cannot pass on MuLMS with this design, whatever the method; the
+paper states this with the attempts.
+
 *Budget* (T4; from `w11a`, 22 minutes per subfield and lane with 8,800
 sentences tagged and 5 students): `w12a` about 4.6 hours in lane 0 (V1's 7
 jobs, then two `crf_mr6` jobs) and 3.9 in lane 1 (V2's 7 jobs and one
@@ -3663,7 +3670,12 @@ because they extend the same files.
 (`smokeao`, `smokeap`) equals the stored run; each job's teachers equal week
 10's `crf_m0`, `_m100` and `_m200` on their subfield (`check_w11.py`); the
 bundle's corpora match the reports' SHA-256 (the runner checks them again);
-every run records `silver_filter` and `names`.
+every run records `silver_filter` and `names`. Done before the bundle: on a
+tiny model and the tests' toy corpora, the committed code (40631ce) repeats
+the week-11 code's runs byte for byte apart from `runtime_sec` for the CRF
+head, mention replacement, multi-task mention replacement, self-training
+and MuLMS's pool and held-out runs; the silver-name runs differ only by the
+added `silver_filter` field.
 
 *Analysis.* `ner_seed_analysis.py` (`mulms`, `week12`: per variant the parts
 `screen`, `decision` and `ten_seeds`, each present when its files exist),
