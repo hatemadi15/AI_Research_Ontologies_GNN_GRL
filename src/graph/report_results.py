@@ -1156,7 +1156,40 @@ def mulms_note(analysis):
         if names.get('unseen_in_silver') is not None:
             line += (f". {100 * names['unseen_in_silver']:.1f}% of the unseen test names are "
                      "silver names")
+    line += week12_sentences(m.get('week12') or {})
     return line + ".\n"
+
+
+WEEK12_NAMES = {'crf_mrs_topic': 'silver sentences', 'crf_mrm_topic': 'silver mentions',
+                'crf_mr6': '6 copies'}
+
+
+def week12_sentences(week12):
+    """The week-12 sentences of the MuLMS bullet (ROADMAP §4, week 12): per variant its
+    3-seed screen against mention replacement (no verdict word: the screen decides nothing)
+    and, where run, its decision on seeds 300 to 900 against the CRF head (1) and mention
+    replacement (2), with the share of the unseen test names among its silver names."""
+    out = ''
+    for variant, parts in week12.items():
+        name = WEEK12_NAMES.get(variant, variant)
+        screen = parts.get('screen')
+        if screen:
+            d = screen['minus_crf_mr']['micro']
+            out += (f". Week 12, names from the held-out subfield's topic corpus, {name} "
+                    f"({variant}), the 3-seed screen against mention replacement: "
+                    f"{delta_cell(d)}")
+        decision = parts.get('decision')
+        if decision:
+            out += (f". Week-12 decision for {name} on seeds 300 to 900: "
+                    f"{interval(decision[variant]['micro'])}")
+            for k, reference in ((1, 'the CRF head'), (2, 'mention replacement')):
+                word, numbers = paired_verdict(decision['minus_crf' if k == 1 else 'minus_crf_mr'])
+                out += f"; decision {k}, against {reference}, paired by subfield: {word} ({numbers})"
+        entry = decision or screen
+        if entry and entry.get('unseen_in_silver') is not None:
+            out += (f". {100 * entry['unseen_in_silver']:.1f}% of the unseen test names are "
+                    f"its silver names")
+    return out
 
 
 def week6_screen_line(comps, method, week='6', names=WEEK6_NAMES):

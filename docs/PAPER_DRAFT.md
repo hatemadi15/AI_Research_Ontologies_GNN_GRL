@@ -15,7 +15,9 @@ size (ROADMAP §4, week 9, part 2). On a third corpus, MuLMS, whose
 held-out subfields differ in topic as MaterioMiner's papers do, its single
 model does not pass and its votes do (C22), so by the pre-registered
 criterion it stays a MaterioMiner result. With names from unlabeled text
-added to its pool (Section 6.7), it fails both MuLMS decisions as well (C23).
+added to its pool (Section 6.7), it fails both MuLMS decisions as well (C23);
+names from a corpus of the held-out subfield's own topic are the last
+pre-registered attempt (ROADMAP §4, week 12).
 The numbers come from `results/` through the claims table of `docs/PAPER.md`
 (C1–C23). References are keys of `docs/references.bib`.
 
@@ -723,6 +725,21 @@ names that three CRF teachers tag in unlabeled in-domain text.
     somewhere in the fatigue corpus. So decisions 3 and 4 test the method
     where its names can reach the test papers (after 24 October). They
     cannot change the methods claim, which needed decision 1.
+- *Week 12 (pre-registered, ROADMAP §4; runs after 24 October):* the names
+  come from a corpus of the held-out subfield's own topic, 40,000 sentences
+  of open-access papers per subfield found by title terms on Europe PMC,
+  with MuLMS's identified articles excluded by identifier and every sentence
+  that shares an 8-word n-gram or a 50-character run with a MuLMS sentence
+  dropped. Such a corpus holds 55–81% of the held-out subfield's unseen test
+  names (77–90% of the unseen MAT names), where the cross-subfield names
+  held 4.4%. A 3-seed screen compares three variants against mention
+  replacement: the sentence filter above, a mention-level filter (a mention
+  joins the pool when the three teachers tag its span alike and confidently,
+  whatever the rest of the sentence), and 6 copies instead of 3 without
+  names (the control). The variant with the largest mean gain goes to the
+  decision if that gain is above 0, on seeds the screen did not see: against
+  the CRF head (decision 1) and mention replacement (decision 2). If no
+  variant passes the screen, the methods route on MuLMS is exhausted.
 
 ## 7 Limitations
 

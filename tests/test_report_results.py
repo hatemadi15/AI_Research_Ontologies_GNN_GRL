@@ -1380,6 +1380,34 @@ def test_mulms_bullet(tmp_path):
             '+4.60]). Week-11 decision 2, against mention replacement, paired by subfield: no '
             'significant change (+1.00, 95% CI [-0.40, +2.40]; strict IOB2 +0.90 [-0.50, '
             '+2.30]). 12.3% of the unseen test names are silver names.\n') in readme
+    # week 12: the screen of two variants (no verdict words), the decision for one of them
+    analysis['mulms']['week12'] = {
+        'crf_mr6': {'screen': {'seeds': [0, 100, 200], 'crf_mr6': score(57.1, 50.0, 64.2),
+                               'minus_crf': {'micro': diff(1.9, 0.5, 3.3)},
+                               'minus_crf_mr': {'micro': diff(0.1, -0.9, 1.1)}}},
+        'crf_mrm_topic': {
+            'screen': {'seeds': [0, 100, 200], 'crf_mrm_topic': score(59.0, 52.0, 66.0),
+                       'minus_crf': {'micro': diff(3.8, 1.5, 6.1)},
+                       'minus_crf_mr': {'micro': diff(2.0, 0.4, 3.6)}, 'unseen_in_silver': 0.41},
+            'decision': {'seeds': list(range(300, 1000, 100)),
+                         'crf_mrm_topic': score(59.2, 52.1, 66.3),
+                         'minus_crf': {'micro': diff(4.0, 1.9, 6.1),
+                                       'micro_strict': diff(3.9, 1.8, 6.0)},
+                         'minus_crf_mr': {'micro': diff(2.2, -0.1, 4.5),
+                                          'micro_strict': diff(2.1, -0.2, 4.4)},
+                         'unseen_in_silver': 0.434, 'decision_1': True, 'decision_2': False}}}
+    (ws.results / 'gpu' / rr.WEEK5_ANALYSIS).write_text(json.dumps(analysis))
+    readme, _ = ws.generate()
+    assert ('12.3% of the unseen test names are silver names. Week 12, names from the held-out '
+            "subfield's topic corpus, 6 copies (crf_mr6), the 3-seed screen against mention "
+            'replacement: +0.10 [-0.90, +1.10]. Week 12, names from the held-out subfield\'s '
+            'topic corpus, silver mentions (crf_mrm_topic), the 3-seed screen against mention '
+            'replacement: +2.00 [+0.40, +3.60]. Week-12 decision for silver mentions on seeds '
+            '300 to 900: 59.20 [52.10, 66.30]; decision 1, against the CRF head, paired by '
+            'subfield: improves (+4.00, 95% CI [+1.90, +6.10]; strict IOB2 +3.90 [+1.80, '
+            '+6.00]); decision 2, against mention replacement, paired by subfield: no '
+            'significant change (+2.20, 95% CI [-0.10, +4.50]; strict IOB2 +2.10 [-0.20, '
+            '+4.40]). 43.4% of the unseen test names are its silver names.\n') in readme
 
 
 def test_a_week3_file_that_is_not_an_object_is_reported(tmp_path, capsys):
