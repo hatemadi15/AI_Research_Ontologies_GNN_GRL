@@ -14,8 +14,10 @@ gives no gain on SOFC-Exp even with its training set cut to MaterioMiner's
 size (ROADMAP §4, week 9, part 2). On a third corpus, MuLMS, whose
 held-out subfields differ in topic as MaterioMiner's papers do, its single
 model does not pass and its votes do (C22), so by the pre-registered
-criterion it stays a MaterioMiner result. The numbers come from `results/`
-through the claims table of `docs/PAPER.md` (C1–C22). References are keys of `docs/references.bib`.
+criterion it stays a MaterioMiner result. With names from unlabeled text
+added to its pool (Section 6.7), it fails both MuLMS decisions as well (C23).
+The numbers come from `results/` through the claims table of `docs/PAPER.md`
+(C1–C23). References are keys of `docs/references.bib`.
 
 ---
 
@@ -681,6 +683,46 @@ with the settings of Section 6.3.
   MaterioMiner (+2.26 [−0.12, +4.64]). By the pre-registered criterion,
   mention replacement and its combination with multi-task training stay
   results for MaterioMiner (C20, C21).
+
+**6.7 Mention replacement with names from unlabeled text.** On a held-out
+paper or subfield most names are new, and mention replacement draws its
+replacements from the training sentences' own names: 602–1,066 mentions per
+fold fine-grained on MaterioMiner, 601–1,309 on MuLMS. This variant adds the
+names that three CRF teachers tag in unlabeled in-domain text.
+- *Method:*
+  - The teachers are the CRF head with the seeds 0, 100 and 200, trained on
+    the fold's training sentences.
+  - They tag the 40,000 fatigue sentences (MaterioMiner), or the training
+    subfields' sentences outside the 400-sentence pool, their tags unread
+    (MuLMS).
+  - A tagged sentence is silver if all three teachers give it the same tags
+    and every tag has a CRF marginal of at least 0.9 (as in self-training,
+    Section 6.1). Its mentions join the replacement pool; the silver
+    sentences themselves are not trained on.
+  - Everything else is mention replacement's (Section 6.3): without silver
+    names a student equals the mention replacement run of its seed.
+- *Decisions:*
+  - on MuLMS's held-out subfields, against the CRF head (1) and against
+    mention replacement (2);
+  - on MaterioMiner's held-out papers, against mention replacement at each
+    granularity (3, 4).
+
+  A methods claim needed decision 1 and one of the others.
+- *Result on MuLMS (C23): no gain.* The method scores 50.69: +2.04 [−0.85,
+  +4.92] against the CRF head and −0.06 [−1.09, +0.96] against mention
+  replacement, over 10 seeds paired by subfield. Its votes gain +2.48
+  [−0.44, +5.40] and −0.23 [−1.15, +0.68].
+- *Why:*
+  - Per fold the teachers find 181–419 silver sentences among 7,400–9,433,
+    with 126–358 distinct names.
+  - Those names hold only 4.4% of the held-out subfield's unseen test names
+    (1.0–7.8% per subfield). The other subfields' names are not the held-out
+    subfield's, so the copies show the model hardly any of the names it
+    misses.
+  - On MaterioMiner, 49–65% of a held-out paper's unseen test names occur
+    somewhere in the fatigue corpus. So decisions 3 and 4 test the method
+    where its names can reach the test papers (after 24 October). They
+    cannot change the methods claim, which needed decision 1.
 
 ## 7 Limitations
 

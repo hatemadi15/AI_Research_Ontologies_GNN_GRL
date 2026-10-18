@@ -744,7 +744,12 @@ stands (ROADMAP §4, weeks 6 to 9):
    head finds 39% of them, as in a new MaterioMiner paper. Mention
    replacement gains +2.10 [−0.31, +4.51] (six subfields gain), which does
    not pass, while its votes beat the CRF votes by +2.71 [+0.22, +5.20]. By
-   the pre-registered criterion it stays a MaterioMiner result.
+   the pre-registered criterion it stays a MaterioMiner result. Week 11
+   added names from unlabeled text to its pool, the mentions that three
+   CRF teachers tag alike and confidently. On MuLMS this adds nothing (−0.06
+   [−1.09, +0.96] against mention replacement), since those names hold only
+   4.4% of a held-out subfield's unseen test names. MaterioMiner's part
+   runs after 24 October.
 4. Why unseen papers are hard (exploratory, no GPU; `ner_mentions.py`):
    81% of a held-out paper's fine-grained entities are names that its
    three training papers never annotate with that type, against 35% on
