@@ -3428,3 +3428,26 @@ decisions 3 and 4 test the method where its names can reach the test
 papers. By the protocol, though, a methods claim needed decision 1, so
 mention replacement, with or without silver names, stays a MaterioMiner
 result whatever `w11b` shows.
+
+### What follows week 11 (18 October; not a protocol)
+
+Mention replacement and its silver-name variant have now failed the
+methods criterion on MuLMS. The silver names failed because they hardly
+reach the test documents: 4.4% of a held-out subfield's unseen names, since
+the names came from the other subfields. That points to one remaining route,
+with `w11b` as its gate:
+1. **`w11b` first** (fixed by the week-11 protocol, after the reset on 24
+   October). On MaterioMiner, 49–65% of a held-out paper's unseen test names
+   occur in the fatigue corpus, so decisions 3 and 4 show whether names from
+   matching unlabeled text add to mention replacement.
+2. **Only if decision 3 or 4 passes: topic corpora for MuLMS.** Unlabeled
+   open-access text of each held-out subfield's own topic (as the fatigue
+   corpus is for MaterioMiner; an SOFC corpus exists), so that the names
+   can reach the test documents without using them. That would be a new
+   protocol, with decision 1 of week 11 asked again on MuLMS.
+3. **Otherwise the evaluation paper.** The candidates left from week 11's
+   list have no route to a methods claim:
+   - extra corpora with heads, against which the outside evidence speaks;
+   - a vote across methods, which cannot repeat on a second corpus;
+   - names from the test documents themselves, which changes the setting
+     and acts like the consistency rule of week 7, which did not pass.
