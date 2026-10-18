@@ -1024,7 +1024,7 @@ chance at class level. For a Task C-style result:
 | 8 | Part 1 done: SOFC-Exp beyond its official split, the CRF head with 10 seeds on 5 random sentence splits and on 5 folds of 9 held-out articles (`--document-folds 5`; protocol below, descriptive): 86.27 against 82.79, a gap of 3.48 points (28–31 on MaterioMiner); part 2 done (its first session hung and was cancelled; it ran after week 9), more papers or more sentences: three training papers cut to the size of two against two papers (`--two-paper-size`; protocol below). Both decisions pass: at the size of two papers, a third paper adds +1.18 [+0.22, +2.15] fine-grained and +3.59 [+1.59, +5.58] coarse-grained, and its sentences add +6.17 and +5.31 more | Part 1: the gap between random splits and unseen documents measured on a second corpus. Part 2: whether a third paper helps at the same number of training sentences |
 | 9 | Part 1 done: mention replacement on the multi-task model (`crf_mt_mr`, 10 seeds on the held-out papers, S2 on SOFC-Exp's two levels; protocol below). 3 of 6 decisions pass: against the multi-task model +3.01 [+0.42, +5.60] fine-grained and +2.30 [+0.49, +4.10] coarse-grained, and its vote against the multi-task vote +2.86 [+0.18, +5.54] fine-grained, now the strongest fine-grained system on unseen papers (55.33); coarse-grained its vote does not beat the seed vote, and S2 fails at both levels, so no methods claim (C21). Part 2 done: on SOFC-Exp cut to MaterioMiner's size (10 of its 26 training articles, 5 draws), mention replacement scores +0.50 [−0.47, +1.46] against the CRF head and does not pass, so its MaterioMiner gain is not a matter of training size | Part 1: the combination's vote improves on the strongest system on unseen papers, and on SOFC-Exp. Part 2: mention replacement improves on the CRF head on a MaterioMiner-sized SOFC-Exp |
 | 10 | Done: MuLMS as a third corpus (7 materials subfields, its outermost entities; `mulms.py`), mention replacement against the CRF head on held-out subfields with 400 training sentences, 10 seeds, and the CRF head on random splits of the same size; protocol committed before any run (a08356f; the batch `w10a` ran from that commit), protocol and outcome below | Mention replacement improves on the CRF head on held-out subfields (decision 1), and its votes on the CRF votes (decision 2). Decision 1 not met: +2.10 [−0.31, +4.51], six of the seven subfields gaining. Decision 2 met: +2.71 [+0.22, +5.20]. By the protocol, mention replacement and its combination (C20, C21) stay results for MaterioMiner |
-| 11 | Protocol committed before any run: mention replacement whose replacement pool also holds the names in the sentences that 3 CRF teachers tag alike and confidently in unlabeled in-domain text (`--augment-names`, variant `crf_mrs`), on MuLMS's 7 held-out subfields (`w11a`) and MaterioMiner's 4 held-out papers (`w11b`), 10 seeds; protocol below | It improves on the CRF head on MuLMS's held-out subfields (decision 1) and on mention replacement (decisions 2–4: MuLMS, MaterioMiner fine- and coarse-grained); a methods claim needs decision 1 and one of decisions 2–4 |
+| 11 | Protocol committed before any run: mention replacement whose replacement pool also holds the names in the sentences that 3 CRF teachers tag alike and confidently in unlabeled in-domain text (`--augment-names`, variant `crf_mrs`), on MuLMS's 7 held-out subfields (`w11a`) and MaterioMiner's 4 held-out papers (`w11b`), 10 seeds; protocol below | It improves on the CRF head on MuLMS's held-out subfields (decision 1) and on mention replacement (decisions 2–4: MuLMS, MaterioMiner fine- and coarse-grained); a methods claim needs decision 1 and one of decisions 2–4. MuLMS (`w11a`): decisions 1 (+2.04 [−0.85, +4.92]) and 2 (−0.06 [−1.09, +0.96]) not met, so no methods claim; MaterioMiner (`w11b`, decisions 3 and 4) after the reset on 24 October |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -2909,6 +2909,11 @@ this on the GPU. Nothing else in the design changes.
   (electrolysis: 3 teachers, the tagging of the fold's unused sentences and 5
   students per lane, 22.4 and 22.9 minutes, no error in the log). At that
   pace the session ends around 04:35, within this week's quota.
+- *04:44: week 11, part `w11a` done* (173 minutes; outcome under the week-11
+  protocol). Its 15 jobs ended without error, 16.4–31.5 minutes per
+  subfield; poly, the largest test set, was the slowest on both lanes. Its
+  outputs are pulled and collected. About 1 GPU hour remains until the quota
+  resets on 24 October; `w11b` runs after the reset.
 
 **Outcome of part 1: 3 of the 6 decisions pass; the combination's vote is
 the strongest fine-grained system on unseen papers, but S2 fails at both
@@ -3381,3 +3386,45 @@ may cover the held-out subfield less.
 - `ner_seedmeans.py --week 11` (decisions 3 and 4), `ner_seed_analysis.py`
   (`mulms`, `silver_names`: decisions 1 and 2), `report_results.py`,
   `ner_mentions.py`, and the paper's tables and figures.
+
+**Outcome of part `w11a` (MuLMS): decisions 1 and 2 fail, so no methods
+claim; decisions 3 and 4 (MaterioMiner, `w11b`) follow after the reset.**
+Session d of 18 October (`w11a` on `ner-gpu-jobs-d`, version 5, from bundle
+427e34c on `ner-gpu-bundle-3`; 2.9 hours from 01:51). The repeat `smokeam` is
+identical (77.95). Per subfield, both lanes' 3 teachers and silver counts are
+identical, and every teacher scores exactly as the stored week-10 CRF run of
+its seed. On the 7 held-out subfields, 10 seeds each:
+- decision 1, mention replacement with silver names against the CRF head:
+  **+2.04 [−0.85, +4.92]** (50.69 against 48.66), which does not pass. Per
+  subfield: electrolysis +2.64, graphene +0.38, pemfc +1.61, poly −0.28,
+  semi +1.16, sofc +8.74, steel −0.00;
+- decision 2, against mention replacement: **−0.06 [−1.09, +0.96]** (50.69
+  against 50.76), which does not pass. Per subfield, in the same order:
+  +1.21, −1.28, −0.67, +0.45, −1.36, +1.35 and −0.15.
+
+Reported:
+- macro F1 against the CRF head +2.37 [+1.27, +3.47], weighted +2.62
+  [+0.02, +5.22]; against mention replacement +0.25 [−0.52, +1.02] and
+  −0.06 [−1.19, +1.06]; strict IOB2 equals the default scoring;
+- its votes score 53.02: +2.48 [−0.44, +5.40] against the CRF votes and
+  −0.23 [−1.15, +0.68] against mention replacement's;
+- the silver names: per fold the teachers tagged the 7,400–9,433 sentences
+  outside the pool and the test set, and 181–419 of them were silver,
+  holding 210–850 mentions (126–358 distinct names). They contain 4.4% of
+  the held-out subfields' unseen test names (1.0% to 7.8% per subfield);
+- seen and unseen names (`ner_mentions.py`): against the CRF head +2.13
+  [−0.84, +5.09] on unseen names, +1.21 [−0.97, +3.39] on seen ones;
+- copies per run: as mention replacement's within a few (433–722 per run
+  at seed 0, against 439–713). A copy that changes nothing is dropped, and
+  the pool decides which do.
+
+The silver names barely touch the names the model misses. The teachers'
+confident names come from the other subfields and hold 4.4% of a held-out
+subfield's unseen test names. So the copies show the model hardly any new
+names that matter, and the method scores as mention replacement does. On
+MaterioMiner, 49% to 65% of a held-out paper's unseen test names occur
+somewhere in the fatigue corpus (`ner_mentions.py`, corpus coverage), so
+decisions 3 and 4 test the method where its names can reach the test
+papers. By the protocol, though, a methods claim needed decision 1, so
+mention replacement, with or without silver names, stays a MaterioMiner
+result whatever `w11b` shows.
