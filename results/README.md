@@ -189,6 +189,16 @@ sentences; the official validation and test articles), with predictions.
 by draw, each the mean of its 10 seeds) and the CRF head on 10 articles
 against all 26 (`ten_minus_all_articles`, paired by seed).
 
+Week 11 (mention replacement with silver names; protocol in ROADMAP §4,
+prepared, no run yet; batches `w11a` and `w11b` from 427e34c): the runs will write
+`gpu/ner_results_mulms_leave_one_subfield_out_crf_mrs_m<N>.json` (MuLMS, run ids the
+subfields) and `gpu/ner_results_{fine,coarse}_leave_one_paper_out_crf_mrs_m<N>.json`
+(MaterioMiner), model seeds 0 to 900, with predictions. Each run's `self_training`
+holds its 3 teachers' scores and the silver counts (`names`: mentions, distinct names,
+and the unseen test entities that are silver names); no name is stored.
+`gpu/ner_week11_comparisons.json` will hold the MaterioMiner decisions and
+`gpu/ner_week5_seed_analysis.json` (`mulms`, `silver_names`) the MuLMS ones.
+
 Week 10 (MuLMS, a third corpus; protocol and outcome in ROADMAP §4; Kaggle
 session `w10a` of 17–18 October, `ner-gpu-jobs-d` version 4, bundle a08356f):
 `mulms_corpus.json` is the report of `src/graph/mulms.py`. It records the
