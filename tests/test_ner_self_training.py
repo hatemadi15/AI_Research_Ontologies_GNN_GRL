@@ -746,8 +746,8 @@ def test_students_train_on_copies_with_the_silver_names(tiny_run, tmp_path, monk
     tr, _, te = nb.random_split(len(data), 0)
     train = [(data[i][0], data[i][1]) for i in tr]
     for offset, student in zip((0, 100, 200), students):
-        res = _load(tmp_path, f'ner_results_fine_random_split_vary_crf_mrs_m{offset}.json')
-        assert res['variant'] == f'crf_mrs_m{offset}'
+        res = _load(tmp_path, f'ner_results_fine_random_split_vary_crf_mrs2_m{offset}.json')
+        assert res['variant'] == f'crf_mrs2_m{offset}'        # 2 copies: named after them
         assert (res['config']['augment_mentions'], res['config']['augment_names']) == (2, True)
         run = res['runs'][0]
         assert {k: run[k] for k in RESULT_KEYS} == {k: student['result'][k] for k in RESULT_KEYS}
@@ -780,11 +780,11 @@ def test_without_silver_names_a_student_is_the_mention_replacement_run(tiny_run,
                           '--augment-names', *flags, '--save-predictions'))
     students = calls[2:]
     for offset, student in zip((0, 100), students):
-        mrs = _load(tmp_path, f'ner_results_fine_random_split_vary_crf_mrs_m{offset}.json')
+        mrs = _load(tmp_path, f'ner_results_fine_random_split_vary_crf_mrs2_m{offset}.json')
         assert mrs['runs'][0]['self_training']['names']['n_mentions'] == 0
         tiny_run('--crf', '--augment-mentions', '2', *flags, '--tag', f'm{offset}',
                  '--seed-offset', str(offset), '--save-predictions')
-        mr = _load(tmp_path, f'ner_results_fine_random_split_vary_crf_mr_m{offset}.json')
+        mr = _load(tmp_path, f'ner_results_fine_random_split_vary_crf_mr2_m{offset}.json')
         keys = (*RESULT_KEYS, 'test_pred', 'n_augmented')
         assert {k: mr['runs'][0][k] for k in keys} == {k: mrs['runs'][0][k] for k in keys}
 
@@ -828,6 +828,19 @@ def test_silver_mentions_parser_and_variant(tmp_path, capsys):
     assert nb.variant_name(SimpleNamespace(**{**vars(args), 'tag': 'm0'})) == 'crf_mrs_fatigue_m0'
     assert nb.spaced_corpus(SimpleNamespace(granularity='mulms'))
     assert not nb.spaced_corpus(SimpleNamespace(granularity='fine'))
+    # another number of copies names the variant; 3 copies keep the names of weeks 7 to 11
+    six = nb.parse_args(['--leave-one-paper-out', '--crf', '--augment-mentions', '6', '--tag',
+                         'm0'])
+    assert nb.variant_name(six) == 'crf_mr6_m0'
+    assert nb.variant_name(nb.parse_args(['--leave-one-paper-out', '--crf', '--multi-task',
+                                          '--augment-mentions', '10', '--tag', 'm0'])) == \
+        'crf_mt_mr10_m0'
+    def tagged(argv, tag='m0'):
+        return nb.variant_name(SimpleNamespace(**{**vars(nb.parse_args(argv)), 'tag': tag}))
+    assert tagged([*base, '--augment-names', '--silver-mentions', '--names-tag', 'topic']) == \
+        'crf_mrm_topic_m0'
+    assert tagged([*base[:-1], '6', '--augment-names', '--silver-mentions', '--names-tag',
+                   'topic']) == 'crf_mrm_topic6_m0'
 
 
 def test_students_with_silver_mentions(tiny_run, tmp_path, monkeypatch):
@@ -851,8 +864,8 @@ def test_students_with_silver_mentions(tiny_run, tmp_path, monkeypatch):
     assert 'silver_mentions' not in seen and 'silver_mention_names' in seen
     names = seen['silver_mention_names']
     for offset, student in zip((0, 100), calls[2:]):
-        res = _load(tmp_path, f'ner_results_fine_random_split_vary_crf_mrm_toy_m{offset}.json')
-        assert res['variant'] == f'crf_mrm_toy_m{offset}'
+        res = _load(tmp_path, f'ner_results_fine_random_split_vary_crf_mrm_toy2_m{offset}.json')
+        assert res['variant'] == f'crf_mrm_toy2_m{offset}'
         assert (res['config']['silver_mentions'], res['config']['names_tag']) == (True, 'toy')
         info = res['runs'][0]['self_training']
         assert info['silver_filter'] == 'mentions' and info['names']['n_mentions'] == len(names)
@@ -863,5 +876,5 @@ def test_students_with_silver_mentions(tiny_run, tmp_path, monkeypatch):
     calls = list(tiny_run(*common))
     assert set(seen['silver_mentions']) <= set(names)
     assert len(seen['silver_mentions']) <= len(names)
-    res = _load(tmp_path / 'sentences', 'ner_results_fine_random_split_vary_crf_mrs_m0.json')
+    res = _load(tmp_path / 'sentences', 'ner_results_fine_random_split_vary_crf_mrs2_m0.json')
     assert res['runs'][0]['self_training']['silver_filter'] == 'sentences'

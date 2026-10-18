@@ -340,6 +340,7 @@ def random_split(n, seed, ratios=(0.65, 0.15, 0.20)):
 
 
 MR_P = 0.5                    # chance that --augment-mentions replaces a mention
+MR_COPIES = 3                 # the copies of weeks 7 to 11; another count names the variant
 
 
 def entity_spans(tags):
@@ -1852,8 +1853,9 @@ PLAIN_VARIANTS = ('baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_st', 'crf_mt
 def variant_name(args):
     """Variant of a run: 'baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_mt_ls', 'crf_st' or
     'crf_st<N>', 'crf_mt_st<N>', 'crf_ctx', 'crf_mt_ctx', 'crf_mr', 'crf_mt_mr', 'crf_mrs'
-    (--augment-names) or 'crf_mrm' (with --silver-mentions), these two plus _<names tag>, with
-    _bias for --entity-bias (crf_bias, crf_ctx_bias), then the tag.
+    (--augment-names) or 'crf_mrm' (with --silver-mentions), these two plus _<names tag>, the
+    mention replacement names plus the copies when not 3 (crf_mr6), with _bias for
+    --entity-bias (crf_bias, crf_ctx_bias), then the tag.
 
     'cw' is --class-weights, 'crf_mt' is --crf --multi-task, 'crf_ls' is --crf
     --label-semantics, 'crf_mt_ls' both, 'crf_st' is --crf --self-train and 'crf_st<N>' that
@@ -1878,6 +1880,8 @@ def variant_name(args):
             name = 'crf_mrm' if getattr(args, 'silver_mentions', False) else 'crf_mrs'
             if getattr(args, 'names_tag', None):
                 name = f'{name}_{args.names_tag}'
+        if getattr(args, 'augment_mentions', 0) not in (0, MR_COPIES):
+            name += str(args.augment_mentions)         # crf_mr6: 6 copies (week 12)
         if getattr(args, 'two_paper_size', False):
             name = 'crf_p3n2'
         if hasattr(args, 'entity_bias'):

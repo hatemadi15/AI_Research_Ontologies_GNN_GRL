@@ -145,9 +145,9 @@ def test_a_run_on_held_out_subfields(tmp_path, monkeypatch):
                           '--threads', '1', '--device', 'cpu', '--leave-one-subfield-out',
                           '--train-pool', '6', '--crf', '--augment-mentions', '2', '--tag',
                           'm100', '--seed-offset', '100', '--save-predictions']))
-    res = json.loads((tmp_path / 'ner' / 'ner_results_mulms_leave_one_subfield_out_crf_mr_m100'
+    res = json.loads((tmp_path / 'ner' / 'ner_results_mulms_leave_one_subfield_out_crf_mr2_m100'
                                          '.json').read_text())
-    assert res['protocol'] == 'leave_one_subfield_out' and res['variant'] == 'crf_mr_m100'
+    assert res['protocol'] == 'leave_one_subfield_out' and res['variant'] == 'crf_mr2_m100'
     assert res['paper_test_f1'] is None
     assert [r['run_id'] for r in res['runs']] == ['alpha', 'beta', 'gamma']
     folds = nb.subfield_folds(toy, subfields, 0, 6, indices=True)
@@ -201,8 +201,8 @@ def test_silver_names_from_the_unused_sentences_of_some_subfields(tmp_path, monk
     assert len(samples[0]) == 12 - 6                  # alpha and gamma, outside the pool
     for off in (0, 100):
         res = json.loads((tmp_path / 'ner' / f'ner_results_mulms_leave_one_subfield_out_'
-                                              f'crf_mrs_m{off}.json').read_text())
-        assert res['variant'] == f'crf_mrs_m{off}'
+                                              f'crf_mrs2_m{off}.json').read_text())
+        assert res['variant'] == f'crf_mrs2_m{off}'           # 2 copies: named after them
         assert (res['config']['self_train'], res['config']['self_train_sha256']) == \
             ('unused', None)
         assert 'subfields' not in res['config']

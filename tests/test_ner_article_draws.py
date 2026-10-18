@@ -94,9 +94,9 @@ def test_a_run_on_article_draws(tmp_path, monkeypatch):
                           '--threads', '1', '--device', 'cpu', '--published-split', '--crf',
                           '--train-articles', '2', '--draws', '2', '--augment-mentions', '2',
                           '--tag', 'm100', '--seed-offset', '100', '--save-predictions']))
-    res = json.loads((tmp_path / 'ner' / 'ner_results_sofc_article_draws_crf_mr_m100.json')
+    res = json.loads((tmp_path / 'ner' / 'ner_results_sofc_article_draws_crf_mr2_m100.json')
                      .read_text())
-    assert res['protocol'] == 'article_draws' and res['variant'] == 'crf_mr_m100'
+    assert res['protocol'] == 'article_draws' and res['variant'] == 'crf_mr2_m100'
     assert [r['run_id'] for r in res['runs']] == ['draw0', 'draw1']
     assert all(r['seed'] == 100 and r['n_train'] == 6 and r['test_index'] == parts[2]
                for r in res['runs'])

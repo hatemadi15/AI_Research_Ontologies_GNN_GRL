@@ -426,9 +426,9 @@ def test_multitask_mention_replacement_run(tiny_run, tmp_path, monkeypatch):
     assert tiny_run('--crf', '--multi-task', '--augment-mentions', '2', '--leave-one-paper-out',
                     '--seeds', '3', '--papers', 'b', '--tag', 'm100',
                     '--seed-offset', '100') == [103]
-    suffix = '_leave_one_paper_out_crf_mt_mr_m100.json'
+    suffix = '_leave_one_paper_out_crf_mt_mr2_m100.json'     # 2 copies: named after them
     fine, coarse = (_load(tmp_path, f'ner_results_{g}{suffix}') for g in ('fine', 'coarse'))
-    assert fine['variant'] == 'crf_mt_mr_m100' and fine['config']['augment_mentions'] == 2
+    assert fine['variant'] == 'crf_mt_mr2_m100' and fine['config']['augment_mentions'] == 2
     (run_f,), (run_c,) = fine['runs'], coarse['runs']
     assert run_f['run_id'] == 'b.conll' and run_f['n_augmented'] == run_c['n_augmented'] > 0
     assert run_f['multi_task']['n_examples'] == run_c['multi_task']['n_examples']

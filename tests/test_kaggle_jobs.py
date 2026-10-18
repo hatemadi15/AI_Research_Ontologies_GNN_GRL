@@ -440,7 +440,8 @@ def test_build_bundle(tmp_path):
     info = kj.build_bundle('HEAD', out, results_dir=results, corpus=corpus,
                            expected_sha256=kj.file_sha256(corpus), wheels=[wheel],
                            sofc_report=tmp_path / 'no_sofc_corpus.json',
-                           mulms_report=tmp_path / 'no_mulms.json')
+                           mulms_report=tmp_path / 'no_mulms.json',
+                           topic_reports=tmp_path / 'no_topics')
     assert sorted(p.name for p in out.iterdir()) == [
         'BUNDLE.json', 'code.tar.gz', 'fatigue_sentences.txt',
         'gpu__ner_results_fine_random_split_vary_crf_m0.json', 'seqeval-1.2.2-py3-none-any.whl']
@@ -453,7 +454,8 @@ def test_build_bundle(tmp_path):
     with pytest.raises(SystemExit):
         kj.build_bundle('HEAD', out, results_dir=results, corpus=corpus, expected_sha256='0' * 64,
                         sofc_report=tmp_path / 'no_sofc_corpus.json',
-                           mulms_report=tmp_path / 'no_mulms.json')
+                           mulms_report=tmp_path / 'no_mulms.json',
+                           topic_reports=tmp_path / 'no_topics')
 
 
 # ---------------------------------------------------------------------------
@@ -656,23 +658,27 @@ def test_build_bundle_with_the_sofc_corpus(tmp_path):
     out = tmp_path / 'bundle'
     info = kj.build_bundle('HEAD', out, results_dir=tmp_path / 'none', corpus=corpus,
                            expected_sha256=kj.file_sha256(corpus), sofc_corpus=sofc,
-                           sofc_report=report, mulms_report=tmp_path / 'no_mulms.json')
+                           sofc_report=report, mulms_report=tmp_path / 'no_mulms.json',
+                           topic_reports=tmp_path / 'no_topics')
     assert (out / 'sofc_sentences.txt').read_bytes() == sofc.read_bytes()
     assert info['sofc_corpus_sha256'] == kj.file_sha256(sofc)
     report.write_text(json.dumps({'corpus': {'sha256': '0' * 64}}))
     with pytest.raises(SystemExit, match='SHA-256'):
         kj.build_bundle('HEAD', out, results_dir=tmp_path / 'none', corpus=corpus,
                         expected_sha256=kj.file_sha256(corpus), sofc_corpus=sofc,
-                        sofc_report=report, mulms_report=tmp_path / 'no_mulms.json')
+                        sofc_report=report, mulms_report=tmp_path / 'no_mulms.json',
+                           topic_reports=tmp_path / 'no_topics')
     info = kj.build_bundle('HEAD', out, results_dir=tmp_path / 'none', corpus=corpus,
                            expected_sha256=kj.file_sha256(corpus), sofc_report=tmp_path / 'no',
-                           mulms_report=tmp_path / 'no_mulms.json')
+                           mulms_report=tmp_path / 'no_mulms.json',
+                           topic_reports=tmp_path / 'no_topics')
     assert info['sofc_corpus_sha256'] is None and not (out / 'sofc_sentences.txt').exists()
     report.write_text(json.dumps({'corpus': {'sha256': kj.file_sha256(sofc)}}))
     with pytest.raises(SystemExit, match='build_sofc_corpus'):      # the report, no corpus
         kj.build_bundle('HEAD', out, results_dir=tmp_path / 'none', corpus=corpus,
                         expected_sha256=kj.file_sha256(corpus), sofc_corpus=tmp_path / 'gone',
-                        sofc_report=report, mulms_report=tmp_path / 'no_mulms.json')
+                        sofc_report=report, mulms_report=tmp_path / 'no_mulms.json',
+                           topic_reports=tmp_path / 'no_topics')
 
 
 def test_run_jobs_places_the_sofc_corpus_only_when_asked(tmp_path):
@@ -859,18 +865,90 @@ def test_build_bundle_with_the_mulms_files(tmp_path):
     out = tmp_path / 'bundle'
     info = kj.build_bundle('HEAD', out, results_dir=tmp_path / 'none', corpus=corpus,
                            expected_sha256=kj.file_sha256(corpus), sofc_report=tmp_path / 'no',
-                           mulms_report=report, mulms_dir=mulms)
+                           mulms_report=report, mulms_dir=mulms,
+                           topic_reports=tmp_path / 'no_topics')
     assert info['mulms_files'] == outputs
     assert (out / 'mulms__a_01.conll').read_bytes() == (mulms / 'a_01.conll').read_bytes()
     (mulms / 'a_01.conll').write_text('changed B-MAT\n\n')
     with pytest.raises(SystemExit, match='mulms.py'):
         kj.build_bundle('HEAD', out, results_dir=tmp_path / 'none', corpus=corpus,
                         expected_sha256=kj.file_sha256(corpus), sofc_report=tmp_path / 'no',
-                        mulms_report=report, mulms_dir=mulms)
+                        mulms_report=report, mulms_dir=mulms,
+                           topic_reports=tmp_path / 'no_topics')
     info = kj.build_bundle('HEAD', out, results_dir=tmp_path / 'none', corpus=corpus,
                            expected_sha256=kj.file_sha256(corpus), sofc_report=tmp_path / 'no',
-                           mulms_report=tmp_path / 'no_mulms.json')
+                           mulms_report=tmp_path / 'no_mulms.json',
+                           topic_reports=tmp_path / 'no_topics')
     assert info['mulms_files'] is None and not list(out.glob('mulms__*'))
+
+
+def test_batch_spec_lists_the_topic_corpora_a_batch_reads(monkeypatch, tmp_path):
+    """Week 12: a batch whose jobs read topic corpora lists them with their recorded SHA-256
+    (results/topic_corpora/<topic>.json), in alphabetical order; other batches do not."""
+    reports = tmp_path / 'topic_corpora'
+    reports.mkdir()
+    for topic, digest in (('sofc', 'c' * 64), ('steel', 'd' * 64)):
+        (reports / f'{topic}.json').write_text(json.dumps({'corpus': {'sha256': digest}}))
+    monkeypatch.setattr(kj, 'TOPIC_REPORTS', reports)
+    real_sha256, real_lanes = kj.corpus_sha256, kj.batch_lanes
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda report=None: (
+        real_sha256(report) if report is not None and Path(report).parent == reports else 'x' * 64))
+    base = ['--granularity', 'mulms', '--leave-one-subfield-out', '--crf', '--train-pool', '400']
+    jobs = [[*base, '--self-train', kj.TOPIC_CORPUS.format(topic='steel'), '--teachers', '3'],
+            [*base, '--self-train', kj.TOPIC_CORPUS.format(topic='sofc'), '--teachers', '3']]
+    monkeypatch.setattr(kj, 'batch_lanes',
+                        lambda name: [jobs, [jobs[0]]] if name == 'w12x' else real_lanes(name))
+    monkeypatch.setattr(kj, 'mulms_files', lambda: {'a_01.conll': 'a' * 64})
+    spec = kj.batch_spec('w12x')
+    assert spec['topic_corpora'] == {'sofc': 'c' * 64, 'steel': 'd' * 64}
+    assert spec['mulms_files'] == {'a_01.conll': 'a' * 64}
+    assert 'topic_corpora' not in kj.batch_spec('w9b')
+
+
+def test_build_bundle_with_the_topic_corpora(tmp_path):
+    corpus = tmp_path / 'corpus.txt'
+    corpus.write_text('One sentence.\n')
+    folder = tmp_path / 'corpus_dir'
+    folder.mkdir()
+    (folder / 'topic_sofc_sentences.txt').write_text('A YSZ anode .\n')
+    reports = tmp_path / 'topic_corpora'
+    reports.mkdir()
+    digest = kj.file_sha256(folder / 'topic_sofc_sentences.txt')
+    (reports / 'sofc.json').write_text(json.dumps({'corpus': {'sha256': digest}}))
+    common = dict(results_dir=tmp_path / 'none', corpus=corpus,
+                  expected_sha256=kj.file_sha256(corpus), sofc_report=tmp_path / 'no',
+                  mulms_report=tmp_path / 'no_mulms.json', topic_reports=reports,
+                  topic_dir=folder)
+    out = tmp_path / 'bundle'
+    info = kj.build_bundle('HEAD', out, **common)
+    assert info['topic_corpora'] == {'sofc': digest}
+    assert (out / 'topic_sofc_sentences.txt').read_text() == 'A YSZ anode .\n'
+    assert json.loads((out / 'BUNDLE.json').read_text())['topic_corpora'] == {'sofc': digest}
+    (folder / 'topic_sofc_sentences.txt').write_text('changed\n')
+    with pytest.raises(SystemExit, match='SHA-256'):
+        kj.build_bundle('HEAD', out, **common)
+    (folder / 'topic_sofc_sentences.txt').unlink()
+    with pytest.raises(SystemExit, match='build_topic_corpus.py --topic sofc'):
+        kj.build_bundle('HEAD', out, **common)
+    info = kj.build_bundle('HEAD', out, **{**common, 'topic_reports': tmp_path / 'no'})
+    assert info['topic_corpora'] is None and not list(out.glob('topic_*'))
+
+
+def test_run_jobs_places_the_topic_corpora_only_when_asked(tmp_path):
+    rj = _run_jobs()
+    inputs, repo = tmp_path / 'input', tmp_path / 'repo'
+    (inputs / 'bundle').mkdir(parents=True)
+    corpus = inputs / 'bundle' / 'topic_sofc_sentences.txt'
+    corpus.write_text('A YSZ anode .\n')
+    assert rj.place_topic_corpora({}, inputs, repo) is None and not repo.exists()
+    digest = rj.file_sha256(corpus)
+    assert rj.place_topic_corpora({'topic_corpora': {'sofc': digest}}, inputs, repo) == {
+        'sofc': digest}
+    assert (repo / rj.TOPIC_CORPUS_DIR / 'topic_sofc_sentences.txt').read_bytes() == corpus.read_bytes()
+    with pytest.raises(RuntimeError, match='SHA-256'):
+        rj.place_topic_corpora({'topic_corpora': {'sofc': '0' * 64}}, inputs, repo)
+    with pytest.raises(FileNotFoundError):
+        rj.place_topic_corpora({'topic_corpora': {'steel': digest}}, inputs, repo)
 
 
 def test_run_jobs_places_the_mulms_files_only_when_asked(tmp_path):

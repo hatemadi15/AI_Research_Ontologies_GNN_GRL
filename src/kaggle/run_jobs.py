@@ -11,7 +11,9 @@ of a frozen commit, the fatigue corpus and the GPU results so far). On Kaggle it
   3. unpacks the code, the corpus (its SHA-256 must be `corpus_sha256`), the SOFC corpus
      when the spec has `sofc_corpus_sha256` (bundle file sofc_sentences.txt, with that
      SHA-256), the MuLMS files when the spec lists them (`mulms_files`: bundle files
-     mulms__<name>, each with its SHA-256) and the GPU results so far (bundle files
+     mulms__<name>, each with its SHA-256), the topic corpora when the spec lists them
+     (`topic_corpora`: bundle files topic_<topic>_sentences.txt, each with its SHA-256)
+     and the GPU results so far (bundle files
      gpu__ner_results_*.json; every run must be a GPU run, i.e. have an `environment`), so
      that finished runs are skipped;
   4. downloads the pinned model snapshots (`models`: repository -> commit) and makes
@@ -55,6 +57,7 @@ CORPUS = Path('data/processed/corpus/fatigue_sentences.txt')   # in the reposito
 SOFC_CORPUS = Path('data/processed/corpus/sofc_sentences.txt')  # with sofc_corpus_sha256
 MULMS_DIR = Path('data/processed/mulms')                         # with mulms_files
 MULMS_PREFIX = 'mulms__'           # the bundle names of the MuLMS files (kaggle_jobs.py)
+TOPIC_CORPUS_DIR = Path('data/processed/corpus')                # with topic_corpora
 ENV_KEYS = ('KAGGLE_KERNEL_RUN_TYPE', 'KAGGLE_DOCKER_IMAGE', 'KAGGLE_CONTAINER_NAME')
 TIMEOUTS = {'nvidia_smi': 120, 'pip': 1800, 'environment': 300}   # seconds
 JOB_GRACE_HOURS = 1.25   # kaggle_jobs.py pushes with a limit of deadline_hours + 1.5
@@ -90,6 +93,27 @@ def place_sofc_corpus(spec, inputs, repo):
     (repo / SOFC_CORPUS).parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(corpus, repo / SOFC_CORPUS)
     return digest
+
+
+def place_topic_corpora(spec, inputs, repo):
+    """The topic corpora (build_topic_corpus.py) into the repository when the spec lists them
+    (topic_corpora: {topic: SHA-256}): bundle files topic_<topic>_sentences.txt, each with
+    its SHA-256. Returns {topic: SHA-256}, or None when the batch uses none."""
+    expected = spec.get('topic_corpora')
+    if not expected:
+        return None
+    folder = repo / TOPIC_CORPUS_DIR
+    folder.mkdir(parents=True, exist_ok=True)
+    for topic, digest in sorted(expected.items()):
+        name = f'topic_{topic}_sentences.txt'
+        path = find(inputs, name)
+        if path is None:
+            raise FileNotFoundError(f'{name} is not under {inputs}')
+        found = file_sha256(path)
+        if found != digest:
+            raise RuntimeError(f'topic corpus {topic}: SHA-256 {found} is not {digest}')
+        shutil.copy2(path, folder / name)
+    return dict(sorted(expected.items()))
 
 
 def place_mulms(spec, inputs, repo):
@@ -318,6 +342,7 @@ def main(spec):
         shutil.copy2(corpus, REPO / CORPUS)
         sofc_digest = place_sofc_corpus(spec, INPUT, REPO)
         mulms = place_mulms(spec, INPUT, REPO)
+        topics = place_topic_corpora(spec, INPUT, REPO)
         restored = restore_results(INPUT, processed / 'ner')
         setup_step(started, f'code, corpora and {len(restored)} results files in place')
         pinned = pin_models(spec['models'])
@@ -325,7 +350,8 @@ def main(spec):
         manifest.update(lambda d: d['setup'].update({
             'code': how, 'bundle': bundle, 'corpus_sha256': digest,
             **({'sofc_corpus_sha256': sofc_digest} if sofc_digest else {}),
-            **({'mulms_files': mulms} if mulms else {}), 'restored': restored,
+            **({'mulms_files': mulms} if mulms else {}),
+            **({'topic_corpora': topics} if topics else {}), 'restored': restored,
             'models': pinned, 'environment': environment(),
             'setup_minutes': round((time.time() - started) / 60, 2)}))
         setup_step(started, 'environment recorded; the lanes start')

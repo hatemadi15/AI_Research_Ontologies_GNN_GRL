@@ -148,8 +148,8 @@ def test_augmented_run(tmp_path, monkeypatch):
                           '--papers', 'b', '--tag', 'm100', '--seed-offset', '100']))
     ((seed, n_train, augmented),) = seen
     assert seed == 100 and augmented and len(augmented) <= 2 * n_train
-    res = json.loads((tmp_path / 'ner' / 'ner_results_fine_leave_one_paper_out_crf_mr_m100.json')
+    res = json.loads((tmp_path / 'ner' / 'ner_results_fine_leave_one_paper_out_crf_mr2_m100.json')
                      .read_text())
     (run,) = res['runs']
-    assert res['variant'] == 'crf_mr_m100' and res['config']['augment_mentions'] == 2
+    assert res['variant'] == 'crf_mr2_m100' and res['config']['augment_mentions'] == 2
     assert run['n_augmented'] == len(augmented) and run['n_train'] == n_train

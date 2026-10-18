@@ -229,6 +229,12 @@ MULMS_POOL = 400
 MULMS_SUBFIELDS = 7
 COST['mulms'] = 1.5         # a run on 400 MuLMS sentences of 29 words, and a larger test
 MULMS_PREFIX = 'mulms__'    # the bundle names of the MuLMS files (as in run_jobs.py)
+# week 12: an unlabeled corpus per MuLMS subfield (build_topic_corpus.py), each with a report
+# that records its SHA-256; a batch whose jobs read one ships it as topic_<topic>_sentences.txt
+TOPIC_NAMES = ('electrolysis', 'graphene', 'pemfc', 'poly', 'semi', 'sofc', 'steel')
+TOPIC_CORPUS_DIR = 'data/processed/corpus'
+TOPIC_CORPUS = TOPIC_CORPUS_DIR + '/topic_{topic}_sentences.txt'
+TOPIC_REPORTS = ROOT / 'results' / 'topic_corpora'
 # week 11: the subfields (MuLMS) and the students of each lane (both lanes train the teachers)
 MULMS_SUBFIELD_NAMES = ('electrolysis', 'graphene', 'pemfc', 'poly', 'semi', 'sofc', 'steel')
 MRS_LANES = (OFFSETS_PUBLISHED[:5], OFFSETS_PUBLISHED[5:])
@@ -656,6 +662,10 @@ def batch_spec(name):
     if any(job[i:i + 2] == ['--granularity', 'mulms'] for lane in lanes for job in lane
            for i in range(len(job) - 1)):
         spec['mulms_files'] = mulms_files()
+    topics = sorted(t for t in TOPIC_NAMES
+                    if any(TOPIC_CORPUS.format(topic=t) in job for lane in lanes for job in lane))
+    if topics:
+        spec['topic_corpora'] = {t: corpus_sha256(TOPIC_REPORTS / f'{t}.json') for t in topics}
     return spec
 
 
@@ -716,7 +726,7 @@ def is_gpu_runs_file(path):
 
 def build_bundle(commit, out_dir, root=ROOT, results_dir=GPU_RESULTS, corpus=None,
                  expected_sha256=None, wheels=(), sofc_corpus=None, sofc_report=None,
-                 mulms_report=None, mulms_dir=None):
+                 mulms_report=None, mulms_dir=None, topic_reports=None, topic_dir=None):
     """Write the bundle files to out_dir (emptied first); returns BUNDLE.json's content.
 
     code.tar.gz is `git archive` of `commit` (the frozen code, tracked files only); the
@@ -727,7 +737,10 @@ def build_bundle(commit, out_dir, root=ROOT, results_dir=GPU_RESULTS, corpus=Non
     runs have none and are not needed to resume runs), and the `wheels` (paths) as they
     are. When MuLMS's report (mulms_report, default MULMS_REPORT) exists, its converted
     files (mulms_dir, default MULMS_DIR) go in as mulms__<name>, each with its recorded
-    SHA-256 (BUNDLE.json's mulms_files, else None).
+    SHA-256 (BUNDLE.json's mulms_files, else None). Every topic corpus with a report under
+    topic_reports (default TOPIC_REPORTS; build_topic_corpus.py), read from topic_dir (default
+    root's TOPIC_CORPUS_DIR), goes in as topic_<topic>_sentences.txt with its recorded SHA-256
+    (BUNDLE.json's topic_corpora, else None).
     """
     out_dir = Path(out_dir)
     if out_dir.exists():
@@ -764,6 +777,20 @@ def build_bundle(commit, out_dir, root=ROOT, results_dir=GPU_RESULTS, corpus=Non
             raise SystemExit(f'{path} is missing or not the recorded file (python '
                              f'src/graph/mulms.py rebuilds it, with --offline from its cache)')
         shutil.copy2(path, out_dir / f'{MULMS_PREFIX}{name}')
+    topic_reports = Path(topic_reports) if topic_reports is not None else TOPIC_REPORTS
+    topic_dir = Path(topic_dir) if topic_dir is not None else Path(root) / TOPIC_CORPUS_DIR
+    topics = {}
+    for report in sorted(topic_reports.glob('*.json')) if topic_reports.is_dir() else []:
+        topic = report.stem
+        path = topic_dir / f'topic_{topic}_sentences.txt'
+        if not path.is_file():
+            raise SystemExit(f'{path} is missing (python src/graph/build_topic_corpus.py --topic '
+                             f'{topic} rebuilds it, with --offline from its cache)')
+        topics[topic] = file_sha256(path)
+        if topics[topic] != corpus_sha256(report):
+            raise SystemExit(f'{path}: SHA-256 {topics[topic]}, not the recorded '
+                             f'{corpus_sha256(report)}')
+        shutil.copy2(path, out_dir / f'topic_{topic}_sentences.txt')
     results = sorted(p.name for p in Path(results_dir).glob('ner_results_*.json')
                      if is_gpu_runs_file(p)) if Path(results_dir).is_dir() else []
     for name in results:
@@ -771,7 +798,7 @@ def build_bundle(commit, out_dir, root=ROOT, results_dir=GPU_RESULTS, corpus=Non
     for wheel in wheels:
         shutil.copy2(wheel, out_dir / Path(wheel).name)
     info = {'commit': full, 'corpus_sha256': digest, 'sofc_corpus_sha256': sofc_digest,
-            'mulms_files': mulms, 'results': results,
+            'mulms_files': mulms, 'topic_corpora': topics or None, 'results': results,
             'wheels': sorted(Path(w).name for w in wheels),
             'created': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}
     (out_dir / 'BUNDLE.json').write_text(json.dumps(info, indent=2))
