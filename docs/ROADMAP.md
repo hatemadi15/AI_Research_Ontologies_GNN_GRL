@@ -3451,3 +3451,80 @@ with `w11b` as its gate:
    - a vote across methods, which cannot repeat on a second corpus;
    - names from the test documents themselves, which changes the setting
      and acts like the consistency rule of week 7, which did not pass.
+
+### Week 12, phase 0 (18 October; not a protocol): can in-topic names reach a held-out subfield?
+
+Measured before any protocol, on the CPU, to decide whether topic corpora
+are worth the GPU hours. All from the saved week-10 predictions and the
+existing corpora.
+
+*Where MuLMS's gap lies, per type* (the CRF head, 10 seeds; pool splits
+against held-out subfields; mention replacement minus the CRF head, mean
+over the 7 subfields):
+
+| Type | Entities | Pool F1 | Held-out F1 | Gap | MR − CRF | Unseen | Recall seen / unseen |
+|---|---|---|---|---|---|---|---|
+| MAT | 12,647 | 75.2 | 54.2 | 21.0 | +2.85 [−2.6, +11.4] | 85.6% | 70.5 / 43.5 |
+| VALUE | 4,628 | 80.6 | 72.8 | 7.8 | +1.92 | 97.2% | 87.9 / 74.2 |
+| PROPERTY | 3,880 | 37.4 | 28.7 | 8.7 | +2.62 | 96.1% | 39.2 / 24.0 |
+| FORM | 3,180 | 59.9 | 26.0 | 33.9 | +3.48 | 87.2% | 54.9 / 18.4 |
+| MEASUREMENT | 2,106 | 48.4 | 40.2 | 8.1 | +0.72 | 67.1% | 45.1 / 33.1 |
+| CITE | 1,704 | 93.1 | 81.6 | 11.5 | +2.39 | 70.3% | 99.1 / 70.0 |
+| SAMPLE | 1,391 | 44.3 | 4.0 | 40.3 | +1.75 | 98.6% | 7.5 / 2.6 |
+| DEV | 757 | 56.3 | 14.7 | 41.5 | −1.47 | 97.1% | 37.8 / 8.9 |
+
+MAT holds 40% of the entities and a 21-point gap, FORM a 34-point gap:
+these are names, and mention replacement gains most on them (sofc: MAT
++11.4, FORM +8.8). SAMPLE and DEV are barely found on any held-out subfield.
+
+*Coverage of a held-out subfield's unseen test names by an in-topic
+corpus.* The SOFC corpus of the week-6 amendment (40,000 sentences of 292
+SOFC articles, built with leakage filtering against SOFC-Exp only) was
+tested against MuLMS's subfields. 665 of its sentences overlap MuLMS's sofc
+documents (some of the four are among its articles); they are excluded
+below, by a 30-character shingle test. The share of the unseen test
+entities whose words occur in the corpus, by exact words and ignoring word
+boundaries and case:
+
+| Held-out subfield | Unseen | Exact | Loose |
+|---|---|---|---|
+| sofc (in topic) | 93.1% | 78.8% (80.3% with MuLMS's hyphen rule) | 83.2% |
+| electrolysis | 83.3% | 61.6% | 68.6% |
+| pemfc | 86.8% | 58.0% | 69.5% |
+| steel | 86.1% | 44.5% | 53.9% |
+
+Week 11's cross-subfield silver names held 4.4%; the fatigue corpus holds
+49–65% of a held-out MaterioMiner paper's. About 45 points of the coverage
+are generic materials names that any materials corpus holds (steel against
+an SOFC corpus), and about 35 points are the topic. For sofc, per type and
+before the leakage exclusion: MAT 89%, FORM 90%, MEASUREMENT 95%, PROPERTY
+72%, VALUE 49%.
+
+*Sources.* Europe PMC has open-access full texts for every subfield: 3,816
+titles for electrolysis (electrolysis, electrolyzer, oxygen or hydrogen
+evolution), 16,219 for graphene, 487 for PEMFC, 9,158 for polymers
+(thermoplastic, epoxy, polyurethane, polypropylene, elastomer, polymer
+melt, injection moulding), 5,161 for semiconductors (SiC, GaN, MOSFET,
+transparent conducting, photovoltaic, epitaxial, chemical vapour
+deposition), 383 for SOFC/SOEC and 7,980 for steel. The SOFC corpus reached
+40,000 sentences from 383 hits, so every topic can. MuLMS ships no article
+identifiers; 16 of its 50 documents are on Europe PMC (found by title), the
+rest come from journals it does not index (MDPI *Metals*, ECS, IOP, Elsevier).
+A topic corpus excludes those 16 by PMCID and every sentence that shares an
+8-word n-gram or a 30-character shingle with any MuLMS sentence, and drops
+an article with 5 or more such sentences.
+
+*Tokens.* MuLMS writes a hyphen as a token of its own (2.2% of its tokens;
+0.01% carry an inner hyphen), keeps Unicode dashes inside tokens, and 1.4%
+of its tokens are subscript digits that PDF extraction split off (`SiO 2`),
+which no tokenizer reproduces. The topic corpora are cut with
+ChemDataExtractor's tokenizer, as the SOFC corpus, then ASCII hyphens are
+split out.
+
+*Reading.* The mechanism of a topic-corpus route is coherent: the gap is in
+names of types that mention replacement already improves, and an in-topic
+corpus holds most of those names, where cross-subfield text held almost
+none. What is untested is whether names that reach the pool convert into
+F1: `w11b` tests that on MaterioMiner, and the silver filter (every tag of
+a sentence confident under three teachers) may admit few of them, so a
+mention-level filter is a candidate for the screen.
