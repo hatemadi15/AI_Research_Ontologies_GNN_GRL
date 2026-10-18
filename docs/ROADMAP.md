@@ -2888,6 +2888,15 @@ this on the GPU. Nothing else in the design changes.
   of `ner-gpu-bundle-3`, ready after the CLI retried four 429 replies.
   `w11a` goes to `ner-gpu-jobs-d` once the bundle has been ready for 30
   minutes and its BUNDLE.json names 427e34c. 3.95 GPU hours remain this week.
+- *01:32: week 11 checked on the real data.* BUNDLE.json names 427e34c, the
+  fatigue corpus's SHA-256 and the 52 MuLMS files. One `w11a` job (graphene)
+  ran with its batch arguments on a tiny random model on the CPU, with two
+  students. Its teachers tagged the fold's 9,433 sentences outside the pool and
+  the test set (10,184 − 400 − 351), none skipped. The random model found no
+  silver sentence, so the students trained on the training names, and the
+  records count the test set's 1,549 entities, 1,264 of them unseen. The
+  teacher of seed 0 reproduces week 10's tiny-model CRF run on graphene
+  (1.11).
 
 **Outcome of part 1: 3 of the 6 decisions pass; the combination's vote is
 the strongest fine-grained system on unseen papers, but S2 fails at both
