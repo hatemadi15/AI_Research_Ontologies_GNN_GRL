@@ -215,7 +215,12 @@ is the gate: per held-out subfield and corpus, the share of the unseen test
 entities (and of their distinct names) whose words occur in a corpus sentence,
 exact and ignoring word boundaries and case, per type, with the sentences
 that share a shingle with the held-out documents left out (`leaked`, 0
-everywhere).
+everywhere). The week-12 batches `w12a` (the screen) and `w12b:<variant>`
+(the decision) run from 40631ce (bundle on `ner-gpu-bundle-3`) after 24
+October and will write
+`gpu/ner_results_mulms_leave_one_subfield_out_{crf_mrs_topic,crf_mrm_topic,crf_mr6}_m<N>.json`
+(run ids the subfields; CC BY-SA 4.0); `gpu/ner_week5_seed_analysis.json`
+(`mulms`, `week12`) will hold the screen and the decisions.
 
 Week 10 (MuLMS, a third corpus; protocol and outcome in ROADMAP §4; Kaggle
 session `w10a` of 17–18 October, `ner-gpu-jobs-d` version 4, bundle a08356f):

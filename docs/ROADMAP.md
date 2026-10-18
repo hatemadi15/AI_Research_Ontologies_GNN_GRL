@@ -3681,3 +3681,9 @@ added `silver_filter` field.
 `screen`, `decision` and `ten_seeds`, each present when its files exist),
 `kaggle_jobs.py` batches `w12a` and `w12b:<variant>` (tested from the frozen
 commit), `report_results.py` for the README bullet once the files exist.
+
+*Bundle.* Built from 40631ce on 18 October and uploaded as the new version
+of `ner-gpu-bundle-3` (457 files: the code, the fatigue corpus, the 52
+MuLMS files, the 7 topic corpora with their SHA-256 in `BUNDLE.json`, and
+393 GPU results files); every upload succeeded at the first try. `w11b`,
+`w12a` and `w12b:<variant>` all run from it after the reset on 24 October.
