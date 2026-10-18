@@ -2896,7 +2896,11 @@ this on the GPU. Nothing else in the design changes.
   silver sentence, so the students trained on the training names, and the
   records count the test set's 1,549 entities, 1,264 of them unseen. The
   teacher of seed 0 reproduces week 10's tiny-model CRF run on graphene
-  (1.11).
+  (1.11). One `w11b` job (coarse-grained, the paper 10.1007_s11340) passed
+  the same check. Its teachers tagged all 40,000 fatigue sentences (the
+  corpus's SHA-256 is the bundle's), and the record counts the paper's 173
+  test entities, 129 of them unseen. Its 963 copies equal those of week 7's
+  mention replacement run of seed 0 on that paper.
 
 **Outcome of part 1: 3 of the 6 decisions pass; the combination's vote is
 the strongest fine-grained system on unseen papers, but S2 fails at both
