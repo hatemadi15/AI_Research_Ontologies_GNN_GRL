@@ -16,9 +16,12 @@ from chem_tokenize import ChemWordTokenizer
 from test_build_sofc_corpus import FakeEuropePMC, hit
 
 # a fake MuLMS: one sentence the n-gram filter catches, one only the shingle test catches
-# (two long words: fewer than 8 tokens, more than 30 characters without spaces)
+# (a split subscript, as MuLMS writes them: no 8 tokens in a row match a sentence that writes
+# SiO2, while the run of characters without spaces is the same)
 NGRAM_LEAK = 'Anode supported cells were sintered at 1400 °C for 4 h in air before the tests.'
-SHINGLE_LEAK = 'Thermogravimetric characterization of the SiO 2 layers followed.'
+SHINGLE_LEAK = ('Thermogravimetric characterization of the SiO 2 layers followed the sintering '
+                'step.')
+SHARED = 'thermogravimetric characterization of the SiO2 layers followed the sintering step'
 REFERENCE = [('sofc_01', NGRAM_LEAK.replace('before the tests.', 'and then reduced.')),
              ('semi_02', SHINGLE_LEAK)]
 
@@ -56,17 +59,19 @@ def test_mulms_hyphen_rule():
 
 
 def test_shingle_filter_drops_sharing_sentences_and_leaking_articles():
-    pool = ['Thermogravimetric characterization of the samples came first.',     # shares
+    pool = [f'First, {SHARED}, as before.',                                     # shares
             'A clean sentence about anodes.',
-            'Then thermogravimetric characterization of each pellet.',           # shares
-            *(f'Run {k}: thermogravimetric characterization of the SiO2 layers.'  # shares
-              for k in range(5)),
+            # a technical term is not leakage: 39 characters shared, under SHINGLE
+            'Thermogravimetric characterization of the samples came first.',
+            f'Then {SHARED} again.',                                            # shares
+            *(f'Run {k}: {SHARED}.' for k in range(5)),                         # share
             'Another clean sentence of the leaking article.']
-    owner = [0, 0, 1, 2, 2, 2, 2, 2, 2]
+    owner = [0, 0, 0, 1, 2, 2, 2, 2, 2, 2]
     kept, dropped = bt.shingle_filter(pool, owner, REFERENCE)
-    assert dropped['sentences'] == [0, 2, 3, 4, 5, 6, 7]
+    assert dropped['sentences'] == [0, 3, 4, 5, 6, 7, 8]
     assert dropped['by_article'] == {0: 1, 1: 1, 2: 5} and dropped['articles'] == [2]
-    assert kept == [1]                      # the leaking article loses its clean sentence too
+    assert kept == [1, 2]                   # the leaking article loses its clean sentence too
+    assert bt.SHINGLE == 50
     # the n-gram filter would not have caught these: fewer than 8 tokens are shared
     kept_ngram, _ = dapt_mlm.filter_corpus(pool, REFERENCE, 8)
     assert len(kept_ngram) == len(pool)
@@ -113,8 +118,7 @@ def test_whole_script(tmp_path):
     # the first article read holds 5 sentences only the shingle test catches: it is dropped
     # whole (the target pool is reached after 3 articles, so a later one might go unread)
     leaker = bf.order_articles([r for r in records if r['pmcid'] != 'PMC1'])[0]['pmcid']
-    texts[leaker] = make_article(int(leaker[3:]), [
-        f'Run {k}: thermogravimetric characterization of SiO2.' for k in range(5)])
+    texts[leaker] = make_article(int(leaker[3:]), [f'Run {k}: {SHARED}.' for k in range(5)])
     fake = FakeEuropePMC(records, texts)
     first = run_script(tmp_path, fake, 'first')
     lines = (tmp_path / 'first.txt').read_text(encoding='utf-8').splitlines()

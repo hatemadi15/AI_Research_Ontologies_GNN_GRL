@@ -749,7 +749,12 @@ stands (ROADMAP §4, weeks 6 to 9):
    CRF teachers tag alike and confidently. On MuLMS this adds nothing (−0.06
    [−1.09, +0.96] against mention replacement), since those names hold only
    4.4% of a held-out subfield's unseen test names. MaterioMiner's part
-   runs after 24 October.
+   runs after 24 October. Week 12 takes the names from a corpus of the
+   held-out subfield's own topic instead: 40,000 sentences of open-access
+   papers per subfield (Europe PMC, titles with the subfield's terms, with
+   MuLMS's own articles and sentences excluded), which hold 55–81% of a
+   held-out subfield's unseen test names (`results/mulms_coverage.json`);
+   its screen and decision are pre-registered in ROADMAP §4.
 4. Why unseen papers are hard (exploratory, no GPU; `ner_mentions.py`):
    81% of a held-out paper's fine-grained entities are names that its
    three training papers never annotate with that type, against 35% on

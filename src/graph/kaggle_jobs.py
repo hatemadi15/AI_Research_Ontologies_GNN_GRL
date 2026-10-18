@@ -133,6 +133,19 @@ Week 11 (mention replacement with silver names: --augment-names; 3 teachers, 10 
   w11b    the CRF run of smoke4 (smokean); then on MaterioMiner's 4 held-out papers (one job
           each, --papers), the teachers tag the whole fatigue corpus; one lane per
           granularity (crf_mrs_m<N>)
+Week 12 (names from a topic corpus: build_topic_corpus.py, one per MuLMS subfield, in the
+bundle as topic_<topic>_sentences.txt; the screen, then the decision for its winner):
+  w12a    the CRF run of smoke4 (smokeao); then the screen, seed offsets 0 to 200, on MuLMS's
+          7 held-out subfields: in lane 0, per subfield, the 3 teachers tag the subfield's
+          topic corpus and the students train mention replacement with its silver names
+          (crf_mrs_topic_m<N>); in lane 1 the same with the mention-level silver filter
+          (--silver-mentions, crf_mrm_topic_m<N>); and mention replacement with 6 copies
+          (crf_mr6_m<N>, one job per seed offset, no teachers), two jobs in lane 0 and one
+          in lane 1. The jobs of a variant share a lane: they extend the same files
+  w12b:V  the decision for the screen's winner V (mrs, mrm or mr6): seed offsets 300 to 900;
+          mrs and mrm as in w12a with each lane training the teachers and 3 or 4 of the
+          students (offsets 300-500 and 600-900), mr6 one job per offset over the lanes
+          (smokeap)
 
 Usage:
   python src/graph/kaggle_jobs.py quota
@@ -204,7 +217,8 @@ PAPERS =('10.1007_s11340-021-00758-x', '10.1038_ncomms7164', '10.1038_s41467-020
 # relative GPU time of one run of each kind (a CRF run is 1), for balancing the lanes
 COST = {'crf': 1.0, 'mt': 1.7, 'ls': 1.1, 'mt_ls': 1.8, 'st': 2.5, 'st3': 22.0,
         'deberta': 4.4, 'ctx': 2.7, 'sofc': 2.7,   # sofc: 3.3 min per CRF run (session b, w6b)
-        'mr': 3.8}           # mention replacement, 3 copies: about 4 times the training sentences
+        'mr': 3.8,           # mention replacement, 3 copies: about 4 times the training sentences
+        'mr6': 6.6}          # 6 copies: about 7 times
 # week 7, part 2a: the biases that --entity-bias decodes besides 0 (ROADMAP §4)
 BIAS_GRID = ('-1', '-0.5', '0.25', '0.5', '0.75', '1', '1.25', '1.5', '2', '2.5', '3')
 # week 6: the options of each method on the held-out papers, and the stage-2 parts
@@ -240,6 +254,10 @@ MULMS_SUBFIELD_NAMES = ('electrolysis', 'graphene', 'pemfc', 'poly', 'semi', 'so
 MRS_LANES = (OFFSETS_PUBLISHED[:5], OFFSETS_PUBLISHED[5:])
 MRS_FLAGS = ('--crf', '--teachers', '3', '--students', '10', '--augment-mentions', '3',
              '--augment-names', '--save-predictions', '--threads', str(THREADS))
+TOPIC_TAG = 'topic'          # --names-tag of the topic-corpus variants (crf_mrs_topic, crf_mrm_topic)
+MR6_COPIES = 6               # week 12's copy-count variant (crf_mr6)
+WEEK12_VARIANTS = ('mrs', 'mrm', 'mr6')     # the screen's variants: w12b:<variant> decides one
+DECISION_LANES = (OFFSETS_W5[:3], OFFSETS_W5[3:])   # w12b: the students per lane (seeds 300-900)
 
 
 # ---------------------------------------------------------------------------
@@ -299,6 +317,35 @@ def mrs_mulms_job(subfield, student_offsets):
     return ['--granularity', 'mulms', '--leave-one-subfield-out', '--train-pool',
             str(MULMS_POOL), '--subfields', subfield, '--self-train', 'unused',
             '--student-offsets', *(str(o) for o in student_offsets), *MRS_FLAGS]
+
+
+def topic_mulms_job(subfield, student_offsets, mentions=False):
+    """Week 12 on MuLMS: one held-out subfield, 400 pool sentences; the 3 teachers tag the
+    subfield's topic corpus (TOPIC_CORPUS, in the bundle; all of it) and the students of
+    `student_offsets` train mention replacement with its silver names (crf_mrs_topic_m<N>;
+    with `mentions`, the mention-level silver filter: crf_mrm_topic_m<N>)."""
+    return ['--granularity', 'mulms', '--leave-one-subfield-out', '--train-pool',
+            str(MULMS_POOL), '--subfields', subfield, '--self-train',
+            TOPIC_CORPUS.format(topic=subfield), '--self-train-sample', '0',
+            '--student-offsets', *(str(o) for o in student_offsets), '--names-tag', TOPIC_TAG,
+            *(('--silver-mentions',) if mentions else ()), *MRS_FLAGS]
+
+
+def mr6_mulms_job(offset):
+    """Week 12 on MuLMS: mention replacement with MR6_COPIES copies (crf_mr6_m<N>) on the 7
+    held-out subfields, 400 pool sentences, one job per seed offset."""
+    return ['--granularity', 'mulms', '--leave-one-subfield-out', '--train-pool',
+            str(MULMS_POOL), '--crf', '--augment-mentions', str(MR6_COPIES), '--tag',
+            f'm{offset}', *(('--seed-offset', str(offset)) if offset else ()),
+            '--save-predictions', '--threads', str(THREADS)]
+
+
+def week12_variant(name):
+    """The variant of a decision batch name 'w12b:V' (ValueError if unknown)."""
+    variant = name[len('w12b:'):]
+    if variant not in WEEK12_VARIANTS:
+        raise ValueError(f'unknown week-12 variant {name!r}; known: {WEEK12_VARIANTS}')
+    return variant
 
 
 def mrs_paper_job(granularity, paper):
@@ -604,6 +651,24 @@ def batch_lanes(name):
         # week 11 on MaterioMiner: one lane per granularity, a job per held-out paper
         return [[repeat + ['--tag', 'smokean']] + [mrs_paper_job('fine', p) for p in PAPERS],
                 [mrs_paper_job('coarse', p) for p in PAPERS]]
+    if name == 'w12a':
+        # week 12's screen on MuLMS, seed offsets 0 to 200: the jobs of a variant share a
+        # lane (they extend the same files); the 6-copy jobs, a file each, fill the lanes
+        return [[repeat + ['--tag', 'smokeao']]
+                + [topic_mulms_job(s, OFFSETS) for s in MULMS_SUBFIELD_NAMES]
+                + [mr6_mulms_job(off) for off in (OFFSETS[0], OFFSETS[2])],
+                [topic_mulms_job(s, OFFSETS, mentions=True) for s in MULMS_SUBFIELD_NAMES]
+                + [mr6_mulms_job(OFFSETS[1])]]
+    if name.startswith('w12b:'):
+        # week 12's decision on MuLMS for the screen's winner, seed offsets 300 to 900
+        variant = week12_variant(name)
+        if variant == 'mr6':
+            lanes = balance([(COST['mulms'] * MULMS_SUBFIELDS * COST['mr6'], mr6_mulms_job(off))
+                             for off in OFFSETS_W5], loads=[COST['crf'], 0.0])
+        else:
+            lanes = [[topic_mulms_job(s, offsets, mentions=variant == 'mrm')
+                      for s in MULMS_SUBFIELD_NAMES] for offsets in DECISION_LANES]
+        return [[repeat + ['--tag', 'smokeap']] + lanes[0], lanes[1]]
     if name == 'w7a':
         # week 7, part 2a: recall calibration. An inner job is the 6 folds of a seed, each
         # trained on two papers (about 4 CRF runs); no predictions, the counts suffice
@@ -624,7 +689,8 @@ def batch_lanes(name):
 
 BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'item3r',
            'smoke4', 'w5a', 'w5b', 'w5c', 'smoke5', 'smoke6', 'w6a', 'w6b', 'w7a', 'w7b',
-           'w7c', 'w7d', 'w7e', 'w8a', 'w8b', 'w9a', 'w9b', 'w10a', 'w11a', 'w11b')
+           'w7c', 'w7d', 'w7e', 'w8a', 'w8b', 'w9a', 'w9b', 'w10a', 'w11a', 'w11b', 'w12a',
+           *(f'w12b:{v}' for v in WEEK12_VARIANTS))
 
 
 def batch_extras(name):

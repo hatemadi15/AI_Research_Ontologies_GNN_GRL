@@ -412,8 +412,48 @@ def test_mulms_held_out_subfields_and_pool_splits(tmp_path):
     assert names['votes']['minus_crf']['micro']['mean_diff'] == pytest.approx(33.33)
     assert names['votes']['minus_crf_mr']['micro']['mean_diff'] == 0.0
     assert names['unseen_in_silver'] == round(sum(range(7)) / 70, 3)
+    assert 'week12' not in sa.mulms(tmp_path)
+    # week 12: a topic-name variant screened on 3 seeds (gains 2 over the CRF head, with the
+    # mention-level filter), and 6 copies on all 10 seeds (0.3 over the CRF head, no teachers)
+    for j, off in enumerate(range(0, 1000, 100)):
+        variants = [('crf_mr6', 0.3)] + ([('crf_mrm_topic', 2.0)] if off <= 200 else [])
+        for system, gain in variants:
+            runs = []
+            for k, name in enumerate(subfields):
+                run = _run(name, 50 + k + j / 10 + gain + (k % 2) / 2)
+                run.update({'test_index': [0], 'test_gold': ['B-MAT O'], 'test_pred': ['B-MAT O']})
+                if system == 'crf_mrm_topic':
+                    run['self_training'] = {'silver_filter': 'mentions', 'names': {
+                        'n_test_unseen': 10, 'n_test_unseen_in_silver': 2 * k}}
+                runs.append(run)
+            (tmp_path / f'ner_results_mulms_leave_one_subfield_out_{system}_m{off}.json'
+             ).write_text(json.dumps({'runs': runs}))
+    week12 = sa.mulms(tmp_path)['week12']
+    assert set(week12) == {'crf_mr6', 'crf_mrm_topic'}
+    assert set(week12['crf_mrm_topic']) == {'screen'}       # seeds 0-200 only
+    screen = week12['crf_mrm_topic']['screen']
+    assert screen['seeds'] == [0, 100, 200] and screen['n_subfields'] == 7
+    assert screen['minus_crf']['micro']['per_run'] == [2.0] * 7
+    assert screen['minus_crf_mr']['micro']['per_run'] == [1.0] * 7
+    assert 'decision_1' not in screen and 'decision_2' not in screen
+    assert screen['subfields']['alpha'] == 52.1                      # 50 + 0.1 (seeds 0-200) + 2
+    assert screen['silver_filter'] == 'mentions' and screen['unseen_in_silver'] == 0.6
+    # the screen's votes: the triple 0-200 only, where 2 of the 3 CRF seeds tag the entity
+    assert screen['votes']['minus_crf']['micro']['mean_diff'] == 0.0
+    six = week12['crf_mr6']
+    assert set(six) == {'screen', 'decision', 'ten_seeds'}
+    decision = six['decision']
+    assert decision['seeds'] == list(range(300, 1000, 100))
+    assert (decision['decision_1'], decision['decision_2']) == (True, False)
+    assert decision['minus_crf_mr']['micro']['per_run'] == [-0.7] * 7
+    assert decision['subfields']['alpha'] == 50.9                    # 50 + 0.6 (seeds 300-900) + 0.3
+    assert six['ten_seeds']['subfields']['alpha'] == 50.75 and 'decision_1' not in six['ten_seeds']
+    assert 'names' not in decision and 'silver_filter' not in decision
     (tmp_path / 'ner_results_mulms_leave_one_subfield_out_crf_mr_m900.json').unlink()
-    assert set(sa.mulms(tmp_path)) == {'random_split_pool'}
+    out = sa.mulms(tmp_path)          # each part needs the references at its offsets only
+    assert set(out) == {'random_split_pool', 'week12'}
+    assert {v: set(parts) for v, parts in out['week12'].items()} == {
+        'crf_mrm_topic': {'screen'}, 'crf_mr6': {'screen'}}
 
 
 def test_paper_count_compares_two_and_three_training_papers(tmp_path):

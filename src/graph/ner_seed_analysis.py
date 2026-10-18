@@ -84,7 +84,15 @@ votes (ner_seedmeans.WEEK5_SYSTEMS) and writes ner_week5_seed_analysis.json next
     (decision 1) and minus mention replacement (decision 2), each with its 95% CI over the
     subfields; its votes against the CRF votes and mention replacement's (reported); and per
     subfield the silver names' counts (name_coverage of ner_baseline.py), with the share of
-    the unseen test entities whose name is a silver name, pooled over the subfields.
+    the unseen test entities whose name is a silver name, pooled over the subfields. week12
+    (week 12; its screen and MuLMS decisions): every other mention replacement variant with
+    files on the held-out subfields (crf_mr<...>: names from a topic corpus, crf_mrs_topic
+    and crf_mrm_topic, or more copies, crf_mr6), each analysed as crf_mrs is against the
+    CRF head and mention replacement at the same seed offsets, in three parts, each present
+    when the variant has every file of its offsets: screen, the offsets 0 to 200 (the means
+    and CIs, no decision; the screen picks the variant by its mean minus mention
+    replacement); decision, the offsets 300 to 900, seeds the screen did not see (decision_1
+    and decision_2); ten_seeds, all 10 offsets (reported).
   - sofc_splits (week 8, part 1; descriptive): SOFC-Exp beyond its official split. Per
     protocol, its 5 random sentence splits and its 5 article folds (--document-folds 5), the
     CRF head's 10-seed mean per split under every F1 average, with the mean and 95% CI over
@@ -105,9 +113,9 @@ from pathlib import Path
 import metrics
 import ner_ensemble
 from ner_baseline import F1_AVERAGES
-from ner_seedmeans import (GRANULARITIES, LOPO, PROTOCOLS, SCREEN_OFFSETS, WEEK5_OFFSETS,
-                           WEEK5_SYSTEMS, WEEK5_TRIPLES, WEEK6_METHODS, file_names, seed_family,
-                           spread, system_scores)
+from ner_seedmeans import (DECISION_OFFSETS, GRANULARITIES, LOPO, PROTOCOLS, SCREEN_OFFSETS,
+                           WEEK5_OFFSETS, WEEK5_SYSTEMS, WEEK5_TRIPLES, WEEK6_METHODS,
+                           file_names, seed_family, spread, system_scores)
 
 RESULTS_DIR = Path(__file__).resolve().parents[2] / 'results' / 'gpu'
 OUT_NAME = 'ner_week5_seed_analysis.json'
@@ -524,10 +532,11 @@ def sofc_draws(directory):
 def fold_votes(files):
     """{run_id: {F1 average: the mean over the seed triples 0-200, 300-500 and 600-800 of
     their votes}} of a 10-seed family's files (ordered by seed offset), from the stored
-    predictions."""
+    predictions; of the triples the files cover (the 3-seed screen: the first one)."""
     by_id = [{r['run_id']: r for r in f['runs']} for f in files]
+    triples = [first for first in WEEK5_TRIPLES if first // 100 + 3 <= len(by_id)]
     votes = {i: [ner_ensemble.ensemble_run(i, [by_id[first // 100 + j][i] for j in range(3)])
-                 for first in WEEK5_TRIPLES] for i in by_id[0]}
+                 for first in triples] for i in by_id[0]}
     return {i: {avg: statistics.mean(get(v) for v in vs) for avg, get in F1_AVERAGES.items()}
             for i, vs in votes.items()}
 
@@ -579,37 +588,82 @@ def mulms(directory):
                                  for off in WEEK5_OFFSETS])
     if mrs and all(files.values()):
         out['silver_names'] = silver_names({**files, 'crf_mrs': mrs})
+    week12 = week12_variants(directory)
+    if week12:
+        out['week12'] = week12
     return out
 
 
 def silver_names(files):
     """The silver_names section of mulms (week 11) from the 10 seed files of crf, crf_mr and
     crf_mrs on the held-out subfields."""
+    return names_variant(files, 'crf_mrs')
+
+
+def names_variant(files, system, decide=True):
+    """A mention replacement variant (`system`) against the CRF head and mention replacement
+    on the held-out subfields, from files {'crf', 'crf_mr', system} of the same seed offsets:
+    its means per subfield and over them, minus each reference with the 95% CI over the
+    subfields (and, with `decide`, decision_1 and decision_2: the CI above 0), the votes when
+    the predictions are saved, and the silver names' counts when the runs have them."""
     scores = {s: system_scores(f) for s, f in files.items()}
-    ids = [i for i in scores['crf_mrs'] if all(i in v for v in scores.values())]
+    ids = [i for i in scores[system] if all(i in v for v in scores.values())]
 
     def minus(get, reference):
-        return {avg: spread([get('crf_mrs', i)[avg] - get(reference, i)[avg] for i in ids],
+        return {avg: spread([get(system, i)[avg] - get(reference, i)[avg] for i in ids],
                             'mean_diff') for avg in F1_AVERAGES}
-    entry = {'crf_mrs': {avg: spread([scores['crf_mrs'][i][avg] for i in ids])
-                         for avg in F1_AVERAGES},
-             'subfields': {i: round(scores['crf_mrs'][i]['micro'], 2) for i in ids},
+    entry = {system: {avg: spread([scores[system][i][avg] for i in ids])
+                      for avg in F1_AVERAGES},
+             'subfields': {i: round(scores[system][i]['micro'], 2) for i in ids},
              'n_subfields': len(ids)}
     for reference, decision in (('crf', 'decision_1'), ('crf_mr', 'decision_2')):
         entry[f'minus_{reference}'] = minus(lambda s, i: scores[s][i], reference)
-        entry[decision] = entry[f'minus_{reference}']['micro']['ci95'][0] > 0
+        if decide:
+            entry[decision] = entry[f'minus_{reference}']['micro']['ci95'][0] > 0
     if all('test_pred' in r for fs in files.values() for f in fs for r in f['runs']):
         votes = {s: fold_votes(f) for s, f in files.items()}
-        entry['votes'] = {'crf_mrs': {avg: spread([votes['crf_mrs'][i][avg] for i in ids])
-                                      for avg in F1_AVERAGES},
+        entry['votes'] = {system: {avg: spread([votes[system][i][avg] for i in ids])
+                                   for avg in F1_AVERAGES},
                           **{f'minus_{r}': minus(lambda s, i: votes[s][i], r)
                              for r in ('crf', 'crf_mr')}}
-    names = {r['run_id']: r['self_training']['names'] for r in files['crf_mrs'][0]['runs']}
-    entry['names'] = {i: names[i] for i in ids}
-    unseen = sum(names[i]['n_test_unseen'] for i in ids)
-    entry['unseen_in_silver'] = (round(sum(names[i]['n_test_unseen_in_silver'] for i in ids)
-                                       / unseen, 3) if unseen else None)
+    runs = files[system][0]['runs']
+    if all('names' in r.get('self_training', {}) for r in runs):
+        names = {r['run_id']: r['self_training']['names'] for r in runs}
+        entry['names'] = {i: names[i] for i in ids}
+        unseen = sum(names[i]['n_test_unseen'] for i in ids)
+        entry['unseen_in_silver'] = (round(sum(names[i]['n_test_unseen_in_silver']
+                                               for i in ids) / unseen, 3) if unseen else None)
+        filters = {r['self_training'].get('silver_filter') for r in runs}
+        if len(filters) == 1:
+            entry['silver_filter'] = filters.pop()
     return entry
+
+
+def week12_variants(directory):
+    """The week12 section of mulms: {variant: {part: names_variant(...)}} for every mention
+    replacement variant other than crf_mr and crf_mrs with files on the held-out subfields;
+    the parts screen (SCREEN_OFFSETS, no decision), decision (DECISION_OFFSETS) and ten_seeds
+    (WEEK5_OFFSETS, no decision), each present when the variant and both references have
+    every file of its offsets."""
+    prefix = f'ner_results_mulms_{MULMS_PROTOCOLS[0]}_'
+    variants = set()
+    for path in sorted(Path(directory).glob(f'{prefix}crf_mr*_m*.json')):
+        variant, _, offset = path.name[len(prefix):-len('.json')].rpartition('_m')
+        if variant not in ('crf_mr', 'crf_mrs') and offset.isdigit():
+            variants.add(variant)
+    out = {}
+    for variant in sorted(variants):
+        entry = {}
+        for part, offsets, decide in (('screen', SCREEN_OFFSETS, False),
+                                      ('decision', DECISION_OFFSETS, True),
+                                      ('ten_seeds', WEEK5_OFFSETS, False)):
+            files = {s: load_files(directory, [f'{prefix}{s}_m{off}.json' for off in offsets])
+                     for s in ('crf', 'crf_mr', variant)}
+            if all(files.values()):
+                entry[part] = {'seeds': list(offsets), **names_variant(files, variant, decide)}
+        if entry:
+            out[variant] = entry
+    return out
 
 
 def analyse(directory):
@@ -720,6 +774,17 @@ def main(argv=None):
                   f"{names['crf_mrs']['micro']['mean']:.2f}, minus {reference} "
                   f"{d['mean_diff']:+.2f} {d['ci95']} ({'passes' if names[decision] else 'no'})")
         print(f"    unseen test names among the silver names: {names['unseen_in_silver']}")
+    for variant, parts in result['mulms'].get('week12', {}).items():
+        for part, entry in parts.items():
+            for reference, decision in (('crf', 'decision_1'), ('crf_mr', 'decision_2')):
+                d = entry[f'minus_{reference}']['micro']
+                verdict = ('passes' if entry[decision] else 'no') if decision in entry else part
+                print(f"  MuLMS, week 12 {variant}, {part} ({len(entry['seeds'])} seeds, "
+                      f"{entry['n_subfields']} subfields): {entry[variant]['micro']['mean']:.2f}"
+                      f", minus {reference} {d['mean_diff']:+.2f} {d['ci95']} ({verdict})")
+            if 'unseen_in_silver' in entry:
+                print(f"    unseen test names among the silver names: "
+                      f"{entry['unseen_in_silver']} ({entry.get('silver_filter')} filter)")
     if 'gap' in result['sofc_splits']:
         print(f"  SOFC-Exp, random splits minus article folds: "
               f"{result['sofc_splits']['gap']['micro']:+.2f} micro F1")

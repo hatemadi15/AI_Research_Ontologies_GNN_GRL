@@ -247,6 +247,7 @@ WEEK5_COMPARISONS = (
 # week 6: methods for unseen papers, screened with seeds 0-200, then decided with 10 seeds
 WEEK6_METHODS = ('crf_deberta', 'crf_ctx', 'crf_mt_st3')
 SCREEN_OFFSETS = (0, 100, 200)
+DECISION_OFFSETS = tuple(range(300, 1000, 100))   # week 12: the seeds the screen did not see
 LOPO = 'leave_one_paper_out'
 # the strongest system on unseen papers after week 5, per granularity (week-5 decision 2)
 UNSEEN_BEST = {'fine': 'crf_mt_ens3', 'coarse': 'crf_ens3'}

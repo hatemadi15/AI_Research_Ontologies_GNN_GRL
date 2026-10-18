@@ -1025,6 +1025,7 @@ chance at class level. For a Task C-style result:
 | 9 | Part 1 done: mention replacement on the multi-task model (`crf_mt_mr`, 10 seeds on the held-out papers, S2 on SOFC-Exp's two levels; protocol below). 3 of 6 decisions pass: against the multi-task model +3.01 [+0.42, +5.60] fine-grained and +2.30 [+0.49, +4.10] coarse-grained, and its vote against the multi-task vote +2.86 [+0.18, +5.54] fine-grained, now the strongest fine-grained system on unseen papers (55.33); coarse-grained its vote does not beat the seed vote, and S2 fails at both levels, so no methods claim (C21). Part 2 done: on SOFC-Exp cut to MaterioMiner's size (10 of its 26 training articles, 5 draws), mention replacement scores +0.50 [−0.47, +1.46] against the CRF head and does not pass, so its MaterioMiner gain is not a matter of training size | Part 1: the combination's vote improves on the strongest system on unseen papers, and on SOFC-Exp. Part 2: mention replacement improves on the CRF head on a MaterioMiner-sized SOFC-Exp |
 | 10 | Done: MuLMS as a third corpus (7 materials subfields, its outermost entities; `mulms.py`), mention replacement against the CRF head on held-out subfields with 400 training sentences, 10 seeds, and the CRF head on random splits of the same size; protocol committed before any run (a08356f; the batch `w10a` ran from that commit), protocol and outcome below | Mention replacement improves on the CRF head on held-out subfields (decision 1), and its votes on the CRF votes (decision 2). Decision 1 not met: +2.10 [−0.31, +4.51], six of the seven subfields gaining. Decision 2 met: +2.71 [+0.22, +5.20]. By the protocol, mention replacement and its combination (C20, C21) stay results for MaterioMiner |
 | 11 | Protocol committed before any run: mention replacement whose replacement pool also holds the names in the sentences that 3 CRF teachers tag alike and confidently in unlabeled in-domain text (`--augment-names`, variant `crf_mrs`), on MuLMS's 7 held-out subfields (`w11a`) and MaterioMiner's 4 held-out papers (`w11b`), 10 seeds; protocol below | It improves on the CRF head on MuLMS's held-out subfields (decision 1) and on mention replacement (decisions 2–4: MuLMS, MaterioMiner fine- and coarse-grained); a methods claim needs decision 1 and one of decisions 2–4. MuLMS (`w11a`): decisions 1 (+2.04 [−0.85, +4.92]) and 2 (−0.06 [−1.09, +0.96]) not met, so no methods claim; MaterioMiner (`w11b`, decisions 3 and 4) after the reset on 24 October |
+| 12 | Protocol committed before any run: mention replacement whose replacement pool holds the names that 3 CRF teachers find in a corpus of the held-out subfield's own topic (40,000 open-access sentences per subfield, `build_topic_corpus.py`; phase 0's gate: they hold 55–81% of the unseen test names), on MuLMS's 7 held-out subfields; a 3-seed screen of three variants (`w12a`: silver sentences `crf_mrs_topic`, silver mentions `crf_mrm_topic`, 6 copies `crf_mr6`), then the 7-seed decision for the screen's winner on seeds the screen did not see (`w12b:<variant>`); protocol below | Screen: the variant with the largest mean gain over mention replacement goes on if it is above 0. Decision 1: it improves on the CRF head (paired by subfield); decision 2: on mention replacement. A methods claim needs decision 1 on MuLMS and the winner's MaterioMiner analogue passing against the CRF head. Runs after the reset on 24 October, after `w11b` |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -3477,28 +3478,44 @@ MAT holds 40% of the entities and a 21-point gap, FORM a 34-point gap:
 these are names, and mention replacement gains most on them (sofc: MAT
 +11.4, FORM +8.8). SAMPLE and DEV are barely found on any held-out subfield.
 
-*Coverage of a held-out subfield's unseen test names by an in-topic
-corpus.* The SOFC corpus of the week-6 amendment (40,000 sentences of 292
-SOFC articles, built with leakage filtering against SOFC-Exp only) was
-tested against MuLMS's subfields. 665 of its sentences overlap MuLMS's sofc
-documents (some of the four are among its articles); they are excluded
-below, by a 30-character shingle test. The share of the unseen test
-entities whose words occur in the corpus, by exact words and ignoring word
-boundaries and case:
+*Coverage of a held-out subfield's unseen test names by the topic corpora*
+(`mulms_coverage.py`, `results/mulms_coverage.json`; 18 October). Seven
+corpora of 40,000 sentences, one per subfield (`build_topic_corpus.py`,
+`results/topic_corpora/`), built from Europe PMC open-access full texts
+whose titles carry the subfield's terms, with MuLMS's 16 identified articles
+excluded by PMCID and every sentence sharing an 8-word n-gram or a
+50-character shingle with a MuLMS sentence dropped. The share of a held-out
+subfield's unseen test entities whose words occur in a row in a corpus
+(exact; the corpus cut with MuLMS's hyphen rule) and ignoring word
+boundaries and case (loose); the best of the other corpora for comparison
+(exact), and as controls the SOFC corpus of the week-6 amendment (built the
+same way from 383 hits, before the MuLMS exclusions) and the fatigue corpus
+(fatigue papers, mostly steels, which is why it holds 56.5% of steel's
+names). No sentence of a topic corpus leaks a MuLMS document (0 shingle
+hits against the held-out documents in every cell):
 
-| Held-out subfield | Unseen | Exact | Loose |
-|---|---|---|---|
-| sofc (in topic) | 93.1% | 78.8% (80.3% with MuLMS's hyphen rule) | 83.2% |
-| electrolysis | 83.3% | 61.6% | 68.6% |
-| pemfc | 86.8% | 58.0% | 69.5% |
-| steel | 86.1% | 44.5% | 53.9% |
+| Held-out subfield | Unseen | Own topic corpus, exact | Loose | Best other topic corpus | SOFC corpus | Fatigue corpus |
+|---|---|---|---|---|---|---|
+| electrolysis | 83.3% | **70.7%** | 75.6% | pemfc 66.6% | 62.2% | 46.2% |
+| graphene | 81.0% | 64.0% | 68.0% | electrolysis **67.3%** | 55.7% | 42.5% |
+| pemfc | 86.8% | **73.9%** | 78.3% | electrolysis 69.5% | 59.8% | 46.1% |
+| poly | 85.8% | **65.9%** | 69.9% | graphene 55.3% | 48.6% | 53.5% |
+| semi | 95.4% | **69.3%** | 74.5% | graphene 62.8% | 55.7% | 50.1% |
+| sofc | 93.1% | **80.8%** | 83.9% | electrolysis 71.2% | 80.6% | 49.1% |
+| steel | 86.1% | **55.0%** | 63.0% | semi 48.1% | 45.7% | 56.5% |
 
-Week 11's cross-subfield silver names held 4.4%; the fatigue corpus holds
-49–65% of a held-out MaterioMiner paper's. About 45 points of the coverage
-are generic materials names that any materials corpus holds (steel against
-an SOFC corpus), and about 35 points are the topic. For sofc, per type and
-before the leakage exclusion: MAT 89%, FORM 90%, MEASUREMENT 95%, PROPERTY
-72%, VALUE 49%.
+Week 11's cross-subfield silver names held 4.4% of the unseen test names;
+the fatigue corpus holds 49–65% of a held-out MaterioMiner paper's. Per
+type, the own corpus holds 77–90% of the unseen MAT names and 85–96% of
+the FORM names, the two types with the largest held-out gaps, 82–94% of
+MEASUREMENT, 45–74% of PROPERTY and 43–57% of VALUE; SAMPLE, DEV and CITE
+vary by subfield (sofc: 58%, 94%, 70%; steel: 9%, 8%, 0%). About 45–65
+points of the coverage are generic: any materials corpus of 40,000 sentences
+holds them (a steel subfield's names in a graphene corpus: 47.5%). The own
+topic adds 4–11 points on six subfields and is 3 points behind the
+electrolysis corpus on graphene (MuLMS's graphene documents are
+electrochemical). So the names are there; whether the silver filter admits
+them and whether they convert into F1 is week 12's question.
 
 *Sources.* Europe PMC has open-access full texts for every subfield: 3,816
 titles for electrolysis (electrolysis, electrolyzer, oxygen or hydrogen
@@ -3511,8 +3528,15 @@ deposition), 383 for SOFC/SOEC and 7,980 for steel. The SOFC corpus reached
 identifiers; 16 of its 50 documents are on Europe PMC (found by title), the
 rest come from journals it does not index (MDPI *Metals*, ECS, IOP, Elsevier).
 A topic corpus excludes those 16 by PMCID and every sentence that shares an
-8-word n-gram or a 30-character shingle with any MuLMS sentence, and drops
-an article with 5 or more such sentences.
+8-word n-gram or a 50-character shingle (its text without spaces, in lower
+case; about 8 words, so the n-gram rule under another tokenization) with any
+MuLMS sentence, and drops an article with 5 or more such sentences. The
+shingle was first 30 characters, which matched technical terms
+("electrochemical impedance spectroscopy", "transmission electron
+microscopy", "yttria-stabilized zirconia (YSZ)") in 270–319 of each topic's
+articles and dropped 62–224 articles per topic whole; at 50 characters, 15
+sentences and no article of the SOFC pool share a run with MuLMS, at 60
+none, so no MuLMS document is among the pool's articles.
 
 *Tokens.* MuLMS writes a hyphen as a token of its own (2.2% of its tokens;
 0.01% carry an inner hyphen), keeps Unicode dashes inside tokens, and 1.4%
@@ -3528,3 +3552,120 @@ none. What is untested is whether names that reach the pool convert into
 F1: `w11b` tests that on MaterioMiner, and the silver filter (every tag of
 a sentence confident under three teachers) may admit few of them, so a
 mention-level filter is a candidate for the screen.
+
+### Week 12 protocol: names from a topic corpus (fixed before any run)
+
+Fixed on 18 October, after phase 0's gate above and before any run of week
+12. It changes the order of "What follows week 11": the gate of the topic
+corpora is phase 0's coverage, measured on the CPU, not `w11b`, which cannot
+run before the GPU reset on 24 October; `w11b` still runs first, and its
+decisions 3 and 4 stand as the week-11 protocol fixed them.
+
+*Why.* Mention replacement is the one method that improves on the CRF head
+on unseen MaterioMiner papers (C20), and on MuLMS's held-out subfields it
+gains +2.10 [−0.31, +4.51] without passing (C22). Its silver-name variant
+added nothing there (C23) because the names came from the other subfields
+and held 4.4% of a held-out subfield's unseen test names: the cross-subfield
+sentences are few (7,400–9,433 per fold) and the sentence-level filter admits
+181–419 of them. Phase 0 built a corpus of each subfield's own topic and
+measured that it holds 55–81% of the held-out subfield's unseen test names
+(64–84% ignoring word boundaries), 77–90% of the unseen MAT names and 85–96%
+of the FORM names, the types with the largest held-out gaps. Two things are
+untested: whether the silver filter admits those names, and whether names in
+the pool turn into F1 on the held-out documents. The teachers never see the
+held-out subfield's labeled sentences, and the corpus excludes MuLMS's
+identified articles and every sentence that shares an 8-word n-gram or a
+50-character run with a MuLMS sentence (phase 0), so the setting stays
+"unseen documents of a new topic", with unlabeled text of that topic, as the
+fatigue corpus is for MaterioMiner.
+
+*Method* (`--augment-names`, as week 11, with these changes):
+- **Unlabeled text:** the held-out subfield's topic corpus,
+  `data/processed/corpus/topic_<subfield>_sentences.txt` (40,000 sentences,
+  `results/topic_corpora/<subfield>.json`; SHA-256 checked in the bundle), all
+  of it tagged (`--self-train-sample 0`). The variant tag is `topic`
+  (`--names-tag topic`), so the runs are `crf_mrs_topic_m<N>`.
+- **Three variants**, the screen's candidates:
+  - V1 `crf_mrs_topic`: week 11's silver filter. A sentence is silver when
+    the 3 teachers give it the same tags, every tag has a CRF marginal of at
+    least 0.9 under each teacher, and it has an entity; its mentions join the
+    pool.
+  - V2 `crf_mrm_topic` (`--silver-mentions`): the mention-level filter. A
+    mention joins the pool when the 3 teachers tag the same span with the same
+    type and every tag of that span has a marginal of at least 0.9 under each
+    teacher; the rest of its sentence need not be confident. Recorded as
+    `silver_filter: mentions`.
+  - V3 `crf_mr6` (`--augment-mentions 6`, no teachers): mention replacement
+    with 6 copies of each sentence instead of 3. The control: if more
+    copies alone gain as much, the names are not the mechanism.
+- **Teachers and students:** as week 11. The 3 CRF teachers are the runs
+  `crf_m0`, `crf_m100` and `crf_m200` of week 10 (their test scores must equal
+  the stored ones; a check). Each student trains on the gold sentences and
+  their copies, 3 copies with replacement probability 0.5, the copy seed equal
+  to the model seed; without silver names a student equals the `crf_mr` run of
+  its seed (tested). The silver sentences are not trained on.
+- **Recorded per run:** the silver counts and the share of the unseen test
+  entities that are silver names (as week 11), and the filter; no name is
+  stored.
+
+*Screen* (`w12a`; seed offsets 0, 100 and 200). Per variant and held-out
+subfield, the mean of its 3 seeds; the screen statistic is the mean over the 7
+subfields of the variant minus week 10's `crf_mr` at the same seeds (its 95%
+CI is reported; the screen decides nothing). **Selection rule:** the variant
+with the largest screen statistic goes to the decision if that statistic is
+above 0. If none is, week 12 ends without a decision: no variant beats
+mention replacement on the screen, and the methods route on MuLMS is
+recorded as exhausted (the evaluation paper, as "What follows week 11"
+states).
+
+*Decision* (`w12b:<variant>`, the winner; seed offsets 300 to 900). The
+screen's selection would bias a decision taken on the same seeds, so the
+decision uses only seeds the screen did not see: 7 students per subfield,
+and for both references the runs of the same seeds. The week-6 rule: the 95%
+Student-t CI of the mean paired difference of micro F1 above 0, each pair a
+held-out subfield (6 degrees of freedom), its value the mean over seeds 300
+to 900.
+1. The winner against the CRF head (week 10's `crf`).
+2. The winner against mention replacement (week 10's `crf_mr`). A pass of
+   decision 1 with a fail of decision 2 means the gain is mention
+   replacement's, not the names'.
+Reported, no decision: all 10 seeds (the screen's and the decision's) against
+both references; the votes over the seed triples 300–500 and 600–800 (and
+over the 3 triples with 10 seeds) against the CRF votes and mention
+replacement's; macro and weighted F1; per subfield the counts of silver names
+and the share of the unseen test names among them, against phase 0's
+coverage (what the filter admits of what the corpus holds).
+
+*The methods criterion* (week 10's): a methods claim scoped to "unseen
+documents of a new topic" needs decision 1 on MuLMS plus a pass on
+MaterioMiner against the CRF head. The MaterioMiner analogue of the winner
+runs only if decision 1 passes: for V1 it is `w11b` (names from the fatigue
+corpus with the sentence filter, decisions 3 and 4 of week 11); for V2 a
+batch of the same shape with `--silver-mentions` (`crf_mrm`, 10 seeds, both
+granularities); for V3 `crf_mr6` on the held-out papers. Each would be a
+decision against week 5's CRF head, pre-registered when it is reached.
+
+*Attempts.* This is the third protocol that asks whether a method improves on
+the CRF head on MuLMS's held-out subfields (weeks 10, 11 and 12), and the
+screen chooses among three variants; the paper reports every attempt and the
+count, and the decision seeds are disjoint from the screen's.
+
+*Budget* (T4; from `w11a`, 22 minutes per subfield and lane with 8,800
+sentences tagged and 5 students): `w12a` about 4.6 hours in lane 0 (V1's 7
+jobs, then two `crf_mr6` jobs) and 3.9 in lane 1 (V2's 7 jobs and one
+`crf_mr6` job), about 8.5 GPU hours; `w12b` about 3.5 hours per lane (each
+lane trains the teachers and 3 or 4 of the students), about 7 GPU hours, or
+about 5 for `crf_mr6`. With `w11b` (2.1 hours), about 18 of the 30 weekly GPU
+hours after the reset on 24 October. The jobs of a variant share a lane
+because they extend the same files.
+
+*Checks before any number is used:* the repeat of the smoke4 CRF run
+(`smokeao`, `smokeap`) equals the stored run; each job's teachers equal week
+10's `crf_m0`, `_m100` and `_m200` on their subfield (`check_w11.py`); the
+bundle's corpora match the reports' SHA-256 (the runner checks them again);
+every run records `silver_filter` and `names`.
+
+*Analysis.* `ner_seed_analysis.py` (`mulms`, `week12`: per variant the parts
+`screen`, `decision` and `ten_seeds`, each present when its files exist),
+`kaggle_jobs.py` batches `w12a` and `w12b:<variant>` (tested from the frozen
+commit), `report_results.py` for the README bullet once the files exist.

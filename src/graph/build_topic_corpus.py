@@ -19,7 +19,11 @@ build_fatigue_corpus.py it uses, with these differences, fixed before any downlo
     tokenization: a sentence sharing a run of SHINGLE characters of its text without spaces, in
     lower case, with any MuLMS sentence is dropped, and an article with ARTICLE_OVERLAP or more
     such sentences is dropped whole (a MuLMS document that Europe PMC holds under a PMCID the
-    title search missed).
+    title search missed). SHINGLE is 50 characters, about the 8 words of the n-gram filter: at
+    30 the runs were technical terms ("electrochemical impedance spectroscopy", "transmission
+    electron microscopy") shared by nearly every article of a topic, which dropped 62 to 224
+    articles per topic whole (18 October); at 50, 15 sentences and no article of the SOFC
+    pool share a run.
   - Size and order: the settings of the fatigue corpus (TARGET_POOL, MAX_SENTENCES, SEED).
     The shingle test runs after the collector has reached TARGET_POOL with the n-gram filter
     alone, so what it drops comes off that pool; the margin over MAX_SENTENCES covers it.
@@ -85,7 +89,7 @@ EXCLUDE_TITLE_TERMS = ('author correction', 'correction', 'erratum', 'corrigendu
                        'retraction')
 EXCLUDE_PATTERNS = bfc.term_patterns(EXCLUDE_TITLE_TERMS)
 SUP = ''                    # superscripts inline, as in the SOFC corpus
-SHINGLE = 30                # characters of text without spaces, lower case, shared: leakage
+SHINGLE = 50                # characters of text without spaces, lower case, shared: leakage
 ARTICLE_OVERLAP = 5         # sentences sharing a shingle that drop an article whole
 
 

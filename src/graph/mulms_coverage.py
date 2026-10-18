@@ -5,9 +5,9 @@ Week 12, phase 0 (docs/ROADMAP.md §4): the gate of the topic-corpus route. No t
 decision. For each held-out subfield (the folds of week 10's CRF runs, rebuilt as
 ner_mentions.py rebuilds them), the gold test entities whose words are no entity of the fold's
 training sentences are *unseen* (ner_mentions.py). For each corpus given:
-  - leaked: the corpus sentences sharing a run of 30 characters of their text without spaces,
-    in lower case, with a sentence of the subfield's documents (a MuLMS article in the corpus,
-    build_topic_corpus.shingles); they are left out of the counts;
+  - leaked: the corpus sentences sharing a run of build_topic_corpus.SHINGLE characters (50)
+    of their text without spaces, in lower case, with a sentence of the subfield's documents (a
+    MuLMS article in the corpus, build_topic_corpus.shingles); they are left out of the counts;
   - exact: the share of the unseen test entities, and of their distinct names, whose words
     occur in a row in a remaining sentence. A corpus's words are its space-separated words
     (--corpus NAME=PATH, or NAME=PATH:raw for a corpus of raw sentences, cut like the
@@ -35,7 +35,7 @@ from collections import Counter, defaultdict
 
 import dapt_mlm
 import ner_mentions as nm
-from build_topic_corpus import TOPICS, hyphen_split, shingles
+from build_topic_corpus import SHINGLE, TOPICS, hyphen_split, shingles
 from ner_baseline import corpus_words, entity_spans
 from config import PROCESSED_DIR, PROJECT_ROOT
 
@@ -156,9 +156,9 @@ def analyse(results_dir, corpus_specs):
     data, folds = mulms_folds(results_dir)
     return {'rule': {'unseen': 'a test entity whose words are no entity of the training '
                                'sentences (ner_mentions.py)',
-                     'leaked': 'a corpus sentence sharing a run of 30 characters without '
-                               'spaces, in lower case, with a sentence of the held-out '
-                               "subfield's documents; left out",
+                     'leaked': f'a corpus sentence sharing a run of {SHINGLE} characters '
+                               'without spaces, in lower case, with a sentence of the '
+                               "held-out subfield's documents; left out",
                      'exact': "the name's words in a row in a remaining sentence, the corpus "
                               "cut with MuLMS's hyphen rule; names of more than "
                               f'{MAX_WORDS} words count as absent',

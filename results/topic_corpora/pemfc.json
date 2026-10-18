@@ -1,0 +1,3420 @@
+{
+  "script": "src/graph/build_topic_corpus.py",
+  "protocol": "docs/ROADMAP.md \u00a74, week 12: mention replacement with names from in-topic text",
+  "topic": "pemfc",
+  "selection": {
+    "source": "Europe PMC REST API",
+    "search_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+    "fulltext_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/{pmcid}/fullTextXML",
+    "result_type": "core",
+    "topic": "pemfc",
+    "query": "OPEN_ACCESS:y AND HAS_FT:y AND TITLE:(\"PEMFC\" OR \"PEMFCs\" OR \"PEM fuel cell\" OR \"PEM fuel cells\" OR \"proton exchange membrane fuel\" OR \"polymer electrolyte membrane fuel\" OR \"polymer electrolyte fuel\" OR \"anion exchange membrane fuel\" OR \"membrane electrode assembly\" OR \"membrane electrode assemblies\")",
+    "title_terms": [
+      "PEMFC",
+      "PEMFCs",
+      "PEM fuel cell",
+      "PEM fuel cells",
+      "proton exchange membrane fuel",
+      "polymer electrolyte membrane fuel",
+      "polymer electrolyte fuel",
+      "anion exchange membrane fuel",
+      "membrane electrode assembly",
+      "membrane electrode assemblies"
+    ],
+    "exclude_title_terms": [
+      "author correction",
+      "correction",
+      "erratum",
+      "corrigendum",
+      "retraction"
+    ],
+    "excluded_pmcids": [
+      "PMC3990421",
+      "PMC4772004",
+      "PMC5700654",
+      "PMC6247067",
+      "PMC6418911",
+      "PMC6631236",
+      "PMC6650920",
+      "PMC7180721",
+      "PMC7231364",
+      "PMC7254350",
+      "PMC7361982",
+      "PMC7435395",
+      "PMC7529785",
+      "PMC7532522",
+      "PMC7590506",
+      "PMC7766479"
+    ],
+    "local_filters": [
+      "a PMCID",
+      "not one of MuLMS's articles",
+      "language eng",
+      "a title term in the title",
+      "no exclusion term in the title"
+    ],
+    "order": "PMCIDs sorted as strings, then random.Random(0).shuffle",
+    "superscripts": "inline, as in the SOFC corpus",
+    "words": "chem_tokenize.ChemWordTokenizer (ChemDataExtractor 1.3.0), then ASCII hyphens inside a word made words of their own, space-separated"
+  },
+  "settings": {
+    "seed": 0,
+    "target_pool": 60000,
+    "max_sentences": 40000,
+    "chunk": 10,
+    "min_words": 5,
+    "max_words": 120,
+    "min_alpha_fraction": 0.5,
+    "max_inline_formula_chars": 30,
+    "ngram": 8,
+    "language": "eng",
+    "page_size": 500,
+    "min_request_interval_seconds": 0.25,
+    "timeout_seconds": 60,
+    "retries": 4,
+    "backoff_seconds": 2.0,
+    "abbreviations": [
+      "approx",
+      "at",
+      "ca",
+      "cf",
+      "eq",
+      "eqs",
+      "fig",
+      "figs",
+      "no",
+      "nos",
+      "pp",
+      "ref",
+      "refs",
+      "resp",
+      "sec",
+      "sect",
+      "vol",
+      "vs",
+      "wt",
+      "et al"
+    ],
+    "dotted_abbreviations": "(?:[A-Za-z]{1,2}\\.)+[A-Za-z]{1,2}",
+    "skipped_sections": "^[\\d.\\s]*(acknowledg|funding|conflicts? of interest|competing interests?|author contributions?|data availability|availability of data|ethic|abbreviations|nomenclature|supplementary|references|declarations?|disclosure)",
+    "splitter": "build_fatigue_corpus.split_sentences"
+  },
+  "counts": {
+    "hits": 651,
+    "api_hit_count": 651,
+    "hits_rejected": 67,
+    "eligible_articles": 584,
+    "articles_used": 293,
+    "articles_downloaded": 292,
+    "failed_downloads": 0,
+    "articles_without_text": 1,
+    "target_reached": true,
+    "paragraphs": 13041,
+    "raw_sentences": 67976,
+    "cut_by_formula": 5685,
+    "length_filtered": 919,
+    "length_filtered_by": {
+      "too_short": 870,
+      "too_long": 13,
+      "non_alphabetic": 36
+    },
+    "after_length_filter": 61372,
+    "duplicates_dropped": 178,
+    "overlap_dropped": 1112,
+    "pool": 60072,
+    "kept": 40000,
+    "shingle_dropped": 10,
+    "articles_dropped_by_shingles": 0
+  },
+  "rejected_by_reason": {
+    "no_title_term": 59,
+    "title_term:correction": 5,
+    "title_term:author correction": 2,
+    "mulms_article": 1
+  },
+  "excluded_by_title": [
+    {
+      "pmcid": "PMC12041547",
+      "term": "correction",
+      "title": "Publisher Correction: A hybrid slime mold enhanced convergent particle swarm optimizer for parameter estimation of proton exchange membrane fuel cell."
+    },
+    {
+      "pmcid": "PMC11707023",
+      "term": "author correction",
+      "title": "Author Correction: Optimal power generation of proton exchange membrane fuel cell using ANFIS based MPPT algorithm."
+    },
+    {
+      "pmcid": "PMC12421496",
+      "term": "correction",
+      "title": "Correction to \"Analysis of Ionomer Distribution and Reaction Mechanisms on Polymer Electrolyte Fuel Cell Pt Catalysts Supported on Mesoporous Carbon under Various Humidity Conditions\"."
+    },
+    {
+      "pmcid": "PMC10474015",
+      "term": "author correction",
+      "title": "Author Correction: The role of oxygen-permeable ionomer for polymer electrolyte fuel cells."
+    },
+    {
+      "pmcid": "PMC9352239",
+      "term": "correction",
+      "title": "Correction to \"On the Performance of Proton Exchange Membrane Fuel Cells with a Catalyst Layer Fabricated Using an Inorganic Dispersant with Various Ultrasonic Mixing\"."
+    },
+    {
+      "pmcid": "PMC7594312",
+      "term": "correction",
+      "title": "Correction to \"Preliminary Investigations of an Opposed Rotary Piston Compressor for the Air Feeding of a Polymer Electrolyte Membrane Fuel Cell System\"."
+    },
+    {
+      "pmcid": "PMC8694911",
+      "term": "correction",
+      "title": "Correction: Nafion film transport properties in a low-Pt PEM fuel cell: impedance spectroscopy study."
+    }
+  ],
+  "failed": [
+    {
+      "pmcid": "PMC11615800",
+      "status": "no_text",
+      "error": "no body paragraphs"
+    }
+  ],
+  "articles": [
+    {
+      "pmcid": "PMC10558662",
+      "doi": "10.1002/advs.202302928",
+      "year": "2023",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "A New Integrated GDL with Wavy Channel and Tunneled Rib for High Power Density PEMFC at Low Back Pressure and Wide Humidity.",
+      "pool_sentences": 231,
+      "corpus_sentences": 156
+    },
+    {
+      "pmcid": "PMC11106828",
+      "doi": "10.1016/j.dib.2024.110484",
+      "year": "2024",
+      "journal": "Data in brief",
+      "license": "cc by-nc",
+      "title": "Dataset of the liquid water distribution in a biomimetic PEM fuel cell.",
+      "pool_sentences": 59,
+      "corpus_sentences": 45
+    },
+    {
+      "pmcid": "PMC8468942",
+      "doi": "10.3390/polym13183064",
+      "year": "2021",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Proton Exchange Membrane Fuel Cells (PEMFCs): Advances and Challenges.",
+      "pool_sentences": 537,
+      "corpus_sentences": 362
+    },
+    {
+      "pmcid": "PMC7528334",
+      "doi": "10.1021/acsomega.0c03347",
+      "year": "2020",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "Preliminary Investigations of an Opposed Rotary Piston Compressor for the Air Feeding of a Polymer Electrolyte Membrane Fuel Cell System.",
+      "pool_sentences": 283,
+      "corpus_sentences": 185
+    },
+    {
+      "pmcid": "PMC10050052",
+      "doi": "10.1007/s41918-022-00175-1",
+      "year": "2023",
+      "journal": "Electrochemical energy reviews",
+      "license": "cc by",
+      "title": "Structure, Property, and Performance of Catalyst Layers in Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 765,
+      "corpus_sentences": 532
+    },
+    {
+      "pmcid": "PMC11943660",
+      "doi": "10.3390/membranes15030072",
+      "year": "2025",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Experimental and Simulation Study of Proton Exchange Membrane Fuel Cell with 12 \u00b5m Thick Membrane over the Temperature Range of 80 \u00b0C to 120 \u00b0C.",
+      "pool_sentences": 195,
+      "corpus_sentences": 125
+    },
+    {
+      "pmcid": "PMC5866058",
+      "doi": "10.1126/sciadv.aar7180",
+      "year": "2018",
+      "journal": "Science advances",
+      "license": "cc by-nc",
+      "title": "Critical advancements in achieving high power and stable nonprecious metal catalyst-based MEAs for real-world proton exchange membrane fuel cell applications.",
+      "pool_sentences": 163,
+      "corpus_sentences": 104
+    },
+    {
+      "pmcid": "PMC11904683",
+      "doi": "10.1021/acsomega.4c10885",
+      "year": "2025",
+      "journal": "ACS omega",
+      "license": "cc by",
+      "title": "Marked CO2 Reduction to Generate C1-C3 Products Using Pt0.9Ru0.1/C-Based Membrane Electrode Assembly at Extremely Low Overpotentials.",
+      "pool_sentences": 177,
+      "corpus_sentences": 124
+    },
+    {
+      "pmcid": "PMC11471586",
+      "doi": "10.1016/j.heliyon.2024.e38556",
+      "year": "2024",
+      "journal": "Heliyon",
+      "license": "cc by-nc-nd",
+      "title": "A comprehensive review of primary cooling techniques and thermal management strategies for polymer electrolyte membrane fuel cells PEMFC.",
+      "pool_sentences": 538,
+      "corpus_sentences": 369
+    },
+    {
+      "pmcid": "PMC11587695",
+      "doi": "10.1002/cssc.202401013",
+      "year": "2024",
+      "journal": "ChemSusChem",
+      "license": "cc by-nc-nd",
+      "title": "Quantitative Analysis and Manipulation of Alkali Metal Cations at the Cathode Surface in Membrane Electrode Assembly Electrolyzers for CO2 Reduction Reactions.",
+      "pool_sentences": 167,
+      "corpus_sentences": 111
+    },
+    {
+      "pmcid": "PMC8514433",
+      "doi": "10.1038/s41467-021-25911-x",
+      "year": "2021",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Advancements in cathode catalyst and cathode layer design for proton exchange membrane fuel cells.",
+      "pool_sentences": 224,
+      "corpus_sentences": 131
+    },
+    {
+      "pmcid": "PMC6120042",
+      "doi": "10.3390/ma11081473",
+      "year": "2018",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Annealing Behaviour of Pt and PtNi Nanowires for Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 161,
+      "corpus_sentences": 101
+    },
+    {
+      "pmcid": "PMC10180127",
+      "doi": "10.3390/ma16093544",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Mechanistic Study of Fast Performance Decay of PtCu Alloy-based Catalyst Layers for Polymer Electrolyte Fuel Cells through Electrochemical Impedance Spectroscopy.",
+      "pool_sentences": 242,
+      "corpus_sentences": 148
+    },
+    {
+      "pmcid": "PMC11509672",
+      "doi": "10.3390/membranes14100211",
+      "year": "2024",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Novel, Fluorine-Free Membranes Based on Sulfonated Polyvinyl Alcohol and Poly(ether-block-amide) with Sulfonated Montmorillonite Nanofiller for PEMFC Applications.",
+      "pool_sentences": 259,
+      "corpus_sentences": 177
+    },
+    {
+      "pmcid": "PMC10663610",
+      "doi": "10.1038/s41467-023-43409-6",
+      "year": "2023",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "A scalable membrane electrode assembly architecture for efficient electrochemical conversion of CO2 to formic acid.",
+      "pool_sentences": 225,
+      "corpus_sentences": 154
+    },
+    {
+      "pmcid": "PMC6190529",
+      "doi": "10.1016/j.heliyon.2018.e00845",
+      "year": "2018",
+      "journal": "Heliyon",
+      "license": "cc by-nc-nd",
+      "title": "Numerical analysis of flow distribution behavior in a proton exchange membrane fuel cell.",
+      "pool_sentences": 138,
+      "corpus_sentences": 101
+    },
+    {
+      "pmcid": "PMC9331710",
+      "doi": "10.3390/polym14152972",
+      "year": "2022",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Characteristics of Water Transport of Membrane Electrolyte over Selected Temperature for Proton Exchange Membrane Fuel Cell.",
+      "pool_sentences": 165,
+      "corpus_sentences": 121
+    },
+    {
+      "pmcid": "PMC11510532",
+      "doi": "10.3390/nano14201672",
+      "year": "2024",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Exploring the Potential of Bimetallic PtPd/C Cathode Catalysts to Enhance the Performance of PEM Fuel Cells.",
+      "pool_sentences": 177,
+      "corpus_sentences": 119
+    },
+    {
+      "pmcid": "PMC10608473",
+      "doi": "10.3390/membranes13100817",
+      "year": "2023",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Boosting Power Density of Proton Exchange Membrane Fuel Cell Using Artificial Intelligence and Optimization Algorithms.",
+      "pool_sentences": 204,
+      "corpus_sentences": 134
+    },
+    {
+      "pmcid": "PMC5862870",
+      "doi": "10.1038/s41598-018-23071-5",
+      "year": "2018",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "A Comprehensive Physical Impedance Model of Polymer Electrolyte Fuel Cell Cathodes in Oxygen-free Atmosphere.",
+      "pool_sentences": 144,
+      "corpus_sentences": 94
+    },
+    {
+      "pmcid": "PMC12528703",
+      "doi": "10.1038/s41598-025-19802-0",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Model-free adaptive fixed-time prescribed performance control for PEMFC air feeding system based on oxygen excess ratio reconstruction.",
+      "pool_sentences": 202,
+      "corpus_sentences": 138
+    },
+    {
+      "pmcid": "PMC12663389",
+      "doi": "10.1038/s41598-025-27043-4",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Integrated neural network and metaheuristic algorithms for balancing electrical performance and thermal safety in PEMFC design.",
+      "pool_sentences": 419,
+      "corpus_sentences": 279
+    },
+    {
+      "pmcid": "PMC12195301",
+      "doi": "10.3390/ma18122826",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Facile Synthesis of Non-Noble CuFeCo/C Catalysts with High Stability for ORR in PEMFC.",
+      "pool_sentences": 119,
+      "corpus_sentences": 76
+    },
+    {
+      "pmcid": "PMC12096229",
+      "doi": "10.1021/acsomega.5c01691",
+      "year": "2025",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "High-Flux Microporous Layers with Bimodal Pore Structures for Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 149,
+      "corpus_sentences": 96
+    },
+    {
+      "pmcid": "PMC8412897",
+      "doi": "10.1021/acsomega.1c01924",
+      "year": "2021",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Experimental and Numerical Study of Proton Exchange Membrane Fuel Cells with a Novel Compound Flow Field.",
+      "pool_sentences": 101,
+      "corpus_sentences": 64
+    },
+    {
+      "pmcid": "PMC11890738",
+      "doi": "10.1038/s41598-025-92528-1",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "A hybrid slime mold enhanced convergent particle swarm optimizer for parameter estimation of proton exchange membrane fuel cell.",
+      "pool_sentences": 464,
+      "corpus_sentences": 318
+    },
+    {
+      "pmcid": "PMC10934875",
+      "doi": "10.3390/polym16050668",
+      "year": "2024",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Structural and Transport Properties of Hydrophilic and Hydrophobic Modified Ionomers in Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 135,
+      "corpus_sentences": 99
+    },
+    {
+      "pmcid": "PMC12652239",
+      "doi": "10.1126/sciadv.aeb3478",
+      "year": "2025",
+      "journal": "Science advances",
+      "license": "cc by-nc",
+      "title": "Maintaining local alkalinity of CO-electroreduction full cell by silica-confined electrocatalysts in membrane electrode assembly.",
+      "pool_sentences": 221,
+      "corpus_sentences": 156
+    },
+    {
+      "pmcid": "PMC9181102",
+      "doi": "10.3390/ma15113766",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Study on Corrosion Resistance and Conductivity of TiMoN Coatings with Different Mo Contents under Simulated PEMFC Cathode Environment.",
+      "pool_sentences": 224,
+      "corpus_sentences": 153
+    },
+    {
+      "pmcid": "PMC11596647",
+      "doi": "10.3390/mi15111375",
+      "year": "2024",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Effect of Hot Junction Size on the Temperature Measurement of Proton Exchange Membrane Fuel Cells Using NiCr/NiSi Thin-Film Thermocouple Sensors.",
+      "pool_sentences": 142,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC8197277",
+      "doi": "10.3390/polym13111713",
+      "year": "2021",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Synthesis of Sulfonated Poly(Arylene Ether Sulfone)s Containing Aliphatic Moieties for Effective Membrane Electrode Assembly Fabrication by Low-Temperature Decal Transfer Methods.",
+      "pool_sentences": 155,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC10906942",
+      "doi": "10.1021/acsenergylett.0c00532",
+      "year": "2020",
+      "journal": "ACS energy letters",
+      "license": "cc by",
+      "title": "Modifying the Electrocatalyst-Ionomer Interface via Sulfonated Poly(ionic liquid) Block Copolymers to Enable High-Performance Polymer Electrolyte Fuel Cells.",
+      "pool_sentences": 80,
+      "corpus_sentences": 50
+    },
+    {
+      "pmcid": "PMC9536324",
+      "doi": "10.1007/s41918-022-00173-3",
+      "year": "2022",
+      "journal": "Electrochemical energy reviews",
+      "license": "cc by",
+      "title": "Controlled Synthesis of Carbon-Supported Pt-Based Electrocatalysts for Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 535,
+      "corpus_sentences": 342
+    },
+    {
+      "pmcid": "PMC12965781",
+      "doi": "10.55730/1300-0527.3783",
+      "year": "2026",
+      "journal": "Turkish journal of chemistry",
+      "license": "cc by",
+      "title": "Efficient electrocatalytic activity of a Fe-MOF based cathode catalyst in PEMFCs.",
+      "pool_sentences": 129,
+      "corpus_sentences": 79
+    },
+    {
+      "pmcid": "PMC8877517",
+      "doi": "10.3390/membranes12020178",
+      "year": "2022",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "A Critical Review on the Use of Ionic Liquids in Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 468,
+      "corpus_sentences": 318
+    },
+    {
+      "pmcid": "PMC12917646",
+      "doi": "10.1021/acsomega.5c09325",
+      "year": "2026",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Secondary Electron Hyperspectral Imaging (SEHI) in FIB - SEM for Proton Exchange Membrane Fuel Cells Technology.",
+      "pool_sentences": 145,
+      "corpus_sentences": 104
+    },
+    {
+      "pmcid": "PMC9695627",
+      "doi": "10.3390/membranes12111069",
+      "year": "2022",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Experimental Investigation on the Anode Flow Field Design for an Air-Cooled Open-Cathode Proton Exchange Membrane Fuel Cell.",
+      "pool_sentences": 177,
+      "corpus_sentences": 114
+    },
+    {
+      "pmcid": "PMC8781780",
+      "doi": "10.3390/membranes12010070",
+      "year": "2022",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Exergetic Performance Coefficient Analysis and Optimization of a High-Temperature Proton Exchange Membrane Fuel Cell.",
+      "pool_sentences": 109,
+      "corpus_sentences": 78
+    },
+    {
+      "pmcid": "PMC12301441",
+      "doi": "10.1038/s41598-025-11542-5",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Optimizing base fluid composition for PEMFC cooling: A machine learning approach to balance thermal and rheological performance.",
+      "pool_sentences": 352,
+      "corpus_sentences": 234
+    },
+    {
+      "pmcid": "PMC9091974",
+      "doi": "10.1039/c8ra07569g",
+      "year": "2018",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Fabrication of microporous layer - free hierarchical gas diffusion electrode as a low Pt-loading PEMFC cathode by direct growth of helical carbon nanofibers.",
+      "pool_sentences": 141,
+      "corpus_sentences": 91
+    },
+    {
+      "pmcid": "PMC11615808",
+      "doi": "10.1002/advs.202402020",
+      "year": "2024",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "\"Straw in the Clay Soil\" Strategy: Anticarbon Corrosive Fluorine-Decorated Graphene Nanoribbons@CNT Composite for Long-Term PEMFC.",
+      "pool_sentences": 216,
+      "corpus_sentences": 147
+    },
+    {
+      "pmcid": "PMC10304778",
+      "doi": "10.3390/mi14061224",
+      "year": "2023",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Water Management Capacity of Metal Foam Flow Field for PEMFC under Flooding Situation.",
+      "pool_sentences": 109,
+      "corpus_sentences": 79
+    },
+    {
+      "pmcid": "PMC6403734",
+      "doi": "10.3390/polym10060569",
+      "year": "2018",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Sulfonated Poly(Arylene Ether Sulfone) and Perfluorosulfonic Acid Composite Membranes Containing Perfluoropolyether Grafted Graphene Oxide for Polymer Electrolyte Membrane Fuel Cell Applications.",
+      "pool_sentences": 161,
+      "corpus_sentences": 101
+    },
+    {
+      "pmcid": "PMC10460847",
+      "doi": "10.1002/advs.202302151",
+      "year": "2023",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Ice Formation during PEM Fuel Cell Cold Start: Acceptable or Not?",
+      "pool_sentences": 162,
+      "corpus_sentences": 104
+    },
+    {
+      "pmcid": "PMC13176994",
+      "doi": "10.1021/acsomega.6c01383",
+      "year": "2026",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Enhanced PEMFC Performance and Durability Enabled by a Highly Oxygen-Permeable Ionomer Binder.",
+      "pool_sentences": 197,
+      "corpus_sentences": 135
+    },
+    {
+      "pmcid": "PMC7361900",
+      "doi": "10.3390/polym12061354",
+      "year": "2020",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Crosslinked Sulfonated Polyphenylsulfone-Vinylon (CSPPSU-vinylon) Membranes for PEM Fuel Cells from SPPSU and Polyvinyl Alcohol (PVA).",
+      "pool_sentences": 139,
+      "corpus_sentences": 100
+    },
+    {
+      "pmcid": "PMC9056845",
+      "doi": "10.1039/d0ra06640k",
+      "year": "2020",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Recovery of expensive Pt/C catalysts from the end-of-life membrane electrode assembly of proton exchange membrane fuel cells.",
+      "pool_sentences": 83,
+      "corpus_sentences": 58
+    },
+    {
+      "pmcid": "PMC12078516",
+      "doi": "10.1038/s41598-025-01637-4",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Designing a new optimal controller for a PEMFC by an improved design of the Coot Optimizer.",
+      "pool_sentences": 286,
+      "corpus_sentences": 186
+    },
+    {
+      "pmcid": "PMC12623867",
+      "doi": "10.1038/s41598-025-08506-0",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Numerical study of cooling characteristics for liquid cooling proton exchange membrane fuel cells.",
+      "pool_sentences": 147,
+      "corpus_sentences": 96
+    },
+    {
+      "pmcid": "PMC5059791",
+      "doi": "10.1039/c6ra16025e",
+      "year": "2016",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "Nafion-stabilised bimetallic Pt-Cr nanoparticles as electrocatalysts for proton exchange membrane fuel cells (PEMFCs).",
+      "pool_sentences": 210,
+      "corpus_sentences": 145
+    },
+    {
+      "pmcid": "PMC7692588",
+      "doi": "10.3390/membranes10110310",
+      "year": "2020",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Modelling the Proton-Conductive Membrane in Practical Polymer Electrolyte Membrane Fuel Cell (PEMFC) Simulation: A Review.",
+      "pool_sentences": 410,
+      "corpus_sentences": 286
+    },
+    {
+      "pmcid": "PMC13334989",
+      "doi": "10.1002/advs.75250",
+      "year": "2026",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Mass-Transport-Engineered CCM Architecture Employing MPL-Free Carbon Paper and Graphene-Coated Ni Foam Channels for High-Temperature PEM Fuel Cells.",
+      "pool_sentences": 235,
+      "corpus_sentences": 165
+    },
+    {
+      "pmcid": "PMC11547494",
+      "doi": "10.3390/nano14211710",
+      "year": "2024",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Investigation of the Theoretical Model of Nano-Coolant Thermal Conductivity Suitable for Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 151,
+      "corpus_sentences": 93
+    },
+    {
+      "pmcid": "PMC9088671",
+      "doi": "10.1039/c8ra07754a",
+      "year": "2018",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "PtRu/C catalyst slurry preparation for large-scale decal transfer with high performance of proton exchange membrane fuel cells.",
+      "pool_sentences": 195,
+      "corpus_sentences": 123
+    },
+    {
+      "pmcid": "PMC7298353",
+      "doi": "10.34133/2020/9089405",
+      "year": "2020",
+      "journal": "Research (Washington, D.C.)",
+      "license": "cc by",
+      "title": "Advancement toward Polymer Electrolyte Membrane Fuel Cells at Elevated Temperatures.",
+      "pool_sentences": 217,
+      "corpus_sentences": 153
+    },
+    {
+      "pmcid": "PMC11647849",
+      "doi": "10.1016/j.heliyon.2024.e40648",
+      "year": "2024",
+      "journal": "Heliyon",
+      "license": "cc by",
+      "title": "Simulation and experimental study of local high frequency resistance distribution in proton exchange membrane fuel cells under steady and dynamic conditions.",
+      "pool_sentences": 200,
+      "corpus_sentences": 131
+    },
+    {
+      "pmcid": "PMC13579217",
+      "doi": "10.1002/adma.74321",
+      "year": "2026",
+      "journal": "Advanced materials (Deerfield Beach, Fla.)",
+      "license": "cc by-nc-nd",
+      "title": "Escaping the Scaling Relationships in Oxygen Reduction Catalysis: Implications for PEM Fuel Cells.",
+      "pool_sentences": 420,
+      "corpus_sentences": 272
+    },
+    {
+      "pmcid": "PMC12471582",
+      "doi": "10.3390/membranes15090280",
+      "year": "2025",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Fluorine-Free Membranes Consisting of a Blend of S-PVA and PEBAX 1657 for Proton Exchange Membrane Fuel Cells: The Role of Titanium Dioxide Phosphate (TiO2PO4) Nanoparticle Fillers.",
+      "pool_sentences": 220,
+      "corpus_sentences": 152
+    },
+    {
+      "pmcid": "PMC9456169",
+      "doi": "10.3390/ijms23179618",
+      "year": "2022",
+      "journal": "International journal of molecular sciences",
+      "license": "cc by",
+      "title": "Performance Analysis of a HT-PEMFC System with 6FPBI Membranes Doped with Cross-Linkable Polymeric Ionic Liquid.",
+      "pool_sentences": 153,
+      "corpus_sentences": 94
+    },
+    {
+      "pmcid": "PMC10303437",
+      "doi": "10.3390/polym15122740",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Two-Stage Microporous Layers with Gradient Pore Size Structure for Improving the Performance of Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 262,
+      "corpus_sentences": 170
+    },
+    {
+      "pmcid": "PMC9145656",
+      "doi": "10.3390/nano12101726",
+      "year": "2022",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Performance of SS304 Modified by Silver Micro/Nano-Dendrite Coating with Hot-Water Super-Repellency in Simulated PEMFC Cathode Environment.",
+      "pool_sentences": 134,
+      "corpus_sentences": 91
+    },
+    {
+      "pmcid": "PMC7599566",
+      "doi": "10.3390/nano10102010",
+      "year": "2020",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Electrochemical and Structural Property of TiSiNb TFSOC on Affordable Interconnects in Proton Exchange Membrane Fuel Cell Applications.",
+      "pool_sentences": 249,
+      "corpus_sentences": 158
+    },
+    {
+      "pmcid": "PMC12222863",
+      "doi": "10.1038/s41598-025-08939-7",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Operando visualization of water distribution hysteresis under temperature cycling in polymer electrolyte fuel cells.",
+      "pool_sentences": 153,
+      "corpus_sentences": 104
+    },
+    {
+      "pmcid": "PMC11413168",
+      "doi": "10.1038/s41467-024-52409-z",
+      "year": "2024",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "Local ionic transport enables selective PGM-free bipolar membrane electrode assembly.",
+      "pool_sentences": 228,
+      "corpus_sentences": 150
+    },
+    {
+      "pmcid": "PMC6415415",
+      "doi": "10.3390/polym10050522",
+      "year": "2018",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Degradation of Silicone Rubbers as Sealing Materials for Proton Exchange Membrane Fuel Cells under Temperature Cycling.",
+      "pool_sentences": 144,
+      "corpus_sentences": 95
+    },
+    {
+      "pmcid": "PMC7144362",
+      "doi": "10.3390/molecules25061410",
+      "year": "2020",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Automotive Subzero Cold-Start Quasi-Adiabatic Proton Exchange Membrane Fuel Cell Fixture: Design and Validation.",
+      "pool_sentences": 176,
+      "corpus_sentences": 112
+    },
+    {
+      "pmcid": "PMC9048716",
+      "doi": "10.1039/c9ra09572a",
+      "year": "2020",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Analytical modeling framework for performance degradation of PEM fuel cells during startup-shutdown cycles.",
+      "pool_sentences": 208,
+      "corpus_sentences": 138
+    },
+    {
+      "pmcid": "PMC10751738",
+      "doi": "10.1021/acsaem.3c01987",
+      "year": "2023",
+      "journal": "ACS applied energy materials",
+      "license": "cc by",
+      "title": "Nanostructured Catalyst Layer Allowing Production of Ultralow Loading Electrodes for Polymer Electrolyte Membrane Fuel Cells with Superior Performance.",
+      "pool_sentences": 144,
+      "corpus_sentences": 96
+    },
+    {
+      "pmcid": "PMC9861409",
+      "doi": "10.3390/membranes13010007",
+      "year": "2022",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Cross-Linked Sulfonated Poly(arylene ether sulfone) Membrane Using Polymeric Cross-Linkers for Polymer Electrolyte Membrane Fuel Cell Applications.",
+      "pool_sentences": 164,
+      "corpus_sentences": 117
+    },
+    {
+      "pmcid": "PMC9320490",
+      "doi": "10.3390/mi13071040",
+      "year": "2022",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Real-Time Monitoring of the Temperature, Flow, and Pressure Inside High-Temperature Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 47,
+      "corpus_sentences": 34
+    },
+    {
+      "pmcid": "PMC13509268",
+      "doi": "10.3390/biomimetics11080545",
+      "year": "2026",
+      "journal": "Biomimetics (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Enhanced Osprey Optimization Algorithm for Global Optimization with Application to PEM Fuel Cell Parameter Identification.",
+      "pool_sentences": 253,
+      "corpus_sentences": 159
+    },
+    {
+      "pmcid": "PMC12654487",
+      "doi": "10.3390/membranes15110324",
+      "year": "2025",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Comparative Study on Structural and Transport Properties of SSC and LSC PFSA Ionomers in PEMFCs with Coexistence of O2 and N2: Molecular Dynamics Simulation Approach.",
+      "pool_sentences": 99,
+      "corpus_sentences": 63
+    },
+    {
+      "pmcid": "PMC12770459",
+      "doi": "10.1038/s41598-025-29800-x",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Prediction of PEMFC life based on IGJO-TCN-BiGRU-Attention.",
+      "pool_sentences": 183,
+      "corpus_sentences": 125
+    },
+    {
+      "pmcid": "PMC11046124",
+      "doi": "10.1016/j.heliyon.2024.e29622",
+      "year": "2024",
+      "journal": "Heliyon",
+      "license": "cc by",
+      "title": "Investigation of membranes-electrodes assemblies in anion exchange membrane fuel cells (AEMFCs): Influence of ionomer ratio in catalyst layers.",
+      "pool_sentences": 301,
+      "corpus_sentences": 187
+    },
+    {
+      "pmcid": "PMC10054652",
+      "doi": "10.3390/membranes13030303",
+      "year": "2023",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Effects of Compression and Porosity Gradients on Two-Phase Behavior in Gas Diffusion Layer of Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 185,
+      "corpus_sentences": 132
+    },
+    {
+      "pmcid": "PMC6523390",
+      "doi": "10.1002/advs.201802066",
+      "year": "2019",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Iron Single Atoms on Graphene as Nonprecious Metal Catalysts for High-Temperature Polymer Electrolyte Membrane Fuel Cells.",
+      "pool_sentences": 131,
+      "corpus_sentences": 78
+    },
+    {
+      "pmcid": "PMC9963054",
+      "doi": "10.3390/membranes13020215",
+      "year": "2023",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Numerical Study on Thermal Stress of High Temperature Proton Exchange Membrane Fuel Cells during Start-Up Process.",
+      "pool_sentences": 154,
+      "corpus_sentences": 106
+    },
+    {
+      "pmcid": "PMC8907236",
+      "doi": "10.1038/s41598-021-04711-9",
+      "year": "2022",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Multiscale simulation approach to investigate the binder distribution in catalyst layers of high-temperature polymer electrolyte membrane fuel cells.",
+      "pool_sentences": 178,
+      "corpus_sentences": 110
+    },
+    {
+      "pmcid": "PMC5583391",
+      "doi": "10.1038/s41467-017-00507-6",
+      "year": "2017",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Durable and self-hydrating tungsten carbide-based composite polymer electrolyte membrane fuel cells.",
+      "pool_sentences": 164,
+      "corpus_sentences": 107
+    },
+    {
+      "pmcid": "PMC8600272",
+      "doi": "10.3906/kim-2101-50",
+      "year": "2021",
+      "journal": "Turkish journal of chemistry",
+      "license": "cc by",
+      "title": "Low loaded Pt-Co catalyst surfaces optimized by magnetron sputtering sequential deposition technique for PEM fuel cell applications: physical and electrochemical analysis on carbon paper support.",
+      "pool_sentences": 211,
+      "corpus_sentences": 142
+    },
+    {
+      "pmcid": "PMC11395920",
+      "doi": "10.3390/ma17174425",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "In Situ Analysis of Binder Degradation during Catalyst-Accelerated Stress Test of Polymer Electrolyte Membrane Fuel Cells.",
+      "pool_sentences": 126,
+      "corpus_sentences": 85
+    },
+    {
+      "pmcid": "PMC11604955",
+      "doi": "10.1038/s41598-024-81168-6",
+      "year": "2024",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "A levy chaotic horizontal vertical crossover based artificial hummingbird algorithm for precise PEMFC parameter estimation.",
+      "pool_sentences": 249,
+      "corpus_sentences": 164
+    },
+    {
+      "pmcid": "PMC11883724",
+      "doi": "10.1021/acs.accounts.4c00695",
+      "year": "2025",
+      "journal": "Accounts of chemical research",
+      "license": "cc by-nc-nd",
+      "title": "Poly(Aryl-co-Aryl Piperidinium) Copolymers for Anion Exchange Membrane Fuel Cells and Water Electrolyzers.",
+      "pool_sentences": 202,
+      "corpus_sentences": 139
+    },
+    {
+      "pmcid": "PMC8950899",
+      "doi": "10.3390/membranes12030301",
+      "year": "2022",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "A High-Durability Graphitic Black Pearl Supported Pt Catalyst for a Proton Exchange Membrane Fuel Cell Stack.",
+      "pool_sentences": 223,
+      "corpus_sentences": 151
+    },
+    {
+      "pmcid": "PMC9003220",
+      "doi": "10.3390/nano12071230",
+      "year": "2022",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Nano-Composite Filler of Heteropolyacid-Imidazole Modified Mesoporous Silica for High Temperature PEMFC at Low Humidity.",
+      "pool_sentences": 170,
+      "corpus_sentences": 121
+    },
+    {
+      "pmcid": "PMC7288593",
+      "doi": "10.1021/acsomega.0c01252",
+      "year": "2020",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "Sulfonation Mechanism of Polysulfone in Concentrated Sulfuric Acid for Proton Exchange Membrane Fuel cell Applications.",
+      "pool_sentences": 67,
+      "corpus_sentences": 45
+    },
+    {
+      "pmcid": "PMC10053836",
+      "doi": "10.3390/membranes13030259",
+      "year": "2023",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Influence of Operating and Electrochemical Parameters on PEMFC Performance: A Simulation Study.",
+      "pool_sentences": 172,
+      "corpus_sentences": 127
+    },
+    {
+      "pmcid": "PMC11474894",
+      "doi": "10.1039/d4ra05965d",
+      "year": "2024",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Design and performance optimization of a lattice-based radial flow field in proton exchange membrane fuel cells.",
+      "pool_sentences": 170,
+      "corpus_sentences": 107
+    },
+    {
+      "pmcid": "PMC6447550",
+      "doi": "10.1038/s41467-019-09503-4",
+      "year": "2019",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Synergistic Mn-Co catalyst outperforms Pt on high-rate oxygen reduction for alkaline polymer electrolyte fuel cells.",
+      "pool_sentences": 180,
+      "corpus_sentences": 116
+    },
+    {
+      "pmcid": "PMC11129111",
+      "doi": "10.1021/acsami.3c11173",
+      "year": "2024",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "Operando Scanning Small-/Wide-Angle X-ray Scattering for Polymer Electrolyte Fuel Cells: Investigation of Catalyst Layer Saturation and Membrane Hydration- Capabilities and Challenges.",
+      "pool_sentences": 310,
+      "corpus_sentences": 196
+    },
+    {
+      "pmcid": "PMC10548514",
+      "doi": "10.1039/d3sc03649a",
+      "year": "2023",
+      "journal": "Chemical science",
+      "license": "cc by-nc",
+      "title": "Ionomer degradation in catalyst layers of anion exchange membrane fuel cells.",
+      "pool_sentences": 75,
+      "corpus_sentences": 54
+    },
+    {
+      "pmcid": "PMC13264618",
+      "doi": "10.1038/s41598-026-54194-9",
+      "year": "2026",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "A reliable starfish optimization algorithm for establishing equivalent circuit of proton exchange membrane fuel cell.",
+      "pool_sentences": 191,
+      "corpus_sentences": 139
+    },
+    {
+      "pmcid": "PMC10323636",
+      "doi": "10.1002/advs.202206062",
+      "year": "2023",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Space Confinement to Regulate Ultrafine CoPt Nanoalloy for Reliable Oxygen Reduction Reaction Catalyst in PEMFC.",
+      "pool_sentences": 211,
+      "corpus_sentences": 141
+    },
+    {
+      "pmcid": "PMC9456530",
+      "doi": "10.3390/ijms231710111",
+      "year": "2022",
+      "journal": "International journal of molecular sciences",
+      "license": "cc by",
+      "title": "Performance Analysis Based on Sustainability Exergy Indicators of High-Temperature Proton Exchange Membrane Fuel Cell.",
+      "pool_sentences": 118,
+      "corpus_sentences": 74
+    },
+    {
+      "pmcid": "PMC11385556",
+      "doi": "10.1038/s41598-024-71223-7",
+      "year": "2024",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Parameter characterization of PEM fuel cell mathematical models using an orthogonal learning-based GOOSE algorithm.",
+      "pool_sentences": 377,
+      "corpus_sentences": 245
+    },
+    {
+      "pmcid": "PMC9089754",
+      "doi": "10.1039/c8ra06426a",
+      "year": "2018",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Chemical state changes of Nafion in model polymer electrolyte fuel cell under oxygen/hydrogen gas atmosphere observed by S-K XANES spectroscopy.",
+      "pool_sentences": 111,
+      "corpus_sentences": 72
+    },
+    {
+      "pmcid": "PMC9736590",
+      "doi": "10.3390/ma15238612",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "N+-Implantation on Nb Coating as Protective Layer for Metal Bipolar Plate in PEMFCs and Their Electrochemical Characteristics.",
+      "pool_sentences": 150,
+      "corpus_sentences": 112
+    },
+    {
+      "pmcid": "PMC7581244",
+      "doi": "10.1021/acsomega.0c04131",
+      "year": "2020",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "Substrate Effect of Platinum-Decorated Carbon on Enhanced Hydrogen Oxidation in PEMFC.",
+      "pool_sentences": 97,
+      "corpus_sentences": 57
+    },
+    {
+      "pmcid": "PMC8779639",
+      "doi": "10.3390/membranes12010072",
+      "year": "2022",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Thermodynamic Modeling and Performance Analysis of Vehicular High-Temperature Proton Exchange Membrane Fuel Cell System.",
+      "pool_sentences": 199,
+      "corpus_sentences": 134
+    },
+    {
+      "pmcid": "PMC7761613",
+      "doi": "10.3390/nano10122412",
+      "year": "2020",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Ordered SnO2@C Flake Array as Catalyst Support for Improved Electrocatalytic Activity and Cathode Durability in PEMFCs.",
+      "pool_sentences": 180,
+      "corpus_sentences": 113
+    },
+    {
+      "pmcid": "PMC6119945",
+      "doi": "10.3390/ma11081405",
+      "year": "2018",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Reduced Graphene Oxide and Its Modifications as Catalyst Supports and Catalyst Layer Modifiers for PEMFC.",
+      "pool_sentences": 130,
+      "corpus_sentences": 86
+    },
+    {
+      "pmcid": "PMC8777856",
+      "doi": "10.3390/polym14020300",
+      "year": "2022",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Recent Advancements in Polysulfone Based Membranes for Fuel Cell (PEMFCs, DMFCs and AMFCs) Applications: A Critical Review.",
+      "pool_sentences": 245,
+      "corpus_sentences": 148
+    },
+    {
+      "pmcid": "PMC7609508",
+      "doi": "10.3389/fchem.2020.572563",
+      "year": "2020",
+      "journal": "Frontiers in chemistry",
+      "license": "cc by",
+      "title": "Mapping Localized Peroxyl Radical Generation on a PEM Fuel Cell Catalyst Using Integrated Scanning Electrochemical Cell Microspectroscopy.",
+      "pool_sentences": 162,
+      "corpus_sentences": 108
+    },
+    {
+      "pmcid": "PMC9200127",
+      "doi": "10.1039/d2sc00541g",
+      "year": "2022",
+      "journal": "Chemical science",
+      "license": "cc by-nc",
+      "title": "Catalytic approaches towards highly durable proton exchange membrane fuel cells with minimized Pt use.",
+      "pool_sentences": 273,
+      "corpus_sentences": 167
+    },
+    {
+      "pmcid": "PMC10708262",
+      "doi": "10.3390/polym15234589",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Study on Self-Humidification in PEMFC with Crossed Flow Channels and an Ultra-Thin Membrane.",
+      "pool_sentences": 205,
+      "corpus_sentences": 142
+    },
+    {
+      "pmcid": "PMC12990961",
+      "doi": "10.1002/anie.4524344",
+      "year": "2026",
+      "journal": "Angewandte Chemie (International ed. in English)",
+      "license": "cc by",
+      "title": "Harnessing Controlled Dealloying-Support Coupling for Ultrastable PtNi Catalysts in PEMFC Applications.",
+      "pool_sentences": 146,
+      "corpus_sentences": 100
+    },
+    {
+      "pmcid": "PMC8617821",
+      "doi": "10.3390/membranes11110879",
+      "year": "2021",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Preparation, Performance and Challenges of Catalyst Layer for Proton Exchange Membrane Fuel Cell.",
+      "pool_sentences": 444,
+      "corpus_sentences": 303
+    },
+    {
+      "pmcid": "PMC3982539",
+      "doi": "10.3389/fchem.2013.00016",
+      "year": "2013",
+      "journal": "Frontiers in chemistry",
+      "license": "cc by",
+      "title": "Carbon supported Ag nanoparticles as high performance cathode catalyst for H2/O2 anion exchange membrane fuel cell.",
+      "pool_sentences": 80,
+      "corpus_sentences": 54
+    },
+    {
+      "pmcid": "PMC10910439",
+      "doi": "10.1021/acsami.4c01794",
+      "year": "2024",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by-nc-nd",
+      "title": "Synthesis of a Mesoporous SnO2 Catalyst Support and the Effect of Its Pore Size on the Performance of Polymer Electrolyte Fuel Cells.",
+      "pool_sentences": 228,
+      "corpus_sentences": 155
+    },
+    {
+      "pmcid": "PMC12899464",
+      "doi": "10.3390/polym18030329",
+      "year": "2026",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Enhancing Hydration Stability and Proton Transport in Nafion/SiO2 Membranes for Medium- to High-Temperature PEMFCs.",
+      "pool_sentences": 182,
+      "corpus_sentences": 117
+    },
+    {
+      "pmcid": "PMC10780504",
+      "doi": "10.3390/nano14010014",
+      "year": "2023",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Tailored Porous Carbon Xerogels for Fe-N-C Catalysts in Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 255,
+      "corpus_sentences": 174
+    },
+    {
+      "pmcid": "PMC4639844",
+      "doi": "10.1038/srep16394",
+      "year": "2015",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Interface-designed Membranes with Shape-controlled Patterns for High-performance Polymer Electrolyte Membrane Fuel Cells.",
+      "pool_sentences": 184,
+      "corpus_sentences": 126
+    },
+    {
+      "pmcid": "PMC12750374",
+      "doi": "10.1021/acsomega.5c07821",
+      "year": "2025",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Investigation of Phenolic Vinyl Resin/Graphite Composite Bipolar Plates for Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 137,
+      "corpus_sentences": 86
+    },
+    {
+      "pmcid": "PMC8624607",
+      "doi": "10.3390/membranes11110817",
+      "year": "2021",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Impact of Membrane Phosphoric Acid Doping Level on Transport Phenomena and Performance in High Temperature PEM Fuel Cells.",
+      "pool_sentences": 120,
+      "corpus_sentences": 77
+    },
+    {
+      "pmcid": "PMC9814259",
+      "doi": "10.1038/s42004-020-00384-z",
+      "year": "2020",
+      "journal": "Communications chemistry",
+      "license": "cc by",
+      "title": "Rechargeable proton exchange membrane fuel cell containing an intrinsic hydrogen storage polymer.",
+      "pool_sentences": 103,
+      "corpus_sentences": 63
+    },
+    {
+      "pmcid": "PMC12391655",
+      "doi": "10.1002/smtd.202500116",
+      "year": "2025",
+      "journal": "Small methods",
+      "license": "cc by-nc-nd",
+      "title": "Dual Metal Fe-Mn-N-C Sites with Improved Stability for the Oxygen Reduction Reaction in Proton Exchange Membrane Fuel Cell.",
+      "pool_sentences": 215,
+      "corpus_sentences": 131
+    },
+    {
+      "pmcid": "PMC8867799",
+      "doi": "10.1021/acsomega.1c06304",
+      "year": "2022",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Effects of the Surface Structure on the Water Transport Behavior in PEMFC Carbon Fiber Papers.",
+      "pool_sentences": 113,
+      "corpus_sentences": 83
+    },
+    {
+      "pmcid": "PMC10629202",
+      "doi": "10.1039/d3ta04711c",
+      "year": "2023",
+      "journal": "Journal of materials chemistry. A",
+      "license": "cc by",
+      "title": "Atomic metal coordinated to nitrogen-doped carbon electrocatalysts for proton exchange membrane fuel cells: a perspective on progress, pitfalls and prospectives.",
+      "pool_sentences": 223,
+      "corpus_sentences": 153
+    },
+    {
+      "pmcid": "PMC12878711",
+      "doi": "10.1021/acsomega.5c06100",
+      "year": "2026",
+      "journal": "ACS omega",
+      "license": "cc by",
+      "title": "A Novel Method to Indirectly Measure Electro-osmotic Drag and Back Diffusion From Total Water Flow Experiments in PEM Fuel Cells.",
+      "pool_sentences": 272,
+      "corpus_sentences": 181
+    },
+    {
+      "pmcid": "PMC11643431",
+      "doi": "10.3390/ma17235900",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Unveiling the Effect of Ti Micro-Alloying on the Microstructure and Corrosion Resistance of the GH3536 Alloy Processed by Laser Metal Deposition in a Simulated Environment for PEMFCs.",
+      "pool_sentences": 215,
+      "corpus_sentences": 150
+    },
+    {
+      "pmcid": "PMC9059279",
+      "doi": "10.1039/c8ra07177b",
+      "year": "2018",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Probing of complex carbon nanofiber paper as gas-diffusion electrode for high temperature polymer electrolyte membrane fuel cell.",
+      "pool_sentences": 159,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC9455219",
+      "doi": "10.1107/s1600577522007949",
+      "year": "2022",
+      "journal": "Journal of synchrotron radiation",
+      "license": "cc by",
+      "title": "Observation of water droplets in microporous layers for polymer electrolyte fuel cells by X-ray computed nano-tomography.",
+      "pool_sentences": 155,
+      "corpus_sentences": 107
+    },
+    {
+      "pmcid": "PMC12876966",
+      "doi": "10.1038/s41598-026-35200-6",
+      "year": "2026",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Optimization of proton exchange membrane fuel cell design parameters using Tianji's horse racing optimization.",
+      "pool_sentences": 290,
+      "corpus_sentences": 196
+    },
+    {
+      "pmcid": "PMC12011709",
+      "doi": "10.1007/s40820-025-01719-y",
+      "year": "2025",
+      "journal": "Nano-micro letters",
+      "license": "cc by",
+      "title": "Revealing the Oxygen Transport Challenges in Catalyst Layers in Proton Exchange Membrane Fuel Cells and Water Electrolysis.",
+      "pool_sentences": 595,
+      "corpus_sentences": 388
+    },
+    {
+      "pmcid": "PMC6835550",
+      "doi": "10.3390/nano9101425",
+      "year": "2019",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Electrochemical Analysis for Demonstrating CO Tolerance of Catalysts in Polymer Electrolyte Membrane Fuel Cells.",
+      "pool_sentences": 102,
+      "corpus_sentences": 60
+    },
+    {
+      "pmcid": "PMC11961732",
+      "doi": "10.1038/s41467-025-58486-y",
+      "year": "2025",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "V activated electro-epoxidation catalyst in membrane electrode assembly system for the production of propylene oxide.",
+      "pool_sentences": 288,
+      "corpus_sentences": 177
+    },
+    {
+      "pmcid": "PMC12397255",
+      "doi": "10.1038/s41467-025-63322-4",
+      "year": "2025",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "Aligned d-orbital energy level of dual-atom sites catalysts for oxygen reduction reaction in anion exchange membrane fuel cells.",
+      "pool_sentences": 241,
+      "corpus_sentences": 166
+    },
+    {
+      "pmcid": "PMC3985936",
+      "doi": "10.1021/jp412501j",
+      "year": "2014",
+      "journal": "The journal of physical chemistry. C, Nanomaterials and interfaces",
+      "license": null,
+      "title": "Graphitic Carbon Nitride Supported Catalysts for Polymer Electrolyte Fuel Cells.",
+      "pool_sentences": 149,
+      "corpus_sentences": 98
+    },
+    {
+      "pmcid": "PMC10785642",
+      "doi": "10.1021/acsomega.3c03671",
+      "year": "2024",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Influence and Optimization of Gas Diffusion Layer Porosity Distribution along the Flow Direction on the Performance of Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 128,
+      "corpus_sentences": 76
+    },
+    {
+      "pmcid": "PMC12330310",
+      "doi": "10.1002/cssc.202500905",
+      "year": "2025",
+      "journal": "ChemSusChem",
+      "license": "cc by",
+      "title": "Influence of Ink Composition and Drying Technique on the Performance and Stability of Fe-N-C-Based High-Temperature Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 227,
+      "corpus_sentences": 157
+    },
+    {
+      "pmcid": "PMC6411755",
+      "doi": "10.1038/s41598-019-38855-6",
+      "year": "2019",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Mesoporous Platinum Prepared by Electrodeposition for Ultralow Loading Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 127,
+      "corpus_sentences": 83
+    },
+    {
+      "pmcid": "PMC10384311",
+      "doi": "10.3390/membranes13070684",
+      "year": "2023",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "NMR Investigation of Water Molecular Dynamics in Sulfonated Polysulfone/Layered Double Hydroxide Composite Membranes for Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 179,
+      "corpus_sentences": 118
+    },
+    {
+      "pmcid": "PMC8112234",
+      "doi": "10.1039/d0ta12398f",
+      "year": "2021",
+      "journal": "Journal of materials chemistry. A",
+      "license": "cc by",
+      "title": "Orientation of a bipolar membrane determines the dominant ion and carbonic species transport in membrane electrode assemblies for CO2 reduction.",
+      "pool_sentences": 156,
+      "corpus_sentences": 108
+    },
+    {
+      "pmcid": "PMC11371835",
+      "doi": "10.1038/s41598-024-57846-w",
+      "year": "2024",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Theoretical analysis of the effect of isotropy on the effective diffusion coefficient in the porous and agglomerated phase of the electrodes of a PEMFC.",
+      "pool_sentences": 195,
+      "corpus_sentences": 131
+    },
+    {
+      "pmcid": "PMC11496990",
+      "doi": "10.1002/advs.202403647",
+      "year": "2024",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Transport-Friendly Microstructure in SSC-MEA: Unveiling the SSC Ionomer-Based Membrane Electrode Assemblies for Enhanced Fuel Cell Performance.",
+      "pool_sentences": 228,
+      "corpus_sentences": 158
+    },
+    {
+      "pmcid": "PMC13276074",
+      "doi": "10.1038/s41598-026-57083-3",
+      "year": "2026",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "An enhanced Draco lizard optimizer for accurate parameter extraction of proton exchange membrane fuel cells.",
+      "pool_sentences": 344,
+      "corpus_sentences": 213
+    },
+    {
+      "pmcid": "PMC11802733",
+      "doi": "10.1038/s41598-025-87695-0",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Enhanced hunger games search algorithm that incorporates the marine predator optimization algorithm for optimal extraction of parameters in PEM fuel cells.",
+      "pool_sentences": 286,
+      "corpus_sentences": 188
+    },
+    {
+      "pmcid": "PMC11909176",
+      "doi": "10.1038/s41598-025-93162-7",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Parrot optimizer with multiple search strategies for parameters estimation of proton exchange membrane fuel cells model.",
+      "pool_sentences": 245,
+      "corpus_sentences": 157
+    },
+    {
+      "pmcid": "PMC11139892",
+      "doi": "10.1038/s41467-024-49095-2",
+      "year": "2024",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "CO electrolysis to multicarbon products over grain boundary-rich Cu nanoparticles in membrane electrode assembly electrolyzers.",
+      "pool_sentences": 228,
+      "corpus_sentences": 148
+    },
+    {
+      "pmcid": "PMC10636174",
+      "doi": "10.1038/s41598-023-46847-w",
+      "year": "2023",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Accurate emulation of steady-state and dynamic performances of PEM fuel cells using simplified models.",
+      "pool_sentences": 178,
+      "corpus_sentences": 102
+    },
+    {
+      "pmcid": "PMC8918329",
+      "doi": "10.1038/s41598-022-08327-5",
+      "year": "2022",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Maximum power point tracking of PEMFC based on hybrid artificial bee colony algorithm with fuzzy control.",
+      "pool_sentences": 135,
+      "corpus_sentences": 93
+    },
+    {
+      "pmcid": "PMC11825906",
+      "doi": "10.1038/s41598-025-89304-6",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "A two stage differential evolution algorithm for parameter estimation of proton exchange membrane fuel cell.",
+      "pool_sentences": 305,
+      "corpus_sentences": 200
+    },
+    {
+      "pmcid": "PMC8659044",
+      "doi": "10.3390/molecules26237370",
+      "year": "2021",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Non-PGM Electrocatalysts for PEM Fuel Cells: A DFT Study on the Effects of Fluorination of FeNx-Doped and N-Doped Carbon Catalysts.",
+      "pool_sentences": 173,
+      "corpus_sentences": 115
+    },
+    {
+      "pmcid": "PMC11822038",
+      "doi": "10.1038/s41598-025-89277-6",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Numerical investigation of high-temperature proton exchange membrane fuel cell conductivity at different parameters.",
+      "pool_sentences": 163,
+      "corpus_sentences": 110
+    },
+    {
+      "pmcid": "PMC9075977",
+      "doi": "10.1039/c9ra07794d",
+      "year": "2019",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Nafion film transport properties in a low-Pt PEM fuel cell: impedance spectroscopy study.",
+      "pool_sentences": 142,
+      "corpus_sentences": 93
+    },
+    {
+      "pmcid": "PMC11739975",
+      "doi": "10.1021/acsomega.4c09174",
+      "year": "2025",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Numerical Investigation of Proton Exchange Membrane Fuel Cells with Symmetrical Serpentine Channels Equipped with Baffles.",
+      "pool_sentences": 154,
+      "corpus_sentences": 100
+    },
+    {
+      "pmcid": "PMC11341301",
+      "doi": "10.1016/j.heliyon.2024.e32501",
+      "year": "2024",
+      "journal": "Heliyon",
+      "license": "cc by",
+      "title": "Unmasking the reactants inhomogeneity in gas diffusion layer and the performances of PEMFC induced by assembly pressure.",
+      "pool_sentences": 141,
+      "corpus_sentences": 92
+    },
+    {
+      "pmcid": "PMC10744794",
+      "doi": "10.3390/membranes13120887",
+      "year": "2023",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Polyvinyl Alcohol/Nafion\u00ae-Zirconia Phosphate Nanocomposite Membranes for Polymer Electrolyte Membrane Fuel Cell Applications: Synthesis and Characterisation.",
+      "pool_sentences": 212,
+      "corpus_sentences": 126
+    },
+    {
+      "pmcid": "PMC12372429",
+      "doi": "10.1002/smll.202409650",
+      "year": "2025",
+      "journal": "Small (Weinheim an der Bergstrasse, Germany)",
+      "license": "cc by",
+      "title": "Electrode Structuring via Carbon Nanotubes and Nafion Ionomer-Coated TiO2 Enhances the Durability of Proton Exchange Membrane Fuel Cells Under Carbon Corrosion Conditions.",
+      "pool_sentences": 214,
+      "corpus_sentences": 147
+    },
+    {
+      "pmcid": "PMC11435624",
+      "doi": "10.3390/s24186120",
+      "year": "2024",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Data-Driven Power Prediction for Proton Exchange Membrane Fuel Cell Reactor Systems.",
+      "pool_sentences": 156,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC4021911",
+      "doi": "10.3390/membranes2030395",
+      "year": "2012",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "A review of molecular-level mechanism of membrane degradation in the polymer electrolyte fuel cell.",
+      "pool_sentences": 143,
+      "corpus_sentences": 99
+    },
+    {
+      "pmcid": "PMC12362820",
+      "doi": "10.1002/advs.202505958",
+      "year": "2025",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "From Seeds to Cell: Improving PEMFC Performance and Durability by Seed-Mediation Synthesis for PtNiIr ORR Nanocatalysts.",
+      "pool_sentences": 163,
+      "corpus_sentences": 117
+    },
+    {
+      "pmcid": "PMC12789529",
+      "doi": "10.1038/s41598-025-14297-1",
+      "year": "2026",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Efficient estimation of proton exchange membrane fuel cells parameters using a hybrid swarm intelligent algorithm.",
+      "pool_sentences": 301,
+      "corpus_sentences": 196
+    },
+    {
+      "pmcid": "PMC12788626",
+      "doi": "10.1371/journal.pone.0336352",
+      "year": "2026",
+      "journal": "PloS one",
+      "license": "cc by",
+      "title": "Temperature dependence laser-assist scattering and its impact on efficiency of PEMFC.",
+      "pool_sentences": 158,
+      "corpus_sentences": 93
+    },
+    {
+      "pmcid": "PMC11238300",
+      "doi": "10.1021/acsomega.4c03523",
+      "year": "2024",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Ni/Graphene Coating for Enhanced Corrosion Resistance of Metal Foam Flow Field in Simulated PEMFC Cathode Environment.",
+      "pool_sentences": 146,
+      "corpus_sentences": 101
+    },
+    {
+      "pmcid": "PMC12001289",
+      "doi": "10.1021/acsaem.5c00265",
+      "year": "2025",
+      "journal": "ACS applied energy materials",
+      "license": "cc by",
+      "title": "Fluorine-Lean Phosphonated Polymers of Intrinsic Microporosity with High Oxygen Permeability as a PEMFC Catalyst Layer Ionomer.",
+      "pool_sentences": 243,
+      "corpus_sentences": 146
+    },
+    {
+      "pmcid": "PMC12530033",
+      "doi": "10.1002/smll.202505914",
+      "year": "2025",
+      "journal": "Small (Weinheim an der Bergstrasse, Germany)",
+      "license": "cc by-nc",
+      "title": "Mesoporous Co-N-C Supported L10-PtCo Alloy Enables Fast Mass Transport for Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 97,
+      "corpus_sentences": 63
+    },
+    {
+      "pmcid": "PMC9565230",
+      "doi": "10.3390/nano12193331",
+      "year": "2022",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Non-Noble Metal Catalysts in Cathodic Oxygen Reduction Reaction of Proton Exchange Membrane Fuel Cells: Recent Advances.",
+      "pool_sentences": 183,
+      "corpus_sentences": 117
+    },
+    {
+      "pmcid": "PMC10146897",
+      "doi": "10.1126/sciadv.adf4863",
+      "year": "2023",
+      "journal": "Science advances",
+      "license": "cc by-nc",
+      "title": "Effective single web-structured electrode for high membrane electrode assembly performance in polymer electrolyte membrane fuel cell.",
+      "pool_sentences": 255,
+      "corpus_sentences": 182
+    },
+    {
+      "pmcid": "PMC10749904",
+      "doi": "10.1016/j.ohx.2023.e00495",
+      "year": "2023",
+      "journal": "HardwareX",
+      "license": "cc by",
+      "title": "An open-source zero-gradient cell hardware to improve and accelerate durability testing of PEM fuel cells.",
+      "pool_sentences": 158,
+      "corpus_sentences": 104
+    },
+    {
+      "pmcid": "PMC13394543",
+      "doi": "10.1039/d6ra04431j",
+      "year": "2026",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "Protic phosphonium-based ionic liquids for intermediate temperature polymer electrolyte membrane fuel cells.",
+      "pool_sentences": 283,
+      "corpus_sentences": 184
+    },
+    {
+      "pmcid": "PMC12843703",
+      "doi": "10.3390/nano16020088",
+      "year": "2026",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Pore-Scale Investigations into Gradient Carbon Microstructures for Enhanced Mass Transport in PEM Fuel Cell Catalyst Layers.",
+      "pool_sentences": 235,
+      "corpus_sentences": 164
+    },
+    {
+      "pmcid": "PMC3345820",
+      "doi": "10.3390/s90301423",
+      "year": "2009",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Real time monitoring of temperature of a micro proton exchange membrane fuel cell.",
+      "pool_sentences": 83,
+      "corpus_sentences": 45
+    },
+    {
+      "pmcid": "PMC10265069",
+      "doi": "10.1002/advs.202300550",
+      "year": "2023",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Progress and Perspective for In Situ Studies of Oxygen Reduction Reaction in Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 415,
+      "corpus_sentences": 266
+    },
+    {
+      "pmcid": "PMC12648384",
+      "doi": "10.1039/d5ra06885a",
+      "year": "2025",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Asymmetric design of a Pt/C catalyst layer for enhanced performance in proton exchange membrane fuel cells.",
+      "pool_sentences": 193,
+      "corpus_sentences": 127
+    },
+    {
+      "pmcid": "PMC9896037",
+      "doi": "10.1002/advs.202205305",
+      "year": "2023",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Alternating Flow Field Design Improves the Performance of Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 146,
+      "corpus_sentences": 97
+    },
+    {
+      "pmcid": "PMC11576950",
+      "doi": "10.1038/s41598-024-80073-2",
+      "year": "2024",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "A hybrid mutational Northern Goshawk and elite opposition learning artificial rabbits optimizer for PEMFC parameter estimation.",
+      "pool_sentences": 279,
+      "corpus_sentences": 195
+    },
+    {
+      "pmcid": "PMC11722982",
+      "doi": "10.3390/s25010029",
+      "year": "2024",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Square Root Unscented Kalman Filter-Based Multiple-Model Fault Diagnosis of PEM Fuel Cells.",
+      "pool_sentences": 291,
+      "corpus_sentences": 182
+    },
+    {
+      "pmcid": "PMC6994205",
+      "doi": "10.1126/sciadv.aaw0870",
+      "year": "2020",
+      "journal": "Science advances",
+      "license": "cc by-nc",
+      "title": "Enhancement of service life of polymer electrolyte fuel cells through application of nanodispersed ionomer.",
+      "pool_sentences": 233,
+      "corpus_sentences": 159
+    },
+    {
+      "pmcid": "PMC10527324",
+      "doi": "10.3390/biomimetics8050426",
+      "year": "2023",
+      "journal": "Biomimetics (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "MPPT of PEM Fuel Cell Using PI-PD Controller Based on Golden Jackal Optimization Algorithm.",
+      "pool_sentences": 186,
+      "corpus_sentences": 124
+    },
+    {
+      "pmcid": "PMC12480710",
+      "doi": "10.1038/s41598-025-14862-8",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Extraction of PEM fuel cell variables based on modified hippopotamus optimization algorithm.",
+      "pool_sentences": 230,
+      "corpus_sentences": 145
+    },
+    {
+      "pmcid": "PMC8466202",
+      "doi": "10.3390/membranes11090691",
+      "year": "2021",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Performance Analysis and Optimization of a High-Temperature PEMFC Vehicle Based on Particle Swarm Optimization Algorithm.",
+      "pool_sentences": 162,
+      "corpus_sentences": 117
+    },
+    {
+      "pmcid": "PMC7912077",
+      "doi": "10.3390/membranes11020102",
+      "year": "2021",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Effect of Membrane Properties on the Carbonation of Anion Exchange Membrane Fuel Cells.",
+      "pool_sentences": 168,
+      "corpus_sentences": 114
+    },
+    {
+      "pmcid": "PMC13288199",
+      "doi": "10.1002/adma.73269",
+      "year": "2026",
+      "journal": "Advanced materials (Deerfield Beach, Fla.)",
+      "license": "cc by",
+      "title": "Theory Guided Fine-Tune of Strain Effects in Pt Ternary Alloy via Rare Earth Templating: Achieving High Performance PEMFCs Catalysts.",
+      "pool_sentences": 208,
+      "corpus_sentences": 141
+    },
+    {
+      "pmcid": "PMC9324827",
+      "doi": "10.3390/membranes12070680",
+      "year": "2022",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Electrochemical Analysis of Polymer Membrane with Inorganic Nanoparticles for High-Temperature PEM Fuel Cells.",
+      "pool_sentences": 190,
+      "corpus_sentences": 122
+    },
+    {
+      "pmcid": "PMC6849074",
+      "doi": "10.1016/j.dib.2019.104727",
+      "year": "2019",
+      "journal": "Data in brief",
+      "license": "cc by",
+      "title": "Performance experimental data of a polymer electrolyte fuel cell considering the variation of the relative humidity of reactants gases.",
+      "pool_sentences": 26,
+      "corpus_sentences": 18
+    },
+    {
+      "pmcid": "PMC5333141",
+      "doi": "10.1038/srep43447",
+      "year": "2017",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "The respective effect of under-rib convection and pressure drop of flow fields on the performance of PEM fuel cells.",
+      "pool_sentences": 147,
+      "corpus_sentences": 83
+    },
+    {
+      "pmcid": "PMC7144465",
+      "doi": "10.3390/molecules25061469",
+      "year": "2020",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of GDM Pairing on PEMFC Performance in Flow-Through and Dead-Ended Anode Mode.",
+      "pool_sentences": 203,
+      "corpus_sentences": 131
+    },
+    {
+      "pmcid": "PMC8434043",
+      "doi": "10.3390/ma14174972",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Corrosion Behavior of Niobium-Coated 316L Stainless Steels as Metal Bipolar Plates for Polymer Electrolyte Membrane Fuel Cells.",
+      "pool_sentences": 152,
+      "corpus_sentences": 100
+    },
+    {
+      "pmcid": "PMC12448063",
+      "doi": "10.1126/sciadv.adw5747",
+      "year": "2025",
+      "journal": "Science advances",
+      "license": "cc by",
+      "title": "Nanofiber membranes for enhanced performance and optimization of proton exchange membrane fuel cells.",
+      "pool_sentences": 255,
+      "corpus_sentences": 183
+    },
+    {
+      "pmcid": "PMC11423278",
+      "doi": "10.1021/acsaem.4c01101",
+      "year": "2024",
+      "journal": "ACS applied energy materials",
+      "license": "cc by",
+      "title": "CO2 Loss into Solution: An Experimental Investigation of CO2 Electrolysis with a Membrane Electrode Assembly Cell.",
+      "pool_sentences": 202,
+      "corpus_sentences": 135
+    },
+    {
+      "pmcid": "PMC11433875",
+      "doi": "10.3390/membranes14090197",
+      "year": "2024",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Sensitivity and Stability Study of Test Conditions for a 1 kW Proton Exchange Membrane Fuel Cell Stack.",
+      "pool_sentences": 175,
+      "corpus_sentences": 112
+    },
+    {
+      "pmcid": "PMC13086952",
+      "doi": "10.1038/s41598-026-42394-2",
+      "year": "2026",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "A parameter estimation method for modelling proton exchange membrane fuel cell based on enhanced meta evolutionary differential evolution algorithm.",
+      "pool_sentences": 401,
+      "corpus_sentences": 271
+    },
+    {
+      "pmcid": "PMC13490156",
+      "doi": "10.3389/fchem.2026.1884122",
+      "year": "2026",
+      "journal": "Frontiers in chemistry",
+      "license": "cc by",
+      "title": "Exergy-guided multiphysics analysis of transport irreversibilities in PEMFC flow-field architectures.",
+      "pool_sentences": 446,
+      "corpus_sentences": 301
+    },
+    {
+      "pmcid": "PMC10304967",
+      "doi": "10.3390/membranes13060593",
+      "year": "2023",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Different Approaches for the Preparation of Composite Ionic Liquid-Based Membranes for Proton Exchange Membrane Fuel Cell Applications-Recent Advancements.",
+      "pool_sentences": 329,
+      "corpus_sentences": 222
+    },
+    {
+      "pmcid": "PMC11313899",
+      "doi": "10.3390/molecules29153696",
+      "year": "2024",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Corrosion and Interfacial Contact Resistance of NiTi Alloy as a Promising Bipolar Plate for PEMFC.",
+      "pool_sentences": 106,
+      "corpus_sentences": 72
+    },
+    {
+      "pmcid": "PMC9801125",
+      "doi": "10.1016/j.heliyon.2022.e12401",
+      "year": "2022",
+      "journal": "Heliyon",
+      "license": "cc by",
+      "title": "Synthesis and characterization of sulfonated poly(eugenol-co-allyleugenol) membranes for proton exchange membrane fuel cells.",
+      "pool_sentences": 220,
+      "corpus_sentences": 143
+    },
+    {
+      "pmcid": "PMC8190917",
+      "doi": "10.1021/acsomega.1c01693",
+      "year": "2021",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Impact of Microporous Layer on Heat and Mass Transfer in a Single Cell of Polymer Electrolyte Fuel Cell Using a Thin Polymer Electrolyte Membrane and a Thin Gas Diffusion Layer Operated at a High-Temperature Range.",
+      "pool_sentences": 172,
+      "corpus_sentences": 115
+    },
+    {
+      "pmcid": "PMC9741098",
+      "doi": "10.3390/ijms232315245",
+      "year": "2022",
+      "journal": "International journal of molecular sciences",
+      "license": "cc by",
+      "title": "Sustainable Plant-Based Biopolymer Membranes for PEM Fuel Cells.",
+      "pool_sentences": 185,
+      "corpus_sentences": 127
+    },
+    {
+      "pmcid": "PMC10972082",
+      "doi": "10.3390/ma17061331",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Study of the Durability of Membrane Electrode Assemblies in Various Accelerated Stress Tests for Proton-Exchange Membrane Water Electrolysis.",
+      "pool_sentences": 132,
+      "corpus_sentences": 89
+    },
+    {
+      "pmcid": "PMC7730999",
+      "doi": "10.3390/ma13235370",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Comparison of Carbon Supports in Anion Exchange Membrane Fuel Cells.",
+      "pool_sentences": 130,
+      "corpus_sentences": 79
+    },
+    {
+      "pmcid": "PMC12022989",
+      "doi": "10.1021/acsami.5c00770",
+      "year": "2025",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "Guided Water Percolation in 3D-Printed Gas Diffusion Layers for Polymer Electrolyte Fuel Cells.",
+      "pool_sentences": 258,
+      "corpus_sentences": 180
+    },
+    {
+      "pmcid": "PMC6811840",
+      "doi": "10.1021/acsomega.9b01763",
+      "year": "2019",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "Coating Distribution Analysis on Gas Diffusion Layers for Polymer Electrolyte Fuel Cells by Neutron and X-ray High-Resolution Tomography.",
+      "pool_sentences": 164,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC8779780",
+      "doi": "10.3390/membranes12010074",
+      "year": "2022",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Cobalt-Doped Carbon Nitride Frameworks Obtained from Calcined Aromatic Polyimines as Cathode Catalyst of Anion Exchange Membrane Fuel Cells.",
+      "pool_sentences": 198,
+      "corpus_sentences": 134
+    },
+    {
+      "pmcid": "PMC5827662",
+      "doi": "10.1038/s41598-018-22001-9",
+      "year": "2018",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "High-performance Platinum-free oxygen reduction reaction and hydrogen oxidation reaction catalyst in polymer electrolyte membrane fuel cell.",
+      "pool_sentences": 233,
+      "corpus_sentences": 159
+    },
+    {
+      "pmcid": "PMC10142057",
+      "doi": "10.3390/membranes13040426",
+      "year": "2023",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "A Hybrid Method for Performance Degradation Probability Prediction of Proton Exchange Membrane Fuel Cell.",
+      "pool_sentences": 185,
+      "corpus_sentences": 122
+    },
+    {
+      "pmcid": "PMC9919960",
+      "doi": "10.3390/s23031534",
+      "year": "2023",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Advanced Energy Management Strategy of Photovoltaic/PEMFC/Lithium-Ion Batteries/Supercapacitors Hybrid Renewable Power System Using White Shark Optimizer.",
+      "pool_sentences": 137,
+      "corpus_sentences": 101
+    },
+    {
+      "pmcid": "PMC12035800",
+      "doi": "10.1021/acs.energyfuels.4c04834",
+      "year": "2025",
+      "journal": "Energy & fuels : an American Chemical Society journal",
+      "license": "cc by",
+      "title": "Thermal Transient Performance of PEM Fuel Cells in Aerospace Applications: A Numerical Study.",
+      "pool_sentences": 295,
+      "corpus_sentences": 186
+    },
+    {
+      "pmcid": "PMC4021953",
+      "doi": "10.3390/membranes3040406",
+      "year": "2013",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Al2O3 Disk Supported Si3N4 Hydrogen Purification Membrane for Low Temperature Polymer Electrolyte Membrane Fuel Cells.",
+      "pool_sentences": 87,
+      "corpus_sentences": 51
+    },
+    {
+      "pmcid": "PMC6722640",
+      "doi": "10.3390/polym11081368",
+      "year": "2019",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "FeNxC Based Catalysts Prepared by the Calcination of Iron-Ethylenediamine@Polyaniline as the Cathode-Catalyst of Proton Exchange Membrane Fuel Cell.",
+      "pool_sentences": 180,
+      "corpus_sentences": 121
+    },
+    {
+      "pmcid": "PMC9783247",
+      "doi": "10.3390/membranes12121265",
+      "year": "2022",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "A Review of Recent Chitosan Anion Exchange Membranes for Polymer Electrolyte Membrane Fuel Cells.",
+      "pool_sentences": 127,
+      "corpus_sentences": 82
+    },
+    {
+      "pmcid": "PMC9101812",
+      "doi": "10.3390/polym14091784",
+      "year": "2022",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Calcined Co(II)-Chelated Polyazomethine as Cathode Catalyst of Anion Exchange Membrane Fuel Cells.",
+      "pool_sentences": 132,
+      "corpus_sentences": 83
+    },
+    {
+      "pmcid": "PMC9032183",
+      "doi": "10.3390/membranes12040356",
+      "year": "2022",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Analytical Model for Concentration (Pressure) Impedance of a Low-Pt PEM Fuel Cell Oxygen Electrode.",
+      "pool_sentences": 70,
+      "corpus_sentences": 48
+    },
+    {
+      "pmcid": "PMC13158919",
+      "doi": "10.1021/acselectrochem.5c00554",
+      "year": "2026",
+      "journal": "ACS electrochemistry",
+      "license": "cc by",
+      "title": "A Catalyst-Coated Mesoporous Carbon-Membrane Electrode Assembly for In Situ Soft X\u2011ray XPS and NEXAFS Studies of Electrocatalytic Interfaces.",
+      "pool_sentences": 239,
+      "corpus_sentences": 168
+    },
+    {
+      "pmcid": "PMC7179096",
+      "doi": "10.3390/molecules25051060",
+      "year": "2020",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Impact of the Cathode Pt Loading on PEMFC Contamination by Several Airborne Contaminants.",
+      "pool_sentences": 140,
+      "corpus_sentences": 94
+    },
+    {
+      "pmcid": "PMC6370893",
+      "doi": "10.1186/s11671-019-2871-8",
+      "year": "2019",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "Nanostructured Pd-Based Electrocatalyst and Membrane Electrode Assembly Behavior in a Passive Direct Glycerol Fuel Cell.",
+      "pool_sentences": 244,
+      "corpus_sentences": 161
+    },
+    {
+      "pmcid": "PMC11600206",
+      "doi": "10.1002/advs.202407570",
+      "year": "2024",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "A Universal Strategy to Enhance Polarization Performance and Anode Reversal Tolerance by Polyaniline-Coated Carbon Support for Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 224,
+      "corpus_sentences": 160
+    },
+    {
+      "pmcid": "PMC12735134",
+      "doi": "10.3390/membranes15120356",
+      "year": "2025",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Experimental Study on OC PEMFC Performance Improvement and MEA Parameter Optimization Under Water Shortage Conditions.",
+      "pool_sentences": 139,
+      "corpus_sentences": 95
+    },
+    {
+      "pmcid": "PMC13197464",
+      "doi": "10.1038/s41598-026-52533-4",
+      "year": "2026",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Assessment of a modified Coronavirus Disease Optimization Algorithm for Parameter Estimation of Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 254,
+      "corpus_sentences": 175
+    },
+    {
+      "pmcid": "PMC12480755",
+      "doi": "10.34133/research.0907",
+      "year": "2025",
+      "journal": "Research (Washington, D.C.)",
+      "license": "cc by",
+      "title": "Membrane Electrode Assembly Design for High-Efficiency Anion Exchange Membrane Water Electrolysis.",
+      "pool_sentences": 287,
+      "corpus_sentences": 196
+    },
+    {
+      "pmcid": "PMC5503373",
+      "doi": "10.3390/ma10030317",
+      "year": "2017",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Towards Highly Performing and Stable PtNi Catalysts in Polymer Electrolyte Fuel Cells for Automotive Application.",
+      "pool_sentences": 156,
+      "corpus_sentences": 114
+    },
+    {
+      "pmcid": "PMC12843995",
+      "doi": "10.3390/membranes16010030",
+      "year": "2026",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Lattice Boltzmann Simulation of Mass Transfer Characteristics in Catalyst Layer of High-Temperature Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 158,
+      "corpus_sentences": 107
+    },
+    {
+      "pmcid": "PMC4704018",
+      "doi": "10.3390/membranes5040888",
+      "year": "2015",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "The Effect of Platinum Electrocatalyst on Membrane Degradation in Polymer Electrolyte Fuel Cells.",
+      "pool_sentences": 132,
+      "corpus_sentences": 84
+    },
+    {
+      "pmcid": "PMC12245014",
+      "doi": "10.1002/advs.202501825",
+      "year": "2025",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Advanced Temperature Design for Dynamic Performance Enhancement of PEMFCs Under High Current Density (HCD).",
+      "pool_sentences": 252,
+      "corpus_sentences": 176
+    },
+    {
+      "pmcid": "PMC12476485",
+      "doi": "10.1177/0734242x251360546",
+      "year": "2025",
+      "journal": "Waste management & research : the journal of the International Solid Wastes and Public Cleansing Association, ISWA",
+      "license": "cc by",
+      "title": "Have proton exchange membrane fuel cells been designed for recycling?",
+      "pool_sentences": 224,
+      "corpus_sentences": 152
+    },
+    {
+      "pmcid": "PMC3231505",
+      "doi": "10.3390/s110908674",
+      "year": "2011",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Real-time remote monitoring of temperature and humidity within a proton exchange membrane fuel cell using flexible sensors.",
+      "pool_sentences": 89,
+      "corpus_sentences": 57
+    },
+    {
+      "pmcid": "PMC5087516",
+      "doi": "10.3390/s16101731",
+      "year": "2016",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "In-Situ Measurement of High-Temperature Proton Exchange Membrane Fuel Cell Stack Using Flexible Five-in-One Micro-Sensor.",
+      "pool_sentences": 87,
+      "corpus_sentences": 53
+    },
+    {
+      "pmcid": "PMC9713876",
+      "doi": "10.1021/acsomega.2c04949",
+      "year": "2022",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Numerical Study on the Effect of an Improved Three-Partition Baffle Flow Field on Proton Exchange Membrane Fuel Cell Performance.",
+      "pool_sentences": 234,
+      "corpus_sentences": 158
+    },
+    {
+      "pmcid": "PMC12302547",
+      "doi": "10.1002/advs.202505304",
+      "year": "2025",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Water Management Fault Diagnosis by Operando Distribution of Relaxation Times Analysis for Anion Exchange Membrane Fuel Cells.",
+      "pool_sentences": 193,
+      "corpus_sentences": 141
+    },
+    {
+      "pmcid": "PMC6640960",
+      "doi": "10.1021/acsomega.6b00555",
+      "year": "2017",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "Zirconium Oxynitride-Catalyzed Oxygen Reduction Reaction at Polymer Electrolyte Fuel Cell Cathodes.",
+      "pool_sentences": 115,
+      "corpus_sentences": 75
+    },
+    {
+      "pmcid": "PMC11082842",
+      "doi": "10.1021/acsami.4c01254",
+      "year": "2024",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "Applicability of Single-Layer Graphene as a Hydrogen-Blocking Interlayer in Low-Temperature PEMFCs.",
+      "pool_sentences": 275,
+      "corpus_sentences": 189
+    },
+    {
+      "pmcid": "PMC9609320",
+      "doi": "10.3390/membranes12101001",
+      "year": "2022",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Microstructure Reconstruction and Multiphysics Dynamic Distribution Simulation of the Catalyst Layer in PEMFC.",
+      "pool_sentences": 142,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC10500626",
+      "doi": "10.1039/d3ya00189j",
+      "year": "2023",
+      "journal": "Energy advances",
+      "license": "cc by-nc",
+      "title": "On the water transport mechanism through the microporous layers of operando polymer electrolyte fuel cells probed directly by X-ray tomographic microscopy.",
+      "pool_sentences": 296,
+      "corpus_sentences": 191
+    },
+    {
+      "pmcid": "PMC9738973",
+      "doi": "10.3390/polym14235248",
+      "year": "2022",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Recent Developments on Bioinspired Cellulose Containing Polymer Nanocomposite Cation and Anion Exchange Membranes for Fuel Cells (PEMFC and AFC).",
+      "pool_sentences": 360,
+      "corpus_sentences": 237
+    },
+    {
+      "pmcid": "PMC10047270",
+      "doi": "10.3390/e25030426",
+      "year": "2023",
+      "journal": "Entropy (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Observation and Analysis of Ejector Hysteresis Phenomena in the Hydrogen Recirculation Subsystem of PEMFCs.",
+      "pool_sentences": 106,
+      "corpus_sentences": 71
+    },
+    {
+      "pmcid": "PMC8272180",
+      "doi": "10.3390/molecules26133932",
+      "year": "2021",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Degradation Investigation of Electrocatalyst in Proton Exchange Membrane Fuel Cell at a High Energy Efficiency.",
+      "pool_sentences": 81,
+      "corpus_sentences": 49
+    },
+    {
+      "pmcid": "PMC9794718",
+      "doi": "10.1038/s41467-022-35603-9",
+      "year": "2022",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Oriented intergrowth of the catalyst layer in membrane electrode assembly for alkaline water electrolysis.",
+      "pool_sentences": 283,
+      "corpus_sentences": 198
+    },
+    {
+      "pmcid": "PMC8235781",
+      "doi": "10.3390/polym13121976",
+      "year": "2021",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Patterned Membranes for Proton Exchange Membrane Fuel Cells Working at Low Humidity.",
+      "pool_sentences": 182,
+      "corpus_sentences": 107
+    },
+    {
+      "pmcid": "PMC10666242",
+      "doi": "10.1021/acsomega.3c06587",
+      "year": "2023",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Ternary Triazole-Based Organic-Inorganic Proton-Conducting Hybrids Based on Computational Models for HT-PEMFC Application.",
+      "pool_sentences": 196,
+      "corpus_sentences": 138
+    },
+    {
+      "pmcid": "PMC9081454",
+      "doi": "10.1039/c8ra02062k",
+      "year": "2018",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Improvement in physical properties of single-layer gas diffusion layers using graphene for proton exchange membrane fuel cells.",
+      "pool_sentences": 139,
+      "corpus_sentences": 85
+    },
+    {
+      "pmcid": "PMC11531494",
+      "doi": "10.1038/s41598-024-77696-w",
+      "year": "2024",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Optimal power generation of proton exchange membrane fuel cell using ANFIS based MPPT algorithm.",
+      "pool_sentences": 270,
+      "corpus_sentences": 179
+    },
+    {
+      "pmcid": "PMC9228718",
+      "doi": "10.3390/nano12121976",
+      "year": "2022",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Properties of SS304 Modified by Nickel-Cobalt Alloy Coating with Cauliflower-Shaped Micro/Nano Structures in Simulated PEMFC Cathode Environment.",
+      "pool_sentences": 180,
+      "corpus_sentences": 122
+    },
+    {
+      "pmcid": "PMC9694323",
+      "doi": "10.3390/ijms232214252",
+      "year": "2022",
+      "journal": "International journal of molecular sciences",
+      "license": "cc by",
+      "title": "Polymer Electrolyte Membranes Containing Functionalized Organic/Inorganic Composite for Polymer Electrolyte Membrane Fuel Cell Applications.",
+      "pool_sentences": 168,
+      "corpus_sentences": 112
+    },
+    {
+      "pmcid": "PMC9361283",
+      "doi": "10.1021/acscatal.2c01753",
+      "year": "2022",
+      "journal": "ACS catalysis",
+      "license": "cc by",
+      "title": "Graphene-Derived Carbon Support Boosts Proton Exchange Membrane Fuel Cell Catalyst Stability.",
+      "pool_sentences": 139,
+      "corpus_sentences": 88
+    },
+    {
+      "pmcid": "PMC11767076",
+      "doi": "10.3390/membranes15010003",
+      "year": "2024",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Carbon Nanofiber-Reinforced Carbon Black Support for Enhancing the Durability of Catalysts Used in Proton Exchange Membrane Fuel Cells Against Carbon Corrosion.",
+      "pool_sentences": 175,
+      "corpus_sentences": 120
+    },
+    {
+      "pmcid": "PMC11387624",
+      "doi": "10.1038/s41598-024-70886-6",
+      "year": "2024",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Parameter extraction of proton exchange membrane fuel cell based on artificial rabbits' optimization algorithm and conducting laboratory tests.",
+      "pool_sentences": 153,
+      "corpus_sentences": 100
+    },
+    {
+      "pmcid": "PMC8956593",
+      "doi": "10.1038/s41467-022-29313-5",
+      "year": "2022",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "High-speed 4D neutron computed tomography for quantifying water dynamics in polymer electrolyte fuel cells.",
+      "pool_sentences": 226,
+      "corpus_sentences": 164
+    },
+    {
+      "pmcid": "PMC11789982",
+      "doi": "10.1002/cssc.202401488",
+      "year": "2025",
+      "journal": "ChemSusChem",
+      "license": "cc by-nc",
+      "title": "Studying the Effect of Operating Conditions and NO2 Cathode Contamination on PEM Fuel Cells Using Distribution Function of Relaxation Times Analysis.",
+      "pool_sentences": 166,
+      "corpus_sentences": 110
+    },
+    {
+      "pmcid": "PMC6025507",
+      "doi": "10.3390/ma11060907",
+      "year": "2018",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Graphitized Carbon: A Promising Stable Cathode Catalyst Support Material for Long Term PEMFC Applications.",
+      "pool_sentences": 96,
+      "corpus_sentences": 70
+    },
+    {
+      "pmcid": "PMC11458577",
+      "doi": "10.1038/s41598-024-74257-z",
+      "year": "2024",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Performance of the multi-U-style structure based flow field for polymer electrolyte membrane fuel cell.",
+      "pool_sentences": 240,
+      "corpus_sentences": 161
+    },
+    {
+      "pmcid": "PMC11814308",
+      "doi": "10.1038/s41598-025-89631-8",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Revolutionizing proton exchange membrane fuel cell modeling through hybrid aquila optimizer and arithmetic algorithm optimization.",
+      "pool_sentences": 251,
+      "corpus_sentences": 175
+    },
+    {
+      "pmcid": "PMC11637076",
+      "doi": "10.1038/s41598-024-64915-7",
+      "year": "2024",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Enhancing PEM fuel cell efficiency with flying squirrel search optimization and Cuckoo Search MPPT techniques in dynamically operating environments.",
+      "pool_sentences": 448,
+      "corpus_sentences": 292
+    },
+    {
+      "pmcid": "PMC7239269",
+      "doi": "10.1002/open.202000089",
+      "year": "2020",
+      "journal": "ChemistryOpen",
+      "license": "cc by-nc-nd",
+      "title": "Impact of Membrane Types and Catalyst Layers Composition on Performance of Polymer Electrolyte Membrane Fuel Cells.",
+      "pool_sentences": 194,
+      "corpus_sentences": 135
+    },
+    {
+      "pmcid": "PMC9144083",
+      "doi": "10.3390/mi13050665",
+      "year": "2022",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Snowflake Bionic Flow Channel Design to Optimize the Pressure Drop and Flow Uniform of Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 118,
+      "corpus_sentences": 74
+    },
+    {
+      "pmcid": "PMC12462616",
+      "doi": "10.1093/nsr/nwaf312",
+      "year": "2025",
+      "journal": "National science review",
+      "license": "cc by",
+      "title": "Proton-donating cations enable efficient and stable acidic CO2 reduction in membrane electrode assemblies.",
+      "pool_sentences": 235,
+      "corpus_sentences": 156
+    },
+    {
+      "pmcid": "PMC10096973",
+      "doi": "10.3390/nano13071233",
+      "year": "2023",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Nitrogen-Doped Graphene Oxide as Efficient Metal-Free Electrocatalyst in PEM Fuel Cells.",
+      "pool_sentences": 304,
+      "corpus_sentences": 195
+    },
+    {
+      "pmcid": "PMC7498754",
+      "doi": "10.1016/j.heliyon.2020.e04848",
+      "year": "2020",
+      "journal": "Heliyon",
+      "license": "cc by-nc-nd",
+      "title": "Some comments on: Yonoff et al. 'Research trends in proton exchange membrane fuel cells during 2008-2018: A bibliometric analysis', Heliyon, 2019, 5: e01724.",
+      "pool_sentences": 44,
+      "corpus_sentences": 26
+    },
+    {
+      "pmcid": "PMC12612149",
+      "doi": "10.1038/s41598-025-23182-w",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Influence of obstacle aspect ratio on proton exchange membrane fuel cell performance with numerical and sensitivity analysis.",
+      "pool_sentences": 178,
+      "corpus_sentences": 118
+    },
+    {
+      "pmcid": "PMC9413767",
+      "doi": "10.3390/ma15165601",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Anion Exchange Membranes for Alkaline Polymer Electrolyte Fuel Cells-A Concise Review.",
+      "pool_sentences": 256,
+      "corpus_sentences": 175
+    },
+    {
+      "pmcid": "PMC6680835",
+      "doi": "10.3390/membranes9070083",
+      "year": "2019",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Composite Membranes for High Temperature PEM Fuel Cells and Electrolysers: A Critical Review.",
+      "pool_sentences": 603,
+      "corpus_sentences": 411
+    },
+    {
+      "pmcid": "PMC13006946",
+      "doi": "10.1021/acsami.5c22540",
+      "year": "2026",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by-nc-nd",
+      "title": "Impact of Microporous Layer Composition on the Water Content in the Membrane Electrode Assembly of Polymer Electrolyte Fuel Cells.",
+      "pool_sentences": 334,
+      "corpus_sentences": 221
+    },
+    {
+      "pmcid": "PMC12677606",
+      "doi": "10.1002/advs.202513666",
+      "year": "2025",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Performance Degradation in Proton Exchange Membrane Fuel Cell Under Large Load Variation at Rapid Startup: Phenomena and Solution Based on Different Flow Fields.",
+      "pool_sentences": 185,
+      "corpus_sentences": 126
+    },
+    {
+      "pmcid": "PMC13628618",
+      "doi": "10.1021/acsomega.6c06384",
+      "year": "2026",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Modeling Impact of Crack Density on the Performance of the Microporous Layer in PEMFCs.",
+      "pool_sentences": 219,
+      "corpus_sentences": 150
+    },
+    {
+      "pmcid": "PMC6536429",
+      "doi": "10.1016/j.heliyon.2019.e01724",
+      "year": "2019",
+      "journal": "Heliyon",
+      "license": "cc by-nc-nd",
+      "title": "Research trends in proton exchange membrane fuel cells during 2008-2018: A bibliometric analysis.",
+      "pool_sentences": 86,
+      "corpus_sentences": 59
+    },
+    {
+      "pmcid": "PMC13631290",
+      "doi": "10.1038/s41467-026-74391-4",
+      "year": "2026",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "Coulombic surface dipole trapping ionomer for efficient proton exchange membrane fuel cells.",
+      "pool_sentences": 314,
+      "corpus_sentences": 209
+    },
+    {
+      "pmcid": "PMC11305322",
+      "doi": "10.1016/j.heliyon.2024.e34631",
+      "year": "2024",
+      "journal": "Heliyon",
+      "license": "cc by-nc",
+      "title": "Performance evaluation and economic analysis of integrated solid oxide electrolyzer cell and proton exchange membrane fuel cell for power generation.",
+      "pool_sentences": 195,
+      "corpus_sentences": 130
+    },
+    {
+      "pmcid": "PMC7070319",
+      "doi": "10.3390/molecules25040955",
+      "year": "2020",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Development of a Current Collector with a Graphene Thin Film for a Proton Exchange Membrane Fuel Cell Module.",
+      "pool_sentences": 175,
+      "corpus_sentences": 113
+    },
+    {
+      "pmcid": "PMC10256161",
+      "doi": "10.1126/sciadv.adg0366",
+      "year": "2023",
+      "journal": "Science advances",
+      "license": "cc by-nc",
+      "title": "Fe/Co dual metal catalysts modulated by S-ligands for efficient acidic oxygen reduction in PEMFC.",
+      "pool_sentences": 196,
+      "corpus_sentences": 136
+    },
+    {
+      "pmcid": "PMC10096711",
+      "doi": "10.3390/polym15071629",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Effects of Cathode GDL Gradient Porosity Distribution along the Flow Channel Direction on Gas-Liquid Transport and Performance of PEMFC.",
+      "pool_sentences": 169,
+      "corpus_sentences": 123
+    },
+    {
+      "pmcid": "PMC9866212",
+      "doi": "10.3390/membranes13010012",
+      "year": "2022",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Analyses of the Effects of Electrolyte and Electrode Thickness on High Temperature Proton Exchange Membrane Fuel Cell (H-TPEMFC) Quality.",
+      "pool_sentences": 311,
+      "corpus_sentences": 207
+    },
+    {
+      "pmcid": "PMC10997768",
+      "doi": "10.1038/s41598-024-58785-2",
+      "year": "2024",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Advanced efficient energy management strategy based on state machine control for multi-sources PV-PEMFC-batteries system.",
+      "pool_sentences": 214,
+      "corpus_sentences": 144
+    },
+    {
+      "pmcid": "PMC10754814",
+      "doi": "10.1038/s41598-023-50080-w",
+      "year": "2023",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Enhanced performance of proton exchange membrane fuel cells by Pt/carbon/antimony-doped tin dioxide triple-junction catalyst.",
+      "pool_sentences": 162,
+      "corpus_sentences": 102
+    },
+    {
+      "pmcid": "PMC11935204",
+      "doi": "10.1002/smsc.202400016",
+      "year": "2024",
+      "journal": "Small science",
+      "license": "cc by",
+      "title": "Structurally Tunable Graphitized Mesoporous Carbon for Enhancing the Accessibility and Durability of Cathode Pt-Based Catalysts for Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 192,
+      "corpus_sentences": 128
+    },
+    {
+      "pmcid": "PMC10874950",
+      "doi": "10.1038/s41598-024-54258-8",
+      "year": "2024",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Dynamic accelerated stress test and coupled on-line analysis program to elucidate aging processes in proton exchange membrane fuel cells.",
+      "pool_sentences": 422,
+      "corpus_sentences": 282
+    },
+    {
+      "pmcid": "PMC11477637",
+      "doi": "10.3390/ma17194713",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Multi-Feature Fusion Method for Life Prediction of Automotive Proton Exchange Membrane Fuel Cell Based on TCN-GRU.",
+      "pool_sentences": 177,
+      "corpus_sentences": 119
+    },
+    {
+      "pmcid": "PMC7751925",
+      "doi": "10.3906/kim-2002-49",
+      "year": "2020",
+      "journal": "Turkish journal of chemistry",
+      "license": "cc by",
+      "title": "Water management improvement in PEM fuel cells via addition of PDMS or APTES polymers to the catalyst layer.",
+      "pool_sentences": 216,
+      "corpus_sentences": 159
+    },
+    {
+      "pmcid": "PMC12606143",
+      "doi": "10.1038/s41598-025-09067-y",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Influence of gravity on water management and mass transport losses in polymer electrolyte membrane fuel cells.",
+      "pool_sentences": 258,
+      "corpus_sentences": 175
+    },
+    {
+      "pmcid": "PMC8780204",
+      "doi": "10.3390/membranes12010094",
+      "year": "2022",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Real-Time Monitoring of HT-PEMFC.",
+      "pool_sentences": 113,
+      "corpus_sentences": 73
+    },
+    {
+      "pmcid": "PMC8456347",
+      "doi": "10.3390/polym13172864",
+      "year": "2021",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Dimethylimidazolium-Functionalized Polybenzimidazole and Its Organic-Inorganic Hybrid Membranes for Anion Exchange Membrane Fuel Cells.",
+      "pool_sentences": 229,
+      "corpus_sentences": 145
+    },
+    {
+      "pmcid": "PMC9698372",
+      "doi": "10.3390/membranes12111103",
+      "year": "2022",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Research Progress, Trends, and Current State of Development on PEMFC-New Insights from a Bibliometric Analysis and Characteristics of Two Decades of Research Output.",
+      "pool_sentences": 436,
+      "corpus_sentences": 291
+    },
+    {
+      "pmcid": "PMC12311147",
+      "doi": "10.1038/s41598-025-09947-3",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "A modified perturb and observe MPPT algorithm for PEMFC with rapid convergence and low power oscillation.",
+      "pool_sentences": 184,
+      "corpus_sentences": 126
+    },
+    {
+      "pmcid": "PMC12683640",
+      "doi": "10.1021/acselectrochem.5c00333",
+      "year": "2025",
+      "journal": "ACS electrochemistry",
+      "license": "cc by",
+      "title": "Hydrophobic Diffusion Media via Electrografted Organosilicons Enable Competitive Performance in Polymer Electrolyte Fuel Cells.",
+      "pool_sentences": 269,
+      "corpus_sentences": 180
+    },
+    {
+      "pmcid": "PMC9080524",
+      "doi": "10.1039/c8ra03187h",
+      "year": "2018",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "Janus or homogeneous nanoparticle mediated self-assembly of polymer electrolyte fuel cell membranes.",
+      "pool_sentences": 139,
+      "corpus_sentences": 80
+    },
+    {
+      "pmcid": "PMC9231265",
+      "doi": "10.3390/membranes12060582",
+      "year": "2022",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Ionomer Membranes Produced from Hexaarylbenzene-Based Partially Fluorinated Poly(arylene ether) Blends for Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 261,
+      "corpus_sentences": 182
+    },
+    {
+      "pmcid": "PMC5551839",
+      "doi": "10.3390/ma10070796",
+      "year": "2017",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Manufacturing the Gas Diffusion Layer for PEM Fuel Cell Using a Novel 3D Printing Technique and Critical Assessment of the Challenges Encountered.",
+      "pool_sentences": 102,
+      "corpus_sentences": 72
+    },
+    {
+      "pmcid": "PMC7254196",
+      "doi": "10.3390/ma13092096",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Investigation of Porous Metal-Based 3D-Printed Anode GDLs for Tubular High Temperature Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 130,
+      "corpus_sentences": 88
+    },
+    {
+      "pmcid": "PMC9784070",
+      "doi": "10.3390/membranes12121217",
+      "year": "2022",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "A Bibliometric Study on Trends in Proton Exchange Membrane Fuel Cell Research during 1990-2022.",
+      "pool_sentences": 163,
+      "corpus_sentences": 105
+    },
+    {
+      "pmcid": "PMC9907015",
+      "doi": "10.3762/bjnano.14.19",
+      "year": "2023",
+      "journal": "Beilstein journal of nanotechnology",
+      "license": "cc by",
+      "title": "A novel approach to pulsed laser deposition of platinum catalyst on carbon particles for use in polymer electrolyte membrane fuel cells.",
+      "pool_sentences": 294,
+      "corpus_sentences": 196
+    },
+    {
+      "pmcid": "PMC8596103",
+      "doi": "10.1002/advs.202102637",
+      "year": "2021",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "3D-Zipped Interface: In Situ Covalent-Locking for High Performance of Anion Exchange Membrane Fuel Cells.",
+      "pool_sentences": 204,
+      "corpus_sentences": 143
+    },
+    {
+      "pmcid": "PMC10647390",
+      "doi": "10.3390/ma16216935",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Numerical Assessment of Mitigation Strategies to Reduce Local Oxygen and Proton Transport Resistances in Polymer Electrolyte Fuel Cells.",
+      "pool_sentences": 200,
+      "corpus_sentences": 139
+    },
+    {
+      "pmcid": "PMC8005776",
+      "doi": "10.1016/j.heliyon.2021.e06506",
+      "year": "2021",
+      "journal": "Heliyon",
+      "license": "cc by-nc-nd",
+      "title": "Performance assessment and economic perspectives of integrated PEM fuel cell and PEM electrolyzer for electric power generation.",
+      "pool_sentences": 277,
+      "corpus_sentences": 184
+    },
+    {
+      "pmcid": "PMC13307501",
+      "doi": "10.3390/polym18121542",
+      "year": "2026",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Sulfonation-Time-Dependent Structure-Property Relationships of Electrospun Polyketone Nanofiber Membranes for PEMFC Applications.",
+      "pool_sentences": 277,
+      "corpus_sentences": 182
+    },
+    {
+      "pmcid": "PMC13366464",
+      "doi": "10.1039/d6sc04270h",
+      "year": "2026",
+      "journal": "Chemical science",
+      "license": "cc by-nc",
+      "title": "High-performance CO2 electrolysis in membrane electrode assemblies: the role of non-alkali cations.",
+      "pool_sentences": 176,
+      "corpus_sentences": 118
+    },
+    {
+      "pmcid": "PMC11342164",
+      "doi": "10.1039/d4ra04019h",
+      "year": "2024",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Hydrophobic modification enhances the microstructure stability of the catalyst layer in alkaline polymer electrolyte fuel cells.",
+      "pool_sentences": 179,
+      "corpus_sentences": 124
+    },
+    {
+      "pmcid": "PMC9657248",
+      "doi": "10.3390/ijms232113312",
+      "year": "2022",
+      "journal": "International journal of molecular sciences",
+      "license": "cc by",
+      "title": "Hybrid Carbon Supports Composed of Small Reduced Graphene Oxide and Carbon Nanotubes for Durable Oxygen Reduction Catalysts in Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 114,
+      "corpus_sentences": 75
+    },
+    {
+      "pmcid": "PMC11723953",
+      "doi": "10.1038/s41598-024-83538-6",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "A quasi affine transformation evolution algorithm with evolution matrix selection operation for parameter estimation of proton exchange membrane fuel cells.",
+      "pool_sentences": 301,
+      "corpus_sentences": 185
+    },
+    {
+      "pmcid": "PMC12429972",
+      "doi": "10.3390/molecules30173658",
+      "year": "2025",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Improving Anti-Corrosion and Conductivity of NiTi Alloy Bipolar Plate Used for PEMFCs via Nb Alloying.",
+      "pool_sentences": 148,
+      "corpus_sentences": 98
+    },
+    {
+      "pmcid": "PMC3312830",
+      "doi": "10.1186/1556-276x-7-34",
+      "year": "2012",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "Durability test with fuel starvation using a Pt/CNF catalyst in PEMFC.",
+      "pool_sentences": 106,
+      "corpus_sentences": 68
+    },
+    {
+      "pmcid": "PMC10058001",
+      "doi": "10.3390/molecules28062810",
+      "year": "2023",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Performance Enhancement of Proton Exchange Membrane Fuel Cell through Carbon Nanofibers Grown In Situ on Carbon Paper.",
+      "pool_sentences": 129,
+      "corpus_sentences": 76
+    },
+    {
+      "pmcid": "PMC9078422",
+      "doi": "10.1039/c7ra12768e",
+      "year": "2018",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Sulfonated graphene oxide/Nafion composite membranes for high temperature and low humidity proton exchange membrane fuel cells.",
+      "pool_sentences": 250,
+      "corpus_sentences": 169
+    },
+    {
+      "pmcid": "PMC9049649",
+      "doi": "10.1039/d0ra00264j",
+      "year": "2020",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Efficient synthesis of Pt-Co nanowires as cathode catalysts for proton exchange membrane fuel cells.",
+      "pool_sentences": 144,
+      "corpus_sentences": 94
+    },
+    {
+      "pmcid": "PMC13177168",
+      "doi": "10.1002/cssc.202502709",
+      "year": "2026",
+      "journal": "ChemSusChem",
+      "license": "cc by-nc-nd",
+      "title": "Insights Into Atomic Ordering and Morphological Control Integration Design for Next-Generation Proton Exchange Membrane Fuel Cells.",
+      "pool_sentences": 250,
+      "corpus_sentences": 159
+    }
+  ],
+  "leakage": {
+    "mulms_sentences": 10184,
+    "mulms_ngrams": 222977,
+    "overlap_by_document": {
+      "sofc_04": 98,
+      "pemfc_02": 223,
+      "pemfc_13": 199,
+      "electrolysis_03": 127,
+      "graphene_01": 97,
+      "sofc_02": 63,
+      "electrolysis_02": 27,
+      "semi_06": 3,
+      "sofc_03": 3,
+      "pemfc_04": 57,
+      "pemfc_14": 21,
+      "oastm_09": 32,
+      "pemfc_03": 122,
+      "pemfc_07": 71,
+      "sofc_01": 80,
+      "electrolysis_04": 45,
+      "steel_03": 8,
+      "graphene_02": 54,
+      "oastm_02": 30,
+      "oastm_05": 31,
+      "pemfc_08": 13,
+      "steel_04": 27,
+      "steel_06": 8,
+      "electrolysis_01": 36,
+      "semi_05": 15,
+      "pemfc_10": 13,
+      "poly_02": 3,
+      "steel_11": 21,
+      "oastm_01": 5,
+      "poly_01": 3,
+      "oastm_11": 6,
+      "semi_01": 5,
+      "poly_11": 8,
+      "steel_05": 3,
+      "semi_08": 4,
+      "semi_04": 5,
+      "oastm_08": 7,
+      "semi_03": 5,
+      "oastm_06": 4,
+      "semi_02": 3,
+      "oastm_03": 1,
+      "oastm_04": 2,
+      "poly_05": 1,
+      "oastm_10": 2
+    },
+    "overlap_examples": [
+      {
+        "sentence": "In addition, the integrated GDL prepared by laser engraving still maintains a high tensile strength compared with the unengraved GDL, as shown in Figure S4 (Supporting Information).",
+        "ngram": "in figure s4 ( supporting information ) .",
+        "docs": [
+          "sofc_04"
+        ]
+      },
+      {
+        "sentence": "Although the laser destroys the carbon fiber structure on the surface, the bottom of the integrated GDL still maintains a complete carbon fiber structure, as shown in Figure S5 (Supporting Information).",
+        "ngram": "in figure s5 ( supporting information ) .",
+        "docs": [
+          "sofc_04"
+        ]
+      },
+      {
+        "sentence": "As shown in Figure 2n, the single fuel cell is composed of a catalyst\u2010coated membrane (CCM), two pieces of new integrated GDL, and two slides of Ti flat plate.",
+        "ngram": "catalyst - coated membrane ( ccm ) ,",
+        "docs": [
+          "pemfc_02"
+        ]
+      },
+      {
+        "sentence": "The study of proton exchange membrane fuel cells (PEMFCs) has received intense attention due to their wide and diverse applications in chemical sensors, electrochemical devices, batteries, supercapacitors, and power generation, which has led to the design of membrane-electrode assemblies (MEAs) that operate in different fuel cell types.",
+        "ngram": "proton exchange membrane fuel cells ( pemfcs )",
+        "docs": [
+          "pemfc_02",
+          "pemfc_13"
+        ]
+      },
+      {
+        "sentence": "Nafion was developed by DuPont in the late 1960s and is still the state-of-the-art low-temperature PEM.",
+        "ngram": "the state - of - the - art",
+        "docs": [
+          "electrolysis_03",
+          "graphene_01",
+          "sofc_02",
+          "sofc_04"
+        ]
+      },
+      {
+        "sentence": "The energy conversion is performed by means of two half-reactions: the hydrogen oxidation reaction (HOR) and the oxygen reduction reaction (ORR).",
+        "ngram": "the hydrogen oxidation reaction ( hor ) and",
+        "docs": [
+          "pemfc_13"
+        ]
+      },
+      {
+        "sentence": "Neutral nanofibers were fabricated through the electrospinning process, functionalized with acidic and basic groups by means of silane chemistry, and characterized by X-ray photoelectron spectroscopy (XPS).",
+        "ngram": "by x - ray photoelectron spectroscopy ( xps",
+        "docs": [
+          "electrolysis_03"
+        ]
+      },
+      {
+        "sentence": "Single metal of platinum group metal (PGM), platinum group metal alloys, and single-atom-based metal oxides and metal nitrides are used like active catalysts for the oxygen reduction reaction (ORR).",
+        "ngram": "active catalysts for the oxygen reduction reaction (",
+        "docs": [
+          "pemfc_02"
+        ]
+      },
+      {
+        "sentence": "The electrophoretic deposition (EPD) method, with considerable results in fabricating the gas diffusion electrode (GDE) in the absence of the binder for membrane\u2013electrode assemblies (MEAs) in PEMFC operating at 140 \u00b0C, is presented in this article.",
+        "ngram": "for membrane - electrode assemblies ( meas )",
+        "docs": [
+          "pemfc_13"
+        ]
+      },
+      {
+        "sentence": "The exploitation of state-of-the-art of carbon-supported Pt electrocatalysts for PEMFCs is mostly limited, due to high Pt loading and durability issues caused by electrochemical instability by oxide formation on the carbon support in high-potential regimes.",
+        "ngram": "of state - of - the - art",
+        "docs": [
+          "electrolysis_02"
+        ]
+      },
+      {
+        "sentence": "Ultrathin cathode catalyst layers prepared using the decal transfer method containing carbon-supported electrocatalysts Pt/C, PtCo/C, and PtCoMn/C were evaluated in terms of charge transfer resistance Rct in a single cell.",
+        "ngram": "pt / c , ptco / c ,",
+        "docs": [
+          "pemfc_02"
+        ]
+      },
+      {
+        "sentence": "The achieved high performance with MEA with ultralow Pt loading of 0.147 mg/cm2 was 1.42 W/cm2, as shown in Figure 24.",
+        "ngram": "ultralow pt loading of 0 . 147 mg",
+        "docs": [
+          "pemfc_02"
+        ]
+      },
+      {
+        "sentence": "The corresponding amount of platinum was 0.1035 gPt/kW, which reached the index pointed out by the Department of Energy (DOE).",
+        "ngram": "the corresponding amount of platinum was 0 .",
+        "docs": [
+          "pemfc_02"
+        ]
+      },
+      {
+        "sentence": "Hydrophobicity and porosity of the gas diffusion layer (GDL) are key parameters in optimizing the design of PEMFCs.",
+        "ngram": "of the gas diffusion layer ( gdl )",
+        "docs": [
+          "pemfc_13"
+        ]
+      },
+      {
+        "sentence": "The state-of-the-art technology is $180/kW, a cost that could be estimated at $50/kW with low-volume production and $45/kW with high-volume projection.",
+        "ngram": "the state - of - the - art",
+        "docs": [
+          "electrolysis_03",
+          "graphene_01",
+          "sofc_02",
+          "sofc_04"
+        ]
+      },
+      {
+        "sentence": "The Supporting Information is available free of charge at https://pubs.acs.org/doi/10.1021/acsomega.0c03347.",
+        "ngram": "the supporting information is available free of charge",
+        "docs": [
+          "electrolysis_02"
+        ]
+      },
+      {
+        "sentence": "The authors declare no competing financial interest.",
+        "ngram": "the authors declare no competing financial interest .",
+        "docs": [
+          "semi_06",
+          "sofc_03"
+        ]
+      },
+      {
+        "sentence": "In this review article, the CL structure formation, visualization, and characterization have been comprehensively reviewed, and the state-of-the-art experimental techniques and results have been scrutinized.",
+        "ngram": "the state - of - the - art",
+        "docs": [
+          "electrolysis_03",
+          "graphene_01",
+          "sofc_02",
+          "sofc_04"
+        ]
+      },
+      {
+        "sentence": "The practical structure of CLs, which is conventionally composed of carbon-based platinum (e.g., Pt/C), ionomer (e.g., Nafion polymer), and void regions (i.e., porous space), can be determined by various manufacturing parameters, including material specification (e.g., nature of catalyst and ionomer materials, size and shape of particles, and composition), catalyst ink composition, preparation procedures, ink application techniques, and drying and hot-pressing conditions.",
+        "ngram": "( e . g . , pt /",
+        "docs": [
+          "pemfc_04",
+          "pemfc_14"
+        ]
+      },
+      {
+        "sentence": "With Nafion polymer, the power density is doubled in comparison with that of the PTFE-bound CLs, and the electrochemical surface area (ECSA) is increased from 22% (PTFE-bounded CLs) to 45.4% (ionomer-bounded CLs).",
+        "ngram": "and the electrochemical surface area ( ecsa )",
+        "docs": [
+          "pemfc_02"
+        ]
+      }
+    ],
+    "duplicate_examples": [
+      {
+        "sentence": "Individual images of the accumulated liquid water for the different experiments can be seen in, whereas images showing the qualitative evolution of liquid water content for 5 and 30 min are shown in.",
+        "duplicate_of": 246
+      },
+      {
+        "sentence": "The conventional serpentine flow-field designs with the two-dimensional channel and rib configuration often cause water accumulation, thus blocking the transport of reactants and interfering with the removal of water, which in turn results in reduced fuel cell performance at high current densities.",
+        "duplicate_of": 745
+      },
+      {
+        "sentence": "His research interests include advanced experimental and numerical techniques for fuel cells and other green energy systems.",
+        "duplicate_of": 1894
+      },
+      {
+        "sentence": "The main conclusions are as follows:",
+        "duplicate_of": 1116
+      },
+      {
+        "sentence": "The authors declare no competing financial interest.",
+        "duplicate_of": 1128
+      },
+      {
+        "sentence": "These multicarbon compounds can be mainly obtained electrochemically from CO2 using Cu\u2010based electrocatalysts.",
+        "duplicate_of": 3000
+      },
+      {
+        "sentence": "There is a slight difference in the water-transport rate for low water activity.",
+        "duplicate_of": 4576
+      },
+      {
+        "sentence": "The diffusion coefficient is generally proportional to the temperature and relative humidity.",
+        "duplicate_of": 4596
+      },
+      {
+        "sentence": "FCs have emerged as highly recommended energy conversion devices due to their numerous advantages.",
+        "duplicate_of": 4828
+      },
+      {
+        "sentence": "The valence state of Co can be analyzed from Figure 5c.",
+        "duplicate_of": 5853
+      },
+      {
+        "sentence": "The peak power density of the S-AD configuration is 0.59 W/cm2, which is 13% higher than that of the CSFF.",
+        "duplicate_of": 6151
+      },
+      {
+        "sentence": "The authors declare no competing financial interest.",
+        "duplicate_of": 1128
+      },
+      {
+        "sentence": "Finally, SCPSO obtained the best Friedman rank of 1.0, which was significantly better than all other algorithms.",
+        "duplicate_of": 6479
+      },
+      {
+        "sentence": "The statistical analysis confirms that SCPSO is a highly accurate, precise, and reliable optimization tool for PEMFC parameter estimation, outperforming traditional and state-of-the-art algorithms across all evaluated metrics.",
+        "duplicate_of": 6597
+      },
+      {
+        "sentence": "The ionomer content in the catalyst layer was 10 wt %.",
+        "duplicate_of": 6922
+      },
+      {
+        "sentence": "The fabricated catalyst-loaded Ni foam was used as working electrode.",
+        "duplicate_of": 6971
+      },
+      {
+        "sentence": "A homemade RHE and a graphite rod were used as reference and counter electrodes, respectively.",
+        "duplicate_of": 6972
+      },
+      {
+        "sentence": "LSV curve was recorded from OCP to 1.8 V versus RHE at 5 mV s\u22121.",
+        "duplicate_of": 6973
+      },
+      {
+        "sentence": "EIS was performed over a frequency range of 100 kHz to 0.1 Hz with 5-mV amplitude.",
+        "duplicate_of": 6974
+      },
+      {
+        "sentence": "The authors declare no competing financial interest.",
+        "duplicate_of": 1128
+      }
+    ],
+    "shingle": {
+      "characters": 50,
+      "article_overlap": 5,
+      "sentences_dropped": 10,
+      "by_article": {
+        "PMC7581244": 1,
+        "PMC12899464": 1,
+        "PMC11643431": 1,
+        "PMC12372429": 1,
+        "PMC11238300": 1,
+        "PMC6994205": 1,
+        "PMC10972082": 1,
+        "PMC12476485": 1,
+        "PMC8272180": 1,
+        "PMC13631290": 1
+      },
+      "articles_dropped": []
+    }
+  },
+  "corpus": {
+    "path": "data/processed/corpus/topic_pemfc_sentences.txt",
+    "sentences": 40000,
+    "words": 1149345,
+    "sha256": "13ac1709715feee76cd50204df3674a58ec268a44d8042561a49080e66b79c55"
+  },
+  "run": {
+    "search_retrieved": "2026-10-18T09:24:30Z",
+    "started": "2026-10-18T10:48:28Z",
+    "finished": "2026-10-18T10:49:26Z",
+    "seconds": 57.7,
+    "used_articles_downloaded_now": 0,
+    "http_requests": 0,
+    "cache_dir": "data/processed/corpus/europepmc_topic_pemfc"
+  }
+}

@@ -47,7 +47,7 @@ def test_coverage_with_leakage_and_types(tmp_path, monkeypatch):
     b = report['subfields']['b']
     assert (b['n_test'], b['n_unseen'], b['unseen_share']) == (10, 9, 0.9)
     c = b['corpora']['topic']
-    # no corpus sentence shares 30 characters with the toy documents, so nothing leaks
+    # no corpus sentence shares 50 characters with the toy documents, so nothing leaks
     assert c['leaked'] == 0
     # exact: YSZ (twice), anode, 750 °C, La0.6Sr0.4CoO3 and cathode (twice) = 7 of 9; the long
     # formula and 'electrolyte' are nowhere in the corpus

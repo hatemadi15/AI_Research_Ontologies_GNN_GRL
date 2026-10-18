@@ -852,6 +852,67 @@ def test_week11_silver_name_batches(monkeypatch, tmp_path):
     assert {'w11a', 'w11b'} <= set(kj.BATCHES)
 
 
+def test_week12_topic_name_batches(monkeypatch, tmp_path):
+    """w12a: the screen's three variants on MuLMS, seed offsets 0 to 200, the jobs of a variant
+    in one lane; w12b:<variant>: the winner's seed offsets 300 to 900, the names variants
+    with each lane training the teachers and 3 or 4 students, the 6-copy jobs balanced."""
+    monkeypatch.setattr(nb.os.path, 'isfile', lambda path: True)    # the corpora are not here
+    monkeypatch.setattr(kj, 'MULMS_REPORT', tmp_path / 'no_mulms.json')
+    monkeypatch.setattr(kj, 'mulms_files', lambda: {'a_01.conll': 'a' * 64})
+    reports = tmp_path / 'topic_corpora'
+    reports.mkdir()
+    for topic in kj.MULMS_SUBFIELD_NAMES:
+        (reports / f'{topic}.json').write_text(json.dumps({'corpus': {'sha256': topic * 8}}))
+    monkeypatch.setattr(kj, 'TOPIC_REPORTS', reports)
+    real_sha256 = kj.corpus_sha256
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda report=None: (
+        real_sha256(report) if report is not None and Path(report).parent == reports else 'x' * 64))
+    lane0, lane1 = _parsed(kj.batch_lanes('w12a'))
+    assert lane0[0].tag == 'smokeao' and lane0[0].granularity == 'fine'
+    names, mentions, six = lane0[1:8], lane1[:7], [lane0[8], lane0[9], lane1[7]]
+    assert len(lane0) == 10 and len(lane1) == 8
+    for lane, mention in ((names, False), (mentions, True)):
+        assert [a.subfields for a in lane] == [[s] for s in kj.MULMS_SUBFIELD_NAMES]
+        for a in lane:
+            assert (a.granularity, a.train_pool, nb.protocol_name(a)) == (
+                'mulms', 400, 'leave_one_subfield_out')
+            assert a.self_train == f'data/processed/corpus/topic_{a.subfields[0]}_sentences.txt'
+            assert (a.self_train_sample, a.teachers, a.students, a.augment_mentions) == (
+                0, 3, 10, 3)
+            assert a.augment_names and a.crf and a.save_predictions and a.names_tag == 'topic'
+            assert getattr(a, 'silver_mentions', False) == mention
+            assert a.student_offsets == [0, 100, 200]
+            view = nb.SimpleNamespace(**{**vars(a), 'tag': 'm0'})
+            assert nb.variant_name(view) == ('crf_mrm_topic_m0' if mention else 'crf_mrs_topic_m0')
+    assert [a.tag for a in six] == ['m0', 'm200', 'm100']
+    for a in six:
+        assert (a.granularity, a.train_pool, a.augment_mentions, a.crf) == ('mulms', 400, 6, True)
+        assert nb.protocol_name(a) == 'leave_one_subfield_out' and not hasattr(a, 'teachers')
+        assert nb.variant_name(a) == f'crf_mr6_{a.tag}'
+    spec = kj.batch_spec('w12a')
+    assert spec['topic_corpora'] == {t: t * 8 for t in kj.MULMS_SUBFIELD_NAMES}
+    assert spec['mulms_files'] == {'a_01.conll': 'a' * 64}
+    for variant in ('mrs', 'mrm'):
+        lane0, lane1 = _parsed(kj.batch_lanes(f'w12b:{variant}'))
+        assert lane0[0].tag == 'smokeap'
+        for lane, offsets in ((lane0[1:], [300, 400, 500]), (lane1, [600, 700, 800, 900])):
+            assert [a.subfields for a in lane] == [[s] for s in kj.MULMS_SUBFIELD_NAMES]
+            for a in lane:
+                assert a.student_offsets == offsets and a.names_tag == 'topic'
+                assert getattr(a, 'silver_mentions', False) == (variant == 'mrm')
+        assert kj.batch_spec(f'w12b:{variant}')['topic_corpora'] == spec['topic_corpora']
+    lane0, lane1 = _parsed(kj.batch_lanes('w12b:mr6'))
+    assert lane0[0].tag == 'smokeap'
+    jobs = lane0[1:] + lane1
+    assert sorted(a.tag for a in jobs) == [f'm{off}' for off in range(300, 1000, 100)]
+    assert all(a.augment_mentions == 6 for a in jobs) and abs(len(lane0) - 1 - len(lane1)) <= 1
+    assert 'topic_corpora' not in kj.batch_spec('w12b:mr6')
+    with pytest.raises(ValueError, match='unknown week-12 variant'):
+        kj.batch_lanes('w12b:mt')
+    assert {'w12a', 'w12b:mrs', 'w12b:mrm', 'w12b:mr6'} <= set(kj.BATCHES)
+    assert kj.batch_name('w12b:mrm') == 'w12b:mrm'
+
+
 def test_build_bundle_with_the_mulms_files(tmp_path):
     corpus = tmp_path / 'corpus.txt'
     corpus.write_text('One sentence.\n')

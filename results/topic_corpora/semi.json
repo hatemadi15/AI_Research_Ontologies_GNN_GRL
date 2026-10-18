@@ -1,0 +1,4686 @@
+{
+  "script": "src/graph/build_topic_corpus.py",
+  "protocol": "docs/ROADMAP.md \u00a74, week 12: mention replacement with names from in-topic text",
+  "topic": "semi",
+  "selection": {
+    "source": "Europe PMC REST API",
+    "search_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+    "fulltext_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/{pmcid}/fullTextXML",
+    "result_type": "core",
+    "topic": "semi",
+    "query": "OPEN_ACCESS:y AND HAS_FT:y AND TITLE:(\"SiC\" OR \"silicon carbide\" OR \"GaN\" OR \"gallium nitride\" OR \"MOSFET\" OR \"MOSFETs\" OR \"transparent conducting\" OR \"silicon photovoltaic\" OR \"silicon photovoltaics\" OR \"photovoltaic modules\" OR \"epitaxial\" OR \"epitaxy\" OR \"chemical vapor deposition\" OR \"chemical vapour deposition\" OR \"wafer\" OR \"wafers\")",
+    "title_terms": [
+      "SiC",
+      "silicon carbide",
+      "GaN",
+      "gallium nitride",
+      "MOSFET",
+      "MOSFETs",
+      "transparent conducting",
+      "silicon photovoltaic",
+      "silicon photovoltaics",
+      "photovoltaic modules",
+      "epitaxial",
+      "epitaxy",
+      "chemical vapor deposition",
+      "chemical vapour deposition",
+      "wafer",
+      "wafers"
+    ],
+    "exclude_title_terms": [
+      "author correction",
+      "correction",
+      "erratum",
+      "corrigendum",
+      "retraction"
+    ],
+    "excluded_pmcids": [
+      "PMC3990421",
+      "PMC4772004",
+      "PMC5700654",
+      "PMC6247067",
+      "PMC6418911",
+      "PMC6631236",
+      "PMC6650920",
+      "PMC7180721",
+      "PMC7231364",
+      "PMC7254350",
+      "PMC7361982",
+      "PMC7435395",
+      "PMC7529785",
+      "PMC7532522",
+      "PMC7590506",
+      "PMC7766479"
+    ],
+    "local_filters": [
+      "a PMCID",
+      "not one of MuLMS's articles",
+      "language eng",
+      "a title term in the title",
+      "no exclusion term in the title"
+    ],
+    "order": "PMCIDs sorted as strings, then random.Random(0).shuffle",
+    "superscripts": "inline, as in the SOFC corpus",
+    "words": "chem_tokenize.ChemWordTokenizer (ChemDataExtractor 1.3.0), then ASCII hyphens inside a word made words of their own, space-separated"
+  },
+  "settings": {
+    "seed": 0,
+    "target_pool": 60000,
+    "max_sentences": 40000,
+    "chunk": 10,
+    "min_words": 5,
+    "max_words": 120,
+    "min_alpha_fraction": 0.5,
+    "max_inline_formula_chars": 30,
+    "ngram": 8,
+    "language": "eng",
+    "page_size": 500,
+    "min_request_interval_seconds": 0.25,
+    "timeout_seconds": 60,
+    "retries": 4,
+    "backoff_seconds": 2.0,
+    "abbreviations": [
+      "approx",
+      "at",
+      "ca",
+      "cf",
+      "eq",
+      "eqs",
+      "fig",
+      "figs",
+      "no",
+      "nos",
+      "pp",
+      "ref",
+      "refs",
+      "resp",
+      "sec",
+      "sect",
+      "vol",
+      "vs",
+      "wt",
+      "et al"
+    ],
+    "dotted_abbreviations": "(?:[A-Za-z]{1,2}\\.)+[A-Za-z]{1,2}",
+    "skipped_sections": "^[\\d.\\s]*(acknowledg|funding|conflicts? of interest|competing interests?|author contributions?|data availability|availability of data|ethic|abbreviations|nomenclature|supplementary|references|declarations?|disclosure)",
+    "splitter": "build_fatigue_corpus.split_sentences"
+  },
+  "counts": {
+    "hits": 6390,
+    "api_hit_count": 6390,
+    "hits_rejected": 222,
+    "eligible_articles": 6168,
+    "articles_used": 370,
+    "articles_downloaded": 368,
+    "failed_downloads": 0,
+    "articles_without_text": 2,
+    "target_reached": true,
+    "paragraphs": 11997,
+    "raw_sentences": 63722,
+    "cut_by_formula": 2073,
+    "length_filtered": 738,
+    "length_filtered_by": {
+      "too_short": 656,
+      "too_long": 17,
+      "non_alphabetic": 65
+    },
+    "after_length_filter": 60911,
+    "duplicates_dropped": 172,
+    "overlap_dropped": 660,
+    "pool": 60079,
+    "kept": 40000,
+    "shingle_dropped": 0,
+    "articles_dropped_by_shingles": 0
+  },
+  "rejected_by_reason": {
+    "title_term:correction": 56,
+    "title_term:author correction": 19,
+    "no_pmcid": 13,
+    "no_title_term": 100,
+    "title_term:corrigendum": 17,
+    "title_term:retraction": 5,
+    "title_term:erratum": 12
+  },
+  "excluded_by_title": [
+    {
+      "pmcid": "PMC13073720",
+      "term": "correction",
+      "title": "Femtosecond Laser Stealth Slicing of 4H-SiC Wafers with Static Aspheric Aberration Correction."
+    },
+    {
+      "pmcid": "PMC13643718",
+      "term": "correction",
+      "title": "Correction: Enhanced performance in transparent conducting materials at the interface of a wide band gap semiconductor and a correlated metal."
+    },
+    {
+      "pmcid": "PMC11661989",
+      "term": "author correction",
+      "title": "Author Correction: Epitaxial growth of high-quality GaN with a high growth rate at low temperatures by radical-enhanced metalorganic chemical vapor deposition."
+    },
+    {
+      "pmcid": "PMC13210685",
+      "term": "correction",
+      "title": "Dispersion Compensation and Multi-Beam Interference Correction Algorithm for Thickness Measurement of SiC Epitaxial Layer."
+    },
+    {
+      "pmcid": "PMC12969868",
+      "term": "correction",
+      "title": "Correction: Gas-phase synthesis of the bicyclic silicon tricarbide molecule (c-SiC3) as a precursor to silicon carbide nanoparticles in space."
+    },
+    {
+      "pmcid": "PMC12388553",
+      "term": "correction",
+      "title": "Integrated LCOS-SLM-Based Laser Slicing System for Aberration Correction in Silicon Carbide Substrate Manufacturing."
+    },
+    {
+      "pmcid": "PMC13133901",
+      "term": "correction",
+      "title": "Correction to \"WSe2 Monolayers Grown by Molecular Beam Epitaxy on hBN\"."
+    },
+    {
+      "pmcid": "PMC13183873",
+      "term": "correction",
+      "title": "Correction: Direct investigation of localized leakage currents in GaN-on-sapphire pn-diodes."
+    },
+    {
+      "pmcid": "PMC12169258",
+      "term": "corrigendum",
+      "title": "Corrigendum to \"Investigations on the microstructure and properties of yttria and silicon carbide reinforced aluminium composites\" [Heliyon Volume 9, Issue 4, April 2023, Article e15462]."
+    },
+    {
+      "pmcid": "PMC12833431",
+      "term": "correction",
+      "title": "Physics-constrained GAN boosts OAM correction in ocean turbulence."
+    },
+    {
+      "pmcid": "PMC13286219",
+      "term": "retraction",
+      "title": "Retraction: SiC ultra -thin films for high-performance quantum spacecraft applications fabricated via nanosecond pulsed laser deposition and doping."
+    },
+    {
+      "pmcid": "PMC11976393",
+      "term": "retraction",
+      "title": "Retraction: Adsorption and sensor performance of transition metal-decorated zirconium-doped silicon carbide nanotubes for NO2 gas application: a computational insight."
+    },
+    {
+      "pmcid": "PMC13325431",
+      "term": "correction",
+      "title": "Correction: Reduced hot-electron energy-loss rate induced by finite-square confinement potential in GaN/AlN, GaAs/AlAs, and GaSb/InAs nanostructured materials."
+    },
+    {
+      "pmcid": "PMC11039656",
+      "term": "author correction",
+      "title": "Author Correction: Numerical simulation analysis of carbon defects in the buffer on vertical leakage and breakdown of GaN on silicon epitaxial layers."
+    },
+    {
+      "pmcid": "PMC12992604",
+      "term": "retraction",
+      "title": "Retraction Note: LungGANDetectAI: a GAN-augmented and attention-guided deep learning framework for accurate and explainable lung cancer detection."
+    },
+    {
+      "pmcid": "PMC10590333",
+      "term": "correction",
+      "title": "Correction: Understanding the 2D-material and substrate interaction during epitaxial growth towards successful remote epitaxy: a review."
+    },
+    {
+      "pmcid": "PMC11021424",
+      "term": "correction",
+      "title": "Publisher Correction: Deep-potential enabled multiscale simulation of gallium nitride devices on boron arsenide cooling substrates."
+    },
+    {
+      "pmcid": "PMC13096232",
+      "term": "retraction",
+      "title": "Retraction Note: Hybrid deep learning framework for cardiovascular disease diagnosis and prognosis using GAN, LSTM, GRU, VARMA, and deep DynaQ network."
+    },
+    {
+      "pmcid": "PMC13077030",
+      "term": "author correction",
+      "title": "Author Correction: Wafer-scale high-\u03ba HfO2 dielectric films with sub-5-\u00c5 equivalent oxide thickness for 2D MoS2 transistors."
+    },
+    {
+      "pmcid": "PMC12714207",
+      "term": "correction",
+      "title": "Correction: A GAN-Based Approach for enhancing security in satellite based IoT networks using MPI enabled HPC."
+    },
+    {
+      "pmcid": "PMC12317124",
+      "term": "correction",
+      "title": "Wafer-scale uniformity improvement of Dolan-bridge Josephson junction by shadow evaporation bias correction."
+    },
+    {
+      "pmcid": "PMC12280160",
+      "term": "correction",
+      "title": "Modified energy-based GAN for intensity in homogeneity correction in brain MR images."
+    },
+    {
+      "pmcid": "PMC10044745",
+      "term": "correction",
+      "title": "Correction: Selective area growth of GaN nanowires and nanofins by molecular beam epitaxy on heteroepitaxial diamond (001) substrates."
+    },
+    {
+      "pmcid": "PMC11541187",
+      "term": "correction",
+      "title": "Publisher Correction: Using both faces of polar semiconductor wafers for functional devices."
+    },
+    {
+      "pmcid": "PMC11243393",
+      "term": "correction",
+      "title": "Correction: Pakhomova et al. High-Entropy Diborides-Silicon Carbide Composites by Reactive and Non-Reactive Spark Plasma Sintering: A Comparative Study. Materials 2024, 17, 718."
+    },
+    {
+      "pmcid": "PMC10601448",
+      "term": "correction",
+      "title": "Correction to \"Chemical Synthesis of La0.75Sr0.25CrO3 Thin Films for p-Type Transparent Conducting Electrodes\"."
+    },
+    {
+      "pmcid": "PMC12199082",
+      "term": "correction",
+      "title": "Correction to \"2D Hole-Arrayed Double-Anode Structure Exciting Surface Plasmon Polaritons for Enhancing Outcoupling Efficiency of Organic Light-Emitting Diodes on Silicon Wafers (OLEDoS)\"."
+    },
+    {
+      "pmcid": "PMC12081724",
+      "term": "author correction",
+      "title": "Author Correction: The molecular dynamic studies of thermal conductivity of SiC ceramic derived from \u03b2/\u03b1 phase transformation."
+    },
+    {
+      "pmcid": "PMC11927885",
+      "term": "correction",
+      "title": "Correction: GAN-WGCNA: Calculating gene modules to identify key intermediate regulators in cocaine addiction."
+    },
+    {
+      "pmcid": "PMC12128096",
+      "term": "correction",
+      "title": "Correction to \"Amorphous Silica Interlayer Unlocks Direct Epitaxial Growth of CsPbBr3 on Silicon via Slip-and-Stick Mechanism\"."
+    },
+    {
+      "pmcid": "PMC12691762",
+      "term": "correction",
+      "title": "Correction: Gan et al. METTL3 Promotes Cutaneous T-Cell Lymphoma Progression by Regulating ARHGEF12 Expression. Int. J. Mol. Sci. 2025, 26, 3640."
+    },
+    {
+      "pmcid": "PMC10383441",
+      "term": "correction",
+      "title": "Correction: Yang et al. Growing Carbon Nanotubes In Situ Surrounding Carbon Fiber Surface via Chemical Vapor Deposition to Reinforce Flexural Strength of Carbon Fiber Composites. Polymers 2023, 15, 2309."
+    },
+    {
+      "pmcid": "PMC11076277",
+      "term": "author correction",
+      "title": "Author Correction: Epitaxy, exfoliation, and strain-induced magnetism in rippled Heusler membranes."
+    },
+    {
+      "pmcid": "PMC12637377",
+      "term": "corrigendum",
+      "title": "Corrigendum to 'Decoding Epigenetic Enhancer-Promoter Interactions in Periodontitis via Transformer-GAN: A Deep Learning Framework for Inflammatory Gene Regulation and Biomarker Discovery' [International Dental Journal Volume 75, Issue 6, December 2025, 103879]."
+    },
+    {
+      "pmcid": "PMC11148189",
+      "term": "correction",
+      "title": "Correction: Highly-sensitive wafer-scale transfer-free graphene MEMS condenser microphones."
+    },
+    {
+      "pmcid": "PMC12091785",
+      "term": "correction",
+      "title": "Correction: An explainable ensemble approach for advanced brain tumor classification applying Dual-GAN mechanism and feature extraction techniques over highly imbalanced data."
+    },
+    {
+      "pmcid": "PMC7711928",
+      "term": "correction",
+      "title": "Correction to Graphene Plasmon Cavities Made with Silicon Carbide."
+    },
+    {
+      "pmcid": "PMC11014829",
+      "term": "correction",
+      "title": "Correction: Efficiency improvement by using metal-insulator-semiconductor structure in InGaN/GaN micro-light-emitting diodes."
+    },
+    {
+      "pmcid": "PMC8497584",
+      "term": "author correction",
+      "title": "Author Correction: Spin-controlled generation of indistinguishable and distinguishable photons from silicon vacancy centres in silicon carbide."
+    },
+    {
+      "pmcid": "PMC8618250",
+      "term": "correction",
+      "title": "Correction: Kirste et al. Structural Analysis of Low Defect Ammonothermally Grown GaN Wafers by Borrmann Effect X-ray Topography. Materials 2021, 14, 5472."
+    },
+    {
+      "pmcid": "PMC10014845",
+      "term": "author correction",
+      "title": "Author Correction: Interfacial stabilization for epitaxial CuCrO2 delafossites."
+    },
+    {
+      "pmcid": "PMC11024111",
+      "term": "correction",
+      "title": "Publisher Correction: Structural degeneracy and formation of crystallographic domains in epitaxial LaFeO3 films revealed by machine\u2011learning assisted 4D\u2011STEM."
+    },
+    {
+      "pmcid": "PMC11075367",
+      "term": "correction",
+      "title": "Deep learning-based whole-body PSMA PET/CT attenuation correction utilizing Pix-2-Pix GAN."
+    },
+    {
+      "pmcid": "PMC9064387",
+      "term": "correction",
+      "title": "Correction: Direct chemical vapor deposition synthesis of large area single-layer brominated graphene."
+    },
+    {
+      "pmcid": "PMC7463566",
+      "term": "erratum",
+      "title": "Erratum: Synthesis, Characterization, and Analysis of Hybrid Carbon Nanotubes by Chemical Vapor Deposition: Application for Aluminum Removal. Polymers 2020, 12, 1305."
+    },
+    {
+      "pmcid": "PMC7558029",
+      "term": "correction",
+      "title": "Correction to \"Partial Pressure Assisted Growth of Single-Layer Graphene Grown by Low-Pressure Chemical Vapor Deposition: Implications for High-Performance Graphene FET Devices\"."
+    },
+    {
+      "pmcid": "PMC7361974",
+      "term": "erratum",
+      "title": "Erratum: Facile Functionalization via Plasma-Enhanced Chemical Vapor Deposition for the Effective Filtration of Oily Aerosol. Polymers 2019, 11, 1490."
+    },
+    {
+      "pmcid": "PMC9114331",
+      "term": "author correction",
+      "title": "Author Correction: Laser slice thinning of GaN-on-GaN high electron mobility transistors."
+    },
+    {
+      "pmcid": "PMC6868004",
+      "term": "correction",
+      "title": "Publisher Correction: Characterization of nitrogen doped graphene bilayers synthesized by fast, low temperature microwave plasma-enhanced chemical vapour deposition."
+    },
+    {
+      "pmcid": "PMC5314448",
+      "term": "corrigendum",
+      "title": "Corrigendum: Photo Initiated Chemical Vapour Deposition To Increase Polymer Hydrophobicity."
+    },
+    {
+      "pmcid": "PMC7321627",
+      "term": "erratum",
+      "title": "Erratum: Polozov, I., et al. Fabrication of Silicon Carbide Fiber-Reinforced Silicon Carbide Matrix Composites Using Binder Jetting Additive Manufacturing from Irregularly-Shaped and Spherical Powders. Materials 2020, 13, 1766."
+    },
+    {
+      "pmcid": "PMC10054654",
+      "term": "correction",
+      "title": "Visible-Image-Assisted Nonuniformity Correction of Infrared Images Using the GAN with SEBlock."
+    },
+    {
+      "pmcid": "PMC10434216",
+      "term": "corrigendum",
+      "title": "Corrigendum: Additive manufacturing of Al2O3 ceramics with MgO/SiC contents by laser powder bed fusion process."
+    },
+    {
+      "pmcid": "PMC10186336",
+      "term": "correction",
+      "title": "Correction: Preparation of UV-curable PSAs by grafting isocyanate-terminated photoreactive monomers and the effect of the functionality of grafted monomers on the debonding properties on Si wafers."
+    },
+    {
+      "pmcid": "PMC11243081",
+      "term": "correction",
+      "title": "Correction: Gong et al. Polishing Mechanism of CMP 4H-SiC Crystal Substrate (0001) Si Surface Based on an Alumina (Al2O3) Abrasive. Materials 2024, 17, 679."
+    },
+    {
+      "pmcid": "PMC5797132",
+      "term": "correction",
+      "title": "Publisher Correction: Crystal Orientation Dependence of Gallium Nitride Wear."
+    },
+    {
+      "pmcid": "PMC10098439",
+      "term": "correction",
+      "title": "Correction: First principles study of electronic and optical properties and photocatalytic performance of GaN-SiS van der Waals heterostructure."
+    },
+    {
+      "pmcid": "PMC8358041",
+      "term": "author correction",
+      "title": "Author Correction: Impact of sandwiched strain periodic multilayer AlN/GaN on strain and crystalline quality of a-plane GaN."
+    },
+    {
+      "pmcid": "PMC8987886",
+      "term": "erratum",
+      "title": "Erratum to shock in China 2018 (SIC-study): a cross-sectional survey."
+    },
+    {
+      "pmcid": "PMC8377029",
+      "term": "author correction",
+      "title": "Author Correction: Ternary logic decoder using independently controlled double-gate Si-NW MOSFETs."
+    },
+    {
+      "pmcid": "PMC9844251",
+      "term": "correction",
+      "title": "Correction: Nanoscale imaging of antiferromagnetic domains in epitaxial films of Cr2O3 via scanning diamond magnetic probe microscopy."
+    },
+    {
+      "pmcid": "PMC5565748",
+      "term": "erratum",
+      "title": "Erratum to: Infrared Reflectance Analysis of Epitaxial n-Type Doped GaN Layers Grown on Sapphire."
+    },
+    {
+      "pmcid": "PMC9054817",
+      "term": "author correction",
+      "title": "Author Correction: Graphene-driving strain engineering to enable strain-free epitaxy of AlN film for deep ultraviolet light-emitting diode."
+    },
+    {
+      "pmcid": "PMC5504463",
+      "term": "corrigendum",
+      "title": "Corrigendum: Synthesis of Sr2Si5N8: Ce3+ phosphors for white LEDs via efficient chemical vapor deposition."
+    },
+    {
+      "pmcid": "PMC9962918",
+      "term": "correction",
+      "title": "Correction for Gan et al., An anti-CTLA-4 heavy chain-only antibody with enhanced Treg depletion shows excellent preclinical efficacy and safety profile."
+    },
+    {
+      "pmcid": "PMC5543302",
+      "term": "corrigendum",
+      "title": "Corrigendum: Controlling hybrid nonlinearities in transparent conducting oxides via two-colour excitation."
+    },
+    {
+      "pmcid": "PMC9481581",
+      "term": "author correction",
+      "title": "Author Correction: Epitaxial growth of an atom-thin layer on a LiNi0.5Mn1.5O4 cathode for stable Li-ion battery cycling."
+    },
+    {
+      "pmcid": "PMC9522324",
+      "term": "correction",
+      "title": "Correction for Gan et al., An anti-CTLA-4 heavy chain-only antibody with enhanced Treg depletion shows excellent preclinical efficacy and safety profile."
+    },
+    {
+      "pmcid": "PMC8433301",
+      "term": "correction",
+      "title": "Correction to: Low limit of detection of the AlGaN/GaN-based sensor by the Kelvin connection detection technique."
+    },
+    {
+      "pmcid": "PMC4785529",
+      "term": "corrigendum",
+      "title": "Corrigendum: Can silicon carbide serve as a saturable absorber for passive mode-locked fiber lasers?"
+    },
+    {
+      "pmcid": "PMC5238566",
+      "term": "erratum",
+      "title": "Erratum: Vectorized magnetometer for space applications using electrical readout of atomic scale defects in silicon carbide."
+    },
+    {
+      "pmcid": "PMC8640010",
+      "term": "author correction",
+      "title": "Author Correction: A quantitative approach for trap analysis between Al0.25Ga0.75N and GaN in high electron mobility transistors."
+    },
+    {
+      "pmcid": "PMC7661531",
+      "term": "author correction",
+      "title": "Author Correction: Solid-phase hetero epitaxial growth of \u03b1-phase formamidinium perovskite."
+    },
+    {
+      "pmcid": "PMC9159994",
+      "term": "author correction",
+      "title": "Author Correction: Controlling polarization direction in epitaxial Pb(Zr0.2Ti0.8)O3 films through Nb (n-type) and Fe (p-type) doping."
+    },
+    {
+      "pmcid": "PMC6795816",
+      "term": "correction",
+      "title": "Publisher Correction: Carrier lifetime enhancement in halide perovskite via remote epitaxy."
+    },
+    {
+      "pmcid": "PMC7998014",
+      "term": "author correction",
+      "title": "Author Correction: Controllable deposition of organic metal halide perovskite films with wafer-scale uniformity by single source flash evaporation."
+    },
+    {
+      "pmcid": "PMC4423994",
+      "term": "correction",
+      "title": "Correction: Enhanced Photoluminescence and Raman Properties of Al-Doped ZnO Nanostructures Prepared Using Thermal Chemical Vapor Deposition of Methanol Assisted with Heated Brass."
+    },
+    {
+      "pmcid": "PMC8350169",
+      "term": "corrigendum",
+      "title": "Corrigendum to 'COVID-19 epidemic strongly affected cancer research in Italy: a survey of the Italian Cancer Society (SIC)': [ESMO Open Volume 6, Issue 3, June 2021, 100165]."
+    },
+    {
+      "pmcid": "PMC9083476",
+      "term": "correction",
+      "title": "Correction: Zr-Cu alloy filler metal for brazing SiC ceramic."
+    },
+    {
+      "pmcid": "PMC8780572",
+      "term": "correction",
+      "title": "Correction: Huang et al. High-Uniform and High-Efficient Color Conversion Nanoporous GaN-Based Micro-LED Display with Embedded Quantum Dots. Nanomaterials 2021, 11, 2696."
+    },
+    {
+      "pmcid": "PMC9443678",
+      "term": "correction",
+      "title": "Correction: Facile, wafer-scale compatible growth of ZnO nanowires via chemical bath deposition: assessment of zinc ion contribution and other limiting factors."
+    },
+    {
+      "pmcid": "PMC6722062",
+      "term": "correction",
+      "title": "Publisher Correction: Gallium arsenide solar cells grown at rates exceeding 300 \u00b5m h-1 by hydride vapor phase epitaxy."
+    },
+    {
+      "pmcid": "PMC4685899",
+      "term": "correction",
+      "title": "Correction: A single-source precursor route to anisotropic halogen-doped zinc oxide particles as a promising candidate for new transparent conducting oxide materials."
+    },
+    {
+      "pmcid": "PMC7090005",
+      "term": "correction",
+      "title": "Publisher Correction: Impact of alloy fluctuations and Coulomb effects on the electronic and optical properties of c-plane GaN/AlGaN quantum wells."
+    },
+    {
+      "pmcid": "PMC6536561",
+      "term": "correction",
+      "title": "Correction to: Wafer-Scale Fabrication of Sub-10 nm TiO2-Ga2O3 n-p Heterojunctions with Efficient Photocatalytic Activity by Atomic Layer Deposition."
+    },
+    {
+      "pmcid": "PMC6497287",
+      "term": "correction",
+      "title": "Correction: Confined and interface optical phonon emission in GaN/InGaN double barrier quantum well heterostructures."
+    },
+    {
+      "pmcid": "PMC4897739",
+      "term": "corrigendum",
+      "title": "Corrigendum: Analysing black phosphorus transistors using an analytic Schottky barrier MOSFET model."
+    },
+    {
+      "pmcid": "PMC5906615",
+      "term": "author correction",
+      "title": "Author Correction: Selective 6H-SiC White Light Emission by Picosecond Laser Direct Writing."
+    },
+    {
+      "pmcid": "PMC9080301",
+      "term": "correction",
+      "title": "Correction: Tunnel injection from WS2 quantum dots to InGaN/GaN quantum wells."
+    },
+    {
+      "pmcid": "PMC5859102",
+      "term": "author correction",
+      "title": "Author Correction: Modulation of van der Waals and classical epitaxy induced by strain at the Si step edges in GeSbTe alloys."
+    },
+    {
+      "pmcid": "PMC5414478",
+      "term": "corrigendum",
+      "title": "Corrigendum: Epitaxy of highly ordered organic semiconductor crystallite networks supported by hexagonal boron nitride."
+    },
+    {
+      "pmcid": "PMC5421103",
+      "term": "corrigendum",
+      "title": "Corrigendum: Hexagonal Boron Nitride Tunnel Barriers Grown on Graphite by High Temperature Molecular Beam Epitaxy."
+    },
+    {
+      "pmcid": "PMC5364424",
+      "term": "corrigendum",
+      "title": "Corrigendum: Wafer-scale two-dimensional semiconductors from printed oxide skin of liquid metals."
+    },
+    {
+      "pmcid": "PMC5681562",
+      "term": "correction",
+      "title": "Publisher Correction: Atomic-scale engineering of ferroelectric-ferromagnetic interfaces of epitaxial perovskite films for functional properties."
+    },
+    {
+      "pmcid": "PMC4890580",
+      "term": "erratum",
+      "title": "Erratum: Strain-Engineered Graphene Grown on Hexagonal Boron Nitride by Molecular Beam Epitaxy."
+    },
+    {
+      "pmcid": "PMC4868078",
+      "term": "corrigendum",
+      "title": "Corrigendum: From the Au nano-clusters to the nanoparticles on 4H-SiC (0001)."
+    },
+    {
+      "pmcid": "PMC5832865",
+      "term": "author correction",
+      "title": "Author Correction: Long-range Stripe Nanodomains in Epitaxial (110) BiFeO3 Thin Films on (100) NdGaO3 Substrate."
+    },
+    {
+      "pmcid": "PMC4642700",
+      "term": "corrigendum",
+      "title": "Corrigendum: Crystallinity of tellurium capping and epitaxy of ferromagnetic topological insulator films on SrTiO3."
+    },
+    {
+      "pmcid": "PMC6329699",
+      "term": "corrigendum",
+      "title": "Corrigendum to \"Effect of carbon nano-tubes and dispersions of SiC and Al2O3 on the mechanical and physical properties of copper-nickel alloy\" [Heliyon 4 (10) (October 2018) e00876]."
+    },
+    {
+      "pmcid": "PMC7062847",
+      "term": "corrigendum",
+      "title": "Corrigendum: He XL, Horak E, Wang D, Li TH, Peng WH, Gan BC (2019) Descriptions of five new species in Entoloma subgenus Claudopus from China, with molecular phylogeny of Entoloma s.l. MycoKeys 61: 1-26. https://doi.org/10.3897/mycokeys.61.46446."
+    },
+    {
+      "pmcid": "PMC5009879",
+      "term": "retraction",
+      "title": "Retraction: Integrating Epitaxial-Like Pb(Zr,Ti)O3 Thin-Film into Silicon for Next-Generation Ferroelectric Field-Effect Transistor."
+    },
+    {
+      "pmcid": "PMC5032010",
+      "term": "erratum",
+      "title": "Erratum: High current density GaAs/Si rectifying heterojunction by defect free Epitaxial Lateral overgrowth on Tunnel Oxide from nano-seed."
+    },
+    {
+      "pmcid": "PMC5718688",
+      "term": "correction",
+      "title": "Proton dose distribution measurements using a MOSFET detector with a simple dose-weighted correction method for LET effects."
+    },
+    {
+      "pmcid": "PMC3868968",
+      "term": "erratum",
+      "title": "ERRATUM: Non-volatile ferroelastic switching of the Verwey transition and resistivity of epitaxial Fe3O4/PMN-PT (011)"
+    },
+    {
+      "pmcid": "PMC4085978",
+      "term": "corrigendum",
+      "title": "CORRIGENDUM: Multiple \u03c0-bands and Bernal stacking of multilayer graphene on C-face SiC, revealed by nano-Angle Resolved Photoemission"
+    },
+    {
+      "pmcid": "PMC2991176",
+      "term": "erratum",
+      "title": "Erratum to: Concentric Multiple Rings by Droplet Epitaxy: Fabrication and Study of the Morphological Anisotropy."
+    },
+    {
+      "pmcid": "PMC2964477",
+      "term": "erratum",
+      "title": "Erratum to: Photoluminescence Study of Low Thermal Budget III\u2013V Nanostructures on Silicon by Droplet Epitaxy"
+    },
+    {
+      "pmcid": "PMC5003463",
+      "term": "correction",
+      "title": "Correction: Gan, L.; Denecke, B. Profiling Pre-MicroRNA and Mature MicroRNA Expressions Using a Single Microarray and Avoiding Separate Sample Preparation. Microarrays 2013, 2, 24-33."
+    },
+    {
+      "pmcid": "PMC2893750",
+      "term": "erratum",
+      "title": "Erratum to: Binding Energy and Spin-Orbit Splitting of a Hydrogenic Donor Impurity in AlGaN/GaN Triangle-Shaped Potential Quantum Well."
+    }
+  ],
+  "failed": [
+    {
+      "pmcid": "PMC10207339",
+      "status": "no_text",
+      "error": "no body paragraphs"
+    },
+    {
+      "pmcid": "PMC11121059",
+      "status": "no_text",
+      "error": "no body paragraphs"
+    }
+  ],
+  "articles": [
+    {
+      "pmcid": "PMC9395186",
+      "doi": "10.3389/fonc.2022.942511",
+      "year": "2022",
+      "journal": "Frontiers in oncology",
+      "license": "cc by",
+      "title": "Swin transformer-based GAN for multi-modal medical image translation.",
+      "pool_sentences": 173,
+      "corpus_sentences": 115
+    },
+    {
+      "pmcid": "PMC5612810",
+      "doi": "10.1016/j.heliyon.2017.e00404",
+      "year": "2017",
+      "journal": "Heliyon",
+      "license": "cc by-nc-nd",
+      "title": "Heteroepitaxial diamond growth on 4H-SiC using microwave plasma chemical vapor deposition.",
+      "pool_sentences": 82,
+      "corpus_sentences": 59
+    },
+    {
+      "pmcid": "PMC7289814",
+      "doi": "10.1038/s41467-020-16740-5",
+      "year": "2020",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Tunable resistivity exponents in the metallic phase of epitaxial nickelates.",
+      "pool_sentences": 131,
+      "corpus_sentences": 88
+    },
+    {
+      "pmcid": "PMC13270175",
+      "doi": "10.1038/s41598-026-49064-3",
+      "year": "2026",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "A multi-task masked autoencoder with GAN-based augmentation for PD-L1 prediction from chest CT images.",
+      "pool_sentences": 239,
+      "corpus_sentences": 170
+    },
+    {
+      "pmcid": "PMC12899606",
+      "doi": "10.3390/nano16030207",
+      "year": "2026",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Molecular Dynamics Study on the Mechanical Properties of Bilayer Silicon Carbide.",
+      "pool_sentences": 175,
+      "corpus_sentences": 118
+    },
+    {
+      "pmcid": "PMC12029545",
+      "doi": "10.3390/mi16040418",
+      "year": "2025",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "The Planar Core-Shell Junctionless MOSFET.",
+      "pool_sentences": 247,
+      "corpus_sentences": 159
+    },
+    {
+      "pmcid": "PMC9785764",
+      "doi": "10.3390/mi13122193",
+      "year": "2022",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Integrating a Soft Body Diode in the Super-Junction MOSFET by Using an n-/n+-Buffer Layer.",
+      "pool_sentences": 150,
+      "corpus_sentences": 100
+    },
+    {
+      "pmcid": "PMC7745045",
+      "doi": "10.1038/s41598-020-78472-2",
+      "year": "2020",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Exceptional in-plane and interfacial thermal transport in graphene/2D-SiC van der Waals heterostructures.",
+      "pool_sentences": 240,
+      "corpus_sentences": 171
+    },
+    {
+      "pmcid": "PMC13209415",
+      "doi": "10.3390/mi17050607",
+      "year": "2026",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Wafer-Level Transfer of GaN-on-Si Light-Emitting Devices via SiO2-SiO2 Direct Bonding: Strain Evolution and Optoelectronic Performance.",
+      "pool_sentences": 168,
+      "corpus_sentences": 108
+    },
+    {
+      "pmcid": "PMC9762279",
+      "doi": "10.1002/advs.202203863",
+      "year": "2022",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Antiferroelectric PbSnO3 Epitaxial Thin Films.",
+      "pool_sentences": 207,
+      "corpus_sentences": 144
+    },
+    {
+      "pmcid": "PMC9324417",
+      "doi": "10.3390/mi13071075",
+      "year": "2022",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Bond Wire Damage Detection Method on Discrete MOSFETs Based on Two-Port Network Measurement.",
+      "pool_sentences": 177,
+      "corpus_sentences": 114
+    },
+    {
+      "pmcid": "PMC10468468",
+      "doi": "10.1186/s40580-023-00387-1",
+      "year": "2023",
+      "journal": "Nano convergence",
+      "license": "cc by",
+      "title": "Unveiling the mechanism of remote epitaxy of crystalline semiconductors on 2D materials-coated substrates.",
+      "pool_sentences": 220,
+      "corpus_sentences": 150
+    },
+    {
+      "pmcid": "PMC9160373",
+      "doi": "10.1093/nsr/nwab122",
+      "year": "2022",
+      "journal": "National science review",
+      "license": "cc by",
+      "title": "Room-temperature coherent manipulation of single-spin qubits in silicon carbide with a high readout contrast.",
+      "pool_sentences": 164,
+      "corpus_sentences": 108
+    },
+    {
+      "pmcid": "PMC6547753",
+      "doi": "10.1038/s41467-019-10095-2",
+      "year": "2019",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Realization of wafer-scale nanogratings with sub-50 nm period through vacancy epitaxy.",
+      "pool_sentences": 205,
+      "corpus_sentences": 136
+    },
+    {
+      "pmcid": "PMC7763619",
+      "doi": "10.3390/ma13245630",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Catalyst-Less and Transfer-Less Synthesis of Graphene on Si(100) Using Direct Microwave Plasma Enhanced Chemical Vapor Deposition and Protective Enclosures.",
+      "pool_sentences": 257,
+      "corpus_sentences": 177
+    },
+    {
+      "pmcid": "PMC13667725",
+      "doi": null,
+      "year": "2026",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Macro-Anchored Physics-Informed GAN for RUL Prediction Under Continuous Block Missing Data",
+      "pool_sentences": 413,
+      "corpus_sentences": 275
+    },
+    {
+      "pmcid": "PMC12922174",
+      "doi": "10.1021/acs.nanolett.5c05226",
+      "year": "2026",
+      "journal": "Nano letters",
+      "license": "cc by",
+      "title": "Wafer-Scale All-Dielectric Quasi-BIC Metasurfaces: Bridging High-Throughput Deep-UV Lithography with Nanophotonic Applications.",
+      "pool_sentences": 108,
+      "corpus_sentences": 65
+    },
+    {
+      "pmcid": "PMC11122828",
+      "doi": "10.3390/mi15050560",
+      "year": "2024",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Wafer-Scale Characterization of 1692-Pixel-Per-Inch Blue Micro-LED Arrays with an Optimized ITO Layer.",
+      "pool_sentences": 128,
+      "corpus_sentences": 77
+    },
+    {
+      "pmcid": "PMC3813935",
+      "doi": "10.1038/srep03092",
+      "year": "2013",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "The origin of local strain in highly epitaxial oxide thin films.",
+      "pool_sentences": 102,
+      "corpus_sentences": 66
+    },
+    {
+      "pmcid": "PMC13505468",
+      "doi": "10.1002/advs.77437",
+      "year": "2026",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Wafer-Scale 3D Integration for High-Density Multi-Valued Neuromorphic Logic.",
+      "pool_sentences": 262,
+      "corpus_sentences": 167
+    },
+    {
+      "pmcid": "PMC12029809",
+      "doi": "10.3390/mi16040442",
+      "year": "2025",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Low-Pressure Chemical Vapor Deposition SiNx Process Study and Its Impact on Interface Characteristics of AlGaN/GaN MISHEMTs.",
+      "pool_sentences": 152,
+      "corpus_sentences": 101
+    },
+    {
+      "pmcid": "PMC10343276",
+      "doi": "10.3390/nano13132014",
+      "year": "2023",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Power-Dependent Optical Characterization of the InGaN/GaN-Based Micro-Light-Emitting-Diode (LED) in High Spatial Resolution.",
+      "pool_sentences": 93,
+      "corpus_sentences": 67
+    },
+    {
+      "pmcid": "PMC8362663",
+      "doi": "10.3389/fdata.2021.659146",
+      "year": "2021",
+      "journal": "Frontiers in big data",
+      "license": "cc by",
+      "title": "Conditional-GAN Based Data Augmentation for Deep Learning Task Classifier Improvement Using fNIRS Data.",
+      "pool_sentences": 380,
+      "corpus_sentences": 264
+    },
+    {
+      "pmcid": "PMC12092576",
+      "doi": "10.1038/s41467-025-59647-9",
+      "year": "2025",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Single V2 defect in 4H silicon carbide Schottky diode at low temperature.",
+      "pool_sentences": 125,
+      "corpus_sentences": 87
+    },
+    {
+      "pmcid": "PMC9072993",
+      "doi": "10.1039/c9ra05758g",
+      "year": "2019",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Induced growth of quasi-free-standing graphene on SiC substrates.",
+      "pool_sentences": 121,
+      "corpus_sentences": 90
+    },
+    {
+      "pmcid": "PMC13167338",
+      "doi": "10.1177/15330338261450065",
+      "year": "2026",
+      "journal": "Technology in cancer research & treatment",
+      "license": "cc by-nc",
+      "title": "Individualized Prediction of Radiation Pneumonitis Using RP-GAN: Leveraging Global Lung Features and Explainable Artificial Intelligence.",
+      "pool_sentences": 203,
+      "corpus_sentences": 127
+    },
+    {
+      "pmcid": "PMC6742762",
+      "doi": "10.1038/s41467-019-12056-1",
+      "year": "2019",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Carrier lifetime enhancement in halide perovskite via remote epitaxy.",
+      "pool_sentences": 298,
+      "corpus_sentences": 206
+    },
+    {
+      "pmcid": "PMC9057924",
+      "doi": "10.1039/d0ra06919a",
+      "year": "2020",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "SiC mesoporous membranes for sulfuric acid decomposition at high temperatures in the iodine-sulfur process.",
+      "pool_sentences": 125,
+      "corpus_sentences": 78
+    },
+    {
+      "pmcid": "PMC11502018",
+      "doi": "10.1515/nanoph-2022-0577",
+      "year": "2023",
+      "journal": "Nanophotonics (Berlin, Germany)",
+      "license": "cc by",
+      "title": "Unidirectional emission of GaN-on-Si microring laser and its on-chip integration.",
+      "pool_sentences": 84,
+      "corpus_sentences": 56
+    },
+    {
+      "pmcid": "PMC4791549",
+      "doi": "10.1038/srep23106",
+      "year": "2016",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "The isotype ZnO/SiC heterojunction prepared by molecular beam epitaxy--A chemical inert interface with significant band discontinuities.",
+      "pool_sentences": 108,
+      "corpus_sentences": 70
+    },
+    {
+      "pmcid": "PMC5841315",
+      "doi": "10.1038/s41598-018-22424-4",
+      "year": "2018",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Polarity-inverted lateral overgrowth and selective wet-etching and regrowth (PILOSWER) of GaN.",
+      "pool_sentences": 119,
+      "corpus_sentences": 82
+    },
+    {
+      "pmcid": "PMC8914825",
+      "doi": "10.3390/polym14051052",
+      "year": "2022",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Durability and Performance of Encapsulant Films for Bifacial Heterojunction Photovoltaic Modules.",
+      "pool_sentences": 119,
+      "corpus_sentences": 77
+    },
+    {
+      "pmcid": "PMC12287428",
+      "doi": "10.1038/s41598-025-07533-1",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "A novel ensemble Wasserstein GAN framework for effective anomaly detection in industrial internet of things environments.",
+      "pool_sentences": 343,
+      "corpus_sentences": 223
+    },
+    {
+      "pmcid": "PMC4978995",
+      "doi": "10.1038/srep31276",
+      "year": "2016",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Wafer-scale high-resolution patterning of reduced graphene oxide films for detection of low concentration biomarkers in plasma.",
+      "pool_sentences": 133,
+      "corpus_sentences": 92
+    },
+    {
+      "pmcid": "PMC8623632",
+      "doi": "10.3390/mi12111318",
+      "year": "2021",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Study of Normally-Off AlGaN/GaN HEMT with Microfield Plate for Improvement of Breakdown Voltage.",
+      "pool_sentences": 115,
+      "corpus_sentences": 80
+    },
+    {
+      "pmcid": "PMC7250824",
+      "doi": "10.1038/s41467-020-16435-x",
+      "year": "2020",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Understanding the interface interaction between U3Si2 fuel and SiC cladding.",
+      "pool_sentences": 145,
+      "corpus_sentences": 98
+    },
+    {
+      "pmcid": "PMC8938550",
+      "doi": "10.1038/s41598-022-08232-x",
+      "year": "2022",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Temperature dependence of the thermo-optic coefficient in 4H-SiC and GaN slabs at the wavelength of 1550 nm.",
+      "pool_sentences": 63,
+      "corpus_sentences": 46
+    },
+    {
+      "pmcid": "PMC11953217",
+      "doi": "10.1038/s42003-025-07936-w",
+      "year": "2025",
+      "journal": "Communications biology",
+      "license": "cc by",
+      "title": "Diffusion MRI GAN synthesizing fibre orientation distribution data using generative adversarial networks.",
+      "pool_sentences": 233,
+      "corpus_sentences": 163
+    },
+    {
+      "pmcid": "PMC10780313",
+      "doi": "10.3390/nano14010072",
+      "year": "2023",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Cf/SiC Ceramic Matrix Composites with Extraordinary Thermomechanical Properties up to 2000 \u00b0C.",
+      "pool_sentences": 147,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC6166460",
+      "doi": "10.4103/0366-6999.241804",
+      "year": "2018",
+      "journal": "Chinese medical journal",
+      "license": "cc by-nc-sa",
+      "title": "Giant Axonal Neuropathy with Unusual Neuroimagings Caused by Compound Heterozygous Mutations in GAN Gene.",
+      "pool_sentences": 42,
+      "corpus_sentences": 29
+    },
+    {
+      "pmcid": "PMC11355763",
+      "doi": "10.3390/ma17163917",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Discharge Gas Composition on SiC Etching in an HFE-347mmy/O2/Ar Plasma.",
+      "pool_sentences": 99,
+      "corpus_sentences": 62
+    },
+    {
+      "pmcid": "PMC4653732",
+      "doi": "10.1038/srep16465",
+      "year": "2015",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Atomically Sharp Interface in an h-BN-epitaxial graphene van der Waals Heterostructure.",
+      "pool_sentences": 152,
+      "corpus_sentences": 111
+    },
+    {
+      "pmcid": "PMC5751027",
+      "doi": "10.3390/ijerph14121611",
+      "year": "2017",
+      "journal": "International journal of environmental research and public health",
+      "license": "cc by",
+      "title": "Real-Time Measurements and Characterization of Airborne Particulate Matter from a Primary Silicon Carbide Production Plant.",
+      "pool_sentences": 249,
+      "corpus_sentences": 160
+    },
+    {
+      "pmcid": "PMC12571315",
+      "doi": "10.1371/journal.pone.0334532",
+      "year": "2025",
+      "journal": "PloS one",
+      "license": "cc by",
+      "title": "DCAF-GAN: Enhancing historical landscape restoration with dual-branch feature extraction and attention fusion.",
+      "pool_sentences": 363,
+      "corpus_sentences": 234
+    },
+    {
+      "pmcid": "PMC11637068",
+      "doi": "10.1038/s41598-024-63197-3",
+      "year": "2024",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Optimizing charge transport in hybrid GaN-PEDOT:PSS/PMMADevice for advanced application.",
+      "pool_sentences": 82,
+      "corpus_sentences": 50
+    },
+    {
+      "pmcid": "PMC9866476",
+      "doi": "10.3390/mi14010175",
+      "year": "2023",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "An Efficient 24-30 GHz GaN-on-Si Driver Amplifier Using Synthesized Matching Networks.",
+      "pool_sentences": 212,
+      "corpus_sentences": 135
+    },
+    {
+      "pmcid": "PMC12780254",
+      "doi": "10.1038/s41467-025-66891-6",
+      "year": "2025",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "Near-infrared organic photoelectrochemical synaptic transistors by wafer-scale photolithography for neuromorphic visual system.",
+      "pool_sentences": 223,
+      "corpus_sentences": 143
+    },
+    {
+      "pmcid": "PMC8041250",
+      "doi": "10.1021/acsami.1c01042",
+      "year": "2021",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "Toward Large-Scale Ga2O3 Membranes via Quasi-Van Der Waals Epitaxy on Epitaxial Graphene Layers.",
+      "pool_sentences": 166,
+      "corpus_sentences": 117
+    },
+    {
+      "pmcid": "PMC4018607",
+      "doi": "10.1038/srep04939",
+      "year": "2014",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Towards ultra-thin plasmonic silicon wafer solar cells with minimized efficiency loss.",
+      "pool_sentences": 105,
+      "corpus_sentences": 77
+    },
+    {
+      "pmcid": "PMC10608585",
+      "doi": "10.3390/ma16206700",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "First-Principles Study of Adsorption of Pb Atoms on 3C-SiC.",
+      "pool_sentences": 170,
+      "corpus_sentences": 113
+    },
+    {
+      "pmcid": "PMC4666851",
+      "doi": "10.1186/s11671-015-1171-1",
+      "year": "2015",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "Enhanced Light Emission due to Formation of Semi-polar InGaN/GaN Multi-quantum Wells.",
+      "pool_sentences": 92,
+      "corpus_sentences": 61
+    },
+    {
+      "pmcid": "PMC13325554",
+      "doi": "10.1002/advs.202516200",
+      "year": "2025",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "In Situ X-Ray Tomography and Acoustic Emission Monitoring of Damage Evolution in C/C-SiC Composites Fabricated by Liquid Silicon Infiltration.",
+      "pool_sentences": 312,
+      "corpus_sentences": 217
+    },
+    {
+      "pmcid": "PMC8778824",
+      "doi": "10.3390/ma15020637",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Influence of Silicon Carbide on Direct Powder Bed Selective Laser Process (Sintering/Melting) of Alumina.",
+      "pool_sentences": 156,
+      "corpus_sentences": 102
+    },
+    {
+      "pmcid": "PMC11533156",
+      "doi": "10.1021/acsami.4c13225",
+      "year": "2024",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "Engineering of Interface Barrier in Hybrid MXene/GaN Heterostructures for Schottky Diode Applications.",
+      "pool_sentences": 159,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC6733952",
+      "doi": "10.1186/s11671-019-3123-7",
+      "year": "2019",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "Atomic-Scale Characterization of Slip Deformation and Nanometric Machinability of Single-Crystal 6H-SiC.",
+      "pool_sentences": 94,
+      "corpus_sentences": 66
+    },
+    {
+      "pmcid": "PMC4672344",
+      "doi": "10.1038/srep17692",
+      "year": "2015",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "A low cost, green method to synthesize GaN nanowires.",
+      "pool_sentences": 150,
+      "corpus_sentences": 101
+    },
+    {
+      "pmcid": "PMC11350218",
+      "doi": "10.1038/s41467-024-51810-y",
+      "year": "2024",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "Utilizing full-spectrum sunlight for ammonia decomposition to hydrogen over GaN nanowires-supported Ru nanoparticles on silicon.",
+      "pool_sentences": 232,
+      "corpus_sentences": 153
+    },
+    {
+      "pmcid": "PMC10558783",
+      "doi": "10.1016/j.heliyon.2023.e19566",
+      "year": "2023",
+      "journal": "Heliyon",
+      "license": "cc by",
+      "title": "Temperature profiles of field-aged photovoltaic modules affected by optical degradation.",
+      "pool_sentences": 377,
+      "corpus_sentences": 251
+    },
+    {
+      "pmcid": "PMC11509730",
+      "doi": "10.3390/mi15101223",
+      "year": "2024",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "A Novel Isolation Approach for GaN-Based Power Integrated Devices.",
+      "pool_sentences": 92,
+      "corpus_sentences": 71
+    },
+    {
+      "pmcid": "PMC5418175",
+      "doi": "10.1186/s11671-017-2110-0",
+      "year": "2017",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "Interfacial Spin Glass State and Exchange Bias in the Epitaxial La0.7Sr0.3MnO3/LaNiO3 Bilayer.",
+      "pool_sentences": 87,
+      "corpus_sentences": 59
+    },
+    {
+      "pmcid": "PMC6567065",
+      "doi": "10.3390/nano9050747",
+      "year": "2019",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Design and Fabrication of Wafer-Level Microlens Array with Moth-Eye Antireflective Nanostructures.",
+      "pool_sentences": 142,
+      "corpus_sentences": 95
+    },
+    {
+      "pmcid": "PMC7014413",
+      "doi": "10.3390/ma13020445",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "High-Performance Temperature Sensors Based on Dual 4H-SiC JBS and SBD Devices.",
+      "pool_sentences": 84,
+      "corpus_sentences": 54
+    },
+    {
+      "pmcid": "PMC3197550",
+      "doi": "10.1186/1748-5908-6-116",
+      "year": "2011",
+      "journal": "Implementation science : IS",
+      "license": "cc by",
+      "title": "Observational measure of implementation progress in community based settings: the Stages of Implementation Completion (SIC).",
+      "pool_sentences": 126,
+      "corpus_sentences": 82
+    },
+    {
+      "pmcid": "PMC7254243",
+      "doi": "10.3390/ma13092203",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Influence of SiC Sludge on the Microstructure of Geopolymers.",
+      "pool_sentences": 131,
+      "corpus_sentences": 84
+    },
+    {
+      "pmcid": "PMC9873793",
+      "doi": "10.1038/s41377-022-01037-7",
+      "year": "2023",
+      "journal": "Light, science & applications",
+      "license": "cc by",
+      "title": "Research progress of large size SiC single crystal materials and devices.",
+      "pool_sentences": 157,
+      "corpus_sentences": 111
+    },
+    {
+      "pmcid": "PMC9417528",
+      "doi": "10.1039/d1na00171j",
+      "year": "2021",
+      "journal": "Nanoscale advances",
+      "license": "cc by",
+      "title": "Recent progress on kinetic control of chemical vapor deposition growth of high-quality wafer-scale transition metal dichalcogenides.",
+      "pool_sentences": 180,
+      "corpus_sentences": 120
+    },
+    {
+      "pmcid": "PMC8879214",
+      "doi": "10.3390/mi13020169",
+      "year": "2022",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Breakdown Behavior of Metal Contact Positions in GaN HEMT with Nitrogen-Implanted Gate Using TCAD Simulation.",
+      "pool_sentences": 100,
+      "corpus_sentences": 75
+    },
+    {
+      "pmcid": "PMC13117960",
+      "doi": "10.3390/jimaging12040142",
+      "year": "2026",
+      "journal": "Journal of imaging",
+      "license": "cc by",
+      "title": "Wafer Defect Recognition for Industrial Inspection: FCS-VMamba Model and Experimental Validation.",
+      "pool_sentences": 259,
+      "corpus_sentences": 179
+    },
+    {
+      "pmcid": "PMC7313702",
+      "doi": "10.3390/s20113174",
+      "year": "2020",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Low-Humidity Sensing Properties of Multi-Layered Graphene Grown by Chemical Vapor Deposition.",
+      "pool_sentences": 126,
+      "corpus_sentences": 90
+    },
+    {
+      "pmcid": "PMC8410839",
+      "doi": "10.1038/s41377-021-00619-1",
+      "year": "2021",
+      "journal": "Light, science & applications",
+      "license": "cc by",
+      "title": "MXene-GaN van der Waals metal-semiconductor junctions for high performance multiple quantum well photodetectors.",
+      "pool_sentences": 197,
+      "corpus_sentences": 122
+    },
+    {
+      "pmcid": "PMC6651644",
+      "doi": "10.3390/ma12132061",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Study on the Laser-Assisted Machining of Carbon Fiber Reinforced Silicon Carbide.",
+      "pool_sentences": 143,
+      "corpus_sentences": 91
+    },
+    {
+      "pmcid": "PMC9146350",
+      "doi": "10.3390/ma15103723",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Direct Wafer-Scale CVD Graphene Growth under Platinum Thin-Films.",
+      "pool_sentences": 84,
+      "corpus_sentences": 54
+    },
+    {
+      "pmcid": "PMC7471959",
+      "doi": "10.1038/s41598-020-71728-x",
+      "year": "2020",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Ultrafast spatiotemporal photocarrier dynamics near GaN surfaces studied by terahertz emission spectroscopy.",
+      "pool_sentences": 126,
+      "corpus_sentences": 94
+    },
+    {
+      "pmcid": "PMC9505277",
+      "doi": "10.3390/mi13091519",
+      "year": "2022",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Low Buffer Trapping Effects above 1200 V in Normally off GaN-on-Silicon Field Effect Transistors.",
+      "pool_sentences": 59,
+      "corpus_sentences": 31
+    },
+    {
+      "pmcid": "PMC5457113",
+      "doi": "10.3390/ma9090743",
+      "year": "2016",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Low Pressure on Surface Roughness and Morphological Defects of 4H-SiC Epitaxial Layers.",
+      "pool_sentences": 122,
+      "corpus_sentences": 89
+    },
+    {
+      "pmcid": "PMC6190469",
+      "doi": "10.3390/mi7100193",
+      "year": "2016",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "A WSi\u207bWSiN\u207bPt Metallization Scheme for Silicon Carbide-Based High Temperature Microsystems.",
+      "pool_sentences": 120,
+      "corpus_sentences": 78
+    },
+    {
+      "pmcid": "PMC13454614",
+      "doi": "10.1038/s41598-026-53550-z",
+      "year": "2026",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "A LION-optimized GAN for multi-target battery state prediction in battery management system.",
+      "pool_sentences": 554,
+      "corpus_sentences": 366
+    },
+    {
+      "pmcid": "PMC9003548",
+      "doi": "10.3390/nano12071232",
+      "year": "2022",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Direct Epitaxial Growth of Polar Hf0.5Zr0.5O2 Films on Corundum.",
+      "pool_sentences": 97,
+      "corpus_sentences": 58
+    },
+    {
+      "pmcid": "PMC6719245",
+      "doi": "10.3390/ma12162583",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Indium Incorporation into InGaN Quantum Wells Grown on GaN Narrow Stripes.",
+      "pool_sentences": 203,
+      "corpus_sentences": 126
+    },
+    {
+      "pmcid": "PMC5690001",
+      "doi": "10.1120/jacmp.v16i4.5433",
+      "year": "2015",
+      "journal": "Journal of applied clinical medical physics",
+      "license": "cc by",
+      "title": "Characterization of MOSFET dosimeters for low-dose measurements in maxillofacial anthropomorphic phantoms.",
+      "pool_sentences": 150,
+      "corpus_sentences": 102
+    },
+    {
+      "pmcid": "PMC6190183",
+      "doi": null,
+      "year": "2017",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Investigation of Au/Si Eutectic Wafer Bonding for MEMS Accelerometers",
+      "pool_sentences": 169,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC7594322",
+      "doi": "10.1021/acsomega.0c04136",
+      "year": "2020",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "Fabrication of Silicon Dioxide by Photo-Chemical Vapor Deposition to Decrease Detector Current of ZnO Ultraviolet Photodetectors.",
+      "pool_sentences": 115,
+      "corpus_sentences": 75
+    },
+    {
+      "pmcid": "PMC10420040",
+      "doi": "10.3390/ma16155323",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Design Optimization and Mechanical Properties of SiC Particle Reinforced Ti-Based Metallic Glass Matrix Composite.",
+      "pool_sentences": 212,
+      "corpus_sentences": 145
+    },
+    {
+      "pmcid": "PMC7040625",
+      "doi": "10.3390/ma13030783",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Energy Absorption Behavior of Al-SiC-Graphene Composite Foam under a High Strain Rate.",
+      "pool_sentences": 195,
+      "corpus_sentences": 121
+    },
+    {
+      "pmcid": "PMC10570295",
+      "doi": "10.1038/s41598-023-43702-w",
+      "year": "2023",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Influence of Bi doping on the electronic structure of (Ga,Mn)As epitaxial layers.",
+      "pool_sentences": 208,
+      "corpus_sentences": 143
+    },
+    {
+      "pmcid": "PMC11156773",
+      "doi": "10.1016/j.zemedi.2023.12.001",
+      "year": "2024",
+      "journal": "Zeitschrift fur medizinische Physik",
+      "license": "cc by",
+      "title": "Predicting disease-related MRI patterns of multiple sclerosis through GAN-based image editing.",
+      "pool_sentences": 207,
+      "corpus_sentences": 126
+    },
+    {
+      "pmcid": "PMC8468553",
+      "doi": "10.3390/nano11092423",
+      "year": "2021",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Novel Carbon-Assisted Chemical Vapor Deposition Growth of Large-Area Uniform Monolayer MoS2 and WS2.",
+      "pool_sentences": 153,
+      "corpus_sentences": 107
+    },
+    {
+      "pmcid": "PMC9419721",
+      "doi": "10.1039/d0na01043j",
+      "year": "2021",
+      "journal": "Nanoscale advances",
+      "license": "cc by-nc",
+      "title": "A wafer-scale synthesis of monolayer MoS2 and their field-effect transistors toward practical applications.",
+      "pool_sentences": 313,
+      "corpus_sentences": 218
+    },
+    {
+      "pmcid": "PMC9170913",
+      "doi": "10.3389/fdgth.2022.878369",
+      "year": "2022",
+      "journal": "Frontiers in digital health",
+      "license": "cc by",
+      "title": "Validating GAN-BioBERT: A Methodology for Assessing Reporting Trends in Clinical Trials.",
+      "pool_sentences": 83,
+      "corpus_sentences": 56
+    },
+    {
+      "pmcid": "PMC12903180",
+      "doi": "10.1021/acsomega.5c10090",
+      "year": "2026",
+      "journal": "ACS omega",
+      "license": "cc by",
+      "title": "A\u2011Site and Epitaxial Strain Effect on the Properties of AMn3Sb5 (A = K, Cs, and Rb) Kagome Lattices.",
+      "pool_sentences": 164,
+      "corpus_sentences": 101
+    },
+    {
+      "pmcid": "PMC9417268",
+      "doi": "10.1039/d1na00221j",
+      "year": "2021",
+      "journal": "Nanoscale advances",
+      "license": "cc by-nc",
+      "title": "Selective area growth of GaN nanowires and nanofins by molecular beam epitaxy on heteroepitaxial diamond (001) substrates.",
+      "pool_sentences": 216,
+      "corpus_sentences": 143
+    },
+    {
+      "pmcid": "PMC3971397",
+      "doi": "10.1038/srep04537",
+      "year": "2014",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-sa",
+      "title": "Growth of millimeter-size single crystal graphene on Cu foils by circumfluence chemical vapor deposition.",
+      "pool_sentences": 68,
+      "corpus_sentences": 43
+    },
+    {
+      "pmcid": "PMC6647976",
+      "doi": "10.1021/acsomega.9b00681",
+      "year": "2019",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "On the Dynamics of Intrinsic Carbon in Copper during the Annealing Phase of Chemical Vapor Deposition Growth of Graphene.",
+      "pool_sentences": 112,
+      "corpus_sentences": 69
+    },
+    {
+      "pmcid": "PMC9571812",
+      "doi": "10.3390/ma15196736",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Study of Carrier Mobilities in 4H-SiC MOSFETS Using Hall Analysis.",
+      "pool_sentences": 110,
+      "corpus_sentences": 70
+    },
+    {
+      "pmcid": "PMC8894414",
+      "doi": "10.1038/s41598-022-07514-8",
+      "year": "2022",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Thermal stability of Si/SiC/ta-C composite coatings and improvement of tribological properties through high-temperature annealing.",
+      "pool_sentences": 167,
+      "corpus_sentences": 111
+    },
+    {
+      "pmcid": "PMC9146535",
+      "doi": "10.3390/ma15103536",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Nearly Lattice-Matched GaN Distributed Bragg Reflectors with Enhanced Performance.",
+      "pool_sentences": 109,
+      "corpus_sentences": 75
+    },
+    {
+      "pmcid": "PMC10521205",
+      "doi": "10.1039/d3na00491k",
+      "year": "2023",
+      "journal": "Nanoscale advances",
+      "license": "cc by-nc",
+      "title": "A high thermal stability ohmic contact for GaN-based devices.",
+      "pool_sentences": 80,
+      "corpus_sentences": 59
+    },
+    {
+      "pmcid": "PMC9657517",
+      "doi": "10.3390/ma15217422",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Plasmon-Induced Enhanced Light Emission and Ultrafast Carrier Dynamics in a Tunable Molybdenum Disulfide-Gallium Nitride Heterostructure.",
+      "pool_sentences": 171,
+      "corpus_sentences": 108
+    },
+    {
+      "pmcid": "PMC9230885",
+      "doi": "10.3390/ma15124084",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Novel Van Der Waals Heterostructures Based on Borophene, Graphene-like GaN and ZnO for Nanoelectronics: A First Principles Study.",
+      "pool_sentences": 115,
+      "corpus_sentences": 70
+    },
+    {
+      "pmcid": "PMC12133248",
+      "doi": "10.1515/nanoph-2024-0682",
+      "year": "2025",
+      "journal": "Nanophotonics (Berlin, Germany)",
+      "license": "cc by",
+      "title": "Sub-MHz homogeneous linewidth in epitaxial Y2O3: Eu3+ thin film on silicon.",
+      "pool_sentences": 85,
+      "corpus_sentences": 60
+    },
+    {
+      "pmcid": "PMC9059850",
+      "doi": "10.1039/c8ra09509d",
+      "year": "2019",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Morphology controlling of \u3008111\u3009-3C-SiC films by HMDS flow rate in LCVD.",
+      "pool_sentences": 71,
+      "corpus_sentences": 41
+    },
+    {
+      "pmcid": "PMC12142676",
+      "doi": "10.1021/acs.nanolett.5c01839",
+      "year": "2025",
+      "journal": "Nano letters",
+      "license": "cc by",
+      "title": "p-Type Surface Defects on n-GaN Nanorods.",
+      "pool_sentences": 119,
+      "corpus_sentences": 76
+    },
+    {
+      "pmcid": "PMC11433422",
+      "doi": "10.3390/ma17184527",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fabrication of Silicon Carbide Nanoparticles Using Pulsed Laser Ablation in Liquid and Viscosity Optimization via Solvent Tuning.",
+      "pool_sentences": 223,
+      "corpus_sentences": 149
+    },
+    {
+      "pmcid": "PMC12434118",
+      "doi": "10.3389/fmedt.2025.1651390",
+      "year": "2025",
+      "journal": "Frontiers in medical technology",
+      "license": "cc by",
+      "title": "Exploration of the antiviral mechanism of gypsum-licorice compatibility pairing in Ma-Xing-Shi-Gan decoction from the perspective of metal-organic supramolecular interactions.",
+      "pool_sentences": 280,
+      "corpus_sentences": 186
+    },
+    {
+      "pmcid": "PMC4385276",
+      "doi": "10.1186/s11671-015-0797-3",
+      "year": "2015",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "Enhanced performance of photonic crystal GaN light-emitting diodes with graphene transparent electrodes.",
+      "pool_sentences": 77,
+      "corpus_sentences": 52
+    },
+    {
+      "pmcid": "PMC7166216",
+      "doi": "10.31661/jbpe.v0i0.1065",
+      "year": "2020",
+      "journal": "Journal of biomedical physics & engineering",
+      "license": "cc by-nc",
+      "title": "Rectal and Bladder Dose Measurements in the Intracavitary Applications of Cervical Cancer Treatment with HDR Afterloading System: Comparison of TPS Data with MOSFET Detector.",
+      "pool_sentences": 80,
+      "corpus_sentences": 48
+    },
+    {
+      "pmcid": "PMC12866776",
+      "doi": "10.1002/advs.202515282",
+      "year": "2026",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Oxygen-Regulated GaN-Based Sensors Fabricated by MOCVD for Switchable Gas Detection: Exhaled Gas Smart Platform for Non-Invasive Disease Detection.",
+      "pool_sentences": 236,
+      "corpus_sentences": 165
+    },
+    {
+      "pmcid": "PMC11433977",
+      "doi": "10.3390/mi15091100",
+      "year": "2024",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Electrical Properties and Reliability of AlGaN/GaN High Electron Mobility Transistor under RF Overdrive Stress at High Temperature.",
+      "pool_sentences": 119,
+      "corpus_sentences": 85
+    },
+    {
+      "pmcid": "PMC11448759",
+      "doi": "10.1039/d4ra04878d",
+      "year": "2024",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Development of eco-friendly pretreatment processes for high-purity silicon recovery from end-of-life photovoltaic modules.",
+      "pool_sentences": 158,
+      "corpus_sentences": 114
+    },
+    {
+      "pmcid": "PMC8010104",
+      "doi": "10.1038/s41598-021-86575-7",
+      "year": "2021",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Gate-controlled amplifiable ultraviolet AlGaN/GaN high-electron-mobility phototransistor.",
+      "pool_sentences": 115,
+      "corpus_sentences": 77
+    },
+    {
+      "pmcid": "PMC5120260",
+      "doi": "10.1038/srep37415",
+      "year": "2016",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Hot electron induced non-saturation current behavior at high electric field in InAlN/GaN heterostructures with ultrathin barrier.",
+      "pool_sentences": 83,
+      "corpus_sentences": 57
+    },
+    {
+      "pmcid": "PMC7052293",
+      "doi": "10.3389/fnins.2020.00085",
+      "year": "2020",
+      "journal": "Frontiers in neuroscience",
+      "license": "cc by",
+      "title": "Identification of Novel Compound Heterozygous Mutations in the GAN Gene of a Chinese Patient Diagnosed With Giant Axonal Neuropathy.",
+      "pool_sentences": 100,
+      "corpus_sentences": 72
+    },
+    {
+      "pmcid": "PMC3526456",
+      "doi": "10.1186/1556-276x-7-649",
+      "year": "2012",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "Intersubband absorption properties of high Al content AlxGa1-xN/GaN multiple quantum wells grown with different interlayers by metal organic chemical vapor deposition.",
+      "pool_sentences": 108,
+      "corpus_sentences": 68
+    },
+    {
+      "pmcid": "PMC11652548",
+      "doi": "10.1186/s11671-024-04169-4",
+      "year": "2024",
+      "journal": "Discover nano",
+      "license": "cc by-nc-nd",
+      "title": "Development of blue-light GaN based micro light-emitting diodes using ion implantation technology.",
+      "pool_sentences": 136,
+      "corpus_sentences": 88
+    },
+    {
+      "pmcid": "PMC8408220",
+      "doi": "10.1038/s41598-021-96954-9",
+      "year": "2021",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Investigation of the safety features of advanced PWR assembly using SiC, Zr, FeCrAl and SS-310 as cladding materials.",
+      "pool_sentences": 248,
+      "corpus_sentences": 162
+    },
+    {
+      "pmcid": "PMC3826094",
+      "doi": "10.1038/srep03201",
+      "year": "2013",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Less strained and more efficient GaN light-emitting diodes with embedded silica hollow nanospheres.",
+      "pool_sentences": 138,
+      "corpus_sentences": 84
+    },
+    {
+      "pmcid": "PMC13567280",
+      "doi": "10.3390/nano16171088",
+      "year": "2026",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Controllable Chemical Vapor Deposition Synthesis and Second-Harmonic Generation of Rhombohedral Cr2S3.",
+      "pool_sentences": 90,
+      "corpus_sentences": 64
+    },
+    {
+      "pmcid": "PMC11633760",
+      "doi": "10.1126/sciadv.adq8561",
+      "year": "2024",
+      "journal": "Science advances",
+      "license": "cc by-nc",
+      "title": "From oxide epitaxy to freestanding membranes: Opportunities and challenges.",
+      "pool_sentences": 275,
+      "corpus_sentences": 195
+    },
+    {
+      "pmcid": "PMC10658449",
+      "doi": "10.1021/acsami.3c10376",
+      "year": "2023",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "Tuning In-Plane Magnetic Anisotropy and Interfacial Exchange Coupling in Epitaxial La2/3Sr1/3CoO3/La2/3Sr1/3MnO3 Heterostructures.",
+      "pool_sentences": 151,
+      "corpus_sentences": 101
+    },
+    {
+      "pmcid": "PMC4770277",
+      "doi": "10.1038/srep22282",
+      "year": "2016",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Epitaxial growth of iridate pyrochlore Nd2Ir2O7 films.",
+      "pool_sentences": 67,
+      "corpus_sentences": 41
+    },
+    {
+      "pmcid": "PMC8875731",
+      "doi": "10.3390/ma15041289",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The Formation Process and Strengthening Mechanism of SiC Nanowires in a Carbon-Coated Porous BN/Si3N4 Ceramic Joint.",
+      "pool_sentences": 173,
+      "corpus_sentences": 113
+    },
+    {
+      "pmcid": "PMC11767926",
+      "doi": "10.3390/mi16010102",
+      "year": "2025",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Short-Circuit Performance Analysis of Commercial 1.7 kV SiC MOSFETs Under Varying Electrical Stress.",
+      "pool_sentences": 232,
+      "corpus_sentences": 148
+    },
+    {
+      "pmcid": "PMC12923741",
+      "doi": "10.1038/s41598-026-38161-y",
+      "year": "2026",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Wafer-scale formation of MoS2 with controlled thickness and high uniformity via conversion of MoOx using H2S sulfurization and subsequent crystallization.",
+      "pool_sentences": 137,
+      "corpus_sentences": 93
+    },
+    {
+      "pmcid": "PMC11676375",
+      "doi": "10.3390/nano14242044",
+      "year": "2024",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Flexible and Stable GaN Piezoelectric Sensor for Motion Monitoring and Fall Warning.",
+      "pool_sentences": 138,
+      "corpus_sentences": 101
+    },
+    {
+      "pmcid": "PMC7795334",
+      "doi": "10.3390/ma14010078",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Anomalous Properties of the Dislocation-Free Interface between Si(111) Substrate and 3C-SiC(111) Epitaxial Layer.",
+      "pool_sentences": 158,
+      "corpus_sentences": 101
+    },
+    {
+      "pmcid": "PMC6722856",
+      "doi": "10.3390/nano9081062",
+      "year": "2019",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Growth Mechanism of SmB6 Nanowires Synthesized by Chemical Vapor Deposition: Catalyst-Assisted and Catalyst-Free.",
+      "pool_sentences": 154,
+      "corpus_sentences": 101
+    },
+    {
+      "pmcid": "PMC9458119",
+      "doi": "10.3390/nano12173007",
+      "year": "2022",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Anisotropic Strain Relaxation in Semipolar (112\u00af2) InGaN/GaN Superlattice Relaxed Templates.",
+      "pool_sentences": 86,
+      "corpus_sentences": 58
+    },
+    {
+      "pmcid": "PMC12059014",
+      "doi": "10.1038/s41467-025-59598-1",
+      "year": "2025",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "Ideal antiferroelectricity with large digital electrostrain in PbZrO3 epitaxial thin films.",
+      "pool_sentences": 159,
+      "corpus_sentences": 104
+    },
+    {
+      "pmcid": "PMC12264968",
+      "doi": "10.1021/acs.inorgchem.5c01934",
+      "year": "2025",
+      "journal": "Inorganic chemistry",
+      "license": "cc by",
+      "title": "Nickel Pyrrolide Complexes as Precursors for the Chemical Vapor Deposition of Metallic Thin Films of Nickel.",
+      "pool_sentences": 102,
+      "corpus_sentences": 61
+    },
+    {
+      "pmcid": "PMC8229523",
+      "doi": "10.3390/ma14123194",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Ultrafast Third-Order Nonlinear Optical Response Excited by fs Laser Pulses at 1550 nm in GaN Crystals.",
+      "pool_sentences": 105,
+      "corpus_sentences": 61
+    },
+    {
+      "pmcid": "PMC6190085",
+      "doi": "10.3390/mi7090152",
+      "year": "2016",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Antireflective SiC Surface Fabricated by Scalable Self-Assembled Nanopatterning.",
+      "pool_sentences": 72,
+      "corpus_sentences": 47
+    },
+    {
+      "pmcid": "PMC3872360",
+      "doi": null,
+      "year": "2006",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": null,
+      "title": "Functional Testing and Characterisation of ISFETs on Wafer Level by Means of a Micro-droplet Cell#",
+      "pool_sentences": 57,
+      "corpus_sentences": 39
+    },
+    {
+      "pmcid": "PMC12660401",
+      "doi": "10.1038/s41598-025-26493-0",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "VISGAB: Virtual staining-driven GAN benchmarking for optimizing skin tissue histology.",
+      "pool_sentences": 388,
+      "corpus_sentences": 244
+    },
+    {
+      "pmcid": "PMC10817223",
+      "doi": "10.1371/journal.pone.0292140",
+      "year": "2024",
+      "journal": "PloS one",
+      "license": "cc by",
+      "title": "An ensemble learning method with GAN-based sampling and consistency check for anomaly detection of imbalanced data streams with concept drift.",
+      "pool_sentences": 375,
+      "corpus_sentences": 257
+    },
+    {
+      "pmcid": "PMC8526815",
+      "doi": "10.1038/s41598-021-00102-2",
+      "year": "2021",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Dopant activation process in Mg-implanted GaN studied by monoenergetic positron beam.",
+      "pool_sentences": 156,
+      "corpus_sentences": 110
+    },
+    {
+      "pmcid": "PMC12278212",
+      "doi": "10.1021/acsami.5c06939",
+      "year": "2025",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "Making Use of Si Contaminants during Chemical Vapor Deposition of Graphene on Cu: Synthesis of a Stable Material with the Textbook-like Band Structure of Free-Standing Graphene.",
+      "pool_sentences": 261,
+      "corpus_sentences": 176
+    },
+    {
+      "pmcid": "PMC5772463",
+      "doi": "10.1038/s41598-018-19510-y",
+      "year": "2018",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Improved Linearity with Polarization Coulomb Field Scattering in AlGaN/GaN Heterostructure Field-Effect Transistors.",
+      "pool_sentences": 91,
+      "corpus_sentences": 59
+    },
+    {
+      "pmcid": "PMC7865510",
+      "doi": "10.3390/ma14030581",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Experimental Methodology for the Separation Materials in the Recycling Process of Silicon Photovoltaic Panels.",
+      "pool_sentences": 146,
+      "corpus_sentences": 104
+    },
+    {
+      "pmcid": "PMC7063106",
+      "doi": "10.1016/j.dib.2020.105352",
+      "year": "2020",
+      "journal": "Data in brief",
+      "license": "cc by",
+      "title": "Data on the effect of CdS on the lateral collection length of charge carriers for Cu(In,Ga)Se2 solar cells with mesh transparent conducting electrodes.",
+      "pool_sentences": 33,
+      "corpus_sentences": 20
+    },
+    {
+      "pmcid": "PMC6803827",
+      "doi": "10.3390/ma12193076",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The Effects of Laser Parameters and the Ablation Mechanism in Laser Ablation of C/SiC Composite.",
+      "pool_sentences": 198,
+      "corpus_sentences": 130
+    },
+    {
+      "pmcid": "PMC3720202",
+      "doi": "10.1186/1556-276x-8-299",
+      "year": "2013",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "Fabrication of vertical GaN/InGaN heterostructure nanowires using Ni-Au bi-metal catalysts.",
+      "pool_sentences": 134,
+      "corpus_sentences": 82
+    },
+    {
+      "pmcid": "PMC6888560",
+      "doi": "10.3390/ma12223670",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Influence of Carrier Gases on the Quality of Epitaxial Corundum-Structured \u03b1-Ga2O3 Films Grown by Mist Chemical Vapor Deposition Method.",
+      "pool_sentences": 124,
+      "corpus_sentences": 85
+    },
+    {
+      "pmcid": "PMC7109625",
+      "doi": "10.1016/j.dib.2020.105422",
+      "year": "2020",
+      "journal": "Data in brief",
+      "license": "cc by",
+      "title": "Thermal stability data of silver nanowire transparent conducting electrode.",
+      "pool_sentences": 28,
+      "corpus_sentences": 18
+    },
+    {
+      "pmcid": "PMC12654416",
+      "doi": "10.3390/mi16111233",
+      "year": "2025",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Improve Intermetal Dielectric Process for HTRB Stability in Power GaN High Electron Mobility Transistor (HEMT) by unbiased-Highly Accelerated Stress Testing (uHAST).",
+      "pool_sentences": 87,
+      "corpus_sentences": 66
+    },
+    {
+      "pmcid": "PMC10701342",
+      "doi": "10.1039/d3ra06438g",
+      "year": "2023",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "Acid protonation promoted different crystal phase structure silicon carbide-based carbon nitride composites to enhance the photocatalytic degradation of dye wastewater.",
+      "pool_sentences": 165,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC13517089",
+      "doi": "10.3390/s26165158",
+      "year": "2026",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Multi-Modal GAN-Based Anomaly Detection for Signal Reliability Assessment in Fabric-Integrated Smart Textiles.",
+      "pool_sentences": 198,
+      "corpus_sentences": 127
+    },
+    {
+      "pmcid": "PMC10628775",
+      "doi": "10.1039/d3ra06630d",
+      "year": "2023",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "Computational-fitting method for mobility extraction in GaN HEMT.",
+      "pool_sentences": 61,
+      "corpus_sentences": 36
+    },
+    {
+      "pmcid": "PMC5116078",
+      "doi": "10.1038/ncomms13352",
+      "year": "2016",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Two-dimensional antimonene single crystals grown by van der Waals epitaxy.",
+      "pool_sentences": 214,
+      "corpus_sentences": 134
+    },
+    {
+      "pmcid": "PMC12657214",
+      "doi": "10.1038/s41563-025-02276-w",
+      "year": "2025",
+      "journal": "Nature materials",
+      "license": "cc by-nc-nd",
+      "title": "Exploiting strained epitaxial germanium for scaling low-noise spin qubits at the micrometre scale.",
+      "pool_sentences": 150,
+      "corpus_sentences": 105
+    },
+    {
+      "pmcid": "PMC7315569",
+      "doi": "10.1021/acsomega.0c01985",
+      "year": "2020",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "Intercalation of Au Atoms into SiC(0001)/Buffer Interfaces-A First-Principles Density Functional Theory Study.",
+      "pool_sentences": 115,
+      "corpus_sentences": 83
+    },
+    {
+      "pmcid": "PMC12463295",
+      "doi": "10.1371/journal.pone.0331019",
+      "year": "2025",
+      "journal": "PloS one",
+      "license": "cc by",
+      "title": "A GAN-Based Approach for enhancing security in satellite based IoT networks using MPI enabled HPC.",
+      "pool_sentences": 697,
+      "corpus_sentences": 474
+    },
+    {
+      "pmcid": "PMC12565841",
+      "doi": "10.3390/mi16101093",
+      "year": "2025",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Effect of AlN Cap Layer on Polarization Coulomb Field Scattering in AlGaN/GaN Heterostructure Field Effect Transistor.",
+      "pool_sentences": 83,
+      "corpus_sentences": 48
+    },
+    {
+      "pmcid": "PMC11197601",
+      "doi": "10.1016/j.fmre.2021.11.027",
+      "year": "2022",
+      "journal": "Fundamental research",
+      "license": "cc by-nc-nd",
+      "title": "Physical mechanism of field modulation effects in ion implanted edge termination of vertical GaN Schottky barrier diodes.",
+      "pool_sentences": 126,
+      "corpus_sentences": 88
+    },
+    {
+      "pmcid": "PMC6723911",
+      "doi": "10.3390/nano9081159",
+      "year": "2019",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fabrication and Surface Interactions of Super-Hydrophobic Silicon Carbide for Membrane Distillation.",
+      "pool_sentences": 140,
+      "corpus_sentences": 92
+    },
+    {
+      "pmcid": "PMC13024612",
+      "doi": "10.3390/biomimetics11030175",
+      "year": "2026",
+      "journal": "Biomimetics (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "GAN-Based Cross-Modality Brain MRI Synthesis: Paired Versus Unpaired Training and Comparison with Diffusion and Transformer Models.",
+      "pool_sentences": 439,
+      "corpus_sentences": 291
+    },
+    {
+      "pmcid": "PMC9057918",
+      "doi": "10.1039/d0ra07776c",
+      "year": "2020",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Synthesis of 2D MoS2(1-x)Se2x semiconductor alloy by chemical vapor deposition.",
+      "pool_sentences": 82,
+      "corpus_sentences": 52
+    },
+    {
+      "pmcid": "PMC12387873",
+      "doi": "10.3390/jimaging11080252",
+      "year": "2025",
+      "journal": "Journal of imaging",
+      "license": "cc by",
+      "title": "Synthetic Scientific Image Generation with VAE, GAN, and Diffusion Model Architectures.",
+      "pool_sentences": 572,
+      "corpus_sentences": 353
+    },
+    {
+      "pmcid": "PMC12704591",
+      "doi": "10.1039/d5ra08712k",
+      "year": "2025",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Structural, morphological, and optical properties of SiC/PVP nanocomposite materials by changing the SiC concentration in PVP.",
+      "pool_sentences": 188,
+      "corpus_sentences": 121
+    },
+    {
+      "pmcid": "PMC9417650",
+      "doi": "10.1039/c9na00601j",
+      "year": "2020",
+      "journal": "Nanoscale advances",
+      "license": "cc by",
+      "title": "Room-temperature solution-phase epitaxial nucleation of PbS quantum dots on rutile TiO2 (100).",
+      "pool_sentences": 102,
+      "corpus_sentences": 73
+    },
+    {
+      "pmcid": "PMC4773757",
+      "doi": "10.1038/srep22355",
+      "year": "2016",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Antiferromagnetic proximity effect in epitaxial CoO/NiO/MgO(001) systems.",
+      "pool_sentences": 128,
+      "corpus_sentences": 80
+    },
+    {
+      "pmcid": "PMC8154121",
+      "doi": "10.1021/acsomega.1c00841",
+      "year": "2021",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Practical Route for the Low-Temperature Growth of Large-Area Bilayer Graphene on Polycrystalline Nickel by Cold-Wall Chemical Vapor Deposition.",
+      "pool_sentences": 197,
+      "corpus_sentences": 133
+    },
+    {
+      "pmcid": "PMC10096935",
+      "doi": "10.3390/nano13071226",
+      "year": "2023",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Brief Review of Transparent Conducting Oxides (TCO): The Influence of Different Deposition Techniques on the Efficiency of Solar Cells.",
+      "pool_sentences": 219,
+      "corpus_sentences": 148
+    },
+    {
+      "pmcid": "PMC12844989",
+      "doi": "10.3390/nano16020125",
+      "year": "2026",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "SIMS Investigation of Al Diffusion Across Interfaces in AlGaN/GaN and AlN/GaN Heterostructures.",
+      "pool_sentences": 137,
+      "corpus_sentences": 97
+    },
+    {
+      "pmcid": "PMC10213599",
+      "doi": "10.1007/s11760-023-02602-2",
+      "year": "2023",
+      "journal": "Signal, image and video processing",
+      "license": null,
+      "title": "SAM C-GAN: a method for removal of face masks from masked faces.",
+      "pool_sentences": 183,
+      "corpus_sentences": 123
+    },
+    {
+      "pmcid": "PMC12314912",
+      "doi": "10.1021/acs.nanolett.5c02741",
+      "year": "2025",
+      "journal": "Nano letters",
+      "license": "cc by-nc-nd",
+      "title": "Boosting Inversion Symmetry Breaking in Epitaxial Tetragonal ZrO2 Via Atomic Layer Deposition.",
+      "pool_sentences": 114,
+      "corpus_sentences": 84
+    },
+    {
+      "pmcid": "PMC11425836",
+      "doi": "10.1002/advs.202405050",
+      "year": "2024",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Wafer-Scale Growth and Transfer of High-Quality MoS2 Array by Interface Design for High-Stability Flexible Photosensitive Device.",
+      "pool_sentences": 241,
+      "corpus_sentences": 154
+    },
+    {
+      "pmcid": "PMC5379558",
+      "doi": "10.1038/srep45726",
+      "year": "2017",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Indium gallium nitride-based ultraviolet, blue, and green light-emitting diodes functionalized with shallow periodic hole patterns.",
+      "pool_sentences": 149,
+      "corpus_sentences": 107
+    },
+    {
+      "pmcid": "PMC7177869",
+      "doi": "10.3390/ma13071558",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Gradient-Modified HfC-SiC Mixed Bi-Interlayers Synthesized under Different TMS Flow Rate Increment for Depositing Diamond Coating onto WC-Co Substrate.",
+      "pool_sentences": 202,
+      "corpus_sentences": 126
+    },
+    {
+      "pmcid": "PMC4154181",
+      "doi": "10.4103/0971-6203.139002",
+      "year": "2014",
+      "journal": "Journal of medical physics",
+      "license": "cc by-nc-sa",
+      "title": "Characteristics of mobile MOSFET dosimetry system for megavoltage photon beams.",
+      "pool_sentences": 117,
+      "corpus_sentences": 72
+    },
+    {
+      "pmcid": "PMC5122532",
+      "doi": "10.1186/s11671-016-1732-y",
+      "year": "2016",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "Reduction of Polarization Field Strength in Fully Strained c-Plane InGaN/(In)GaN Multiple Quantum Wells Grown by MOCVD.",
+      "pool_sentences": 105,
+      "corpus_sentences": 73
+    },
+    {
+      "pmcid": "PMC4880934",
+      "doi": "10.1038/srep26891",
+      "year": "2016",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "A novel approach of chemical mechanical polishing for cadmium zinc telluride wafers.",
+      "pool_sentences": 112,
+      "corpus_sentences": 68
+    },
+    {
+      "pmcid": "PMC11382051",
+      "doi": "10.1016/j.heliyon.2024.e35426",
+      "year": "2024",
+      "journal": "Heliyon",
+      "license": "cc by-nc-nd",
+      "title": "Multi-omics reveals protective effects of Ling Gui Zhu Gan Decoction on hyperlipidaemia in hamster.",
+      "pool_sentences": 196,
+      "corpus_sentences": 126
+    },
+    {
+      "pmcid": "PMC12270172",
+      "doi": "10.1371/journal.pone.0324957",
+      "year": "2025",
+      "journal": "PloS one",
+      "license": "cc by",
+      "title": "FLPneXAINet: Federated deep learning and explainable AI for improved pneumonia prediction utilizing GAN-augmented chest X-ray data.",
+      "pool_sentences": 309,
+      "corpus_sentences": 190
+    },
+    {
+      "pmcid": "PMC9671350",
+      "doi": "10.1371/journal.pone.0277667",
+      "year": "2022",
+      "journal": "PloS one",
+      "license": "cc by",
+      "title": "Defect-selective-etched porous GaN as a buffer layer for high efficiency InGaN/GaN light-emitting diodes.",
+      "pool_sentences": 110,
+      "corpus_sentences": 63
+    },
+    {
+      "pmcid": "PMC11604957",
+      "doi": "10.1038/s41598-024-81254-9",
+      "year": "2024",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "A new critical growth parameter of H2/CH4 gas flow ratio and mechanistic model for SiC nanowire synthesis via Si substrate carbonization.",
+      "pool_sentences": 96,
+      "corpus_sentences": 61
+    },
+    {
+      "pmcid": "PMC5492213",
+      "doi": "10.1021/acsnano.7b02726",
+      "year": "2017",
+      "journal": "ACS nano",
+      "license": null,
+      "title": "Highly Oriented Atomically Thin Ambipolar MoSe2 Grown by Molecular Beam Epitaxy.",
+      "pool_sentences": 127,
+      "corpus_sentences": 83
+    },
+    {
+      "pmcid": "PMC6648095",
+      "doi": "10.1021/acsomega.9b00525",
+      "year": "2019",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "Evolution of the Length and Radius of Catalyst-Free III-V Nanowires Grown by Selective Area Epitaxy.",
+      "pool_sentences": 106,
+      "corpus_sentences": 73
+    },
+    {
+      "pmcid": "PMC8433684",
+      "doi": "10.3390/ma14175105",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "4H-SiC Schottky Barrier Diodes for Efficient Thermal Neutron Detection.",
+      "pool_sentences": 119,
+      "corpus_sentences": 79
+    },
+    {
+      "pmcid": "PMC6189772",
+      "doi": "10.3390/mi7100192",
+      "year": "2016",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Cost-Efficient Wafer-Level Capping for MEMS and Imaging Sensors by Adhesive Wafer Bonding.",
+      "pool_sentences": 167,
+      "corpus_sentences": 105
+    },
+    {
+      "pmcid": "PMC8288945",
+      "doi": "10.1093/nsr/nwaa060",
+      "year": "2020",
+      "journal": "National science review",
+      "license": "cc by",
+      "title": "Wet synthesis endows scalable epitaxy of complex oxide multiferroics.",
+      "pool_sentences": 15,
+      "corpus_sentences": 10
+    },
+    {
+      "pmcid": "PMC9322837",
+      "doi": "10.3390/ijms23148013",
+      "year": "2022",
+      "journal": "International journal of molecular sciences",
+      "license": "cc by",
+      "title": "Regiospecific Grafting of Chitosan Oligomers Brushes onto Silicon Wafers.",
+      "pool_sentences": 169,
+      "corpus_sentences": 114
+    },
+    {
+      "pmcid": "PMC5666483",
+      "doi": "10.3390/nano7100318",
+      "year": "2017",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Upcycling Waste Lard Oil into Vertical Graphene Sheets by Inductively Coupled Plasma Assisted Chemical Vapor Deposition.",
+      "pool_sentences": 111,
+      "corpus_sentences": 69
+    },
+    {
+      "pmcid": "PMC9782961",
+      "doi": "10.3390/mi13122159",
+      "year": "2022",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "High-Precision Wafer Bonding Alignment Mark Using Moir\u00e9 Fringes and Digital Grating.",
+      "pool_sentences": 107,
+      "corpus_sentences": 70
+    },
+    {
+      "pmcid": "PMC12500998",
+      "doi": "10.1038/s41598-025-18072-0",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "AuNis modified AlGaN/GaN HEMT biosensor for reliable detection of small Rho GTPases in Jurkat T cell lysate.",
+      "pool_sentences": 203,
+      "corpus_sentences": 125
+    },
+    {
+      "pmcid": "PMC11643664",
+      "doi": "10.3390/nano14231957",
+      "year": "2024",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effects of Substrate Temperature on Optical, Structural, and Surface Properties of Metal-Organic Vapor Phase Epitaxy-Grown MgZnO Films.",
+      "pool_sentences": 199,
+      "corpus_sentences": 134
+    },
+    {
+      "pmcid": "PMC1156917",
+      "doi": null,
+      "year": "2005",
+      "journal": "Biomedical engineering online",
+      "license": "cc by",
+      "title": "Review of \"Advances in Silicon Carbide Processing and Applications\" 1st Edition by Steven E. Saddow and Anant Agarwal",
+      "pool_sentences": 19,
+      "corpus_sentences": 14
+    },
+    {
+      "pmcid": "PMC5803264",
+      "doi": "10.1038/s41598-018-20976-z",
+      "year": "2018",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Nitrogen-doped mesoporous SiC materials with catalytically active cobalt nanoparticles for the efficient and selective hydrogenation of nitroarenes.",
+      "pool_sentences": 68,
+      "corpus_sentences": 40
+    },
+    {
+      "pmcid": "PMC8078779",
+      "doi": "10.1371/journal.pone.0250458",
+      "year": "2021",
+      "journal": "PloS one",
+      "license": "cc by",
+      "title": "Increasing prediction accuracy of pathogenic staging by sample augmentation with a GAN.",
+      "pool_sentences": 143,
+      "corpus_sentences": 89
+    },
+    {
+      "pmcid": "PMC13117090",
+      "doi": "10.3390/ma19081536",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "First-Principles Study of Interfacial Properties and Fracture Behavior of (3C and 4H) SiC/Al Interfaces.",
+      "pool_sentences": 152,
+      "corpus_sentences": 101
+    },
+    {
+      "pmcid": "PMC8778421",
+      "doi": "10.3390/mi13010106",
+      "year": "2022",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Study of Self-Heating and High-Power Microwave Effects for Enhancement-Mode p-Gate GaN HEMT.",
+      "pool_sentences": 181,
+      "corpus_sentences": 114
+    },
+    {
+      "pmcid": "PMC8082393",
+      "doi": "10.3389/fphar.2021.622268",
+      "year": "2021",
+      "journal": "Frontiers in pharmacology",
+      "license": "cc by",
+      "title": "Comprehensive RNA-Seq Analysis of Potential Therapeutic Targets of Gan-Dou-Fu-Mu Decoction for Treatment of Wilson Disease Using a Toxic Milk Mouse Model.",
+      "pool_sentences": 180,
+      "corpus_sentences": 117
+    },
+    {
+      "pmcid": "PMC12895511",
+      "doi": "10.1021/acsnano.5c19478",
+      "year": "2026",
+      "journal": "ACS nano",
+      "license": "cc by",
+      "title": "Controlling Mixed Mo/MoS2 Domains on Si by Molecular Beam Epitaxy for the Hydrogen Evolution Reaction.",
+      "pool_sentences": 274,
+      "corpus_sentences": 183
+    },
+    {
+      "pmcid": "PMC7513469",
+      "doi": "10.1021/acs.macromol.0c01258",
+      "year": "2020",
+      "journal": "Macromolecules",
+      "license": null,
+      "title": "Deposition of Ion-Conductive Membranes from Ionic Liquids via Initiated Chemical Vapor Deposition.",
+      "pool_sentences": 206,
+      "corpus_sentences": 132
+    },
+    {
+      "pmcid": "PMC10662869",
+      "doi": "10.1097/md.0000000000034446",
+      "year": "2023",
+      "journal": "Medicine",
+      "license": "cc by-nc",
+      "title": "Exploration of the possible mechanisms of Ling Gui Zhu Gan decoction in nephrotic syndrome based on network pharmacology, molecular docking and molecular dynamics simulation.",
+      "pool_sentences": 156,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC8585340",
+      "doi": "10.3390/ma14216328",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Boron-Doped Diamond/GaN Heterojunction-The Influence of the Low-Temperature Deposition.",
+      "pool_sentences": 128,
+      "corpus_sentences": 69
+    },
+    {
+      "pmcid": "PMC10708812",
+      "doi": "10.3390/s23239586",
+      "year": "2023",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "N-Channel MOSFET Reliability Issue Induced by Visible/Near-Infrared Photons in Image Sensors.",
+      "pool_sentences": 106,
+      "corpus_sentences": 64
+    },
+    {
+      "pmcid": "PMC11231972",
+      "doi": "10.1021/acsami.4c03112",
+      "year": "2024",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "III-Nitride Magnetron Sputter Epitaxy on Si: Controlling Morphology, Crystal Quality, and Polarity Using Al Seed Layers.",
+      "pool_sentences": 167,
+      "corpus_sentences": 110
+    },
+    {
+      "pmcid": "PMC10625639",
+      "doi": "10.1038/s41598-023-46110-2",
+      "year": "2023",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Electrochemical etching strategy for shaping monolithic 3D structures from 4H-SiC wafers.",
+      "pool_sentences": 87,
+      "corpus_sentences": 61
+    },
+    {
+      "pmcid": "PMC10700681",
+      "doi": "10.1002/advs.202304254",
+      "year": "2023",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Engineering Cf /ZrB2 -SiC-Y2 O3 for Thermal Structures of Hypersonic Vehicles with Excellent Long-Term Ultrahigh Temperature Ablation Resistance.",
+      "pool_sentences": 201,
+      "corpus_sentences": 130
+    },
+    {
+      "pmcid": "PMC9054777",
+      "doi": "10.1038/s41598-022-10814-8",
+      "year": "2022",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Strain induced anisotropy in liquid phase epitaxy grown nickel ferrite on magnesium gallate substrates.",
+      "pool_sentences": 178,
+      "corpus_sentences": 118
+    },
+    {
+      "pmcid": "PMC10311334",
+      "doi": "10.1093/bioinformatics/btad239",
+      "year": "2023",
+      "journal": "Bioinformatics (Oxford, England)",
+      "license": "cc by",
+      "title": "GAN-based data augmentation for transcriptomics: survey and comparative assessment.",
+      "pool_sentences": 210,
+      "corpus_sentences": 143
+    },
+    {
+      "pmcid": "PMC7353563",
+      "doi": "10.3390/jfb11020033",
+      "year": "2020",
+      "journal": "Journal of functional biomaterials",
+      "license": "cc by",
+      "title": "Anti-Bacterial Properties and Biocompatibility of Novel SiC Coating for Dental Ceramic.",
+      "pool_sentences": 144,
+      "corpus_sentences": 92
+    },
+    {
+      "pmcid": "PMC9967560",
+      "doi": "10.3390/mi14020250",
+      "year": "2023",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Ground-State Structure of Quaternary Alloys (SiC)1-x (AlN)x and (SiC)1-x (GaN)x.",
+      "pool_sentences": 91,
+      "corpus_sentences": 63
+    },
+    {
+      "pmcid": "PMC9919445",
+      "doi": "10.3390/ma16031014",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Novel Photonic Applications of Silicon Carbide.",
+      "pool_sentences": 398,
+      "corpus_sentences": 256
+    },
+    {
+      "pmcid": "PMC11962701",
+      "doi": "10.1002/smll.202410526",
+      "year": "2025",
+      "journal": "Small (Weinheim an der Bergstrasse, Germany)",
+      "license": "cc by-nc-nd",
+      "title": "Epitaxial Growth of 2D Core-Crown SnS2/SnSe2 Heterostructure Through Interfacial Modification with Polyvinylpyrrolidone.",
+      "pool_sentences": 95,
+      "corpus_sentences": 62
+    },
+    {
+      "pmcid": "PMC12066060",
+      "doi": "10.1186/s13005-025-00516-7",
+      "year": "2025",
+      "journal": "Head & face medicine",
+      "license": "cc by",
+      "title": "Comparison of manual and virtual model surgery for wafer fabrication in maxillary repositioning: an in vitro study.",
+      "pool_sentences": 176,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC11990726",
+      "doi": "10.3390/ma18071622",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Investigation of 2-Mercapto-1-Methylimidazole as a New Type of Leveler in Wafer Electroplating Copper.",
+      "pool_sentences": 137,
+      "corpus_sentences": 88
+    },
+    {
+      "pmcid": "PMC7423364",
+      "doi": "10.1126/sciadv.aba5029",
+      "year": "2020",
+      "journal": "Science advances",
+      "license": "cc by",
+      "title": "A general ink formulation of 2D crystals for wafer-scale inkjet printing.",
+      "pool_sentences": 124,
+      "corpus_sentences": 83
+    },
+    {
+      "pmcid": "PMC4956397",
+      "doi": "10.1177/1744806916656382",
+      "year": "2016",
+      "journal": "Molecular pain",
+      "license": "cc by-nc",
+      "title": "Go-sha-jinki-Gan (GJG) ameliorates allodynia in chronic constriction injury-model mice via suppression of TNF-\u03b1 expression in the spinal cord.",
+      "pool_sentences": 242,
+      "corpus_sentences": 161
+    },
+    {
+      "pmcid": "PMC6928204",
+      "doi": "10.1038/s41598-019-56292-3",
+      "year": "2019",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Thermal Management of GaN-on-Si High Electron Mobility Transistor by Copper Filled Micro-Trench Structure.",
+      "pool_sentences": 154,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC9025216",
+      "doi": "10.3390/ma15082941",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Investigation of Exfoliation Efficiency of 6H-SiC Implanted Sequentially with He+ and H2+ Ions.",
+      "pool_sentences": 171,
+      "corpus_sentences": 106
+    },
+    {
+      "pmcid": "PMC13207906",
+      "doi": "10.1039/d6na00352d",
+      "year": "2026",
+      "journal": "Nanoscale advances",
+      "license": "cc by-nc",
+      "title": "Strain-driven electronic phase transition and quantum transport signatures in epitaxial bismuth films on silicon substrates.",
+      "pool_sentences": 152,
+      "corpus_sentences": 92
+    },
+    {
+      "pmcid": "PMC7504521",
+      "doi": "10.3390/ma13173674",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Influencing Martensitic Transition in Epitaxial Ni-Mn-Ga-Co Films with Large Angle Grain Boundaries.",
+      "pool_sentences": 158,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC11768176",
+      "doi": "10.3390/polym17020128",
+      "year": "2025",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "A Multi-Phase Analytical Model for Effective Electrical Conductivity of Polymer Matrix Composites Containing Micro-SiC Whiskers and Nano-Carbon Black Hybrids.",
+      "pool_sentences": 135,
+      "corpus_sentences": 95
+    },
+    {
+      "pmcid": "PMC5557947",
+      "doi": "10.1038/s41598-017-07418-y",
+      "year": "2017",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Leaky Integrate and Fire Neuron by Charge-Discharge Dynamics in Floating-Body MOSFET.",
+      "pool_sentences": 107,
+      "corpus_sentences": 66
+    },
+    {
+      "pmcid": "PMC8007356",
+      "doi": "10.1155/2021/5522755",
+      "year": "2021",
+      "journal": "Evidence-based complementary and alternative medicine : eCAM",
+      "license": "cc by",
+      "title": "Jian-Gan-Xiao-Zhi Decoction Alleviates Inflammatory Response in Nonalcoholic Fatty Liver Disease Model Rats through Modulating Gut Microbiota.",
+      "pool_sentences": 160,
+      "corpus_sentences": 110
+    },
+    {
+      "pmcid": "PMC11946469",
+      "doi": "10.3390/mi16030271",
+      "year": "2025",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Back Propagation Neural Network-Based Predictive Model for Magnetorheological-Chemical Polishing of Silicon Carbide.",
+      "pool_sentences": 118,
+      "corpus_sentences": 83
+    },
+    {
+      "pmcid": "PMC11356544",
+      "doi": "10.3390/mi15080993",
+      "year": "2024",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "A Study on the Dynamic Switching Characteristics of p-GaN HEMT Power Devices.",
+      "pool_sentences": 113,
+      "corpus_sentences": 78
+    },
+    {
+      "pmcid": "PMC13048252",
+      "doi": "10.1126/sciadv.aee0270",
+      "year": "2026",
+      "journal": "Science advances",
+      "license": "cc by-nc",
+      "title": "Quasi-epitaxial heterojunction interface reconstruction enables 11.96% certified efficiency in Cd-free Cu2ZnSnS4 solar cells.",
+      "pool_sentences": 190,
+      "corpus_sentences": 141
+    },
+    {
+      "pmcid": "PMC8838496",
+      "doi": "10.3390/nano12030575",
+      "year": "2022",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Field Emission of Multi-Walled Carbon Nanotubes from Pt-Assisted Chemical Vapor Deposition.",
+      "pool_sentences": 88,
+      "corpus_sentences": 60
+    },
+    {
+      "pmcid": "PMC6041225",
+      "doi": "10.1186/s11671-018-2625-z",
+      "year": "2018",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "Alkali-metal-adsorbed g-GaN monolayer: ultralow work functions and optical properties.",
+      "pool_sentences": 100,
+      "corpus_sentences": 63
+    },
+    {
+      "pmcid": "PMC11730940",
+      "doi": "10.1016/j.heliyon.2024.e41362",
+      "year": "2025",
+      "journal": "Heliyon",
+      "license": "cc by",
+      "title": "Studying the effect of processing parameters on the microstructure, strength, hardness, and corrosion characteristics of friction stir dissimilar welded AA5083 and AA7075 aluminum alloys reinforced with Al-SiC matrix.",
+      "pool_sentences": 136,
+      "corpus_sentences": 97
+    },
+    {
+      "pmcid": "PMC8706368",
+      "doi": "10.3390/nano11123293",
+      "year": "2021",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Single-Walled Carbon Nanotube Synthesis Yield Variation in a Horizontal Chemical Vapor Deposition Reactor.",
+      "pool_sentences": 152,
+      "corpus_sentences": 92
+    },
+    {
+      "pmcid": "PMC6387240",
+      "doi": "10.3390/s19030488",
+      "year": "2019",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Wafer-Level-Based Open-Circuit Sensitivity Model from Theoretical ALEM and Empirical OSCM Parameters for a Capacitive MEMS Acoustic Sensor.",
+      "pool_sentences": 139,
+      "corpus_sentences": 89
+    },
+    {
+      "pmcid": "PMC11065406",
+      "doi": "10.7717/peerj-cs.2001",
+      "year": "2024",
+      "journal": "PeerJ. Computer science",
+      "license": "cc by",
+      "title": "ONE3A: one-against-all authentication model for smartphone using GAN network and optimization techniques.",
+      "pool_sentences": 285,
+      "corpus_sentences": 197
+    },
+    {
+      "pmcid": "PMC4650707",
+      "doi": "10.1038/srep10976",
+      "year": "2015",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Flat Panel Light Source with Lateral Gate Structure Based on SiC Nanowire Field Emitters.",
+      "pool_sentences": 126,
+      "corpus_sentences": 99
+    },
+    {
+      "pmcid": "PMC10974966",
+      "doi": "10.3390/nano14060523",
+      "year": "2024",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Improved Vth Stability and Gate Reliability of GaN-Based MIS-HEMTs by Employing Alternating O2 Plasma Treatment.",
+      "pool_sentences": 80,
+      "corpus_sentences": 51
+    },
+    {
+      "pmcid": "PMC7716239",
+      "doi": "10.3390/nano10112168",
+      "year": "2020",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Metal Oxide Nanolayer-Decorated Epitaxial Graphene: A Gas Sensor Study.",
+      "pool_sentences": 170,
+      "corpus_sentences": 114
+    },
+    {
+      "pmcid": "PMC12723348",
+      "doi": "10.1002/smll.202508738",
+      "year": "2025",
+      "journal": "Small (Weinheim an der Bergstrasse, Germany)",
+      "license": "cc by",
+      "title": "Robust Material Properties in Epitaxial In2Te3 Thin Films across Varying Thicknesses.",
+      "pool_sentences": 194,
+      "corpus_sentences": 129
+    },
+    {
+      "pmcid": "PMC8188223",
+      "doi": "10.1002/advs.202004204",
+      "year": "2021",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Epitaxial Growth of Nanostructured Li2 Se on Lithium Metal for All Solid-State Batteries.",
+      "pool_sentences": 120,
+      "corpus_sentences": 80
+    },
+    {
+      "pmcid": "PMC3769070",
+      "doi": "10.1107/s0021889813003695",
+      "year": "2013",
+      "journal": "Journal of applied crystallography",
+      "license": "cc by",
+      "title": "Crack propagation and fracture in silicon wafers under thermal stress.",
+      "pool_sentences": 143,
+      "corpus_sentences": 93
+    },
+    {
+      "pmcid": "PMC7428871",
+      "doi": "10.1155/2020/6376912",
+      "year": "2020",
+      "journal": "Evidence-based complementary and alternative medicine : eCAM",
+      "license": "cc by",
+      "title": "Gan-Qing-Ning Formula Inhibits the Growth of Hepatocellular Carcinoma by Promoting Apoptosis and Inhibiting Angiogenesis in H22 Tumor-Bearing Mice.",
+      "pool_sentences": 170,
+      "corpus_sentences": 118
+    },
+    {
+      "pmcid": "PMC8269511",
+      "doi": "10.3390/ma14133558",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Influence of Ti3C2Tx MXene and Surface-Modified Ti3C2Tx MXene Addition on Microstructure and Mechanical Properties of Silicon Carbide Composites Sintered via Spark Plasma Sintering Method.",
+      "pool_sentences": 211,
+      "corpus_sentences": 143
+    },
+    {
+      "pmcid": "PMC3432621",
+      "doi": "10.1186/1556-276x-7-373",
+      "year": "2012",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "Nucleation control for the growth of vertically aligned GaN nanowires.",
+      "pool_sentences": 90,
+      "corpus_sentences": 63
+    },
+    {
+      "pmcid": "PMC9002994",
+      "doi": "10.3390/nano12071208",
+      "year": "2022",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Chemical Vapor Deposition-Fabricated Manganese-Doped and Potassium-Doped Hexagonal Tungsten Trioxide Nanowires with Enhanced Gas Sensing and Photocatalytic Properties.",
+      "pool_sentences": 118,
+      "corpus_sentences": 84
+    },
+    {
+      "pmcid": "PMC5445773",
+      "doi": "10.3390/ma3114892",
+      "year": "2010",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Transparent Conducting Oxides for Photovoltaics: Manipulation of Fermi Level, Work Function and Energy Band Alignment.",
+      "pool_sentences": 248,
+      "corpus_sentences": 173
+    },
+    {
+      "pmcid": "PMC6843710",
+      "doi": "10.1021/acsomega.9b01488",
+      "year": "2019",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "Chemical Vapor Deposition Growth of Silicon Nanowires with Diameter Smaller Than 5 nm.",
+      "pool_sentences": 109,
+      "corpus_sentences": 75
+    },
+    {
+      "pmcid": "PMC3520026",
+      "doi": "10.1038/srep00969",
+      "year": "2012",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Induced magnetic moment of Eu(3+) ions in GaN.",
+      "pool_sentences": 112,
+      "corpus_sentences": 69
+    },
+    {
+      "pmcid": "PMC13417628",
+      "doi": "10.3390/s26144336",
+      "year": "2026",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Packaging Design and Thermal Characterization of 3D Double-Sided Cooling Automotive SiC Power Modules with Reliable Junction Temperature Sensing.",
+      "pool_sentences": 265,
+      "corpus_sentences": 176
+    },
+    {
+      "pmcid": "PMC12072612",
+      "doi": "10.3390/ma18092118",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "First-Principles Calculations of Hydrogen Solution and Diffusion in 3C-SiC Grain Boundaries.",
+      "pool_sentences": 164,
+      "corpus_sentences": 111
+    },
+    {
+      "pmcid": "PMC4273690",
+      "doi": "10.1186/1556-276x-9-685",
+      "year": "2014",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "Synthesis of gallium nitride nanostructures by nitridation of electrochemically deposited gallium oxide on silicon substrate.",
+      "pool_sentences": 108,
+      "corpus_sentences": 74
+    },
+    {
+      "pmcid": "PMC7923179",
+      "doi": "10.3390/ma14040944",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Different Rotational Speeds on Graphene-Wrapped SiC Core-Shell Nanoparticles in Wet Milling Medium.",
+      "pool_sentences": 177,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC9058150",
+      "doi": "10.1039/d0ra07856e",
+      "year": "2020",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "High quality N-polar GaN films grown with varied V/III ratios by metal-organic vapor phase epitaxy.",
+      "pool_sentences": 123,
+      "corpus_sentences": 83
+    },
+    {
+      "pmcid": "PMC5629253",
+      "doi": "10.1038/s41598-017-12702-y",
+      "year": "2017",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Selective-area growth of single-crystal wurtzite GaN nanorods on SiOx/Si(001) substrates by reactive magnetron sputter epitaxy exhibiting single-mode lasing.",
+      "pool_sentences": 196,
+      "corpus_sentences": 137
+    },
+    {
+      "pmcid": "PMC11468870",
+      "doi": "10.1002/adma.202105923",
+      "year": "2022",
+      "journal": "Advanced materials (Deerfield Beach, Fla.)",
+      "license": "cc by",
+      "title": "Wafer-Scale Electroactive Nanoporous Silicon: Large and Fully Reversible Electrochemo-Mechanical Actuation in Aqueous Electrolytes.",
+      "pool_sentences": 278,
+      "corpus_sentences": 188
+    },
+    {
+      "pmcid": "PMC11857164",
+      "doi": "10.3390/mi16020210",
+      "year": "2025",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Study on the Electro-Fenton Chemomechanical Removal Behavior in Single-Crystal GaN Pin-Disk Friction Wear Experiments.",
+      "pool_sentences": 208,
+      "corpus_sentences": 146
+    },
+    {
+      "pmcid": "PMC12516722",
+      "doi": "10.1021/acs.jpclett.5c02179",
+      "year": "2025",
+      "journal": "The journal of physical chemistry letters",
+      "license": "cc by-nc-nd",
+      "title": "Subsurface Interface Structure Controlling Local Electronic Properties of Epitaxial Graphene on SiC(0001).",
+      "pool_sentences": 181,
+      "corpus_sentences": 121
+    },
+    {
+      "pmcid": "PMC2216991",
+      "doi": "10.1085/jgp.107.3.353",
+      "year": "1996",
+      "journal": "The Journal of general physiology",
+      "license": "cc by-nc-sa",
+      "title": "Micromolar 4-aminopyridine enhances invasion of a vertebrate neurosecretory terminal arborization: optical recording of action potential propagation using an ultrafast photodiode-MOSFET camera and a photodiode array.",
+      "pool_sentences": 3,
+      "corpus_sentences": 3
+    },
+    {
+      "pmcid": "PMC10651894",
+      "doi": "10.1038/s41467-023-43199-x",
+      "year": "2023",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Engineering chirality at wafer scale with ordered carbon nanotube architectures.",
+      "pool_sentences": 215,
+      "corpus_sentences": 133
+    },
+    {
+      "pmcid": "PMC8067603",
+      "doi": "10.3390/foods10040791",
+      "year": "2021",
+      "journal": "Foods (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Fortification with Raspberry Juice on the Antioxidant and Potentially Anti-Inflammatory Activity of Wafers Subjected to In Vitro Digestion.",
+      "pool_sentences": 241,
+      "corpus_sentences": 151
+    },
+    {
+      "pmcid": "PMC10456616",
+      "doi": "10.3390/mi14081641",
+      "year": "2023",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "A Frequency-Dependent Dynamic Electric-Mechanical Network for Thin-Wafer Piezoelectric Transducers Polarized in the Thickness Direction: Physical Model and Experimental Confirmation.",
+      "pool_sentences": 262,
+      "corpus_sentences": 175
+    },
+    {
+      "pmcid": "PMC4518308",
+      "doi": "10.1038/ncomms8536",
+      "year": "2015",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Rapid epitaxy-free graphene synthesis on silicidated polycrystalline platinum.",
+      "pool_sentences": 190,
+      "corpus_sentences": 128
+    },
+    {
+      "pmcid": "PMC8421935",
+      "doi": "10.21037/atm-21-310",
+      "year": "2021",
+      "journal": "Annals of translational medicine",
+      "license": "cc by-nc-nd",
+      "title": "Shock in China 2018 (SIC-study): a cross-sectional survey.",
+      "pool_sentences": 142,
+      "corpus_sentences": 82
+    },
+    {
+      "pmcid": "PMC3414757",
+      "doi": "10.1186/1556-276x-7-255",
+      "year": "2012",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "Scanning tunneling spectroscopy of epitaxial graphene nanoisland on Ir(111).",
+      "pool_sentences": 59,
+      "corpus_sentences": 41
+    },
+    {
+      "pmcid": "PMC13303187",
+      "doi": "10.3390/mi17060651",
+      "year": "2026",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "A Wafer-Level Stacking Scheme Based on Hybrid Etching and Low-Temperature Bonding for High-Performance MEMS Devices.",
+      "pool_sentences": 113,
+      "corpus_sentences": 74
+    },
+    {
+      "pmcid": "PMC9413586",
+      "doi": "10.3390/mi13081221",
+      "year": "2022",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Electroplated Al Press Marking for Wafer-Level Bonding.",
+      "pool_sentences": 242,
+      "corpus_sentences": 170
+    },
+    {
+      "pmcid": "PMC11311122",
+      "doi": "10.1021/acs.cgd.4c00235",
+      "year": "2024",
+      "journal": "Crystal growth & design",
+      "license": "cc by",
+      "title": "Geometrically Controlled Microscale Patterning and Epitaxial Lateral Overgrowth of Nitrogen-Polar GaN.",
+      "pool_sentences": 93,
+      "corpus_sentences": 57
+    },
+    {
+      "pmcid": "PMC3733736",
+      "doi": "10.1186/1556-276x-8-342",
+      "year": "2013",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "On the phenomenon of large photoluminescence red shift in GaN nanoparticles.",
+      "pool_sentences": 93,
+      "corpus_sentences": 61
+    },
+    {
+      "pmcid": "PMC8584936",
+      "doi": "10.3390/ma14216250",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Optimization of Abrasive Water Jet Machining of SiC Reinforced Aluminum Alloy Based Metal Matrix Composites Using Taguchi-DEAR Technique.",
+      "pool_sentences": 113,
+      "corpus_sentences": 76
+    },
+    {
+      "pmcid": "PMC10189706",
+      "doi": "10.1186/s41687-023-00581-z",
+      "year": "2023",
+      "journal": "Journal of patient-reported outcomes",
+      "license": "cc by",
+      "title": "Psychometric evaluation of the Symptoms of Infection with Coronavirus-19 (SIC): results from a cross-sectional study and a phase 3 clinical trial.",
+      "pool_sentences": 165,
+      "corpus_sentences": 117
+    },
+    {
+      "pmcid": "PMC10495642",
+      "doi": "10.1016/j.xpro.2023.102530",
+      "year": "2023",
+      "journal": "STAR protocols",
+      "license": "cc by-nc-nd",
+      "title": "A light-driven selective protocol for on-demand methanol and formic acid syntheses with a recyclable GaN catalyst.",
+      "pool_sentences": 225,
+      "corpus_sentences": 144
+    },
+    {
+      "pmcid": "PMC3224798",
+      "doi": "10.1186/1556-276x-6-589",
+      "year": "2011",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "Atomistic aspects of ductile responses of cubic silicon carbide during nanometric cutting.",
+      "pool_sentences": 114,
+      "corpus_sentences": 77
+    },
+    {
+      "pmcid": "PMC7762273",
+      "doi": "10.3390/nano10122443",
+      "year": "2020",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Resist-Free Directed Self-Assembly Chemo-Epitaxy Approach for Line/Space Patterning.",
+      "pool_sentences": 143,
+      "corpus_sentences": 95
+    },
+    {
+      "pmcid": "PMC7662516",
+      "doi": "10.3390/ma13214771",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Dielectric Tunability Properties in (110)-Oriented Epitaxial 0.5Ba(Ti0.8Zr0.2)O3-0.5(Ba0.7Ca0.3)TiO3 Thin Films Prepared by PLD Method.",
+      "pool_sentences": 142,
+      "corpus_sentences": 94
+    },
+    {
+      "pmcid": "PMC10867782",
+      "doi": "10.3389/fbioe.2024.1330713",
+      "year": "2024",
+      "journal": "Frontiers in bioengineering and biotechnology",
+      "license": "cc by",
+      "title": "TSE-GAN: strain elastography using generative adversarial network for thyroid disease diagnosis.",
+      "pool_sentences": 250,
+      "corpus_sentences": 190
+    },
+    {
+      "pmcid": "PMC5362931",
+      "doi": "10.1038/srep45026",
+      "year": "2017",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Voltage control of magnetic anisotropy in epitaxial Ru/Co2FeAl/MgO heterostructures.",
+      "pool_sentences": 126,
+      "corpus_sentences": 92
+    },
+    {
+      "pmcid": "PMC10475100",
+      "doi": "10.1038/s41598-023-41484-9",
+      "year": "2023",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Deep neural architecture for natural language image synthesis for Tamil text using BASEGAN and hybrid super resolution GAN (HSRGAN).",
+      "pool_sentences": 264,
+      "corpus_sentences": 181
+    },
+    {
+      "pmcid": "PMC11826119",
+      "doi": "10.1002/cssc.202401452",
+      "year": "2025",
+      "journal": "ChemSusChem",
+      "license": "cc by",
+      "title": "Precursor Development and Aerosol-Assisted Chemical Vapour Deposition for BiVO4 and W-Doped BiVO4 Photoanodes: A Universal Ligand Approach.",
+      "pool_sentences": 214,
+      "corpus_sentences": 142
+    },
+    {
+      "pmcid": "PMC8620583",
+      "doi": "10.3390/mi12111386",
+      "year": "2021",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Wafer-Scale Patterning of Protein Templates for Hydrogel Fabrication.",
+      "pool_sentences": 166,
+      "corpus_sentences": 105
+    },
+    {
+      "pmcid": "PMC13209002",
+      "doi": "10.3390/mi17050595",
+      "year": "2026",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Simulation Study of Enhancement-Mode \u03b2-Ga2O3 MOSFETs on a Novel P-Ga2O3/AlN/SiC Substrate.",
+      "pool_sentences": 103,
+      "corpus_sentences": 67
+    },
+    {
+      "pmcid": "PMC10101642",
+      "doi": "10.1371/journal.pcbi.1011035",
+      "year": "2023",
+      "journal": "PLoS computational biology",
+      "license": "cc by",
+      "title": "Applying a GAN-based classifier to improve transcriptome-based prognostication in breast cancer.",
+      "pool_sentences": 183,
+      "corpus_sentences": 116
+    },
+    {
+      "pmcid": "PMC8745924",
+      "doi": "10.3390/ma15010005",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Impact of Methanol Concentration on Properties of Ultra-Nanocrystalline Diamond Films Grown by Hot-Filament Chemical Vapour Deposition.",
+      "pool_sentences": 96,
+      "corpus_sentences": 61
+    },
+    {
+      "pmcid": "PMC11678037",
+      "doi": "10.3390/ma17246233",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Improving the Fracture Toughness of Boron Carbide via Minor Additions of SiC and TiB2 Through Hot-Press Sintering.",
+      "pool_sentences": 122,
+      "corpus_sentences": 87
+    },
+    {
+      "pmcid": "PMC11242903",
+      "doi": "10.3390/ma17133107",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Study on Bottom Distributed Bragg Reflector Radius and Electric Aperture Radius on Performance Characteristics of GaN-Based Vertical-Cavity Surface-Emitting Laser.",
+      "pool_sentences": 283,
+      "corpus_sentences": 195
+    },
+    {
+      "pmcid": "PMC8780599",
+      "doi": "10.3390/ma15020587",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Silicon Carbide Nanoparticles on the Friction-Wear Properties of Copper-Based Friction Discs.",
+      "pool_sentences": 227,
+      "corpus_sentences": 151
+    },
+    {
+      "pmcid": "PMC6759175",
+      "doi": "10.1371/journal.pone.0222928",
+      "year": "2019",
+      "journal": "PloS one",
+      "license": "cc by",
+      "title": "Intensive measures of luminescence in GaN/InGaN heterostructures.",
+      "pool_sentences": 110,
+      "corpus_sentences": 73
+    },
+    {
+      "pmcid": "PMC9315561",
+      "doi": "10.3390/mi13071011",
+      "year": "2022",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Precision Layered Stealth Dicing of SiC Wafers by Ultrafast Lasers.",
+      "pool_sentences": 125,
+      "corpus_sentences": 77
+    },
+    {
+      "pmcid": "PMC7075118",
+      "doi": "10.3390/nano10020277",
+      "year": "2020",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Novel Route to High-Quality Graphene Quantum Dots by Hydrogen-Assisted Pyrolysis of Silicon Carbide.",
+      "pool_sentences": 86,
+      "corpus_sentences": 51
+    },
+    {
+      "pmcid": "PMC10609171",
+      "doi": "10.3390/mi14101948",
+      "year": "2023",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Simulation of Single-Event Transient Effect for GaN High-Electron-Mobility Transistor.",
+      "pool_sentences": 135,
+      "corpus_sentences": 86
+    },
+    {
+      "pmcid": "PMC5458876",
+      "doi": "10.3390/ma8115417",
+      "year": "2015",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Origin of the Electroluminescence from Annealed-ZnO/GaN Heterojunction Light-Emitting Diodes.",
+      "pool_sentences": 121,
+      "corpus_sentences": 83
+    },
+    {
+      "pmcid": "PMC3211224",
+      "doi": "10.1186/1556-276x-6-171",
+      "year": "2011",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "Multiscale investigation of graphene layers on 6H-SiC(000-1).",
+      "pool_sentences": 137,
+      "corpus_sentences": 93
+    },
+    {
+      "pmcid": "PMC10785670",
+      "doi": "10.1021/acsomega.3c05863",
+      "year": "2024",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "PLM-GAN: A Large-Scale Protein Loop Modeling Using pix2pix GAN.",
+      "pool_sentences": 170,
+      "corpus_sentences": 101
+    },
+    {
+      "pmcid": "PMC13363331",
+      "doi": "10.3390/ma19132791",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Impact of Temperature and Interface Traps on Threshold Voltage and Carrier Mobility of Hydrogen-Terminated Diamond MOSFETs.",
+      "pool_sentences": 259,
+      "corpus_sentences": 178
+    },
+    {
+      "pmcid": "PMC9102702",
+      "doi": "10.3390/ma15093008",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Multi-Scale Simulation Study of Irradiation Swelling of Silicon Carbide.",
+      "pool_sentences": 151,
+      "corpus_sentences": 112
+    },
+    {
+      "pmcid": "PMC12851711",
+      "doi": "10.1097/md.0000000000047368",
+      "year": "2026",
+      "journal": "Medicine",
+      "license": "cc by-nc",
+      "title": "Study of the multitarget mechanism of Zao Ren Gan Cao Da Mai decoction in the treatment of insomnia comorbid with depression based on network pharmacology and molecular docking technology.",
+      "pool_sentences": 125,
+      "corpus_sentences": 84
+    },
+    {
+      "pmcid": "PMC6930664",
+      "doi": "10.3390/molecules24234241",
+      "year": "2019",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "UHPLC-ESI-MS/MS Quantitative Analyses of Multicomponent Hu Gan Tablets.",
+      "pool_sentences": 106,
+      "corpus_sentences": 63
+    },
+    {
+      "pmcid": "PMC4108976",
+      "doi": "10.1186/1556-276x-9-349",
+      "year": "2014",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "Graphene as a transparent conducting and surface field layer in planar Si solar cells.",
+      "pool_sentences": 149,
+      "corpus_sentences": 114
+    },
+    {
+      "pmcid": "PMC7019869",
+      "doi": "10.3390/mi11010101",
+      "year": "2020",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Vertical Leakage in GaN-on-Si Stacks Investigated by a Buffer Decomposition Experiment.",
+      "pool_sentences": 99,
+      "corpus_sentences": 60
+    },
+    {
+      "pmcid": "PMC6972738",
+      "doi": "10.1038/s41598-019-55424-z",
+      "year": "2020",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "The influence of AlN buffer layer on the growth of self-assembled GaN nanocolumns on graphene.",
+      "pool_sentences": 159,
+      "corpus_sentences": 111
+    },
+    {
+      "pmcid": "PMC6626086",
+      "doi": "10.1186/s11671-019-3072-1",
+      "year": "2019",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "Electron Tomography of Pencil-Shaped GaN/(In,Ga)N Core-Shell Nanowires.",
+      "pool_sentences": 160,
+      "corpus_sentences": 111
+    },
+    {
+      "pmcid": "PMC7177355",
+      "doi": "10.3390/ma13071538",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effects of Recessed-Gate Structure on AlGaN/GaN-on-SiC MIS-HEMTs with Thin AlOxNy MIS Gate.",
+      "pool_sentences": 78,
+      "corpus_sentences": 63
+    },
+    {
+      "pmcid": "PMC6644655",
+      "doi": "10.1021/acsomega.8b02078",
+      "year": "2018",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "Probing Crystal Dislocations in a Micrometer-Thick GaN Film by Modern High-Voltage Electron Microscopy.",
+      "pool_sentences": 107,
+      "corpus_sentences": 67
+    },
+    {
+      "pmcid": "PMC3674240",
+      "doi": "10.1038/ncomms2854",
+      "year": "2013",
+      "journal": "Nature communications",
+      "license": "cc by-nc-sa",
+      "title": "Polytype control of spin qubits in silicon carbide.",
+      "pool_sentences": 111,
+      "corpus_sentences": 83
+    },
+    {
+      "pmcid": "PMC6539795",
+      "doi": "10.3390/ma12091537",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effects of Cu-Coated SiC Content on Microstructure and Properties of Laser Cladding SiCp/Al\u207bSi Composite Coatings.",
+      "pool_sentences": 137,
+      "corpus_sentences": 83
+    },
+    {
+      "pmcid": "PMC5356344",
+      "doi": "10.1038/srep44703",
+      "year": "2017",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Effects of collision cascade density on radiation defect dynamics in 3C-SiC.",
+      "pool_sentences": 133,
+      "corpus_sentences": 80
+    },
+    {
+      "pmcid": "PMC13209000",
+      "doi": "10.3390/ma19102070",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Influence of Grinding Process Parameters on the Three-Dimensional Surface Roughness of Silicon Carbide Particle-Reinforced Aluminum Matrix (SiCp/Al) Composites.",
+      "pool_sentences": 269,
+      "corpus_sentences": 183
+    },
+    {
+      "pmcid": "PMC10673131",
+      "doi": null,
+      "year": "2023",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Comprehensive Comparison of MOCVD- and LPCVD-SiNx Surface Passivation for AlGaN/GaN HEMTs for 5G RF Applications",
+      "pool_sentences": 106,
+      "corpus_sentences": 78
+    },
+    {
+      "pmcid": "PMC8453331",
+      "doi": "10.1016/j.compmedimag.2021.101969",
+      "year": "2021",
+      "journal": "Computerized medical imaging and graphics : the official journal of the Computerized Medical Imaging Society",
+      "license": "cc by",
+      "title": "FA-GAN: Fused attentive generative adversarial networks for MRI image super-resolution.",
+      "pool_sentences": 122,
+      "corpus_sentences": 77
+    },
+    {
+      "pmcid": "PMC11427205",
+      "doi": "10.1364/boe.528968",
+      "year": "2024",
+      "journal": "Biomedical optics express",
+      "license": null,
+      "title": "GAN-based quantitative oblique back-illumination microscopy enables computationally efficient epi-mode refractive index tomography.",
+      "pool_sentences": 140,
+      "corpus_sentences": 86
+    },
+    {
+      "pmcid": "PMC12546601",
+      "doi": "10.1038/s41598-025-20965-z",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Enhanced power conversion efficiency in high power single spatial mode ridge waveguide diode lasers using extreme triple asymmetric epitaxial structure.",
+      "pool_sentences": 86,
+      "corpus_sentences": 61
+    },
+    {
+      "pmcid": "PMC11450983",
+      "doi": "10.1186/s12911-024-02699-6",
+      "year": "2024",
+      "journal": "BMC medical informatics and decision making",
+      "license": "cc by-nc-nd",
+      "title": "Development of brain tumor radiogenomic classification using GAN-based augmentation of MRI slices in the newly released gazi brains dataset.",
+      "pool_sentences": 440,
+      "corpus_sentences": 301
+    },
+    {
+      "pmcid": "PMC11190271",
+      "doi": "10.1038/s41598-024-65142-w",
+      "year": "2024",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Deep-level defects induced by implantations of Si and Mg ions into undoped epitaxial GaN.",
+      "pool_sentences": 140,
+      "corpus_sentences": 87
+    },
+    {
+      "pmcid": "PMC10574060",
+      "doi": "10.3390/molecules28196757",
+      "year": "2023",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Investigating the Influence of Diffusion on the Cohesive Zone Model of the SiC/Al Composite Interface.",
+      "pool_sentences": 254,
+      "corpus_sentences": 168
+    },
+    {
+      "pmcid": "PMC6045652",
+      "doi": "10.1038/s41598-018-28744-9",
+      "year": "2018",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Effect of temperature on the oxidation of Cu nanowires and development of an easy to produce, oxidation-resistant transparent conducting electrode using a PEDOT:PSS coating.",
+      "pool_sentences": 130,
+      "corpus_sentences": 82
+    },
+    {
+      "pmcid": "PMC4048538",
+      "doi": "10.1186/1556-276x-9-266",
+      "year": "2014",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "Hydrothermal epitaxy and resultant properties of EuTiO3 films on SrTiO3(001) substrate.",
+      "pool_sentences": 97,
+      "corpus_sentences": 67
+    },
+    {
+      "pmcid": "PMC5554060",
+      "doi": "10.3390/ma10060679",
+      "year": "2017",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Carbon in Fabrication Al-SiC Nanocomposites for Tribological Application.",
+      "pool_sentences": 175,
+      "corpus_sentences": 124
+    },
+    {
+      "pmcid": "PMC4754650",
+      "doi": "10.1038/srep20669",
+      "year": "2016",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Ab initio molecular dynamics simulation of the effects of stacking faults on the radiation response of 3C-SiC.",
+      "pool_sentences": 88,
+      "corpus_sentences": 52
+    },
+    {
+      "pmcid": "PMC7220905",
+      "doi": "10.1038/s41467-020-16023-z",
+      "year": "2020",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Controlling interlayer excitons in MoS2 layers grown by chemical vapor deposition.",
+      "pool_sentences": 113,
+      "corpus_sentences": 79
+    },
+    {
+      "pmcid": "PMC12016276",
+      "doi": "10.1080/14686996.2025.2485869",
+      "year": "2025",
+      "journal": "Science and technology of advanced materials",
+      "license": "cc by-nc",
+      "title": "Epitaxial lateral overgrowth of m-plane \u03b1-Ga2O3 by halide vapor phase epitaxy.",
+      "pool_sentences": 141,
+      "corpus_sentences": 84
+    },
+    {
+      "pmcid": "PMC4187007",
+      "doi": "10.1038/srep06541",
+      "year": "2014",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-sa",
+      "title": "Formation of graphene grain boundaries on Cu(100) surface and a route towards their elimination in chemical vapor deposition growth.",
+      "pool_sentences": 125,
+      "corpus_sentences": 79
+    },
+    {
+      "pmcid": "PMC8541231",
+      "doi": "10.3390/mi12101159",
+      "year": "2021",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Development of GaN HEMTs Fabricated on Silicon, Silicon-on-Insulator, and Engineered Substrates and the Heterogeneous Integration.",
+      "pool_sentences": 322,
+      "corpus_sentences": 202
+    },
+    {
+      "pmcid": "PMC11008238",
+      "doi": "10.1021/acs.langmuir.4c00385",
+      "year": "2024",
+      "journal": "Langmuir : the ACS journal of surfaces and colloids",
+      "license": "cc by",
+      "title": "Epitaxial Growth of Surface Perforations on Parallel Cylinders in Terraced Films of Block Copolymer/Homopolymer Blends.",
+      "pool_sentences": 293,
+      "corpus_sentences": 199
+    },
+    {
+      "pmcid": "PMC8705877",
+      "doi": "10.3390/nano11123177",
+      "year": "2021",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Bright Silicon Carbide Single-Photon Emitting Diodes at Low Temperatures: Toward Quantum Photonics Applications.",
+      "pool_sentences": 95,
+      "corpus_sentences": 59
+    },
+    {
+      "pmcid": "PMC9609073",
+      "doi": "10.1021/acsomega.2c05099",
+      "year": "2022",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Comparative and Efficient Ammonia Gas Sensing Study with Self-assembly-Synthesized Metal Oxide-SiC Fiber-Based Mesoporous SiO2 Composites.",
+      "pool_sentences": 171,
+      "corpus_sentences": 117
+    },
+    {
+      "pmcid": "PMC9573724",
+      "doi": "10.3390/polym14194137",
+      "year": "2022",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Tribological Behavior of 3D-Printed Nanometer SiC and SiO2 Particle-Reinforced Polyamide 12 Composites by Selective Laser Sintering under Seawater Lubrication Condition.",
+      "pool_sentences": 193,
+      "corpus_sentences": 123
+    },
+    {
+      "pmcid": "PMC7150873",
+      "doi": "10.3390/pharmaceutics12030213",
+      "year": "2020",
+      "journal": "Pharmaceutics",
+      "license": "cc by",
+      "title": "Initiated Chemical Vapor Deposition of Crosslinked Organic Coatings for Controlling Gentamicin Delivery.",
+      "pool_sentences": 162,
+      "corpus_sentences": 104
+    },
+    {
+      "pmcid": "PMC6548790",
+      "doi": "10.1186/s11671-019-3025-8",
+      "year": "2019",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "High Breakdown Voltage and Low Dynamic ON-Resistance AlGaN/GaN HEMT with Fluorine Ion Implantation in SiNx Passivation Layer.",
+      "pool_sentences": 60,
+      "corpus_sentences": 40
+    },
+    {
+      "pmcid": "PMC8528904",
+      "doi": "10.1186/s11671-021-03615-x",
+      "year": "2021",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "Impact of Surface States and Aluminum Mole Fraction on Surface Potential and 2DEG in AlGaN/GaN HEMTs.",
+      "pool_sentences": 137,
+      "corpus_sentences": 95
+    },
+    {
+      "pmcid": "PMC7324381",
+      "doi": "10.1038/s41598-020-67274-1",
+      "year": "2020",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Enhancing carrier transport and carrier capture with a good current spreading characteristic via graphene transparent conductive electrodes in InGaN/GaN multiple-quantum-well light emitting diodes.",
+      "pool_sentences": 98,
+      "corpus_sentences": 61
+    },
+    {
+      "pmcid": "PMC13319742",
+      "doi": "10.1038/s41378-026-01366-2",
+      "year": "2026",
+      "journal": "Microsystems & nanoengineering",
+      "license": "cc by-nc-nd",
+      "title": "AlGaN/GaN HEMT H\u2082 sensor with integrated Wheatstone bridge and on-chip microheater for 0.1-ppm detection.",
+      "pool_sentences": 179,
+      "corpus_sentences": 120
+    },
+    {
+      "pmcid": "PMC10268588",
+      "doi": "10.1073/pnas.2215722120",
+      "year": "2023",
+      "journal": "Proceedings of the National Academy of Sciences of the United States of America",
+      "license": "cc by-nc-nd",
+      "title": "Crystallization of heavy fermions via epitaxial strain in spinel LiV2O4 thin film.",
+      "pool_sentences": 124,
+      "corpus_sentences": 80
+    },
+    {
+      "pmcid": "PMC10214437",
+      "doi": "10.1021/acs.nanolett.2c05094",
+      "year": "2023",
+      "journal": "Nano letters",
+      "license": "cc by-nc-nd",
+      "title": "Lattice Reconstruction in MoSe2-WSe2 Heterobilayers Synthesized by Chemical Vapor Deposition.",
+      "pool_sentences": 65,
+      "corpus_sentences": 43
+    },
+    {
+      "pmcid": "PMC6911984",
+      "doi": "10.1016/j.dib.2019.104868",
+      "year": "2020",
+      "journal": "Data in brief",
+      "license": "cc by",
+      "title": "Data on the structure, chemical state of silicon carbide synthesized by adiabatic cyclic compression in a chemical reactor.",
+      "pool_sentences": 60,
+      "corpus_sentences": 38
+    },
+    {
+      "pmcid": "PMC11730160",
+      "doi": "10.3390/cryst8040178",
+      "year": "2018",
+      "journal": "Crystals",
+      "license": "cc by",
+      "title": "Characterization of Sub-Monolayer Contaminants at the Regrowth Interface in GaN Nanowires Grown by Selective-Area Molecular Beam Epitaxy.",
+      "pool_sentences": 85,
+      "corpus_sentences": 56
+    },
+    {
+      "pmcid": "PMC8839171",
+      "doi": "10.3390/ma15030964",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of SiC Abrasive Blasting Parameters on the Quality of the Ceramic and Ni-Cr Dental Alloy Joint.",
+      "pool_sentences": 83,
+      "corpus_sentences": 47
+    },
+    {
+      "pmcid": "PMC6223922",
+      "doi": "10.1007/s40820-015-0064-2",
+      "year": "2016",
+      "journal": "Nano-micro letters",
+      "license": "cc by",
+      "title": "Investigation of Single-Wall MoS2 Monolayer Flakes Grown by Chemical Vapor Deposition.",
+      "pool_sentences": 119,
+      "corpus_sentences": 80
+    },
+    {
+      "pmcid": "PMC13358579",
+      "doi": "10.21037/jtd-2026-0717",
+      "year": "2026",
+      "journal": "Journal of thoracic disease",
+      "license": "cc by-nc-nd",
+      "title": "GAN-generated target reconstruction CT radiomics for prediction of the novel IASLC grading of pulmonary adenocarcinoma.",
+      "pool_sentences": 174,
+      "corpus_sentences": 125
+    },
+    {
+      "pmcid": "PMC13118495",
+      "doi": "10.3390/mi17040442",
+      "year": "2026",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Research on Diamond Nano-Grinding of 4H-SiC Crystals and Wear of Abrasives with Different Sharpness.",
+      "pool_sentences": 286,
+      "corpus_sentences": 193
+    },
+    {
+      "pmcid": "PMC8151828",
+      "doi": "10.3390/life11050429",
+      "year": "2021",
+      "journal": "Life (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The \"Water Problem\"(sic), the Illusory Pond and Life's Submarine Emergence-A Review.",
+      "pool_sentences": 248,
+      "corpus_sentences": 169
+    },
+    {
+      "pmcid": "PMC12372829",
+      "doi": "10.2147/jir.s515631",
+      "year": "2025",
+      "journal": "Journal of inflammation research",
+      "license": "cc by-nc",
+      "title": "Investigating the Underlying Mechanisms of Ma-Xing-Shi-Gan-Tang on Asthma via Metabolomics and Network Pharmacology.",
+      "pool_sentences": 210,
+      "corpus_sentences": 154
+    },
+    {
+      "pmcid": "PMC6187712",
+      "doi": "10.3390/mi9050207",
+      "year": "2018",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "High Temperature AlGaN/GaN Membrane Based Pressure Sensors.",
+      "pool_sentences": 89,
+      "corpus_sentences": 66
+    },
+    {
+      "pmcid": "PMC9694500",
+      "doi": "10.3390/ma15228083",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "High-Speed Dicing of SiC Wafers with 0.048 mm Diamond Blades via Rolling-Slitting.",
+      "pool_sentences": 156,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC5448900",
+      "doi": null,
+      "year": "2012",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Surface Preparation and Deposited Gate Oxides for Gallium Nitride Based Metal Oxide Semiconductor Devices",
+      "pool_sentences": 368,
+      "corpus_sentences": 240
+    },
+    {
+      "pmcid": "PMC12654458",
+      "doi": "10.3390/mi16111257",
+      "year": "2025",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Ultrasonic Vibration-Assisted Micro-Electrical Discharge Machining Characteristics and Parameter Optimization of C/SiC Composites.",
+      "pool_sentences": 238,
+      "corpus_sentences": 165
+    },
+    {
+      "pmcid": "PMC8836874",
+      "doi": "10.3390/ma15030830",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Structural and Insulating Behaviour of High-Permittivity Binary Oxide Thin Films for Silicon Carbide and Gallium Nitride Electronic Devices.",
+      "pool_sentences": 364,
+      "corpus_sentences": 251
+    },
+    {
+      "pmcid": "PMC3852575",
+      "doi": "10.1155/2013/931980",
+      "year": "2013",
+      "journal": "TheScientificWorldJournal",
+      "license": "cc by",
+      "title": "Donor-like surface traps on two-dimensional electron gas and current collapse of AlGaN/GaN HEMTs.",
+      "pool_sentences": 104,
+      "corpus_sentences": 70
+    },
+    {
+      "pmcid": "PMC12471317",
+      "doi": "10.3390/mi16091067",
+      "year": "2025",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "High Power Density X-Band GaN-on-Si HEMTs with 10.2 W/mm Used by Low Parasitic Gold-Free Ohmic Contact.",
+      "pool_sentences": 72,
+      "corpus_sentences": 48
+    },
+    {
+      "pmcid": "PMC8672204",
+      "doi": "10.34133/2021/9862483",
+      "year": "2021",
+      "journal": "Research (Washington, D.C.)",
+      "license": "cc by",
+      "title": "Wafer-Scale Synthesis of WS2 Films with In Situ Controllable p-Type Doping by Atomic Layer Deposition.",
+      "pool_sentences": 143,
+      "corpus_sentences": 105
+    },
+    {
+      "pmcid": "PMC7824397",
+      "doi": "10.3390/mi12010012",
+      "year": "2020",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Dielectrophoresis-Based Positioning of Carbon Nanotubes for Wafer-Scale Fabrication of Carbon Nanotube Devices.",
+      "pool_sentences": 108,
+      "corpus_sentences": 69
+    },
+    {
+      "pmcid": "PMC10987481",
+      "doi": "10.1038/s41598-024-56699-7",
+      "year": "2024",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "A GAN-based genetic algorithm for solving the 3D bin packing problem.",
+      "pool_sentences": 248,
+      "corpus_sentences": 164
+    },
+    {
+      "pmcid": "PMC6409802",
+      "doi": "10.3390/nano9020255",
+      "year": "2019",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Antibacterial Silicon Oxide Thin Films Doped with Zinc and Copper Grown by Atmospheric Pressure Plasma Chemical Vapor Deposition.",
+      "pool_sentences": 171,
+      "corpus_sentences": 118
+    },
+    {
+      "pmcid": "PMC10672858",
+      "doi": null,
+      "year": "2023",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Exploring the Potential of GaN-Based Power HEMTs with Coherent Channel \u2020",
+      "pool_sentences": 87,
+      "corpus_sentences": 53
+    },
+    {
+      "pmcid": "PMC9747707",
+      "doi": "10.1038/s41378-022-00468-x",
+      "year": "2022",
+      "journal": "Microsystems & nanoengineering",
+      "license": "cc by",
+      "title": "Wafer-level vapor cells filled with laser-actuated hermetic seals for integrated atomic devices.",
+      "pool_sentences": 183,
+      "corpus_sentences": 120
+    },
+    {
+      "pmcid": "PMC11848613",
+      "doi": "10.1002/advs.202411925",
+      "year": "2025",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Weighted Echo State Graph Neural Networks Based on Robust and Epitaxial Film Memristors.",
+      "pool_sentences": 197,
+      "corpus_sentences": 132
+    },
+    {
+      "pmcid": "PMC8517960",
+      "doi": "10.1021/acsami.1c11867",
+      "year": "2021",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "Heteroepitaxial Growth of High Optical Quality, Wafer-Scale van der Waals Heterostrucutres.",
+      "pool_sentences": 143,
+      "corpus_sentences": 96
+    },
+    {
+      "pmcid": "PMC8073031",
+      "doi": "10.3390/ma14082043",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Wear Properties of Nitride-Bonded Silicon Carbide under the Action of an Abrasive Soil Mass.",
+      "pool_sentences": 163,
+      "corpus_sentences": 119
+    },
+    {
+      "pmcid": "PMC5353678",
+      "doi": "10.1038/srep44627",
+      "year": "2017",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Effects of GaN/AlGaN/Sputtered AlN nucleation layers on performance of GaN-based ultraviolet light-emitting diodes.",
+      "pool_sentences": 97,
+      "corpus_sentences": 66
+    },
+    {
+      "pmcid": "PMC10535465",
+      "doi": "10.3390/mi14091797",
+      "year": "2023",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Research on the Preparation and Application of Fixed-Abrasive Tools Based on Solid-Phase Reactions for Sapphire Wafer Lapping and Polishing.",
+      "pool_sentences": 170,
+      "corpus_sentences": 114
+    },
+    {
+      "pmcid": "PMC10342605",
+      "doi": "10.3390/ma16134761",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Parameters Optimization of Laser-Grinding Chain for Processing Groove of 2.5-Dimensional C/SiC Composites.",
+      "pool_sentences": 133,
+      "corpus_sentences": 91
+    },
+    {
+      "pmcid": "PMC6187652",
+      "doi": "10.3390/mi9030093",
+      "year": "2018",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Wafer-Level Packaging Method for RF MEMS Applications Using Pre-Patterned BCB Polymer.",
+      "pool_sentences": 149,
+      "corpus_sentences": 100
+    },
+    {
+      "pmcid": "PMC7765353",
+      "doi": "10.3390/ma13245723",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Lattice Defects and Exfoliation Efficiency of 6H-SiC via H2+ Implantation at Elevated Temperature.",
+      "pool_sentences": 175,
+      "corpus_sentences": 123
+    },
+    {
+      "pmcid": "PMC10760893",
+      "doi": "10.1371/journal.pone.0290303",
+      "year": "2024",
+      "journal": "PloS one",
+      "license": "cc by",
+      "title": "GAN-based medical image small region forgery detection via a two-stage cascade framework.",
+      "pool_sentences": 387,
+      "corpus_sentences": 260
+    },
+    {
+      "pmcid": "PMC7393100",
+      "doi": "10.1038/s41598-020-69341-z",
+      "year": "2020",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Enhanced mechanical and wear properties of Al6061 alloy nanocomposite reinforced by CNT-template-grown core-shell CNT/SiC nanotubes.",
+      "pool_sentences": 174,
+      "corpus_sentences": 120
+    },
+    {
+      "pmcid": "PMC4572748",
+      "doi": "10.1038/srep14084",
+      "year": "2015",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Investigation of diffusion length distribution on polycrystalline silicon wafers via photoluminescence methods.",
+      "pool_sentences": 189,
+      "corpus_sentences": 127
+    },
+    {
+      "pmcid": "PMC12392450",
+      "doi": "10.1021/acsaelm.5c00815",
+      "year": "2025",
+      "journal": "ACS applied electronic materials",
+      "license": "cc by",
+      "title": "Beyond Epitaxy: Ion Implantation as a Tool for Orbital Engineering.",
+      "pool_sentences": 116,
+      "corpus_sentences": 72
+    },
+    {
+      "pmcid": "PMC11515488",
+      "doi": "10.1186/s12911-024-02712-y",
+      "year": "2024",
+      "journal": "BMC medical informatics and decision making",
+      "license": "cc by",
+      "title": "Deep learning assisted cancer disease prediction from gene expression data using WT-GAN.",
+      "pool_sentences": 416,
+      "corpus_sentences": 285
+    },
+    {
+      "pmcid": "PMC4450543",
+      "doi": "10.1038/srep10699",
+      "year": "2015",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "High-mobility and air-stable single-layer WS2 field-effect transistors sandwiched between chemical vapor deposition-grown hexagonal BN films.",
+      "pool_sentences": 137,
+      "corpus_sentences": 98
+    },
+    {
+      "pmcid": "PMC13177000",
+      "doi": "10.1021/acsomega.5c12489",
+      "year": "2026",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Solvent Effects on the Blinking Statistics of Color Centers in Chemical Vapor Deposition-Grown hBN.",
+      "pool_sentences": 165,
+      "corpus_sentences": 97
+    },
+    {
+      "pmcid": "PMC10574512",
+      "doi": "10.3390/ma16196568",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Palladium-Based Contacts on p-GaN and Their Application in Laser Diodes.",
+      "pool_sentences": 282,
+      "corpus_sentences": 194
+    },
+    {
+      "pmcid": "PMC5456143",
+      "doi": "10.3390/ma7096748",
+      "year": "2014",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Matrix Structure Evolution and Nanoreinforcement Distribution in Mechanically Milled and Spark Plasma Sintered Al-SiC Nanocomposites.",
+      "pool_sentences": 145,
+      "corpus_sentences": 96
+    },
+    {
+      "pmcid": "PMC12318636",
+      "doi": "10.1002/ece3.71845",
+      "year": "2025",
+      "journal": "Ecology and evolution",
+      "license": "cc by",
+      "title": "Construction of GAN-RES and Its Application to Small Sample Fusulinid Fossil Recognition.",
+      "pool_sentences": 117,
+      "corpus_sentences": 66
+    },
+    {
+      "pmcid": "PMC12120779",
+      "doi": "10.1002/advs.202413035",
+      "year": "2025",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Chemical Vapor Deposition Strategy of Fe-N-C Nanotubes for the Oxygen Evolution Reaction.",
+      "pool_sentences": 108,
+      "corpus_sentences": 73
+    },
+    {
+      "pmcid": "PMC3276418",
+      "doi": "10.1186/1556-276x-7-22",
+      "year": "2012",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "SiC formation for a solar cell passivation layer using an RF magnetron co-sputtering system.",
+      "pool_sentences": 83,
+      "corpus_sentences": 55
+    },
+    {
+      "pmcid": "PMC13279803",
+      "doi": "10.1038/s41598-026-49156-0",
+      "year": "2026",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Advanced detection of coronary artery disease using a GAN-transformer model on plasma cytokine profiles.",
+      "pool_sentences": 455,
+      "corpus_sentences": 308
+    },
+    {
+      "pmcid": "PMC9414464",
+      "doi": "10.3390/mi13081249",
+      "year": "2022",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Numerical Analysis of a CZTS Solar Cell with MoS2 as a Buffer Layer and Graphene as a Transparent Conducting Oxide Layer for Enhanced Cell Performance.",
+      "pool_sentences": 158,
+      "corpus_sentences": 106
+    },
+    {
+      "pmcid": "PMC8433478",
+      "doi": "10.1038/s41378-020-0134-6",
+      "year": "2020",
+      "journal": "Microsystems & nanoengineering",
+      "license": "cc by",
+      "title": "Wafer-scale 3D shaping of high aspect ratio structures by multistep plasma etching and corner lithography.",
+      "pool_sentences": 162,
+      "corpus_sentences": 113
+    },
+    {
+      "pmcid": "PMC11314727",
+      "doi": "10.3390/s24154922",
+      "year": "2024",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "LPDi GAN: A License Plate De-Identification Method to Preserve Strong Data Utility.",
+      "pool_sentences": 178,
+      "corpus_sentences": 122
+    },
+    {
+      "pmcid": "PMC5407402",
+      "doi": "10.1186/s11671-017-2087-8",
+      "year": "2017",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "Efficient Carrier Injection, Transport, Relaxation, and Recombination Associated with a Stronger Carrier Localization and a Low Polarization Effect of Nonpolar m-plane InGaN/GaN Light-Emitting Diodes.",
+      "pool_sentences": 82,
+      "corpus_sentences": 49
+    }
+  ],
+  "leakage": {
+    "mulms_sentences": 10184,
+    "mulms_ngrams": 222977,
+    "overlap_by_document": {
+      "steel_04": 14,
+      "sofc_04": 51,
+      "pemfc_07": 54,
+      "electrolysis_03": 38,
+      "semi_06": 30,
+      "semi_01": 25,
+      "oastm_11": 12,
+      "sofc_01": 40,
+      "steel_03": 15,
+      "semi_04": 45,
+      "semi_05": 33,
+      "steel_06": 11,
+      "steel_11": 17,
+      "pemfc_13": 30,
+      "graphene_01": 48,
+      "pemfc_08": 15,
+      "oastm_06": 14,
+      "semi_02": 11,
+      "electrolysis_01": 19,
+      "pemfc_02": 7,
+      "pemfc_10": 1,
+      "electrolysis_02": 25,
+      "oastm_09": 27,
+      "graphene_02": 42,
+      "oastm_02": 20,
+      "oastm_05": 14,
+      "sofc_02": 49,
+      "oastm_08": 6,
+      "electrolysis_04": 35,
+      "semi_08": 5,
+      "steel_05": 15,
+      "sofc_03": 5,
+      "oastm_07": 1,
+      "oastm_03": 7,
+      "oastm_04": 2,
+      "semi_03": 12,
+      "poly_01": 7,
+      "poly_09": 2,
+      "pemfc_03": 12,
+      "poly_11": 9,
+      "pemfc_04": 4,
+      "oastm_10": 6,
+      "poly_02": 4,
+      "oastm_01": 9,
+      "poly_05": 2,
+      "pemfc_14": 2,
+      "steel_08": 3,
+      "poly_04": 2
+    },
+    "overlap_examples": [
+      {
+        "sentence": "The crystalline quality and strain state of the NNO films with different thickness and on different substrates was determined by X-ray diffraction (for details see Supplementary Note 1 and later discussions).",
+        "ngram": "was determined by x - ray diffraction (",
+        "docs": [
+          "steel_04"
+        ]
+      },
+      {
+        "sentence": "The high-angle annular dark-field (HAADF) STEM image shown in Fig. 4a evidences the epitaxial, cube-on-cube growth of a 5-nm-thick NNO film on a LAO substrate, with a flat, atomically sharp interface.",
+        "ngram": "the high - angle annular dark - field",
+        "docs": [
+          "sofc_04"
+        ]
+      },
+      {
+        "sentence": "Cross-sectional specimens of the films were prepared and studied by scanning transmission electron microscopy (STEM) on a probe-corrected FEI Titan 60\u2013300 microscope equipped with a high-brightness field-emission gun (X-FEG) and a CEOS aberration corrector for the condenser system.",
+        "ngram": "by scanning transmission electron microscopy ( stem )",
+        "docs": [
+          "sofc_04"
+        ]
+      },
+      {
+        "sentence": "High-angle annular dark-field (HAADF) STEM images were acquired with a convergence angle of 25 mrad and a probe size below 1 \u212b.",
+        "ngram": "high - angle annular dark - field (",
+        "docs": [
+          "sofc_04"
+        ]
+      },
+      {
+        "sentence": "On the other hand, the n-buffer layer introduces the series resistance.",
+        "ngram": "on the other hand , the n -",
+        "docs": [
+          "pemfc_07"
+        ]
+      },
+      {
+        "sentence": "The heat flux in each system can be calculated from the slope of the energy profile.",
+        "ngram": "can be calculated from the slope of the",
+        "docs": [
+          "sofc_04"
+        ]
+      },
+      {
+        "sentence": "Periodic boundary conditions in the x, y, and z directions are used here to eradicate the size effect.",
+        "ngram": "in the x , y , and z",
+        "docs": [
+          "electrolysis_03"
+        ]
+      },
+      {
+        "sentence": "High-resolution X-ray diffraction (HRXRD) would provide a direct measurement of lattice strain.",
+        "ngram": "resolution x - ray diffraction ( hrxrd )",
+        "docs": [
+          "semi_06"
+        ]
+      },
+      {
+        "sentence": "Meanwhile, as shown in Figure 6a, the PL peak wavelength continuously blue-shifted from approximately 514 nm to 511 nm, accompanied by a noticeable narrowing of the full width at half maximum (FWHM).",
+        "ngram": "the full width at half maximum ( fwhm",
+        "docs": [
+          "semi_01"
+        ]
+      },
+      {
+        "sentence": "This increased leakage can be primarily attributed to two factors: first, the ICP etching performed to fabricate probe access via inevitably introduced plasma damage and dense surface states on the sidewalls, which act as non-radiative Shockley\u2013Read\u2013Hall (SRH) leakage channels; second, the profound strain relaxation (as evidenced in Section 3.2), combined with thermal annealing at 300 \u00b0C, may have activated latent threading dislocations as conductive leakage paths.",
+        "ngram": "shockley - read - hall ( srh )",
+        "docs": [
+          "oastm_11"
+        ]
+      },
+      {
+        "sentence": "The phase identification was performed by X\u2010ray diffraction (XRD).",
+        "ngram": "by x - ray diffraction ( xrd )",
+        "docs": [
+          "sofc_01",
+          "steel_03"
+        ]
+      },
+      {
+        "sentence": "The differently oriented samples performed the polarization\u2013voltage (P\u2013V) and capacitance\u2013voltage (C\u2013V) measurements.",
+        "ngram": "capacitance - voltage ( c - v )",
+        "docs": [
+          "semi_04"
+        ]
+      },
+      {
+        "sentence": "Considering the direct relation between AFE order and atomic displacement, high\u2010angle annular dark\u2010field scanning transmission electron microscopy (HAADF\u2010STEM) is a powerful method for analyzing PSO thin films.",
+        "ngram": "field scanning transmission electron microscopy ( haadf -",
+        "docs": [
+          "semi_05"
+        ]
+      },
+      {
+        "sentence": "The parasitic inductances of other valid bond wires (Nos. 2\u20136) are calculated by Equations (1)\u2013(3), described in Section 2.2, and summarized in Table 3.",
+        "ngram": "calculated by equations ( 1 ) - (",
+        "docs": [
+          "steel_06"
+        ]
+      },
+      {
+        "sentence": "Similarly, for other bond wire damage models, such as cutting off two bond wires (Nos. 1 and 2), cutting off three bond wires (Nos. 1, 2, and 3), cutting off four bond wires (Nos. 1, 2, 3, and 4), and cutting off five bond wires (Nos. 1, 2, 3, 4, and 5), the parasitic inductances are calculated from Equations (1)\u2013(3), and listed in Appendix A, Table A1, Table A2, Table A3 and Table A4.",
+        "ngram": "equations ( 1 ) - ( 3 )",
+        "docs": [
+          "steel_11"
+        ]
+      },
+      {
+        "sentence": "Hong et al. grew InAs NWs on suspended graphene through MOCVD, resulting in a uniform in-plane alignment of vertical hexagonal NWs, as shown in Fig. 2c.",
+        "ngram": ", as shown in fig . 2c .",
+        "docs": [
+          "pemfc_13"
+        ]
+      },
+      {
+        "sentence": "The calculated vdW adsorption energy for the InAs/graphene system is 64 meV with an equilibrium vdW gap of 3.1 \u00c5 (Fig. 2f), which is in good agreement with TEM observation.",
+        "ngram": ") , which is in good agreement with",
+        "docs": [
+          "steel_03"
+        ]
+      },
+      {
+        "sentence": "High-angle annular dark field (HAADF) scanning transmission electron microscope (STEM) reveals a high-quality interface, with GaAs atomic columns perfectly aligned remotely through the 5 \u00c5 gap (Fig. 5b).",
+        "ngram": "high - angle annular dark field ( haadf",
+        "docs": [
+          "graphene_01"
+        ]
+      },
+      {
+        "sentence": "We also measured the time traces of the fluorescence intensity of a single PL6 defect with a sampling time of 0.1 s at exciting laser powers of 0.2 mW (black), 1 mW (orange), 3 mW (blue) and 9 mW (green), as shown in Fig. 1(c).",
+        "ngram": "in fig . 1 ( c ) .",
+        "docs": [
+          "semi_05"
+        ]
+      },
+      {
+        "sentence": "The CW-ODMR spectrum in the zero magnetic field excited with a 50-\u03bcW laser is shown in Fig. 2(a).",
+        "ngram": "shown in fig . 2 ( a )",
+        "docs": [
+          "pemfc_08"
+        ]
+      }
+    ],
+    "duplicate_examples": [
+      {
+        "sentence": "The error maps are calculated by calculating the absolute difference between the generated images with the ground truth images.",
+        "duplicate_of": 98
+      },
+      {
+        "sentence": "Both di/dtmax and \u0394VDS decreases.",
+        "duplicate_of": 1166
+      },
+      {
+        "sentence": "Oscillation is also gradually suppressed.",
+        "duplicate_of": 1167
+      },
+      {
+        "sentence": "During the reverse recovery process, they make the reverse recovery current smoother.",
+        "duplicate_of": 1171
+      },
+      {
+        "sentence": "The surface morphology of the S-ITO films was relatively smooth and dense, while that of the E-ITO films was rather rough.",
+        "duplicate_of": 3438
+      },
+      {
+        "sentence": "Also, with four pixels, the corresponding VF values of the five different regions were 2.89, 2.83, 2.83, 2.83, and 2.79 V at 30 A/cm2.",
+        "duplicate_of": 3483
+      },
+      {
+        "sentence": "As the current density was increased from 30 to 1500 A/cm2, the blue shifts in the EL peaks\u2019 wavelength were approximately 8.2, 7.5, 6.4, 8.2, and 6.3 nm from region 1 to region 5, respectively.",
+        "duplicate_of": 3491
+      },
+      {
+        "sentence": "Under such conditions the defects have positive or only slightly negative formation energies interrupting any further interactions.",
+        "duplicate_of": 6506
+      },
+      {
+        "sentence": "Measurements were performed with a time resolution of one second.",
+        "duplicate_of": 7404
+      },
+      {
+        "sentence": "No specific reasons for the peaks were identified.",
+        "duplicate_of": 7480
+      },
+      {
+        "sentence": "All spectra consist of GaN band gap-related resonance (3.43 eV) followed by the FKO.",
+        "duplicate_of": 9541
+      },
+      {
+        "sentence": "The surface barrier height value of 0.72 and 1.02 eV was obtained for GaN and V2C/GaN, respectively.",
+        "duplicate_of": 9549
+      },
+      {
+        "sentence": "A high degree of polycondensation in the Si\u2013O\u2013Al framework structure corresponds to high strength.",
+        "duplicate_of": 11146
+      },
+      {
+        "sentence": "Therefore, the high SiCS content of geopolymer sample may reduce the precursor amounts and delay the geopolymer reaction.",
+        "duplicate_of": 11124
+      },
+      {
+        "sentence": "At an NS/SS ratio of 1.6, the SiCSMG with 10% SiCS content had higher strength of about 70 MPa after 56 days curing.",
+        "duplicate_of": 11164
+      },
+      {
+        "sentence": "Her current research interest is on the controllable fabrication and application of nanomaterials (especially 1D vanadium dioxide, and 2D transition metal dichalcogenides).",
+        "duplicate_of": 11508
+      },
+      {
+        "sentence": "Her current research interest is on the controllable fabrication and application of nanomaterials (especially 1D vanadium dioxide, and 2D transition metal dichalcogenides).",
+        "duplicate_of": 11508
+      },
+      {
+        "sentence": "All experiments were repeated three times.",
+        "duplicate_of": 12300
+      },
+      {
+        "sentence": "The broad peak at 2\u03b8 = 43\u00b0 is indicative of an amorphous layer.",
+        "duplicate_of": 12838
+      },
+      {
+        "sentence": "No crystalline compounds were found in the deposited layers.",
+        "duplicate_of": 12839
+      }
+    ],
+    "shingle": {
+      "characters": 50,
+      "article_overlap": 5,
+      "sentences_dropped": 0,
+      "by_article": {},
+      "articles_dropped": []
+    }
+  },
+  "corpus": {
+    "path": "data/processed/corpus/topic_semi_sentences.txt",
+    "sentences": 40000,
+    "words": 1142918,
+    "sha256": "447c2524303a6fd89eb239b068bbb1b1a0a9e1a2b9c8fa91c831d91efe8def3f"
+  },
+  "run": {
+    "search_retrieved": "2026-10-18T09:47:41Z",
+    "started": "2026-10-18T10:48:28Z",
+    "finished": "2026-10-18T10:49:21Z",
+    "seconds": 53.4,
+    "used_articles_downloaded_now": 0,
+    "http_requests": 0,
+    "cache_dir": "data/processed/corpus/europepmc_topic_semi"
+  }
+}

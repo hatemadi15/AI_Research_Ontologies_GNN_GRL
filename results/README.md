@@ -201,6 +201,22 @@ and the unseen test entities that are silver names); no name is stored.
 `gpu/ner_week5_seed_analysis.json` (`mulms`, `silver_names`) holds the MuLMS
 decisions, and `gpu/ner_week11_comparisons.json` will hold the MaterioMiner ones.
 
+Week 12, phase 0 (names from a topic corpus; the gate in ROADMAP §4, no
+training): `mulms_articles.json` (`mulms_articles.py`) is the Europe PMC search
+for MuLMS's 50 documents by title, 16 found with a PMCID; `topic_corpora/<topic>.json`
+(`build_topic_corpus.py`, one per MuLMS subfield) is the report of a corpus of
+40,000 sentences of open-access full texts whose titles carry the subfield's
+terms (the query, the articles with their licences, every count, the leakage
+filters against MuLMS: the 16 PMCIDs, 8-word n-grams and 50-character
+shingles, and the corpus's SHA-256; the corpus itself,
+`data/processed/corpus/topic_<topic>_sentences.txt`, is not versioned and the
+report rebuilds it from the cache); `mulms_coverage.json` (`mulms_coverage.py`)
+is the gate: per held-out subfield and corpus, the share of the unseen test
+entities (and of their distinct names) whose words occur in a corpus sentence,
+exact and ignoring word boundaries and case, per type, with the sentences
+that share a shingle with the held-out documents left out (`leaked`, 0
+everywhere).
+
 Week 10 (MuLMS, a third corpus; protocol and outcome in ROADMAP §4; Kaggle
 session `w10a` of 17–18 October, `ner-gpu-jobs-d` version 4, bundle a08356f):
 `mulms_corpus.json` is the report of `src/graph/mulms.py`. It records the

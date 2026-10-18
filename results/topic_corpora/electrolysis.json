@@ -1,0 +1,3959 @@
+{
+  "script": "src/graph/build_topic_corpus.py",
+  "protocol": "docs/ROADMAP.md \u00a74, week 12: mention replacement with names from in-topic text",
+  "topic": "electrolysis",
+  "selection": {
+    "source": "Europe PMC REST API",
+    "search_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+    "fulltext_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/{pmcid}/fullTextXML",
+    "result_type": "core",
+    "topic": "electrolysis",
+    "query": "OPEN_ACCESS:y AND HAS_FT:y AND TITLE:(\"electrolysis\" OR \"electrolyzer\" OR \"electrolyzers\" OR \"electrolyser\" OR \"electrolysers\" OR \"oxygen evolution\" OR \"hydrogen evolution\" OR \"water splitting\" OR \"electrocatalyst\" OR \"electrocatalysts\")",
+    "title_terms": [
+      "electrolysis",
+      "electrolyzer",
+      "electrolyzers",
+      "electrolyser",
+      "electrolysers",
+      "oxygen evolution",
+      "hydrogen evolution",
+      "water splitting",
+      "electrocatalyst",
+      "electrocatalysts"
+    ],
+    "exclude_title_terms": [
+      "author correction",
+      "correction",
+      "erratum",
+      "corrigendum",
+      "retraction"
+    ],
+    "excluded_pmcids": [
+      "PMC3990421",
+      "PMC4772004",
+      "PMC5700654",
+      "PMC6247067",
+      "PMC6418911",
+      "PMC6631236",
+      "PMC6650920",
+      "PMC7180721",
+      "PMC7231364",
+      "PMC7254350",
+      "PMC7361982",
+      "PMC7435395",
+      "PMC7529785",
+      "PMC7532522",
+      "PMC7590506",
+      "PMC7766479"
+    ],
+    "local_filters": [
+      "a PMCID",
+      "not one of MuLMS's articles",
+      "language eng",
+      "a title term in the title",
+      "no exclusion term in the title"
+    ],
+    "order": "PMCIDs sorted as strings, then random.Random(0).shuffle",
+    "superscripts": "inline, as in the SOFC corpus",
+    "words": "chem_tokenize.ChemWordTokenizer (ChemDataExtractor 1.3.0), then ASCII hyphens inside a word made words of their own, space-separated"
+  },
+  "settings": {
+    "seed": 0,
+    "target_pool": 60000,
+    "max_sentences": 40000,
+    "chunk": 10,
+    "min_words": 5,
+    "max_words": 120,
+    "min_alpha_fraction": 0.5,
+    "max_inline_formula_chars": 30,
+    "ngram": 8,
+    "language": "eng",
+    "page_size": 500,
+    "min_request_interval_seconds": 0.25,
+    "timeout_seconds": 60,
+    "retries": 4,
+    "backoff_seconds": 2.0,
+    "abbreviations": [
+      "approx",
+      "at",
+      "ca",
+      "cf",
+      "eq",
+      "eqs",
+      "fig",
+      "figs",
+      "no",
+      "nos",
+      "pp",
+      "ref",
+      "refs",
+      "resp",
+      "sec",
+      "sect",
+      "vol",
+      "vs",
+      "wt",
+      "et al"
+    ],
+    "dotted_abbreviations": "(?:[A-Za-z]{1,2}\\.)+[A-Za-z]{1,2}",
+    "skipped_sections": "^[\\d.\\s]*(acknowledg|funding|conflicts? of interest|competing interests?|author contributions?|data availability|availability of data|ethic|abbreviations|nomenclature|supplementary|references|declarations?|disclosure)",
+    "splitter": "build_fatigue_corpus.split_sentences"
+  },
+  "counts": {
+    "hits": 6271,
+    "api_hit_count": 6271,
+    "hits_rejected": 215,
+    "eligible_articles": 6056,
+    "articles_used": 311,
+    "articles_downloaded": 310,
+    "failed_downloads": 0,
+    "articles_without_text": 1,
+    "target_reached": true,
+    "paragraphs": 9937,
+    "raw_sentences": 63277,
+    "cut_by_formula": 888,
+    "length_filtered": 712,
+    "length_filtered_by": {
+      "too_short": 611,
+      "too_long": 22,
+      "non_alphabetic": 79
+    },
+    "after_length_filter": 61677,
+    "duplicates_dropped": 135,
+    "overlap_dropped": 1422,
+    "pool": 60100,
+    "kept": 40000,
+    "shingle_dropped": 20,
+    "articles_dropped_by_shingles": 0
+  },
+  "rejected_by_reason": {
+    "no_title_term": 126,
+    "title_term:author correction": 23,
+    "no_pmcid": 12,
+    "title_term:correction": 43,
+    "title_term:erratum": 4,
+    "title_term:retraction": 3,
+    "mulms_article": 3,
+    "title_term:corrigendum": 1
+  },
+  "excluded_by_title": [
+    {
+      "pmcid": "PMC11982287",
+      "term": "author correction",
+      "title": "Author Correction: Sequential oxygen evolution and decoupled water splitting via electrochemical redox reaction of nickel hydroxides."
+    },
+    {
+      "pmcid": "PMC12735473",
+      "term": "correction",
+      "title": "Correction: Huang et al. Constructing Molybdenum Phosphide@Cobalt Phosphide Heterostructure Nanoarrays on Nickel Foam as a Bifunctional Electrocatalyst for Enhanced Overall Water Splitting. Molecules 2023, 28, 3647."
+    },
+    {
+      "pmcid": "PMC13388608",
+      "term": "correction",
+      "title": "Correction: High Polarity Doping of CoFe Layered Hydroxides: Bifunctional and Corrosion-Resistant Anion Exchange Membrane Seawater Electrolyzers."
+    },
+    {
+      "pmcid": "PMC13334550",
+      "term": "correction",
+      "title": "Correction: Dual-functional Ni and Co oxide-doped carbon nanocomposite: an effective catalyst for electrochemical water splitting and CO2 utilization."
+    },
+    {
+      "pmcid": "PMC13149001",
+      "term": "author correction",
+      "title": "Author Correction: Interfacial solvation pre-organizes the transition state of the oxygen evolution reaction."
+    },
+    {
+      "pmcid": "PMC12903134",
+      "term": "correction",
+      "title": "Correction to \u201cA Sustainable and Regenerative Process for the Treatment of Textile Effluents Using Nonphotocatalytic Water Splitting by Nanoporous Oxygen-Deficient Ferrite\u201d"
+    },
+    {
+      "pmcid": "PMC13063060",
+      "term": "correction",
+      "title": "Correction to \"Corrosion and Electrolysis Mechanisms of Elemental Cobalt in NaCl Solution\"."
+    },
+    {
+      "pmcid": "PMC13041704",
+      "term": "correction",
+      "title": "Correction: Marigold-flower-like MoS2 nanosheet assemblies for enhanced alkaline hydrogen evolution."
+    },
+    {
+      "pmcid": "PMC13068950",
+      "term": "author correction",
+      "title": "Author Correction: Operando monitoring of the functional role of tetrahedral cobalt centers for the oxygen evolution reaction."
+    },
+    {
+      "pmcid": "PMC13216337",
+      "term": "author correction",
+      "title": "Author Correction: Electrified interfacial oxygen-down water boosts efficient and durable electrolysis."
+    },
+    {
+      "pmcid": "PMC10721841",
+      "term": "author correction",
+      "title": "Author Correction: Corrosion-resistant cobalt phosphide electrocatalysts for salinity tolerance hydrogen evolution."
+    },
+    {
+      "pmcid": "PMC12472801",
+      "term": "correction",
+      "title": "Correction: Liu et al. Recent Development on the Synthesis Strategies and Mechanisms of Co3O4-Based Electrocatalysts for Oxygen Evolution Reaction: A Review. Molecules 2025, 30, 3238."
+    },
+    {
+      "pmcid": "PMC12899824",
+      "term": "correction",
+      "title": "Correction: Irfan et al. Recent Advances in MXene-Based Composites for Their Efficiency in the Degradation of Antibiotics and Water Splitting. Molecules 2025, 30, 3712."
+    },
+    {
+      "pmcid": "PMC12226810",
+      "term": "correction",
+      "title": "Correction to \"Robust SrTiO3 Passivation of Silicon Photocathode by Reduced Graphene Oxide for Solar Water Splitting\"."
+    },
+    {
+      "pmcid": "PMC12466932",
+      "term": "correction",
+      "title": "Correction: Dual-functional Ni and Co oxide-doped carbon nanocomposite: an effective catalyst for electrochemical water splitting and CO2 utilization."
+    },
+    {
+      "pmcid": "PMC12533687",
+      "term": "correction",
+      "title": "Correction: Atomic-scale engineering of Fe-Cu nanoparticles on amine-functionalized silica: CNT-driven synergy for ultra-efficient hydrogen evolution."
+    },
+    {
+      "pmcid": "PMC12571194",
+      "term": "correction",
+      "title": "Correction: Rare earth metal (Sm)-doped NiMnO3 nanostructures for highly competent alkaline oxygen evolution reaction."
+    },
+    {
+      "pmcid": "PMC12053946",
+      "term": "erratum",
+      "title": "Erratum: Addition to \"Er-Doping Enhances the Oxygen Evolution Performance of Cobalt Oxide in Acidic Medium\"."
+    },
+    {
+      "pmcid": "PMC12146778",
+      "term": "correction",
+      "title": "Correction: Ultrahigh photocatalytic hydrogen evolution of linear conjugated terpolymers enabled by an ultra-low ratio of the benzothiadiazole monomer."
+    },
+    {
+      "pmcid": "PMC12942654",
+      "term": "correction",
+      "title": "Correction: Khdary et al. Preparation of Cu/Sn-Organic Nano-Composite Catalysts for Potential Use in Hydrogen Evolution Reaction and Electrochemical Characterization. Nanomaterials 2023, 13, 911."
+    },
+    {
+      "pmcid": "PMC12442606",
+      "term": "correction",
+      "title": "Correction to \"Spin Magnetic Effect Activate Dual Site Intramolecular O-O Bridging for Nickel-Iron Hydroxide Enhanced Oxygen Evolution Catalysis\"."
+    },
+    {
+      "pmcid": "PMC12526193",
+      "term": "correction",
+      "title": "Correction: Shaban et al. Design of SnO2:Ni,Ir Nanoparticulate Photoelectrodes for Efficient Photoelectrochemical Water Splitting. Nanomaterials 2022, 12, 453."
+    },
+    {
+      "pmcid": "PMC13162373",
+      "term": "correction",
+      "title": "Correction: Placebo and nocebo effects of percutaneous needle electrolysis and dry-needling: an intra and inter-treatment sessions analysis of a three-arm randomized double-blinded controlled trial in patients with patellar tendinopathy."
+    },
+    {
+      "pmcid": "PMC12109398",
+      "term": "correction",
+      "title": "Correction: Ni-Mo nanostructure alloys as effective electrocatalysts for green hydrogen production in an acidic medium."
+    },
+    {
+      "pmcid": "PMC9314344",
+      "term": "author correction",
+      "title": "Author Correction: Anti-dissolution Pt single site with Pt(OH)(O3)/Co(P) coordination for efficient alkaline water splitting electrolyzer."
+    },
+    {
+      "pmcid": "PMC11649803",
+      "term": "author correction",
+      "title": "Author Correction: Novel synthesis of CuHCF/B-rGO composites for oxygen evolution reaction activity."
+    },
+    {
+      "pmcid": "PMC11811918",
+      "term": "correction",
+      "title": "Correction to \"Fe-Doped Ni-Based Catalysts Surpass Ir-Baselines for Oxygen Evolution Due to Optimal Charge-Transfer Characteristics\"."
+    },
+    {
+      "pmcid": "PMC12202799",
+      "term": "author correction",
+      "title": "Author Correction: Support-free iridium hydroxide for high-efficiency proton-exchange membrane water electrolysis."
+    },
+    {
+      "pmcid": "PMC11876493",
+      "term": "correction",
+      "title": "Correction: Transition Metal Carbonitride MXenes Anchored with Pt Sub-nanometer Clusters to Achieve High-Performance Hydrogen Evolution Reaction at All pH Range."
+    },
+    {
+      "pmcid": "PMC11387502",
+      "term": "author correction",
+      "title": "Author Correction: Strong synergy between gold nanoparticles and cobalt porphyrin induces highly efficient photocatalytic hydrogen evolution."
+    },
+    {
+      "pmcid": "PMC12037798",
+      "term": "correction",
+      "title": "Publisher Correction: Chaos-enhanced manganese electrolysis: nodule suppression and improved efficiency using controllable chaotic electrical signals."
+    },
+    {
+      "pmcid": "PMC11044225",
+      "term": "correction",
+      "title": "Correction to \"Role of NiO Nanoparticles in Enhancing Structure Properties of TiO2 and Its Applications in Photodegradation and Hydrogen Evolution\"."
+    },
+    {
+      "pmcid": "PMC11259566",
+      "term": "author correction",
+      "title": "Author Correction: Alkali cation-induced cathodic corrosion in Cu electrocatalysts."
+    },
+    {
+      "pmcid": "PMC10795045",
+      "term": "correction",
+      "title": "Correction to \"Band Gap and Morphology Engineering of Hematite Nanoflakes from an Ex Situ Sn Doping for Enhanced Photoelectrochemical Water Splitting\"."
+    },
+    {
+      "pmcid": "PMC11046477",
+      "term": "correction",
+      "title": "Correction to \"Metal-Free Homogeneous O2 Reduction by an Iminium-Based Electrocatalyst\"."
+    },
+    {
+      "pmcid": "PMC10850472",
+      "term": "author correction",
+      "title": "Author Correction: Efficient and stable visible-light-driven Z-scheme overall water splitting using an oxysulfide H2 evolution photocatalyst."
+    },
+    {
+      "pmcid": "PMC8187692",
+      "term": "correction",
+      "title": "Correction to: High-Index-Faceted Ni3S2 Branch Arrays as Bifunctional Electrocatalysts for Efficient Water Splitting."
+    },
+    {
+      "pmcid": "PMC11447159",
+      "term": "author correction",
+      "title": "Author Correction: An acid-tolerant metal-organic framework for industrial CO2 electrolysis using a proton exchange membrane."
+    },
+    {
+      "pmcid": "PMC11390870",
+      "term": "author correction",
+      "title": "Author Correction: A high-performance capillary-fed electrolysis cell promises more cost-competitive renewable hydrogen."
+    },
+    {
+      "pmcid": "PMC10869774",
+      "term": "author correction",
+      "title": "Author Correction: Iridium single atoms incorporated in Co3O4 efficiently catalyze the oxygen evolution in acidic conditions."
+    },
+    {
+      "pmcid": "PMC11267493",
+      "term": "correction",
+      "title": "Correction to \"Efficient Visible Light Photocatalytic Hydrogen Evolution by Boosting the Interfacial Electron Transfer in Mesoporous Mott-Schottky Heterojunctions of Co2P-Modified CdIn2S4 Nanocrystals\"."
+    },
+    {
+      "pmcid": "PMC9417580",
+      "term": "correction",
+      "title": "Correction: NiCo2O4 nanoparticles inlaid on sulphur and nitrogen doped and co-doped rGO sheets as efficient electrocatalysts for the oxygen evolution and methanol oxidation reactions."
+    },
+    {
+      "pmcid": "PMC9902546",
+      "term": "author correction",
+      "title": "Author Correction: Observation of a robust and active catalyst for hydrogen evolution under high current densities."
+    },
+    {
+      "pmcid": "PMC11129175",
+      "term": "correction",
+      "title": "Correction to Nb Doping and Alloying of 2D WS2 by Atomic Layer Deposition for 2D Transition Metal Dichalcogenide Transistors and HER Electrocatalysts."
+    },
+    {
+      "pmcid": "PMC9400016",
+      "term": "correction",
+      "title": "Correction to Covalent Triazine Frameworks Embedded with Ir Complexes for Enhanced Photocatalytic Hydrogen Evolution."
+    },
+    {
+      "pmcid": "PMC9426433",
+      "term": "correction",
+      "title": "Correction: Microflower-like Co9S8@MoS2 heterostructure as an efficient bifunctional catalyst for overall water splitting."
+    },
+    {
+      "pmcid": "PMC9835152",
+      "term": "correction",
+      "title": "Correction: Carbon nanotube-titanium dioxide nanocomposite support for improved activity and stability of an iridium catalyst toward the oxygen evolution reaction."
+    },
+    {
+      "pmcid": "PMC10268566",
+      "term": "correction",
+      "title": "Correction: Study on ultrasonic leaching and recovery of fluoride from spent cathode carbon of aluminum electrolysis."
+    },
+    {
+      "pmcid": "PMC9700770",
+      "term": "author correction",
+      "title": "Author Correction: An integrated platinum-nanocarbon electrocatalyst for efficient oxygen reduction."
+    },
+    {
+      "pmcid": "PMC9346126",
+      "term": "retraction",
+      "title": "Retraction Note: One-step assembly of 2H-1T MoS2:Cu/reduced graphene oxide nanosheets for highly efficient hydrogen evolution."
+    },
+    {
+      "pmcid": "PMC9941106",
+      "term": "author correction",
+      "title": "Author Correction: Interpretable design of Ir-free trimetallic electrocatalysts for ammonia oxidation with graph neural networks."
+    },
+    {
+      "pmcid": "PMC9744815",
+      "term": "author correction",
+      "title": "Author Correction: Discovery of LaAlO3 as an efficient catalyst for two-electron water electrolysis towards hydrogen peroxide."
+    },
+    {
+      "pmcid": "PMC8526663",
+      "term": "correction",
+      "title": "Correction to: WS2-WC-WO3 nano\u2011hollow spheres as an efficient and durable catalyst for hydrogen evolution reaction."
+    },
+    {
+      "pmcid": "PMC8504798",
+      "term": "correction",
+      "title": "Correction to \"Tracking Charge Transfer to Residual Metal Clusters in Conjugated Polymers for Photocatalytic Hydrogen Evolution\"."
+    },
+    {
+      "pmcid": "PMC9365853",
+      "term": "author correction",
+      "title": "Author Correction: Sustainable oxygen evolution electrocatalysis in aqueous 1 M H2SO4 with earth abundant nanostructured Co3O4."
+    },
+    {
+      "pmcid": "PMC9244901",
+      "term": "correction",
+      "title": "Correction to \"Technical and Economic Assessment of a High-Quality Syngas Production Process Integrating Oxygen Gasification and Water Electrolysis: The Chinese Case\"."
+    },
+    {
+      "pmcid": "PMC8153209",
+      "term": "correction",
+      "title": "Correction: On the electronic structure and hydrogen evolution reaction activity of platinum group metal-based high-entropy-alloy nanoparticles."
+    },
+    {
+      "pmcid": "PMC6868168",
+      "term": "author correction",
+      "title": "Author Correction: The rapid electrochemical activation of MoTe2 for the hydrogen evolution reaction."
+    },
+    {
+      "pmcid": "PMC7482409",
+      "term": "correction",
+      "title": "Correction to Boosting the Oxygen Evolution Reaction Activity of NiFe2O4 Nanosheets by Phosphate Ion Functionalization."
+    },
+    {
+      "pmcid": "PMC7765383",
+      "term": "erratum",
+      "title": "Erratum: Melnikov, S.; et al. Water Splitting and Transport of Ions in Electromembrane System with Bilayer Ion-Exchange Membrane. Membranes 2020, 10, 346."
+    },
+    {
+      "pmcid": "PMC8830053",
+      "term": "retraction",
+      "title": "Retraction of \"Porous Organic Polymer-Derived Fe2P@N,P-Codoped Porous Carbon as Efficient Electrocatalysts for pH Universal ORR\"."
+    },
+    {
+      "pmcid": "PMC7271148",
+      "term": "correction",
+      "title": "Publisher Correction: Atomically engineering activation sites onto metallic 1T-MoS2 catalysts for enhanced electrochemical hydrogen evolution."
+    },
+    {
+      "pmcid": "PMC7853641",
+      "term": "correction",
+      "title": "Correction to \"Operando X-ray Absorption Spectroscopy (XAS) Observation of Photoinduced Oxidation in FeNi (Oxy)hydroxide Overlayers on Hematite (\u03b1-Fe2O3) Photoanodes for Solar Water Splitting\"."
+    },
+    {
+      "pmcid": "PMC9042127",
+      "term": "retraction",
+      "title": "Retraction: Carbon black hybrid material furnished monodisperse platinum nanoparticles as highly efficient and reusable electrocatalysts for formic acid electro-oxidation."
+    },
+    {
+      "pmcid": "PMC7595147",
+      "term": "author correction",
+      "title": "Author Correction: High-power lithium-selenium batteries enabled by atomic cobalt electrocatalyst in hollow carbon cathode."
+    },
+    {
+      "pmcid": "PMC6879738",
+      "term": "author correction",
+      "title": "Author Correction: Atomic layer deposited Pt-Ru dual-metal dimers and identifying their active sites for hydrogen evolution reaction."
+    },
+    {
+      "pmcid": "PMC6965187",
+      "term": "correction",
+      "title": "Publisher Correction: Spectroelectrochemical study of water oxidation on nickel and iron oxyhydroxide electrocatalysts."
+    },
+    {
+      "pmcid": "PMC9064310",
+      "term": "correction",
+      "title": "Correction: Photoelectrochemical study of carbon-modified p-type Cu2O nanoneedles and n-type TiO2-x nanorods for Z-scheme solar water splitting in a tandem cell configuration."
+    },
+    {
+      "pmcid": "PMC5970216",
+      "term": "author correction",
+      "title": "Author Correction: Highly (001)-textured p-type WSe2 Thin Films as Efficient Large-Area Photocathodes for Solar Hydrogen Evolution."
+    },
+    {
+      "pmcid": "PMC5620992",
+      "term": "erratum",
+      "title": "Erratum: High performance platinum single atom electrocatalyst for oxygen reduction reaction."
+    },
+    {
+      "pmcid": "PMC5481823",
+      "term": "erratum",
+      "title": "Erratum: Ruthenium-cobalt nanoalloys encapsulated in nitrogen-doped graphene as active electrocatalysts for producing hydrogen in alkaline media."
+    },
+    {
+      "pmcid": "PMC5481824",
+      "term": "corrigendum",
+      "title": "Corrigendum: Ruthenium-cobalt nanoalloys encapsulated in nitrogen-doped graphene as active electrocatalysts for producing hydrogen in alkaline media."
+    },
+    {
+      "pmcid": "PMC5805673",
+      "term": "correction",
+      "title": "Publisher Correction: A Co3O4-CDots-C3N4 three component electrocatalyst design concept for efficient and tunable CO2 reduction to syngas."
+    },
+    {
+      "pmcid": "PMC4415796",
+      "term": "correction",
+      "title": "Correction: Substrate selection for fundamental studies of electrocatalysts and photoelectrodes: inert potential windows in acidic, neutral, and basic electrolyte."
+    }
+  ],
+  "failed": [
+    {
+      "pmcid": "PMC10667846",
+      "status": "no_text",
+      "error": "no body paragraphs"
+    }
+  ],
+  "articles": [
+    {
+      "pmcid": "PMC12689798",
+      "doi": "10.1038/s41467-025-66408-1",
+      "year": "2025",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "Breathing mode in Nd-CoOx for active and stable proton exchange membrane water electrolysis.",
+      "pool_sentences": 338,
+      "corpus_sentences": 236
+    },
+    {
+      "pmcid": "PMC11409851",
+      "doi": "10.1039/d4sc04905e",
+      "year": "2024",
+      "journal": "Chemical science",
+      "license": "cc by-nc",
+      "title": "Coordination engineering of single-atom ruthenium in 2D MoS2 for enhanced hydrogen evolution.",
+      "pool_sentences": 150,
+      "corpus_sentences": 94
+    },
+    {
+      "pmcid": "PMC11614902",
+      "doi": "10.1038/s41467-024-54959-8",
+      "year": "2024",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "Low-valence platinum single atoms in sulfur-containing covalent organic frameworks for photocatalytic hydrogen evolution.",
+      "pool_sentences": 113,
+      "corpus_sentences": 82
+    },
+    {
+      "pmcid": "PMC11123806",
+      "doi": "10.3390/nano14100876",
+      "year": "2024",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Solvothermal Fabrication of Mesoporous Pd Nano-Corals at Mild Temperature for Alkaline Hydrogen Evolution Reaction.",
+      "pool_sentences": 113,
+      "corpus_sentences": 79
+    },
+    {
+      "pmcid": "PMC11561081",
+      "doi": "10.1038/s41467-024-53523-8",
+      "year": "2024",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "Hierarchically conductive electrodes unlock stable and scalable CO2 electrolysis.",
+      "pool_sentences": 180,
+      "corpus_sentences": 117
+    },
+    {
+      "pmcid": "PMC10447464",
+      "doi": "10.1038/s41467-023-40912-8",
+      "year": "2023",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Nano-metal diborides-supported anode catalyst with strongly coupled TaOx/IrO2 catalytic layer for low-iridium-loading proton exchange membrane electrolyzer.",
+      "pool_sentences": 243,
+      "corpus_sentences": 156
+    },
+    {
+      "pmcid": "PMC6648821",
+      "doi": "10.1021/acsomega.9b00048",
+      "year": "2019",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "Photocatalytic Activity of Ga2O3 Supported on Al2O3 for Water Splitting and CO2 Reduction.",
+      "pool_sentences": 150,
+      "corpus_sentences": 107
+    },
+    {
+      "pmcid": "PMC12874104",
+      "doi": "10.1016/j.isci.2026.114714",
+      "year": "2026",
+      "journal": "iScience",
+      "license": "cc by",
+      "title": "Nitrogen plasma engineered MoS2 for catalyzing hydrogen evolution reaction.",
+      "pool_sentences": 142,
+      "corpus_sentences": 102
+    },
+    {
+      "pmcid": "PMC13389024",
+      "doi": "10.1038/s41467-026-73708-7",
+      "year": "2026",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "Water engineering via surfactant coacervates enables efficient and robust solar hydrogen evolution.",
+      "pool_sentences": 276,
+      "corpus_sentences": 183
+    },
+    {
+      "pmcid": "PMC4459147",
+      "doi": "10.1038/srep11141",
+      "year": "2015",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Photocatalytic generation of hydrogen by core-shell WO\u2083/BiVO\u2084 nanorods with ultimate water splitting efficiency.",
+      "pool_sentences": 166,
+      "corpus_sentences": 121
+    },
+    {
+      "pmcid": "PMC12322918",
+      "doi": "10.1021/acscatal.5c02831",
+      "year": "2025",
+      "journal": "ACS catalysis",
+      "license": "cc by",
+      "title": "Engineering Ru@Ir Core-Shell Nanoparticles on Titanium Oxynitride-Graphene Support for a Highly Active and Durable pH-Universal Hydrogen Evolution Reaction.",
+      "pool_sentences": 258,
+      "corpus_sentences": 168
+    },
+    {
+      "pmcid": "PMC13149554",
+      "doi": "10.1038/s41467-026-70691-x",
+      "year": "2026",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "Paired electrolysis enables para-C-H amination of phenols with nitroarenes and mechanistic visualization via multifunctional electrochemical mass spectrometry.",
+      "pool_sentences": 194,
+      "corpus_sentences": 124
+    },
+    {
+      "pmcid": "PMC11936012",
+      "doi": "10.1002/smsc.202300055",
+      "year": "2023",
+      "journal": "Small science",
+      "license": "cc by",
+      "title": "Silver Compositing Boosts Water Electrolysis Activity and Durability of RuO2 in a Proton-Exchange-Membrane Water Electrolyzer.",
+      "pool_sentences": 154,
+      "corpus_sentences": 101
+    },
+    {
+      "pmcid": "PMC13538509",
+      "doi": "10.1038/s41467-026-76421-7",
+      "year": "2026",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "Phosphorene dominated integrative dual-electric field guiding charge flow for vapor-fed photocatalytic hydrogen evolution.",
+      "pool_sentences": 305,
+      "corpus_sentences": 213
+    },
+    {
+      "pmcid": "PMC13177401",
+      "doi": "10.1021/acsmaterialsau.5c00212",
+      "year": "2026",
+      "journal": "ACS materials Au",
+      "license": "cc by",
+      "title": "Soft-Matter Confinement Modulates Excited-State Dynamics of Ru Photocatalysts for Hydrogen Evolution in Aqueous Media.",
+      "pool_sentences": 282,
+      "corpus_sentences": 196
+    },
+    {
+      "pmcid": "PMC10667810",
+      "doi": "10.1002/advs.202303106",
+      "year": "2023",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Organometal Halide Perovskite-Based Photoelectrochemical Module Systems for Scalable Unassisted Solar Water Splitting.",
+      "pool_sentences": 266,
+      "corpus_sentences": 160
+    },
+    {
+      "pmcid": "PMC10082148",
+      "doi": "10.1007/s40820-023-01044-2",
+      "year": "2023",
+      "journal": "Nano-micro letters",
+      "license": "cc by",
+      "title": "Recent Advances of Electrocatalyst and Cell Design for Hydrogen Peroxide Production.",
+      "pool_sentences": 461,
+      "corpus_sentences": 287
+    },
+    {
+      "pmcid": "PMC12508719",
+      "doi": "10.1002/smll.202508259",
+      "year": "2025",
+      "journal": "Small (Weinheim an der Bergstrasse, Germany)",
+      "license": "cc by-nc",
+      "title": "Modulating Oxygen Evolution Reaction Pathways via (Oxy)Hydroxide-Driven Surface Reconstruction on Ti3C2 MXene Electrocatalysts.",
+      "pool_sentences": 154,
+      "corpus_sentences": 102
+    },
+    {
+      "pmcid": "PMC8425945",
+      "doi": "10.1002/advs.202101653",
+      "year": "2021",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Constructing Active Sites from Atomic-Scale Geometrical Engineering in Spinel Oxide Solid Solutions for Efficient and Robust Oxygen Evolution Reaction Electrocatalysts.",
+      "pool_sentences": 191,
+      "corpus_sentences": 139
+    },
+    {
+      "pmcid": "PMC11000219",
+      "doi": "10.1021/acs.jpcc.3c07864",
+      "year": "2024",
+      "journal": "The journal of physical chemistry. C, Nanomaterials and interfaces",
+      "license": "cc by",
+      "title": "In Situ X-ray Absorption Spectroscopy of LaFeO3 and LaFeO3/LaNiO3 Thin Films in the Electrocatalytic Oxygen Evolution Reaction.",
+      "pool_sentences": 171,
+      "corpus_sentences": 114
+    },
+    {
+      "pmcid": "PMC9680824",
+      "doi": "10.1039/d2ra06123f",
+      "year": "2022",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Ab initio insight into the electrolysis of water on basal and edge (fullerene C20) surfaces of 4 \u00c5 single-walled carbon nanotubes.",
+      "pool_sentences": 130,
+      "corpus_sentences": 92
+    },
+    {
+      "pmcid": "PMC13000569",
+      "doi": "10.1021/acsomega.5c12847",
+      "year": "2026",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "The Interplay of Dy Doping and Sulfur Vacancies in MoS2 for an Efficient Hydrogen Evolution Reaction.",
+      "pool_sentences": 178,
+      "corpus_sentences": 125
+    },
+    {
+      "pmcid": "PMC7542592",
+      "doi": "10.1021/acsomega.0c02754",
+      "year": "2020",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "Solution-Processed Synthesis of Copper Oxide (Cu x O) Thin Films for Efficient Photocatalytic Solar Water Splitting.",
+      "pool_sentences": 145,
+      "corpus_sentences": 100
+    },
+    {
+      "pmcid": "PMC11935853",
+      "doi": "10.1002/smsc.202100032",
+      "year": "2021",
+      "journal": "Small science",
+      "license": "cc by",
+      "title": "Enhancing Hydrogen Evolution Electrocatalytic Performance in Neutral Media via Nitrogen and Iron Phosphide Interactions.",
+      "pool_sentences": 138,
+      "corpus_sentences": 91
+    },
+    {
+      "pmcid": "PMC11643860",
+      "doi": "10.3390/molecules29235768",
+      "year": "2024",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Rational Design of Novel Single-Atom Catalysts of Transition-Metal-Doped 2D AlN Monolayer as Highly Effective Electrocatalysts for Nitrogen Reduction Reaction.",
+      "pool_sentences": 103,
+      "corpus_sentences": 64
+    },
+    {
+      "pmcid": "PMC9270335",
+      "doi": "10.1038/s41467-022-31660-2",
+      "year": "2022",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Subnanometric Ru clusters with upshifted D band center improve performance for alkaline hydrogen evolution reaction.",
+      "pool_sentences": 208,
+      "corpus_sentences": 148
+    },
+    {
+      "pmcid": "PMC12362793",
+      "doi": "10.1002/advs.202503970",
+      "year": "2025",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "B-Site-Metal-Mediated Coke-Resistant CO2 Electrolysis on Perovskite Surfaces.",
+      "pool_sentences": 119,
+      "corpus_sentences": 72
+    },
+    {
+      "pmcid": "PMC7221846",
+      "doi": "10.3390/molecules25081965",
+      "year": "2020",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Understanding Surface Modulation to Improve the Photo/Electrocatalysts for Water Oxidation/Reduction.",
+      "pool_sentences": 318,
+      "corpus_sentences": 214
+    },
+    {
+      "pmcid": "PMC9795487",
+      "doi": "10.1021/acsaem.2c02995",
+      "year": "2022",
+      "journal": "ACS applied energy materials",
+      "license": "cc by",
+      "title": "Designing High Interfacial Conduction beyond Bulk via Engineering the Semiconductor-Ionic Heterostructure CeO2-\u03b4/BaZr0.8Y0.2O3 for Superior Proton Conductive Fuel Cell and Water Electrolysis Applications.",
+      "pool_sentences": 200,
+      "corpus_sentences": 128
+    },
+    {
+      "pmcid": "PMC7677346",
+      "doi": "10.3389/fchem.2020.605343",
+      "year": "2020",
+      "journal": "Frontiers in chemistry",
+      "license": "cc by",
+      "title": "g-C3N4 Modified by meso-Tetrahydroxyphenylchlorin for Photocatalytic Hydrogen Evolution Under Visible/Near-Infrared Light.",
+      "pool_sentences": 139,
+      "corpus_sentences": 90
+    },
+    {
+      "pmcid": "PMC12819517",
+      "doi": "10.1038/s41467-025-67467-0",
+      "year": "2025",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "Enhanced piezo-photocatalytic water splitting activity via engineering robust dipole moments in covalent organic frameworks.",
+      "pool_sentences": 342,
+      "corpus_sentences": 232
+    },
+    {
+      "pmcid": "PMC12970241",
+      "doi": "10.1002/advs.202518742",
+      "year": "2026",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Unraveling the Origin of Exceptional Activity in NiMo Alloys for Alkaline Hydrogen Evolution.",
+      "pool_sentences": 116,
+      "corpus_sentences": 84
+    },
+    {
+      "pmcid": "PMC11409087",
+      "doi": "10.1016/j.heliyon.2024.e37188",
+      "year": "2024",
+      "journal": "Heliyon",
+      "license": "cc by-nc",
+      "title": "Fabrication of binder-less metal electrodes for electrochemical water splitting - A review.",
+      "pool_sentences": 397,
+      "corpus_sentences": 274
+    },
+    {
+      "pmcid": "PMC4701711",
+      "doi": "10.1186/s11671-015-1208-5",
+      "year": "2016",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "Synthesis of PtM (M=Co, Ni)/Reduced Graphene Oxide Nanocomposites as Electrocatalysts for the Oxygen Reduction Reaction.",
+      "pool_sentences": 83,
+      "corpus_sentences": 66
+    },
+    {
+      "pmcid": "PMC12102252",
+      "doi": "10.1038/s41467-025-60201-w",
+      "year": "2025",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "Dynamic polarization control of Ni electrodes for sustainable and scalable water electrolysis under alkaline conditions.",
+      "pool_sentences": 214,
+      "corpus_sentences": 137
+    },
+    {
+      "pmcid": "PMC10962578",
+      "doi": "10.1002/chem.202203590",
+      "year": "2023",
+      "journal": "Chemistry (Weinheim an der Bergstrasse, Germany)",
+      "license": "cc by",
+      "title": "Thermally Activated vs. Photochemical Hydrogen Evolution Reactions-A Tale of Three Metals.",
+      "pool_sentences": 266,
+      "corpus_sentences": 186
+    },
+    {
+      "pmcid": "PMC10771526",
+      "doi": "10.1038/s41467-024-44725-1",
+      "year": "2024",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Large electronegativity differences between adjacent atomic sites activate and stabilize ZnIn2S4 for efficient photocatalytic overall water splitting.",
+      "pool_sentences": 159,
+      "corpus_sentences": 102
+    },
+    {
+      "pmcid": "PMC10477283",
+      "doi": "10.1038/s41467-023-40972-w",
+      "year": "2023",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Turing structuring with multiple nanotwins to engineer efficient and stable catalysts for hydrogen evolution reaction.",
+      "pool_sentences": 324,
+      "corpus_sentences": 205
+    },
+    {
+      "pmcid": "PMC12933374",
+      "doi": "10.1021/jacsau.5c01681",
+      "year": "2026",
+      "journal": "JACS Au",
+      "license": "cc by-nc-nd",
+      "title": "Catalyst-Free Electro-photochemical Hydroalkylation of N\u2011Aryl Maleimides via Alternate Electrode Electrolysis: A Sustainable Route to N\u2011Aryl Succinimides with Quaternary Center.",
+      "pool_sentences": 150,
+      "corpus_sentences": 96
+    },
+    {
+      "pmcid": "PMC12462931",
+      "doi": "10.1002/advs.202510546",
+      "year": "2025",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "A Review of Designing Hierarchical Structure Within Membrane Electrode Assembly for Water Electrolyzer.",
+      "pool_sentences": 356,
+      "corpus_sentences": 229
+    },
+    {
+      "pmcid": "PMC12915073",
+      "doi": "10.1002/advs.202523030",
+      "year": "2026",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "A Dual-Piezoelectric Metal-Organic Cage/COF Z-Scheme Heterojunction for Solar-Mechanical Water Splitting.",
+      "pool_sentences": 320,
+      "corpus_sentences": 231
+    },
+    {
+      "pmcid": "PMC13220183",
+      "doi": "10.1021/acsphyschemau.5c00152",
+      "year": "2026",
+      "journal": "ACS physical chemistry Au",
+      "license": "cc by",
+      "title": "Cation-Surface Interactions During Electrocatalytic Hydrogen Evolution Probed by Surface X\u2011ray Diffraction.",
+      "pool_sentences": 209,
+      "corpus_sentences": 137
+    },
+    {
+      "pmcid": "PMC8162382",
+      "doi": "10.1039/d0sc01445a",
+      "year": "2020",
+      "journal": "Chemical science",
+      "license": "cc by-nc",
+      "title": "Nickel catalysis enables convergent paired electrolysis for direct arylation of benzylic C-H bonds.",
+      "pool_sentences": 88,
+      "corpus_sentences": 66
+    },
+    {
+      "pmcid": "PMC9084337",
+      "doi": "10.1039/c8ra05237a",
+      "year": "2018",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Hierarchical Co-FeS2/CoS2 heterostructures as a superior bifunctional electrocatalyst.",
+      "pool_sentences": 85,
+      "corpus_sentences": 48
+    },
+    {
+      "pmcid": "PMC8981903",
+      "doi": "10.1002/advs.202105869",
+      "year": "2022",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Underfocus Laser Induced Ni Nanoparticles Embedded Metallic MoN Microrods as Patterned Electrode for Efficient Overall Water Splitting.",
+      "pool_sentences": 164,
+      "corpus_sentences": 117
+    },
+    {
+      "pmcid": "PMC12598801",
+      "doi": "10.1002/open.202500279",
+      "year": "2025",
+      "journal": "ChemistryOpen",
+      "license": "cc by",
+      "title": "Microwave-Assisted Synthesis of Ir\uf8ffNi Electrocatalysts for the Oxygen Evolution Reaction in Acidic Electrolyte.",
+      "pool_sentences": 255,
+      "corpus_sentences": 164
+    },
+    {
+      "pmcid": "PMC9091322",
+      "doi": "10.1039/c8ra08338j",
+      "year": "2018",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Comparison of two water oxidation electrocatalysts by copper or zinc supermolecule complexes based on porphyrin ligand.",
+      "pool_sentences": 99,
+      "corpus_sentences": 70
+    },
+    {
+      "pmcid": "PMC9852592",
+      "doi": "10.1038/s41467-023-35999-y",
+      "year": "2023",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Integrated interfacial design of covalent organic framework photocatalysts to promote hydrogen evolution from water.",
+      "pool_sentences": 193,
+      "corpus_sentences": 133
+    },
+    {
+      "pmcid": "PMC7011753",
+      "doi": "10.1021/acs.chemmater.9b02825",
+      "year": "2019",
+      "journal": "Chemistry of materials : a publication of the American Chemical Society",
+      "license": null,
+      "title": "Structurally Diverse Covalent Triazine-Based Framework Materials for Photocatalytic Hydrogen Evolution from Water.",
+      "pool_sentences": 148,
+      "corpus_sentences": 95
+    },
+    {
+      "pmcid": "PMC10477159",
+      "doi": "10.1186/s11671-023-03890-w",
+      "year": "2023",
+      "journal": "Discover nano",
+      "license": "cc by",
+      "title": "Fe-phthalocyanine derived highly conjugated 2D covalent organic framework as superior electrocatalyst for oxygen reduction reaction.",
+      "pool_sentences": 93,
+      "corpus_sentences": 61
+    },
+    {
+      "pmcid": "PMC4557299",
+      "doi": "10.1038/ncomms8261",
+      "year": "2015",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Bifunctional non-noble metal oxide nanoparticle electrocatalysts through lithium-induced conversion for overall water splitting.",
+      "pool_sentences": 144,
+      "corpus_sentences": 95
+    },
+    {
+      "pmcid": "PMC6883038",
+      "doi": "10.1038/s41467-019-13426-5",
+      "year": "2019",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Nanocomposite electrodes for high current density over 3 A cm-2 in solid oxide electrolysis cells.",
+      "pool_sentences": 193,
+      "corpus_sentences": 130
+    },
+    {
+      "pmcid": "PMC10633874",
+      "doi": "10.1021/acsomega.3c05801",
+      "year": "2023",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Chitosan-Derived Nitrogen-Doped Carbon as a Support of Cobalt(II)-Phthalocyanine/Gold Nanoparticles for Photocatalytic Water Splitting.",
+      "pool_sentences": 133,
+      "corpus_sentences": 96
+    },
+    {
+      "pmcid": "PMC8564452",
+      "doi": "10.1002/advs.202102950",
+      "year": "2021",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Insights into Interfacial and Bulk Transport Phenomena Affecting Proton Exchange Membrane Water Electrolyzer Performance at Ultra-Low Iridium Loadings.",
+      "pool_sentences": 165,
+      "corpus_sentences": 113
+    },
+    {
+      "pmcid": "PMC12713075",
+      "doi": "10.1002/advs.202514504",
+      "year": "2025",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Iron Nanoparticles on Porous Carbon Discs: Electrocatalysts with Over 30% Energy Efficiencies for the Production of Ammonia from Nitrate.",
+      "pool_sentences": 150,
+      "corpus_sentences": 100
+    },
+    {
+      "pmcid": "PMC12775258",
+      "doi": "10.1007/s40820-025-01952-5",
+      "year": "2026",
+      "journal": "Nano-micro letters",
+      "license": "cc by",
+      "title": "Pulsed Dynamic Water Electrolysis: Mass Transfer Enhancement, Microenvironment Regulation, and Hydrogen Production Optimization.",
+      "pool_sentences": 870,
+      "corpus_sentences": 589
+    },
+    {
+      "pmcid": "PMC11962687",
+      "doi": "10.1002/smll.202409151",
+      "year": "2025",
+      "journal": "Small (Weinheim an der Bergstrasse, Germany)",
+      "license": "cc by-nc-nd",
+      "title": "Synergistic Composition and Surface Engineering of Ruthenium-Cobalt Hydroxide Nanowires for Efficient Oxygen Evolution Catalysis.",
+      "pool_sentences": 237,
+      "corpus_sentences": 161
+    },
+    {
+      "pmcid": "PMC6648149",
+      "doi": "10.1021/acsomega.8b03449",
+      "year": "2019",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "Tungsten Carbide Hollow Microspheres with Robust and Stable Electrocatalytic Activity toward Hydrogen Evolution Reaction.",
+      "pool_sentences": 68,
+      "corpus_sentences": 45
+    },
+    {
+      "pmcid": "PMC10293845",
+      "doi": "10.1073/pnas.2305489120",
+      "year": "2023",
+      "journal": "Proceedings of the National Academy of Sciences of the United States of America",
+      "license": "cc by-nc-nd",
+      "title": "A multifunctional copper single-atom electrocatalyst aerogel for smart sensing and producing ammonia from nitrate.",
+      "pool_sentences": 184,
+      "corpus_sentences": 116
+    },
+    {
+      "pmcid": "PMC11618364",
+      "doi": "10.1038/s41467-024-54987-4",
+      "year": "2024",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "Tackling activity-stability paradox of reconstructed NiIrOx electrocatalysts by bridged W-O moiety.",
+      "pool_sentences": 510,
+      "corpus_sentences": 346
+    },
+    {
+      "pmcid": "PMC7098039",
+      "doi": "10.1021/acsomega.0c00074",
+      "year": "2020",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "Water Electrolysis Using Thin Pt and RuO x Catalysts Deposited by a Flame-Annealing Method on Pencil-Lead Graphite-Rod Electrodes.",
+      "pool_sentences": 178,
+      "corpus_sentences": 108
+    },
+    {
+      "pmcid": "PMC12260528",
+      "doi": "10.1073/pnas.2426207122",
+      "year": "2025",
+      "journal": "Proceedings of the National Academy of Sciences of the United States of America",
+      "license": "cc by-nc-nd",
+      "title": "Sulfur-mediated transformation from osmium nanocrystals to single atoms for efficient alkaline hydrogen evolution reaction.",
+      "pool_sentences": 173,
+      "corpus_sentences": 116
+    },
+    {
+      "pmcid": "PMC9000227",
+      "doi": "10.3390/nano12071130",
+      "year": "2022",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Nonmetallic Active Sites on Nickel Phosphide in Oxygen Evolution Reaction.",
+      "pool_sentences": 150,
+      "corpus_sentences": 95
+    },
+    {
+      "pmcid": "PMC8948565",
+      "doi": "10.1002/advs.202105248",
+      "year": "2022",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "High Efficiency Water Splitting using Ultrasound Coupled to a BaTiO3 Nanofluid.",
+      "pool_sentences": 181,
+      "corpus_sentences": 124
+    },
+    {
+      "pmcid": "PMC12355722",
+      "doi": "10.1021/acs.chemrev.4c00466",
+      "year": "2025",
+      "journal": "Chemical reviews",
+      "license": "cc by",
+      "title": "Anion-Exchange-Membrane Electrolysis with Alkali-Free Water Feed.",
+      "pool_sentences": 1454,
+      "corpus_sentences": 943
+    },
+    {
+      "pmcid": "PMC9848275",
+      "doi": "10.1126/sciadv.add6978",
+      "year": "2023",
+      "journal": "Science advances",
+      "license": "cc by-nc",
+      "title": "Superaerophilic/superaerophobic cooperative electrode for efficient hydrogen evolution reaction via enhanced mass transfer.",
+      "pool_sentences": 151,
+      "corpus_sentences": 106
+    },
+    {
+      "pmcid": "PMC6586645",
+      "doi": "10.1038/s41598-019-45085-3",
+      "year": "2019",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Phosphate Recovery from Swine Wastewater by a Struvite Precipitation Electrolyzer.",
+      "pool_sentences": 153,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC9418998",
+      "doi": "10.1039/c8na00130h",
+      "year": "2019",
+      "journal": "Nanoscale advances",
+      "license": "cc by-nc",
+      "title": "Sulfur-doped graphene/transition metal dichalcogenide heterostructured hybrids with electrocatalytic activity toward the hydrogen evolution reaction.",
+      "pool_sentences": 129,
+      "corpus_sentences": 91
+    },
+    {
+      "pmcid": "PMC9494430",
+      "doi": "10.1021/acsomega.2c03388",
+      "year": "2022",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Electronic Properties and Electrocatalytic Water Splitting Activity for Precious-Metal-Adsorbed Silicene with Nonmetal Doping.",
+      "pool_sentences": 120,
+      "corpus_sentences": 83
+    },
+    {
+      "pmcid": "PMC10974835",
+      "doi": "10.3390/nano14060500",
+      "year": "2024",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Pd-Based Bimetallic Electrocatalysts for Hydrogen Oxidation Reaction in 0.1 M KOH Solution.",
+      "pool_sentences": 191,
+      "corpus_sentences": 118
+    },
+    {
+      "pmcid": "PMC12591033",
+      "doi": "10.1039/d5ra05923b",
+      "year": "2025",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Biowaste-derived porous nano-carbon-supported transition metal borides as efficient electrocatalysts for alkaline water splitting: a waste-to-wealth approach.",
+      "pool_sentences": 175,
+      "corpus_sentences": 116
+    },
+    {
+      "pmcid": "PMC11580383",
+      "doi": "10.1021/acs.langmuir.4c03557",
+      "year": "2024",
+      "journal": "Langmuir : the ACS journal of surfaces and colloids",
+      "license": "cc by",
+      "title": "Enhanced Oxygen Evolution Reaction Performance of NiMoO4/Carbon Paper Electrocatalysts in Anion Exchange Membrane Water Electrolysis by Atmospheric-Pressure Plasma Jet Treatment.",
+      "pool_sentences": 190,
+      "corpus_sentences": 120
+    },
+    {
+      "pmcid": "PMC11263604",
+      "doi": "10.1038/s41467-024-50535-2",
+      "year": "2024",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Engineering interfacial sulfur migration in transition-metal sulfide enables low overpotential for durable hydrogen evolution in seawater.",
+      "pool_sentences": 154,
+      "corpus_sentences": 99
+    },
+    {
+      "pmcid": "PMC6286314",
+      "doi": "10.1038/s41467-018-07678-w",
+      "year": "2018",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Efficient oxygen evolution electrocatalysis in acid by a perovskite with face-sharing IrO6 octahedral dimers.",
+      "pool_sentences": 199,
+      "corpus_sentences": 135
+    },
+    {
+      "pmcid": "PMC13071826",
+      "doi": "10.1039/d6sc01575a",
+      "year": "2026",
+      "journal": "Chemical science",
+      "license": "cc by-nc",
+      "title": "ZrO2-induced d-d spatial coordination effects of Ru single-atom catalysts to boost the oxygen evolution reaction.",
+      "pool_sentences": 115,
+      "corpus_sentences": 82
+    },
+    {
+      "pmcid": "PMC9568589",
+      "doi": "10.1038/s41467-022-33846-0",
+      "year": "2022",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Promoting nickel oxidation state transitions in single-layer NiFeB hydroxide nanosheets for efficient oxygen evolution.",
+      "pool_sentences": 204,
+      "corpus_sentences": 128
+    },
+    {
+      "pmcid": "PMC13502524",
+      "doi": "10.17159/2078-516x/2026/v38i1a24229",
+      "year": "2026",
+      "journal": "South African journal of sports medicine",
+      "license": "cc by",
+      "title": "Ultrasound-guided percutaneous needle electrolysis for musculoskeletal injuries: A scoping review considering implications for athletic populations.",
+      "pool_sentences": 253,
+      "corpus_sentences": 159
+    },
+    {
+      "pmcid": "PMC12214576",
+      "doi": "10.1038/s41467-025-60620-9",
+      "year": "2025",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Engineered PW12-polyoxometalate docked Fe sites on CoFe hydroxide anode for durable seawater electrolysis.",
+      "pool_sentences": 162,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC9069938",
+      "doi": "10.1039/c9ra05342e",
+      "year": "2019",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "Mass-producible 2D-WS2 bulk modified screen printed electrodes towards the hydrogen evolution reaction.",
+      "pool_sentences": 103,
+      "corpus_sentences": 68
+    },
+    {
+      "pmcid": "PMC9072957",
+      "doi": "10.1039/c9ra07258f",
+      "year": "2019",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Nickel foam and stainless steel mesh as electrocatalysts for hydrogen evolution reaction, oxygen evolution reaction and overall water splitting in alkaline media.",
+      "pool_sentences": 123,
+      "corpus_sentences": 80
+    },
+    {
+      "pmcid": "PMC11588069",
+      "doi": "10.1073/pnas.2316352121",
+      "year": "2024",
+      "journal": "Proceedings of the National Academy of Sciences of the United States of America",
+      "license": "cc by-nc-nd",
+      "title": "Self-sacrificing and self-supporting biomass carbon anode-assisted water electrolysis for low-cost hydrogen production.",
+      "pool_sentences": 232,
+      "corpus_sentences": 156
+    },
+    {
+      "pmcid": "PMC13444124",
+      "doi": "10.1038/s41467-026-74714-5",
+      "year": "2026",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Trifunctional electrocatalyst with accurate surface reconstruction for zinc-air batteries and water electrolyzers.",
+      "pool_sentences": 228,
+      "corpus_sentences": 153
+    },
+    {
+      "pmcid": "PMC10145119",
+      "doi": "10.3390/ma16083280",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Multicomponent Metal Oxide- and Metal Hydroxide-Based Electrocatalysts for Alkaline Water Splitting.",
+      "pool_sentences": 298,
+      "corpus_sentences": 205
+    },
+    {
+      "pmcid": "PMC9417698",
+      "doi": "10.1039/d0na00727g",
+      "year": "2020",
+      "journal": "Nanoscale advances",
+      "license": "cc by-nc",
+      "title": "Recent progress of Ni-Fe layered double hydroxide and beyond towards electrochemical water splitting.",
+      "pool_sentences": 164,
+      "corpus_sentences": 116
+    },
+    {
+      "pmcid": "PMC10266373",
+      "doi": "10.1021/acsaem.3c00032",
+      "year": "2023",
+      "journal": "ACS applied energy materials",
+      "license": "cc by-nc-nd",
+      "title": "Cobalt-Iron Oxyhydroxide Obtained from the Metal Phosphide: A Highly Effective Electrocatalyst for the Oxygen Evolution Reaction at High Current Densities.",
+      "pool_sentences": 202,
+      "corpus_sentences": 141
+    },
+    {
+      "pmcid": "PMC10444008",
+      "doi": "10.1080/21655979.2023.2244759",
+      "year": "2023",
+      "journal": "Bioengineered",
+      "license": "cc by-nc",
+      "title": "A study of electron source preference and its impact on hydrogen production in microbial electrolysis cells fed with synthetic fermentation effluent.",
+      "pool_sentences": 141,
+      "corpus_sentences": 92
+    },
+    {
+      "pmcid": "PMC10906942",
+      "doi": "10.1021/acsenergylett.0c00532",
+      "year": "2020",
+      "journal": "ACS energy letters",
+      "license": "cc by",
+      "title": "Modifying the Electrocatalyst-Ionomer Interface via Sulfonated Poly(ionic liquid) Block Copolymers to Enable High-Performance Polymer Electrolyte Fuel Cells.",
+      "pool_sentences": 80,
+      "corpus_sentences": 56
+    },
+    {
+      "pmcid": "PMC8539809",
+      "doi": "10.3390/nano11102483",
+      "year": "2021",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Flower-Like Dual-Defective Z-Scheme Heterojunction g-C3N4/ZnIn2S4 High-Efficiency Photocatalytic Hydrogen Evolution and Degradation of Mixed Pollutants.",
+      "pool_sentences": 280,
+      "corpus_sentences": 181
+    },
+    {
+      "pmcid": "PMC6431957",
+      "doi": "10.1039/c8sc04986f",
+      "year": "2019",
+      "journal": "Chemical science",
+      "license": "cc by-nc",
+      "title": "Ultralow-temperature photochemical synthesis of atomically dispersed Pt catalysts for the hydrogen evolution reaction.",
+      "pool_sentences": 123,
+      "corpus_sentences": 74
+    },
+    {
+      "pmcid": "PMC8588390",
+      "doi": "10.3390/molecules26216362",
+      "year": "2021",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Applying Active Learning to the Screening of Molecular Oxygen Evolution Catalysts.",
+      "pool_sentences": 138,
+      "corpus_sentences": 93
+    },
+    {
+      "pmcid": "PMC11472222",
+      "doi": "10.1039/d4ra05868b",
+      "year": "2024",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Al, P-co-doping and interface engineering synergistically boost the electrocatalytic performance of WS2/Ni3S2/NiS nanosheet heterostructure for efficient hydrogen evolution reaction.",
+      "pool_sentences": 182,
+      "corpus_sentences": 134
+    },
+    {
+      "pmcid": "PMC6124904",
+      "doi": "10.1039/c8sc02444h",
+      "year": "2018",
+      "journal": "Chemical science",
+      "license": "cc by",
+      "title": "Microwave-assisted CVD-like synthesis of dispersed monolayer/few-layer N-doped graphene encapsulated metal nanocrystals for efficient electrocatalytic oxygen evolution.",
+      "pool_sentences": 108,
+      "corpus_sentences": 72
+    },
+    {
+      "pmcid": "PMC9026035",
+      "doi": "10.1021/acsomega.1c05666",
+      "year": "2022",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Exchange Functionals and Basis Sets for Density Functional Theory Studies of Water Splitting on Selected ZnO Nanocluster Catalysts.",
+      "pool_sentences": 193,
+      "corpus_sentences": 125
+    },
+    {
+      "pmcid": "PMC12348109",
+      "doi": "10.3390/molecules30153228",
+      "year": "2025",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Enhanced NiFe2O4 Catalyst Performance and Stability in Anion Exchange Membrane Water Electrolysis: Influence of Iron Content and Membrane Selection.",
+      "pool_sentences": 263,
+      "corpus_sentences": 174
+    },
+    {
+      "pmcid": "PMC8779218",
+      "doi": "10.3390/nano12020179",
+      "year": "2022",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Ethanol Solvothermal Treatment on Graphitic Carbon Nitride Materials for Enhancing Photocatalytic Hydrogen Evolution Performance.",
+      "pool_sentences": 131,
+      "corpus_sentences": 85
+    },
+    {
+      "pmcid": "PMC9520354",
+      "doi": "10.3389/fchem.2022.1011597",
+      "year": "2022",
+      "journal": "Frontiers in chemistry",
+      "license": "cc by",
+      "title": "Recent advances in the design of single-atom electrocatalysts by defect engineering.",
+      "pool_sentences": 113,
+      "corpus_sentences": 68
+    },
+    {
+      "pmcid": "PMC7738544",
+      "doi": "10.1038/s41598-020-78558-x",
+      "year": "2020",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Investigation of polymer-derived Si-(B)-C-N ceramic/reduced graphene oxide composite systems as active catalysts towards the hydrogen evolution reaction.",
+      "pool_sentences": 227,
+      "corpus_sentences": 160
+    },
+    {
+      "pmcid": "PMC10373465",
+      "doi": "10.1021/acsomega.3c02084",
+      "year": "2023",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "MoS2-Based Nanocomposites for Photocatalytic Hydrogen Evolution and Carbon Dioxide Reduction.",
+      "pool_sentences": 538,
+      "corpus_sentences": 353
+    },
+    {
+      "pmcid": "PMC7839530",
+      "doi": "10.1002/chem.202004140",
+      "year": "2021",
+      "journal": "Chemistry (Weinheim an der Bergstrasse, Germany)",
+      "license": "cc by-nc-nd",
+      "title": "Iodonium Cation-Pool Electrolysis for the Three-Component Synthesis of 1,3-Oxazoles.",
+      "pool_sentences": 69,
+      "corpus_sentences": 41
+    },
+    {
+      "pmcid": "PMC7467929",
+      "doi": "10.1038/s41598-020-71389-w",
+      "year": "2020",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Synergistic effects in bimetallic Pd-CoO electrocatalytic thin films for oxygen evolution reaction.",
+      "pool_sentences": 202,
+      "corpus_sentences": 121
+    },
+    {
+      "pmcid": "PMC9076585",
+      "doi": "10.1039/c9ra06374a",
+      "year": "2019",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Intrinsic poorly-crystallized Fe5O7(OH)\u00b74H2O: a highly efficient oxygen evolution reaction electrocatalyst under alkaline conditions.",
+      "pool_sentences": 52,
+      "corpus_sentences": 35
+    },
+    {
+      "pmcid": "PMC6644471",
+      "doi": "10.1021/acsomega.8b01206",
+      "year": "2018",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "Cobalt-Doped Goethite-Type Iron Oxyhydroxide (\u03b1-FeOOH) for Highly Efficient Oxygen Evolution Catalysis.",
+      "pool_sentences": 114,
+      "corpus_sentences": 78
+    },
+    {
+      "pmcid": "PMC12368890",
+      "doi": "10.1002/open.202400488",
+      "year": "2025",
+      "journal": "ChemistryOpen",
+      "license": "cc by",
+      "title": "Electrochemical Reduction of CO2 in a Zero-Gap Electrolyzer Cell on a Metal Molecular Electrocatalyst.",
+      "pool_sentences": 96,
+      "corpus_sentences": 56
+    },
+    {
+      "pmcid": "PMC13376225",
+      "doi": "10.1002/cssc.70895",
+      "year": "2026",
+      "journal": "ChemSusChem",
+      "license": "cc by",
+      "title": "Steel Based Precious Group Metal-Free High-Performance Electrodes for Alkaline Exchange Membrane Water Electrolysis.",
+      "pool_sentences": 229,
+      "corpus_sentences": 146
+    },
+    {
+      "pmcid": "PMC10189288",
+      "doi": "10.1016/j.ultsonch.2023.106429",
+      "year": "2023",
+      "journal": "Ultrasonics sonochemistry",
+      "license": "cc by-nc-nd",
+      "title": "Sono-electrolysis performance based on indirect continuous sonication and membraneless alkaline electrolysis: Experiment, modelling and analysis.",
+      "pool_sentences": 175,
+      "corpus_sentences": 116
+    },
+    {
+      "pmcid": "PMC12177864",
+      "doi": "10.1002/smll.202503399",
+      "year": "2025",
+      "journal": "Small (Weinheim an der Bergstrasse, Germany)",
+      "license": "cc by",
+      "title": "(ReMoV)X2 (X = S, Se) Ternary Alloy Nanosheets for Enhanced Electrocatalytic Hydrogen Evolution Reaction.",
+      "pool_sentences": 231,
+      "corpus_sentences": 165
+    },
+    {
+      "pmcid": "PMC13495906",
+      "doi": "10.1002/smll.74333",
+      "year": "2026",
+      "journal": "Small (Weinheim an der Bergstrasse, Germany)",
+      "license": "cc by-nc",
+      "title": "MOF-Derived Bi2WO6/MXene Ternary Heterojunction as a Highly Efficient Piezocatalyst for Ultrasound-Driven Hydrogen Evolution and Oxygen Evolution Reaction.",
+      "pool_sentences": 256,
+      "corpus_sentences": 172
+    },
+    {
+      "pmcid": "PMC8624952",
+      "doi": "10.3390/nano11112989",
+      "year": "2021",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Cobalt-Iron-Phosphate Hydrogen Evolution Reaction Electrocatalyst for Solar-Driven Alkaline Seawater Electrolyzer.",
+      "pool_sentences": 140,
+      "corpus_sentences": 90
+    },
+    {
+      "pmcid": "PMC8724338",
+      "doi": "10.1007/s40820-021-00785-2",
+      "year": "2022",
+      "journal": "Nano-micro letters",
+      "license": "cc by",
+      "title": "Shining Light on Anion-Mixed Nanocatalysts for Efficient Water Electrolysis: Fundamentals, Progress, and Perspectives.",
+      "pool_sentences": 421,
+      "corpus_sentences": 279
+    },
+    {
+      "pmcid": "PMC7341534",
+      "doi": "10.1021/acs.jpclett.0c01258",
+      "year": "2020",
+      "journal": "The journal of physical chemistry letters",
+      "license": null,
+      "title": "Lattice Oxygen Exchange in Rutile IrO2 during the Oxygen Evolution Reaction.",
+      "pool_sentences": 120,
+      "corpus_sentences": 78
+    },
+    {
+      "pmcid": "PMC11468471",
+      "doi": "10.1002/adma.202007434",
+      "year": "2021",
+      "journal": "Advanced materials (Deerfield Beach, Fla.)",
+      "license": "cc by-nc-nd",
+      "title": "A Generalized Method for High-Speed Fluorination of Metal Oxides by Spark Plasma Sintering Yields Ta3 O7 F and TaO2 F with High Photocatalytic Activity for Oxygen Evolution from Water.",
+      "pool_sentences": 183,
+      "corpus_sentences": 129
+    },
+    {
+      "pmcid": "PMC11955876",
+      "doi": "10.1039/d4ra08760g",
+      "year": "2025",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Synergistic effects of fluorine doping on CoPS electrocatalysts for highly efficient hydrogen evolution reaction.",
+      "pool_sentences": 101,
+      "corpus_sentences": 76
+    },
+    {
+      "pmcid": "PMC8163356",
+      "doi": "10.1039/d0sc03328f",
+      "year": "2020",
+      "journal": "Chemical science",
+      "license": "cc by",
+      "title": "Selective single-atom electrocatalysts: a review with a focus on metal-doped covalent triazine frameworks.",
+      "pool_sentences": 225,
+      "corpus_sentences": 146
+    },
+    {
+      "pmcid": "PMC10568344",
+      "doi": "10.1016/j.heliyon.2023.e20261",
+      "year": "2023",
+      "journal": "Heliyon",
+      "license": "cc by-nc-nd",
+      "title": "Solvothermally designed Pr-MOF/Fe2O3 based nanocomposites for efficient electrocatalytic water splitting.",
+      "pool_sentences": 168,
+      "corpus_sentences": 101
+    },
+    {
+      "pmcid": "PMC10536842",
+      "doi": "10.1021/acsomega.3c06094",
+      "year": "2023",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "V2O5-Fe3O4/rGO Ternary Nanocomposite with Dual Applications as a Dye Degradation Photocatalyst and OER Electrocatalyst.",
+      "pool_sentences": 184,
+      "corpus_sentences": 112
+    },
+    {
+      "pmcid": "PMC5458681",
+      "doi": "10.1039/c6sc02477g",
+      "year": "2017",
+      "journal": "Chemical science",
+      "license": "cc by-nc",
+      "title": "Photodriven hydrogen evolution by molecular catalysts using Al2O3-protected perylene-3,4-dicarboximide on NiO electrodes.",
+      "pool_sentences": 157,
+      "corpus_sentences": 107
+    },
+    {
+      "pmcid": "PMC6685470",
+      "doi": "10.1002/advs.201900140",
+      "year": "2019",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Stimulated Electrocatalytic Hydrogen Evolution Activity of MOF-Derived MoS2 Basal Domains via Charge Injection through Surface Functionalization and Heteroatom Doping.",
+      "pool_sentences": 162,
+      "corpus_sentences": 119
+    },
+    {
+      "pmcid": "PMC7069983",
+      "doi": "10.1038/s41467-020-15231-x",
+      "year": "2020",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Cation insertion to break the activity/stability relationship for highly active oxygen evolution reaction catalyst.",
+      "pool_sentences": 205,
+      "corpus_sentences": 134
+    },
+    {
+      "pmcid": "PMC8922135",
+      "doi": "10.1002/advs.202104877",
+      "year": "2022",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Unraveling CoNiP-CoP2 3D-on-1D Hybrid Nanoarchitecture for Long-Lasting Electrochemical Hybrid Cells and Oxygen Evolution Reaction.",
+      "pool_sentences": 344,
+      "corpus_sentences": 233
+    },
+    {
+      "pmcid": "PMC12609940",
+      "doi": "10.3390/molecules30214209",
+      "year": "2025",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fe-Doped Nickel Carbonate Hydroxide-Supported Ru Nanocluster Catalyst as Efficient OER Electrocatalysts.",
+      "pool_sentences": 161,
+      "corpus_sentences": 106
+    },
+    {
+      "pmcid": "PMC9059505",
+      "doi": "10.1039/c8ra08781d",
+      "year": "2019",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Au@PdAg core-shell nanotubes as advanced electrocatalysts for methanol electrooxidation in alkaline media.",
+      "pool_sentences": 110,
+      "corpus_sentences": 71
+    },
+    {
+      "pmcid": "PMC11375789",
+      "doi": "10.1039/d4dt02182g",
+      "year": "2024",
+      "journal": "Dalton transactions (Cambridge, England : 2003)",
+      "license": "cc by",
+      "title": "Nickel(II) complexes with 14-membered bis-thiosemicarbazide and bis-isothiosemicarbazide ligands: synthesis, characterization and catalysis of oxygen evolution reaction.",
+      "pool_sentences": 267,
+      "corpus_sentences": 191
+    },
+    {
+      "pmcid": "PMC6933577",
+      "doi": "10.1021/acsomega.9b02143",
+      "year": "2019",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "A van der Waals Heterostructure Based on Graphene-like Gallium Nitride and Boron Selenide: A High-Efficiency Photocatalyst for Water Splitting.",
+      "pool_sentences": 124,
+      "corpus_sentences": 74
+    },
+    {
+      "pmcid": "PMC6524082",
+      "doi": "10.1002/advs.201900119",
+      "year": "2019",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Chemical Dopants on Edge of Holey Graphene Accelerate Electrochemical Hydrogen Evolution Reaction.",
+      "pool_sentences": 119,
+      "corpus_sentences": 85
+    },
+    {
+      "pmcid": "PMC13592200",
+      "doi": "10.1039/d6ra03756a",
+      "year": "2026",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Willow tree leaf-derived porous carbon-supported Co nanoparticles as enhanced oxygen reduction reaction electrocatalysts.",
+      "pool_sentences": 198,
+      "corpus_sentences": 131
+    },
+    {
+      "pmcid": "PMC11809190",
+      "doi": "10.1039/d4ra08845j",
+      "year": "2025",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Studying CeO2-modified defective carbon as an electrocatalyst for electrochemical reduction of CO2.",
+      "pool_sentences": 207,
+      "corpus_sentences": 124
+    },
+    {
+      "pmcid": "PMC9814188",
+      "doi": "10.1038/s42004-022-00713-4",
+      "year": "2022",
+      "journal": "Communications chemistry",
+      "license": "cc by",
+      "title": "Photogenerated hole traps in metal-organic-framework photocatalysts for visible-light-driven hydrogen evolution.",
+      "pool_sentences": 150,
+      "corpus_sentences": 88
+    },
+    {
+      "pmcid": "PMC9570565",
+      "doi": "10.3390/molecules27196644",
+      "year": "2022",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Au-TiO2/Ti Hybrid Coating as a Liquid and Gas Diffusion Layer with Improved Performance and Stability in Proton Exchange Membrane Water Electrolyzer.",
+      "pool_sentences": 135,
+      "corpus_sentences": 86
+    },
+    {
+      "pmcid": "PMC8457090",
+      "doi": "10.1002/anie.202105324",
+      "year": "2021",
+      "journal": "Angewandte Chemie (International ed. in English)",
+      "license": "cc by-nc",
+      "title": "Holistic View on Materials Development: Water Electrolysis as a Case Study.",
+      "pool_sentences": 104,
+      "corpus_sentences": 71
+    },
+    {
+      "pmcid": "PMC5490055",
+      "doi": "10.1039/c4sc04037f",
+      "year": "2015",
+      "journal": "Chemical science",
+      "license": "cc by-nc",
+      "title": "Hollow ternary PtPdCu nanoparticles: a superior and durable cathodic electrocatalyst.",
+      "pool_sentences": 118,
+      "corpus_sentences": 77
+    },
+    {
+      "pmcid": "PMC13000895",
+      "doi": "10.1039/d6ra01624c",
+      "year": "2026",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Ni-Fe bimetallic carbon nanotube catalysts derived from a two-dimensional metalloporphyrin Fe-MOF precursor for oxygen reduction and oxygen evolution reactions.",
+      "pool_sentences": 235,
+      "corpus_sentences": 165
+    },
+    {
+      "pmcid": "PMC9136838",
+      "doi": "10.1021/acsami.1c24223",
+      "year": "2022",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "Deep Eutectic Solvent Synthesis of Perovskite Electrocatalysts for Water Oxidation.",
+      "pool_sentences": 118,
+      "corpus_sentences": 66
+    },
+    {
+      "pmcid": "PMC10794432",
+      "doi": "10.1007/s11356-023-31353-3",
+      "year": "2024",
+      "journal": "Environmental science and pollution research international",
+      "license": "cc by",
+      "title": "A comprehensive review on the application of semiconducting materials in the degradation of effluents and water splitting.",
+      "pool_sentences": 369,
+      "corpus_sentences": 243
+    },
+    {
+      "pmcid": "PMC12046571",
+      "doi": null,
+      "year": "2025",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Enhanced electrocatalytic hydrogen evolution via nitrogen-induced electron density modulation in ReSe2/2D carbon heterostructures\u2020 \u2020 Electronic supplementary information (ESI) available. See DOI: https://doi.org/10.1039/d5ra01096a",
+      "pool_sentences": 310,
+      "corpus_sentences": 212
+    },
+    {
+      "pmcid": "PMC9491177",
+      "doi": "10.1039/d2ra04570b",
+      "year": "2022",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Mn-doped Co3O4 for acid, neutral and alkaline electrocatalytic oxygen evolution reaction.",
+      "pool_sentences": 227,
+      "corpus_sentences": 158
+    },
+    {
+      "pmcid": "PMC8400674",
+      "doi": "10.3390/ma14164739",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Computational Study of Novel Semiconducting Sc2CT2 (T = F, Cl, Br) MXenes for Visible-Light Photocatalytic Water Splitting.",
+      "pool_sentences": 113,
+      "corpus_sentences": 71
+    },
+    {
+      "pmcid": "PMC8171343",
+      "doi": "10.1039/d0sc06429g",
+      "year": "2021",
+      "journal": "Chemical science",
+      "license": "cc by-nc",
+      "title": "Water oxidation kinetics of nanoporous BiVO4 photoanodes functionalised with nickel/iron oxyhydroxide electrocatalysts.",
+      "pool_sentences": 150,
+      "corpus_sentences": 102
+    },
+    {
+      "pmcid": "PMC4382694",
+      "doi": "10.1038/ncomms7616",
+      "year": "2015",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Electrodeposition of hierarchically structured three-dimensional nickel-iron electrodes for efficient oxygen evolution at high current densities.",
+      "pool_sentences": 153,
+      "corpus_sentences": 106
+    },
+    {
+      "pmcid": "PMC13052062",
+      "doi": "10.1002/open.202500377",
+      "year": "2026",
+      "journal": "ChemistryOpen",
+      "license": "cc by",
+      "title": "Enhancing the Oxygen Evolution Performance by Introducing NiO-Supported Mesoporous Titanium Dioxide.",
+      "pool_sentences": 168,
+      "corpus_sentences": 98
+    },
+    {
+      "pmcid": "PMC8981091",
+      "doi": "10.1039/d1ra08614f",
+      "year": "2022",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Proton reduction by a bimetallic zinc selenolate electrocatalyst.",
+      "pool_sentences": 142,
+      "corpus_sentences": 100
+    },
+    {
+      "pmcid": "PMC13616364",
+      "doi": "10.1002/advs.77902",
+      "year": "2026",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Tailoring Electronic Structure of NbB2 Nanorods Through Selenium Incorporation for Synergistically Enhanced Hydrogen Evolution and Triboelectric Energy Harvesting.",
+      "pool_sentences": 352,
+      "corpus_sentences": 219
+    },
+    {
+      "pmcid": "PMC8894469",
+      "doi": "10.1038/s41467-022-28805-8",
+      "year": "2022",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Interstitial boron-triggered electron-deficient Os aerogels for enhanced pH-universal hydrogen evolution.",
+      "pool_sentences": 186,
+      "corpus_sentences": 118
+    },
+    {
+      "pmcid": "PMC5331331",
+      "doi": "10.1038/ncomms14548",
+      "year": "2017",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Interface confined hydrogen evolution reaction in zero valent metal nanoparticles-intercalated molybdenum disulfide.",
+      "pool_sentences": 167,
+      "corpus_sentences": 95
+    },
+    {
+      "pmcid": "PMC7317712",
+      "doi": "10.1002/cssc.202000300",
+      "year": "2020",
+      "journal": "ChemSusChem",
+      "license": "cc by-nc-nd",
+      "title": "Electron Transfer Mediated by Iron Carbonyl Clusters Enhance Light-Driven Hydrogen Evolution in Water by Quantum Dots.",
+      "pool_sentences": 165,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC7690575",
+      "doi": "10.3390/nano10112096",
+      "year": "2020",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Efficient Photocatalytic Hydrogen Evolution over TiO2-X Mesoporous Spheres-ZnO Nanorods Heterojunction.",
+      "pool_sentences": 114,
+      "corpus_sentences": 78
+    },
+    {
+      "pmcid": "PMC11503487",
+      "doi": "10.1021/acscentsci.4c01085",
+      "year": "2024",
+      "journal": "ACS central science",
+      "license": "cc by",
+      "title": "High-Entropy Engineering in Hollow Layered Hydroxide Arrays to Boost 5-Hydroxymethylfurfural Electrooxidation by Suppressing Oxygen Evolution.",
+      "pool_sentences": 177,
+      "corpus_sentences": 116
+    },
+    {
+      "pmcid": "PMC9073648",
+      "doi": "10.1039/c9ra07031a",
+      "year": "2019",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Temperature-induced structural diversity of metal-organic frameworks and their applications in selective sensing of nitrobenzene and electrocatalyzing the oxygen evolution reaction.",
+      "pool_sentences": 126,
+      "corpus_sentences": 80
+    },
+    {
+      "pmcid": "PMC11697232",
+      "doi": "10.1038/s41467-024-55688-8",
+      "year": "2025",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "Tracking the correlation between spintronic structure and oxygen evolution reaction mechanism of cobalt-ruthenium-based electrocatalyst.",
+      "pool_sentences": 281,
+      "corpus_sentences": 185
+    },
+    {
+      "pmcid": "PMC9783226",
+      "doi": "10.3390/membranes12121195",
+      "year": "2022",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Modeling, Degradation Study, Failures Diagnosis and Faulty Operating Management of Electrolyzers.",
+      "pool_sentences": 25,
+      "corpus_sentences": 18
+    },
+    {
+      "pmcid": "PMC5089059",
+      "doi": "10.1021/acscatal.6b01274",
+      "year": "2016",
+      "journal": "ACS catalysis",
+      "license": null,
+      "title": "Enhancement of the Hydrogen Evolution Reaction from Ni-MoS2 Hybrid Nanoclusters.",
+      "pool_sentences": 170,
+      "corpus_sentences": 114
+    },
+    {
+      "pmcid": "PMC9299148",
+      "doi": "10.1002/chem.202103817",
+      "year": "2021",
+      "journal": "Chemistry (Weinheim an der Bergstrasse, Germany)",
+      "license": "cc by",
+      "title": "Multifunctional Polyoxometalate Platforms for Supramolecular Light-Driven Hydrogen Evolution*.",
+      "pool_sentences": 112,
+      "corpus_sentences": 84
+    },
+    {
+      "pmcid": "PMC11781020",
+      "doi": "10.1021/acsnano.4c09903",
+      "year": "2025",
+      "journal": "ACS nano",
+      "license": "cc by",
+      "title": "Two-Dimensional Tantalum Carbo-Selenide for Hydrogen Evolution.",
+      "pool_sentences": 292,
+      "corpus_sentences": 180
+    },
+    {
+      "pmcid": "PMC9284608",
+      "doi": "10.1021/acsmaterialsau.2c00025",
+      "year": "2022",
+      "journal": "ACS materials Au",
+      "license": "cc by",
+      "title": "Immobilization of a [CoIIICoII(H2O)W11O39]7- Polyoxoanion for the Photocatalytic Oxygen Evolution Reaction.",
+      "pool_sentences": 176,
+      "corpus_sentences": 110
+    },
+    {
+      "pmcid": "PMC12382175",
+      "doi": "10.1186/s13065-025-01614-y",
+      "year": "2025",
+      "journal": "BMC chemistry",
+      "license": "cc by",
+      "title": "Advanced graphene-silica fume/polyaniline-iron nanoparticle composite electrocatalyst for efficient oxygen reduction in alkaline media.",
+      "pool_sentences": 157,
+      "corpus_sentences": 110
+    },
+    {
+      "pmcid": "PMC10535034",
+      "doi": "10.3390/membranes13090748",
+      "year": "2023",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Nanoflake NiMn Layered Double Hydroxide Coated on Porous Membrane-like Ni-Foam for Sustainable and Efficient Electrocatalytic Oxygen Evolution.",
+      "pool_sentences": 141,
+      "corpus_sentences": 92
+    },
+    {
+      "pmcid": "PMC10958496",
+      "doi": "10.1021/jacs.3c13076",
+      "year": "2024",
+      "journal": "Journal of the American Chemical Society",
+      "license": "cc by",
+      "title": "Potential Dependent Reorientation Controlling Activity of a Molecular Electrocatalyst.",
+      "pool_sentences": 53,
+      "corpus_sentences": 35
+    },
+    {
+      "pmcid": "PMC11955824",
+      "doi": "10.1039/d4ra08980d",
+      "year": "2025",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Amorphous/crystalline nanostructured Co-FeOOH/CoCe-MOF/NF heterojunctions for efficient electrocatalytic overall water splitting.",
+      "pool_sentences": 114,
+      "corpus_sentences": 76
+    },
+    {
+      "pmcid": "PMC5838529",
+      "doi": "10.1002/anie.201709652",
+      "year": "2018",
+      "journal": "Angewandte Chemie (International ed. in English)",
+      "license": "cc by-nc",
+      "title": "The Common Intermediates of Oxygen Evolution and Dissolution Reactions during Water Electrolysis on Iridium.",
+      "pool_sentences": 77,
+      "corpus_sentences": 49
+    },
+    {
+      "pmcid": "PMC12381231",
+      "doi": "10.1038/s41467-025-63181-z",
+      "year": "2025",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "Adsorbed oxygen dynamics at forced convection interface in the oxygen evolution reaction.",
+      "pool_sentences": 293,
+      "corpus_sentences": 199
+    },
+    {
+      "pmcid": "PMC8826910",
+      "doi": "10.1038/s41467-022-28147-5",
+      "year": "2022",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Predicting the efficiency of oxygen-evolving electrolysis on the Moon and Mars.",
+      "pool_sentences": 266,
+      "corpus_sentences": 170
+    },
+    {
+      "pmcid": "PMC8580302",
+      "doi": "10.1126/sciadv.abk0919",
+      "year": "2021",
+      "journal": "Science advances",
+      "license": "cc by-nc",
+      "title": "In situ activation of Br-confined Ni-based metal-organic framework hollow prisms toward efficient electrochemical oxygen evolution.",
+      "pool_sentences": 167,
+      "corpus_sentences": 100
+    },
+    {
+      "pmcid": "PMC11287272",
+      "doi": "10.1073/pnas.2405846121",
+      "year": "2024",
+      "journal": "Proceedings of the National Academy of Sciences of the United States of America",
+      "license": "cc by-nc-nd",
+      "title": "Oxygenate-induced structural evolution of high-entropy electrocatalysts for multifunctional alcohol electrooxidation integrated with hydrogen production.",
+      "pool_sentences": 171,
+      "corpus_sentences": 108
+    },
+    {
+      "pmcid": "PMC9700689",
+      "doi": "10.1038/s41467-022-34884-4",
+      "year": "2022",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Discovery of LaAlO3 as an efficient catalyst for two-electron water electrolysis towards hydrogen peroxide.",
+      "pool_sentences": 182,
+      "corpus_sentences": 125
+    },
+    {
+      "pmcid": "PMC9999420",
+      "doi": "10.1021/jacs.2c12617",
+      "year": "2023",
+      "journal": "Journal of the American Chemical Society",
+      "license": "cc by",
+      "title": "Nanoscale Electron Transfer Variations at Electrocatalyst-Electrolyte Interfaces Resolved by in Situ Conductive Atomic Force Microscopy.",
+      "pool_sentences": 171,
+      "corpus_sentences": 113
+    },
+    {
+      "pmcid": "PMC9073711",
+      "doi": "10.1039/c9ra07939d",
+      "year": "2019",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Boosting the hydrogen evolution activity of a Co-N-C electrocatalyst by codoping with Al.",
+      "pool_sentences": 133,
+      "corpus_sentences": 91
+    },
+    {
+      "pmcid": "PMC8655887",
+      "doi": "10.1021/acsomega.1c05206",
+      "year": "2021",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Trace Amount of NiP2 Cooperative CoMoP Nanosheets Inducing Efficient Hydrogen Evolution.",
+      "pool_sentences": 122,
+      "corpus_sentences": 85
+    },
+    {
+      "pmcid": "PMC10584973",
+      "doi": "10.1038/s41467-023-42348-6",
+      "year": "2023",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Non-invasive current collectors for improved current-density distribution during CO2 electrolysis on super-hydrophobic electrodes.",
+      "pool_sentences": 216,
+      "corpus_sentences": 139
+    },
+    {
+      "pmcid": "PMC9507342",
+      "doi": "10.1002/advs.202201916",
+      "year": "2022",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Probing Dynamic Self-Reconstruction on Perovskite Fluorides toward Ultrafast Oxygen Evolution.",
+      "pool_sentences": 169,
+      "corpus_sentences": 117
+    },
+    {
+      "pmcid": "PMC10619616",
+      "doi": "10.1039/d3sc04532c",
+      "year": "2023",
+      "journal": "Chemical science",
+      "license": "cc by-nc",
+      "title": "Ion sieving membrane for direct seawater anti-precipitation hydrogen evolution reaction electrode.",
+      "pool_sentences": 147,
+      "corpus_sentences": 99
+    },
+    {
+      "pmcid": "PMC11840523",
+      "doi": "10.1016/j.isci.2025.111859",
+      "year": "2025",
+      "journal": "iScience",
+      "license": "cc by-nc",
+      "title": "Boron phosphide microwires based on-chip electrocatalytic oxygen evolution microdevice.",
+      "pool_sentences": 207,
+      "corpus_sentences": 134
+    },
+    {
+      "pmcid": "PMC10090041",
+      "doi": "10.1038/s41467-023-37754-9",
+      "year": "2023",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Oxynitrides enabled photoelectrochemical water splitting with over 3,000 hrs stable operation in practical two-electrode configuration.",
+      "pool_sentences": 185,
+      "corpus_sentences": 111
+    },
+    {
+      "pmcid": "PMC12983302",
+      "doi": "10.1021/jacs.5c17824",
+      "year": "2026",
+      "journal": "Journal of the American Chemical Society",
+      "license": "cc by",
+      "title": "Electrolysis-Assisted Reduction of Dimethylformamide for Unactivated Alkene Functionalizations.",
+      "pool_sentences": 174,
+      "corpus_sentences": 111
+    },
+    {
+      "pmcid": "PMC6977482",
+      "doi": "10.7717/peerj.7985",
+      "year": "2020",
+      "journal": "PeerJ",
+      "license": "cc by",
+      "title": "Toward a clinical real time tissue ablation technology: combining electroporation and electrolysis (E2).",
+      "pool_sentences": 245,
+      "corpus_sentences": 164
+    },
+    {
+      "pmcid": "PMC6959317",
+      "doi": "10.1038/s41467-019-14157-3",
+      "year": "2020",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Efficient electrochemical production of glucaric acid and H2 via glucose electrolysis.",
+      "pool_sentences": 181,
+      "corpus_sentences": 129
+    },
+    {
+      "pmcid": "PMC12061291",
+      "doi": "10.1002/advs.202500226",
+      "year": "2025",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Interface Effects in Metal-2D TMDs Systems: Advancing the Design and Development Electrocatalysts.",
+      "pool_sentences": 293,
+      "corpus_sentences": 202
+    },
+    {
+      "pmcid": "PMC11739974",
+      "doi": "10.1021/acsomega.4c07787",
+      "year": "2025",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Transient Kinetic QXAFS Approach for Understanding the RDE-MEA Gap in Fuel Cell (Oxygen Reduction Reaction) Performances of Pt-Based Electrocatalysts.",
+      "pool_sentences": 154,
+      "corpus_sentences": 99
+    },
+    {
+      "pmcid": "PMC9313588",
+      "doi": "10.1002/anie.202202079",
+      "year": "2022",
+      "journal": "Angewandte Chemie (International ed. in English)",
+      "license": "cc by",
+      "title": "Activating a [FeFe] Hydrogenase Mimic for Hydrogen Evolution under Visible Light.",
+      "pool_sentences": 77,
+      "corpus_sentences": 49
+    },
+    {
+      "pmcid": "PMC8421379",
+      "doi": "10.1038/s41467-021-25647-8",
+      "year": "2021",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Interfacial electronic structure engineering on molybdenum sulfide for robust dual-pH hydrogen evolution.",
+      "pool_sentences": 281,
+      "corpus_sentences": 183
+    },
+    {
+      "pmcid": "PMC13284189",
+      "doi": "10.1038/s41598-026-49517-9",
+      "year": "2026",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Synergistic interface engineering of Ni-integrated Co-ZIF67 on two-demensional MXene for enhanced oxygen evolution reaction.",
+      "pool_sentences": 232,
+      "corpus_sentences": 151
+    },
+    {
+      "pmcid": "PMC6567302",
+      "doi": "10.3390/nano9050751",
+      "year": "2019",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Active Pore-Edge Engineering of Single-Layer Niobium Diselenide Porous Nanosheets Electrode for Hydrogen Evolution.",
+      "pool_sentences": 151,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC13206546",
+      "doi": "10.3390/gels12050397",
+      "year": "2026",
+      "journal": "Gels (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Noble Metal Aerogels: Synthesis and Application as Support-Free Anode Electrocatalysts for Ethanol Electro-Oxidation.",
+      "pool_sentences": 563,
+      "corpus_sentences": 377
+    },
+    {
+      "pmcid": "PMC12279174",
+      "doi": "10.1002/advs.202501976",
+      "year": "2025",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "A Nanostructured Ru-Mn-Nb Alloy with Oxygen-Enriched Boundaries for Ampere-Level Hydrogen Evolution.",
+      "pool_sentences": 238,
+      "corpus_sentences": 152
+    },
+    {
+      "pmcid": "PMC6724126",
+      "doi": "10.3390/nano9081161",
+      "year": "2019",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Recent Advances in Oxygen Electrocatalysts Based on Perovskite Oxides.",
+      "pool_sentences": 270,
+      "corpus_sentences": 182
+    },
+    {
+      "pmcid": "PMC12706061",
+      "doi": "10.1038/s41467-025-67294-3",
+      "year": "2025",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Photoelectrochemical water splitting cells at elevated pressure using BiVO4 and platinized III-V semiconductor photoelectrodes.",
+      "pool_sentences": 326,
+      "corpus_sentences": 217
+    },
+    {
+      "pmcid": "PMC6430014",
+      "doi": "10.1039/c8sc05757e",
+      "year": "2019",
+      "journal": "Chemical science",
+      "license": "cc by",
+      "title": "An Al-doped SrTiO3 photocatalyst maintaining sunlight-driven overall water splitting activity for over 1000 h of constant illumination.",
+      "pool_sentences": 126,
+      "corpus_sentences": 86
+    },
+    {
+      "pmcid": "PMC5063145",
+      "doi": "10.1002/advs.201500243",
+      "year": "2016",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Metal-Organic Frameworks as Promising Photosensitizers for Photoelectrochemical Water Splitting.",
+      "pool_sentences": 129,
+      "corpus_sentences": 87
+    },
+    {
+      "pmcid": "PMC8187493",
+      "doi": "10.1007/s40820-021-00607-5",
+      "year": "2021",
+      "journal": "Nano-micro letters",
+      "license": "cc by",
+      "title": "N-Doped Graphene-Decorated NiCo Alloy Coupled with Mesoporous NiCoMoO Nano-sheet Heterojunction for Enhanced Water Electrolysis Activity at High Current Density.",
+      "pool_sentences": 135,
+      "corpus_sentences": 93
+    },
+    {
+      "pmcid": "PMC11356654",
+      "doi": "10.3390/ma17164057",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Multifunctional Design of Catalysts for Seawater Electrolysis for Hydrogen Production.",
+      "pool_sentences": 223,
+      "corpus_sentences": 148
+    },
+    {
+      "pmcid": "PMC12700888",
+      "doi": "10.1038/s41467-025-65980-w",
+      "year": "2025",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Oxide-hybridized carbon as a catalyst support for efficient anion exchange membrane water electrolysis.",
+      "pool_sentences": 269,
+      "corpus_sentences": 180
+    },
+    {
+      "pmcid": "PMC8179675",
+      "doi": "10.1039/d0sc03280h",
+      "year": "2020",
+      "journal": "Chemical science",
+      "license": "cc by",
+      "title": "Surface site density and utilization of platinum group metal (PGM)-free Fe-NC and FeNi-NC electrocatalysts for the oxygen reduction reaction.",
+      "pool_sentences": 233,
+      "corpus_sentences": 153
+    },
+    {
+      "pmcid": "PMC5355867",
+      "doi": "10.1039/c6sc01098a",
+      "year": "2016",
+      "journal": "Chemical science",
+      "license": "cc by",
+      "title": "Vibrational spectroscopy reveals the initial steps of biological hydrogen evolution.",
+      "pool_sentences": 119,
+      "corpus_sentences": 79
+    },
+    {
+      "pmcid": "PMC10934916",
+      "doi": "10.3390/nano14050407",
+      "year": "2024",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Ni,Fe,Co-LDH Coated Porous Transport Layers for Zero-Gap Alkaline Water Electrolyzers.",
+      "pool_sentences": 116,
+      "corpus_sentences": 86
+    },
+    {
+      "pmcid": "PMC6936089",
+      "doi": "10.1021/acscentsci.9b01110",
+      "year": "2019",
+      "journal": "ACS central science",
+      "license": null,
+      "title": "Advanced Ultrathin RuPdM (M = Ni, Co, Fe) Nanosheets Electrocatalyst Boosts Hydrogen Evolution.",
+      "pool_sentences": 113,
+      "corpus_sentences": 73
+    },
+    {
+      "pmcid": "PMC12866813",
+      "doi": "10.1002/advs.202505118",
+      "year": "2026",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Efficient Light Harvesting and Water Retention Realized by Soybean Protein-Based Microgels Embedded in Hybrid Sodium Alginate Hydrogels Containing Photocatalyst for Hydrogen Evolution.",
+      "pool_sentences": 154,
+      "corpus_sentences": 101
+    },
+    {
+      "pmcid": "PMC11468612",
+      "doi": "10.1002/adma.202103218",
+      "year": "2021",
+      "journal": "Advanced materials (Deerfield Beach, Fla.)",
+      "license": "cc by-nc-nd",
+      "title": "Metamorphosis of Heterostructured Surface-Mounted Metal-Organic Frameworks Yielding Record Oxygen Evolution Mass Activities.",
+      "pool_sentences": 180,
+      "corpus_sentences": 122
+    },
+    {
+      "pmcid": "PMC10383487",
+      "doi": "10.3390/nano13142085",
+      "year": "2023",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Hydrogen Evolution Reaction on Ultra-Smooth Sputtered Nanocrystalline Ni Thin Films in Alkaline Media-From Intrinsic Activity to the Effects of Surface Oxidation.",
+      "pool_sentences": 276,
+      "corpus_sentences": 184
+    },
+    {
+      "pmcid": "PMC12224984",
+      "doi": "10.1002/advs.202501967",
+      "year": "2025",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Unveiling Surface Species Formed on Ni-Fe Spinel Oxides During the Oxygen Evolution Reaction at the Atomic Scale.",
+      "pool_sentences": 261,
+      "corpus_sentences": 168
+    },
+    {
+      "pmcid": "PMC6652109",
+      "doi": "10.1002/open.201900190",
+      "year": "2019",
+      "journal": "ChemistryOpen",
+      "license": "cc by-nc",
+      "title": "One-Step Synthesis of NiFe Layered Double Hydroxide Nanosheet Array/N-Doped Graphite Foam Electrodes for Oxygen Evolution Reactions.",
+      "pool_sentences": 111,
+      "corpus_sentences": 72
+    },
+    {
+      "pmcid": "PMC12787436",
+      "doi": "10.3390/nano16010027",
+      "year": "2025",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Application of PVA Membrane Doped with TiO2 and ZrO2 for Higher Efficiency of Alkaline Electrolysis Process.",
+      "pool_sentences": 184,
+      "corpus_sentences": 120
+    },
+    {
+      "pmcid": "PMC10675175",
+      "doi": "10.3390/molecules28227563",
+      "year": "2023",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Computational Design of Ni6@Pt1M31 Clusters for Multifunctional Electrocatalysts.",
+      "pool_sentences": 153,
+      "corpus_sentences": 105
+    },
+    {
+      "pmcid": "PMC12299054",
+      "doi": "10.3390/nano15141070",
+      "year": "2025",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Review on Laser-Induced Graphene-Based Electrocatalysts for the Oxygen Reduction Reaction in Electrochemical Energy Storage and Conversion.",
+      "pool_sentences": 286,
+      "corpus_sentences": 196
+    },
+    {
+      "pmcid": "PMC11421220",
+      "doi": "10.1021/acscatal.4c02572",
+      "year": "2024",
+      "journal": "ACS catalysis",
+      "license": "cc by",
+      "title": "Effect of Iron Doping in Ordered Nickel Oxide Thin Film Catalyst for the Oxygen Evolution Reaction.",
+      "pool_sentences": 339,
+      "corpus_sentences": 232
+    },
+    {
+      "pmcid": "PMC8229196",
+      "doi": "10.3390/bios11060170",
+      "year": "2021",
+      "journal": "Biosensors",
+      "license": "cc by",
+      "title": "Impact of Carbon Felt Electrode Pretreatment on Anodic Biofilm Composition in Microbial Electrolysis Cells.",
+      "pool_sentences": 179,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC6667450",
+      "doi": "10.1038/s41598-019-47575-w",
+      "year": "2019",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Carbon nanotubes-based PdM bimetallic catalysts through N4-system for efficient ethanol oxidation and hydrogen evolution reaction.",
+      "pool_sentences": 167,
+      "corpus_sentences": 106
+    },
+    {
+      "pmcid": "PMC10958446",
+      "doi": "10.1021/acsami.3c11642",
+      "year": "2024",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "In Situ Growth of Interfacially Nanoengineered 2D-2D WS2/Ti3C2Tx MXene for the Enhanced Performance of Hydrogen Evolution Reactions.",
+      "pool_sentences": 243,
+      "corpus_sentences": 162
+    },
+    {
+      "pmcid": "PMC7815492",
+      "doi": "10.1016/j.ultsonch.2020.105454",
+      "year": "2021",
+      "journal": "Ultrasonics sonochemistry",
+      "license": "cc by-nc-nd",
+      "title": "Ultrasound assisted synthesis of highly active nanoflower-like CoMoS4 electrocatalyst for oxygen and hydrogen evolution reactions.",
+      "pool_sentences": 153,
+      "corpus_sentences": 94
+    },
+    {
+      "pmcid": "PMC13021358",
+      "doi": "10.1002/cssc.202501880",
+      "year": "2026",
+      "journal": "ChemSusChem",
+      "license": "cc by",
+      "title": "Structural and Electrochemical Evolution of Nickel Sulfides During Alkaline Hydrogen Evolution Reaction.",
+      "pool_sentences": 200,
+      "corpus_sentences": 129
+    },
+    {
+      "pmcid": "PMC9890562",
+      "doi": "10.1039/d2ra07363c",
+      "year": "2023",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Defect and strain engineered MoS2/graphene catalyst for an enhanced hydrogen evolution reaction.",
+      "pool_sentences": 138,
+      "corpus_sentences": 86
+    },
+    {
+      "pmcid": "PMC12377287",
+      "doi": "10.1039/d5ra04486c",
+      "year": "2025",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Electrode selection framework for oxygen evolution reaction catalysts involving density functional theory and finite element method.",
+      "pool_sentences": 276,
+      "corpus_sentences": 203
+    },
+    {
+      "pmcid": "PMC7538641",
+      "doi": "10.3389/fchem.2020.00713",
+      "year": "2020",
+      "journal": "Frontiers in chemistry",
+      "license": "cc by",
+      "title": "Editorial: Carbon-Based Bifunctional Oxygen Electrocatalysts.",
+      "pool_sentences": 18,
+      "corpus_sentences": 12
+    },
+    {
+      "pmcid": "PMC11085547",
+      "doi": "10.3390/nano14090770",
+      "year": "2024",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Oxygen Defects Containing TiN Films for the Hydrogen Evolution Reaction: A Robust Thin-Film Electrocatalyst with Outstanding Performance.",
+      "pool_sentences": 177,
+      "corpus_sentences": 118
+    },
+    {
+      "pmcid": "PMC11605038",
+      "doi": "10.1038/s41467-024-54754-5",
+      "year": "2024",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "Corrosion-resistant NiFe anode towards kilowatt-scale alkaline seawater electrolysis.",
+      "pool_sentences": 187,
+      "corpus_sentences": 121
+    },
+    {
+      "pmcid": "PMC10797592",
+      "doi": "10.1021/acsami.3c13801",
+      "year": "2024",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "Dimensionally Stable Anion Exchange Membranes Based on Macromolecular-Cross-Linked Poly(arylene piperidinium) for Water Electrolysis.",
+      "pool_sentences": 279,
+      "corpus_sentences": 190
+    },
+    {
+      "pmcid": "PMC6215150",
+      "doi": "10.3390/nano8100835",
+      "year": "2018",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fabrication of ZnO/Red Phosphorus Heterostructure for Effective Photocatalytic H\u2082 Evolution from Water Splitting.",
+      "pool_sentences": 123,
+      "corpus_sentences": 82
+    },
+    {
+      "pmcid": "PMC10486200",
+      "doi": "10.1039/d3ra04837c",
+      "year": "2023",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "Synergistic effect of bimetallic Pd-Pt nanocrystals for highly efficient methanol oxidation electrocatalysts.",
+      "pool_sentences": 134,
+      "corpus_sentences": 99
+    },
+    {
+      "pmcid": "PMC10758114",
+      "doi": "10.1021/acs.jpclett.3c02578",
+      "year": "2023",
+      "journal": "The journal of physical chemistry letters",
+      "license": "cc by",
+      "title": "Boosting Photocatalytic Water Splitting of Polymeric C60 by Reduced Dimensionality from Two-Dimensional Monolayer to One-Dimensional Chain.",
+      "pool_sentences": 92,
+      "corpus_sentences": 63
+    },
+    {
+      "pmcid": "PMC8479867",
+      "doi": "10.1021/jacsau.1c00258",
+      "year": "2021",
+      "journal": "JACS Au",
+      "license": "cc by-nc-nd",
+      "title": "In Silico Design of Covalent Organic Framework-Based Electrocatalysts.",
+      "pool_sentences": 166,
+      "corpus_sentences": 104
+    },
+    {
+      "pmcid": "PMC9490594",
+      "doi": "10.1016/j.isci.2022.105098",
+      "year": "2022",
+      "journal": "iScience",
+      "license": "cc by",
+      "title": "Recent advances in metallic transition metal dichalcogenides as electrocatalysts for hydrogen evolution reaction.",
+      "pool_sentences": 317,
+      "corpus_sentences": 225
+    },
+    {
+      "pmcid": "PMC6027530",
+      "doi": "10.3390/nano8060432",
+      "year": "2018",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Carbon Nitride Materials as Efficient Catalyst Supports for Proton Exchange Membrane Water Electrolyzers.",
+      "pool_sentences": 149,
+      "corpus_sentences": 102
+    },
+    {
+      "pmcid": "PMC10584842",
+      "doi": "10.1038/s41467-023-42370-8",
+      "year": "2023",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "In situ X-ray spectroscopies beyond conventional X-ray absorption spectroscopy on deciphering dynamic configuration of electrocatalysts.",
+      "pool_sentences": 398,
+      "corpus_sentences": 267
+    },
+    {
+      "pmcid": "PMC12061240",
+      "doi": "10.1002/advs.202413796",
+      "year": "2025",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Constructing Stable Bifunctional Electrocatalyst of Co\u2500Co2Nb5O14 with Reversible Interface Reconstitution Ability for Sustainable Zn-Air Batteries.",
+      "pool_sentences": 191,
+      "corpus_sentences": 132
+    },
+    {
+      "pmcid": "PMC11314187",
+      "doi": "10.3390/molecules29153707",
+      "year": "2024",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Gold Nanoparticle Mesoporous Carbon Composite as Catalyst for Hydrogen Evolution Reaction.",
+      "pool_sentences": 86,
+      "corpus_sentences": 62
+    },
+    {
+      "pmcid": "PMC9516553",
+      "doi": "10.1021/acsaem.2c01201",
+      "year": "2022",
+      "journal": "ACS applied energy materials",
+      "license": "cc by",
+      "title": "Metal-Free SeBN Ternary-Doped Porous Carbon as Efficient Electrocatalysts for CO2 Reduction Reaction.",
+      "pool_sentences": 140,
+      "corpus_sentences": 90
+    },
+    {
+      "pmcid": "PMC9292432",
+      "doi": "10.1002/anie.202109212",
+      "year": "2021",
+      "journal": "Angewandte Chemie (International ed. in English)",
+      "license": "cc by-nc-nd",
+      "title": "What Makes High-Entropy Alloys Exceptional Electrocatalysts?",
+      "pool_sentences": 209,
+      "corpus_sentences": 142
+    },
+    {
+      "pmcid": "PMC9361295",
+      "doi": "10.1021/acscatal.2c01534",
+      "year": "2022",
+      "journal": "ACS catalysis",
+      "license": "cc by",
+      "title": "Mechanisms of the Oxygen Evolution Reaction on NiFe2O4 and CoFe2O4 Inverse-Spinel Oxides.",
+      "pool_sentences": 235,
+      "corpus_sentences": 163
+    },
+    {
+      "pmcid": "PMC11808562",
+      "doi": "10.1039/d4sc07901a",
+      "year": "2025",
+      "journal": "Chemical science",
+      "license": "cc by-nc",
+      "title": "Inverse opal anatase/rutile TiO2 multi-heterojunctions enable efficient photoelectrochemical water splitting.",
+      "pool_sentences": 128,
+      "corpus_sentences": 83
+    },
+    {
+      "pmcid": "PMC11522909",
+      "doi": "10.1021/jacsau.4c00710",
+      "year": "2024",
+      "journal": "JACS Au",
+      "license": "cc by-nc-nd",
+      "title": "Decoupling Electrolytic Water Splitting by an Oxygen-Mediating Process.",
+      "pool_sentences": 185,
+      "corpus_sentences": 124
+    },
+    {
+      "pmcid": "PMC8633808",
+      "doi": "10.1098/rsos.201887",
+      "year": "2021",
+      "journal": "Royal Society open science",
+      "license": "cc by",
+      "title": "Pollutant removal from municipal sewage by a microaerobic up-flow oxidation ditch coupled with micro-electrolysis.",
+      "pool_sentences": 209,
+      "corpus_sentences": 134
+    },
+    {
+      "pmcid": "PMC9861855",
+      "doi": "10.3390/molecules28020664",
+      "year": "2023",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A {Co9}-Added Polyoxometalate for Efficient Visible-Light-Driven Hydrogen Evolution.",
+      "pool_sentences": 91,
+      "corpus_sentences": 58
+    },
+    {
+      "pmcid": "PMC13002916",
+      "doi": "10.1038/s41467-026-69124-6",
+      "year": "2026",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "Dynamic chromium dopant promotes interfacial water activation on cobalt spinel oxide for efficient oxygen evolution in acid.",
+      "pool_sentences": 197,
+      "corpus_sentences": 135
+    },
+    {
+      "pmcid": "PMC9086244",
+      "doi": "10.1039/c8ra04569k",
+      "year": "2018",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Group-IVA element-doped SrIn2O4 as potential materials for hydrogen production from water splitting with solar energy.",
+      "pool_sentences": 107,
+      "corpus_sentences": 70
+    },
+    {
+      "pmcid": "PMC6593711",
+      "doi": "10.1002/cssc.201802935",
+      "year": "2019",
+      "journal": "ChemSusChem",
+      "license": "cc by-nc-nd",
+      "title": "Sodium Tantalate Photocatalysts Doped with Metal Cations: Why Are They Active for Water Splitting?",
+      "pool_sentences": 260,
+      "corpus_sentences": 176
+    },
+    {
+      "pmcid": "PMC11082350",
+      "doi": "10.3389/fchem.2024.1381144",
+      "year": "2024",
+      "journal": "Frontiers in chemistry",
+      "license": "cc by",
+      "title": "Solar enhanced oxygen evolution reaction with transition metal telluride.",
+      "pool_sentences": 205,
+      "corpus_sentences": 142
+    },
+    {
+      "pmcid": "PMC7214942",
+      "doi": "10.1016/j.isci.2020.101094",
+      "year": "2020",
+      "journal": "iScience",
+      "license": "cc by-nc-nd",
+      "title": "Bubble Formation in the Electrolyte Triggers Voltage Instability in CO2 Electrolyzers.",
+      "pool_sentences": 65,
+      "corpus_sentences": 43
+    },
+    {
+      "pmcid": "PMC11339921",
+      "doi": "10.1021/acs.accounts.4c00283",
+      "year": "2024",
+      "journal": "Accounts of chemical research",
+      "license": "cc by",
+      "title": "Design of Cr-Based Molecular Electrocatalyst Systems for the CO2 Reduction Reaction.",
+      "pool_sentences": 165,
+      "corpus_sentences": 111
+    },
+    {
+      "pmcid": "PMC10490037",
+      "doi": "10.3390/nano13172463",
+      "year": "2023",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Exploring the Effects of Various Two-Dimensional Supporting Materials on the Water Electrolysis of Co-Mo Sulfide/Oxide Heterostructure.",
+      "pool_sentences": 111,
+      "corpus_sentences": 72
+    },
+    {
+      "pmcid": "PMC8395656",
+      "doi": "10.1021/jacsau.1c00015",
+      "year": "2021",
+      "journal": "JACS Au",
+      "license": "cc by-nc-nd",
+      "title": "The Gas Diffusion Electrode Setup as Straightforward Testing Device for Proton Exchange Membrane Water Electrolyzer Catalysts.",
+      "pool_sentences": 71,
+      "corpus_sentences": 48
+    },
+    {
+      "pmcid": "PMC11671443",
+      "doi": "10.1007/s40820-024-01595-y",
+      "year": "2024",
+      "journal": "Nano-micro letters",
+      "license": "cc by",
+      "title": "NiNC Catalysts in CO2-to-CO Electrolysis.",
+      "pool_sentences": 42,
+      "corpus_sentences": 20
+    },
+    {
+      "pmcid": "PMC8471190",
+      "doi": "10.3390/nano11092338",
+      "year": "2021",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Morphology and Plasmonic on Au/ZnO Films for Efficient Photoelectrochemical Water Splitting.",
+      "pool_sentences": 283,
+      "corpus_sentences": 200
+    },
+    {
+      "pmcid": "PMC6202420",
+      "doi": "10.1038/s41598-018-34010-9",
+      "year": "2018",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Rolling dopant and strain in Y-doped BiFeO3 epitaxial thin films for photoelectrochemical water splitting.",
+      "pool_sentences": 146,
+      "corpus_sentences": 97
+    },
+    {
+      "pmcid": "PMC12051194",
+      "doi": "10.1021/acselectrochem.4c00156",
+      "year": "2025",
+      "journal": "ACS electrochemistry",
+      "license": "cc by",
+      "title": "Identifying and Quantifying Loss Sources in Anion-Exchange Membrane Water Electrolyzers.",
+      "pool_sentences": 200,
+      "corpus_sentences": 128
+    },
+    {
+      "pmcid": "PMC8336516",
+      "doi": "10.1002/advs.202004516",
+      "year": "2021",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Exploring the Dominant Role of Atomic- and Nano-Ruthenium as Active Sites for Hydrogen Evolution Reaction in Both Acidic and Alkaline Media.",
+      "pool_sentences": 169,
+      "corpus_sentences": 110
+    },
+    {
+      "pmcid": "PMC12752562",
+      "doi": "10.1002/advs.202509394",
+      "year": "2025",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Pyrolysis-Free Formed Cooperative Coupling Pt-Co Dual-Functional Sites for Saline Electrolysis with High Adaptability.",
+      "pool_sentences": 111,
+      "corpus_sentences": 83
+    },
+    {
+      "pmcid": "PMC11367707",
+      "doi": "10.1039/d4ra05023a",
+      "year": "2024",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "Molybdenum tungsten hydrogen oxide doped with phosphorus for enhanced oxygen/hydrogen evolution reactions.",
+      "pool_sentences": 125,
+      "corpus_sentences": 81
+    },
+    {
+      "pmcid": "PMC6644723",
+      "doi": "10.1021/acsomega.8b01414",
+      "year": "2018",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "Modulation of Hydrogen Evolution Catalytic Activity of Basal Plane in Monolayer Platinum and Palladium Dichalcogenides.",
+      "pool_sentences": 162,
+      "corpus_sentences": 105
+    },
+    {
+      "pmcid": "PMC11632583",
+      "doi": "10.1002/cssc.202400825",
+      "year": "2024",
+      "journal": "ChemSusChem",
+      "license": "cc by-nc-nd",
+      "title": "Polybenzimidazole-Reinforced Terphenylene Anion Exchange Water Electrolysis Membranes.",
+      "pool_sentences": 221,
+      "corpus_sentences": 152
+    },
+    {
+      "pmcid": "PMC5573321",
+      "doi": "10.1038/s41598-017-09982-9",
+      "year": "2017",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Fe-based hybrid electrocatalysts for nonaqueous lithium-oxygen batteries.",
+      "pool_sentences": 139,
+      "corpus_sentences": 102
+    },
+    {
+      "pmcid": "PMC6662091",
+      "doi": "10.1002/advs.201900301",
+      "year": "2019",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Direct In Situ Growth of Centimeter-Scale Multi-Heterojunction MoS2/WS2/WSe2 Thin-Film Catalyst for Photo-Electrochemical Hydrogen Evolution.",
+      "pool_sentences": 164,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC11789999",
+      "doi": "10.1002/cssc.202401758",
+      "year": "2025",
+      "journal": "ChemSusChem",
+      "license": "cc by-nc",
+      "title": "Boosting the O2-to-H2O2 Selectivity Using Sn-Doped Carbon Electrocatalysts: Towards Highly Efficient Cathodes for Actual Water Decontamination.",
+      "pool_sentences": 189,
+      "corpus_sentences": 134
+    },
+    {
+      "pmcid": "PMC12216532",
+      "doi": "10.1038/s41467-025-61069-6",
+      "year": "2025",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "Full runner electrolyzer stack for industrial-current-density NOx--mediated ammonia synthesis from air and water.",
+      "pool_sentences": 230,
+      "corpus_sentences": 146
+    },
+    {
+      "pmcid": "PMC6771717",
+      "doi": "10.1002/anie.201903200",
+      "year": "2019",
+      "journal": "Angewandte Chemie (International ed. in English)",
+      "license": "cc by-nc",
+      "title": "Oxygen Isotope Labeling Experiments Reveal Different Reaction Sites for the Oxygen Evolution Reaction on Nickel and Nickel Iron Oxides.",
+      "pool_sentences": 103,
+      "corpus_sentences": 67
+    },
+    {
+      "pmcid": "PMC9131433",
+      "doi": "10.1002/advs.202200146",
+      "year": "2022",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "A Self-Reconstructed Bifunctional Electrocatalyst of Pseudo-Amorphous Nickel Carbide @ Iron Oxide Network for Seawater Splitting.",
+      "pool_sentences": 192,
+      "corpus_sentences": 134
+    },
+    {
+      "pmcid": "PMC11007721",
+      "doi": "10.1021/acsomega.4c00495",
+      "year": "2024",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Synergistic Effects of Carbon Vacancies in Conjunction with Phosphorus Dopant across Bilayer Graphene for the Enhanced Hydrogen Evolution Reaction.",
+      "pool_sentences": 161,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC11234434",
+      "doi": "10.1002/advs.202309548",
+      "year": "2024",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Concentrated Solar Light Photoelectrochemical Water Splitting for Stable and High-Yield Hydrogen Production.",
+      "pool_sentences": 128,
+      "corpus_sentences": 87
+    },
+    {
+      "pmcid": "PMC8978917",
+      "doi": "10.1039/d1ra08004k",
+      "year": "2022",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Robust direct Z-scheme exciton transfer dynamics by architecting 3D BiOI MF-supported non-stoichiometric Cu0.75In0.25S NC nanocomposite for co-catalyst-free photocatalytic hydrogen evolution.",
+      "pool_sentences": 143,
+      "corpus_sentences": 94
+    },
+    {
+      "pmcid": "PMC6610430",
+      "doi": "10.3389/fchem.2019.00405",
+      "year": "2019",
+      "journal": "Frontiers in chemistry",
+      "license": "cc by",
+      "title": "Efficient Light-Driven Hydrogen Evolution Using a Thiosemicarbazone-Nickel (II) Complex.",
+      "pool_sentences": 120,
+      "corpus_sentences": 80
+    },
+    {
+      "pmcid": "PMC12368631",
+      "doi": "10.1021/acsomega.5c01650",
+      "year": "2025",
+      "journal": "ACS omega",
+      "license": "cc by",
+      "title": "The Role of Pt3/TiO2(h K l) Interface in Hydrogen and Water Splitting: A DFT Perspective on Reactivity and Limitations.",
+      "pool_sentences": 231,
+      "corpus_sentences": 146
+    },
+    {
+      "pmcid": "PMC9982578",
+      "doi": "10.1002/advs.202206029",
+      "year": "2023",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Ionic Liquid Meets MOF: A Facile Method to Optimize the Structure of CoSe2-NiSe2 Heterojunctions with N, P, and F Triple-Doped Carbon Using Ionic Liquid for Efficient Hydrogen Evolution and Flexible Supercapacitors.",
+      "pool_sentences": 206,
+      "corpus_sentences": 138
+    },
+    {
+      "pmcid": "PMC6640763",
+      "doi": "10.1021/acsomega.6b00179",
+      "year": "2016",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "Single-Step Synthesis of W2C Nanoparticle-Dispersed Carbon Electrocatalysts for Hydrogen Evolution Reactions Utilizing Phosphate Groups on Carbon Edge Sites.",
+      "pool_sentences": 132,
+      "corpus_sentences": 84
+    },
+    {
+      "pmcid": "PMC8596115",
+      "doi": "10.1002/advs.202102207",
+      "year": "2021",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Facile Atomic-Level Tuning of Reactive Metal-Support Interactions in the Pt QDs@ HF-Free MXene Heterostructure for Accelerating pH-Universal Hydrogen Evolution Reaction.",
+      "pool_sentences": 162,
+      "corpus_sentences": 105
+    },
+    {
+      "pmcid": "PMC13451410",
+      "doi": "10.1038/s41598-026-64755-7",
+      "year": "2026",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Design and experimental validation of a smart alkaline electrolyzer-based green hydrogen generation and storage pilot system.",
+      "pool_sentences": 235,
+      "corpus_sentences": 160
+    },
+    {
+      "pmcid": "PMC10209667",
+      "doi": "10.1039/d3ra01945d",
+      "year": "2023",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "Selenium-transition metal supported on a mixture of reduced graphene oxide and silica template for water splitting.",
+      "pool_sentences": 207,
+      "corpus_sentences": 148
+    },
+    {
+      "pmcid": "PMC10161030",
+      "doi": "10.1002/advs.202207495",
+      "year": "2023",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Manageable Bubble Release Through 3D Printed Microcapillary for Highly Efficient Overall Water Splitting.",
+      "pool_sentences": 151,
+      "corpus_sentences": 97
+    },
+    {
+      "pmcid": "PMC11301624",
+      "doi": "10.1021/acscatal.4c02329",
+      "year": "2024",
+      "journal": "ACS catalysis",
+      "license": "cc by",
+      "title": "Unraveling the Role of Particle Size and Nanostructuring on the Oxygen Evolution Activity of Fe-Doped NiO.",
+      "pool_sentences": 228,
+      "corpus_sentences": 151
+    },
+    {
+      "pmcid": "PMC9967514",
+      "doi": "10.3390/nano13040643",
+      "year": "2023",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Diatomite-like KFeS2 for Use in High-Performance Electrodes for Energy Storage and Oxygen Evolution.",
+      "pool_sentences": 116,
+      "corpus_sentences": 83
+    },
+    {
+      "pmcid": "PMC7696768",
+      "doi": "10.3390/membranes10110339",
+      "year": "2020",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Processing Ceramic Proton Conductor Membranes for Use in Steam Electrolysis.",
+      "pool_sentences": 252,
+      "corpus_sentences": 166
+    },
+    {
+      "pmcid": "PMC7075145",
+      "doi": "10.3390/nano10020238",
+      "year": "2020",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Gold Nanoclusters as Electrocatalysts for Energy Conversion.",
+      "pool_sentences": 193,
+      "corpus_sentences": 139
+    },
+    {
+      "pmcid": "PMC11990215",
+      "doi": "10.3390/nano15070474",
+      "year": "2025",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Atomic Layer Deposition of Nickel Oxides as Electrocatalyst for Oxygen Evolution Reaction.",
+      "pool_sentences": 106,
+      "corpus_sentences": 65
+    },
+    {
+      "pmcid": "PMC13625575",
+      "doi": "10.1021/jacsau.6c01104",
+      "year": "2026",
+      "journal": "JACS Au",
+      "license": "cc by-nc-nd",
+      "title": "Bridging the Gap Between Laboratory Catalyst Research and Practical Water Electrolyzer Commercialization.",
+      "pool_sentences": 203,
+      "corpus_sentences": 151
+    },
+    {
+      "pmcid": "PMC11396138",
+      "doi": "10.3390/ma17174259",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "PCDA/ZnO Organic-Inorganic Hybrid Photoanode for Efficient Photoelectrochemical Solar Water Splitting.",
+      "pool_sentences": 173,
+      "corpus_sentences": 119
+    },
+    {
+      "pmcid": "PMC7383969",
+      "doi": "10.1002/chem.202000982",
+      "year": "2020",
+      "journal": "Chemistry (Weinheim an der Bergstrasse, Germany)",
+      "license": "cc by-nc",
+      "title": "Yield-not only Lifetime-of the Photoinduced Charge-Separated State in Iridium Complex-Polyoxometalate Dyads Impact Their Hydrogen Evolution Reactivity.",
+      "pool_sentences": 163,
+      "corpus_sentences": 110
+    },
+    {
+      "pmcid": "PMC12400507",
+      "doi": "10.1039/d5ra03467a",
+      "year": "2025",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "Green synthesis of iron-doped cobalt sulfide via synergistic electronic and structural engineering in ethaline deep eutectic solvent for efficient oxygen evolution reaction.",
+      "pool_sentences": 172,
+      "corpus_sentences": 123
+    },
+    {
+      "pmcid": "PMC8875161",
+      "doi": "10.3390/membranes12020116",
+      "year": "2022",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Characterization of PBI/Graphene Oxide Composite Membranes for the SO2 Depolarized Electrolysis at High Temperature.",
+      "pool_sentences": 187,
+      "corpus_sentences": 124
+    },
+    {
+      "pmcid": "PMC10755701",
+      "doi": "10.1021/acsami.3c12330",
+      "year": "2023",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "Insights into the LiI Redox Mediation in Aprotic Li-O2 Batteries: Solvation Effects and Singlet Oxygen Evolution.",
+      "pool_sentences": 187,
+      "corpus_sentences": 126
+    },
+    {
+      "pmcid": "PMC9028323",
+      "doi": "10.3390/nano12081316",
+      "year": "2022",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Recent Application of Nanomaterials to Overcome Technological Challenges of Microbial Electrolysis Cells.",
+      "pool_sentences": 255,
+      "corpus_sentences": 176
+    },
+    {
+      "pmcid": "PMC9417137",
+      "doi": "10.1039/d2na00014h",
+      "year": "2022",
+      "journal": "Nanoscale advances",
+      "license": "cc by-nc",
+      "title": "Ultrafine platinum nanoparticles supported on N,S-codoped porous carbon nanofibers as efficient multifunctional materials for noticeable oxygen reduction reaction and water splitting performance.",
+      "pool_sentences": 109,
+      "corpus_sentences": 74
+    },
+    {
+      "pmcid": "PMC8748569",
+      "doi": "10.1186/s11671-021-03644-6",
+      "year": "2022",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "Molybdenum Disulfide Nanosheets Decorated with Platinum Nanoparticle as a High Active Electrocatalyst in Hydrogen Evolution Reaction.",
+      "pool_sentences": 127,
+      "corpus_sentences": 87
+    },
+    {
+      "pmcid": "PMC11714179",
+      "doi": "10.1002/advs.202409855",
+      "year": "2025",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Electronic Structure Engineering of Single-Atom Tungsten on Vacancy-enriched V3S4 Nanosheets for Efficient Hydrogen Evolution.",
+      "pool_sentences": 128,
+      "corpus_sentences": 93
+    },
+    {
+      "pmcid": "PMC10574382",
+      "doi": "10.3390/nano13192682",
+      "year": "2023",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Constructing FeS and ZnS Heterojunction on N,S-Codoped Carbon as Robust Electrocatalyst toward Oxygen Reduction Reaction.",
+      "pool_sentences": 133,
+      "corpus_sentences": 87
+    },
+    {
+      "pmcid": "PMC8984944",
+      "doi": "10.1039/d2ra00868h",
+      "year": "2022",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "MWCNT-modified MXene as cost-effective efficient bifunctional catalyst for overall water splitting.",
+      "pool_sentences": 108,
+      "corpus_sentences": 73
+    },
+    {
+      "pmcid": "PMC12667537",
+      "doi": "10.1002/advs.202506733",
+      "year": "2025",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Transport Matters: The Critical Role of the Hydrogen Evolution Reaction (HER) in Accelerating Electrochemical Nitrate to Ammonia Conversion.",
+      "pool_sentences": 255,
+      "corpus_sentences": 170
+    },
+    {
+      "pmcid": "PMC12348357",
+      "doi": "10.3390/nano15151210",
+      "year": "2025",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Uncovering Stability Origins in Layered Ferromagnetic Electrocatalysts Through Homolog Comparison.",
+      "pool_sentences": 109,
+      "corpus_sentences": 81
+    },
+    {
+      "pmcid": "PMC9106752",
+      "doi": "10.1038/s41467-022-30379-4",
+      "year": "2022",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Unraveling the electronegativity-dominated intermediate adsorption on high-entropy alloy electrocatalysts.",
+      "pool_sentences": 247,
+      "corpus_sentences": 170
+    },
+    {
+      "pmcid": "PMC10289644",
+      "doi": "10.1126/sciadv.adh1718",
+      "year": "2023",
+      "journal": "Science advances",
+      "license": "cc by",
+      "title": "IrOx\u00b7nH2O with lattice water-assisted oxygen exchange for high-performance proton exchange membrane water electrolyzers.",
+      "pool_sentences": 241,
+      "corpus_sentences": 164
+    },
+    {
+      "pmcid": "PMC12291084",
+      "doi": "10.1021/acsami.5c05381",
+      "year": "2025",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "Morphological Degradation of Oxygen Evolution Reaction-Electrocatalyzing Nickel Selenides at Industrially Relevant Current Densities.",
+      "pool_sentences": 151,
+      "corpus_sentences": 102
+    },
+    {
+      "pmcid": "PMC12954382",
+      "doi": "10.1002/smll.202510427",
+      "year": "2026",
+      "journal": "Small (Weinheim an der Bergstrasse, Germany)",
+      "license": "cc by",
+      "title": "Engineering Iridium-Ruthenium Dual-Atomic Active Sites on Redox-Active Covalent Organic Frameworks for Boosted Overall Water Splitting.",
+      "pool_sentences": 203,
+      "corpus_sentences": 139
+    },
+    {
+      "pmcid": "PMC9043841",
+      "doi": "10.1039/d1ra05045a",
+      "year": "2021",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Rapid large-scale synthesis of ultrathin NiFe-layered double hydroxide nanosheets with tunable structures as robust oxygen evolution electrocatalysts.",
+      "pool_sentences": 87,
+      "corpus_sentences": 59
+    },
+    {
+      "pmcid": "PMC6502737",
+      "doi": "10.1016/j.dib.2019.103941",
+      "year": "2019",
+      "journal": "Data in brief",
+      "license": "cc by",
+      "title": "Effect of Ni/Rh ratios on characteristics of NixRhy nanosponges towards high-performance hydrogen evolution reaction.",
+      "pool_sentences": 37,
+      "corpus_sentences": 19
+    },
+    {
+      "pmcid": "PMC11937382",
+      "doi": "10.1038/s41467-025-58297-1",
+      "year": "2025",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "Achieving pH-universal oxygen electrolysis via synergistic density and coordination tuning over biomass-derived Fe single-atom catalyst.",
+      "pool_sentences": 256,
+      "corpus_sentences": 178
+    },
+    {
+      "pmcid": "PMC10910467",
+      "doi": "10.1021/acsami.3c18548",
+      "year": "2024",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "General Pyrolysis for High-Loading Transition Metal Single Atoms on 2D-Nitro-Oxygeneous Carbon as Efficient ORR Electrocatalysts.",
+      "pool_sentences": 187,
+      "corpus_sentences": 115
+    },
+    {
+      "pmcid": "PMC9032615",
+      "doi": "10.1039/d1ra01841h",
+      "year": "2021",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "A comprehensive and critical review of the recent progress in electrocatalysts for the ethanol oxidation reaction.",
+      "pool_sentences": 751,
+      "corpus_sentences": 503
+    },
+    {
+      "pmcid": "PMC9070620",
+      "doi": "10.1039/c9ra05910e",
+      "year": "2019",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Preparation and thermal treatment influence on Pt-decorated electrospun carbon nanofiber electrocatalysts.",
+      "pool_sentences": 170,
+      "corpus_sentences": 107
+    },
+    {
+      "pmcid": "PMC8560839",
+      "doi": "10.1038/s41598-021-00776-8",
+      "year": "2021",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Ni2P nanocrystals embedded Ni-MOF nanosheets supported on nickel foam as bifunctional electrocatalyst for urea electrolysis.",
+      "pool_sentences": 177,
+      "corpus_sentences": 121
+    },
+    {
+      "pmcid": "PMC10623383",
+      "doi": "10.1039/d3ra04738e",
+      "year": "2023",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "An advanced PdNPs@MoS2 nanocomposite for efficient oxygen evolution reaction in alkaline media.",
+      "pool_sentences": 176,
+      "corpus_sentences": 111
+    },
+    {
+      "pmcid": "PMC11960101",
+      "doi": "10.1093/nsr/nwaf060",
+      "year": "2025",
+      "journal": "National science review",
+      "license": "cc by",
+      "title": "Corrosion-resistant single-atom catalysts for direct seawater electrolysis.",
+      "pool_sentences": 432,
+      "corpus_sentences": 290
+    },
+    {
+      "pmcid": "PMC9607557",
+      "doi": "10.3390/ma15207209",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Studying Performance and Kinetic Differences between Various Anode Electrodes in Proton Exchange Membrane Water Electrolysis Cell.",
+      "pool_sentences": 145,
+      "corpus_sentences": 97
+    },
+    {
+      "pmcid": "PMC7288040",
+      "doi": "10.3390/molecules25102304",
+      "year": "2020",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effects of Structure and Constituent of Prussian Blue Analogs on Their Application in Oxygen Evolution Reaction.",
+      "pool_sentences": 343,
+      "corpus_sentences": 235
+    },
+    {
+      "pmcid": "PMC10644102",
+      "doi": "10.1039/d3ra07003d",
+      "year": "2023",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "Electrocatalytic activity and surface oxide reconstruction of bimetallic iron-cobalt nanocarbide electrocatalysts for the oxygen evolution reaction.",
+      "pool_sentences": 185,
+      "corpus_sentences": 118
+    },
+    {
+      "pmcid": "PMC9488072",
+      "doi": null,
+      "year": "2019",
+      "journal": "Environmental science and ecotechnology",
+      "license": "cc by-nc-nd",
+      "title": "CoSe2 nanobelt coupled with CoMoO4 nanosheet as efficient electrocatalysts for hydrogen and oxygen evolution reaction",
+      "pool_sentences": 154,
+      "corpus_sentences": 108
+    },
+    {
+      "pmcid": "PMC10701642",
+      "doi": "10.1039/d3ra06824b",
+      "year": "2023",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Enhanced activity of Co-Mo-S catalysts towards hydrodesulfurization and hydrogen evolution reaction via NaBH4 assisted formation.",
+      "pool_sentences": 134,
+      "corpus_sentences": 80
+    },
+    {
+      "pmcid": "PMC12464802",
+      "doi": "10.1002/smtd.202500476",
+      "year": "2025",
+      "journal": "Small methods",
+      "license": "cc by",
+      "title": "Unravelling the Electro-Photocatalytic Water Splitting Capabilities of 2D-Bifunctional Mo2S3-WS2 Catalyst: Implications for Renewable Energy Platforms.",
+      "pool_sentences": 273,
+      "corpus_sentences": 178
+    },
+    {
+      "pmcid": "PMC3813942",
+      "doi": "10.1038/srep03109",
+      "year": "2013",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Turning indium oxide into a superior electrocatalyst: deterministic heteroatoms.",
+      "pool_sentences": 121,
+      "corpus_sentences": 75
+    },
+    {
+      "pmcid": "PMC11026478",
+      "doi": "10.1038/s41467-024-47490-3",
+      "year": "2024",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Extrinsic hydrophobicity-controlled silver nanoparticles as efficient and stable catalysts for CO2 electrolysis.",
+      "pool_sentences": 232,
+      "corpus_sentences": 151
+    },
+    {
+      "pmcid": "PMC12910535",
+      "doi": "10.1002/adma.202515355",
+      "year": "2026",
+      "journal": "Advanced materials (Deerfield Beach, Fla.)",
+      "license": "cc by-nc",
+      "title": "High-Performance Zero-Gap Glycerol-Fed Electrolyzer for C3 Chemicals and Hydrogen Production.",
+      "pool_sentences": 300,
+      "corpus_sentences": 188
+    },
+    {
+      "pmcid": "PMC11165517",
+      "doi": "10.1002/advs.202310181",
+      "year": "2024",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Tuning the Electronic Property of Reconstructed Atomic Ni-CuO Cluster Supported on N/O-C for Electrocatalytic Oxygen Evolution.",
+      "pool_sentences": 138,
+      "corpus_sentences": 89
+    },
+    {
+      "pmcid": "PMC11054377",
+      "doi": "10.3390/molecules29081805",
+      "year": "2024",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Hierarchically Structured Graphene Aerogel Supported Nickel-Cobalt Oxide Nanowires as an Efficient Electrocatalyst for Oxygen Evolution Reaction.",
+      "pool_sentences": 123,
+      "corpus_sentences": 80
+    },
+    {
+      "pmcid": "PMC10619543",
+      "doi": "10.1039/d3sc04542k",
+      "year": "2023",
+      "journal": "Chemical science",
+      "license": "cc by",
+      "title": "Mechanochemical one-pot synthesis of heterostructured pentlandite-carbon composites for the hydrogen evolution reaction.",
+      "pool_sentences": 175,
+      "corpus_sentences": 116
+    },
+    {
+      "pmcid": "PMC9000727",
+      "doi": "10.3390/nano12071188",
+      "year": "2022",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Solvent Etching Process for Graphitic Carbon Nitride Photocatalysts Containing Platinum Cocatalyst: Effects of Water Hydrolysis on Photocatalytic Properties and Hydrogen Evolution Behaviors.",
+      "pool_sentences": 160,
+      "corpus_sentences": 94
+    },
+    {
+      "pmcid": "PMC10619919",
+      "doi": "10.3389/fchem.2023.1286257",
+      "year": "2023",
+      "journal": "Frontiers in chemistry",
+      "license": "cc by",
+      "title": "DFT-assisted low-dimensional carbon-based electrocatalysts design and mechanism study: a review.",
+      "pool_sentences": 389,
+      "corpus_sentences": 255
+    },
+    {
+      "pmcid": "PMC5363780",
+      "doi": "10.1039/c6sc02116f",
+      "year": "2016",
+      "journal": "Chemical science",
+      "license": "cc by",
+      "title": "Tantalum nitride films integrated with transparent conductive oxide substrates via atomic layer deposition for photoelectrochemical water splitting.",
+      "pool_sentences": 189,
+      "corpus_sentences": 121
+    }
+  ],
+  "leakage": {
+    "mulms_sentences": 10184,
+    "mulms_ngrams": 222977,
+    "overlap_by_document": {
+      "electrolysis_03": 381,
+      "electrolysis_01": 131,
+      "oastm_09": 41,
+      "sofc_04": 149,
+      "steel_04": 34,
+      "semi_05": 37,
+      "graphene_01": 217,
+      "graphene_02": 122,
+      "oastm_02": 108,
+      "oastm_05": 93,
+      "sofc_01": 238,
+      "pemfc_03": 100,
+      "electrolysis_04": 122,
+      "pemfc_02": 43,
+      "pemfc_04": 59,
+      "sofc_02": 48,
+      "pemfc_07": 88,
+      "pemfc_13": 56,
+      "steel_03": 23,
+      "sofc_03": 7,
+      "electrolysis_02": 54,
+      "semi_06": 11,
+      "pemfc_14": 15,
+      "oastm_03": 10,
+      "steel_11": 9,
+      "semi_04": 8,
+      "semi_02": 1,
+      "pemfc_08": 12,
+      "semi_08": 4,
+      "oastm_11": 6,
+      "steel_05": 11,
+      "oastm_08": 9,
+      "poly_01": 3,
+      "oastm_01": 9,
+      "poly_11": 3,
+      "semi_01": 2,
+      "steel_06": 5,
+      "pemfc_10": 2,
+      "poly_02": 1,
+      "steel_08": 2,
+      "oastm_06": 2,
+      "poly_04": 2,
+      "oastm_04": 2,
+      "semi_03": 1
+    },
+    "overlap_examples": [
+      {
+        "sentence": "The system also delivers 1 A cm\u22122 at 1.93 V and 2 A cm\u22122 at 2.12 V.",
+        "ngram": "2 a cm - 2 at 2 .",
+        "docs": [
+          "electrolysis_03"
+        ]
+      },
+      {
+        "sentence": "Dark-field energy-dispersive X-ray spectroscopy (EDX) elemental mapping images (Fig. 1d) show the homogeneous distributions of Co, Nd, and O elements in Nd-CoOx.",
+        "ngram": "energy - dispersive x - ray spectroscopy (",
+        "docs": [
+          "electrolysis_01",
+          "oastm_09",
+          "sofc_04",
+          "steel_04"
+        ]
+      },
+      {
+        "sentence": "The atomic structure of Nd-CoOx was carefully probed by using aberration-corrected high-angle annular dark-field scanning transmission electron microscopy (HAADF-STEM).",
+        "ngram": "field scanning transmission electron microscopy ( haadf -",
+        "docs": [
+          "semi_05"
+        ]
+      },
+      {
+        "sentence": "X-ray photoelectron spectroscopy (XPS) has been used to probe the electronic structures of the catalysts (Supplementary Fig. 4).",
+        "ngram": "x - ray photoelectron spectroscopy ( xps )",
+        "docs": [
+          "electrolysis_03",
+          "graphene_01",
+          "graphene_02",
+          "oastm_02",
+          "oastm_05",
+          "sofc_01"
+        ]
+      },
+      {
+        "sentence": "Fig. 2a displays the normalized Co K-edge X-ray Absorption Near Edge Structure (XANES) spectra for CoOx, Nd-CoOx, CoO, and Co3O4.",
+        "ngram": "x - ray absorption near edge structure (",
+        "docs": [
+          "electrolysis_03"
+        ]
+      },
+      {
+        "sentence": "The Fourier-transform (FT) curves of extended X-ray absorption fine structure (EXAFS) spectra are displayed in Fig. 2b.",
+        "ngram": "extended x - ray absorption fine structure (",
+        "docs": [
+          "electrolysis_03",
+          "graphene_01"
+        ]
+      },
+      {
+        "sentence": "Double-layer capacitance (Cdl) measurements are applied to estimate the electrochemically active surface area (ECSA) of the catalysts.",
+        "ngram": "the electrochemically active surface area ( ecsa )",
+        "docs": [
+          "electrolysis_03",
+          "pemfc_03"
+        ]
+      },
+      {
+        "sentence": "Commercial Co3O4 (99.9%), Co(NO3)2\u00b76H2O (99%), Nd(NO3)3\u00b76H2O (99.9%), La(NO3)3\u00b76H2O (99.9%) and Pr(NO3)3\u00b76H2O (99.9%) have been obtained from Shanghai Aladdin Industrial Co., Ltd.",
+        "ngram": ", co ( no3 ) 2 \u00b7 6h2o",
+        "docs": [
+          "electrolysis_04"
+        ]
+      },
+      {
+        "sentence": "Subsequently, the Pt/C-CP, 0.4 mm Ti plate and the Nafion 117 membrane (loaded with anodic ink) were hot pressed at 363 K for 30 s, obtaining the membrane electrode assembly (MEA).",
+        "ngram": "the membrane electrode assembly ( mea ) .",
+        "docs": [
+          "pemfc_02"
+        ]
+      },
+      {
+        "sentence": "This unique configuration accelerates the kinetics of water dissociation, as confirmed by X-ray absorption fine structure (XAFS) spectroscopy.",
+        "ngram": "x - ray absorption fine structure ( xafs",
+        "docs": [
+          "electrolysis_03"
+        ]
+      },
+      {
+        "sentence": "Additionally, X-ray photoelectron spectroscopy (XPS) was utilized to further prove the presence of metal and non-metal elements (Fig. 2d).",
+        "ngram": ", x - ray photoelectron spectroscopy ( xps",
+        "docs": [
+          "oastm_02"
+        ]
+      },
+      {
+        "sentence": "Ru\u2013X\u2013MoS2 exhibited smaller semicircular diameters compared with MoS2 and X\u2013MoS2, indicating that the coordination environment modification of the single-atom Ru with non-metal atoms reduces charge-transfer resistance (Rct) and facilitates efficient charge transfer from the catalysts to the electrodes.",
+        "ngram": "charge - transfer resistance ( rct ) and",
+        "docs": [
+          "pemfc_02"
+        ]
+      },
+      {
+        "sentence": "The local structure of Ru atom in Ru\u2013O\u2013MoS2 is unveiled by the Fourier-transformed extended X-ray absorption fine structure (EXAFS) spectrum (Fig. 5f).",
+        "ngram": "extended x - ray absorption fine structure (",
+        "docs": [
+          "electrolysis_03",
+          "graphene_01"
+        ]
+      },
+      {
+        "sentence": "Additionally, the Brunauer-Emmett-Teller (BET) surface area and pore size distribution of S-TFPT were calculated to be approximately 1033.10 m2 g\u22121 and 2.95 nm, respectively, which is in good agreement with the theoretical value of 2.97 nm (Supplementary Figs. 8-9).",
+        "ngram": ", the brunauer - emmett - teller (",
+        "docs": [
+          "pemfc_04"
+        ]
+      },
+      {
+        "sentence": "Subsequent X-ray photoelectron spectroscopy (XPS) analysis provided definitive evidence of the presence of platinum within PtSA@S-TFPT, with characteristic binding energy peaks at 76.6 and 73.3 eV for the 4 f doublet of Pt, indicative of partially positively charged Ptx+ (0 <x < 2) species in PtSA@S-TFPT (Supplementary Fig. 16a, b).",
+        "ngram": "x - ray photoelectron spectroscopy ( xps )",
+        "docs": [
+          "electrolysis_03",
+          "graphene_01",
+          "graphene_02",
+          "oastm_02",
+          "oastm_05",
+          "sofc_01"
+        ]
+      },
+      {
+        "sentence": "Consistent with these findings, high-angle annular dark-field scanning transmission electron microscopy (HADDF-STEM) and energy-dispersive X-ray (EDX) mapping analyses of PtSA@S-TFPT demonstrate the homogeneous distribution of carbon (C), nitrogen (N), oxygen (O), sulfur (S), and platinum (Pt) elements, without discernible instances of element aggregations (Fig. 2c\u2013h).",
+        "ngram": "energy - dispersive x - ray ( edx",
+        "docs": [
+          "sofc_01"
+        ]
+      },
+      {
+        "sentence": "Additionally, the Fourier-transformed (FT) k2-weighted R-space extended X-ray absorption fine structure (EXAFS) was conducted to further elucidate the coordination configuration of Pt single atoms.",
+        "ngram": "extended x - ray absorption fine structure (",
+        "docs": [
+          "electrolysis_03",
+          "graphene_01"
+        ]
+      },
+      {
+        "sentence": "The Pd NC with an average monomer (aggregate) size of 52 nm and average ligament size of 4.1 nm shows superior activity compared to conventional Pd NPs and the state-of-the-art Pt (under large potentials) for H2 evolution in alkaline water electrolysis.",
+        "ngram": "the state - of - the - art",
+        "docs": [
+          "electrolysis_03",
+          "graphene_01",
+          "sofc_02",
+          "sofc_04"
+        ]
+      },
+      {
+        "sentence": "To study the mesoporosity and surface area of the materials, a nitrogen gas physisorption experiment was carried out and the results were analyzed based on the Brunauer\u2013Emmett\u2013Teller (BET) and Barrett\u2013Joyner\u2013Halenda (BJH) methods.",
+        "ngram": "the brunauer - emmett - teller ( bet",
+        "docs": [
+          "pemfc_03",
+          "pemfc_04",
+          "pemfc_07",
+          "pemfc_13"
+        ]
+      },
+      {
+        "sentence": "The 0.5 cm2 electrode performs well, achieving 47% FE towards ethylene and an estimated 84% FE towards C2+ products (see Supplementary Section 4 and Supplementary Fig. S17 for full product analysis) at an industrially relevant current density of 200 mA/cm2 and at voltages comparable to literature.",
+        "ngram": "current density of 200 ma / cm2 and",
+        "docs": [
+          "electrolysis_04"
+        ]
+      }
+    ],
+    "duplicate_examples": [
+      {
+        "sentence": "TEM images were obtained by using Tecnai T20.",
+        "duplicate_of": 1675
+      },
+      {
+        "sentence": "A peer review file is available.",
+        "duplicate_of": 1164
+      },
+      {
+        "sentence": "A peer review file is available.",
+        "duplicate_of": 1164
+      },
+      {
+        "sentence": "Beam deacceleration was applied to improve the image quality by using a stage bias of 600 V.",
+        "duplicate_of": 2882
+      },
+      {
+        "sentence": "The MAPbI3 film was spin\u2010coated at 5000 rpm for 30 s.",
+        "duplicate_of": 3348
+      },
+      {
+        "sentence": "The substrate was transferred to a hot plate at 100 \u00b0C for 5 min.",
+        "duplicate_of": 3350
+      },
+      {
+        "sentence": "the white line loses intensity",
+        "duplicate_of": 4342
+      },
+      {
+        "sentence": "The authors declare no competing financial interest.",
+        "duplicate_of": 2182
+      },
+      {
+        "sentence": "The authors declare no competing financial interest.",
+        "duplicate_of": 2182
+      },
+      {
+        "sentence": "Under an argon atmosphere, established by 30 min of purging, Pd(PPh3)4 (0.29 g, 0.25 mmol) was added to initiate the Suzuki coupling.",
+        "duplicate_of": 6459
+      },
+      {
+        "sentence": "The reaction proceeded at 100 \u00b0C over 24 h.",
+        "duplicate_of": 6460
+      },
+      {
+        "sentence": "Standard workup included cooling, dilution with dichloromethane (20 mL), and removal of the catalyst by filtration through a Celite pad.",
+        "duplicate_of": 6461
+      },
+      {
+        "sentence": "After 10 min of sonication for homogenization, the mixture was flash-frozen in liquid nitrogen (77 K) and subjected to three freeze-pump-thaw cycles.",
+        "duplicate_of": 6469
+      },
+      {
+        "sentence": "The tube was then evacuated to 100 mTorr, sealed, and heated at 120 \u00b0C for 3 days.",
+        "duplicate_of": 6470
+      },
+      {
+        "sentence": "The brown precipitate that formed was collected via centrifugation and washed sequentially with tetrahydrofuran and anhydrous acetone.",
+        "duplicate_of": 6471
+      },
+      {
+        "sentence": "The resulting powder was activated by stirring in dimethylsulfoxide for 6 h.",
+        "duplicate_of": 6472
+      },
+      {
+        "sentence": "After 10 min of sonication for homogenization, the mixture was flash-frozen in liquid nitrogen (77 K) and subjected to three freeze-pump-thaw cycles.",
+        "duplicate_of": 6469
+      },
+      {
+        "sentence": "The tube was then evacuated to 100 mTorr, sealed, and heated at 120 \u00b0C for 3 days.",
+        "duplicate_of": 6470
+      },
+      {
+        "sentence": "The brown precipitate that formed was collected via centrifugation and washed sequentially with tetrahydrofuran and anhydrous acetone.",
+        "duplicate_of": 6471
+      },
+      {
+        "sentence": "The resulting powder was activated by stirring in dimethylsulfoxide for 6 h.",
+        "duplicate_of": 6472
+      }
+    ],
+    "shingle": {
+      "characters": 50,
+      "article_overlap": 5,
+      "sentences_dropped": 20,
+      "by_article": {
+        "PMC11936012": 2,
+        "PMC9795487": 1,
+        "PMC12915073": 1,
+        "PMC11580383": 1,
+        "PMC11472222": 1,
+        "PMC11955876": 1,
+        "PMC10568344": 1,
+        "PMC6685470": 1,
+        "PMC12382175": 1,
+        "PMC10535034": 1,
+        "PMC6567302": 1,
+        "PMC11468612": 1,
+        "PMC6027530": 1,
+        "PMC10209667": 1,
+        "PMC12291084": 1,
+        "PMC9043841": 1,
+        "PMC11937382": 1,
+        "PMC9488072": 1,
+        "PMC12464802": 1
+      },
+      "articles_dropped": []
+    }
+  },
+  "corpus": {
+    "path": "data/processed/corpus/topic_electrolysis_sentences.txt",
+    "sentences": 40000,
+    "words": 1241702,
+    "sha256": "8722375b63c3b822fee02cbc417525ea228f85784062f656157607ac2062285f"
+  },
+  "run": {
+    "search_retrieved": "2026-10-18T09:31:29Z",
+    "started": "2026-10-18T10:48:28Z",
+    "finished": "2026-10-18T10:49:30Z",
+    "seconds": 62.5,
+    "used_articles_downloaded_now": 0,
+    "http_requests": 0,
+    "cache_dir": "data/processed/corpus/europepmc_topic_electrolysis"
+  }
+}
