@@ -693,6 +693,13 @@ with the settings of Section 6.3.
   its official split, with intervals over seeds only. The folds alone
   range over 9 points (79.77 to 88.76), so one split of held-out articles
   is a noisy estimate of a method's effect on new articles.
+- **MuLMS as converted.** A flat tagger needs one level, so our MuLMS runs
+  keep the outermost entities (68.6% of them) and repair 276 damaged tokens
+  (Section 2). Their scores therefore cannot be compared with the published
+  MuLMS numbers. Its 7 held-out subfields give 6 degrees of freedom, and the
+  subfields differ widely (the CRF head scores 32.49 to 56.82). So a gain
+  of 2 points, as mention replacement's (Section 6.6), passes only if the
+  subfields agree closely.
 - **Methods tested on MaterioMiner only.** Self-training used a fatigue
   corpus, which fits MaterioMiner's domain only, and coarse-to-fine
   completion was tested before SOFC-Exp's slot level was converted; their
