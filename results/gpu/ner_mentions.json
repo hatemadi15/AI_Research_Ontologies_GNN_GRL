@@ -2135,6 +2135,295 @@
         }
       }
     },
+    "mulms_random_split_pool": {
+      "crf": {
+        "seeds": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "n_runs": 50,
+        "seen": {
+          "n_gold": 132340,
+          "n_pred": 133272,
+          "n_correct": 107528,
+          "recall": 81.25,
+          "precision": 80.68,
+          "f1": 80.97,
+          "share": 0.413
+        },
+        "seen_other": {
+          "n_gold": 4520,
+          "n_pred": 4413,
+          "n_correct": 1078,
+          "recall": 23.85,
+          "precision": 24.43,
+          "f1": 24.14,
+          "share": 0.014
+        },
+        "unseen": {
+          "n_gold": 183890,
+          "n_pred": 175192,
+          "n_correct": 99573,
+          "recall": 54.15,
+          "precision": 56.84,
+          "f1": 55.46,
+          "share": 0.573
+        },
+        "all": {
+          "n_gold": 320750,
+          "n_pred": 312877,
+          "n_correct": 208179,
+          "recall": 64.9,
+          "precision": 66.54,
+          "f1": 65.71,
+          "share": 1.0
+        }
+      },
+      "crf_ens3": {
+        "seeds": [
+          0,
+          300,
+          600
+        ],
+        "n_runs": 15,
+        "seen": {
+          "n_gold": 39702,
+          "n_pred": 39998,
+          "n_correct": 32678,
+          "recall": 82.31,
+          "precision": 81.7,
+          "f1": 82.0,
+          "share": 0.413
+        },
+        "seen_other": {
+          "n_gold": 1356,
+          "n_pred": 1025,
+          "n_correct": 307,
+          "recall": 22.64,
+          "precision": 29.95,
+          "f1": 25.79,
+          "share": 0.014
+        },
+        "unseen": {
+          "n_gold": 55167,
+          "n_pred": 48302,
+          "n_correct": 29977,
+          "recall": 54.34,
+          "precision": 62.06,
+          "f1": 57.94,
+          "share": 0.573
+        },
+        "all": {
+          "n_gold": 96225,
+          "n_pred": 89325,
+          "n_correct": 62962,
+          "recall": 65.43,
+          "precision": 70.49,
+          "f1": 67.87,
+          "share": 1.0
+        }
+      }
+    },
+    "mulms_leave_one_subfield_out": {
+      "crf": {
+        "seeds": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "n_runs": 70,
+        "seen": {
+          "n_gold": 36910,
+          "n_pred": 33363,
+          "n_correct": 24530,
+          "recall": 66.46,
+          "precision": 73.52,
+          "f1": 69.81,
+          "share": 0.116
+        },
+        "seen_other": {
+          "n_gold": 1310,
+          "n_pred": 822,
+          "n_correct": 161,
+          "recall": 12.29,
+          "precision": 19.59,
+          "f1": 15.1,
+          "share": 0.004
+        },
+        "unseen": {
+          "n_gold": 281300,
+          "n_pred": 198531,
+          "n_correct": 110730,
+          "recall": 39.36,
+          "precision": 55.77,
+          "f1": 46.15,
+          "share": 0.88
+        },
+        "all": {
+          "n_gold": 319520,
+          "n_pred": 232716,
+          "n_correct": 135421,
+          "recall": 42.38,
+          "precision": 58.19,
+          "f1": 49.04,
+          "share": 1.0
+        }
+      },
+      "crf_ens3": {
+        "seeds": [
+          0,
+          300,
+          600
+        ],
+        "n_runs": 21,
+        "seen": {
+          "n_gold": 11073,
+          "n_pred": 9842,
+          "n_correct": 7431,
+          "recall": 67.11,
+          "precision": 75.5,
+          "f1": 71.06,
+          "share": 0.116
+        },
+        "seen_other": {
+          "n_gold": 393,
+          "n_pred": 156,
+          "n_correct": 39,
+          "recall": 9.92,
+          "precision": 25.0,
+          "f1": 14.21,
+          "share": 0.004
+        },
+        "unseen": {
+          "n_gold": 84390,
+          "n_pred": 53545,
+          "n_correct": 33182,
+          "recall": 39.32,
+          "precision": 61.97,
+          "f1": 48.11,
+          "share": 0.88
+        },
+        "all": {
+          "n_gold": 95856,
+          "n_pred": 63543,
+          "n_correct": 40652,
+          "recall": 42.41,
+          "precision": 63.98,
+          "f1": 51.01,
+          "share": 1.0
+        }
+      },
+      "crf_mr": {
+        "seeds": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "n_runs": 70,
+        "seen": {
+          "n_gold": 36910,
+          "n_pred": 38015,
+          "n_correct": 26458,
+          "recall": 71.68,
+          "precision": 69.6,
+          "f1": 70.63,
+          "share": 0.116
+        },
+        "seen_other": {
+          "n_gold": 1310,
+          "n_pred": 830,
+          "n_correct": 145,
+          "recall": 11.07,
+          "precision": 17.47,
+          "f1": 13.55,
+          "share": 0.004
+        },
+        "unseen": {
+          "n_gold": 281300,
+          "n_pred": 223347,
+          "n_correct": 121372,
+          "recall": 43.15,
+          "precision": 54.34,
+          "f1": 48.1,
+          "share": 0.88
+        },
+        "all": {
+          "n_gold": 319520,
+          "n_pred": 262192,
+          "n_correct": 147975,
+          "recall": 46.31,
+          "precision": 56.44,
+          "f1": 50.88,
+          "share": 1.0
+        }
+      },
+      "crf_mr_ens3": {
+        "seeds": [
+          0,
+          300,
+          600
+        ],
+        "n_runs": 21,
+        "seen": {
+          "n_gold": 11073,
+          "n_pred": 11464,
+          "n_correct": 8094,
+          "recall": 73.1,
+          "precision": 70.6,
+          "f1": 71.83,
+          "share": 0.116
+        },
+        "seen_other": {
+          "n_gold": 393,
+          "n_pred": 130,
+          "n_correct": 30,
+          "recall": 7.63,
+          "precision": 23.08,
+          "f1": 11.47,
+          "share": 0.004
+        },
+        "unseen": {
+          "n_gold": 84390,
+          "n_pred": 61088,
+          "n_correct": 36908,
+          "recall": 43.74,
+          "precision": 60.42,
+          "f1": 50.74,
+          "share": 0.88
+        },
+        "all": {
+          "n_gold": 95856,
+          "n_pred": 72682,
+          "n_correct": 45032,
+          "recall": 46.98,
+          "precision": 61.96,
+          "f1": 53.44,
+          "share": 1.0
+        }
+      }
+    },
     "fine_published_split": {
       "baseline": {
         "n_runs": 10,
@@ -2852,6 +3141,50 @@
         "seen_other": 0.0,
         "unseen": 0.484
       }
+    },
+    "mulms": {
+      "electrolysis": {
+        "n_gold": 3787,
+        "seen": 0.162,
+        "seen_other": 0.004,
+        "unseen": 0.833
+      },
+      "graphene": {
+        "n_gold": 1549,
+        "seen": 0.184,
+        "seen_other": 0.006,
+        "unseen": 0.81
+      },
+      "pemfc": {
+        "n_gold": 7238,
+        "seen": 0.132,
+        "seen_other": 0.001,
+        "unseen": 0.868
+      },
+      "poly": {
+        "n_gold": 5430,
+        "seen": 0.136,
+        "seen_other": 0.006,
+        "unseen": 0.858
+      },
+      "semi": {
+        "n_gold": 5400,
+        "seen": 0.045,
+        "seen_other": 0.001,
+        "unseen": 0.954
+      },
+      "sofc": {
+        "n_gold": 3854,
+        "seen": 0.061,
+        "seen_other": 0.008,
+        "unseen": 0.931
+      },
+      "steel": {
+        "n_gold": 4694,
+        "seen": 0.132,
+        "seen_other": 0.007,
+        "unseen": 0.861
+      }
     }
   },
   "types": {
@@ -3207,6 +3540,86 @@
         "unseen_share": 0.225,
         "recall_seen": 83.39,
         "recall_unseen": 52.83
+      }
+    },
+    "mulms_leave_one_subfield_out": {
+      "MAT": {
+        "n_gold_per_run": 1806.7,
+        "unseen_share": 0.856,
+        "recall_seen": 70.47,
+        "recall_unseen": 43.51
+      },
+      "VALUE": {
+        "n_gold_per_run": 661.1,
+        "unseen_share": 0.972,
+        "recall_seen": 87.89,
+        "recall_unseen": 74.21
+      },
+      "PROPERTY": {
+        "n_gold_per_run": 554.3,
+        "unseen_share": 0.961,
+        "recall_seen": 39.2,
+        "recall_unseen": 24.04
+      },
+      "FORM": {
+        "n_gold_per_run": 454.3,
+        "unseen_share": 0.872,
+        "recall_seen": 54.85,
+        "recall_unseen": 18.39
+      },
+      "MEASUREMENT": {
+        "n_gold_per_run": 300.9,
+        "unseen_share": 0.671,
+        "recall_seen": 45.15,
+        "recall_unseen": 33.11
+      },
+      "CITE": {
+        "n_gold_per_run": 243.4,
+        "unseen_share": 0.703,
+        "recall_seen": 99.1,
+        "recall_unseen": 70.04
+      },
+      "SAMPLE": {
+        "n_gold_per_run": 198.7,
+        "unseen_share": 0.986,
+        "recall_seen": 7.5,
+        "recall_unseen": 2.64
+      },
+      "TECHNIQUE": {
+        "n_gold_per_run": 131.4,
+        "unseen_share": 0.973,
+        "recall_seen": 52.11,
+        "recall_unseen": 14.96
+      },
+      "DEV": {
+        "n_gold_per_run": 108.1,
+        "unseen_share": 0.971,
+        "recall_seen": 37.78,
+        "recall_unseen": 8.94
+      },
+      "INSTRUMENT": {
+        "n_gold_per_run": 52.9,
+        "unseen_share": 0.986,
+        "recall_seen": 30.0,
+        "recall_unseen": 15.48
+      },
+      "NUM": {
+        "n_gold_per_run": 37.1,
+        "unseen_share": 0.842,
+        "recall_seen": 18.67,
+        "recall_unseen": 4.79
+      },
+      "UNIT": {
+        "n_gold_per_run": 13.0,
+        "unseen_share": 1.0,
+        "recall_seen": null,
+        "recall_unseen": 9.56
+      },
+      "RANGE": {
+        "n_gold_per_run": 2.6,
+        "unseen_share": 1.0,
+        "recall_seen": null,
+        "recall_unseen": 0.0
       }
     },
     "fine_published_split": {
@@ -3697,6 +4110,16 @@
       "unseen_share": {
         "random_splits": 0.297,
         "held_out": 0.464
+      }
+    },
+    "mulms": {
+      "random_splits_recall": 64.9,
+      "held_out_recall": 42.38,
+      "held_out_recall_with_random_mix": 50.17,
+      "random_recall_with_held_out_mix": 57.17,
+      "unseen_share": {
+        "random_splits": 0.573,
+        "held_out": 0.88
       }
     }
   },
@@ -5067,6 +5490,92 @@
     },
     "sofc_random_split_vary": {},
     "sofc_document_folds": {},
+    "mulms_random_split_pool": {},
+    "mulms_leave_one_subfield_out": {
+      "crf_mr": {
+        "reference": "crf",
+        "seeds": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "seen": {
+          "method": 68.36,
+          "reference": 67.06,
+          "mean_diff": 1.3,
+          "ci95": [
+            -1.21,
+            3.81
+          ],
+          "n_pairs": 7
+        },
+        "unseen": {
+          "method": 48.02,
+          "reference": 45.83,
+          "mean_diff": 2.19,
+          "ci95": [
+            -0.25,
+            4.63
+          ],
+          "n_pairs": 7
+        },
+        "all": {
+          "method": 50.76,
+          "reference": 48.66,
+          "mean_diff": 2.1,
+          "ci95": [
+            -0.31,
+            4.51
+          ],
+          "n_pairs": 7
+        }
+      },
+      "crf_mr_ens3": {
+        "reference": "crf_ens3",
+        "seeds": [
+          0,
+          300,
+          600
+        ],
+        "seen": {
+          "method": 69.41,
+          "reference": 68.23,
+          "mean_diff": 1.17,
+          "ci95": [
+            -1.69,
+            4.04
+          ],
+          "n_pairs": 7
+        },
+        "unseen": {
+          "method": 50.61,
+          "reference": 47.69,
+          "mean_diff": 2.92,
+          "ci95": [
+            0.41,
+            5.44
+          ],
+          "n_pairs": 7
+        },
+        "all": {
+          "method": 53.25,
+          "reference": 50.54,
+          "mean_diff": 2.71,
+          "ci95": [
+            0.22,
+            5.2
+          ],
+          "n_pairs": 7
+        }
+      }
+    },
     "fine_published_split": {
       "crf": {
         "reference": "baseline",
