@@ -93,7 +93,8 @@ def test_week4_systems_and_comparisons_follow_the_week4_protocol():
         ns.comparison_list(3, gpu=True)
     assert ns.OUT_NAMES == {3: 'ner_week3_comparisons.json', 4: 'ner_week4_comparisons.json',
                             5: 'ner_week5_comparisons.json', 6: 'ner_week6_comparisons.json',
-                            7: 'ner_week7_comparisons.json', 9: 'ner_week9_comparisons.json'}
+                            7: 'ner_week7_comparisons.json', 9: 'ner_week9_comparisons.json',
+                            11: 'ner_week11_comparisons.json'}
 
 
 def test_week5_systems_and_comparisons_follow_the_week5_protocol():
@@ -383,6 +384,39 @@ def test_week9_mention_replacement_on_the_multi_task_model(tmp_path):
     assert comps[key.format('fine', lopo, 'crf_mt_mr_ens3_vs_crf_mt_ens3')]['micro'][
         'mean_diff'] == 1.0
     assert (tmp_path / 'ner_week9_comparisons.json').exists()
+
+
+def test_week11_silver_names_against_mention_replacement(tmp_path):
+    """Week 11: crf_mrs against mention replacement decides per granularity; against the
+    CRF head and its vote against mention replacement's, the seed vote and the multi-task
+    vote reported. Its own file."""
+    pytest.importorskip('scipy')
+    lopo = 'leave_one_paper_out'
+    systems = ns.system_list(11)
+    assert systems['crf_mrs'] == tuple(f'crf_mrs_m{n}' for n in range(0, 1000, 100))
+    assert systems['crf_mrs_ens3'] == ('crf_mrs_ens3', 'crf_mrs_ens3_m300', 'crf_mrs_ens3_m600')
+    assert ns.comparison_list(11, gpu=True) == (
+        ('crf_mrs', 'crf_mr', lopo), ('crf_mrs', 'crf', None),
+        ('crf_mrs_ens3', 'crf_mr_ens3', None), ('crf_mrs_ens3', 'crf_ens3', None),
+        ('crf_mrs_ens3', 'crf_mt_ens3', None))
+    with pytest.raises(ValueError):
+        ns.comparison_list(11)
+    for g in ('fine', 'coarse'):
+        for stem, plus in (('crf', 0), ('crf_mr', 1.5), ('crf_mrs', 2.5), ('crf_ens3', 2),
+                           ('crf_mt_ens3', 3), ('crf_mr_ens3', 3.5), ('crf_mrs_ens3', 4)):
+            for name in systems[stem]:
+                _write(tmp_path, g, lopo, name, [x + plus for x in (50, 51, 52, 53)])
+    comps = ns.main(['--results', str(tmp_path), '--week', '11', '--gpu'])
+    key = 'ner_results_{}_{}_{}'
+    roles = {k: c['role'] for k, c in comps.items()}
+    assert roles == {
+        **{key.format(g, lopo, 'crf_mrs_vs_crf_mr'): 'decision' for g in ('fine', 'coarse')},
+        **{key.format(g, lopo, name): 'reported' for g in ('fine', 'coarse')
+           for name in ('crf_mrs', 'crf_mrs_ens3_vs_crf_mr_ens3', 'crf_mrs_ens3_vs_crf_ens3',
+                        'crf_mrs_ens3_vs_crf_mt_ens3')}}
+    assert comps[key.format('fine', lopo, 'crf_mrs_vs_crf_mr')]['micro']['mean_diff'] == 1.0
+    assert comps[key.format('coarse', lopo, 'crf_mrs')]['micro']['mean_diff'] == 2.5
+    assert (tmp_path / 'ner_week11_comparisons.json').exists()
 
 
 def test_decides_on_one_protocol_or_several():

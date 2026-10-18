@@ -1147,6 +1147,24 @@ def test_week9_table_and_bullets(tmp_path):
     assert '| multi-task + mention replacement vs mention replacement |' in readme
 
 
+def test_week11_table_and_bullet(tmp_path):
+    """Week 11: mention replacement with silver names, a table of its MaterioMiner
+    comparisons and a bullet per granularity's decision, from its own file."""
+    ws = Workspace(tmp_path)
+    lopo = 'leave_one_paper_out'
+    for g in ('fine', 'coarse'):
+        ws.week4('crf_mrs', 'crf_mr', g, lopo, gpu=True, role='decision',
+                 micro=(0.8, 0.1, 1.5), score=(52.0, 45.0, 59.0), name=rr.WEEK11_FILE)
+        ws.week4('crf_mrs', 'crf', g, lopo, gpu=True, micro=(3.5, 2.0, 5.0),
+                 score=(52.0, 45.0, 59.0), name=rr.WEEK11_FILE)
+    readme, _ = ws.generate()
+    assert ('* NER week 11 (GPU runs; mention replacement with silver names, 10 seeds), '
+            'mention replacement with silver names vs the mention replacement (paired '
+            'micro-F1 difference, leaving one paper out): fine-grained improves') in readme
+    assert '#### NER week-11 comparisons, mention replacement with silver names' in readme
+    assert '| mention replacement with silver names vs CRF head |' in readme
+
+
 def test_a_week6_vote_that_passes_takes_the_unseen_slot(tmp_path):
     ws = Workspace(tmp_path)
     lopo = 'leave_one_paper_out'
@@ -1348,6 +1366,20 @@ def test_mulms_bullet(tmp_path):
             'strict IOB2 +1.40 [-0.30, +3.10]). The CRF head on 5 random splits of the same size '
             '(descriptive): 70.10 [69.00, 71.20], 14.90 points above the held-out '
             'subfields.\n') in readme
+    analysis['mulms']['silver_names'] = {
+        'crf_mrs': score(58.0, 51.0, 65.0),
+        'minus_crf': {'micro': diff(2.8, 0.9, 4.7), 'micro_strict': diff(2.7, 0.8, 4.6)},
+        'minus_crf_mr': {'micro': diff(1.0, -0.4, 2.4), 'micro_strict': diff(0.9, -0.5, 2.3)},
+        'unseen_in_silver': 0.123}
+    (ws.results / 'gpu' / rr.WEEK5_ANALYSIS).write_text(json.dumps(analysis))
+    readme, _ = ws.generate()
+    assert ('14.90 points above the held-out subfields. Week 11, mention replacement with the '
+            "teachers' silver names in its pool (the fold's sentences outside its pool and test "
+            'set): 58.00 [51.00, 65.00]. Week-11 decision 1, against the CRF head, paired by '
+            'subfield: improves (+2.80, 95% CI [+0.90, +4.70]; strict IOB2 +2.70 [+0.80, '
+            '+4.60]). Week-11 decision 2, against mention replacement, paired by subfield: no '
+            'significant change (+1.00, 95% CI [-0.40, +2.40]; strict IOB2 +0.90 [-0.50, '
+            '+2.30]). 12.3% of the unseen test names are silver names.\n') in readme
 
 
 def test_a_week3_file_that_is_not_an_object_is_reported(tmp_path, capsys):

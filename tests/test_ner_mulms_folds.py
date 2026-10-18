@@ -153,3 +153,60 @@ def test_a_run_on_held_out_subfields(tmp_path, monkeypatch):
     folds = nb.subfield_folds(toy, subfields, 0, 6, indices=True)
     assert all(r['seed'] == 100 and r['n_train'] == 5 and r['n_val'] == 1
                and r['test_index'] == fold[3] for r, fold in zip(res['runs'], folds))
+
+
+def test_silver_names_from_the_unused_sentences_of_some_subfields(tmp_path, monkeypatch):
+    """Week 11 on MuLMS: --subfields runs only the folds named, and --self-train unused gives
+    the teachers, per fold, the sentences in none of its parts (outside the pool and the test
+    subfield), whose names join the students' pool (--augment-names)."""
+    torch = pytest.importorskip('torch')
+    transformers = pytest.importorskip('transformers')
+    pytest.importorskip('seqeval')
+    pytest.importorskip('scipy')
+    words = ['steel', 'alloy', 'tensile', 'strength', 'yield', 'room', 'temperature', 'high']
+    path = tmp_path / 'tiny'
+    path.mkdir()
+    vocab = ['[PAD]', '[UNK]', '[CLS]', '[SEP]', '[MASK]', *words, '##s']
+    (path / 'vocab.txt').write_text('\n'.join(vocab) + '\n')
+    transformers.BertTokenizerFast(str(path / 'vocab.txt')).save_pretrained(path)
+    torch.manual_seed(0)
+    transformers.BertModel(transformers.BertConfig(
+        vocab_size=len(vocab), hidden_size=16, num_hidden_layers=1, num_attention_heads=2,
+        intermediate_size=32, max_position_embeddings=64)).save_pretrained(path)
+    toy = [([w, 'alloy', 'high'] + ['high'] * (k % 3), ['B-MAT', 'I-MAT', 'O'] + ['O'] * (k % 3),
+            f'{"aabbcc"[k // 3]}{k // 3}.conll')
+           for k, w in enumerate(['steel', 'yield'] * 9)]
+    subfields = {f'{"aabbcc"[i]}{i}.conll': {'a': 'alpha', 'b': 'beta', 'c': 'gamma'}["aabbcc"[i]]
+                 for i in range(6)}
+    monkeypatch.setattr(nb, 'PROCESSED_DIR', str(tmp_path))
+    monkeypatch.setattr(nb, 'load_split_corpus', lambda granularity: toy)
+    monkeypatch.setattr(nb, 'mulms_subfields', lambda folder=None: subfields)
+    samples = []
+    train_with_teachers = nb.train_with_teachers
+
+    def recording(seed, offsets, train, val, test, labels, args, device, sample, **kwargs):
+        samples.append(sample)
+        return train_with_teachers(seed, offsets, train, val, test, labels, args, device,
+                                   sample, **kwargs)
+    monkeypatch.setattr(nb, 'train_with_teachers', recording)
+    nb.run(nb.parse_args(['--granularity', 'mulms', '--model', str(path), '--epochs', '1',
+                          '--threads', '1', '--device', 'cpu', '--leave-one-subfield-out',
+                          '--train-pool', '6', '--crf', '--teachers', '2', '--self-train',
+                          'unused', '--augment-mentions', '2', '--augment-names',
+                          '--subfields', 'beta', '--save-predictions']))
+    [(_, tr, va, te)] = [f for f in nb.subfield_folds(toy, subfields, 0, 6, indices=True)
+                         if f[0] == 'beta']
+    used = set(tr) | set(va) | set(te)
+    assert samples == [[toy[i][0] for i in range(len(toy)) if i not in used]]
+    assert len(samples[0]) == 12 - 6                  # alpha and gamma, outside the pool
+    for off in (0, 100):
+        res = json.loads((tmp_path / 'ner' / f'ner_results_mulms_leave_one_subfield_out_'
+                                              f'crf_mrs_m{off}.json').read_text())
+        assert res['variant'] == f'crf_mrs_m{off}'
+        assert (res['config']['self_train'], res['config']['self_train_sha256']) == \
+            ('unused', None)
+        assert 'subfields' not in res['config']
+        [run] = res['runs']
+        assert run['run_id'] == 'beta' and run['seed'] == off and run['test_index'] == te
+        assert run['self_training']['n_sampled'] == 6
+        assert run['self_training']['names']['n_test_entities'] == len(te)  # one MAT each

@@ -78,7 +78,13 @@ votes (ner_seedmeans.WEEK5_SYSTEMS) and writes ner_week5_seed_analysis.json next
     2). random_split_pool (descriptive): the CRF head on 5 random splits of a 400-sentence
     pool (the next 20% of the sentences testing), its 10-seed mean per split, and its votes
     over the same seed triples (the mean of the 3 votes per split); and the gap, random
-    splits minus held-out subfields (the CRF head), per F1 average.
+    splits minus held-out subfields (the CRF head), per F1 average. silver_names (week 11;
+    its MuLMS decisions): mention replacement with the teachers' silver names in its pool
+    (crf_mrs) on the held-out subfields, its 10-seed means per subfield, minus the CRF head
+    (decision 1) and minus mention replacement (decision 2), each with its 95% CI over the
+    subfields; its votes against the CRF votes and mention replacement's (reported); and per
+    subfield the silver names' counts (name_coverage of ner_baseline.py), with the share of
+    the unseen test entities whose name is a silver name, pooled over the subfields.
   - sofc_splits (week 8, part 1; descriptive): SOFC-Exp beyond its official split. Per
     protocol, its 5 random sentence splits and its 5 article folds (--document-folds 5), the
     CRF head's 10-seed mean per split under every F1 average, with the mean and 95% CI over
@@ -569,7 +575,41 @@ def mulms(directory):
         out['gap'] = {avg: round(out[MULMS_PROTOCOLS[1]][avg]['mean']
                                  - out[MULMS_PROTOCOLS[0]]['crf'][avg]['mean'], 2)
                       for avg in F1_AVERAGES}
+    mrs = load_files(directory, [f'ner_results_mulms_{MULMS_PROTOCOLS[0]}_crf_mrs_m{off}.json'
+                                 for off in WEEK5_OFFSETS])
+    if mrs and all(files.values()):
+        out['silver_names'] = silver_names({**files, 'crf_mrs': mrs})
     return out
+
+
+def silver_names(files):
+    """The silver_names section of mulms (week 11) from the 10 seed files of crf, crf_mr and
+    crf_mrs on the held-out subfields."""
+    scores = {s: system_scores(f) for s, f in files.items()}
+    ids = [i for i in scores['crf_mrs'] if all(i in v for v in scores.values())]
+
+    def minus(get, reference):
+        return {avg: spread([get('crf_mrs', i)[avg] - get(reference, i)[avg] for i in ids],
+                            'mean_diff') for avg in F1_AVERAGES}
+    entry = {'crf_mrs': {avg: spread([scores['crf_mrs'][i][avg] for i in ids])
+                         for avg in F1_AVERAGES},
+             'subfields': {i: round(scores['crf_mrs'][i]['micro'], 2) for i in ids},
+             'n_subfields': len(ids)}
+    for reference, decision in (('crf', 'decision_1'), ('crf_mr', 'decision_2')):
+        entry[f'minus_{reference}'] = minus(lambda s, i: scores[s][i], reference)
+        entry[decision] = entry[f'minus_{reference}']['micro']['ci95'][0] > 0
+    if all('test_pred' in r for fs in files.values() for f in fs for r in f['runs']):
+        votes = {s: fold_votes(f) for s, f in files.items()}
+        entry['votes'] = {'crf_mrs': {avg: spread([votes['crf_mrs'][i][avg] for i in ids])
+                                      for avg in F1_AVERAGES},
+                          **{f'minus_{r}': minus(lambda s, i: votes[s][i], r)
+                             for r in ('crf', 'crf_mr')}}
+    names = {r['run_id']: r['self_training']['names'] for r in files['crf_mrs'][0]['runs']}
+    entry['names'] = {i: names[i] for i in ids}
+    unseen = sum(names[i]['n_test_unseen'] for i in ids)
+    entry['unseen_in_silver'] = (round(sum(names[i]['n_test_unseen_in_silver'] for i in ids)
+                                       / unseen, 3) if unseen else None)
+    return entry
 
 
 def analyse(directory):
@@ -672,6 +712,14 @@ def main(argv=None):
     if 'gap' in result['mulms']:
         print(f"  MuLMS, random pool splits minus held-out subfields: "
               f"{result['mulms']['gap']['micro']:+.2f} micro F1")
+    names = result['mulms'].get('silver_names')
+    if names:
+        for reference, decision in (('crf', 'decision_1'), ('crf_mr', 'decision_2')):
+            d = names[f'minus_{reference}']['micro']
+            print(f"  MuLMS, silver names ({names['n_subfields']} subfields): crf_mrs "
+                  f"{names['crf_mrs']['micro']['mean']:.2f}, minus {reference} "
+                  f"{d['mean_diff']:+.2f} {d['ci95']} ({'passes' if names[decision] else 'no'})")
+        print(f"    unseen test names among the silver names: {names['unseen_in_silver']}")
     if 'gap' in result['sofc_splits']:
         print(f"  SOFC-Exp, random splits minus article folds: "
               f"{result['sofc_splits']['gap']['micro']:+.2f} micro F1")

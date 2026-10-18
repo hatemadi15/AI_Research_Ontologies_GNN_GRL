@@ -124,6 +124,15 @@ Week 10 (MuLMS, a third corpus: mulms.py; its outermost entities):
           random pool splits the CRF head, each trained on 400 sentences (--train-pool 400),
           seed offsets 0 to 900 (crf_m<N>, crf_mr_m<N>), balanced over the lanes; the bundle
           holds the converted corpus (its SHA-256, mulms_sha256)
+Week 11 (mention replacement with silver names: --augment-names; 3 teachers, 10 students):
+  w11a    the CRF run of smoke4 (smokeam); then on MuLMS's 7 held-out subfields (one job
+          each, --subfields), 3 CRF teachers tag the fold's sentences outside its pool and
+          test set (--self-train unused) and the students train mention replacement whose
+          pool holds their silver names (crf_mrs_m<N>). Each lane trains the same teachers
+          and half of the students (seed offsets 0-400 and 500-900), so their files differ
+  w11b    the CRF run of smoke4 (smokean); then on MaterioMiner's 4 held-out papers (one job
+          each, --papers), the teachers tag the whole fatigue corpus; one lane per
+          granularity (crf_mrs_m<N>)
 
 Usage:
   python src/graph/kaggle_jobs.py quota
@@ -220,6 +229,11 @@ MULMS_POOL = 400
 MULMS_SUBFIELDS = 7
 COST['mulms'] = 1.5         # a run on 400 MuLMS sentences of 29 words, and a larger test
 MULMS_PREFIX = 'mulms__'    # the bundle names of the MuLMS files (as in run_jobs.py)
+# week 11: the subfields (MuLMS) and the students of each lane (both lanes train the teachers)
+MULMS_SUBFIELD_NAMES = ('electrolysis', 'graphene', 'pemfc', 'poly', 'semi', 'sofc', 'steel')
+MRS_LANES = (OFFSETS_PUBLISHED[:5], OFFSETS_PUBLISHED[5:])
+MRS_FLAGS = ('--crf', '--teachers', '3', '--students', '10', '--augment-mentions', '3',
+             '--augment-names', '--save-predictions', '--threads', str(THREADS))
 
 
 # ---------------------------------------------------------------------------
@@ -270,6 +284,22 @@ def mtst_jobs(students):
              '--self-train', CORPUS, '--teachers', '3', '--students', str(students),
              '--self-train-sample', '0', '--save-predictions', '--threads', str(THREADS)]
             for paper in PAPERS]
+
+
+def mrs_mulms_job(subfield, student_offsets):
+    """Week 11 on MuLMS: one held-out subfield, 400 pool sentences; the 3 teachers tag the
+    fold's unused sentences and the students of `student_offsets` (of 10) train mention
+    replacement with their silver names (crf_mrs_m<N>)."""
+    return ['--granularity', 'mulms', '--leave-one-subfield-out', '--train-pool',
+            str(MULMS_POOL), '--subfields', subfield, '--self-train', 'unused',
+            '--student-offsets', *(str(o) for o in student_offsets), *MRS_FLAGS]
+
+
+def mrs_paper_job(granularity, paper):
+    """Week 11 on MaterioMiner: one held-out paper; the 3 teachers tag the whole fatigue
+    corpus and the 10 students train mention replacement with their silver names."""
+    return ['--granularity', granularity, '--leave-one-paper-out', '--papers', paper,
+            '--self-train', CORPUS, '--self-train-sample', '0', *MRS_FLAGS]
 
 
 def published_job(granularity, *flags):
@@ -558,6 +588,16 @@ def batch_lanes(name):
                 for off in OFFSETS_PUBLISHED]
         lanes = balance(jobs, loads=[COST['crf'], 0.0])
         return [[repeat + ['--tag', 'smokeal']] + lanes[0], lanes[1]]
+    if name == 'w11a':
+        # week 11 on MuLMS: both lanes train the teachers of every subfield, each lane half of
+        # the students, so that no two lanes write the same file
+        return [[repeat + ['--tag', 'smokeam']] +
+                [mrs_mulms_job(s, MRS_LANES[0]) for s in MULMS_SUBFIELD_NAMES],
+                [mrs_mulms_job(s, MRS_LANES[1]) for s in MULMS_SUBFIELD_NAMES]]
+    if name == 'w11b':
+        # week 11 on MaterioMiner: one lane per granularity, a job per held-out paper
+        return [[repeat + ['--tag', 'smokean']] + [mrs_paper_job('fine', p) for p in PAPERS],
+                [mrs_paper_job('coarse', p) for p in PAPERS]]
     if name == 'w7a':
         # week 7, part 2a: recall calibration. An inner job is the 6 folds of a seed, each
         # trained on two papers (about 4 CRF runs); no predictions, the counts suffice
@@ -578,7 +618,7 @@ def batch_lanes(name):
 
 BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'item3r',
            'smoke4', 'w5a', 'w5b', 'w5c', 'smoke5', 'smoke6', 'w6a', 'w6b', 'w7a', 'w7b',
-           'w7c', 'w7d', 'w7e', 'w8a', 'w8b', 'w9a', 'w9b', 'w10a')
+           'w7c', 'w7d', 'w7e', 'w8a', 'w8b', 'w9a', 'w9b', 'w10a', 'w11a', 'w11b')
 
 
 def batch_extras(name):

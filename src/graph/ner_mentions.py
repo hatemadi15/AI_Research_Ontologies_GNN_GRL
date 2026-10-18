@@ -79,8 +79,9 @@ REFERENCE = 'crf'
 HELD_OUT = {'fine': (RANDOM, LOPO), 'coarse': (RANDOM, LOPO), 'sofc': (RANDOM, DOCUMENT_FOLDS),
             'mulms': (POOL_SPLITS, SUBFIELDS)}
 # families with 10 seeds per split (or the screen's 3) on the random splits and held-out papers
-FAMILIES = ('crf', 'crf_mt', 'crf_ls', 'crf_st3', 'crf_ctx', 'crf_mt_st3', 'crf_mr', 'crf_mt_mr')
-VOTED = ('crf', 'crf_mt', 'crf_ctx', 'crf_mt_st3', 'crf_mr', 'crf_mt_mr')
+FAMILIES = ('crf', 'crf_mt', 'crf_ls', 'crf_st3', 'crf_ctx', 'crf_mt_st3', 'crf_mr', 'crf_mt_mr',
+            'crf_mrs')
+VOTED = ('crf', 'crf_mt', 'crf_ctx', 'crf_mt_st3', 'crf_mr', 'crf_mt_mr', 'crf_mrs')
 # a published split's systems: plain MatSciBERT, the CRF head and the methods run on it
 PUBLISHED_SPLITS = ('fine', 'coarse', 'sofc', 'sofc_slot')
 PUBLISHED_METHODS = ('crf_ctx', 'crf_mt', 'crf_mr', 'crf_mt_mr', 'crf_cdetest')

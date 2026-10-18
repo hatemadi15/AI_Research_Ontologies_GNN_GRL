@@ -39,7 +39,8 @@ COMPARISONS = (('3', 'CPU', '3', 'ner_week3_comparisons.json'),
                ('6', 'GPU', '10', 'gpu/ner_week6_comparisons.json'),
                ('7', 'GPU', '3', 'gpu/ner_week7_screen.json'),
                ('7', 'GPU', '10', 'gpu/ner_week7_comparisons.json'),
-               ('9', 'GPU', '10', 'gpu/ner_week9_comparisons.json'))
+               ('9', 'GPU', '10', 'gpu/ner_week9_comparisons.json'),
+               ('11', 'GPU', '10', 'gpu/ner_week11_comparisons.json'))
 DECIDED = ('decision', 'screen')
 PROTOCOL_NAMES = {'random_split_vary': 'random splits', 'leave_one_paper_out': 'unseen papers'}
 AVERAGES = (('micro', 'micro'), ('macro', 'macro'), ('weighted', 'weighted'),

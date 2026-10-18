@@ -393,6 +393,25 @@ def test_mulms_held_out_subfields_and_pool_splits(tmp_path):
     assert out['random_split_pool']['n_splits'] == 5
     assert out['random_split_pool']['crf_votes']['micro']['mean'] == pytest.approx(66.67)
     assert out['gap']['micro'] == round(72.45 - held['crf']['micro']['mean'], 2)
+    assert 'silver_names' not in out
+    # week 11: crf_mrs gains 0.5 over mention replacement on every subfield
+    for j, off in enumerate(range(0, 1000, 100)):
+        runs = []
+        for k, name in enumerate(subfields):
+            run = _run(name, 50 + k + j / 10 + 1.5 + (k % 2) / 2)
+            run.update({'test_index': [0], 'test_gold': ['B-MAT O'], 'test_pred': ['B-MAT O'],
+                        'self_training': {'names': {'n_test_unseen': 10,
+                                                    'n_test_unseen_in_silver': k}}})
+            runs.append(run)
+        (tmp_path / f'ner_results_mulms_leave_one_subfield_out_crf_mrs_m{off}.json'
+         ).write_text(json.dumps({'runs': runs}))
+    names = sa.mulms(tmp_path)['silver_names']
+    assert names['n_subfields'] == 7 and names['subfields']['alpha'] == 51.95
+    assert names['minus_crf']['micro']['per_run'] == [1.5] * 7 and names['decision_1']
+    assert names['minus_crf_mr']['micro']['per_run'] == [0.5] * 7 and names['decision_2']
+    assert names['votes']['minus_crf']['micro']['mean_diff'] == pytest.approx(33.33)
+    assert names['votes']['minus_crf_mr']['micro']['mean_diff'] == 0.0
+    assert names['unseen_in_silver'] == round(sum(range(7)) / 70, 3)
     (tmp_path / 'ner_results_mulms_leave_one_subfield_out_crf_mr_m900.json').unlink()
     assert set(sa.mulms(tmp_path)) == {'random_split_pool'}
 

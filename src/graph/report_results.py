@@ -212,6 +212,8 @@ WEEK7_SYSTEM_NAMES = {**WEEK6_NAMES, **{
     'crf_mr': 'mention replacement', 'crf_mr_ens3': 'mention-replacement vote',
     'crf_mt_mr': 'multi-task + mention replacement',
     'crf_mt_mr_ens3': 'multi-task + mention-replacement vote',
+    'crf_mrs': 'mention replacement with silver names',
+    'crf_mrs_ens3': 'silver-name mention-replacement vote',
     **{v: f'{WEEK6_NAMES[ref]} + coarse-to-fine completion'
        for v, ref in WEEK7C_COMPARISONS}}
 # Week 9 (week-9 protocol): mention replacement on the multi-task model, as in
@@ -221,6 +223,13 @@ WEEK9_COMPARISONS = (('crf_mt_mr', 'crf_mt'),
                      *(('crf_mt_mr_ens3', ref) for ref in UNSEEN_BEST.values()),
                      ('crf_mt_mr', 'crf'), ('crf_mt_mr', 'crf_mr'))
 WEEK9_DECISIONS = WEEK9_COMPARISONS[:3]
+# Week 11 (week-11 protocol): mention replacement with the teachers' silver names in its pool,
+# as in ner_seedmeans.WEEK11_COMPARISONS; the first decides (MuLMS: mulms_note)
+WEEK11_FILE = 'ner_week11_comparisons.json'
+WEEK11_COMPARISONS = (('crf_mrs', 'crf_mr'), ('crf_mrs', 'crf'), ('crf_mrs_ens3', 'crf_mr_ens3'),
+                      *(('crf_mrs_ens3', ref)
+                        for ref in dict.fromkeys(('crf_ens3', *UNSEEN_BEST.values()))))
+WEEK11_DECISIONS = WEEK11_COMPARISONS[:1]
 # the label of a week-7 method in the SOFC-Exp bullet (both parts decide on SOFC-Exp)
 WEEK7_SOFC_LABELS = {**{m: f"Week 7, {name} on the CRF head's predictions"
                         for m, name in WEEK7_NAMES.items()},
@@ -841,6 +850,18 @@ WEEK9_INTRO = (
     "rows are reported without a decision.\n")
 
 
+WEEK11_INTRO = (
+    "Δ = with the change − without it, on the same held-out paper, GPU runs only, 10 model "
+    "seeds: a model scores the mean of its 10 runs, a vote the mean of its votes over 3 "
+    "disjoint seed triples. Week-11 protocol: mention replacement whose replacement pool also "
+    "holds the mentions of the sentences that 3 CRF teachers tag alike and confidently in the "
+    "40,000-sentence fatigue corpus (`--augment-names`). Pre-registered rule: a change improves "
+    "on its reference only if the 95% Student-t CI of the mean micro-F1 difference lies "
+    "entirely above 0. Decision on MaterioMiner, per granularity on the 4 held-out papers: "
+    "against mention replacement (do the silver names add?); its MuLMS decisions are in the "
+    "week-10 bullet. The other rows are reported without a decision.\n")
+
+
 def ner_week7_table(res, comparisons=WEEK7_COMPARISONS,
                     title='part 1 (the consistency rule, 10-seed means, GPU runs)',
                     intro=WEEK7_INTRO, file=WEEK7_FILE, week='7'):
@@ -884,7 +905,10 @@ def build_tables(res):
                              WEEK7C_INTRO)
            + ner_week7_table(res, WEEK9_COMPARISONS,
                              'mention replacement on the multi-task model (10-seed means, GPU '
-                             'runs)', WEEK9_INTRO, file=WEEK9_FILE, week='9'))
+                             'runs)', WEEK9_INTRO, file=WEEK9_FILE, week='9')
+           + ner_week7_table(res, WEEK11_COMPARISONS,
+                             'mention replacement with silver names (10-seed means, GPU runs)',
+                             WEEK11_INTRO, file=WEEK11_FILE, week='11'))
     return '\n'.join(out).strip()
 
 
@@ -1085,6 +1109,11 @@ def ner_notes(res):
         note += week6_verdict_line(week9, variant, reference,
                                    'mention replacement on the multi-task model, 10 seeds',
                                    week='9', names=WEEK7_SYSTEM_NAMES)
+    week11 = res.comparisons(GPU_PREFIX + WEEK11_FILE)
+    for variant, reference in WEEK11_DECISIONS:
+        note += week6_verdict_line(week11, variant, reference,
+                                   'mention replacement with silver names, 10 seeds',
+                                   week='11', names=WEEK7_SYSTEM_NAMES)
     return note + sofc_note(analysis) + mulms_note(analysis)
 
 
@@ -1115,6 +1144,18 @@ def mulms_note(analysis):
                  f"(descriptive): {interval(pool['micro'])}")
         if 'gap' in m:
             line += f", {m['gap']['micro']:.2f} points above the held-out subfields"
+    names = m.get('silver_names')
+    if names:
+        line += (". Week 11, mention replacement with the teachers' silver names in its pool "
+                 f"(the fold's sentences outside its pool and test set): "
+                 f"{interval(names['crf_mrs']['micro'])}")
+        for k, reference in ((1, 'the CRF head'), (2, 'mention replacement')):
+            word, numbers = paired_verdict(names['minus_crf' if k == 1 else 'minus_crf_mr'])
+            line += (f". Week-11 decision {k}, against {reference}, paired by subfield: "
+                     f"{word} ({numbers})")
+        if names.get('unseen_in_silver') is not None:
+            line += (f". {100 * names['unseen_in_silver']:.1f}% of the unseen test names are "
+                     "silver names")
     return line + ".\n"
 
 

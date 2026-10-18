@@ -453,8 +453,8 @@ def test_teacher_tags_and_silver_selection(tiny_model):
 def tiny_run(tiny_model, tmp_path, monkeypatch):
     """run(*flags) on the toy corpus (MAT and PROP kept) in tmp_path/ner; returns the calls.
 
-    Every train_one call gives {'seed', 'silver', 'teacher', 'result', 'weights'}: weights
-    are those of its CRF losses (None: unweighted), one list per batch.
+    Every train_one call gives {'seed', 'silver', 'augmented', 'teacher', 'result',
+    'weights'}: weights are those of its CRF losses (None: unweighted), one list per batch.
     """
     monkeypatch.setattr(nb, 'PROCESSED_DIR', str(tmp_path))
     monkeypatch.setattr(nb, 'load_split_corpus', lambda granularity: _toy_ner_corpus())
@@ -475,6 +475,7 @@ def tiny_run(tiny_model, tmp_path, monkeypatch):
         first = len(losses)
         out = train_one(seed, *args, **kwargs)
         calls.append({'seed': seed, 'silver': kwargs.get('silver'),
+                      'augmented': kwargs.get('augmented'),
                       'teacher': kwargs.get('keep_tagger', False),
                       'result': out[0] if kwargs.get('keep_tagger') else out,
                       'weights': losses[first:]})
@@ -644,3 +645,145 @@ def test_more_students_than_teachers(tiny_run, tmp_path, monkeypatch):
     # finished runs are skipped
     n = len(record)
     assert len(tiny_run(*st3, '--students', '4')) == n
+
+
+# --- mention replacement with silver names (--augment-names; ROADMAP §4, week 11)
+
+def test_the_names_join_the_pool_after_the_training_mentions():
+    """names extend the pool of their type; without them the copies are those of week 7."""
+    sentences = [(['steel', 'is', 'hard'], ['B-MAT', 'O', 'O']),
+                 (['alloy', 'X', 'yields'], ['B-MAT', 'O', 'O'])]
+    assert nb.mention_replacements(sentences, 3, 7) == \
+        nb.mention_replacements(sentences, 3, 7, names=())
+    names = [('MAT', ('Ti-6Al-4V',)), ('MAT', ('Inconel', '718')), ('PROP', ('hardness',))]
+    copies = nb.mention_replacements(sentences, 20, 0, p=1.0, names=names)
+    drawn = {tuple(w[:len(w) - 2]) for w, _ in copies}
+    assert drawn == {('steel',), ('alloy',), ('Ti-6Al-4V',), ('Inconel', '718')}
+    for words, tags in copies:                       # a two-word name is tagged B, I
+        assert tags == ['B-MAT'] + ['I-MAT'] * (len(words) - 3) + ['O', 'O']
+    # a type with names but no training mention is never copied into a sentence
+    assert all('hardness' not in w for w, _ in copies)
+
+
+def test_silver_mentions_and_unused_sentences():
+    silver = [(['Ti-6Al-4V', 'at', '300', 'K'], ['B-MAT', 'O', 'B-COND', 'I-COND']),
+              (['the', 'alloy'], ['O', 'B-MAT'])]
+    assert nb.silver_mentions(silver) == [('MAT', ('Ti-6Al-4V',)), ('COND', ('300', 'K')),
+                                          ('MAT', ('alloy',))]
+    data = [([f'w{i}'], ['O'], 'd') for i in range(6)]
+    assert nb.unused_sentences(data, ([4, 0], [2], [5])) == [['w1'], ['w3']]
+    train = [(['steel', 'and', 'Ti-6Al-4V'], ['B-MAT', 'O', 'B-MAT'], 'a')]
+    test = [(['Ti-6Al-4V', ',', 'alloy', 'and', 'Inconel'], ['B-MAT', 'O', 'B-MAT', 'O', 'B-MAT'],
+             'b'), (['alloy'], ['B-PROP'], 'b')]
+    names = [('MAT', ('alloy',)), ('MAT', ('alloy',)), ('PROP', ('Inconel',))]
+    assert nb.name_coverage(names, train, test) == {
+        'n_mentions': 3, 'n_distinct': 2, 'n_test_entities': 4,
+        'n_test_unseen': 3,                      # alloy (MAT), Inconel (MAT), alloy (PROP)
+        'n_test_unseen_in_silver': 1}            # only alloy as a MAT
+
+
+def test_augment_names_parser_checks(tmp_path, capsys):
+    corpus = str(_corpus(tmp_path))
+    base = ['--leave-one-paper-out', '--crf', '--self-train', corpus, '--teachers', '3']
+    args = nb.parse_args([*base, '--augment-mentions', '3', '--augment-names'])
+    assert nb.variant_name(SimpleNamespace(**{**vars(args), 'tag': 'm100'})) == 'crf_mrs_m100'
+    for argv, error in (
+            ([*base, '--augment-names'], '--augment-names needs --augment-mentions'),
+            (['--leave-one-paper-out', '--crf', '--augment-mentions', '3', '--augment-names'],
+             '--augment-names needs --augment-mentions and --self-train'),
+            ([*base, '--augment-mentions', '3'], '--augment-mentions is not available with '
+                                                '--self-train'),
+            (['--crf', '--multi-task', '--self-train', corpus, '--teachers', '3',
+              '--augment-mentions', '3', '--augment-names'], 'not available with --multi-task'),
+            (['--leave-one-paper-out', '--crf', '--self-train', 'unused', '--teachers', '3',
+              '--augment-mentions', '3', '--augment-names'], 'needs --teachers and --train-pool'),
+            (['--granularity', 'mulms', '--leave-one-subfield-out', '--train-pool', '400',
+              '--crf', '--self-train', 'unused', '--teachers', '3', '--self-train-sample', '0',
+              '--augment-mentions', '3', '--augment-names'], 'no --self-train-sample'),
+            (['--granularity', 'mulms', '--leave-one-subfield-out', '--train-pool', '400',
+              '--crf', '--self-train', corpus, '--teachers', '3'],
+             '--self-train is not available with --granularity mulms'),
+            (['--leave-one-paper-out', '--crf', '--subfields', 'steel'],
+             '--subfields needs --leave-one-subfield-out')):
+        with pytest.raises(SystemExit):
+            nb.parse_args(argv)
+        assert error in capsys.readouterr().err
+    mulms = nb.parse_args(['--granularity', 'mulms', '--leave-one-subfield-out', '--train-pool',
+                           '400', '--crf', '--self-train', 'unused', '--teachers', '3',
+                           '--students', '10', '--augment-mentions', '3', '--augment-names',
+                           '--subfields', 'steel', 'sofc'])
+    assert nb.protocol_name(mulms) == 'leave_one_subfield_out'
+    assert 'subfields' not in nb.stored_config(mulms)
+
+
+def test_students_train_on_copies_with_the_silver_names(tiny_run, tmp_path, monkeypatch):
+    """--augment-names: the teachers and silver data of --teachers 3, then each student on
+    the gold data and its copies (with its own seed), whose pool holds the silver mentions;
+    no silver sentence is trained on. The teachers are the plain CRF runs of their seeds."""
+    corpus = _corpus(tmp_path)
+    monkeypatch.setattr(nb, 'unanimous_silver', lambda votes: True)   # every tagged sentence
+    seen = []                                    # (silver sentences, their mentions)
+    silver_mentions = nb.silver_mentions
+
+    def recording_mentions(silver):
+        seen.append((silver, silver_mentions(silver)))
+        return seen[-1][1]
+    monkeypatch.setattr(nb, 'silver_mentions', recording_mentions)
+    flags = ('--vary-split', '--seeds', '0')
+    mrs = ('--crf', '--self-train', str(corpus), '--teachers', '3', '--self-train-sample', '0',
+           '--augment-mentions', '2', '--augment-names', *flags, '--save-predictions')
+    calls = list(tiny_run(*mrs))
+    [(silver, names)] = seen                     # once per run, for all its students
+    words = [nb.corpus_words(line) for line in CORPUS_LINES[:6] if line]
+    assert [w for w, _ in silver] == words[:5]   # the long one skipped
+    assert names                                 # the random teachers tag a few entities
+    assert [(c['seed'], c['teacher']) for c in calls] == [
+        (0, True), (100, True), (200, True), (0, False), (100, False), (200, False)]
+    teachers, students = calls[:3], calls[3:]
+    assert all(c['silver'] is None and c['augmented'] is None for c in teachers)
+    assert all(c['silver'] is None for c in students)
+    data = nb.granularity_data('fine', nb.parse_args(['--granularity', 'fine', '--top-k', '2']))[0]
+    tr, _, te = nb.random_split(len(data), 0)
+    train = [(data[i][0], data[i][1]) for i in tr]
+    for offset, student in zip((0, 100, 200), students):
+        res = _load(tmp_path, f'ner_results_fine_random_split_vary_crf_mrs_m{offset}.json')
+        assert res['variant'] == f'crf_mrs_m{offset}'
+        assert (res['config']['augment_mentions'], res['config']['augment_names']) == (2, True)
+        run = res['runs'][0]
+        assert {k: run[k] for k in RESULT_KEYS} == {k: student['result'][k] for k in RESULT_KEYS}
+        info = run['self_training']
+        assert info['n_silver'] == 5 and [t['seed'] for t in info['teachers']] == [0, 100, 200]
+        # the student's copies: mention replacement with its seed, the silver names joining
+        # the pool of their types
+        assert student['augmented'] == nb.mention_replacements(train, 2, offset, names=names)
+        assert run['n_augmented'] == len(student['augmented'])
+        assert info['names'] == nb.name_coverage(names, [data[i] for i in tr],
+                                                 [data[i] for i in te])
+        assert info['names']['n_mentions'] == len(names)
+    # each teacher is the plain CRF run of its seed
+    for offset, teacher in zip((0, 100, 200), teachers):
+        tiny_run('--crf', *flags, '--tag', f'm{offset}', '--seed-offset', str(offset))
+        plain = _load(tmp_path, f'ner_results_fine_random_split_vary_crf_m{offset}.json')
+        assert {k: plain['runs'][0][k] for k in RESULT_KEYS} == \
+            {k: teacher['result'][k] for k in RESULT_KEYS}
+
+
+def test_without_silver_names_a_student_is_the_mention_replacement_run(tiny_run, tmp_path,
+                                                                        monkeypatch):
+    """With no silver sentence the pool is the training mentions', so each student equals
+    the crf_mr run of its seed: the two variants differ only in the pool."""
+    corpus = _corpus(tmp_path)
+    monkeypatch.setattr(nb, 'unanimous_silver', lambda votes: False)  # no silver sentence
+    flags = ('--vary-split', '--seeds', '0')
+    calls = list(tiny_run('--crf', '--self-train', str(corpus), '--teachers', '2',
+                          '--self-train-sample', '0', '--augment-mentions', '2',
+                          '--augment-names', *flags, '--save-predictions'))
+    students = calls[2:]
+    for offset, student in zip((0, 100), students):
+        mrs = _load(tmp_path, f'ner_results_fine_random_split_vary_crf_mrs_m{offset}.json')
+        assert mrs['runs'][0]['self_training']['names']['n_mentions'] == 0
+        tiny_run('--crf', '--augment-mentions', '2', *flags, '--tag', f'm{offset}',
+                 '--seed-offset', str(offset), '--save-predictions')
+        mr = _load(tmp_path, f'ner_results_fine_random_split_vary_crf_mr_m{offset}.json')
+        keys = (*RESULT_KEYS, 'test_pred', 'n_augmented')
+        assert {k: mr['runs'][0][k] for k in keys} == {k: mrs['runs'][0][k] for k in keys}

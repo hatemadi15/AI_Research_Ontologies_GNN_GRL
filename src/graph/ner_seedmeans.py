@@ -103,6 +103,14 @@ ner_week9_comparisons.json:
     model?) and its vote crf_mt_mr_ens3 vs UNSEEN_BEST per granularity. Reported: the
     other granularity's vote, crf_mt_mr vs crf and vs crf_mr.
 
+Week 11 (--week 11 --gpu; week-11 protocol) tests mention replacement whose pool also holds
+the names of the teachers' silver sentences (crf_mrs, --augment-names), 10 seeds on the
+held-out papers, written to ner_week11_comparisons.json (its MuLMS decisions are in
+ner_seed_analysis.py, mulms):
+  - Decisions: crf_mrs vs crf_mr per granularity (do the silver names add to mention
+    replacement?). Reported: crf_mrs vs crf, and its vote crf_mrs_ens3 vs crf_mr_ens3, the
+    seed vote crf_ens3 and UNSEEN_BEST.
+
 Usage:
   python src/graph/ner_seedmeans.py [--results results] [--out results/ner_week3_comparisons.json]
   python src/graph/ner_seedmeans.py --week 4                            # CPU votes
@@ -111,6 +119,7 @@ Usage:
   python src/graph/ner_seedmeans.py --week 6 --gpu --results results/gpu [--screen]
   python src/graph/ner_seedmeans.py --week 7 --gpu --results results/gpu [--screen]
   python src/graph/ner_seedmeans.py --week 9 --gpu --results results/gpu
+  python src/graph/ner_seedmeans.py --week 11 --gpu --results results/gpu
 """
 
 import argparse
@@ -126,7 +135,7 @@ RESULTS_DIR = Path(__file__).resolve().parents[2] / 'results'
 OUT_NAME = 'ner_week3_comparisons.json'
 OUT_NAMES = {3: OUT_NAME, 4: 'ner_week4_comparisons.json', 5: 'ner_week5_comparisons.json',
              6: 'ner_week6_comparisons.json', 7: 'ner_week7_comparisons.json',
-             9: 'ner_week9_comparisons.json'}
+             9: 'ner_week9_comparisons.json', 11: 'ner_week11_comparisons.json'}
 SCREEN_NAMES = {6: 'ner_week6_screen.json', 7: 'ner_week7_screen.json'}
 SCREEN_NAME = SCREEN_NAMES[6]
 
@@ -352,19 +361,38 @@ WEEK9_COMPARISONS = (
     ('crf_mt_mr', 'crf', None),
     ('crf_mt_mr', 'crf_mr', None),
 )
+# week 11: mention replacement with the silver names of 3 teachers in its pool
+# (--augment-names), 10 seeds on the held-out papers
+WEEK11_SYSTEMS = {
+    **WEEK7_SYSTEMS,
+    'crf_mrs': seed_family('crf_mrs'),
+    'crf_mrs_ens3': vote_family('crf_mrs'),
+}
+WEEK11_COMPARISONS = (
+    # decisions: do the silver names add to mention replacement? (held-out papers)
+    ('crf_mrs', 'crf_mr', LOPO),
+    # reported: against the CRF head; its vote against mention replacement's, the seed vote
+    # and the strongest system on unseen papers after week 5
+    ('crf_mrs', 'crf', None),
+    ('crf_mrs_ens3', 'crf_mr_ens3', None),
+    *(('crf_mrs_ens3', ref, None) for ref in dict.fromkeys(('crf_ens3',
+                                                            *UNSEEN_BEST.values()))),
+)
 
 
 def comparison_list(week, gpu=False, screen=False):
     """The comparisons of a week's protocol: week 3, week 4 on the CPU or the GPU runs,
-    week 5, week 6 or week 7 (their stage-1 screens with screen=True) or week 9; GPU runs
-    only from week 5."""
+    week 5, week 6 or week 7 (their stage-1 screens with screen=True), week 9 or week 11;
+    GPU runs only from week 5."""
     if week == 3:
         if gpu:
             raise ValueError('the week-3 comparisons are made on the CPU runs only')
         return COMPARISONS
-    if week in (5, 6, 7, 9):
+    if week in (5, 6, 7, 9, 11):
         if not gpu:
             raise ValueError(f'the week-{week} comparisons are made on the GPU runs only')
+        if week == 11:
+            return WEEK11_COMPARISONS
         if week == 9:
             return WEEK9_COMPARISONS
         if week == 7:
@@ -377,6 +405,8 @@ def comparison_list(week, gpu=False, screen=False):
 
 def system_list(week, screen=False):
     """The systems (name: the variants of its results files) of a week's protocol."""
+    if week == 11:
+        return WEEK11_SYSTEMS
     if week == 9:
         return WEEK9_SYSTEMS
     if week == 7:

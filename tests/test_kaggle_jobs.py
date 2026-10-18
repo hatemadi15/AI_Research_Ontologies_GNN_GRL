@@ -807,6 +807,45 @@ def test_week10_mulms_batch(monkeypatch, tmp_path):
     assert 'w10a' in kj.BATCHES
 
 
+def test_week11_silver_name_batches(monkeypatch, tmp_path):
+    """w11a: on MuLMS each lane trains the teachers of all 7 subfields and half of the 10
+    students (so the lanes write different files); w11b: on MaterioMiner one lane per
+    granularity, a job per held-out paper; both start with the repeat."""
+    monkeypatch.setattr(nb.os.path, 'isfile', lambda path: True)    # the corpus is not here
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda report=None: 'x' * 64)
+    report = tmp_path / 'mulms_corpus.json'
+    report.write_text(json.dumps({'outputs': {'a_01.conll': 'a' * 64}}))
+    monkeypatch.setattr(kj, 'MULMS_REPORT', report)
+    lane0, lane1 = _parsed(kj.batch_lanes('w11a'))
+    assert lane0[0].tag == 'smokeam' and lane0[0].granularity == 'fine'
+    for lane, offsets in ((lane0[1:], range(0, 500, 100)), (lane1, range(500, 1000, 100))):
+        assert [a.subfields for a in lane] == [[s] for s in kj.MULMS_SUBFIELD_NAMES]
+        for a in lane:
+            assert (a.granularity, a.train_pool, nb.protocol_name(a)) == (
+                'mulms', 400, 'leave_one_subfield_out')
+            assert (a.self_train, a.teachers, a.students, a.augment_mentions) == (
+                'unused', 3, 10, 3)
+            assert a.augment_names and a.crf and a.save_predictions
+            assert a.student_offsets == list(offsets)
+    assert set(kj.MULMS_SUBFIELD_NAMES) == {'electrolysis', 'graphene', 'pemfc', 'poly', 'semi',
+                                            'sofc', 'steel'}
+    assert 'mulms_files' in kj.batch_spec('w11a')
+    lane0, lane1 = _parsed(kj.batch_lanes('w11b'))
+    assert lane0[0].tag == 'smokean'
+    for lane, g in ((lane0[1:], 'fine'), (lane1, 'coarse')):
+        assert [a.papers for a in lane] == [[p] for p in kj.PAPERS]
+        for a in lane:
+            assert (a.granularity, nb.protocol_name(a), a.self_train) == (
+                g, 'leave_one_paper_out', kj.CORPUS)
+            assert (a.teachers, a.students, a.self_train_sample, a.augment_mentions) == (
+                3, 10, 0, 3)
+            assert a.augment_names and not hasattr(a, 'student_offsets')
+            view = nb.SimpleNamespace(**{**vars(a), 'tag': 'm300'})
+            assert nb.variant_name(view) == 'crf_mrs_m300'
+    assert 'mulms_files' not in kj.batch_spec('w11b')
+    assert {'w11a', 'w11b'} <= set(kj.BATCHES)
+
+
 def test_build_bundle_with_the_mulms_files(tmp_path):
     corpus = tmp_path / 'corpus.txt'
     corpus.write_text('One sentence.\n')
