@@ -11,8 +11,11 @@ gain on unseen papers at both granularities, C20) are decided, and so is
 mention replacement on the multi-task model (the strongest fine-grained
 system on unseen papers, but no gain on SOFC-Exp, C21). Mention replacement
 gives no gain on SOFC-Exp even with its training set cut to MaterioMiner's
-size (ROADMAP §4, week 9, part 2). The numbers come from `results/`
-through the claims table of `docs/PAPER.md` (C1–C21). References are keys of `docs/references.bib`.
+size (ROADMAP §4, week 9, part 2). On a third corpus, MuLMS, whose
+held-out subfields differ in topic as MaterioMiner's papers do, its single
+model does not pass and its votes do (C22), so by the pre-registered
+criterion it stays a MaterioMiner result. The numbers come from `results/`
+through the claims table of `docs/PAPER.md` (C1–C22). References are keys of `docs/references.bib`.
 
 ---
 
@@ -23,15 +26,19 @@ carry either way:
 - the published MaterioMiner numbers reproduce on the released split;
 - a model trained on three papers loses 18–31 F1 points on the fourth;
   on SOFC-Exp, whose 45 articles share one topic and one annotation
-  scheme, held-out articles cost 3.5 points, so the gap grows with how
-  much the papers differ;
+  scheme, held-out articles cost 3.5 points, and on MuLMS a held-out
+  materials subfield costs 17, so the gap grows with how much the
+  documents differ;
 - of the additions tested under a pre-registered 10-seed design, only the
   CRF head, seed votes and multi-task training hold, and multi-task
   training only on MaterioMiner: on SOFC-Exp's two levels it gains nothing;
 - mention replacement is the one method that improves a single model on
   unseen papers at both granularities (+2.77 and +1.28 F1), all of it on
   names the training papers lack; on SOFC-Exp it gives nothing, even with
-  its training set cut to MaterioMiner's size;
+  its training set cut to MaterioMiner's size, and on MuLMS's held-out
+  subfields, where unseen names are as many as in a new MaterioMiner
+  paper, its single model gains +2.10 without passing while its vote
+  passes;
 - on the multi-task model the two gains add up: +6.73 F1 fine-grained over
   the CRF head, close to what a third training paper adds, and its vote is
   the strongest fine-grained system on unseen papers; on SOFC-Exp the
@@ -223,6 +230,14 @@ share of new names does not explain this (47.8% in the best fold, 45.4%
 in the worst); the folds differ in recall on seen and unseen names alike
 (86.6–92.8 and 76.4–89.0), so some articles are simply harder.
 
+On MuLMS (Section 2), whose held-out documents come from another materials
+subfield, the gap is close to MaterioMiner's. The models train on 340
+sentences, about MaterioMiner's training size. The CRF head scores 65.72
+[65.25, 66.19] over 5 random splits of that size and 48.66 [40.91, 56.40]
+over the 7 held-out subfields (10 seeds each; Figure 1, fourth panel): a
+gap of 17.06 points. Per subfield it scores 32.49 (semi) to 56.82 (steel).
+88% of a held-out subfield's test names are unseen, 57% on random splits.
+
 **5.3 The CRF head, and a second dataset (C3, C4, C13).**
 - **Published split:** the CRF head scores 73.31 [72.28, 74.35] and 75.48
   [74.23, 76.72], +3.12 and +2.96 over plain MatSciBERT, paired by seed.
@@ -348,6 +363,11 @@ splits pooled).
   head finds 82% of them (89% of the seen). Its articles share one topic,
   its 4 types are broad, and its most frequent type, VALUE, is found at
   95–97% whether seen or not.
+- **MuLMS's held-out subfields are like MaterioMiner's held-out papers.**
+  88% of their test entities are unseen (57% on random splits of the same
+  size), and the CRF head finds 39% of them (67% of the seen). The larger
+  share of unseen names accounts for about a third of its 22.5-point
+  recall gap, the lower recall within each kind for the rest.
 - **The gains are on unseen names.** Paired over the 4 held-out papers
   (fine-grained F1), every gain is significant only on unseen names:
   multi-task training +4.02 [+1.53, +6.51] (seen +2.88 [−2.70, +8.47]),
@@ -439,7 +459,8 @@ Each method is decided under a protocol committed before its runs. On
 MaterioMiner it is decided against the CRF head on the 4 held-out papers,
 and its vote against the strongest system on unseen papers (the multi-task
 vote fine-grained, the seed vote coarse-grained). A methods claim also
-needs its gain to repeat on SOFC-Exp.
+needs its gain to repeat on a second corpus: SOFC-Exp, and for mention
+replacement also MuLMS's held-out subfields (Section 6.6).
 
 **6.1 Multi-task self-training.** Three multi-task teachers, trained with
 three seeds on the gold data, tag 40,000 sentences of open-access fatigue
@@ -640,7 +661,26 @@ with the settings of Section 6.3.
   gain on unseen documents holds on two corpora whose held-out documents
   differ in topic and on none whose articles share one: a methods claim
   scoped to that setting.
-- *Result:* pending (the session of 17 October).
+- *Result (C22): the single model does not pass, its votes do.* Mention
+  replacement scores 50.76 against the CRF head's 48.66: +2.10 [−0.31,
+  +4.51] over 10 seeds, paired by subfield. Six subfields gain
+  (electrolysis +1.42, graphene +1.66, pemfc +2.28, semi +2.52, sofc
+  +7.39, steel +0.15) and poly loses 0.73, so with 7 subfields the
+  interval reaches below 0. Macro F1 gains +2.12 [+1.14, +3.09] and
+  weighted F1 +2.68 [+0.32, +5.04] (reported). Its votes score 53.25
+  against the CRF votes' 50.54: +2.71 [+0.22, +5.20], which passes.
+- *Unseen names:* 88% of a held-out subfield's test names are unseen, and
+  the CRF head finds 39% of them, as on a held-out MaterioMiner paper (81%
+  and 35%; Section 5.8). Mention replacement gains +2.19 [−0.25, +4.63] on
+  them (seen +1.30 [−1.21, +3.81]), its votes +2.92 [+0.41, +5.44].
+- *What it means:* the condition named after SOFC-Exp's results holds on
+  MuLMS, and the mean gain is close to MaterioMiner's fine-grained +2.77,
+  but the single-model decision fails. Across the corpora the passes do
+  not line up: the single model passes on MaterioMiner, while the vote
+  against the seed vote passes on MuLMS but not coarse-grained on
+  MaterioMiner (+2.26 [−0.12, +4.64]). By the pre-registered criterion,
+  mention replacement and its combination with multi-task training stay
+  results for MaterioMiner (C20, C21).
 
 ## 7 Limitations
 

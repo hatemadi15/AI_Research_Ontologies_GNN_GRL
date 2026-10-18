@@ -3175,7 +3175,7 @@ replacement stays a MaterioMiner result.** Session d of 17–18 October
 identical (77.95). On the 7 held-out subfields, 10 seeds each:
 - decision 1, mention replacement against the CRF head: **+2.10 [−0.31,
   +4.51]** (50.76 against 48.66), which does not pass. Six subfields gain
-  (electrolysis +1.42, graphene +1.66, pemfc +2.28, semi +2.52, sofc +7.40,
+  (electrolysis +1.42, graphene +1.66, pemfc +2.28, semi +2.52, sofc +7.39,
   steel +0.15) and poly loses 0.73;
 - decision 2, its votes against the CRF votes: **+2.71 [+0.22, +5.20]**
   (53.25 against 50.54), which passes. Per subfield, in the same order:

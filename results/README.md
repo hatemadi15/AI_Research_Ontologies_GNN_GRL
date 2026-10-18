@@ -189,17 +189,22 @@ sentences; the official validation and test articles), with predictions.
 by draw, each the mean of its 10 seeds) and the CRF head on 10 articles
 against all 26 (`ten_minus_all_articles`, paired by seed).
 
-Week 10 (MuLMS, a third corpus; protocol in ROADMAP §4, prepared, no run yet):
+Week 10 (MuLMS, a third corpus; protocol and outcome in ROADMAP §4; Kaggle
+session `w10a` of 17–18 October, `ner-gpu-jobs-d` version 4, bundle a08356f):
 `mulms_corpus.json` is the report of `src/graph/mulms.py`. It records the
 Hugging Face revision of MuLMS, the SHA-256 of its parquet files and of every
 converted file, the flattening rule (the outermost entities), the token rule
 (whitespace-separated pieces, without those a BERT tokenizer erases) and every
 count.
 The converted CoNLL files stay in `data/processed/mulms/`, outside git, and
-`mulms.py` rebuilds them; the Kaggle bundle ships them. The runs will write
-`gpu/ner_results_mulms_leave_one_subfield_out_<variant>.json` (run ids: the
-subfields) and `gpu/ner_results_mulms_random_split_pool_crf_m<N>.json`.
-`gpu/ner_week5_seed_analysis.json` (`mulms`) will hold the decisions. *Licence:*
+`mulms.py` rebuilds them; the Kaggle bundle ships them. The runs wrote
+`gpu/ner_results_mulms_leave_one_subfield_out_crf_m<N>.json` (the CRF head)
+and `_crf_mr_m<N>.json` (mention replacement), run ids the 7 subfields, and
+`gpu/ner_results_mulms_random_split_pool_crf_m<N>.json` (runs `seed0` to
+`seed4`), model seeds 0 to 900, with predictions. `gpu/ner_week5_seed_analysis.json`
+(`mulms`) holds both decisions, the votes and the gap; `gpu/ner_mentions.json`
+and `gpu/ner_matching.json` hold MuLMS's unseen names and looser matching
+(settings `mulms_leave_one_subfield_out` and `mulms_random_split_pool`). *Licence:*
 MuLMS is CC BY-SA 4.0 (Schrader et al., 2023), so every results file with
 `mulms` in its name, which holds MuLMS's tags (`test_gold`), is CC BY-SA 4.0
 as well, unlike the rest of the repository (Apache 2.0).

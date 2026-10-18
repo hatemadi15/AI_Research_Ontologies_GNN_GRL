@@ -713,7 +713,9 @@ stands (ROADMAP §4, weeks 6 to 9):
    ran the CRF head on SOFC-Exp's random sentence splits and on folds of
    held-out articles: 86.27 against 82.79, a gap of 3.48 points, against
    28–31 on MaterioMiner. On a corpus whose articles share one topic,
-   random splits overstate the score on new articles far less.
+   random splits overstate the score on new articles far less. On MuLMS
+   (week 10), whose held-out documents come from another materials
+   subfield, the gap is 17.06 points, close to MaterioMiner's.
 3. Week 7: document-level label consistency and coarse-to-fine completion
    give no claim (the first hurts on SOFC-Exp). Recall calibration (a bias
    on the CRF head's emissions, chosen on inner folds) gives no claim
@@ -736,7 +738,13 @@ stands (ROADMAP §4, weeks 6 to 9):
    cut SOFC-Exp's training set to MaterioMiner's size (10 of its 26
    articles, 5 draws): mention replacement still gains nothing there
    (+0.50 [−0.47, +1.46]), so its MaterioMiner gain is not a matter of
-   training size.
+   training size. Week 10 tested it on a third corpus, MuLMS, holding out
+   each of its 7 materials subfields in turn (340 training sentences, as
+   on MaterioMiner). There 88% of the test names are unseen and the CRF
+   head finds 39% of them, as in a new MaterioMiner paper. Mention
+   replacement gains +2.10 [−0.31, +4.51] (six subfields gain), which does
+   not pass, while its votes beat the CRF votes by +2.71 [+0.22, +5.20]. By
+   the pre-registered criterion it stays a MaterioMiner result.
 4. Why unseen papers are hard (exploratory, no GPU; `ner_mentions.py`):
    81% of a held-out paper's fine-grained entities are names that its
    three training papers never annotate with that type, against 35% on
