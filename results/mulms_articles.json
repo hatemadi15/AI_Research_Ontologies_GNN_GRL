@@ -1,0 +1,180 @@
+{
+ "electrolysis_01": null,
+ "electrolysis_02": {
+  "subfield": "electrolysis",
+  "title": "Assembly of Pt Nanoparticles on Graphitized Carbon Nanofibers as Hierarchically Structured Electrodes",
+  "pmcid": "PMC7590506",
+  "pmid": "33134881",
+  "doi": "10.1021/acsanm.0c01945",
+  "matched_title": "Assembly of Pt Nanoparticles on Graphitized Carbon Nanofibers as Hierarchically Structured Electrodes.",
+  "score": 1.0
+ },
+ "electrolysis_03": {
+  "subfield": "electrolysis",
+  "title": "Highly efficient oxygen evolution reaction via facile bubble transport realized by three - dimensionally stack - printed catalysts",
+  "pmcid": "PMC7529785",
+  "pmid": "33004820",
+  "doi": "10.1038/s41467-020-18686-0",
+  "matched_title": "Highly efficient oxygen evolution reaction via facile bubble transport realized by three-dimensionally stack-printed catalysts.",
+  "score": 1.0
+ },
+ "electrolysis_04": {
+  "subfield": "electrolysis",
+  "title": "Common - Ion Effect Triggered Highly Sustained Seawater Electrolysis with Additional NaCl Production",
+  "pmcid": "PMC7532522",
+  "pmid": "33043295",
+  "doi": "10.34133/2020/2872141",
+  "matched_title": "Common-Ion Effect Triggered Highly Sustained Seawater Electrolysis with Additional NaCl Production.",
+  "score": 1.0
+ },
+ "graphene_01": null,
+ "graphene_02": {
+  "subfield": "graphene",
+  "title": "Direct Laser Writing of Transparent Polyimide Film for Supercapacitor",
+  "pmcid": "PMC7766479",
+  "pmid": "33352840",
+  "doi": "10.3390/nano10122547",
+  "matched_title": "Direct Laser Writing of Transparent Polyimide Film for Supercapacitor.",
+  "score": 1.0
+ },
+ "oastm_01": {
+  "subfield": "steel",
+  "title": "Grain boundary excess volume and defect annealing of copper after high - pressure torsion",
+  "pmcid": "PMC3990421",
+  "pmid": "24748848",
+  "doi": "10.1016/j.actamat.2013.12.036",
+  "matched_title": "Grain boundary excess volume and defect annealing of copper after high-pressure torsion.",
+  "score": 1.0
+ },
+ "oastm_02": null,
+ "oastm_03": null,
+ "oastm_04": null,
+ "oastm_05": null,
+ "oastm_06": null,
+ "oastm_07": null,
+ "oastm_08": null,
+ "oastm_09": null,
+ "oastm_10": null,
+ "oastm_11": null,
+ "pemfc_02": null,
+ "pemfc_03": null,
+ "pemfc_04": {
+  "subfield": "pemfc",
+  "title": "Full Parametric Study of the Influence of Ionomer Content , Catalyst Loading and Catalyst Type on Oxygen and Ion Transport in PEM Fuel Cell Catalyst Layers",
+  "pmcid": "PMC7180721",
+  "pmid": "32230750",
+  "doi": "10.3390/molecules25071523",
+  "matched_title": "Full Parametric Study of the Influence of Ionomer Content, Catalyst Loading and Catalyst Type on Oxygen and Ion Transport in PEM Fuel Cell Catalyst Layers.",
+  "score": 1.0
+ },
+ "pemfc_07": null,
+ "pemfc_08": null,
+ "pemfc_10": null,
+ "pemfc_13": null,
+ "pemfc_14": {
+  "subfield": "pemfc",
+  "title": "Transport and Electrochemical Interface Properties of Ionomers in Low - Pt Loading Catalyst Layers : Effect of Ionomer Equivalent Weight and Relative Humidity",
+  "pmcid": "PMC7435395",
+  "pmid": "32722653",
+  "doi": "10.3390/molecules25153387",
+  "matched_title": "Transport and Electrochemical Interface Properties of Ionomers in Low-Pt Loading Catalyst Layers: Effect of Ionomer Equivalent Weight and Relative Humidity.",
+  "score": 1.0
+ },
+ "poly_01": {
+  "subfield": "poly",
+  "title": "Experimental Characterization and Simulation of Thermoplastic Polymer Flow Hesitation in Thin - Wall Injection Molding Using Direct In - Mold Visualization Technique",
+  "pmcid": "PMC7231364",
+  "pmid": "32325915",
+  "doi": "10.3390/mi11040428",
+  "matched_title": "Experimental Characterization and Simulation of Thermoplastic Polymer Flow Hesitation in Thin-Wall Injection Molding Using Direct In-Mold Visualization Technique.",
+  "score": 1.0
+ },
+ "poly_02": {
+  "subfield": "poly",
+  "title": "Molecular Dynamics Simulation on the Interfacial Behavior of Over - Molded Hybrid Fiber Reinforced Thermoplastic Composites",
+  "pmcid": "PMC7361982",
+  "pmid": "32498238",
+  "doi": "10.3390/polym12061270",
+  "matched_title": "Molecular Dynamics Simulation on the Interfacial Behavior of Over-molded Hybrid Fiber Reinforced Thermoplastic Composites.",
+  "score": 1.0
+ },
+ "poly_04": {
+  "subfield": "poly",
+  "title": "Radial Basis Function Neural Network - Based Modeling of the Dynamic Thermo - Mechanical Response and Damping Behavior of Thermoplastic Elastomer Systems",
+  "pmcid": "PMC6631236",
+  "pmid": "31234362",
+  "doi": "10.3390/polym11061074",
+  "matched_title": "Radial Basis Function Neural Network-Based Modeling of the Dynamic Thermo-Mechanical Response and Damping Behavior of Thermoplastic Elastomer Systems.",
+  "score": 1.0
+ },
+ "poly_05": {
+  "subfield": "poly",
+  "title": "Modeling the Temperature Dependence of Dynamic Mechanical Properties and Visco - Elastic Behavior of Thermoplastic Polyurethane Using Artificial Neural Network",
+  "pmcid": "PMC6418911",
+  "pmid": "30965826",
+  "doi": "10.3390/polym9100519",
+  "matched_title": "Modeling the Temperature Dependence of Dynamic Mechanical Properties and Visco-Elastic Behavior of Thermoplastic Polyurethane Using Artificial Neural Network.",
+  "score": 1.0
+ },
+ "poly_07": null,
+ "poly_09": null,
+ "poly_11": null,
+ "semi_01": null,
+ "semi_02": null,
+ "semi_03": null,
+ "semi_04": null,
+ "semi_05": null,
+ "semi_06": null,
+ "semi_08": null,
+ "sofc_01": {
+  "subfield": "sofc",
+  "title": "Rational Design of a Water - Storable Hierarchical Architecture Decorated with Amorphous Barium Oxide and Nickel Nanoparticles as a Solid Oxide Fuel Cell Anode with Excellent Sulfur Tolerance",
+  "pmcid": "PMC5700654",
+  "pmid": "29201629",
+  "doi": "10.1002/advs.201700337",
+  "matched_title": "Rational Design of a Water-Storable Hierarchical Architecture Decorated with Amorphous Barium Oxide and Nickel Nanoparticles as a Solid Oxide Fuel Cell Anode with Excellent Sulfur Tolerance.",
+  "score": 1.0
+ },
+ "sofc_02": {
+  "subfield": "sofc",
+  "title": "Micro solid oxide fuel cell fabricated on porous stainless steel : a new strategy for enhanced thermal cycling ability",
+  "pmcid": "PMC4772004",
+  "pmid": "26928921",
+  "doi": "10.1038/srep22443",
+  "matched_title": "Micro solid oxide fuel cell fabricated on porous stainless steel: a new strategy for enhanced thermal cycling ability.",
+  "score": 1.0
+ },
+ "sofc_03": null,
+ "sofc_04": {
+  "subfield": "sofc",
+  "title": "3D Self‐Architectured Steam Electrode Enabled Efficient and Durable Hydrogen Production in a Proton‐Conducting Solid Oxide Electrolysis Cell at Temperatures Lower Than 600 ° C",
+  "pmcid": "PMC6247067",
+  "pmid": "30479914",
+  "doi": "10.1002/advs.201800360",
+  "matched_title": "3D Self-Architectured Steam Electrode Enabled Efficient and Durable Hydrogen Production in a Proton-Conducting Solid Oxide Electrolysis Cell at Temperatures Lower Than 600 °C.",
+  "score": 1.0
+ },
+ "steel_03": null,
+ "steel_04": null,
+ "steel_05": {
+  "subfield": "steel",
+  "title": "Effect of Annealing Time and Temperature Parameters on the Microstructure , Hardness , and Strain - Hardening Coefficients of 42CrMo4 Steel",
+  "pmcid": "PMC7254350",
+  "pmid": "32357455",
+  "doi": "10.3390/ma13092022",
+  "matched_title": "Effect of Annealing Time and Temperature Parameters on the Microstructure, Hardness, and Strain-Hardening Coefficients of 42CrMo4 Steel.",
+  "score": 1.0
+ },
+ "steel_06": null,
+ "steel_07": null,
+ "steel_08": null,
+ "steel_11": {
+  "subfield": "steel",
+  "title": "Effect of Pre - Corrosion Pits on Residual Fatigue Life for 42CrMo Steel",
+  "pmcid": "PMC6650920",
+  "pmid": "31269733",
+  "doi": "10.3390/ma12132130",
+  "matched_title": "Effect of Pre-Corrosion Pits on Residual Fatigue Life for 42CrMo Steel.",
+  "score": 1.0
+ }
+}
