@@ -2905,6 +2905,10 @@ this on the GPU. Nothing else in the design changes.
   minutes after its bundle was ready. It started at once. Its log showed every
   setup step within 1.0 minute (383 results files in place) and the repeat
   `smokeam` done in 1.25 minutes.
+- *02:31: the first held-out subfield of `w11a` done on both lanes*
+  (electrolysis: 3 teachers, the tagging of the fold's unused sentences and 5
+  students per lane, 22.4 and 22.9 minutes, no error in the log). At that
+  pace the session ends around 04:35, within this week's quota.
 
 **Outcome of part 1: 3 of the 6 decisions pass; the combination's vote is
 the strongest fine-grained system on unseen papers, but S2 fails at both
