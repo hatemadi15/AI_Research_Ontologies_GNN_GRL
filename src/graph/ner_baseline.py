@@ -100,9 +100,14 @@ m<offset> --seed-offset <offset>), and each record stores the teachers' scores.
 With `--augment-mentions K --augment-names` (week 11) the students do not train on the silver
 sentences: each trains on the gold sentences and their mention replacement copies, whose
 replacement pool also holds the mentions of the silver sentences, names from outside the
-training sentences (files `_crf_mrs_m<offset>`). `--self-train unused` (with --train-pool,
-MuLMS) takes as the corpus, per fold, the sentences in none of its parts, without their tags;
-`--subfields` runs only some folds of --leave-one-subfield-out.
+training sentences (files `_crf_mrs_m<offset>`). With `--silver-mentions` the names are those
+of the silver mentions instead: a span that every teacher tags as the same entity, each of its
+tags with a marginal of at least 0.9 under each teacher, whatever the rest of the sentence
+(files `_crf_mrm_m<offset>`); `--names-tag LABEL` names the corpus in the variant
+(`_crf_mrm_<label>_m<offset>`). `--self-train unused` (with --train-pool, MuLMS) takes as the
+corpus, per fold, the sentences in none of its parts, without their tags; `--subfields` runs
+only some folds of --leave-one-subfield-out. A MuLMS corpus holds words separated by spaces
+(build_topic_corpus.py).
 
 `--context N` (week-6 protocol) encodes each sentence between up to N subwords of the
 neighbouring sentences of the same paper and part on each side (FLERT) and tags only the
@@ -973,8 +978,8 @@ def self_training_corpus(path, size=SELF_TRAIN_SAMPLE, seed=SELF_TRAIN_SEED, spa
 
 def spaced_corpus(args):
     """True when the --self-train corpus holds words separated by spaces: SOFC-Exp's
-    granularities (build_sofc_corpus.py)."""
-    return args.granularity in (*SOFC, 'sofc_both')
+    granularities (build_sofc_corpus.py) and MuLMS (build_topic_corpus.py)."""
+    return args.granularity in (*SOFC, 'sofc_both', 'mulms')
 
 
 def fit_sample(tokenizer, sample, max_length):
@@ -1233,6 +1238,21 @@ def name_coverage(names, train, test):
             'n_test_unseen_in_silver': sum(m in silver for m in unseen)}
 
 
+def silver_mention_names(sentences, votes, threshold=None):
+    """(type, words) of the silver mentions (--silver-mentions), in order: a span that every
+    teacher tags as the same entity (entity_spans of each teacher's tags agree on its start,
+    end and type), each of its tags with a marginal of at least `threshold` (SILVER_THRESHOLD)
+    under each teacher. votes: per sentence, per teacher (tags, least marginal, marginals)."""
+    threshold = SILVER_THRESHOLD if threshold is None else threshold
+    names = []
+    for words, teachers in zip(sentences, votes):
+        common = set.intersection(*(set(entity_spans(tags)) for tags, _, _ in teachers))
+        for start, end, kind in sorted(common):
+            if all(min(marginals[start:end]) >= threshold for _, _, marginals in teachers):
+                names.append((kind, tuple(words[start:end])))
+    return names
+
+
 UNUSED_CORPUS = 'unused'      # --self-train unused: a fold's sentences in none of its parts
 
 
@@ -1271,7 +1291,8 @@ def train_with_teachers(seed, offsets, train, val, test, labels, args, device, s
         if sentences is None:      # one tokenizer for all teachers
             sentences, n_skipped = fit_sample(tagger.tokenizer, sample,
                                               tagger.model.config.max_position_embeddings)
-        out = [(tuple(tags), min(marginals))
+        keep = getattr(args, 'silver_mentions', False)      # per-word marginals for the names
+        out = [(tuple(tags), min(marginals), tuple(marginals) if keep else None)
                for tags, marginals in teacher_tags(tagger, sentences, args.batch_size, device)]
         del tagger
         if str(device).startswith('cuda'):
@@ -1282,17 +1303,20 @@ def train_with_teachers(seed, offsets, train, val, test, labels, args, device, s
                          'test_f1': record['f1'], 'test_f1_strict': record['f1_strict'],
                          'test_macro_f1': round(F1_AVERAGES['macro'](record), 2),
                          'best_epoch': record['best_epoch'],
-                         'n_silver_alone': sum(is_silver(t, [m]) for t, m in out)})
+                         'n_silver_alone': sum(is_silver(t, [m]) for t, m, _ in out)})
         print(f"    teacher seed {seed + offset}: val F1 {record['val_f1']:.2f}, test F1 "
               f"{record['f1']:.2f}; {teachers[-1]['n_silver_alone']} silver alone of "
               f"{len(sentences)} tagged", flush=True)
     per_sentence = list(zip(*tagged))
     silver = [(words, list(votes[0][0])) for words, votes in zip(sentences, per_sentence)
-              if unanimous_silver(votes)]
-    n_agreed = sum(all(t == votes[0][0] for t, _ in votes) for votes in per_sentence)
+              if unanimous_silver([(t, m) for t, m, _ in votes])]
+    n_agreed = sum(all(t == votes[0][0] for t, *_ in votes) for votes in per_sentence)
     print(f"    {len(silver)} silver of {len(sentences)} tagged sentences ({n_agreed} tagged "
           f"alike; {n_skipped} of {len(sample)} sampled skipped); students:", flush=True)
-    names = silver_mentions(silver) if getattr(args, 'augment_names', False) else None
+    names = None
+    if getattr(args, 'augment_names', False):
+        names = (silver_mention_names(sentences, per_sentence)
+                 if getattr(args, 'silver_mentions', False) else silver_mentions(silver))
     coverage = name_coverage(names, train, test) if names is not None else None
     students = {}
     for offset in offsets if student_offsets is None else student_offsets:
@@ -1311,6 +1335,8 @@ def train_with_teachers(seed, offsets, train, val, test, labels, args, device, s
             'teachers': teachers}
         if names is not None:
             student['self_training']['names'] = coverage
+            student['self_training']['silver_filter'] = (
+                'mentions' if getattr(args, 'silver_mentions', False) else 'sentences')
         students[offset] = student
     return students
 
@@ -1819,13 +1845,15 @@ RESULT_FILE = re.compile(r'ner_results_(fine|coarse|sofc_slot|sofc|mulms)'
 PLAIN_VARIANTS = ('baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_st', 'crf_mt_ls', 'crf_st3',
                   'crf_ctx', 'crf_mt_st3', 'crf_mt_ctx', 'crf_mr', 'crf_bias', 'crf_mt_bias',
                   'crf_ls_bias', 'crf_mt_ls_bias', 'crf_ctx_bias', 'crf_mt_ctx_bias',
-                  'crf_mr_bias', 'crf_eb', 'crf_ebv', 'crf_p3n2', 'crf_mt_mr', 'crf_mrs')
+                  'crf_mr_bias', 'crf_eb', 'crf_ebv', 'crf_p3n2', 'crf_mt_mr', 'crf_mrs',
+                  'crf_mrm')
 
 
 def variant_name(args):
     """Variant of a run: 'baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_mt_ls', 'crf_st' or
-    'crf_st<N>', 'crf_mt_st<N>', 'crf_ctx', 'crf_mt_ctx', 'crf_mr', 'crf_mt_mr' or 'crf_mrs'
-    (--augment-names), with _bias for --entity-bias (crf_bias, crf_ctx_bias), then the tag.
+    'crf_st<N>', 'crf_mt_st<N>', 'crf_ctx', 'crf_mt_ctx', 'crf_mr', 'crf_mt_mr', 'crf_mrs'
+    (--augment-names) or 'crf_mrm' (with --silver-mentions), these two plus _<names tag>, with
+    _bias for --entity-bias (crf_bias, crf_ctx_bias), then the tag.
 
     'cw' is --class-weights, 'crf_mt' is --crf --multi-task, 'crf_ls' is --crf
     --label-semantics, 'crf_mt_ls' both, 'crf_st' is --crf --self-train and 'crf_st<N>' that
@@ -1847,7 +1875,9 @@ def variant_name(args):
         if getattr(args, 'augment_mentions', 0):
             name = 'crf_mt_mr' if multi_task else 'crf_mr'
         if getattr(args, 'augment_names', False):
-            name = 'crf_mrs'
+            name = 'crf_mrm' if getattr(args, 'silver_mentions', False) else 'crf_mrs'
+            if getattr(args, 'names_tag', None):
+                name = f'{name}_{args.names_tag}'
         if getattr(args, 'two_paper_size', False):
             name = 'crf_p3n2'
         if hasattr(args, 'entity_bias'):
@@ -2971,6 +3001,15 @@ def parse_args(argv=None):
                              'silver sentences (names from outside the training sentences); '
                              'the silver sentences are not trained on (files tagged '
                              '_crf_mrs_m<offset>; ROADMAP §4, week 11)')
+    parser.add_argument('--silver-mentions', action='store_true', default=argparse.SUPPRESS,
+                        help='with --augment-names: the names of the silver mentions, spans '
+                             'every teacher tags as the same entity with every tag confident, '
+                             'whatever the rest of the sentence, instead of the mentions of '
+                             'the silver sentences (files tagged _crf_mrm; ROADMAP §4, week 12)')
+    parser.add_argument('--names-tag', type=tag_name, default=argparse.SUPPRESS, metavar='LABEL',
+                        help='with --augment-names: a label of the corpus the names come from, '
+                             'appended to the variant (crf_mrm_<label>); lowercase letters and '
+                             'digits')
     parser.add_argument('--entity-bias', type=float, nargs='+', default=argparse.SUPPRESS,
                         metavar='D',
                         help='with --crf: decode the test and validation sentences again with D '
@@ -3153,6 +3192,9 @@ def parse_args(argv=None):
                          '--teachers (the teachers tag the names)')
         if getattr(args, 'multi_task', False):
             parser.error('--augment-names is not available with --multi-task')
+    for option in ('silver_mentions', 'names_tag'):
+        if hasattr(args, option) and not getattr(args, 'augment_names', False):
+            parser.error(f"--{option.replace('_', '-')} needs --augment-names")
     if hasattr(args, 'entity_bias'):
         if not args.crf:
             parser.error('--entity-bias needs --crf (it shifts the emissions of the Viterbi '

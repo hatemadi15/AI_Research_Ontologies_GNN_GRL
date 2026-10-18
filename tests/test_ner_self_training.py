@@ -787,3 +787,81 @@ def test_without_silver_names_a_student_is_the_mention_replacement_run(tiny_run,
         mr = _load(tmp_path, f'ner_results_fine_random_split_vary_crf_mr_m{offset}.json')
         keys = (*RESULT_KEYS, 'test_pred', 'n_augmented')
         assert {k: mr['runs'][0][k] for k in keys} == {k: mrs['runs'][0][k] for k in keys}
+
+
+# --- silver mentions and the names tag (week 12)
+
+def test_silver_mention_names_need_every_teacher_confident_on_the_span():
+    """A span counts when every teacher tags it as the same entity with every tag at 0.9 or
+    more, whatever the rest of the sentence; a teacher with another span or a low marginal
+    drops it."""
+    sentences = [['Ti', 'alloy', 'at', '300', 'K'], ['steel', 'bar'], ['Ni', 'foam']]
+    sure = (0.95, 0.99, 0.5, 0.97, 0.96)                    # 'at' uncertain: no silver sentence
+    votes = [[(('B-MAT', 'I-MAT', 'O', 'B-COND', 'I-COND'), 0.5, sure)] * 3,
+             # the third teacher ends the entity after 'steel'
+             [(('B-MAT', 'I-MAT'), 0.95, (0.95, 0.95)), (('B-MAT', 'I-MAT'), 0.95, (0.95, 0.95)),
+              (('B-MAT', 'O'), 0.95, (0.95, 0.95))],
+             # the second teacher is not sure of 'foam'
+             [(('B-MAT', 'I-MAT'), 0.9, (0.99, 0.9)), (('B-MAT', 'I-MAT'), 0.8, (0.99, 0.8)),
+              (('B-MAT', 'I-MAT'), 0.9, (0.99, 0.9))]]
+    assert nb.silver_mention_names(sentences, votes) == [('MAT', ('Ti', 'alloy')),
+                                                         ('COND', ('300', 'K'))]
+    # at a lower threshold the foam counts
+    assert nb.silver_mention_names(sentences, votes, threshold=0.8)[-1] == ('MAT', ('Ni', 'foam'))
+
+
+def test_silver_mentions_parser_and_variant(tmp_path, capsys):
+    corpus = str(_corpus(tmp_path))
+    base = ['--leave-one-paper-out', '--crf', '--self-train', corpus, '--teachers', '3',
+            '--augment-mentions', '3']
+    for argv, error in ((['--leave-one-paper-out', '--crf', '--silver-mentions'],
+                         '--silver-mentions needs --augment-names'),
+                        (['--leave-one-paper-out', '--crf', '--names-tag', 'topic'],
+                         '--names-tag needs --augment-names'),
+                        ([*base, '--augment-names', '--names-tag', 'Topic!'], 'invalid')):
+        with pytest.raises(SystemExit):
+            nb.parse_args(argv)
+        assert error in capsys.readouterr().err
+    args = nb.parse_args([*base, '--augment-names', '--silver-mentions', '--names-tag', 'topic'])
+    assert nb.variant_name(SimpleNamespace(**{**vars(args), 'tag': 'm100'})) == 'crf_mrm_topic_m100'
+    args = nb.parse_args([*base, '--augment-names', '--names-tag', 'fatigue'])
+    assert nb.variant_name(SimpleNamespace(**{**vars(args), 'tag': 'm0'})) == 'crf_mrs_fatigue_m0'
+    assert nb.spaced_corpus(SimpleNamespace(granularity='mulms'))
+    assert not nb.spaced_corpus(SimpleNamespace(granularity='fine'))
+
+
+def test_students_with_silver_mentions(tiny_run, tmp_path, monkeypatch):
+    """--silver-mentions: the names are the silver mentions, which include every mention of a
+    silver sentence; the record says which filter was used and the variant carries the names
+    tag."""
+    corpus = _corpus(tmp_path)
+    monkeypatch.setattr(nb, 'SILVER_THRESHOLD', 0.0)     # every agreed tag counts
+    seen = {}
+    for name in ('silver_mentions', 'silver_mention_names'):
+        original = getattr(nb, name)
+
+        def recording(*args, _name=name, _original=original, **kwargs):
+            seen[_name] = _original(*args, **kwargs)
+            return seen[_name]
+        monkeypatch.setattr(nb, name, recording)
+    flags = ('--vary-split', '--seeds', '0')
+    common = ('--crf', '--self-train', str(corpus), '--teachers', '2', '--self-train-sample',
+              '0', '--augment-mentions', '2', '--augment-names', *flags, '--save-predictions')
+    calls = list(tiny_run(*common, '--silver-mentions', '--names-tag', 'toy'))
+    assert 'silver_mentions' not in seen and 'silver_mention_names' in seen
+    names = seen['silver_mention_names']
+    for offset, student in zip((0, 100), calls[2:]):
+        res = _load(tmp_path, f'ner_results_fine_random_split_vary_crf_mrm_toy_m{offset}.json')
+        assert res['variant'] == f'crf_mrm_toy_m{offset}'
+        assert (res['config']['silver_mentions'], res['config']['names_tag']) == (True, 'toy')
+        info = res['runs'][0]['self_training']
+        assert info['silver_filter'] == 'mentions' and info['names']['n_mentions'] == len(names)
+        assert student['augmented'] is not None and student['silver'] is None
+    # the sentence-level names (sentences whose every tag the teachers agree on) are among
+    # the mention-level ones (spans they agree on)
+    monkeypatch.setattr(nb, 'PROCESSED_DIR', str(tmp_path / 'sentences'))
+    calls = list(tiny_run(*common))
+    assert set(seen['silver_mentions']) <= set(names)
+    assert len(seen['silver_mentions']) <= len(names)
+    res = _load(tmp_path / 'sentences', 'ner_results_fine_random_split_vary_crf_mrs_m0.json')
+    assert res['runs'][0]['self_training']['silver_filter'] == 'sentences'
