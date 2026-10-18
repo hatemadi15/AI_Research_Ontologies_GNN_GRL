@@ -2901,6 +2901,10 @@ this on the GPU. Nothing else in the design changes.
   corpus's SHA-256 is the bundle's), and the record counts the paper's 173
   test entities, 129 of them unseen. Its 963 copies equal those of week 7's
   mention replacement run of seed 0 on that paper.
+- *01:50: week 11, part `w11a` pushed* to `ner-gpu-jobs-d` (version 5), 31
+  minutes after its bundle was ready. It started at once. Its log showed every
+  setup step within 1.0 minute (383 results files in place) and the repeat
+  `smokeam` done in 1.25 minutes.
 
 **Outcome of part 1: 3 of the 6 decisions pass; the combination's vote is
 the strongest fine-grained system on unseen papers, but S2 fails at both
