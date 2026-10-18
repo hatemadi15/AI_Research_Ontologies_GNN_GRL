@@ -3218,3 +3218,30 @@ The single model passes on MaterioMiner at both granularities but not on
 MuLMS. The vote against the seed vote passes on MuLMS but not
 coarse-grained on MaterioMiner (+2.26 [−0.12, +4.64]); fine-grained it
 gained +3.61 [+1.71, +5.52] there (reported, not a decision).
+
+### Candidates for week 11 (18 October; not a protocol)
+
+Written after week 10's decisions, from the list written before week 9 (its
+items 1, 3 and 4, renumbered) and one new item.
+1. **Extra corpora, each with its own head** (item 1 before). Outside
+   evidence is against it (Schrader et al., 2023, Table 11). A screen at
+   most, and only if the others fail.
+2. **A vote across methods** (item 3 before). It needs no training, but it
+   has no route to a repeat on a second corpus. MuLMS has one level of
+   types, so it has no multi-task members. On SOFC-Exp mention replacement
+   ran only at the entity level, where none of the members gains. Not
+   chosen.
+3. **Mention replacement with names from outside the training papers**
+   (item 4 before): the names in sentences that three CRF teachers tag
+   alike and confidently in unlabeled in-domain text join the replacement
+   pool. Week 10 shows the setting it is meant for. On a held-out MuLMS
+   subfield most names are unseen (88%) and hard to find (39%), and
+   mention replacement with the training sentences' names gained +2.10
+   without passing. On MaterioMiner the text is the 40,000-sentence
+   fatigue corpus of self-training. On MuLMS it is the training subfields'
+   sentences outside the 400-sentence pool, without their labels. It
+   reuses the multi-teacher machinery of week 5. **Chosen for week 11.**
+4. **Names from the test documents themselves** (new): the teachers tag the
+   held-out paper's or subfield's own sentences, and their names join the
+   pool. Not chosen: it uses the test sentences at training time, a
+   different setting from every other week.
