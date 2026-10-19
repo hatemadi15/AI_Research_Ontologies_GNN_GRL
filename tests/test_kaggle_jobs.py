@@ -609,6 +609,26 @@ def test_run_jobs_limits_the_setup_commands(monkeypatch, capsys):
     assert capsys.readouterr().out == 'setup: pip install (1.5 min)\n'
 
 
+def test_environment_record_without_nvidia_smi_and_on_a_tpu(monkeypatch):
+    """A TPU VM has no nvidia-smi: the record says so instead of ending the setup (the first
+    TPU session died there); with device xla the command is not even tried."""
+    rj = _run_jobs()
+    calls = []
+
+    def fake_run(cmd, **kwargs):
+        calls.append(cmd[0])
+        if cmd[0] == 'nvidia-smi':
+            raise FileNotFoundError(2, 'No such file or directory', 'nvidia-smi')
+        return SimpleNamespace(stdout='2.9.0 None 5.18.0\n', stderr='', returncode=0)
+    monkeypatch.setattr(rj.subprocess, 'run', fake_run)
+    env = rj.environment()
+    assert env['nvidia_smi'].startswith('not found') and env['torch_xla'] == '2.9.0 None 5.18.0'
+    assert env['torch_cuda_transformers'] == '2.9.0 None 5.18.0' and 'nvidia-smi' in calls
+    calls.clear()
+    env = rj.environment('xla')
+    assert env['nvidia_smi'] == 'skipped: xla' and 'nvidia-smi' not in calls
+
+
 def test_cpu_runs_record_no_environment():
     assert nb.run_environment('cpu') is None
 

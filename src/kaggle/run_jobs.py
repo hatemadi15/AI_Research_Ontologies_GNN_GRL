@@ -305,21 +305,27 @@ def run_lane(lane, jobs, manifest, deadline, logs, processed, stop_at=None, devi
         print(f'lane {lane} job {k}: {record["status"]} in {record["minutes"]} min', flush=True)
 
 
-def environment():
+def environment(device=None):
+    """The session's software: python, torch, transformers, torch_xla (a TPU: its device type
+    and chips), nvidia-smi (a GPU; 'not found' without it), pip freeze and Kaggle's variables."""
     def run(cmd):
         try:
             out = subprocess.run(cmd, capture_output=True, text=True,
                                  timeout=TIMEOUTS['environment'])
         except subprocess.TimeoutExpired:
             return 'timed out'
-        return out.stdout.strip()
+        except OSError as exc:                     # no such command (nvidia-smi on a TPU VM)
+            return f'not found: {exc}'
+        return (out.stdout + out.stderr).strip() if out.returncode else out.stdout.strip()
     torch_info = run([sys.executable, '-c',
                       'import torch, transformers; print(torch.__version__, torch.version.cuda, '
                       'transformers.__version__)'])
-    xla_info = run([sys.executable, '-c', 'import torch_xla; print(torch_xla.__version__)'])
+    xla_info = run([sys.executable, '-c',
+                    'import torch_xla, torch_xla.runtime as xr; print(torch_xla.__version__, '
+                    'xr.device_type(), xr.addressable_device_count())'])
     return {'python': sys.version.split()[0], 'torch_cuda_transformers': torch_info,
             'torch_xla': xla_info or None,
-            'nvidia_smi': run(['nvidia-smi']),
+            'nvidia_smi': 'skipped: xla' if device == 'xla' else run(['nvidia-smi']),
             'pip_freeze': run([sys.executable, '-m', 'pip', 'freeze']).splitlines(),
             **{k: os.environ.get(k) for k in ENV_KEYS}}
 
@@ -373,7 +379,7 @@ def main(spec):
             **({'sofc_corpus_sha256': sofc_digest} if sofc_digest else {}),
             **({'mulms_files': mulms} if mulms else {}),
             **({'topic_corpora': topics} if topics else {}), 'restored': restored,
-            'models': pinned, 'environment': environment(),
+            'models': pinned, 'environment': environment(device),
             'setup_minutes': round((time.time() - started) / 60, 2)}))
         setup_step(started, 'environment recorded; the lanes start')
         deadline = started + 3600 * spec.get('deadline_hours', 10)
