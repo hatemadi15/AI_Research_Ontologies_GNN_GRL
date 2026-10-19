@@ -3680,6 +3680,7 @@ stay local.
 
 | Subfield | Teachers' test F1 (CPU) | Sentence filter 0.9: names, coverage, fill | Mention filter 0.9: names, coverage, fill | Mention filter 0.7: coverage, fill | Gold unseen names: fill / override |
 |---|---|---|---|---|---|
+| pemfc | 44.4, 51.1, 52.9 | 300, 19.2%, +3.16 | 6,259, 29.4%, +3.97 | 37.6%, −0.44 | −10.51 / −5.91 |
 | sofc | 53.4, 51.9, 51.2 | 340, 25.8%, +5.79 | 4,344, 34.4%, +5.91 | 45.8%, +5.96 | +15.16 / +27.06 |
 | steel | 55.2, 58.2, 58.6 | 667, 13.3%, +0.01 | 7,913, 25.0%, −10.03 | 32.5%, −13.18 | −1.82 / +4.13 |
 
@@ -3717,6 +3718,23 @@ the screen can detect, and on sofc the dictionary rule (+5.9 at the
 protocol's filters) is the cheap baseline the week-12 variants must beat;
 it will be reported next to them. Whether the protocol's threshold (0.9)
 or filter should change is decided after the seven subfields are in.
+
+*Reading, pemfc.* A third pattern. The corpus holds 73.9% of pemfc's
+unseen test names; the mention filter at 0.9 admits 29.4% (6,259 names;
+9,604 MAT and 10,248 VALUE mentions among 20,605), the sentence filter
+19.2% (300 names). The held-out CRF head (10 seeds: precision 60.5, recall
+42.9, F1 50.0) gains from the 0.9 lexicons as a fill (+4.0 mention, +3.2
+sentence, on all 10 seeds) and loses from everything looser (mention 0.7
+−0.4, 0.5 −4.1; every override negative), and loses most from the gold
+names themselves (the unseen gold names fill to −10.5, override to −5.9):
+in pemfc's documents the same string is an entity in one sentence and not
+in the next, so the complete name list is poison while the teachers'
+unanimous, confident names, the strings that are entities wherever they
+occur, make a usable gazetteer. *So far (3 of 7).* The threshold 0.9 is
+the right end of its range on every subfield seen (0.7 helps only on
+sofc); the agreement filter selects what a gold list cannot; the two
+filters are not yet separable (the mention filter at 0.9 is at least as
+good as the sentence filter on sofc and pemfc, both are harmful on steel).
 
 ### Week 12 protocol: names from a topic corpus (fixed before any run)
 
