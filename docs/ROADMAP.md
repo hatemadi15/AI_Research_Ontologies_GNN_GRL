@@ -3596,6 +3596,39 @@ mention-level filter is a candidate for the screen.
   test that amendment 1 had made obsolete); the branch restarted from
   `main`.
 
+### Week 12, the CPU probe (19–20 October; not a protocol): what the silver filter admits, and the dictionary ceiling
+
+`silver_lexicon.py` (`docs/METHODS_PLAN.md` §4B), per held-out subfield: the
+fold's 3 CRF teachers trained here on the CPU (their numbers differ from
+the GPU's), the subfield's topic corpus tagged, the lexicon of each filter
+at thresholds 0.9, 0.7 and 0.5, its coverage of the subfield's unseen test
+names (phase 0 measured what the corpus holds; this is the pool a student
+would see), and the dictionary rule on week 10's saved CRF predictions (10
+seeds): every verbatim match of a lexicon name tagged as its entity where
+the model tagged O (fill) or whatever it tagged (override); the gold names
+as the leaky ceilings. `results/silver_lexicons/<subfield>.json`; the names
+stay local.
+
+| Subfield | Teachers' test F1 (CPU) | Sentence filter 0.9: names, coverage, fill | Mention filter 0.9: names, coverage, fill | Mention filter 0.7: coverage, fill | Gold unseen names: fill / override |
+|---|---|---|---|---|---|
+| steel | 55.2, 58.2, 58.6 | 667, 13.3%, +0.01 | 7,913, 25.0%, −10.03 | 32.5%, −13.18 | −1.82 / +4.13 |
+
+*Reading, steel.* The corpus holds 55.0% of steel's unseen test names; the
+mention filter at 0.9 admits 25.0% of them (7,913 names, 14,280 MAT and
+11,224 VALUE mentions among 29,420), the sentence filter 13.3% (week 11's
+cross-subfield names held 4.4%). SAMPLE and DEV are absent from every
+lexicon (0 and 1 mentions at 0.9): the teachers do not find them in the
+corpus either. As a dictionary the lexicon is harmful: filling the CRF
+head's O tags with the 0.9 mention lexicon moves precision from 61.3 to
+39.7 and recall from 53.2 to 57.3 (−10.0 F1), and even the gold unseen
+names fill to 42.0 precision and 76.3 recall (−1.8; overriding, +4.1). A
+string that is an entity somewhere in steel's documents is usually not one
+where it occurs next, so no gazetteer can help there and a names method
+must keep the context's say; whether mention replacement, which swaps
+names only inside gold entity contexts, raises recall without that
+precision loss is what the screen measures (its precision and recall will
+be reported with it).
+
 ### Week 12 protocol: names from a topic corpus (fixed before any run)
 
 Fixed on 18 October, after phase 0's gate above and before any run of week
