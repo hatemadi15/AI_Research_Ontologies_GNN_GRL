@@ -3640,6 +3640,14 @@ mention-level filter is a candidate for the screen.
   `w12a` 14.6, `w12c` 3.2, `w12b` 7, the MaterioMiner analogue 2.1), so
   the analogue would move to the following week. It is the user's call;
   nothing runs before 24 October either way.
+- The GPU quota was raised to 45 hours a week on 19 October (16.1 left
+  before the reset of 24 October). The order changes to use them: `w11b`
+  (bundle 77c37be, no dependency on the probe) is pushed at once; the names
+  variants of the screen (V1, V2, V4, V7) follow as soon as the probe's
+  seven-subfield reading fixes the filter and threshold (a third amendment
+  if it changes them) and the bundle is rebuilt, in two sessions (`w12c`
+  and the names part of `w12a`); V6 and the `crf_mr6` jobs, the decision
+  batch and the analogue run after the reset.
 
 ### Week 12, the CPU probe (19–20 October; not a protocol): what the silver filter admits, and the dictionary ceiling
 
@@ -3869,10 +3877,10 @@ selection rule and the same decisions for the winner:
 V7's option, variant and parser rules are in `ner_baseline.py` (48f37d3);
 its screen is the batch `w12c` (its 7 jobs over two lanes, about 3.2 GPU
 hours, after `w11b` on the lane `w12a` leaves free), its decision batch
-`w12b:gzm`. The budget of the week after the reset becomes about 29 of 30
-GPU hours (`w11b` 2.1, `w12a` 14.6, `w12c` 3.2, `w12b` 7, the MaterioMiner
-analogue 2.1), so the analogue moves to the following week if the quota
-runs short. The paths the change does not touch were checked
+`w12b:gzm`. The budget is about 29 GPU hours in all (`w11b` 2.1, `w12a`
+14.6, `w12c` 3.2, `w12b` 7, the MaterioMiner analogue 2.1); the quota was
+raised to 45 hours a week on 19 October (16.1 of them left before the
+reset), so nothing waits for a later week. The paths the change does not touch were checked
 byte-identical to 77c37be on the tiny corpora (`crf`, `mr`, `mt_mr`, `st3`,
 `mrs`, the MuLMS pool and unused-corpus runs), and the XLA path still
 repeats. The bundle of every week-12 batch is rebuilt from the commit

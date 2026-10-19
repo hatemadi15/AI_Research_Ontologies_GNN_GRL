@@ -186,9 +186,9 @@ mechanism or the lexicon carries the gain. If V7 wins the screen, the
 claim becomes "a lexicon harvested from the topic's unlabeled text,
 injected as a feature, improves NER on unseen topics", and mention
 replacement with the lexicon is its ablation; if an MR variant wins, V7 is
-the feature baseline the paper reports. Budget after the reset: about 29
-of 30 hours (`w11b` 2.1, `w12a` 14.6, `w12c` 3.2, `w12b` 7, the analogue
-2.1), the analogue moving to the following week if the quota runs short.
+the feature baseline the paper reports. Budget: about 29 hours in
+all (`w11b` 2.1, `w12a` 14.6, `w12c` 3.2, `w12b` 7, the analogue 2.1),
+within a quota raised to 45 hours a week on 19 October.
 The bundle is rebuilt from the commit that closes the probe.
 
 ### B. The CPU probe (this week, before any GPU hour)
@@ -264,7 +264,7 @@ all tested or ruled out, in `ROADMAP.md`.
 
 | Resource | Capacity | Used for | Rules |
 |---|---|---|---|
-| Kaggle T4 GPU | about 30 hours a week, reset Friday 00:00 UTC (next: 24 October); 12-hour sessions, 2 at a time | every pre-registered decision (comparable with the existing GPU references) | the existing bundle and batch rules |
+| Kaggle T4 GPU | 45 hours a week since 19 October (30 before; 16.1 left this week), reset Friday 00:00 UTC (next: 24 October); 12-hour sessions, 2 at a time | every pre-registered decision (comparable with the existing GPU references) | the existing bundle and batch rules |
 | Kaggle TPU v5e-8 | separate quota (20 hours a week historically; the account's settings show the current figure); 9-hour sessions; 8 cores | a bounded feasibility spike, then the ablations of §4C and any new reference family | TPU numbers are compared only with TPU numbers (as CPU with CPU, GPU with GPU) |
 | this environment's CPU | 4 cores, 15 GB; 2 lanes of 2 threads as in weeks 2–3: a 340-sentence CRF run in 15–20 minutes, tagging 40,000 sentences in about 75 minutes per teacher | the probe (§4B), corpus building, every analysis, CRF-only references if needed | results written per run and committed daily (the container can be reclaimed) |
 
@@ -305,7 +305,10 @@ GPU.
 **GPU budget, week of 24 October** (hours): `w11b` 2.1; `w12a` 14.6 (lane 0:
 V1 3.2, V4 3.2, one `crf_mr6` job 0.7; lane 1: V2 3.2, V6 3.0, two `crf_mr6`
 jobs 1.4; about 7.5 hours of wall time); `w12b` 7; the MaterioMiner analogue
-2.1 if decision 1 passes. Total about 26 of 30.
+2.1 if decision 1 passes. Total about 29 with amendment 2, of a quota raised to 45
+hours on 19 October; its 16.1 hours left before the reset go to `w11b` at once and
+to the names variants of the screen as soon as the probe's reading fixes the
+filter, so that the decision batch can run on 24 October.
 
 ## 6. Schedule and decision points
 
