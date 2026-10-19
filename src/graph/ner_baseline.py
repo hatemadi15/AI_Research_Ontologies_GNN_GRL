@@ -2465,9 +2465,8 @@ def xla_setup():
     the highest precision (fp32 on a TPU is bf16 passes otherwise), so that the numbers are
     the arithmetic's, not the precision's; the batches are padded to XLA_WIDTHS and training
     takes full batches only, so that each shape compiles once."""
-    import torch_xla
-    if hasattr(torch_xla, 'backends') and hasattr(torch_xla.backends, 'set_mat_mul_precision'):
-        torch_xla.backends.set_mat_mul_precision('highest')
+    import torch_xla.backends
+    torch_xla.backends.set_mat_mul_precision('highest')
 
 
 def xla_sync():
@@ -2521,13 +2520,13 @@ def run_environment(device):
     if is_xla(device):
         import torch
         import torch_xla
+        import torch_xla.backends
+        import torch_xla.runtime
         import transformers
-        precision = (torch_xla.backends.get_mat_mul_precision()
-                     if hasattr(torch_xla, 'backends')
-                     and hasattr(torch_xla.backends, 'get_mat_mul_precision') else None)
         return {'device': f'xla:{torch_xla.runtime.device_type()}', 'torch': torch.__version__,
                 'torch_xla': torch_xla.__version__, 'transformers': transformers.__version__,
-                'matmul_precision': precision, 'widths': list(XLA_WIDTHS)}
+                'matmul_precision': torch_xla.backends.get_mat_mul_precision(),
+                'widths': list(XLA_WIDTHS)}
     if not device.startswith('cuda'):
         return None
     import torch

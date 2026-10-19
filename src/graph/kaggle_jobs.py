@@ -150,6 +150,12 @@ bundle as topic_<topic>_sentences.txt; the screen, then the decision for its win
           and 3 or 4 of the students (offsets 300-500 and 600-900), mr6 one job per offset
           over the lanes (smokeap)
 
+The TPU spike (docs/METHODS_PLAN.md §5; every batch named tpu... runs on the TPU v5e-8, one
+lane per chip, its jobs with --device xla, its results in results/tpu/, a family of their own):
+  tpu-smoke  the same fine-grained CRF job (the 4 held-out papers, seed 0) on all 8 chips at
+          once (crf_tpua to crf_tpuh): the wall time per run on one chip while 8 run, and
+          whether the 8 files are identical
+
 Usage:
   python src/graph/kaggle_jobs.py quota
   python src/graph/kaggle_jobs.py bundle --commit HEAD
@@ -205,6 +211,11 @@ DEBERTA_PINS = {'pip': ('sentencepiece==0.2.2',),
 BATCH_EXTRAS = {'smoke5': DEBERTA_PINS, 'smoke6': DEBERTA_PINS, 'w6a': DEBERTA_PINS}
 THREADS = 2
 DEADLINE_HOURS = 10                 # no job starts later; a Kaggle session lasts 12 hours
+# the TPU spike (docs/METHODS_PLAN.md §5): a batch named tpu... runs on Kaggle's TPU v5e-8, one
+# lane per chip, with --device xla; its results are a family of their own (results/tpu/)
+TPU_LANES = 8
+TPU_DEADLINE_HOURS = 7              # a Kaggle TPU session lasts 9 hours
+TPU_RESULTS = ROOT / 'results' / 'tpu'
 RESULTS_PREFIX = 'gpu__'            # as in run_jobs.py
 PLACEHOLDER = 'JOBS = None   # the job spec; kaggle_jobs.py push replaces this line'
 
@@ -664,6 +675,12 @@ def batch_lanes(name):
         return [[repeat + ['--tag', 'smokeam']] +
                 [mrs_mulms_job(s, MRS_LANES[0]) for s in MULMS_SUBFIELD_NAMES],
                 [mrs_mulms_job(s, MRS_LANES[1]) for s in MULMS_SUBFIELD_NAMES]]
+    if name == 'tpu-smoke':
+        # the TPU spike: the same fine-grained CRF job (the 4 held-out papers, seed 0) on every
+        # chip at once, as crf_tpua to crf_tpuh: the wall time per run on one chip while 8 run,
+        # and whether the 8 files are identical
+        return [[job('fine', 'leave_one_paper_out', '--device', 'xla', tag=f'tpu{letter}')]
+                for letter in 'abcdefgh'[:TPU_LANES]]
     if name == 'w11b':
         # week 11 on MaterioMiner: one lane per granularity, a job per held-out paper
         return [[repeat + ['--tag', 'smokean']] + [mrs_paper_job('fine', p) for p in PAPERS],
@@ -711,7 +728,7 @@ def batch_lanes(name):
 BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'item3r',
            'smoke4', 'w5a', 'w5b', 'w5c', 'smoke5', 'smoke6', 'w6a', 'w6b', 'w7a', 'w7b',
            'w7c', 'w7d', 'w7e', 'w8a', 'w8b', 'w9a', 'w9b', 'w10a', 'w11a', 'w11b', 'w12a',
-           *(f'w12b:{v}' for v in WEEK12_VARIANTS))
+           *(f'w12b:{v}' for v in WEEK12_VARIANTS), 'tpu-smoke')
 
 
 def batch_extras(name):
@@ -753,6 +770,8 @@ def batch_spec(name):
                     if any(TOPIC_CORPUS.format(topic=t) in job for lane in lanes for job in lane))
     if topics:
         spec['topic_corpora'] = {t: corpus_sha256(TOPIC_REPORTS / f'{t}.json') for t in topics}
+    if is_tpu_batch(name):
+        spec.update({'gpu': None, 'device': 'xla', 'deadline_hours': TPU_DEADLINE_HOURS})
     return spec
 
 
@@ -764,15 +783,24 @@ def render_script(spec, template=None):
     return text.replace(PLACEHOLDER, f'JOBS = json.loads({json.dumps(json.dumps(spec))})')
 
 
-def kernel_metadata(user, kernel=KERNEL, dataset=DATASET):
+def kernel_metadata(user, kernel=KERNEL, dataset=DATASET, tpu=False):
     """kernel-metadata.json of a job kernel: private, GPU (T4 x2), internet, the bundle, and
-    the pinned Kaggle image."""
-    return {'id': f'{user}/{kernel}', 'title': kernel, 'code_file': 'run_jobs.py',
+    the pinned Kaggle image; with `tpu`, the TPU (v5e-8) and Kaggle's TPU environment instead
+    of the GPU and the pinned image."""
+    meta = {'id': f'{user}/{kernel}', 'title': kernel, 'code_file': 'run_jobs.py',
             'language': 'python', 'kernel_type': 'script', 'is_private': True,
-            'enable_gpu': True, 'enable_tpu': False, 'enable_internet': True,
+            'enable_gpu': not tpu, 'enable_tpu': tpu, 'enable_internet': True,
             'dataset_sources': [f'{user}/{dataset}'], 'competition_sources': [],
-            'kernel_sources': [], 'model_sources': [], 'machine_shape': MACHINE,
-            'docker_image': DOCKER_IMAGE, 'docker_image_pinning_type': 'original'}
+            'kernel_sources': [], 'model_sources': []}
+    if not tpu:
+        meta.update({'machine_shape': MACHINE, 'docker_image': DOCKER_IMAGE,
+                     'docker_image_pinning_type': 'original'})
+    return meta
+
+
+def is_tpu_batch(name):
+    """A batch that runs on the TPU (its name starts with tpu)."""
+    return name.startswith('tpu')
 
 
 def dataset_metadata(user, dataset=DATASET):
@@ -1014,8 +1042,9 @@ def cmd_push(args):
     with tempfile.TemporaryDirectory() as folder:
         Path(folder, 'run_jobs.py').write_text(render_script(spec))
         Path(folder, 'kernel-metadata.json').write_text(
-            json.dumps(kernel_metadata(user, args.kernel, args.dataset), indent=2))
-        timeout = str(int(3600 * (DEADLINE_HOURS + 1.5)))
+            json.dumps(kernel_metadata(user, args.kernel, args.dataset,
+                                       tpu=is_tpu_batch(args.batch)), indent=2))
+        timeout = str(int(3600 * (spec['deadline_hours'] + 1.5)))
         out = kaggle('kernels', 'push', '-p', folder, '-t', timeout)
         print(out)
     if 'error' in out.lower():       # the CLI exits 0 on a refused push (e.g. 2 GPU sessions)
@@ -1049,12 +1078,13 @@ def cmd_pull(args):
 
 
 def cmd_collect(args):
-    copied, problems = collect(args.pulled)
+    dest = Path(args.results_dir)
+    copied, problems = collect(args.pulled, dest)
     for name in copied:
         print(f'  copied {name}')
     for name, found in problems.items():
         print(f"  NOT copied {name}: {'; '.join(found)}")
-    print(f'{len(copied)} files copied to {GPU_RESULTS}, {len(problems)} refused')
+    print(f'{len(copied)} files copied to {dest}, {len(problems)} refused')
 
 
 def cmd_quota(args):
@@ -1083,6 +1113,8 @@ def main(argv=None):
     sub.add_parser('pull', help="download the kernel's outputs").set_defaults(func=cmd_pull)
     p = sub.add_parser('collect', help='copy pulled results files to results/gpu/')
     p.add_argument('pulled', help='a directory made by pull')
+    p.add_argument('--results-dir', default=str(GPU_RESULTS), metavar='DIR',
+                   help='where the files go (TPU batches: results/tpu)')
     p.set_defaults(func=cmd_collect)
     sub.add_parser('quota', help='weekly GPU quota').set_defaults(func=cmd_quota)
     args = parser.parse_args(argv)

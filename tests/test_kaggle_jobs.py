@@ -925,6 +925,39 @@ def test_week12_topic_name_batches(monkeypatch, tmp_path):
     assert kj.batch_name('w12b:st3') == 'w12b:st3'
 
 
+def test_tpu_smoke_batch_metadata_and_lane_environment(monkeypatch, tmp_path):
+    """The TPU spike: tpu-smoke runs the same fine-grained CRF job on 8 lanes with --device
+    xla; its spec names the device and the shorter deadline; the kernel is a TPU kernel; the
+    runner gives each lane a chip instead of a GPU."""
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda report=None: 'x' * 64)
+    lanes = _parsed(kj.batch_lanes('tpu-smoke'))
+    assert len(lanes) == 8 and all(len(lane) == 1 for lane in lanes)
+    assert [lane[0].tag for lane in lanes] == [f'tpu{c}' for c in 'abcdefgh']
+    for lane in lanes:
+        a = lane[0]
+        assert (a.granularity, nb.protocol_name(a), a.device, a.crf) == (
+            'fine', 'leave_one_paper_out', 'xla', True)
+        assert nb.variant_name(a) == f'crf_{a.tag}'
+    spec = kj.batch_spec('tpu-smoke')
+    assert (spec['device'], spec['gpu'], spec['deadline_hours']) == ('xla', None, 7)
+    assert 'device' not in kj.batch_spec('w9b') and kj.batch_spec('w9b')['gpu'] == 'Tesla T4'
+    assert kj.is_tpu_batch('tpu-smoke') and not kj.is_tpu_batch('w12a')
+    meta = kj.kernel_metadata('u', 'k', 'd', tpu=True)
+    assert (meta['enable_tpu'], meta['enable_gpu']) == (True, False)
+    assert 'machine_shape' not in meta and 'docker_image' not in meta
+    gpu = kj.kernel_metadata('u', 'k', 'd')
+    assert (gpu['enable_tpu'], gpu['enable_gpu'], gpu['machine_shape']) == (
+        False, True, kj.MACHINE)
+    rj = _run_jobs()
+    env = rj.job_env(3, tmp_path, 'xla')
+    assert (env['TPU_VISIBLE_CHIPS'], env['PJRT_DEVICE'], env['TPU_PROCESS_BOUNDS']) == (
+        '3', 'TPU', '1,1,1')
+    assert 'CUDA_VISIBLE_DEVICES' not in env and env['HF_HUB_OFFLINE'] == '1'
+    env = rj.job_env(1, tmp_path)
+    assert env['CUDA_VISIBLE_DEVICES'] == '1' and 'TPU_VISIBLE_CHIPS' not in env
+    assert 'tpu-smoke' in kj.BATCHES and kj.batch_name('tpu-smoke') == 'tpu-smoke'
+
+
 def test_build_bundle_with_the_mulms_files(tmp_path):
     corpus = tmp_path / 'corpus.txt'
     corpus.write_text('One sentence.\n')

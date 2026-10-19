@@ -5,7 +5,9 @@ run_jobs.py - runs NER jobs on a Kaggle GPU session (ROADMAP §4, week-4 protoco
 private Kaggle kernel with the bundle dataset attached (kaggle_jobs.py bundle: the code
 of a frozen commit, the fatigue corpus and the GPU results so far). On Kaggle it:
 
-  1. checks the GPUs: one per lane, each of the spec's type (`gpu`, e.g. Tesla T4);
+  1. checks the GPUs: one per lane, each of the spec's type (`gpu`, e.g. Tesla T4); or, with
+     `device` xla (a TPU batch), gives each lane one TPU chip (TPU_VISIBLE_CHIPS) and skips
+     the GPU check;
   2. installs the spec's pinned packages (`pip`, from PyPI) and the bundle's wheels
      (`wheels`, packages that PyPI has as source only); torch is the Kaggle image's;
   3. unpacks the code, the corpus (its SHA-256 must be `corpus_sha256`), the SOFC corpus
@@ -228,10 +230,20 @@ def job_command(job):
     return [sys.executable, 'src/graph/ner_baseline.py', *job]
 
 
-def job_env(lane, processed):
+TPU_ENV = {'PJRT_DEVICE': 'TPU', 'TPU_PROCESS_BOUNDS': '1,1,1',
+           'TPU_CHIPS_PER_PROCESS_BOUNDS': '1,1,1'}      # one chip per lane process
+
+
+def job_env(lane, processed, device=None):
+    """The environment of a lane's jobs: its GPU (CUDA_VISIBLE_DEVICES), or with device
+    'xla' its TPU chip (TPU_VISIBLE_CHIPS, one chip per process), the processed directory
+    and the offline switches."""
     env = dict(os.environ)
-    env.update({'CUDA_VISIBLE_DEVICES': str(lane), 'PROCESSED_DIR': str(processed),
-                'CUBLAS_WORKSPACE_CONFIG': ':4096:8', 'HF_HUB_OFFLINE': '1',
+    if device == 'xla':
+        env.update({**TPU_ENV, 'TPU_VISIBLE_CHIPS': str(lane)})
+    else:
+        env.update({'CUDA_VISIBLE_DEVICES': str(lane), 'CUBLAS_WORKSPACE_CONFIG': ':4096:8'})
+    env.update({'PROCESSED_DIR': str(processed), 'HF_HUB_OFFLINE': '1',
                 'TRANSFORMERS_OFFLINE': '1', 'PYTHONUNBUFFERED': '1'})
     return env
 
@@ -259,20 +271,22 @@ def setup_step(started, step):
     print(f'setup: {step} ({(time.time() - started) / 60:.1f} min)', flush=True)
 
 
-def run_job(job, lane, processed, log, stop_at):
+def run_job(job, lane, processed, log, stop_at, device=None):
     """Run one job into `log`; its exit code, or None if it was stopped at `stop_at`."""
     with open(log, 'w') as out:
         try:
-            return subprocess.run(job_command(job), cwd=REPO, env=job_env(lane, processed),
+            return subprocess.run(job_command(job), cwd=REPO,
+                                  env=job_env(lane, processed, device),
                                   stdout=out, stderr=subprocess.STDOUT,
                                   timeout=max(MIN_JOB_SECONDS, stop_at - time.time())).returncode
         except subprocess.TimeoutExpired:
             return None
 
 
-def run_lane(lane, jobs, manifest, deadline, logs, processed, stop_at=None):
+def run_lane(lane, jobs, manifest, deadline, logs, processed, stop_at=None, device=None):
     """The jobs of a lane one after the other: none starts after `deadline`, and one still
-    running at `stop_at` (default: JOB_GRACE_HOURS after the deadline) is stopped."""
+    running at `stop_at` (default: JOB_GRACE_HOURS after the deadline) is stopped; device
+    'xla' gives the lane a TPU chip (job_env)."""
     stop_at = deadline + 3600 * JOB_GRACE_HOURS if stop_at is None else stop_at
     for k, job in enumerate(jobs):
         record = {'lane': lane, 'index': k, 'args': job}
@@ -283,7 +297,7 @@ def run_lane(lane, jobs, manifest, deadline, logs, processed, stop_at=None):
         log = logs / f'lane{lane}_job{k:02d}.log'
         record.update({'log': log.name, 'start': time.strftime('%Y-%m-%dT%H:%M:%S')})
         begin = time.time()
-        code = run_job(job, lane, processed, log, stop_at)
+        code = run_job(job, lane, processed, log, stop_at, device)
         record.update({'exit_code': code, 'minutes': round((time.time() - begin) / 60, 2),
                        'status': ('stopped: time limit' if code is None
                                   else 'done' if code == 0 else 'failed')})
@@ -302,7 +316,9 @@ def environment():
     torch_info = run([sys.executable, '-c',
                       'import torch, transformers; print(torch.__version__, torch.version.cuda, '
                       'transformers.__version__)'])
+    xla_info = run([sys.executable, '-c', 'import torch_xla; print(torch_xla.__version__)'])
     return {'python': sys.version.split()[0], 'torch_cuda_transformers': torch_info,
+            'torch_xla': xla_info or None,
             'nvidia_smi': run(['nvidia-smi']),
             'pip_freeze': run([sys.executable, '-m', 'pip', 'freeze']).splitlines(),
             **{k: os.environ.get(k) for k in ENV_KEYS}}
@@ -314,13 +330,18 @@ def main(spec):
     logs.mkdir(parents=True, exist_ok=True)
     manifest = Manifest(WORK / 'manifest.json', {'spec': spec, 'jobs': [], 'setup': {}})
     setup_step(started, 'started')
+    device = spec.get('device')
     try:
-        names = gpu_names()
-        manifest.update(lambda d: d['setup'].update({'gpus': names}))
-        error = check_gpus(names, len(spec['lanes']), spec.get('gpu'))
-        if error:
-            raise RuntimeError(error)
-        setup_step(started, f'GPUs {names}')
+        if device == 'xla':
+            manifest.update(lambda d: d['setup'].update({'tpu_lanes': len(spec['lanes'])}))
+            setup_step(started, f"TPU, {len(spec['lanes'])} lanes (one chip each)")
+        else:
+            names = gpu_names()
+            manifest.update(lambda d: d['setup'].update({'gpus': names}))
+            error = check_gpus(names, len(spec['lanes']), spec.get('gpu'))
+            if error:
+                raise RuntimeError(error)
+            setup_step(started, f'GPUs {names}')
         wheels = [find(INPUT, name) for name in spec.get('wheels', [])]
         if None in wheels:
             raise FileNotFoundError(f"wheels {spec.get('wheels')} not all under {INPUT}")
@@ -357,7 +378,8 @@ def main(spec):
         setup_step(started, 'environment recorded; the lanes start')
         deadline = started + 3600 * spec.get('deadline_hours', 10)
         threads = [threading.Thread(target=run_lane,
-                                    args=(lane, jobs, manifest, deadline, logs, processed))
+                                    args=(lane, jobs, manifest, deadline, logs, processed, None,
+                                          device))
                    for lane, jobs in enumerate(spec['lanes'])]
         for t in threads:
             t.start()
