@@ -536,14 +536,36 @@ def encode(tokenizer, sentences, label2id, max_length=512, contexts=None, budget
     return features
 
 
-def batches(features, batch_size, pad_id, shuffle_seed=None):
+XLA_WIDTHS = (32, 64, 128, 256, 512)   # --device xla: the padded widths (one compilation each)
+
+
+def is_xla(device):
+    """--device xla: training on an XLA device (a TPU; the CPU with PJRT_DEVICE=CPU)."""
+    return str(device).startswith('xla')
+
+
+def bucket_width(width, widths):
+    """The smallest of `widths` at least `width` (`width` itself beyond them); `width` when
+    widths is None."""
+    if widths is None:
+        return width
+    return next((w for w in widths if w >= width), width)
+
+
+def batches(features, batch_size, pad_id, shuffle_seed=None, widths=None, full=False):
+    """Padded batches (ids, mask, labels, positions) in `features` order, shuffled with
+    shuffle_seed. widths (XLA): each batch is padded to the smallest of them that holds its
+    longest sequence, so that the shapes repeat; full (XLA, training): a last batch shorter
+    than batch_size is left out, so that the shapes repeat there too."""
     import torch
     order = list(range(len(features)))
     if shuffle_seed is not None:
         random.Random(shuffle_seed).shuffle(order)
     for start in range(0, len(order), batch_size):
         chunk = [features[i] for i in order[start:start + batch_size]]
-        width = max(len(f['input_ids']) for f in chunk)
+        if full and len(chunk) < batch_size:
+            break
+        width = bucket_width(max(len(f['input_ids']) for f in chunk), widths)
         ids = [f['input_ids'] + [pad_id] * (width - len(f['input_ids'])) for f in chunk]
         mask = [f['attention_mask'] + [0] * (width - len(f['attention_mask'])) for f in chunk]
         labels = [f['labels'] + [-100] * (width - len(f['labels'])) for f in chunk]
@@ -560,8 +582,9 @@ def predict(model, features, batch_size, pad_id, id2label, device, crf=None):
     import torch
     model.eval()
     preds = [None] * len(features)
+    widths = XLA_WIDTHS if is_xla(device) else None
     with torch.no_grad():
-        for ids, mask, labels, idx in batches(features, batch_size, pad_id):
+        for ids, mask, labels, idx in batches(features, batch_size, pad_id, widths=widths):
             logits = model(input_ids=ids.to(device), attention_mask=mask.to(device)).logits
             if crf is None:
                 best = logits.argmax(-1).cpu()
@@ -569,7 +592,9 @@ def predict(model, features, batch_size, pad_id, id2label, device, crf=None):
                     keep = labels[row] != -100
                     preds[i] = [id2label[int(p)] for p in best[row][keep]]
             else:
-                emissions, _, word_mask = word_view(logits, labels)
+                emissions, _, word_mask = word_view(logits, labels, widths)
+                if widths:
+                    emissions, word_mask = emissions.cpu(), word_mask.cpu()
                 for i, path in zip(idx, crf.decode(emissions, word_mask)):
                     preds[i] = [id2label[p] for p in path]
     return preds
@@ -681,16 +706,17 @@ def bio_allowed(label_list):
     return allowed, start
 
 
-def word_view(logits, labels):
+def word_view(logits, labels, widths=None):
     """Word-level emissions, gold tags and mask from subword logits.
 
     Words are the first-subword positions (labels != -100). Returns emissions
-    (B, W, L), tags (B, W) and a left-aligned boolean mask (B, W).
+    (B, W, L), tags (B, W) and a left-aligned boolean mask (B, W); widths (XLA): W is the
+    smallest of them that holds the longest sequence (bucket_width).
     """
     import torch
     keep = labels != -100
     n_words = keep.sum(1)
-    width = max(int(n_words.max()), 1)
+    width = bucket_width(max(int(n_words.max()), 1), widths)
     idx = torch.zeros(labels.size(0), width, dtype=torch.long)
     for b in range(labels.size(0)):
         pos = keep[b].nonzero(as_tuple=True)[0]
@@ -738,6 +764,10 @@ def _define_crf():
             return (self.transitions + self.trans_penalty,
                     self.start + self.start_penalty, self.end)
 
+        def scores_on(self, device):
+            """scores() on `device`: the XLA runs decode and take marginals on the CPU."""
+            return tuple(s.to(device) for s in self.scores())
+
         def nll(self, emissions, tags, mask, weights=None):
             """Mean negative log-likelihood of the gold tag sequences.
 
@@ -768,7 +798,7 @@ def _define_crf():
 
             nll keeps its own copy of the recursion, so that training is unchanged.
             """
-            trans, start, end = self.scores()
+            trans, start, end = self.scores_on(emissions.device)
             alpha = start + emissions[:, 0]
             for t in range(1, emissions.size(1)):
                 nxt = torch.logsumexp(alpha.unsqueeze(2) + trans + emissions[:, t].unsqueeze(1),
@@ -789,7 +819,7 @@ def _define_crf():
 
         def decode(self, emissions, mask):
             """Viterbi label-id paths, one list per sequence."""
-            trans, start, end = self.scores()
+            trans, start, end = self.scores_on(emissions.device)
             score = start + emissions[:, 0]
             backpointers = []
             for t in range(1, emissions.size(1)):
@@ -1013,10 +1043,14 @@ def teacher_tags(tagger, sentences, batch_size, device):
                       tagger.label2id, model.config.max_position_embeddings)
     model.eval()
     out = [None] * len(features)
+    widths = XLA_WIDTHS if is_xla(device) else None
     with torch.no_grad():
-        for ids, mask, labels, idx in batches(features, batch_size, tagger.tokenizer.pad_token_id):
+        for ids, mask, labels, idx in batches(features, batch_size, tagger.tokenizer.pad_token_id,
+                                              widths=widths):
             logits = model(input_ids=ids.to(device), attention_mask=mask.to(device)).logits
-            emissions, _, word_mask = word_view(logits, labels)
+            emissions, _, word_mask = word_view(logits, labels, widths)
+            if widths:
+                emissions, word_mask = emissions.cpu(), word_mask.cpu()
             marginals = crf.marginals(emissions, word_mask)
             for row, (i, path) in enumerate(zip(idx, crf.decode(emissions, word_mask))):
                 out[i] = ([tagger.id2label[p] for p in path],
@@ -1050,6 +1084,8 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
                               get_linear_schedule_with_warmup, set_seed)
 
     set_seed(seed)
+    if is_xla(device):
+        xla_seed(seed)
     label_list = ['O'] + [f'{p}-{t}' for t in labels for p in ('B', 'I')]
     label2id = {lab: i for i, lab in enumerate(label_list)}
     id2label = {i: lab for lab, i in label2id.items()}
@@ -1107,24 +1143,29 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
 
     best = (-1.0, None, -1)
     history = []
+    xla = is_xla(device)
+    widths = XLA_WIDTHS if xla else None
     for epoch in range(args.epochs):
         model.train()
         total = 0.0
         for ids, mask, lab, idx in batches(f_train, args.batch_size, pad_id,
-                                           shuffle_seed=seed * 1000 + epoch):
+                                           shuffle_seed=seed * 1000 + epoch, widths=widths,
+                                           full=xla):
             logits = model(input_ids=ids.to(device), attention_mask=mask.to(device)).logits
             if crf is None:
                 loss = loss_fn(logits.view(-1, logits.size(-1)), lab.to(device).view(-1))
             elif silver:
-                loss = crf.nll(*word_view(logits, lab),
+                loss = crf.nll(*word_view(logits, lab, widths),
                                weights=torch.tensor([weight[i] for i in idx], device=device))
             else:
-                loss = crf.nll(*word_view(logits, lab))
+                loss = crf.nll(*word_view(logits, lab, widths))
             loss.backward()
             torch.nn.utils.clip_grad_norm_(params, 1.0)
             optimizer.step()
             scheduler.step()
             optimizer.zero_grad()
+            if xla:
+                xla_sync()
             total += loss.item()
         val_pred = predict(model, f_val, args.batch_size, pad_id, id2label, device, crf)
         val_f1 = score([g for _, g, _ in val], val_pred)['f1']
@@ -2414,7 +2455,39 @@ def torch_device(args):
     device = args.device or ('cuda' if torch.cuda.is_available() else 'cpu')
     if device.startswith('cuda'):
         cuda_determinism()
+    elif is_xla(device):
+        xla_setup()
     return device
+
+
+def xla_setup():
+    """--device xla (docs/METHODS_PLAN.md §5, the TPU): torch_xla with its matrix products at
+    the highest precision (fp32 on a TPU is bf16 passes otherwise), so that the numbers are
+    the arithmetic's, not the precision's; the batches are padded to XLA_WIDTHS and training
+    takes full batches only, so that each shape compiles once."""
+    import torch_xla
+    if hasattr(torch_xla, 'backends') and hasattr(torch_xla.backends, 'set_mat_mul_precision'):
+        torch_xla.backends.set_mat_mul_precision('highest')
+
+
+def xla_sync():
+    """Run the graph of the step (torch_xla.sync, formerly xm.mark_step)."""
+    import torch_xla
+    if hasattr(torch_xla, 'sync'):
+        torch_xla.sync()
+    else:
+        import torch_xla.core.xla_model as xm
+        xm.mark_step()
+
+
+def xla_seed(seed):
+    """The XLA device's random state (dropout) from the seed, after transformers' set_seed."""
+    import torch_xla
+    if hasattr(torch_xla, 'manual_seed'):
+        torch_xla.manual_seed(seed)
+    else:
+        import torch_xla.core.xla_model as xm
+        xm.set_rng_state(seed)
 
 
 def cuda_determinism():
@@ -2438,10 +2511,23 @@ def cuda_determinism():
 
 
 def run_environment(device):
-    """Where a CUDA run trained, stored with every GPU run as `environment`; None on a CPU.
+    """Where a CUDA or XLA run trained, stored with every such run as `environment`; None on
+    a CPU.
 
-    The GPU, the CUDA, cuDNN, torch and transformers versions, and the determinism settings.
+    CUDA: the GPU, the CUDA, cuDNN, torch and transformers versions, and the determinism
+    settings. XLA: the device type (TPU, or CPU under PJRT_DEVICE=CPU), the torch, torch_xla
+    and transformers versions, the matrix-product precision and the padded widths.
     """
+    if is_xla(device):
+        import torch
+        import torch_xla
+        import transformers
+        precision = (torch_xla.backends.get_mat_mul_precision()
+                     if hasattr(torch_xla, 'backends')
+                     and hasattr(torch_xla.backends, 'get_mat_mul_precision') else None)
+        return {'device': f'xla:{torch_xla.runtime.device_type()}', 'torch': torch.__version__,
+                'torch_xla': torch_xla.__version__, 'transformers': transformers.__version__,
+                'matmul_precision': precision, 'widths': list(XLA_WIDTHS)}
     if not device.startswith('cuda'):
         return None
     import torch
