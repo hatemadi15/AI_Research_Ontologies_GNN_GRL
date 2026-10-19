@@ -3595,6 +3595,20 @@ mention-level filter is a candidate for the screen.
   requirements, a batch test that assumed the SOFC corpus file and a parser
   test that amendment 1 had made obsolete); the branch restarted from
   `main`.
+- Related work for the names route (`docs/METHODS_PLAN.md` §2, the
+  draft's §8, `docs/references.bib`): a second search found the pieces
+  older than the plan's first check said. Zafarian and Asghari (NSURL
+  2019) harvested a gazetteer from unlabeled news with a supervised tagger
+  and a confidence threshold, as a feature; Kozareva (EACL 2006) built
+  gazetteers from unlabeled text by patterns and, bootstrapping, kept an
+  example only when two classifiers agreed; Song et al. (FLAIRS 2020)
+  found that replacing annotated entities with random gazetteer entries
+  gave no significant gain on OntoNotes, where test names are not the
+  bottleneck. The novelty statement is narrowed to the combination and the
+  setting (an unseen topic's lexicon from its own text, by three teachers'
+  agreement, injected into gold contexts, held-out topics of a materials
+  corpus), the dictionary rule becomes a reported baseline and a
+  gazetteer match feature a required one if names pass (§4C).
 
 ### Week 12, the CPU probe (19–20 October; not a protocol): what the silver filter admits, and the dictionary ceiling
 

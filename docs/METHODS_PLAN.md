@@ -69,21 +69,60 @@ topic", with the pre-registered decisions on MuLMS (7 subfields) and the
 MaterioMiner analogue (4 papers), the SOFC-Exp control where it is not
 expected to help, and the ablations of §4C.
 
-**Novelty, checked on 19 October.** Dai and Adel (2020) replace mentions
-with the training set's own names. Amalvy, Labatut and Dufour (TALN 2022)
-use mention replacement to adapt CoNLL-2003 to fantasy literature with
-*predefined lists* of target-domain person names (from an annotated target
-corpus or WikiGold). BOND (Liang et al., 2020) and PATNER use dictionaries
-from knowledge bases as distant supervision and self-train on the silver
-labels. EnTDA (Hu et al., 2022) and LLM-DA generate entity-to-text examples.
-None harvests the lexicon from unlabeled target-topic text by teacher
-agreement and injects it into gold contexts; none evaluates on held-out
-topics of a materials corpus. Sources:
+**Novelty, checked on 19 October (a second search the same evening).**
+The pieces are old; the combination and the setting are not. Kozareva
+(EACL 2006 SRW) generated gazetteers from unlabeled Spanish news by
+preposition patterns, used them as features and, when bootstrapping, added
+an unlabeled example only when two classifiers agreed on it. Zafarian and
+Asghari (NSURL 2019) decoded an unlabeled Farsi news corpus with a
+supervised tagger, kept the entities whose word and sentence confidence
+passed a threshold as a gazetteer, and retrained with the gazetteer as a
+feature: the harvest by a tagger is theirs, with one model, no agreement
+filter, and the lexicon entering as a feature rather than through the
+training contexts. Song, Lawrie, Finin and Mayfield (FLAIRS 2020) found
+Wikidata match features worth +0.52 F1 on OntoNotes, and that replacing
+annotated entities with random gazetteer entries of the same type "did not
+produce statistically significant improvements": mention replacement with
+an external lexicon failed where the test names were not the bottleneck.
+Dai and Adel (2020) replace with the training set's own names; Amalvy,
+Labatut and Dufour (TALN 2022; arXiv 2023) adapt CoNLL-2003 to fantasy
+novels with *predefined lists* of target names and gain recall at a
+precision cost; COSINER (Bartolini et al., 2024) picks the training-set
+replacement that fits the context best; Torres et al. (2024) find mention
+replacement helps small training sets and hurts larger ones (BERT on
+MaSciP, a materials synthesis corpus, gains at every size); Sharma et al.
+(ACL 2023) find that most augmentations make the tagger memorise entities
+and score unseen entities separately. On the teacher side, Wu et al. (ACL
+2020) train a student on unlabeled target-language text from several
+teachers, and Qu et al. (AAAI 2023) use two teachers' agreement and
+disagreement in distantly supervised NER; BOND (Liang et al., 2020) and
+PATNER self-train on dictionary-matched silver labels; EnTDA (Hu et al.,
+2022) and LLM-DA generate entity-to-text examples; GEMNET (Meng et al.,
+NAACL 2021) gates gazetteer features against the context. None harvests
+the lexicon of an unseen topic from that topic's unlabeled text by the
+agreement of several teachers and injects it into gold contexts by
+mention replacement with the topic held out of the labeled data, and none
+evaluates on held-out topics of a materials corpus. The claim is therefore
+about the combination and the setting, never about a piece, and the paper
+owes two baselines: the lexicon as a dictionary rule, which the probe
+already prices (fill: +5.9 on sofc, −10.0 on steel), and, if names pass,
+the lexicon as a match feature on the encoder output (Song et al.'s
+one-hot match; one more variant, on the GPU, in §4C). Sources:
+[Kozareva 2006](https://aclanthology.org/E06-3004/),
+[Zafarian and Asghari 2019](https://aclanthology.org/2019.nsurl-1.16/),
+[Song et al. 2020](https://arxiv.org/abs/2003.03072),
 [Amalvy et al. 2022](https://aclanthology.org/2022.jeptalnrecital-taln.19.pdf),
+[Amalvy et al. 2023](https://arxiv.org/abs/2302.04555),
+[COSINER](https://ceur-ws.org/Vol-3741/paper20.pdf),
+[Torres et al. 2024](https://arxiv.org/abs/2411.14551),
+[Sharma et al. 2023](https://aclanthology.org/2023.acl-long.390/),
+[Wu et al. 2020](https://aclanthology.org/2020.acl-main.581/),
+[Qu et al. 2023](https://arxiv.org/abs/2212.06522),
 [BOND](https://arxiv.org/pdf/2006.15509),
 [PATNER](https://par.nsf.gov/biblio/10380151),
 [EnTDA](https://arxiv.org/abs/2210.10343v2),
 [LLM-DA](https://www.themoonlight.io/en/review/llm-da-data-augmentation-via-large-language-models-for-few-shot-named-entity-recognition),
+[GEMNET](https://aclanthology.org/2021.naacl-main.118/),
 [Chen et al. 2021](https://arxiv.org/pdf/2109.01758).
 
 **Honest odds.** Decision 1 (against the CRF head) on MuLMS: about 0.45,
@@ -108,6 +147,10 @@ of §4B moves these within days, before any GPU hour is spent.
    paper (§5), not a route to a method.
 5. *Three attempts on the same corpus.* Reported with the count; the decision
    seeds are disjoint from the screen's.
+6. *Why not use the lexicon as a feature, or as a dictionary?* Both are
+   baselines the paper owes (§2): the dictionary rule is priced by the probe
+   on every subfield; the match feature joins the ablations if names pass
+   (§4C).
 
 ## 4. The work, ranked
 
@@ -168,6 +211,11 @@ the week of 31 October, 10 seeds each on MuLMS:
 - MaterioMiner: the winner on the multi-task model (the strongest
   MaterioMiner system is MT+MR) and SOFC-Exp with the SOFC corpus (the
   control where unseen names are few).
+- the two lexicon baselines the related work demands (§2): the dictionary
+  rule on the winner's predictions (no training; the probe's code) and the
+  lexicon as a one-hot match feature on the encoder output (Song et al.
+  2020), 10 seeds on MuLMS, decided against the CRF head and reported
+  against the winner.
 
 ### D. If names fail and in-topic self-training passes
 

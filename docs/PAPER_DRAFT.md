@@ -833,6 +833,34 @@ self-training uses an in-domain corpus of open-access papers, one per
 dataset, without the dataset's own papers or any sentence that shares a
 word 8-gram with them.
 
+**Names from unlabeled text.** Gazetteers have been generated from
+unlabeled text since Kozareva (kozareva2006bootstrapping), who extracted
+Spanish location and person lists with preposition patterns, used them as
+features and, when bootstrapping, added an unlabeled example only when two
+classifiers agreed on it. Zafarian and Asghari (zafarian2019gazetteer)
+decode an unlabeled news corpus with a supervised tagger, keep the
+confident entities as a gazetteer and retrain with it as a feature; GEMNET
+(meng2021gemnet) gates gazetteer features against the context; Song et al.
+(song2020gazetteers) measure Wikidata match features at +0.5 F1 on
+OntoNotes, while replacing annotated entities with random gazetteer
+entries of the same type gave them no significant gain. Replacement names
+otherwise come from the training set (dai2020analysis;
+bartolini2024cosiner choose the one that fits the context), from
+predefined lists of the target domain's names (amalvy2022mention), from a
+masked language model (zhou2022melm) or from a large one
+(sharma2023paraphrase; hu2022entda); Torres et al.
+(torres2024augmentation) find that mention replacement helps small
+training sets and hurts larger ones, and that most augmentations make the
+tagger memorise entities is why Sharma et al. score unseen entities
+separately. Teachers have tagged unlabeled target text for a student in
+cross-lingual NER (wu2020teacher) and, with two teachers' agreement, in
+distantly supervised NER (qu2023adaptive); cross-domain NER is otherwise
+studied with domain-specific types and corpora (liu2021crossner;
+chen2021crossdomain). Section 6.7 harvests the lexicon of the held-out
+topic from that topic's own unlabeled text by the agreement of three
+teachers, injects it by mention replacement into gold contexts, and
+reports the same lexicon as a dictionary rule beside it.
+
 **Decision thresholds.** For a calibrated classifier the F1-optimal
 threshold is half the optimal F1 (lipton2014optimal). A single weight on
 the O label already trades precision for recall in CRF extractors
