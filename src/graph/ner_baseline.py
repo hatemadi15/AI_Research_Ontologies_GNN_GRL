@@ -1853,9 +1853,10 @@ PLAIN_VARIANTS = ('baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_st', 'crf_mt
 def variant_name(args):
     """Variant of a run: 'baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_mt_ls', 'crf_st' or
     'crf_st<N>', 'crf_mt_st<N>', 'crf_ctx', 'crf_mt_ctx', 'crf_mr', 'crf_mt_mr', 'crf_mrs'
-    (--augment-names) or 'crf_mrm' (with --silver-mentions), these two plus _<names tag>, the
-    mention replacement names plus the copies when not 3 (crf_mr6), with _bias for
-    --entity-bias (crf_bias, crf_ctx_bias), then the tag.
+    (--augment-names) or 'crf_mrm' (with --silver-mentions), these two and the self-training
+    names plus _<names tag> (crf_mrm_topic, crf_st3_topic), the mention replacement names
+    plus the copies when not 3 (crf_mr6, crf_mrm_topic6), with _bias for --entity-bias
+    (crf_bias, crf_ctx_bias), then the tag.
 
     'cw' is --class-weights, 'crf_mt' is --crf --multi-task, 'crf_ls' is --crf
     --label-semantics, 'crf_mt_ls' both, 'crf_st' is --crf --self-train and 'crf_st<N>' that
@@ -1872,6 +1873,8 @@ def variant_name(args):
             name = 'crf_st' if teachers == 1 else f'crf_st{teachers}'
             if multi_task:
                 name = f'crf_mt_st{teachers}'
+            if getattr(args, 'names_tag', None) and not getattr(args, 'augment_names', False):
+                name = f'{name}_{args.names_tag}'          # crf_st3_topic (week 12)
         if getattr(args, 'context', 0):
             name = 'crf_mt_ctx' if multi_task else 'crf_ctx'
         if getattr(args, 'augment_mentions', 0):
@@ -3011,9 +3014,9 @@ def parse_args(argv=None):
                              'whatever the rest of the sentence, instead of the mentions of '
                              'the silver sentences (files tagged _crf_mrm; ROADMAP §4, week 12)')
     parser.add_argument('--names-tag', type=tag_name, default=argparse.SUPPRESS, metavar='LABEL',
-                        help='with --augment-names: a label of the corpus the names come from, '
-                             'appended to the variant (crf_mrm_<label>); lowercase letters and '
-                             'digits')
+                        help='with --augment-names, or --self-train with --teachers: a label of '
+                             'the corpus the teachers tag, appended to the variant '
+                             '(crf_mrm_<label>, crf_st3_<label>); lowercase letters and digits')
     parser.add_argument('--entity-bias', type=float, nargs='+', default=argparse.SUPPRESS,
                         metavar='D',
                         help='with --crf: decode the test and validation sentences again with D '
@@ -3126,8 +3129,9 @@ def parse_args(argv=None):
         for option in ('leave_one_paper_out', 'leave_two_papers_out', 'document_folds',
                        'published_split', 'multi_task', 'label_semantics', 'self_train',
                        'context', 'entity_bias', 'retokenized_test'):
-            if option == 'self_train' and getattr(args, 'augment_names', False):
-                continue          # mention replacement with silver names (week 11)
+            if option == 'self_train' and (getattr(args, 'augment_names', False)
+                                           or hasattr(args, 'teachers')):
+                continue          # silver names (week 11) or self-training with teachers (12)
             if getattr(args, option, None) not in (None, False):
                 parser.error(f"--{option.replace('_', '-')} is not available with "
                              f"--granularity mulms")
@@ -3196,9 +3200,12 @@ def parse_args(argv=None):
                          '--teachers (the teachers tag the names)')
         if getattr(args, 'multi_task', False):
             parser.error('--augment-names is not available with --multi-task')
-    for option in ('silver_mentions', 'names_tag'):
-        if hasattr(args, option) and not getattr(args, 'augment_names', False):
-            parser.error(f"--{option.replace('_', '-')} needs --augment-names")
+    if hasattr(args, 'silver_mentions') and not getattr(args, 'augment_names', False):
+        parser.error('--silver-mentions needs --augment-names')
+    if hasattr(args, 'names_tag') and not (getattr(args, 'augment_names', False)
+                                           or hasattr(args, 'teachers')):
+        parser.error('--names-tag needs --augment-names, or --self-train with --teachers (the '
+                     'corpus the teachers tag)')
     if hasattr(args, 'entity_bias'):
         if not args.crf:
             parser.error('--entity-bias needs --crf (it shifts the emissions of the Viterbi '

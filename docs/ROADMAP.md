@@ -1025,7 +1025,7 @@ chance at class level. For a Task C-style result:
 | 9 | Part 1 done: mention replacement on the multi-task model (`crf_mt_mr`, 10 seeds on the held-out papers, S2 on SOFC-Exp's two levels; protocol below). 3 of 6 decisions pass: against the multi-task model +3.01 [+0.42, +5.60] fine-grained and +2.30 [+0.49, +4.10] coarse-grained, and its vote against the multi-task vote +2.86 [+0.18, +5.54] fine-grained, now the strongest fine-grained system on unseen papers (55.33); coarse-grained its vote does not beat the seed vote, and S2 fails at both levels, so no methods claim (C21). Part 2 done: on SOFC-Exp cut to MaterioMiner's size (10 of its 26 training articles, 5 draws), mention replacement scores +0.50 [−0.47, +1.46] against the CRF head and does not pass, so its MaterioMiner gain is not a matter of training size | Part 1: the combination's vote improves on the strongest system on unseen papers, and on SOFC-Exp. Part 2: mention replacement improves on the CRF head on a MaterioMiner-sized SOFC-Exp |
 | 10 | Done: MuLMS as a third corpus (7 materials subfields, its outermost entities; `mulms.py`), mention replacement against the CRF head on held-out subfields with 400 training sentences, 10 seeds, and the CRF head on random splits of the same size; protocol committed before any run (a08356f; the batch `w10a` ran from that commit), protocol and outcome below | Mention replacement improves on the CRF head on held-out subfields (decision 1), and its votes on the CRF votes (decision 2). Decision 1 not met: +2.10 [−0.31, +4.51], six of the seven subfields gaining. Decision 2 met: +2.71 [+0.22, +5.20]. By the protocol, mention replacement and its combination (C20, C21) stay results for MaterioMiner |
 | 11 | Protocol committed before any run: mention replacement whose replacement pool also holds the names in the sentences that 3 CRF teachers tag alike and confidently in unlabeled in-domain text (`--augment-names`, variant `crf_mrs`), on MuLMS's 7 held-out subfields (`w11a`) and MaterioMiner's 4 held-out papers (`w11b`), 10 seeds; protocol below | It improves on the CRF head on MuLMS's held-out subfields (decision 1) and on mention replacement (decisions 2–4: MuLMS, MaterioMiner fine- and coarse-grained); a methods claim needs decision 1 and one of decisions 2–4. MuLMS (`w11a`): decisions 1 (+2.04 [−0.85, +4.92]) and 2 (−0.06 [−1.09, +0.96]) not met, so no methods claim; MaterioMiner (`w11b`, decisions 3 and 4) after the reset on 24 October |
-| 12 | Protocol committed before any run: mention replacement whose replacement pool holds the names that 3 CRF teachers find in a corpus of the held-out subfield's own topic (40,000 open-access sentences per subfield, `build_topic_corpus.py`; phase 0's gate: they hold 55–81% of the unseen test names), on MuLMS's 7 held-out subfields; a 3-seed screen of three variants (`w12a`: silver sentences `crf_mrs_topic`, silver mentions `crf_mrm_topic`, 6 copies `crf_mr6`), then the 7-seed decision for the screen's winner on seeds the screen did not see (`w12b:<variant>`); protocol below | Screen: the variant with the largest mean gain over mention replacement goes on if it is above 0. Decision 1: it improves on the CRF head (paired by subfield); decision 2: on mention replacement. A methods claim needs decision 1 on MuLMS and the winner's MaterioMiner analogue passing against the CRF head. Runs after the reset on 24 October, after `w11b` |
+| 12 | Protocol committed before any run: mention replacement whose replacement pool holds the names that 3 CRF teachers find in a corpus of the held-out subfield's own topic (40,000 open-access sentences per subfield, `build_topic_corpus.py`; phase 0's gate: they hold 55–81% of the unseen test names), on MuLMS's 7 held-out subfields; a 3-seed screen of five variants (`w12a`: silver sentences `crf_mrs_topic`, silver mentions `crf_mrm_topic`, the same with 6 copies `crf_mrm_topic6`, 6 copies without names `crf_mr6`, self-training on the topic corpus `crf_st3_topic`; amendment 1), then the 7-seed decision for the screen's winner on seeds the screen did not see (`w12b:<variant>`); protocol below, plan in `docs/METHODS_PLAN.md` | Screen: the variant with the largest mean gain over mention replacement goes on if it is above 0. Decision 1: it improves on the CRF head (paired by subfield); decision 2: on mention replacement. A methods claim needs decision 1 on MuLMS and the winner's MaterioMiner analogue passing against the CRF head. Runs after the reset on 24 October, after `w11b` |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -3681,6 +3681,30 @@ added `silver_filter` field.
 `screen`, `decision` and `ten_seeds`, each present when its files exist),
 `kaggle_jobs.py` batches `w12a` and `w12b:<variant>` (tested from the frozen
 commit), `report_results.py` for the README bullet once the files exist.
+
+**Amendment 1 (19 October, before any run; `docs/METHODS_PLAN.md` §4A).**
+The screen gains two variants, with the same 3-seed design, the same
+selection rule and the same decision for the winner:
+- V4 `crf_mrm_topic6`: the mention-level filter with 6 copies of each
+  sentence instead of 3 (`--augment-mentions 6`). With thousands of silver
+  names and about 1,500 replacement slots per fold, 3 copies show most
+  silver names never; 6 copies double the exposure, and V3 (6 copies
+  without names) is its control.
+- V6 `crf_st3_topic`: self-training on the topic corpus, week 4's method
+  with 3 teachers (the students train on the gold sentences plus the silver
+  sentences, weight 0.5), the baseline a names method must beat. If V6 wins
+  the screen, the decision is V6's and the finding is "in-topic
+  self-training", scoped as such.
+The names of V4 and V6 and their parser rules are in `ner_baseline.py`
+(`--names-tag` now also labels a self-training run's corpus); `w12a` puts
+V1 and V4 in lane 0, V2 and V6 in lane 1, and the three `crf_mr6` jobs one
+in lane 0 and two in lane 1 (about 7.5 hours per lane); `w12b:mrm6` and
+`w12b:st3` are the decision batches of the new variants. The budget of the
+week after the reset becomes about 26 of 30 GPU hours (`w11b` 2.1, `w12a`
+14.6, `w12b` 7, the MaterioMiner analogue 2.1). Before the runs, the CPU
+probe of `METHODS_PLAN.md` §4B measures what the silver filter admits and
+the dictionary ceiling; if admission is the bottleneck, a second amendment
+can change the threshold or the filter, still before any run.
 
 *Bundle.* Built from 40631ce on 18 October and uploaded as the new version
 of `ner-gpu-bundle-3` (457 files: the code, the fatigue corpus, the 52

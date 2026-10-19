@@ -136,16 +136,19 @@ Week 11 (mention replacement with silver names: --augment-names; 3 teachers, 10 
 Week 12 (names from a topic corpus: build_topic_corpus.py, one per MuLMS subfield, in the
 bundle as topic_<topic>_sentences.txt; the screen, then the decision for its winner):
   w12a    the CRF run of smoke4 (smokeao); then the screen, seed offsets 0 to 200, on MuLMS's
-          7 held-out subfields: in lane 0, per subfield, the 3 teachers tag the subfield's
-          topic corpus and the students train mention replacement with its silver names
-          (crf_mrs_topic_m<N>); in lane 1 the same with the mention-level silver filter
-          (--silver-mentions, crf_mrm_topic_m<N>); and mention replacement with 6 copies
-          (crf_mr6_m<N>, one job per seed offset, no teachers), two jobs in lane 0 and one
-          in lane 1. The jobs of a variant share a lane: they extend the same files
-  w12b:V  the decision for the screen's winner V (mrs, mrm or mr6): seed offsets 300 to 900;
-          mrs and mrm as in w12a with each lane training the teachers and 3 or 4 of the
-          students (offsets 300-500 and 600-900), mr6 one job per offset over the lanes
-          (smokeap)
+          7 held-out subfields, five variants (amendment 1), per subfield one job in which
+          the 3 teachers tag the subfield's topic corpus: in lane 0 the students train
+          mention replacement with the silver names of the sentence filter
+          (crf_mrs_topic_m<N>) and, with the mention-level filter (--silver-mentions) and 6
+          copies, crf_mrm_topic6_m<N>; in lane 1 the mention-level filter with 3 copies
+          (crf_mrm_topic_m<N>) and self-training on the silver sentences (crf_st3_topic_m<N>);
+          and mention replacement with 6 copies and no names (crf_mr6_m<N>, one job per seed
+          offset, no teachers), one job in lane 0 and two in lane 1. The jobs of a variant
+          share a lane: they extend the same files
+  w12b:V  the decision for the screen's winner V (mrs, mrm, mrm6, st3 or mr6): seed offsets
+          300 to 900; the teacher variants as in w12a with each lane training the teachers
+          and 3 or 4 of the students (offsets 300-500 and 600-900), mr6 one job per offset
+          over the lanes (smokeap)
 
 Usage:
   python src/graph/kaggle_jobs.py quota
@@ -256,7 +259,8 @@ MRS_FLAGS = ('--crf', '--teachers', '3', '--students', '10', '--augment-mentions
              '--augment-names', '--save-predictions', '--threads', str(THREADS))
 TOPIC_TAG = 'topic'          # --names-tag of the topic-corpus variants (crf_mrs_topic, crf_mrm_topic)
 MR6_COPIES = 6               # week 12's copy-count variant (crf_mr6)
-WEEK12_VARIANTS = ('mrs', 'mrm', 'mr6')     # the screen's variants: w12b:<variant> decides one
+# the screen's variants (amendment 1 added mrm6 and st3): w12b:<variant> decides one
+WEEK12_VARIANTS = ('mrs', 'mrm', 'mr6', 'mrm6', 'st3')
 DECISION_LANES = (OFFSETS_W5[:3], OFFSETS_W5[3:])   # w12b: the students per lane (seeds 300-900)
 
 
@@ -319,16 +323,29 @@ def mrs_mulms_job(subfield, student_offsets):
             '--student-offsets', *(str(o) for o in student_offsets), *MRS_FLAGS]
 
 
-def topic_mulms_job(subfield, student_offsets, mentions=False):
+def topic_mulms_job(subfield, student_offsets, mentions=False, copies=3, names=True):
     """Week 12 on MuLMS: one held-out subfield, 400 pool sentences; the 3 teachers tag the
     subfield's topic corpus (TOPIC_CORPUS, in the bundle; all of it) and the students of
     `student_offsets` train mention replacement with its silver names (crf_mrs_topic_m<N>;
-    with `mentions`, the mention-level silver filter: crf_mrm_topic_m<N>)."""
-    return ['--granularity', 'mulms', '--leave-one-subfield-out', '--train-pool',
-            str(MULMS_POOL), '--subfields', subfield, '--self-train',
-            TOPIC_CORPUS.format(topic=subfield), '--self-train-sample', '0',
-            '--student-offsets', *(str(o) for o in student_offsets), '--names-tag', TOPIC_TAG,
-            *(('--silver-mentions',) if mentions else ()), *MRS_FLAGS]
+    with `mentions`, the mention-level silver filter: crf_mrm_topic_m<N>; `copies` of each
+    sentence, 6 for crf_mrm_topic6). Without `names` the students self-train on the silver
+    sentences instead (week 4's method, 3 teachers: crf_st3_topic_m<N>)."""
+    job = ['--granularity', 'mulms', '--leave-one-subfield-out', '--train-pool',
+           str(MULMS_POOL), '--subfields', subfield, '--self-train',
+           TOPIC_CORPUS.format(topic=subfield), '--self-train-sample', '0',
+           '--student-offsets', *(str(o) for o in student_offsets), '--names-tag', TOPIC_TAG]
+    if not names:
+        return job + ['--crf', '--teachers', '3', '--students', '10', '--save-predictions',
+                      '--threads', str(THREADS)]
+    flags = [f if f != '3' or MRS_FLAGS[i - 1] != '--augment-mentions' else str(copies)
+             for i, f in enumerate(MRS_FLAGS)]
+    return job + (['--silver-mentions'] if mentions else []) + flags
+
+
+def topic_variant_job(variant, subfield, student_offsets):
+    """The job of a week-12 names or self-training variant (WEEK12_VARIANTS but mr6)."""
+    return topic_mulms_job(subfield, student_offsets, mentions=variant in ('mrm', 'mrm6'),
+                           copies=6 if variant == 'mrm6' else 3, names=variant != 'st3')
 
 
 def mr6_mulms_job(offset):
@@ -652,13 +669,17 @@ def batch_lanes(name):
         return [[repeat + ['--tag', 'smokean']] + [mrs_paper_job('fine', p) for p in PAPERS],
                 [mrs_paper_job('coarse', p) for p in PAPERS]]
     if name == 'w12a':
-        # week 12's screen on MuLMS, seed offsets 0 to 200: the jobs of a variant share a
-        # lane (they extend the same files); the 6-copy jobs, a file each, fill the lanes
+        # week 12's screen on MuLMS, seed offsets 0 to 200 (amendment 1: five variants): the
+        # jobs of a variant share a lane (they extend the same files); lane 0 the sentence
+        # filter and the mention filter with 6 copies, lane 1 the mention filter and
+        # self-training; the 6-copy jobs without names, a file each, fill the lanes
         return [[repeat + ['--tag', 'smokeao']]
-                + [topic_mulms_job(s, OFFSETS) for s in MULMS_SUBFIELD_NAMES]
-                + [mr6_mulms_job(off) for off in (OFFSETS[0], OFFSETS[2])],
-                [topic_mulms_job(s, OFFSETS, mentions=True) for s in MULMS_SUBFIELD_NAMES]
-                + [mr6_mulms_job(OFFSETS[1])]]
+                + [topic_variant_job(v, s, OFFSETS) for v in ('mrs', 'mrm6')
+                   for s in MULMS_SUBFIELD_NAMES]
+                + [mr6_mulms_job(OFFSETS[0])],
+                [topic_variant_job(v, s, OFFSETS) for v in ('mrm', 'st3')
+                 for s in MULMS_SUBFIELD_NAMES]
+                + [mr6_mulms_job(off) for off in (OFFSETS[1], OFFSETS[2])]]
     if name.startswith('w12b:'):
         # week 12's decision on MuLMS for the screen's winner, seed offsets 300 to 900
         variant = week12_variant(name)
@@ -666,8 +687,8 @@ def batch_lanes(name):
             lanes = balance([(COST['mulms'] * MULMS_SUBFIELDS * COST['mr6'], mr6_mulms_job(off))
                              for off in OFFSETS_W5], loads=[COST['crf'], 0.0])
         else:
-            lanes = [[topic_mulms_job(s, offsets, mentions=variant == 'mrm')
-                      for s in MULMS_SUBFIELD_NAMES] for offsets in DECISION_LANES]
+            lanes = [[topic_variant_job(variant, s, offsets) for s in MULMS_SUBFIELD_NAMES]
+                     for offsets in DECISION_LANES]
         return [[repeat + ['--tag', 'smokeap']] + lanes[0], lanes[1]]
     if name == 'w7a':
         # week 7, part 2a: recall calibration. An inner job is the 6 folds of a seed, each

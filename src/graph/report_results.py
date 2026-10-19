@@ -1161,7 +1161,8 @@ def mulms_note(analysis):
 
 
 WEEK12_NAMES = {'crf_mrs_topic': 'silver sentences', 'crf_mrm_topic': 'silver mentions',
-                'crf_mr6': '6 copies'}
+                'crf_mrm_topic6': 'silver mentions with 6 copies',
+                'crf_st3_topic': 'self-training on the silver sentences', 'crf_mr6': '6 copies'}
 
 
 def week12_sentences(week12):

@@ -810,6 +810,28 @@ def test_silver_mention_names_need_every_teacher_confident_on_the_span():
     assert nb.silver_mention_names(sentences, votes, threshold=0.8)[-1] == ('MAT', ('Ni', 'foam'))
 
 
+def test_self_training_with_teachers_on_mulms_and_its_corpus_tag(tmp_path):
+    """Week 12's self-training baseline: --self-train FILE with --teachers is allowed on MuLMS
+    without --augment-names, and --names-tag labels the corpus (crf_st3_topic); the tag
+    without teachers or names is refused."""
+    corpus = tmp_path / 'topic.txt'
+    corpus.write_text('A YSZ anode .\n')
+    base = ['--granularity', 'mulms', '--leave-one-subfield-out', '--train-pool', '400',
+            '--crf', '--self-train', str(corpus), '--teachers', '3', '--students', '3']
+    args = nb.parse_args(base + ['--names-tag', 'topic'])
+    assert nb.variant_name(args) == 'crf_st3_topic'
+    assert nb.variant_name(nb.parse_args(base)) == 'crf_st3'
+    args = nb.parse_args(base + ['--augment-mentions', '6', '--augment-names',
+                                 '--silver-mentions', '--names-tag', 'topic'])
+    assert nb.variant_name(args) == 'crf_mrm_topic6'
+    with pytest.raises(SystemExit):
+        nb.parse_args(['--granularity', 'mulms', '--leave-one-subfield-out', '--train-pool',
+                       '400', '--crf', '--self-train', str(corpus)])        # no teachers
+    with pytest.raises(SystemExit):
+        nb.parse_args(['--granularity', 'fine', '--leave-one-paper-out', '--crf',
+                       '--augment-mentions', '3', '--names-tag', 'topic'])   # no corpus
+
+
 def test_silver_mentions_parser_and_variant(tmp_path, capsys):
     corpus = str(_corpus(tmp_path))
     base = ['--leave-one-paper-out', '--crf', '--self-train', corpus, '--teachers', '3',

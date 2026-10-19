@@ -640,16 +640,17 @@ def names_variant(files, system, decide=True):
 
 
 def week12_variants(directory):
-    """The week12 section of mulms: {variant: {part: names_variant(...)}} for every mention
-    replacement variant other than crf_mr and crf_mrs with files on the held-out subfields;
+    """The week12 section of mulms: {variant: {part: names_variant(...)}} for every variant
+    other than crf, crf_mr and crf_mrs with files on the held-out subfields (crf_mrs_topic,
+    crf_mrm_topic, crf_mrm_topic6, crf_st3_topic, crf_mr6);
     the parts screen (SCREEN_OFFSETS, no decision), decision (DECISION_OFFSETS) and ten_seeds
     (WEEK5_OFFSETS, no decision), each present when the variant and both references have
     every file of its offsets."""
     prefix = f'ner_results_mulms_{MULMS_PROTOCOLS[0]}_'
     variants = set()
-    for path in sorted(Path(directory).glob(f'{prefix}crf_mr*_m*.json')):
+    for path in sorted(Path(directory).glob(f'{prefix}crf_*_m*.json')):
         variant, _, offset = path.name[len(prefix):-len('.json')].rpartition('_m')
-        if variant not in ('crf_mr', 'crf_mrs') and offset.isdigit():
+        if variant not in ('crf', 'crf_mr', 'crf_mrs') and offset.isdigit():
             variants.add(variant)
     out = {}
     for variant in sorted(variants):
