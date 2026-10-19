@@ -3611,6 +3611,7 @@ stay local.
 
 | Subfield | Teachers' test F1 (CPU) | Sentence filter 0.9: names, coverage, fill | Mention filter 0.9: names, coverage, fill | Mention filter 0.7: coverage, fill | Gold unseen names: fill / override |
 |---|---|---|---|---|---|
+| sofc | 53.4, 51.9, 51.2 | 340, 25.8%, +5.79 | 4,344, 34.4%, +5.91 | 45.8%, +5.96 | +15.16 / +27.06 |
 | steel | 55.2, 58.2, 58.6 | 667, 13.3%, +0.01 | 7,913, 25.0%, −10.03 | 32.5%, −13.18 | −1.82 / +4.13 |
 
 *Reading, steel.* The corpus holds 55.0% of steel's unseen test names; the
@@ -3628,6 +3629,25 @@ must keep the context's say; whether mention replacement, which swaps
 names only inside gold entity contexts, raises recall without that
 precision loss is what the screen measures (its precision and recall will
 be reported with it).
+
+*Reading, sofc.* The opposite case. The corpus holds 80.8% of sofc's
+unseen test names; the mention filter at 0.9 admits 34.4% (4,344 names;
+15,553 MAT and 7,093 VALUE mentions among 24,460), the sentence filter
+25.8% (340 names). The held-out CRF head is recall-starved there (10
+seeds: precision 57.5, recall 35.3, F1 43.5), and the admitted names
+recur as entities: filling its O tags with the 0.9 mention lexicon moves
+recall to 46.5 for a precision of 52.8 (+5.9 F1, positive on all 10 seeds,
++1.9 to +9.1); the 0.9 sentence lexicon gives the same gain at less
+precision cost (56.7 / 43.7, +5.8), the 0.7 sentence lexicon the largest
+(+7.2 fill, +7.3 override), and only the 0.5 mention lexicon tips over
+(+1.2 fill, −2.1 override). The gold unseen names fill to +15.2 and
+override to +27.1. *So far.* Two subfields bracket the question: a lexicon
+of names the teachers agree on is a strong gazetteer on sofc and poison on
+steel, so the gain of any names method will vary by subfield as much as
+the screen can detect, and on sofc the dictionary rule (+5.9 at the
+protocol's filters) is the cheap baseline the week-12 variants must beat;
+it will be reported next to them. Whether the protocol's threshold (0.9)
+or filter should change is decided after the seven subfields are in.
 
 ### Week 12 protocol: names from a topic corpus (fixed before any run)
 
