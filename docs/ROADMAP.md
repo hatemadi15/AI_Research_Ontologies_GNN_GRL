@@ -3653,6 +3653,17 @@ mention-level filter is a candidate for the screen.
   fine-grained held-out papers) and 4 in lane 1 (the coarse ones), about
   2.1 GPU hours; its outputs go through `$SP/post_w11b.sh` for decisions 3
   and 4 of week 11.
+- *22:41: the sixth TPU session*, a version of `ner-tpu-nb` committed from
+  Kaggle's editor with "TPU VM v5e-8" chosen in the session options
+  (21:12–22:41), ran on the same CPU-only image as the five API-pushed
+  ones (`gcr.io/kaggle-images/python`, no `/dev/accel*`, no TPU variables,
+  torch_xla's one CPU device; the job failed after the same 77 minutes of
+  libtpu metadata timeouts), and Kaggle charged no TPU time for it (0.00 of
+  20 hours after six sessions). The editor's draft session with the same
+  setting stayed at "starting". The spike's cap is spent: the TPU is dropped
+  from the schedule, and the ablations run on the GPU, whose quota is now
+  45 hours a week; the XLA port stays in the code, tested on XLA-CPU, for a
+  TPU that Kaggle may attach another day.
 
 ### Week 12, the CPU probe (19–20 October; not a protocol): what the silver filter admits, and the dictionary ceiling
 

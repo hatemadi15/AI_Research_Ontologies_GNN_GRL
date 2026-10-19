@@ -265,7 +265,7 @@ all tested or ruled out, in `ROADMAP.md`.
 | Resource | Capacity | Used for | Rules |
 |---|---|---|---|
 | Kaggle T4 GPU | 45 hours a week since 19 October (30 before; 16.1 left this week), reset Friday 00:00 UTC (next: 24 October); 12-hour sessions, 2 at a time | every pre-registered decision (comparable with the existing GPU references) | the existing bundle and batch rules |
-| Kaggle TPU v5e-8 | separate quota (20 hours a week historically; the account's settings show the current figure); 9-hour sessions; 8 cores | a bounded feasibility spike, then the ablations of §4C and any new reference family | TPU numbers are compared only with TPU numbers (as CPU with CPU, GPU with GPU) |
+| Kaggle TPU v5e-8 | 20 hours a week on paper; none attached in six sessions (19 October) | nothing for now (the spike's outcome below); the port stays | TPU numbers are compared only with TPU numbers (as CPU with CPU, GPU with GPU) |
 | this environment's CPU | 4 cores, 15 GB; 2 lanes of 2 threads as in weeks 2–3: a 340-sentence CRF run in 15–20 minutes, tagging 40,000 sentences in about 75 minutes per teacher | the probe (§4B), corpus building, every analysis, CRF-only references if needed | results written per run and committed daily (the container can be reclaimed) |
 
 **The TPU spike** (cap: 2 days of engineering, 1 session of at most 3 TPU
@@ -290,17 +290,18 @@ takes no longer than the same run on a T4 (8 chips against a session's 2
 GPUs: 4× a T4 session's throughput); otherwise the TPU is dropped and the
 ablations wait for GPU weeks.
 
-*Status, 19 October.* The port is done and tested on XLA-CPU (repeats
-exactly; the CPU path byte-identical). Five Kaggle sessions pushed through
-the API, four script kernels and one notebook kernel with `enable_tpu`,
-all ran on a machine without a TPU (no accelerator devices or variables;
-0.00 TPU hours counted); the notebook session lost 77 minutes in libtpu's
-metadata lookups before failing at the first XLA call. The spike waits on
-one action only the account holder can take: run `ner-tpu-nb` once from
-Kaggle's editor with TPU v5e-8 chosen in the accelerator menu. If a TPU
-appears there, `tpu-smoke` (8 chips) decides go/no-go within 3 TPU hours;
-if the menu has no TPU, the TPU is dropped and the ablations run on the
-GPU.
+*Outcome, 19 October: no-go, for want of a TPU.* The port is done and
+tested on XLA-CPU (repeats exactly; the CPU path byte-identical). Six
+Kaggle sessions, five pushed through the API (script and notebook kernels
+with `enable_tpu`) and one committed from the editor with "TPU VM v5e-8"
+chosen, all ran on the standard CPU image without a TPU (no accelerator
+devices or variables, 0.00 TPU hours charged); each notebook session lost
+77 minutes in libtpu's metadata lookups before failing at the first XLA
+call, and the editor's draft session with the same setting never started.
+The spike's cap is spent. The TPU leaves the schedule; the ablations run
+on the GPU, whose quota rose to 45 hours a week the same day. The XLA
+port stays in the code for a TPU Kaggle may attach another day
+(`tpu-smoke1`, `tpu-smoke`, the go/no-go rule above).
 
 **GPU budget, week of 24 October** (hours): `w11b` 2.1; `w12a` 14.6 (lane 0:
 V1 3.2, V4 3.2, one `crf_mr6` job 0.7; lane 1: V2 3.2, V6 3.0, two `crf_mr6`
@@ -315,9 +316,9 @@ filter, so that the decision batch can run on 24 October.
 | When | What | Decides |
 |---|---|---|
 | 19–23 Oct (no GPU) | the CPU probe on all 7 subfields; V4 and V6 in the code with tests; amendment 1 committed; the TPU port tested on XLA-CPU; related work for the names route | the amendment's filter/threshold; whether the route has a ceiling |
-| 24 Oct (reset) | `w11b` and `w12a` together, `w12c` after `w11b`; the TPU spike session in parallel if a TPU can be attached from the editor | week-11 decisions 3–4; the screen's winner; TPU go/no-go |
+| 24 Oct (reset) | `w12a`'s remaining jobs (V6, `crf_mr6`), then `w12b:<winner>`; `w11b`, `w12c` and the names part of `w12a` already run this week on the raised quota | week-11 decisions 3–4; the screen's winner |
 | 25–27 Oct | `w12b:<winner>`; the MaterioMiner analogue if decision 1 passes | the methods criterion |
-| 31 Oct–7 Nov | ablations (§4C) on TPU or GPU; or route E; the evaluation paper's remaining items either way | the paper's claims |
+| 31 Oct–7 Nov | ablations (§4C) on the GPU; or route E; the evaluation paper's remaining items either way | the paper's claims |
 | 7–14 Nov | the paper assembled as what the results say; title and abstract fixed by 14 Nov | — |
 
 Stop rules: the methods route gets the two GPU weeks after the reset and
