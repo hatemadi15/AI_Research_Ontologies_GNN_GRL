@@ -965,6 +965,9 @@ def test_tpu_smoke_batch_metadata_and_lane_environment(monkeypatch, tmp_path):
     meta = kj.kernel_metadata('u', 'k', 'd', tpu=True)
     assert (meta['enable_tpu'], meta['enable_gpu']) == (True, False)
     assert 'machine_shape' not in meta and 'docker_image' not in meta
+    assert (meta['kernel_type'], meta['code_file']) == ('notebook', 'run_jobs.ipynb')
+    nb_json = json.loads(kj.notebook_cell('print(1)\n'))
+    assert nb_json['cells'][0]['source'] == 'print(1)\n' and nb_json['nbformat'] == 4
     gpu = kj.kernel_metadata('u', 'k', 'd')
     assert (gpu['enable_tpu'], gpu['enable_gpu'], gpu['machine_shape']) == (
         False, True, kj.MACHINE)

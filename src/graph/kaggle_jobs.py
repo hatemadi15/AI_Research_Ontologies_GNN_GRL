@@ -805,16 +805,27 @@ def render_script(spec, template=None):
 def kernel_metadata(user, kernel=KERNEL, dataset=DATASET, tpu=False):
     """kernel-metadata.json of a job kernel: private, GPU (T4 x2), internet, the bundle, and
     the pinned Kaggle image; with `tpu`, the TPU (v5e-8) and Kaggle's TPU environment instead
-    of the GPU and the pinned image."""
-    meta = {'id': f'{user}/{kernel}', 'title': kernel, 'code_file': 'run_jobs.py',
-            'language': 'python', 'kernel_type': 'script', 'is_private': True,
-            'enable_gpu': not tpu, 'enable_tpu': tpu, 'enable_internet': True,
-            'dataset_sources': [f'{user}/{dataset}'], 'competition_sources': [],
-            'kernel_sources': [], 'model_sources': []}
+    of the GPU and the pinned image, and the script wrapped as a notebook (notebook_cell): four
+    script sessions of 19 October asked for the TPU and ran on a plain CPU machine."""
+    meta = {'id': f'{user}/{kernel}', 'title': kernel,
+            'code_file': 'run_jobs.ipynb' if tpu else 'run_jobs.py',
+            'language': 'python', 'kernel_type': 'notebook' if tpu else 'script',
+            'is_private': True, 'enable_gpu': not tpu, 'enable_tpu': tpu,
+            'enable_internet': True, 'dataset_sources': [f'{user}/{dataset}'],
+            'competition_sources': [], 'kernel_sources': [], 'model_sources': []}
     if not tpu:
         meta.update({'machine_shape': MACHINE, 'docker_image': DOCKER_IMAGE,
                      'docker_image_pinning_type': 'original'})
     return meta
+
+
+def notebook_cell(source):
+    """A one-cell notebook (nbformat 4) holding `source` as its code cell, as JSON text."""
+    return json.dumps({'nbformat': 4, 'nbformat_minor': 5,
+                       'metadata': {'kernelspec': {'name': 'python3', 'language': 'python',
+                                                   'display_name': 'Python 3'}},
+                       'cells': [{'cell_type': 'code', 'execution_count': None, 'id': 'jobs',
+                                  'metadata': {}, 'outputs': [], 'source': source}]}, indent=1)
 
 
 def is_tpu_batch(name):
@@ -1058,11 +1069,15 @@ def cmd_bundle(args):
 def cmd_push(args):
     user = username(args)
     spec = batch_spec(args.batch)
+    tpu = is_tpu_batch(args.batch)
     with tempfile.TemporaryDirectory() as folder:
-        Path(folder, 'run_jobs.py').write_text(render_script(spec))
+        script = render_script(spec)
+        if tpu:
+            Path(folder, 'run_jobs.ipynb').write_text(notebook_cell(script))
+        else:
+            Path(folder, 'run_jobs.py').write_text(script)
         Path(folder, 'kernel-metadata.json').write_text(
-            json.dumps(kernel_metadata(user, args.kernel, args.dataset,
-                                       tpu=is_tpu_batch(args.batch)), indent=2))
+            json.dumps(kernel_metadata(user, args.kernel, args.dataset, tpu=tpu), indent=2))
         timeout = str(int(3600 * (spec['deadline_hours'] + 1.5)))
         out = kaggle('kernels', 'push', '-p', folder, '-t', timeout)
         print(out)
