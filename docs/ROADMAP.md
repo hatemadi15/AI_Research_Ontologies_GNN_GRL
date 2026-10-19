@@ -3648,6 +3648,11 @@ mention-level filter is a candidate for the screen.
   if it changes them) and the bundle is rebuilt, in two sessions (`w12c`
   and the names part of `w12a`); V6 and the `crf_mr6` jobs, the decision
   batch and the analogue run after the reset.
+- *21:06: `w11b` pushed* to `ner-gpu-jobs-d` (version 6) from bundle
+  77c37be, 5 jobs in lane 0 (the smoke4 repeat `smokean` and the 4
+  fine-grained held-out papers) and 4 in lane 1 (the coarse ones), about
+  2.1 GPU hours; its outputs go through `$SP/post_w11b.sh` for decisions 3
+  and 4 of week 11.
 
 ### Week 12, the CPU probe (19–20 October; not a protocol): what the silver filter admits, and the dictionary ceiling
 
