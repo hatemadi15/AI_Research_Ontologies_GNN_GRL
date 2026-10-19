@@ -113,8 +113,9 @@ of §4B moves these within days, before any GPU hour is spent.
 
 ### A. The week-12 screen, amended before any run
 
-The protocol of `ROADMAP.md` §4 stands; amendment 1 (19 October) adds two
-variants to the screen, each with the same 3-seed design and selection rule:
+The protocol of `ROADMAP.md` §4 stands; amendment 1 (19 October, committed
+as 77c37be before any run) adds two variants to the screen, each with the
+same 3-seed design and selection rule:
 
 | Variant | What it is | Why |
 |---|---|---|
