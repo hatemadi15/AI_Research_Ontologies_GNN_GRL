@@ -217,9 +217,11 @@ compilation per shape), the CRF forward on the device, Viterbi on the CPU,
 fp32 matmul precision, one independent job per core (8 runs in parallel,
 different seeds or folds). It is developed and tested here with
 `PJRT_DEVICE=CPU` (XLA on the CPU) before the session. The session runs one
-MaterioMiner CRF job twice on 8 cores: throughput per run and a determinism
-check. Go if a run costs at most a quarter of a T4 run's wall time per core
-(8 cores: at least 4× a T4 session); otherwise the TPU is dropped and the
+MaterioMiner CRF job on one chip (`tpu-smoke1`), then the same job on all 8
+chips at once (`tpu-smoke`): the wall time per run with every chip busy, and
+whether the 8 files are identical. Go if a run on one chip, with all 8 busy,
+takes no longer than the same run on a T4 (8 chips against a session's 2
+GPUs: 4× a T4 session's throughput); otherwise the TPU is dropped and the
 ablations wait for GPU weeks.
 
 **GPU budget, week of 24 October** (hours): `w11b` 2.1; `w12a` 14.6 (lane 0:
