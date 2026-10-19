@@ -3577,9 +3577,24 @@ mention-level filter is a candidate for the screen.
   a tiny-model CRF run repeats exactly and gives the CPU path's scores; the
   CPU path itself repeats the pre-port files byte for byte apart from
   `runtime_sec` on every tiny-model option. TPU batches (`tpu-smoke1`: one
-  job on one chip; `tpu-smoke`: the same job on all 8 chips) run on
+  job on one chip; `tpu-smoke`: the same job on all 8 chips) are meant for
   Kaggle's TPU v5e-8 from a bundle of ca69981; their results go to
-  `results/tpu/`, a family of their own.
+  `results/tpu/`, a family of their own. Four script sessions of
+  `tpu-smoke1` on 19 October (kernel `ner-tpu-jobs`, `enable_tpu` with the
+  machine shape stored as TpuV5E8) ran on a plain CPU machine: Kaggle's
+  Python image, no `/dev/accel*` or `/dev/vfio/*` device, torch_xla seeing
+  one CPU device, and 0 of the 20 weekly TPU hours counted. Along the way
+  the runner learned to survive a machine without nvidia-smi, the batch
+  installs torch 2.9.0 (the CPU wheel) with torch_xla 2.9.0 and libtpu
+  0.0.21.1 (the `tpu` extra pins a libtpu PyPI no longer has) and
+  torchaudio and torchvision to match, and the record lists the
+  accelerator devices and variables. A fifth session runs the same batch
+  as a notebook kernel (`ner-tpu-nb`).
+- Pull request #11 (weeks 6–12) merged into `main` as b5ca78e after its CI
+  passed (568 tests; the CI first found seqeval missing from the test
+  requirements, a batch test that assumed the SOFC corpus file and a parser
+  test that amendment 1 had made obsolete); the branch restarted from
+  `main`.
 
 ### Week 12 protocol: names from a topic corpus (fixed before any run)
 
