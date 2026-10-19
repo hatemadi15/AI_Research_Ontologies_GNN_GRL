@@ -3609,6 +3609,37 @@ mention-level filter is a candidate for the screen.
   agreement, injected into gold contexts, held-out topics of a materials
   corpus), the dictionary rule becomes a reported baseline and a
   gazetteer match feature a required one if names pass (§4C).
+- The fifth TPU session, the notebook kernel `ner-tpu-nb` (19:14–20:48
+  UTC, 92 minutes): the same machine as the script kernels (no
+  `/dev/accel*`, torch_xla sees one CPU device, no TPU variables in the
+  environment); with PJRT_DEVICE=TPU the job spent 77 minutes in libtpu's
+  metadata lookups (every `tpu-env` variable DEADLINE_EXCEEDED) and failed
+  at the first XLA call ("TPU initialization failed: no device found");
+  the quota still shows 0.00 of 20 TPU hours used, so Kaggle attached no
+  TPU to any kernel pushed through the API, notebook or script. The spike
+  stays open on the website's side: open `ner-tpu-nb` in Kaggle's editor,
+  choose TPU v5e-8 in the accelerator menu, save and run it once; if the
+  record then lists accelerator devices, `tpu-smoke` follows.
+- Prepared, in no protocol: the names as a gazetteer match feature
+  (`--names-feature`, `ner_baseline.py`): the students of a `--teachers`
+  run keep the plain CRF head and add to the emissions of every verbatim
+  match of a harvested name a term learned from zero (two columns per
+  type, first word and later words, learning rate 1e-2, no weight decay);
+  the lexicon is the same as V2's (the mention filter at 0.9), the index
+  the probe's (at most 8 words, the most frequent type), and the record
+  counts the names and the matches (`names_feature`). Variant
+  `crf_gzm_topic`; batches `w12c` (its 3-seed screen over two lanes, about
+  3.2 GPU hours) and `w12b:gzm`; the week-12 report names it; the probe's
+  index moved into the baseline module. The paths the change does not
+  touch were checked byte-identical to 77c37be on the tiny corpora
+  (`crf`, `mr`, `mt_mr`, `st3`, `mrs`, the MuLMS pool and unused-corpus
+  runs). **Amendment 2, proposed, not adopted**: V7 = `crf_gzm_topic`
+  joins the screen under the same selection rule, which the related work
+  (§2 of the plan) makes the baseline a reviewer will ask for; the GPU
+  budget after the reset would then be about 29 of 30 hours (`w11b` 2.1,
+  `w12a` 14.6, `w12c` 3.2, `w12b` 7, the MaterioMiner analogue 2.1), so
+  the analogue would move to the following week. It is the user's call;
+  nothing runs before 24 October either way.
 
 ### Week 12, the CPU probe (19–20 October; not a protocol): what the silver filter admits, and the dictionary ceiling
 

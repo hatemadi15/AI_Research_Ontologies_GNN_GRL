@@ -900,3 +900,85 @@ def test_students_with_silver_mentions(tiny_run, tmp_path, monkeypatch):
     assert len(seen['silver_mentions']) <= len(names)
     res = _load(tmp_path / 'sentences', 'ner_results_fine_random_split_vary_crf_mrs2_m0.json')
     assert res['runs'][0]['self_training']['silver_filter'] == 'sentences'
+
+
+def test_lexicon_index_matches_and_features():
+    """--names-feature's pure parts: the index keeps a name's most frequent type and drops
+    names over LEXICON_MAX_WORDS; the matcher takes the longest name at each word, left to
+    right; the features are two columns per type of the run, first word and later words."""
+    names = [('MAT', ('YSZ',)), ('MAT', ('La', 'Sr', 'Co')), ('DEV', ('Co',)),
+             ('DEV', ('La', 'Sr', 'Co')), ('MAT', ('La', 'Sr', 'Co')), ('PROP', ('w',) * 9)]
+    index = nb.lexicon_index(names)
+    assert index == {('YSZ',): 'MAT', ('La', 'Sr', 'Co'): 'MAT', ('Co',): 'DEV'}
+    words = ['the', 'La', 'Sr', 'Co', 'cell', 'Co', 'YSZ']
+    assert nb.lexicon_matches(words, index) == [(1, 4, 'MAT'), (5, 6, 'DEV'), (6, 7, 'MAT')]
+    assert nb.match_features(words, index, ['MAT', 'DEV']) == [
+        [0, 0, 0, 0], [1, 0, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0],
+        [1, 0, 0, 0]]
+    # a type the run does not label is matched (it blocks the words) but has no column
+    assert nb.match_features(words, index, ['DEV']) == [[0, 0]] * 5 + [[1, 0], [0, 0]]
+    assert nb.lexicon_matches(words, {}) == []
+    assert nb.match_features(words, {}, ['MAT']) == [[0.0, 0.0]] * 7
+
+
+def test_names_feature_parser_and_variant(tmp_path, capsys):
+    corpus = str(_corpus(tmp_path))
+    base = ['--leave-one-paper-out', '--crf', '--self-train', corpus, '--teachers', '3']
+    for argv, error in ((['--leave-one-paper-out', '--crf', '--names-feature'],
+                         '--names-feature needs --crf and --self-train with --teachers'),
+                        ([*base, '--names-feature', '--multi-task'],
+                         '--names-feature is not available with --multi-task'),
+                        (['--leave-one-paper-out', '--crf', '--silver-mentions'],
+                         '--silver-mentions needs --augment-names or --names-feature')):
+        with pytest.raises(SystemExit):
+            nb.parse_args(argv)
+        assert error in capsys.readouterr().err
+
+    def tagged(argv, tag='m0'):
+        return nb.variant_name(SimpleNamespace(**{**vars(nb.parse_args(argv)), 'tag': tag}))
+    assert tagged([*base, '--names-feature']) == 'crf_gzs_m0'
+    assert tagged([*base, '--names-feature', '--silver-mentions']) == 'crf_gzm_m0'
+    assert tagged([*base, '--names-feature', '--silver-mentions', '--names-tag', 'topic']) == \
+        'crf_gzm_topic_m0'
+    assert tagged([*base, '--names-feature', '--silver-mentions', '--augment-mentions', '3',
+                   '--names-tag', 'topic']) == 'crf_mr_gzm_topic_m0'
+    assert tagged([*base, '--names-feature', '--silver-mentions', '--augment-mentions', '3',
+                   '--augment-names', '--names-tag', 'topic']) == 'crf_mrm_gzm_topic_m0'
+    assert tagged([*base, '--names-feature', '--augment-mentions', '6', '--augment-names',
+                   '--names-tag', 'topic']) == 'crf_mrs_gzs_topic6_m0'
+    args = nb.parse_args(['--granularity', 'mulms', '--leave-one-subfield-out', '--train-pool',
+                          '400', '--crf', '--self-train', corpus, '--teachers', '3',
+                          '--names-feature', '--silver-mentions', '--names-tag', 'topic'])
+    assert nb.variant_name(args) == 'crf_gzm_topic' and args.names_feature
+
+
+def test_students_with_the_names_as_a_feature(tiny_run, tmp_path, monkeypatch):
+    """--names-feature: the silver mentions are the students' lexicon; each student trains
+    the plain CRF head with a match term learned from zero and no copies; the record counts
+    the names and the matches, and the variant is crf_gzm_<tag>."""
+    corpus = _corpus(tmp_path)
+    monkeypatch.setattr(nb, 'SILVER_THRESHOLD', 0.0)     # every agreed tag counts
+    seen = {}
+    real_index = nb.lexicon_index
+
+    def spy(names):
+        seen['index'] = real_index(names)
+        return seen['index']
+    monkeypatch.setattr(nb, 'lexicon_index', spy)
+    calls = list(tiny_run('--crf', '--self-train', str(corpus), '--teachers', '2',
+                          '--self-train-sample', '0', '--names-feature', '--silver-mentions',
+                          '--vary-split', '--seeds', '0', '--names-tag', 'toy',
+                          '--save-predictions'))
+    assert seen['index'] and len(calls) == 4
+    for offset, student in zip((0, 100), calls[2:]):
+        res = _load(tmp_path, f'ner_results_fine_random_split_vary_crf_gzm_toy_m{offset}.json')
+        assert res['variant'] == f'crf_gzm_toy_m{offset}' and res['config']['names_feature']
+        run = res['runs'][0]
+        assert run['self_training']['silver_filter'] == 'mentions'
+        assert run['self_training']['names']['n_distinct'] >= len(seen['index'])
+        info = run['names_feature']
+        assert info['n_names'] == len(seen['index']) and info['lr'] == nb.GAZ_LR
+        assert info['n_train_matches'] >= 0 and info['n_test_matches'] >= 0
+        assert (info['weight_abs_max'] > 0) == (info['n_train_matches'] > 0)
+        assert student['augmented'] is None and student['silver'] is None
+        assert 'n_augmented' not in run and len(run['test_pred']) == run['n_test']

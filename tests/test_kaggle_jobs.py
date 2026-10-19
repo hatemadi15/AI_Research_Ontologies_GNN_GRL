@@ -1103,3 +1103,41 @@ def test_run_jobs_places_the_mulms_files_only_when_asked(tmp_path):
         rj.place_mulms({'mulms_files': {'a_01.conll': '0' * 64}}, inputs, repo)
     with pytest.raises(FileNotFoundError):
         rj.place_mulms({'mulms_files': {'b_01.conll': digest}}, inputs, repo)
+
+
+def test_week12_gazetteer_feature_batches(monkeypatch, tmp_path):
+    """w12c (amendment 2, if adopted): the match-feature variant's screen, one job per
+    subfield over the two lanes, no copies; w12b:gzm: its decision over seed offsets 300 to
+    900."""
+    monkeypatch.setattr(nb.os.path, 'isfile', lambda path: True)
+    monkeypatch.setattr(kj, 'MULMS_REPORT', tmp_path / 'no_mulms.json')
+    monkeypatch.setattr(kj, 'mulms_files', lambda: {'a_01.conll': 'a' * 64})
+    reports = tmp_path / 'topic_corpora'
+    reports.mkdir()
+    for topic in kj.MULMS_SUBFIELD_NAMES:
+        (reports / f'{topic}.json').write_text(json.dumps({'corpus': {'sha256': topic * 8}}))
+    monkeypatch.setattr(kj, 'TOPIC_REPORTS', reports)
+    real_sha256 = kj.corpus_sha256
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda report=None: (
+        real_sha256(report) if report is not None and Path(report).parent == reports else 'x' * 64))
+
+    def kind(a):
+        return nb.variant_name(nb.SimpleNamespace(**{**vars(a), 'tag': ''}))
+    lane0, lane1 = _parsed(kj.batch_lanes('w12c'))
+    assert lane0[0].tag == 'smokeaq' and lane0[0].granularity == 'fine'
+    jobs = lane0[1:] + lane1
+    assert (len(lane0), len(lane1)) == (5, 3)
+    assert [a.subfields for a in jobs] == [[s] for s in kj.MULMS_SUBFIELD_NAMES]
+    for a in jobs:
+        assert kind(a) == 'crf_gzm_topic' and a.names_feature and a.silver_mentions
+        assert not hasattr(a, 'augment_mentions') and not hasattr(a, 'augment_names')
+        assert (a.teachers, a.students, a.student_offsets) == (3, 10, [0, 100, 200])
+        assert a.self_train == f'data/processed/corpus/topic_{a.subfields[0]}_sentences.txt'
+        assert a.crf and a.save_predictions and a.names_tag == 'topic'
+    lane0, lane1 = _parsed(kj.batch_lanes('w12b:gzm'))
+    assert lane0[0].tag == 'smokeap' and (len(lane0), len(lane1)) == (8, 7)
+    for lane, offsets in ((lane0[1:], [300, 400, 500]), (lane1, [600, 700, 800, 900])):
+        assert [a.subfields for a in lane] == [[s] for s in kj.MULMS_SUBFIELD_NAMES]
+        for a in lane:
+            assert kind(a) == 'crf_gzm_topic' and a.student_offsets == offsets
+    assert 'w12c' in kj.BATCHES and 'w12b:gzm' in kj.BATCHES

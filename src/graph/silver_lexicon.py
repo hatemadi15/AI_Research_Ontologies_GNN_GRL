@@ -31,7 +31,7 @@ import argparse
 import json
 import os
 import time
-from collections import Counter, defaultdict
+from collections import Counter
 
 import dapt_mlm
 import ner_baseline as nb
@@ -46,7 +46,7 @@ THRESHOLDS = (0.9, 0.7, 0.5)
 TEACHER_OFFSETS = (0, 100, 200)
 SEED_OFFSETS = tuple(range(0, 1000, 100))
 POOL, SPLIT_SEED = 400, 0
-MAX_NAME = 8                  # words of a name the dictionary rule matches
+MAX_NAME = nb.LEXICON_MAX_WORDS   # words of a name the dictionary rule matches
 
 
 def read_corpus(path, limit=0):
@@ -82,14 +82,7 @@ def lexicons_from_votes(sentences, votes, thresholds=THRESHOLDS):
     return out
 
 
-def lexicon_index(names):
-    """{words: type} of the names (at most MAX_NAME words), the most frequent type of a name
-    that has several."""
-    counts = defaultdict(Counter)
-    for kind, words in names:
-        if len(words) <= MAX_NAME:
-            counts[tuple(words)][kind] += 1
-    return {words: kinds.most_common(1)[0][0] for words, kinds in counts.items()}
+lexicon_index = nb.lexicon_index        # {words: type}, the most frequent type per name
 
 
 def apply_lexicon(words, tags, index, mode='fill'):

@@ -573,11 +573,13 @@ def batches(features, batch_size, pad_id, shuffle_seed=None, widths=None, full=F
                order[start:start + batch_size])
 
 
-def predict(model, features, batch_size, pad_id, id2label, device, crf=None):
+def predict(model, features, batch_size, pad_id, id2label, device, crf=None, gaz=None,
+            feats=None):
     """Word-level predicted tags per sentence (first-subword positions).
 
     Without a CRF the tag of a word is the argmax at its first subword; with
-    one it is the Viterbi path over the word-level emissions.
+    one it is the Viterbi path over the word-level emissions. gaz and feats
+    (--names-feature): the match term gaz(feature_batch(feats, ...)) is added to the emissions.
     """
     import torch
     model.eval()
@@ -593,6 +595,9 @@ def predict(model, features, batch_size, pad_id, id2label, device, crf=None):
                     preds[i] = [id2label[int(p)] for p in best[row][keep]]
             else:
                 emissions, _, word_mask = word_view(logits, labels, widths)
+                if gaz is not None:
+                    emissions = emissions + gaz(
+                        feature_batch(feats, idx, emissions.size(1), emissions.device))
                 if widths:
                     emissions, word_mask = emissions.cpu(), word_mask.cpu()
                 for i, path in zip(idx, crf.decode(emissions, word_mask)):
@@ -691,6 +696,8 @@ def prediction_fields(test_index, test, test_pred):
 # encoder, so they get their own learning rate (100x the default encoder rate),
 # fixed in advance rather than tuned.
 CRF_LR = 5e-3
+GAZ_LR = 1e-2                 # --names-feature: the match term starts at zero and must reach the
+                              # emissions' scale within a run (no weight decay, as the CRF)
 CRF_FORBIDDEN = -1e4   # added to transitions that break IOB2
 
 
@@ -1064,7 +1071,7 @@ def is_silver(tags, marginals):
 
 
 def train_one(seed, train, val, test, labels, args, device, test_index=None, descriptions=None,
-              silver=None, keep_tagger=False, contexts=None, augmented=None):
+              silver=None, keep_tagger=False, contexts=None, augmented=None, lexicon=None):
     """Fine-tune and test once; `seed` is the model seed (--seed-offset included).
 
     test_index (positions of `test` in the corpus) is stored with the
@@ -1077,7 +1084,10 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
     tokenizer, label2id and id2label (teacher_tags). contexts (--context): the
     part_contexts of train, val and test ({'train': ..., 'val': ..., 'test': ...}),
     encoded around each sentence with up to args.context subwords per side. augmented
-    (--augment-mentions): (words, tags) sentences trained on as gold ones.
+    (--augment-mentions): (words, tags) sentences trained on as gold ones. lexicon
+    (--names-feature): {words: type} (lexicon_index); the emissions of every word then add a
+    linear term, learned from zero at GAZ_LR, on its match features (match_features), in
+    training, validation and test alike; the record adds `names_feature`.
     """
     import torch
     from transformers import (AutoModelForTokenClassification, AutoTokenizer,
@@ -1104,6 +1114,17 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
         model.classifier = make_label_head(embeddings, model.config).to(device)
     pad_id = tokenizer.pad_token_id
     crf = make_crf(label_list).to(device) if getattr(args, 'crf', False) else None
+    gaz = rows = None
+    if lexicon is not None:
+        assert crf is not None and not silver and not entity_biases(args), \
+            'the match term is a CRF emission term; no silver sentences or biases with it'
+        types = list(labels)
+        rows = {'train': feature_rows(tokenizer, train, lexicon, types)
+                + (feature_rows(tokenizer, augmented, lexicon, types) if augmented else []),
+                'val': feature_rows(tokenizer, val, lexicon, types),
+                'test': feature_rows(tokenizer, test, lexicon, types)}
+        gaz = torch.nn.Linear(2 * len(types), len(label_list), bias=False).to(device)
+        torch.nn.init.zeros_(gaz.weight)
 
     def encode_part(name, part):
         sentences = [(t, g) for t, g, _ in part]
@@ -1130,11 +1151,17 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
     if crf is None:
         optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=0.01)
     else:
-        optimizer = torch.optim.AdamW(
-            [{'params': model.parameters()},
-             {'params': crf.parameters(), 'lr': CRF_LR, 'weight_decay': 0.0}],
-            lr=args.lr, weight_decay=0.01)
+        groups = [{'params': model.parameters()},
+                  {'params': crf.parameters(), 'lr': CRF_LR, 'weight_decay': 0.0}]
+        if gaz is not None:
+            groups.append({'params': gaz.parameters(), 'lr': GAZ_LR, 'weight_decay': 0.0})
+        optimizer = torch.optim.AdamW(groups, lr=args.lr, weight_decay=0.01)
     params = list(model.parameters()) + (list(crf.parameters()) if crf is not None else [])
+    params += list(gaz.parameters()) if gaz is not None else []
+
+    def decode(part_features, part):
+        return predict(model, part_features, args.batch_size, pad_id, id2label, device, crf,
+                       gaz=gaz, feats=None if rows is None else rows[part])
     steps = args.epochs * ((len(f_train) + args.batch_size - 1) // args.batch_size)
     scheduler = get_linear_schedule_with_warmup(optimizer, int(0.1 * steps), steps)
 
@@ -1157,6 +1184,11 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
             elif silver:
                 loss = crf.nll(*word_view(logits, lab, widths),
                                weights=torch.tensor([weight[i] for i in idx], device=device))
+            elif gaz is not None:
+                emissions, tags, word_mask = word_view(logits, lab, widths)
+                emissions = emissions + gaz(
+                    feature_batch(rows['train'], idx, emissions.size(1), emissions.device))
+                loss = crf.nll(emissions, tags, word_mask)
             else:
                 loss = crf.nll(*word_view(logits, lab, widths))
             loss.backward()
@@ -1167,29 +1199,38 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
             if xla:
                 xla_sync()
             total += loss.item()
-        val_pred = predict(model, f_val, args.batch_size, pad_id, id2label, device, crf)
+        val_pred = decode(f_val, 'val')
         val_f1 = score([g for _, g, _ in val], val_pred)['f1']
         history.append({'epoch': epoch, 'train_loss': round(total, 4), 'val_f1': val_f1})
         print(f"    seed {seed} epoch {epoch}: loss {total:.3f} val F1 {val_f1:.2f}", flush=True)
         if val_f1 > best[0]:
-            best = (val_f1, (snapshot(model), snapshot(crf) if crf is not None else None), epoch)
+            best = (val_f1, (snapshot(model), snapshot(crf) if crf is not None else None,
+                             snapshot(gaz) if gaz is not None else None), epoch)
         elif epoch - best[2] >= args.patience:
             break
 
     model.load_state_dict(best[1][0])
     if crf is not None:
         crf.load_state_dict(best[1][1])
+    if gaz is not None:
+        gaz.load_state_dict(best[1][2])
     biases = entity_biases(args)
     if biases:
         decodes = biased_decodes(model, f_test, args.batch_size, pad_id, id2label, device, crf,
                                  biases)
         test_pred = decodes[0.0]
     else:
-        test_pred = predict(model, f_test, args.batch_size, pad_id, id2label, device, crf)
+        test_pred = decode(f_test, 'test')
     result = score([g for _, g, _ in test], test_pred)
     result.update({'seed': seed, 'best_epoch': best[2], 'val_f1': best[0],
                    'n_train': len(train), 'n_val': len(val), 'n_test': len(test),
                    'history': history})
+    if gaz is not None:
+        result['names_feature'] = {
+            'n_names': len(lexicon), 'lr': GAZ_LR,
+            'n_train_matches': int(sum(r[:, 0::2].sum() for r in rows['train'])),
+            'n_test_matches': int(sum(r[:, 0::2].sum() for r in rows['test'])),
+            'weight_abs_max': round(float(gaz.weight.detach().abs().max()), 4)}
     if getattr(args, 'save_predictions', False):
         result.update(prediction_fields(test_index, test, test_pred))
     if biases:
@@ -1199,7 +1240,8 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
             getattr(args, 'save_predictions', False)))
     if keep_tagger:
         return result, SimpleNamespace(model=model, crf=crf, tokenizer=tokenizer,
-                                       label2id=label2id, id2label=id2label)
+                                       label2id=label2id, id2label=id2label, gaz=gaz,
+                                       lexicon=lexicon)
     return result
 
 
@@ -1295,6 +1337,75 @@ def silver_mention_names(sentences, votes, threshold=None):
     return names
 
 
+LEXICON_MAX_WORDS = 8       # words of a name that lexicon_matches looks up (the probe's rule too)
+
+
+def lexicon_index(names):
+    """{words: type} of the (type, words) names of at most LEXICON_MAX_WORDS words; a name
+    with several types gets its most frequent one, the first met among equals."""
+    counts = {}
+    for kind, words in names:
+        if len(words) <= LEXICON_MAX_WORDS:
+            counts.setdefault(tuple(words), Counter())[kind] += 1
+    return {words: kinds.most_common(1)[0][0] for words, kinds in counts.items()}
+
+
+def lexicon_matches(words, index):
+    """(start, end, type) of the maximal verbatim matches of index names in `words`: at each
+    word the longest name that starts there, left to right, no overlaps, whatever the tags."""
+    longest = min(LEXICON_MAX_WORDS, max((len(w) for w in index), default=0))
+    out, i = [], 0
+    while i < len(words):
+        for n in range(min(longest, len(words) - i), 0, -1):
+            kind = index.get(tuple(words[i:i + n]))
+            if kind is not None:
+                out.append((i, i + n, kind))
+                i += n
+                break
+        else:
+            i += 1
+    return out
+
+
+def match_features(words, index, types):
+    """The gazetteer match features of a sentence (--names-feature): per word, two columns
+    per type of `types` in order, 1.0 in the first on the first word of a lexicon match of
+    that type (lexicon_matches) and 1.0 in the second on its other words, 0.0 elsewhere."""
+    column = {kind: 2 * k for k, kind in enumerate(types)}
+    out = [[0.0] * (2 * len(types)) for _ in words]
+    for start, end, kind in lexicon_matches(words, index):
+        if kind in column:
+            out[start][column[kind]] = 1.0
+            for t in range(start + 1, end):
+                out[t][column[kind] + 1] = 1.0
+    return out
+
+
+def feature_rows(tokenizer, sentences, index, types):
+    """match_features of each (words, ...) sentence as a float tensor over the words that
+    have a subword, in order (the words word_view sees; one without carries no tag and no
+    row)."""
+    import torch
+    rows = []
+    for words, *_ in sentences:
+        present = sorted({i for i in tokenizer(list(words), is_split_into_words=True,
+                                               truncation=False).word_ids() if i is not None})
+        feats = match_features(words, index, types)
+        rows.append(torch.tensor([feats[i] for i in present], dtype=torch.float32)
+                    .reshape(len(present), 2 * len(types)))
+    return rows
+
+
+def feature_batch(rows, idx, width, device):
+    """The feature rows of the sentences at `idx` as one (B, width, F) tensor padded with
+    zeros (word_view's order), on `device`."""
+    import torch
+    out = torch.zeros(len(idx), width, rows[idx[0]].size(1))
+    for b, i in enumerate(idx):
+        out[b, :rows[i].size(0)] = rows[i]
+    return out.to(device)
+
+
 UNUSED_CORPUS = 'unused'      # --self-train unused: a fold's sentences in none of its parts
 
 
@@ -1318,8 +1429,10 @@ def train_with_teachers(seed, offsets, train, val, test, labels, args, device, s
     the student instead trains on the gold data and its mention replacement copies
     (--augment-mentions K, with that seed), whose pool also holds the mentions of the silver
     sentences (silver_mentions); the silver sentences themselves are not trained on, and
-    the record adds n_augmented and, in `self_training`, `names` (name_coverage). Each
-    record adds
+    the record adds n_augmented and, in `self_training`, `names` (name_coverage). With
+    --names-feature the names are the student's lexicon instead (train_one's `lexicon`,
+    lexicon_index), with --augment-mentions on top of its copies, with --augment-names on
+    top of the pool too. Each record adds
     `self_training`: n_sampled, n_skipped, n_agreed (sentences that all teachers tag
     alike), n_silver, marginal_threshold, and per teacher (in offset order) its seed,
     val_f1, test_f1, test_f1_strict, test_macro_f1, best_epoch and n_silver_alone (its
@@ -1356,21 +1469,26 @@ def train_with_teachers(seed, offsets, train, val, test, labels, args, device, s
     print(f"    {len(silver)} silver of {len(sentences)} tagged sentences ({n_agreed} tagged "
           f"alike; {n_skipped} of {len(sample)} sampled skipped); students:", flush=True)
     names = None
-    if getattr(args, 'augment_names', False):
+    feature = getattr(args, 'names_feature', False)
+    if getattr(args, 'augment_names', False) or feature:
         names = (silver_mention_names(sentences, per_sentence)
                  if getattr(args, 'silver_mentions', False) else silver_mentions(silver))
     coverage = name_coverage(names, train, test) if names is not None else None
+    index = lexicon_index(names) if feature else None
     students = {}
     for offset in offsets if student_offsets is None else student_offsets:
         if names is None:
             student = train_one(seed + offset, train, val, test, labels, args, device,
                                 test_index=test_index, silver=silver)
         else:
-            augmented = mention_replacements([(w, t) for w, t, _ in train],
-                                             args.augment_mentions, seed + offset, names=names)
+            pool = names if getattr(args, 'augment_names', False) else ()
+            augmented = (mention_replacements([(w, t) for w, t, _ in train],
+                                              args.augment_mentions, seed + offset, names=pool)
+                         if getattr(args, 'augment_mentions', 0) else None)
             student = train_one(seed + offset, train, val, test, labels, args, device,
-                                test_index=test_index, augmented=augmented)
-            student['n_augmented'] = len(augmented)
+                                test_index=test_index, augmented=augmented, lexicon=index)
+            if augmented is not None:
+                student['n_augmented'] = len(augmented)
         student['self_training'] = {
             'n_sampled': len(sample), 'n_skipped': n_skipped, 'n_agreed': n_agreed,
             'n_silver': len(silver), 'marginal_threshold': SILVER_THRESHOLD,
@@ -1894,10 +2012,12 @@ PLAIN_VARIANTS = ('baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_st', 'crf_mt
 def variant_name(args):
     """Variant of a run: 'baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_mt_ls', 'crf_st' or
     'crf_st<N>', 'crf_mt_st<N>', 'crf_ctx', 'crf_mt_ctx', 'crf_mr', 'crf_mt_mr', 'crf_mrs'
-    (--augment-names) or 'crf_mrm' (with --silver-mentions), these two and the self-training
-    names plus _<names tag> (crf_mrm_topic, crf_st3_topic), the mention replacement names
-    plus the copies when not 3 (crf_mr6, crf_mrm_topic6), with _bias for --entity-bias
-    (crf_bias, crf_ctx_bias), then the tag.
+    (--augment-names) or 'crf_mrm' (with --silver-mentions), 'crf_gzs' or 'crf_gzm'
+    (--names-feature; 'crf_mr_gzm' with --augment-mentions too, 'crf_mrm_gzm' with
+    --augment-names as well), these and the self-training names plus _<names tag>
+    (crf_mrm_topic, crf_gzm_topic, crf_st3_topic), the mention replacement names plus the
+    copies when not 3 (crf_mr6, crf_mrm_topic6), with _bias for --entity-bias (crf_bias,
+    crf_ctx_bias), then the tag.
 
     'cw' is --class-weights, 'crf_mt' is --crf --multi-task, 'crf_ls' is --crf
     --label-semantics, 'crf_mt_ls' both, 'crf_st' is --crf --self-train and 'crf_st<N>' that
@@ -1920,8 +2040,16 @@ def variant_name(args):
             name = 'crf_mt_ctx' if multi_task else 'crf_ctx'
         if getattr(args, 'augment_mentions', 0):
             name = 'crf_mt_mr' if multi_task else 'crf_mr'
-        if getattr(args, 'augment_names', False):
-            name = 'crf_mrm' if getattr(args, 'silver_mentions', False) else 'crf_mrs'
+        feature = getattr(args, 'names_feature', False)
+        if getattr(args, 'augment_names', False) or feature:
+            letter = 'm' if getattr(args, 'silver_mentions', False) else 's'
+            if not feature:
+                name = f'crf_mr{letter}'
+            elif getattr(args, 'augment_names', False):
+                name = f'crf_mr{letter}_gz{letter}'
+            else:
+                name = (f'crf_mr_gz{letter}' if getattr(args, 'augment_mentions', 0)
+                        else f'crf_gz{letter}')
             if getattr(args, 'names_tag', None):
                 name = f'{name}_{args.names_tag}'
         if getattr(args, 'augment_mentions', 0) not in (0, MR_COPIES):
@@ -3098,6 +3226,15 @@ def parse_args(argv=None):
                              'every teacher tags as the same entity with every tag confident, '
                              'whatever the rest of the sentence, instead of the mentions of '
                              'the silver sentences (files tagged _crf_mrm; ROADMAP §4, week 12)')
+    parser.add_argument('--names-feature', action='store_true', default=argparse.SUPPRESS,
+                        help='with --crf and --self-train CORPUS --teachers N: the names the '
+                             'teachers tag in the corpus (the mentions of the silver '
+                             'sentences, or the silver mentions with --silver-mentions) are a '
+                             'gazetteer for each student, which adds to the emissions of every '
+                             'verbatim match a term learned per type and match position (first '
+                             'word, later word; files tagged _crf_gzs or _crf_gzm); with '
+                             '--augment-mentions the copies as well (_crf_mr_gzm), with '
+                             '--augment-names the names in their pool too (_crf_mrm_gzm)')
     parser.add_argument('--names-tag', type=tag_name, default=argparse.SUPPRESS, metavar='LABEL',
                         help='with --augment-names, or --self-train with --teachers: a label of '
                              'the corpus the teachers tag, appended to the variant '
@@ -3274,8 +3411,9 @@ def parse_args(argv=None):
         if args.augment_mentions < 1:
             parser.error('--augment-mentions: at least 1 copy')
         for option in ('label_semantics', 'self_train', 'context'):
-            if option == 'self_train' and getattr(args, 'augment_names', False):
-                continue          # the silver names join the pool (week 11)
+            if option == 'self_train' and (getattr(args, 'augment_names', False)
+                                           or getattr(args, 'names_feature', False)):
+                continue          # the silver names join the pool (week 11) or are a feature
             if getattr(args, option, None) not in (None, False):
                 parser.error(f"--augment-mentions is not available with "
                              f"--{option.replace('_', '-')}")
@@ -3285,8 +3423,17 @@ def parse_args(argv=None):
                          '--teachers (the teachers tag the names)')
         if getattr(args, 'multi_task', False):
             parser.error('--augment-names is not available with --multi-task')
-    if hasattr(args, 'silver_mentions') and not getattr(args, 'augment_names', False):
-        parser.error('--silver-mentions needs --augment-names')
+    if getattr(args, 'names_feature', False):
+        if not (args.crf and hasattr(args, 'teachers')):
+            parser.error('--names-feature needs --crf and --self-train with --teachers (the '
+                         'teachers tag the names)')
+        for option in ('multi_task', 'label_semantics', 'context', 'entity_bias'):
+            if getattr(args, option, None) not in (None, False):
+                parser.error(f"--names-feature is not available with "
+                             f"--{option.replace('_', '-')}")
+    if hasattr(args, 'silver_mentions') and not (getattr(args, 'augment_names', False)
+                                                 or getattr(args, 'names_feature', False)):
+        parser.error('--silver-mentions needs --augment-names or --names-feature')
     if hasattr(args, 'names_tag') and not (getattr(args, 'augment_names', False)
                                            or hasattr(args, 'teachers')):
         parser.error('--names-tag needs --augment-names, or --self-train with --teachers (the '

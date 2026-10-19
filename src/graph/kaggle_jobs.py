@@ -145,10 +145,15 @@ bundle as topic_<topic>_sentences.txt; the screen, then the decision for its win
           and mention replacement with 6 copies and no names (crf_mr6_m<N>, one job per seed
           offset, no teachers), one job in lane 0 and two in lane 1. The jobs of a variant
           share a lane: they extend the same files
-  w12b:V  the decision for the screen's winner V (mrs, mrm, mrm6, st3 or mr6): seed offsets
-          300 to 900; the teacher variants as in w12a with each lane training the teachers
-          and 3 or 4 of the students (offsets 300-500 and 600-900), mr6 one job per offset
-          over the lanes (smokeap)
+  w12c    the gazetteer-feature variant's screen (amendment 2, if adopted): the CRF run of
+          smoke4 (smokeaq); then per subfield one job in which the 3 teachers tag the topic
+          corpus and the students train the plain CRF head with the mention-level silver
+          names as a match feature (--names-feature --silver-mentions, no copies:
+          crf_gzm_topic_m<N>), seed offsets 0 to 200, 4 subfields in lane 0 and 3 in lane 1
+  w12b:V  the decision for the screen's winner V (mrs, mrm, mrm6, st3, gzm or mr6): seed
+          offsets 300 to 900; the teacher variants as in w12a with each lane training the
+          teachers and 3 or 4 of the students (offsets 300-500 and 600-900), mr6 one job
+          per offset over the lanes (smokeap)
 
 The TPU spike (docs/METHODS_PLAN.md §5; every batch named tpu... runs on the TPU v5e-8, one
 lane per chip, its jobs with --device xla, its results in results/tpu/, a family of their own):
@@ -280,7 +285,7 @@ MRS_FLAGS = ('--crf', '--teachers', '3', '--students', '10', '--augment-mentions
 TOPIC_TAG = 'topic'          # --names-tag of the topic-corpus variants (crf_mrs_topic, crf_mrm_topic)
 MR6_COPIES = 6               # week 12's copy-count variant (crf_mr6)
 # the screen's variants (amendment 1 added mrm6 and st3): w12b:<variant> decides one
-WEEK12_VARIANTS = ('mrs', 'mrm', 'mr6', 'mrm6', 'st3')
+WEEK12_VARIANTS = ('mrs', 'mrm', 'mr6', 'mrm6', 'st3', 'gzm')   # gzm: w12c (amendment 2)
 DECISION_LANES = (OFFSETS_W5[:3], OFFSETS_W5[3:])   # w12b: the students per lane (seeds 300-900)
 
 
@@ -343,17 +348,24 @@ def mrs_mulms_job(subfield, student_offsets):
             '--student-offsets', *(str(o) for o in student_offsets), *MRS_FLAGS]
 
 
-def topic_mulms_job(subfield, student_offsets, mentions=False, copies=3, names=True):
+def topic_mulms_job(subfield, student_offsets, mentions=False, copies=3, names=True,
+                    feature=False):
     """Week 12 on MuLMS: one held-out subfield, 400 pool sentences; the 3 teachers tag the
     subfield's topic corpus (TOPIC_CORPUS, in the bundle; all of it) and the students of
     `student_offsets` train mention replacement with its silver names (crf_mrs_topic_m<N>;
     with `mentions`, the mention-level silver filter: crf_mrm_topic_m<N>; `copies` of each
     sentence, 6 for crf_mrm_topic6). Without `names` the students self-train on the silver
-    sentences instead (week 4's method, 3 teachers: crf_st3_topic_m<N>)."""
+    sentences instead (week 4's method, 3 teachers: crf_st3_topic_m<N>). With `feature` the
+    students train the plain CRF head with the names as a gazetteer match feature
+    (--names-feature, no copies: crf_gzm_topic_m<N> with `mentions`)."""
     job = ['--granularity', 'mulms', '--leave-one-subfield-out', '--train-pool',
            str(MULMS_POOL), '--subfields', subfield, '--self-train',
            TOPIC_CORPUS.format(topic=subfield), '--self-train-sample', '0',
            '--student-offsets', *(str(o) for o in student_offsets), '--names-tag', TOPIC_TAG]
+    if feature:
+        return job + (['--silver-mentions'] if mentions else []) + [
+            '--names-feature', '--crf', '--teachers', '3', '--students', '10',
+            '--save-predictions', '--threads', str(THREADS)]
     if not names:
         return job + ['--crf', '--teachers', '3', '--students', '10', '--save-predictions',
                       '--threads', str(THREADS)]
@@ -364,8 +376,9 @@ def topic_mulms_job(subfield, student_offsets, mentions=False, copies=3, names=T
 
 def topic_variant_job(variant, subfield, student_offsets):
     """The job of a week-12 names or self-training variant (WEEK12_VARIANTS but mr6)."""
-    return topic_mulms_job(subfield, student_offsets, mentions=variant in ('mrm', 'mrm6'),
-                           copies=6 if variant == 'mrm6' else 3, names=variant != 'st3')
+    return topic_mulms_job(subfield, student_offsets, mentions=variant in ('mrm', 'mrm6', 'gzm'),
+                           copies=6 if variant == 'mrm6' else 3, names=variant != 'st3',
+                           feature=variant == 'gzm')
 
 
 def mr6_mulms_job(offset):
@@ -710,6 +723,12 @@ def batch_lanes(name):
                 [topic_variant_job(v, s, OFFSETS) for v in ('mrm', 'st3')
                  for s in MULMS_SUBFIELD_NAMES]
                 + [mr6_mulms_job(off) for off in (OFFSETS[1], OFFSETS[2])]]
+    if name == 'w12c':
+        # the screen of the gazetteer-feature variant (amendment 2, if adopted): the mention
+        # filter's names as a match feature of the plain CRF head, seed offsets 0 to 200, the
+        # subfields over the two lanes (each job trains its own teachers)
+        jobs = [topic_variant_job('gzm', s, OFFSETS) for s in MULMS_SUBFIELD_NAMES]
+        return [[repeat + ['--tag', 'smokeaq']] + jobs[:4], jobs[4:]]
     if name.startswith('w12b:'):
         # week 12's decision on MuLMS for the screen's winner, seed offsets 300 to 900
         variant = week12_variant(name)
@@ -740,7 +759,7 @@ def batch_lanes(name):
 
 BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'item3r',
            'smoke4', 'w5a', 'w5b', 'w5c', 'smoke5', 'smoke6', 'w6a', 'w6b', 'w7a', 'w7b',
-           'w7c', 'w7d', 'w7e', 'w8a', 'w8b', 'w9a', 'w9b', 'w10a', 'w11a', 'w11b', 'w12a',
+           'w7c', 'w7d', 'w7e', 'w8a', 'w8b', 'w9a', 'w9b', 'w10a', 'w11a', 'w11b', 'w12a', 'w12c',
            *(f'w12b:{v}' for v in WEEK12_VARIANTS), 'tpu-smoke1', 'tpu-smoke')
 
 

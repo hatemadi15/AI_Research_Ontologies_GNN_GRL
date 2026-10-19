@@ -173,6 +173,24 @@ to the decision on seeds 300–900 (decisions 1 and 2 as fixed). If V6 wins,
 the decision is V6's and the finding is "in-topic self-training", scoped
 as such. If V3 wins, names are not the mechanism.
 
+**Amendment 2, proposed on 19 October (not adopted; the user's call).**
+The related work (§2) makes the lexicon as a *feature* the baseline a
+reviewer will ask for: the same harvested names, injected not through
+mention replacement but as a match feature of the plain CRF head
+(`--names-feature`: a term learned from zero on two columns per type,
+first word and later words of every verbatim match; code and tests ready,
+variant `crf_gzm_topic`, batches `w12c` for its 3-seed screen and
+`w12b:gzm`). Adding it to the screen as V7 costs about 3.2 GPU hours and
+answers, on the screen's seeds, whether the injection mechanism or the
+lexicon carries the gain. If V7 wins the screen, the claim becomes "a
+lexicon harvested from the topic's unlabeled text improves NER on unseen
+topics, injected as a feature", and mention replacement with the lexicon
+is its ablation; if an MR variant wins, V7 is the feature baseline the
+paper reports. Budget after the reset with V7: about 29 of 30 hours
+(`w11b` 2.1, `w12a` 14.6, `w12c` 3.2, `w12b` 7, the analogue 2.1), the
+analogue moving to the following week if the quota runs short. Without
+V7 the feature baseline runs in the ablation week (§4C), 10 seeds.
+
 ### B. The CPU probe (this week, before any GPU hour)
 
 `silver_lexicon.py`, on this environment's CPU, per held-out subfield:
@@ -272,6 +290,18 @@ takes no longer than the same run on a T4 (8 chips against a session's 2
 GPUs: 4× a T4 session's throughput); otherwise the TPU is dropped and the
 ablations wait for GPU weeks.
 
+*Status, 19 October.* The port is done and tested on XLA-CPU (repeats
+exactly; the CPU path byte-identical). Five Kaggle sessions pushed through
+the API, four script kernels and one notebook kernel with `enable_tpu`,
+all ran on a machine without a TPU (no accelerator devices or variables;
+0.00 TPU hours counted); the notebook session lost 77 minutes in libtpu's
+metadata lookups before failing at the first XLA call. The spike waits on
+one action only the account holder can take: run `ner-tpu-nb` once from
+Kaggle's editor with TPU v5e-8 chosen in the accelerator menu. If a TPU
+appears there, `tpu-smoke` (8 chips) decides go/no-go within 3 TPU hours;
+if the menu has no TPU, the TPU is dropped and the ablations run on the
+GPU.
+
 **GPU budget, week of 24 October** (hours): `w11b` 2.1; `w12a` 14.6 (lane 0:
 V1 3.2, V4 3.2, one `crf_mr6` job 0.7; lane 1: V2 3.2, V6 3.0, two `crf_mr6`
 jobs 1.4; about 7.5 hours of wall time); `w12b` 7; the MaterioMiner analogue
@@ -282,7 +312,7 @@ jobs 1.4; about 7.5 hours of wall time); `w12b` 7; the MaterioMiner analogue
 | When | What | Decides |
 |---|---|---|
 | 19–23 Oct (no GPU) | the CPU probe on all 7 subfields; V4 and V6 in the code with tests; amendment 1 committed; the TPU port tested on XLA-CPU; related work for the names route | the amendment's filter/threshold; whether the route has a ceiling |
-| 24 Oct (reset) | `w11b`; then `w12a`; the TPU spike session in parallel | week-11 decisions 3–4; the screen's winner; TPU go/no-go |
+| 24 Oct (reset) | `w11b`; then `w12a` (and `w12c` if amendment 2 is adopted); the TPU spike session in parallel if a TPU can be attached from the editor | week-11 decisions 3–4; the screen's winner; TPU go/no-go |
 | 25–27 Oct | `w12b:<winner>`; the MaterioMiner analogue if decision 1 passes | the methods criterion |
 | 31 Oct–7 Nov | ablations (§4C) on TPU or GPU; or route E; the evaluation paper's remaining items either way | the paper's claims |
 | 7–14 Nov | the paper assembled as what the results say; title and abstract fixed by 14 Nov | — |
