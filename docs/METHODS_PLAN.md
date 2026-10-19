@@ -167,29 +167,29 @@ same 3-seed design and selection rule:
 | V3 `crf_mr6` | 6 copies, no names | the control for more augmentation |
 | V4 `crf_mrm_topic6` | names by the mention filter, 6 copies | more exposure per name: with thousands of silver names and about 1,500 replacement slots per fold, 3 copies show most names never |
 | V6 `crf_st3_topic` | self-training on the topic corpus (silver sentences trained on, week 4's method) | the baseline a method must beat |
+| V7 `crf_gzm_topic` | V2's names as a gazetteer match feature of the plain CRF head (amendment 2) | the injection baseline the related work demands; a learned term can weigh a lexicon whose value swings by subfield |
 
 Selection: the largest mean gain over mention replacement, if above 0, goes
 to the decision on seeds 300–900 (decisions 1 and 2 as fixed). If V6 wins,
 the decision is V6's and the finding is "in-topic self-training", scoped
 as such. If V3 wins, names are not the mechanism.
 
-**Amendment 2, proposed on 19 October (not adopted; the user's call).**
-The related work (§2) makes the lexicon as a *feature* the baseline a
-reviewer will ask for: the same harvested names, injected not through
-mention replacement but as a match feature of the plain CRF head
-(`--names-feature`: a term learned from zero on two columns per type,
-first word and later words of every verbatim match; code and tests ready,
-variant `crf_gzm_topic`, batches `w12c` for its 3-seed screen and
-`w12b:gzm`). Adding it to the screen as V7 costs about 3.2 GPU hours and
-answers, on the screen's seeds, whether the injection mechanism or the
-lexicon carries the gain. If V7 wins the screen, the claim becomes "a
-lexicon harvested from the topic's unlabeled text improves NER on unseen
-topics, injected as a feature", and mention replacement with the lexicon
-is its ablation; if an MR variant wins, V7 is the feature baseline the
-paper reports. Budget after the reset with V7: about 29 of 30 hours
-(`w11b` 2.1, `w12a` 14.6, `w12c` 3.2, `w12b` 7, the analogue 2.1), the
-analogue moving to the following week if the quota runs short. Without
-V7 the feature baseline runs in the ablation week (§4C), 10 seeds.
+**Amendment 2 (19 October, adopted; committed before any run).** The
+related work (§2) makes the lexicon as a *feature* the baseline a reviewer
+will ask for: the same harvested names, injected not through mention
+replacement but as a match feature of the plain CRF head
+(`--names-feature`: a term learned from zero at learning rate 1e-2 on two
+columns per type, first word and later words of every verbatim match;
+variant `crf_gzm_topic`, batch `w12c` for its 3-seed screen, `w12b:gzm`
+for its decision). It answers on the screen's seeds whether the injection
+mechanism or the lexicon carries the gain. If V7 wins the screen, the
+claim becomes "a lexicon harvested from the topic's unlabeled text,
+injected as a feature, improves NER on unseen topics", and mention
+replacement with the lexicon is its ablation; if an MR variant wins, V7 is
+the feature baseline the paper reports. Budget after the reset: about 29
+of 30 hours (`w11b` 2.1, `w12a` 14.6, `w12c` 3.2, `w12b` 7, the analogue
+2.1), the analogue moving to the following week if the quota runs short.
+The bundle is rebuilt from the commit that closes the probe.
 
 ### B. The CPU probe (this week, before any GPU hour)
 
@@ -312,7 +312,7 @@ jobs 1.4; about 7.5 hours of wall time); `w12b` 7; the MaterioMiner analogue
 | When | What | Decides |
 |---|---|---|
 | 19–23 Oct (no GPU) | the CPU probe on all 7 subfields; V4 and V6 in the code with tests; amendment 1 committed; the TPU port tested on XLA-CPU; related work for the names route | the amendment's filter/threshold; whether the route has a ceiling |
-| 24 Oct (reset) | `w11b`; then `w12a` (and `w12c` if amendment 2 is adopted); the TPU spike session in parallel if a TPU can be attached from the editor | week-11 decisions 3–4; the screen's winner; TPU go/no-go |
+| 24 Oct (reset) | `w11b` and `w12a` together, `w12c` after `w11b`; the TPU spike session in parallel if a TPU can be attached from the editor | week-11 decisions 3–4; the screen's winner; TPU go/no-go |
 | 25–27 Oct | `w12b:<winner>`; the MaterioMiner analogue if decision 1 passes | the methods criterion |
 | 31 Oct–7 Nov | ablations (§4C) on TPU or GPU; or route E; the evaluation paper's remaining items either way | the paper's claims |
 | 7–14 Nov | the paper assembled as what the results say; title and abstract fixed by 14 Nov | — |

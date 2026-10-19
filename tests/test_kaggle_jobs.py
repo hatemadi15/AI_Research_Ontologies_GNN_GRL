@@ -1106,7 +1106,7 @@ def test_run_jobs_places_the_mulms_files_only_when_asked(tmp_path):
 
 
 def test_week12_gazetteer_feature_batches(monkeypatch, tmp_path):
-    """w12c (amendment 2, if adopted): the match-feature variant's screen, one job per
+    """w12c (amendment 2): the match-feature variant's screen, one job per
     subfield over the two lanes, no copies; w12b:gzm: its decision over seed offsets 300 to
     900."""
     monkeypatch.setattr(nb.os.path, 'isfile', lambda path: True)

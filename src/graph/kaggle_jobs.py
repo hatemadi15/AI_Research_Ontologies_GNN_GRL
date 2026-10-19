@@ -145,7 +145,7 @@ bundle as topic_<topic>_sentences.txt; the screen, then the decision for its win
           and mention replacement with 6 copies and no names (crf_mr6_m<N>, one job per seed
           offset, no teachers), one job in lane 0 and two in lane 1. The jobs of a variant
           share a lane: they extend the same files
-  w12c    the gazetteer-feature variant's screen (amendment 2, if adopted): the CRF run of
+  w12c    the gazetteer-feature variant's screen (amendment 2): the CRF run of
           smoke4 (smokeaq); then per subfield one job in which the 3 teachers tag the topic
           corpus and the students train the plain CRF head with the mention-level silver
           names as a match feature (--names-feature --silver-mentions, no copies:
@@ -724,7 +724,7 @@ def batch_lanes(name):
                  for s in MULMS_SUBFIELD_NAMES]
                 + [mr6_mulms_job(off) for off in (OFFSETS[1], OFFSETS[2])]]
     if name == 'w12c':
-        # the screen of the gazetteer-feature variant (amendment 2, if adopted): the mention
+        # the screen of the gazetteer-feature variant (amendment 2): the mention
         # filter's names as a match feature of the plain CRF head, seed offsets 0 to 200, the
         # subfields over the two lanes (each job trains its own teachers)
         jobs = [topic_variant_job('gzm', s, OFFSETS) for s in MULMS_SUBFIELD_NAMES]
