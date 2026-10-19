@@ -219,9 +219,12 @@ TPU_DEADLINE_HOURS = 7              # a Kaggle TPU session lasts 9 hours
 TPU_RESULTS = ROOT / 'results' / 'tpu'
 # Kaggle's TPU VM image (19 October: torch 2.11.0+cpu, no torch_xla): torch_xla and the
 # matching torch (the CPU wheel) with the TPU runtime, installed by the runner with PIP
-# (torch_xla[tpu] pins libtpu 0.0.21, which PyPI no longer has: its 0.0.21.1 is pinned here)
+# (torch_xla[tpu] pins libtpu 0.0.21, which PyPI no longer has: its 0.0.21.1 is pinned here;
+# torchaudio and torchvision follow torch, else the image's builds for its torch break
+# transformers' import)
 TPU_PINS = {'pip': ('--extra-index-url', 'https://download.pytorch.org/whl/cpu',
-                    'torch==2.9.0+cpu', 'torch_xla==2.9.0', 'libtpu==0.0.21.1')}
+                    'torch==2.9.0+cpu', 'torchaudio==2.9.0+cpu', 'torchvision==0.24.0+cpu',
+                    'torch_xla==2.9.0', 'libtpu==0.0.21.1')}
 RESULTS_PREFIX = 'gpu__'            # as in run_jobs.py
 PLACEHOLDER = 'JOBS = None   # the job spec; kaggle_jobs.py push replaces this line'
 

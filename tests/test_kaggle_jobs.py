@@ -981,7 +981,8 @@ def test_tpu_smoke_batch_metadata_and_lane_environment(monkeypatch, tmp_path):
     spec1 = kj.batch_spec('tpu-smoke1')
     assert spec1['device'] == 'xla' and spec1['restore_results'] is False
     assert 'torch_xla==2.9.0' in spec1['pip'] and 'torch==2.9.0+cpu' in spec1['pip']
-    assert 'libtpu==0.0.21.1' in spec1['pip'] and 'torch_xla==2.9.0' not in kj.batch_spec('w12a')['pip']
+    assert 'libtpu==0.0.21.1' in spec1['pip'] and 'torchaudio==2.9.0+cpu' in spec1['pip']
+    assert 'torch_xla==2.9.0' not in kj.batch_spec('w12a')['pip']
     assert 'restore_results' not in kj.batch_spec('w12a')
 
 

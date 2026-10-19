@@ -327,6 +327,9 @@ def environment(device=None):
             'torch_xla': xla_info or None,
             'nvidia_smi': 'skipped: xla' if device == 'xla' else run(['nvidia-smi']),
             'accelerator_devices': run(['bash', '-c', 'ls -d /dev/accel* /dev/vfio/* 2>&1 | head']),
+            'accelerator_variables': {k: v for k, v in sorted(os.environ.items())
+                                      if any(w in k.upper() for w in ('TPU', 'XLA', 'PJRT',
+                                                                      'JAX', 'ACCEL'))},
             'pip_freeze': run([sys.executable, '-m', 'pip', 'freeze']).splitlines(),
             **{k: os.environ.get(k) for k in ENV_KEYS}}
 
