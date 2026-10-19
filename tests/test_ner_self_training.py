@@ -701,7 +701,7 @@ def test_augment_names_parser_checks(tmp_path, capsys):
               '--crf', '--self-train', 'unused', '--teachers', '3', '--self-train-sample', '0',
               '--augment-mentions', '3', '--augment-names'], 'no --self-train-sample'),
             (['--granularity', 'mulms', '--leave-one-subfield-out', '--train-pool', '400',
-              '--crf', '--self-train', corpus, '--teachers', '3'],
+              '--crf', '--self-train', corpus],        # no teachers (week 12 allows them)
              '--self-train is not available with --granularity mulms'),
             (['--leave-one-paper-out', '--crf', '--subfields', 'steel'],
              '--subfields needs --leave-one-subfield-out')):

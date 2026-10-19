@@ -644,6 +644,7 @@ def test_sofc_mtst_batch(monkeypatch):
     """w6c:sofc-mtst (week-6 amendment): two repeats, then multi-task self-training on
     SOFC-Exp's two levels with the SOFC corpus, the 3 teachers in both lanes and the students
     split 0-400 / 500-900; only this batch's spec carries the SOFC corpus's SHA-256."""
+    monkeypatch.setattr(nb.os.path, 'isfile', lambda path: True)    # the SOFC corpus is not here
     monkeypatch.setattr(kj, 'corpus_sha256',
                         lambda report=kj.CORPUS_REPORT: 'f' * 64 if report == kj.CORPUS_REPORT
                         else 's' * 64)
