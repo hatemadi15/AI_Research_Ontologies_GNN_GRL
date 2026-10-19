@@ -978,7 +978,11 @@ def test_tpu_smoke_batch_metadata_and_lane_environment(monkeypatch, tmp_path):
     assert 'tpu-smoke' in kj.BATCHES and kj.batch_name('tpu-smoke') == 'tpu-smoke'
     (lane,) = _parsed(kj.batch_lanes('tpu-smoke1'))
     assert len(lane) == 1 and lane[0].tag == 'tpu1' and lane[0].device == 'xla'
-    assert kj.batch_spec('tpu-smoke1')['device'] == 'xla'
+    spec1 = kj.batch_spec('tpu-smoke1')
+    assert spec1['device'] == 'xla' and spec1['restore_results'] is False
+    assert 'torch_xla[tpu]==2.9.0' in spec1['pip'] and 'torch==2.9.0+cpu' in spec1['pip']
+    assert 'torch_xla[tpu]==2.9.0' not in kj.batch_spec('w12a')['pip']
+    assert 'restore_results' not in kj.batch_spec('w12a')
 
 
 def test_build_bundle_with_the_mulms_files(tmp_path):

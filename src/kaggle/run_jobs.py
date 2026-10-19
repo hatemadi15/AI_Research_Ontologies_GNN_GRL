@@ -326,6 +326,7 @@ def environment(device=None):
     return {'python': sys.version.split()[0], 'torch_cuda_transformers': torch_info,
             'torch_xla': xla_info or None,
             'nvidia_smi': 'skipped: xla' if device == 'xla' else run(['nvidia-smi']),
+            'accelerator_devices': run(['bash', '-c', 'ls -d /dev/accel* /dev/vfio/* 2>&1 | head']),
             'pip_freeze': run([sys.executable, '-m', 'pip', 'freeze']).splitlines(),
             **{k: os.environ.get(k) for k in ENV_KEYS}}
 
@@ -370,7 +371,8 @@ def main(spec):
         sofc_digest = place_sofc_corpus(spec, INPUT, REPO)
         mulms = place_mulms(spec, INPUT, REPO)
         topics = place_topic_corpora(spec, INPUT, REPO)
-        restored = restore_results(INPUT, processed / 'ner')
+        restored = (restore_results(INPUT, processed / 'ner')
+                    if spec.get('restore_results', True) else [])
         setup_step(started, f'code, corpora and {len(restored)} results files in place')
         pinned = pin_models(spec['models'])
         setup_step(started, 'models pinned')

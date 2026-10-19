@@ -217,6 +217,12 @@ DEADLINE_HOURS = 10                 # no job starts later; a Kaggle session last
 TPU_LANES = 8
 TPU_DEADLINE_HOURS = 7              # a Kaggle TPU session lasts 9 hours
 TPU_RESULTS = ROOT / 'results' / 'tpu'
+# Kaggle's TPU VM image (19 October: torch 2.11.0+cpu, no torch_xla): torch_xla and the
+# matching torch (the CPU wheel) with the TPU runtime, installed by the runner with PIP
+TPU_PINS = {'pip': ('--extra-index-url', 'https://download.pytorch.org/whl/cpu',
+                    'torch==2.9.0+cpu', '-f',
+                    'https://storage.googleapis.com/libtpu-releases/index.html',
+                    'torch_xla[tpu]==2.9.0')}
 RESULTS_PREFIX = 'gpu__'            # as in run_jobs.py
 PLACEHOLDER = 'JOBS = None   # the job spec; kaggle_jobs.py push replaces this line'
 
@@ -737,9 +743,12 @@ BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'i
 
 
 def batch_extras(name):
-    """The extra pins of a batch (BATCH_EXTRAS; DeBERTa's for a stage-2 batch with it)."""
+    """The extra pins of a batch (BATCH_EXTRAS; DeBERTa's for a stage-2 batch with it;
+    torch_xla's for a TPU batch)."""
     if name.startswith('w6c:') and any('deberta' in m for m in stage2_methods(name)):
         return DEBERTA_PINS
+    if is_tpu_batch(name):
+        return TPU_PINS
     return BATCH_EXTRAS.get(name, {})
 
 
@@ -776,7 +785,10 @@ def batch_spec(name):
     if topics:
         spec['topic_corpora'] = {t: corpus_sha256(TOPIC_REPORTS / f'{t}.json') for t in topics}
     if is_tpu_batch(name):
-        spec.update({'gpu': None, 'device': 'xla', 'deadline_hours': TPU_DEADLINE_HOURS})
+        # TPU results are a family of their own: no GPU results file is restored (it would
+        # only cost setup time; a run would not be skipped for it either, its tag differs)
+        spec.update({'gpu': None, 'device': 'xla', 'deadline_hours': TPU_DEADLINE_HOURS,
+                     'restore_results': False})
     return spec
 
 
