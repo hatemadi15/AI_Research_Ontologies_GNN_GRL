@@ -20,6 +20,18 @@ between sentences (the format of the MaterioMiner files). It also writes split.j
 official document split of SOFC-Exp-Metadata.csv (26 train, 8 dev, 11 test), and checks
 the counts of the paper: 45 documents, 876 sentences and 4,590 entities.
 
+The slot tags are a second, finer level of types on the same tokens (19 slot types, e.g.
+anode_material or working_temperature; every slot token lies inside an entity). They are
+written to <out>_slot/<doc>.conll (data/raw/dataset/sofc_exp_slot): the same sentences,
+with the slot tags of the corpus, all of them (ner_baseline.py --granularity sofc_slot
+keeps the 17 that SOFC-Exp's own evaluation scores).
+
+context.json holds the whole text of each document for document context (ner_baseline.py
+--context): {doc: {"sentences": every sentence as tokens, in text order, annotated or not
+(annotations/tokens/<doc>.csv, offsets relative to the sentence), "annotated": the
+positions among them of the sentences of <doc>.conll}}. The annotated sentences' tokens
+must equal those of the entity annotations.
+
 Usage:
   git clone https://github.com/boschresearch/sofc-exp_textmining_resources.git <dir>
   python src/graph/sofc_exp.py <dir>/sofc-exp-corpus [--out data/raw/dataset/sofc_exp]
@@ -35,7 +47,10 @@ from pathlib import Path
 
 OUT_DIR = Path(__file__).resolve().parents[2] / 'data' / 'raw' / 'dataset' / 'sofc_exp'
 EXPECTED = {'documents': 45, 'sentences': 876, 'entities': 4590}
+EXPECTED_SLOTS = 4263            # the slot mentions of the corpus (counted, not in the paper)
 TAG = re.compile(r'O|[BI]-[A-Z]+')
+SLOT_TAG = re.compile(r'O|[BI]-[a-z_]+')
+LEVELS = {'entity': (4, TAG), 'slot': (5, SLOT_TAG)}     # the tag column of each level
 
 
 class ConversionError(ValueError):
@@ -48,8 +63,10 @@ def read_rows(path):
             if line.strip()]
 
 
-def convert_document(corpus, doc):
-    """[(tokens, tags)] of the annotated sentences of one document, in text order."""
+def convert_document(corpus, doc, level='entity'):
+    """[(tokens, tags)] of the annotated sentences of one document, in text order: the entity
+    tags, or with level='slot' the slot tags."""
+    column, pattern = LEVELS[level]
     corpus = Path(corpus)
     text = (corpus / 'texts' / f'{doc}.txt').read_text(encoding='utf-8')
     sentences = {}
@@ -58,7 +75,8 @@ def convert_document(corpus, doc):
         sentences[sid] = (experiment == '1', int(begin))
     tokens = {}
     for row in read_rows(corpus / 'annotations' / 'entity_types_and_slots' / f'{doc}.csv'):
-        sid, _, begin, end, tag = row[:5]
+        sid, _, begin, end = row[:4]
+        tag = row[column] if len(row) > column else None
         annotated, offset = sentences[sid]
         if not annotated:
             raise ConversionError(f'{doc}: sentence {sid} has entity tags but is not annotated')
@@ -66,7 +84,7 @@ def convert_document(corpus, doc):
         if not word or re.search(r'\s', word):
             raise ConversionError(f'{doc}: sentence {sid}: token {word!r} is empty or has '
                                   f'whitespace')
-        if not TAG.fullmatch(tag):
+        if tag is None or not pattern.fullmatch(tag):
             raise ConversionError(f'{doc}: sentence {sid}: tag {tag!r}')
         tokens.setdefault(sid, []).append((offset + int(begin), word, tag))
     out = []
@@ -80,6 +98,114 @@ def convert_document(corpus, doc):
     return out
 
 
+def entity_spans(tokens):
+    """[(begin, end, type)] of the entities of one sentence's [(begin, end, tag)] tokens
+    (BIO tags, character offsets)."""
+    spans = []
+    for begin, end, tag in tokens:
+        if tag.startswith('B-'):
+            spans.append([begin, end, tag[2:]])
+        elif tag.startswith('I-'):
+            spans[-1][1] = end
+    return [tuple(span) for span in spans]
+
+
+def retokenize_sentence(text, entities, tokenizer):
+    """(words, tags, counts) of a sentence's text cut by `tokenizer` (span_tokenize), with
+    the tags of its entities ([(begin, end, type)] in text order, offsets in `text`).
+
+    The words that overlap an entity, and no earlier one, take its type, the first B-.
+    counts: 'inexact', the entities whose begin or end falls inside a word or that share
+    a word with an earlier entity (they cover the words they get), and 'lost', those left
+    without a word (one word holds two entities, e.g. "(NiO)-yttria")."""
+    spans = list(tokenizer.span_tokenize(text))
+    tags = ['O'] * len(spans)
+    counts = Counter(inexact=0, lost=0)
+    for begin, end, kind in entities:
+        overlap = [k for k, (b, e) in enumerate(spans) if b < end and e > begin]
+        inside = [k for k in overlap if tags[k] == 'O']
+        if not inside:
+            counts['lost'] += 1
+            continue
+        counts['inexact'] += (inside != overlap or spans[inside[0]][0] != begin
+                              or spans[inside[-1]][1] != end)
+        for k in inside:
+            tags[k] = ('B-' if k == inside[0] else 'I-') + kind
+    return [text[b:e] for b, e in spans], tags, counts
+
+
+def retokenized_document(corpus, doc, tokenizer):
+    """(sentences, counts) of one document's annotated sentences cut into words by
+    `tokenizer`, the entity tags carried over by character offsets (retokenize_sentence):
+    [(words, tags)] in text order, and the entities, inexact and lost ones."""
+    corpus = Path(corpus)
+    text = (corpus / 'texts' / f'{doc}.txt').read_text(encoding='utf-8')
+    bounds = {sid: (int(begin), int(end)) for sid, _, begin, end in
+              read_rows(corpus / 'annotations' / 'sentences' / f'{doc}.csv')}
+    tokens = {}
+    for row in read_rows(corpus / 'annotations' / 'entity_types_and_slots' / f'{doc}.csv'):
+        sid, _, begin, end, tag = row[:5]
+        tokens.setdefault(sid, []).append((int(begin), int(end), tag))
+    out, counts = [], Counter()
+    for sid in sorted(tokens, key=lambda s: bounds[s][0]):
+        begin, end = bounds[sid]
+        entities = entity_spans(sorted(tokens[sid]))
+        words, tags, found = retokenize_sentence(text[begin:end], entities, tokenizer)
+        out.append((words, tags))
+        counts.update(found, entities=len(entities))
+    return out, counts
+
+
+def write_retokenized_test(corpus, out_dir, tokenizer=None):
+    """<doc>.conll of every test article of the official split, cut into words by
+    ChemDataExtractor's tokenizer (chem_tokenize; that of the training and development
+    articles), and stats.json; returns the stats."""
+    if tokenizer is None:
+        from chem_tokenize import ChemWordTokenizer
+        tokenizer = ChemWordTokenizer()
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    split = read_split(corpus)
+    stats = {'tokenizer': 'chem_tokenize.ChemWordTokenizer (ChemDataExtractor 1.3.0)',
+             'documents': {}}
+    for doc in sorted(d for d, part in split.items() if part == 'test'):
+        sentences, counts = retokenized_document(corpus, doc, tokenizer)
+        write_conll(out_dir / f'{doc}.conll', sentences)
+        stats['documents'][doc] = {'sentences': len(sentences), 'entities': counts['entities'],
+                                   'inexact': counts['inexact'], 'lost': counts['lost']}
+    for key in ('sentences', 'entities', 'inexact', 'lost'):
+        stats[key] = sum(d[key] for d in stats['documents'].values())
+    (out_dir / 'stats.json').write_text(json.dumps(stats, indent=2) + '\n')
+    return stats
+
+
+def document_context(corpus, doc, annotated):
+    """Every sentence of a document as tokens, in text order, and the positions among them
+    of its annotated sentences (`annotated`: convert_document's output, whose words they must
+    match)."""
+    corpus = Path(corpus)
+    text = (corpus / 'texts' / f'{doc}.txt').read_text(encoding='utf-8')
+    begins = {sid: int(begin) for sid, _, begin, _ in
+              read_rows(corpus / 'annotations' / 'sentences' / f'{doc}.csv')}
+    tagged = {row[0] for row in
+              read_rows(corpus / 'annotations' / 'entity_types_and_slots' / f'{doc}.csv')}
+    tokens = {}
+    for sid, _, begin, end in (row[:4] for row in
+                               read_rows(corpus / 'annotations' / 'tokens' / f'{doc}.csv')):
+        word = text[begins[sid] + int(begin):begins[sid] + int(end)]
+        if not word or re.search(r'\s', word):
+            raise ConversionError(f'{doc}: sentence {sid}: token {word!r} is empty or has '
+                                  f'whitespace')
+        tokens.setdefault(sid, []).append((int(begin), word))
+    order = sorted(tokens, key=lambda sid: begins[sid])
+    sentences = [[w for _, w in sorted(tokens[sid])] for sid in order]
+    positions = [k for k, sid in enumerate(order) if sid in tagged]
+    if [sentences[k] for k in positions] != [words for words, _ in annotated]:
+        raise ConversionError(f'{doc}: the token files and the entity annotations cut '
+                              f'different words')
+    return {'sentences': sentences, 'annotated': positions}
+
+
 def read_split(corpus):
     """{document: 'train', 'dev' or 'test'} from SOFC-Exp-Metadata.csv."""
     with open(Path(corpus) / 'SOFC-Exp-Metadata.csv', encoding='utf-8', newline='') as f:
@@ -87,31 +213,52 @@ def read_split(corpus):
     return {row['name']: row['set'] for row in rows}
 
 
-def convert(corpus, out_dir=OUT_DIR, expected=EXPECTED):
-    """Write <doc>.conll for every document and split.json to out_dir; returns the counts."""
+def write_conll(path, sentences):
+    """One "token tag" line per token, a blank line between sentences."""
+    lines = []
+    for words, tags in sentences:
+        lines += [f'{w} {t}' for w, t in zip(words, tags)] + ['']
+    Path(path).write_text('\n'.join(lines), encoding='utf-8')
+
+
+def convert(corpus, out_dir=OUT_DIR, expected=EXPECTED, expected_slots=EXPECTED_SLOTS):
+    """Write <doc>.conll for every document, split.json and context.json to out_dir, and the
+    slot tags' <doc>.conll to <out_dir>_slot; returns the counts."""
     corpus, out_dir = Path(corpus), Path(out_dir)
+    slot_dir = out_dir.with_name(out_dir.name + '_slot')
     split = read_split(corpus)
     docs = sorted(p.stem for p in (corpus / 'annotations' / 'entity_types_and_slots')
                   .glob('*.csv'))
     if sorted(split) != docs:
         raise ConversionError('the metadata and the annotation files name different documents')
     out_dir.mkdir(parents=True, exist_ok=True)
-    counts = Counter()
+    slot_dir.mkdir(parents=True, exist_ok=True)
+    counts, slots = Counter(), Counter()
+    context = {}
     for doc in docs:
         sentences = convert_document(corpus, doc)
-        lines = []
-        for words, tags in sentences:
-            lines += [f'{w} {t}' for w, t in zip(words, tags)] + ['']
-            counts.update(t[2:] for t in tags if t.startswith('B-'))
-        (out_dir / f'{doc}.conll').write_text('\n'.join(lines), encoding='utf-8')
+        slot_sentences = convert_document(corpus, doc, 'slot')
+        if [w for w, _ in slot_sentences] != [w for w, _ in sentences]:
+            raise ConversionError(f'{doc}: the slot tags cut other sentences')
+        context[doc] = document_context(corpus, doc, sentences)
+        for name, found, store in ((out_dir, sentences, counts),
+                                   (slot_dir, slot_sentences, slots)):
+            write_conll(name / f'{doc}.conll', found)
+            for _, tags in found:
+                store.update(t[2:] for t in tags if t.startswith('B-'))
         counts['sentences'] += len(sentences)
     (out_dir / 'split.json').write_text(json.dumps(split, indent=2, sort_keys=True) + '\n')
+    (out_dir / 'context.json').write_text(json.dumps(context, sort_keys=True) + '\n',
+                                          encoding='utf-8')
     stats = {'documents': len(docs), 'sentences': counts.pop('sentences'),
              'entities': sum(counts.values()), 'types': dict(sorted(counts.items())),
+             'slots': sum(slots.values()), 'slot_types': dict(sorted(slots.items())),
              'split': dict(sorted(Counter(split.values()).items()))}
     found = {k: stats[k] for k in expected}
     if found != expected:
         raise ConversionError(f'counts {found}, not those of the paper {expected}')
+    if stats['slots'] != expected_slots:
+        raise ConversionError(f"{stats['slots']} slot mentions, not {expected_slots}")
     return stats
 
 
@@ -119,11 +266,17 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description='SOFC-Exp as CoNLL files for ner_baseline.py')
     parser.add_argument('corpus', help='the sofc-exp-corpus directory of the repository')
     parser.add_argument('--out', default=str(OUT_DIR), metavar='DIR')
+    parser.add_argument('--retokenized-test', default=None, metavar='DIR',
+                        help="also write the test articles cut into words by ChemDataExtractor's "
+                             'tokenizer to DIR (data/raw/dataset/sofc_exp_test_cde)')
     args = parser.parse_args(argv)
     if not os.path.isdir(args.corpus):
         parser.error(f'not a directory: {args.corpus}')
     stats = convert(args.corpus, args.out)
     print(json.dumps(stats, indent=2))
+    if args.retokenized_test:
+        test = write_retokenized_test(args.corpus, args.retokenized_test)
+        print(json.dumps({k: test[k] for k in ('sentences', 'entities', 'inexact', 'lost')}))
     return stats
 
 

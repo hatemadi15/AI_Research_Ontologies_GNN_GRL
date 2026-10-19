@@ -412,3 +412,73 @@ def test_multitask_leave_one_paper_out(tiny_run, tmp_path):
         index = [i for i, x in enumerate(data['fine'][1]) if x[2] == run_f['run_id']]
         _check_pair(run_f, run_c, data, index)
         assert run_f['n_train'] == 10 and run_f['seed'] == 3
+
+
+def test_multitask_mention_replacement_run(tiny_run, tmp_path, monkeypatch):
+    """--multi-task --augment-mentions: one file per head (_crf_mt_mr), each run storing the
+    number of copies, which train with both heads' tags. Every other sentence names its
+    Strength 'yield strengths', so that a replacement can change a sentence."""
+    corpora = _toy_corpora()
+    for g in ('fine', 'coarse'):
+        corpora[g] = [(tokens[:2] + ['yield'] + tokens[3:] if pos % 2 else tokens, tags, doc)
+                      for pos, (tokens, tags, doc) in enumerate(corpora[g])]
+    monkeypatch.setattr(nb, 'load_split_corpus', lambda granularity: corpora[granularity])
+    assert tiny_run('--crf', '--multi-task', '--augment-mentions', '2', '--leave-one-paper-out',
+                    '--seeds', '3', '--papers', 'b', '--tag', 'm100',
+                    '--seed-offset', '100') == [103]
+    suffix = '_leave_one_paper_out_crf_mt_mr2_m100.json'     # 2 copies: named after them
+    fine, coarse = (_load(tmp_path, f'ner_results_{g}{suffix}') for g in ('fine', 'coarse'))
+    assert fine['variant'] == 'crf_mt_mr2_m100' and fine['config']['augment_mentions'] == 2
+    (run_f,), (run_c,) = fine['runs'], coarse['runs']
+    assert run_f['run_id'] == 'b.conll' and run_f['n_augmented'] == run_c['n_augmented'] > 0
+    assert run_f['multi_task']['n_examples'] == run_c['multi_task']['n_examples']
+
+
+def _toy_sofc():
+    """SOFC-Exp's two levels on the toy sentences (the coarse ones, so the levels align): slot
+    tags from the fine tags (Temp as interconnect_material, a type the slot level drops) and
+    entity tags from the coarse ones; papers a and b train, c is dev, d is test."""
+    toy = _toy_corpora()
+    slot_of = {'Steel': 'anode_material', 'Alloy': 'cathode_material',
+               'Strength': 'power_density', 'Yield': 'resistance',
+               'Temp': 'interconnect_material'}
+    entity_of = {'Material': 'MATERIAL', 'Property': 'VALUE', 'Condition': 'EXPERIMENT'}
+
+    def rename(tags, names):
+        return [t if t == 'O' else f'{t[:2]}{names[t[2:]]}' for t in tags]
+    slot = [(c[0], rename(f[1][:len(c[0])], slot_of), c[2])
+            for f, c in zip(toy['fine'], toy['coarse'])]
+    entity = [(t, rename(tags, entity_of), d) for t, tags, d in toy['coarse']]
+    return {'sofc_slot': slot, 'sofc': entity}
+
+
+def test_multitask_on_the_two_sofc_exp_levels(tiny_run, tmp_path, monkeypatch):
+    """--granularity sofc_both --published-split: the slot head ('fine') and the entity head
+    ('coarse') of one model per seed, on the official split by article, a file per level."""
+    corpora = _toy_sofc()
+    monkeypatch.setattr(nb, 'load_split_corpus', lambda granularity: corpora[granularity])
+    raw = tmp_path / 'raw'
+    (raw / 'sofc_exp').mkdir(parents=True)
+    (raw / 'sofc_exp' / 'split.json').write_text(json.dumps(
+        {'a': 'train', 'b': 'train', 'c': 'dev', 'd': 'test'}))
+    monkeypatch.setattr(nb, 'RAW_DIR', str(raw))
+    assert tiny_run('--crf', '--multi-task', '--granularity', 'sofc_both', '--published-split',
+                    '--seeds', '0', '1', '--save-predictions') == [0, 1]
+    slot = _load(tmp_path, 'ner_results_sofc_slot_published_split_crf_mt.json')
+    entity = _load(tmp_path, 'ner_results_sofc_published_split_crf_mt.json')
+    labels = {'fine': ['anode_material', 'cathode_material', 'power_density', 'resistance'],
+              'coarse': ['EXPERIMENT', 'MATERIAL', 'VALUE']}
+    data = {}
+    for head, g, res in (('fine', 'sofc_slot', slot), ('coarse', 'sofc', entity)):
+        assert (res['granularity'], res['protocol'], res['variant']) == (
+            g, 'published_split', 'crf_mt')
+        assert res['labels'] == labels[head] and res['paper_test_f1'] is None
+        assert res['summary']['run_ids'] == ['seed0', 'seed1']
+        data[head] = (labels[head], [(t, nb.restrict_tags(tags, set(labels[head])), d)
+                                     for t, tags, d in corpora[g]])
+    test = [i for i, x in enumerate(corpora['sofc']) if x[2] == 'd.conll']
+    for run_s, run_e, seed in zip(slot['runs'], entity['runs'], (0, 1)):
+        _check_pair(run_s, run_e, data, test)
+        assert (run_s['run_id'], run_s['seed']) == (f'seed{seed}', seed)
+        assert (run_s['n_train'], run_s['n_val']) == (12, 6)
+        assert run_s['multi_task']['n_split_examples'] == 0       # the levels align

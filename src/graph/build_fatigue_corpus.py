@@ -342,22 +342,22 @@ def search(fetcher, query=QUERY, page_size=PAGE_SIZE):
             return page['hitCount'], records
 
 
-def load_hits(cache_dir, fetcher, refresh=False):
+def load_hits(cache_dir, fetcher, refresh=False, query=QUERY):
     """The cached search ({query, retrieved, api_hit_count, records}), or a new one, cached."""
     path = os.path.join(cache_dir, HITS_FILE)
     if os.path.exists(path) and not refresh:
         with open(path, encoding='utf-8') as f:
             hits = json.load(f)
-        if hits['query'] != QUERY:
+        if hits['query'] != query:
             raise SystemExit(f'{path} holds the results of another query; use --refresh-search '
                              f'(this changes the articles) or another --cache-dir')
         return hits
     if fetcher is None:
         raise SystemExit(f'--offline needs {path} (the cached search results)')
-    count, records = search(fetcher)
+    count, records = search(fetcher, query)
     if count != len(records):
         print(f'  warning: the API reports {count} hits, {len(records)} were returned', flush=True)
-    hits = {'query': QUERY, 'retrieved': utc_now(), 'api_hit_count': count,
+    hits = {'query': query, 'retrieved': utc_now(), 'api_hit_count': count,
             'records': [slim(r) for r in records]}
     write_atomic(path, json.dumps(hits, ensure_ascii=False).encode('utf-8'))
     return hits
@@ -415,8 +415,9 @@ def is_citation(el):
     return local(el.tag) == 'xref' and el.get('ref-type', 'bibr') in DROPPED_XREFS
 
 
-def child_text(el):
-    """What a child element contributes to the text of its paragraph (not its tail)."""
+def child_text(el, sup='^'):
+    """What a child element contributes to the text of its paragraph (not its tail); `sup`
+    goes before the text of a superscript."""
     name = local(el.tag)
     if name in FLOATS or is_citation(el):
         return ''
@@ -425,17 +426,18 @@ def child_text(el):
     if name in ('inline-formula', 'math'):
         return formula_text(el)
     if name == 'sup':
-        text = inline_text(el)
-        return f'^{text}' if re.search(r'\w', text) else ''
+        text = inline_text(el, sup)
+        return f'{sup}{text}' if re.search(r'\w', text) else ''
     if name == 'break':
         return ' '
     if name in BLOCKS:
-        return f'{BREAK}{inline_text(el)}{BREAK}'
-    return inline_text(el)
+        return f'{BREAK}{inline_text(el, sup)}{BREAK}'
+    return inline_text(el, sup)
 
 
-def inline_text(el):
-    """The text of an element with citations dropped and formulas, sub and sup replaced.
+def inline_text(el, sup='^'):
+    """The text of an element with citations dropped and formulas, sub and sup replaced (a
+    superscript is written after `sup`: 10^7).
 
     The separators between two citations ("1, 2", "1-3") go with them."""
     parts = [el.text or '']
@@ -445,7 +447,7 @@ def inline_text(el):
         if (is_citation(child) and i + 1 < len(children) and is_citation(children[i + 1])
                 and CITATION_GAP.fullmatch(tail)):
             tail = ''
-        parts += [child_text(child), tail]
+        parts += [child_text(child, sup), tail]
     return ''.join(parts)
 
 
@@ -454,7 +456,7 @@ def section_title(sec):
     return clean_text(inline_text(title)) if title is not None else ''
 
 
-def body_paragraphs(root):
+def body_paragraphs(root, sup='^'):
     """The text of every paragraph of <body>, in order, without floats and skipped sections.
 
     A display formula between two paragraphs puts a BREAK at the end of the first and at the
@@ -473,7 +475,7 @@ def body_paragraphs(root):
             elif name in FLOATS or (name == 'sec' and SKIPPED_SECTIONS.match(section_title(el))):
                 continue
             elif name == 'p':
-                found.append((BREAK if after_formula else '') + inline_text(el))
+                found.append((BREAK if after_formula else '') + inline_text(el, sup))
                 after_formula = False
             else:
                 walk(el)
@@ -554,12 +556,12 @@ def length_rejection(sentence):
     return None
 
 
-def article_sentences(xml):
+def article_sentences(xml, sup='^'):
     """(sentences, counts) of one JATS article: its body sentences that pass the length filters,
     and a Counter of paragraphs, raw_sentences, cut_by_formula, too_short, too_long and
-    non_alphabetic."""
+    non_alphabetic. `sup` goes before the text of a superscript."""
     counts, sentences = Counter(), []
-    for paragraph in map(tidy, body_paragraphs(ET.fromstring(xml))):
+    for paragraph in map(tidy, body_paragraphs(ET.fromstring(xml), sup)):
         if not paragraph.strip(BREAK + ' '):
             continue
         found, cut = paragraph_sentences(paragraph)
@@ -575,7 +577,7 @@ def article_sentences(xml):
     return sentences, counts
 
 
-def read_article(article, cache_dir, fetcher):
+def read_article(article, cache_dir, fetcher, sup='^'):
     """One article as an item: status 'ok', 'failed' (no usable XML) or 'no_text', its error,
     sentences, counts, and whether it was downloaded now."""
     xml, error, downloaded = cached_xml(article['pmcid'], cache_dir, fetcher)
@@ -585,7 +587,7 @@ def read_article(article, cache_dir, fetcher):
         item.update(status='failed', error=error)
         return item
     try:
-        item['sentences'], item['counts'] = article_sentences(xml)
+        item['sentences'], item['counts'] = article_sentences(xml, sup)
     except ET.ParseError as exc:
         item.update(status='failed', error=f'invalid XML: {exc}')
     else:

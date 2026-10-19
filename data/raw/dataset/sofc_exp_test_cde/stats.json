@@ -1,0 +1,75 @@
+{
+  "tokenizer": "chem_tokenize.ChemWordTokenizer (ChemDataExtractor 1.3.0)",
+  "documents": {
+    "PMC6164086": {
+      "sentences": 15,
+      "entities": 78,
+      "inexact": 0,
+      "lost": 0
+    },
+    "PMC6247067": {
+      "sentences": 10,
+      "entities": 65,
+      "inexact": 4,
+      "lost": 0
+    },
+    "PMC6249295": {
+      "sentences": 14,
+      "entities": 74,
+      "inexact": 1,
+      "lost": 1
+    },
+    "PMC6337513": {
+      "sentences": 24,
+      "entities": 161,
+      "inexact": 2,
+      "lost": 1
+    },
+    "PMC6370853": {
+      "sentences": 6,
+      "entities": 45,
+      "inexact": 0,
+      "lost": 0
+    },
+    "PMC6427619": {
+      "sentences": 13,
+      "entities": 73,
+      "inexact": 3,
+      "lost": 0
+    },
+    "PMC6445146": {
+      "sentences": 16,
+      "entities": 81,
+      "inexact": 2,
+      "lost": 0
+    },
+    "PMC6461657": {
+      "sentences": 39,
+      "entities": 233,
+      "inexact": 2,
+      "lost": 0
+    },
+    "PMC6517467": {
+      "sentences": 16,
+      "entities": 71,
+      "inexact": 0,
+      "lost": 0
+    },
+    "PMC6523084": {
+      "sentences": 11,
+      "entities": 54,
+      "inexact": 0,
+      "lost": 0
+    },
+    "PMC6632008": {
+      "sentences": 9,
+      "entities": 43,
+      "inexact": 0,
+      "lost": 0
+    }
+  },
+  "sentences": 173,
+  "entities": 978,
+  "inexact": 14,
+  "lost": 2
+}

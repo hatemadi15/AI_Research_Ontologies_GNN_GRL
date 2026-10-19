@@ -965,6 +965,451 @@ def test_week5_analysis_bullets(tmp_path):
             'coarse-grained one.') in readme
 
 
+def test_week6_lists_follow_ner_seedmeans():
+    ns = pytest.importorskip('ner_seedmeans')
+    assert rr.WEEK6_FILE == ns.OUT_NAMES[6] and rr.WEEK6_SCREEN_FILE == ns.SCREEN_NAME
+    assert rr.WEEK6_METHODS == ns.WEEK6_METHODS and rr.UNSEEN_BEST == ns.UNSEEN_BEST
+    assert list(rr.WEEK6_SCREEN_COMPARISONS) == [
+        (v, r) for v, r, _ in ns.comparison_list(6, True, screen=True)]
+    assert list(rr.WEEK6_COMPARISONS) == [(v, r) for v, r, _ in ns.comparison_list(6, True)]
+    assert set(rr.WEEK6_NAMES) >= set(ns.WEEK6_SYSTEMS) | set(ns.WEEK6_SCREEN_SYSTEMS)
+
+
+def test_week6_tables_and_bullets(tmp_path):
+    """The screen and the 10-seed comparisons get a table each, over the held-out papers, and
+    a bullet per comparison with each granularity's role."""
+    ws = Workspace(tmp_path)
+    lopo = 'leave_one_paper_out'
+    for g, micro in (('fine', (1.2, -0.5, 2.9)), ('coarse', (-0.4, -1.0, 0.2))):
+        ws.week4('crf_deberta', 'crf', g, lopo, gpu=True, role='screen', micro=micro,
+                 score=(50.0, 44.0, 56.0), name=rr.WEEK6_SCREEN_FILE)
+    ws.week4('crf_deberta_ens3', 'crf_mt_ens3', 'fine', lopo, gpu=True, role='decision',
+             micro=(2.0, 0.5, 3.5), score=(55.0, 48.0, 62.0), name=rr.WEEK6_FILE)
+    ws.week4('crf_deberta_ens3', 'crf_mt_ens3', 'coarse', lopo, gpu=True, role='reported',
+             micro=(1.0, -1.0, 3.0), score=(62.0, 56.0, 68.0), name=rr.WEEK6_FILE)
+    readme, _ = ws.generate()
+    rows = table_rows(readme, '#### NER week-6 screen')
+    assert [r.split(' | ')[:3] for r in rows] == [
+        ['| DeBERTa-v3-large vs CRF head', 'fine', '4'],
+        ['| DeBERTa-v3-large vs CRF head', 'coarse', '4']]
+    assert all(r.endswith('| screen |') for r in rows)
+    rows = table_rows(readme, '#### NER week-6 comparisons')
+    assert [r.split(' | ')[0] for r in rows] == ['| DeBERTa-v3-large vote vs multi-task vote'] * 2
+    assert ('* NER week 6, the screen (GPU runs, seeds 0, 100 and 200, leaving one paper out; '
+            'mean paired micro-F1 difference [95% CI]; it decides only which methods get 10 '
+            'seeds): DeBERTa-v3-large goes to stage 2; against the CRF head fine-grained +1.20 '
+            '[-0.50, +2.90], coarse-grained -0.40 [-1.00, +0.20].\n') in readme
+    assert ('* NER week 6 (GPU runs, 10 seeds), DeBERTa-v3-large vote vs the multi-task vote '
+            '(paired micro-F1 difference, leaving one paper out): fine-grained improves (+2.00, '
+            '95% CI [+0.50, +3.50]') in readme
+    assert 'the pre-registered decision); coarse-grained no significant change' in readme
+
+
+def test_week7_table_and_bullets(tmp_path):
+    """Week 7, part 1: the consistency rule gets a table over both protocols (the held-out
+    papers first) and a bullet per decision, with each granularity's role."""
+    ws = Workspace(tmp_path)
+    lopo, rand = 'leave_one_paper_out', 'random_split_vary'
+    for g, micro, role in (('fine', (0.30, -0.35, 0.95), 'decision'),
+                           ('coarse', (0.12, 0.01, 0.24), 'decision')):
+        ws.week4('crf_dc', 'crf', g, lopo, gpu=True, role=role, micro=micro,
+                 score=(49.0, 45.0, 53.0), name=rr.WEEK7_FILE)
+    ws.week4('crf_dc', 'crf', 'fine', rand, gpu=True, micro=(-0.12, -0.40, 0.16),
+             score=(77.5, 76.0, 79.0), name=rr.WEEK7_FILE)
+    ws.week4('crf_mt_ens3_dc', 'crf_mt_ens3', 'fine', lopo, gpu=True, role='decision',
+             micro=(0.33, -0.74, 1.40), score=(53.0, 47.0, 59.0), name=rr.WEEK7_FILE)
+    ws.week4('crf_dcr', 'crf', 'coarse', lopo, gpu=True, micro=(0.64, 0.29, 1.00),
+             score=(59.0, 55.0, 63.0), name=rr.WEEK7_FILE)
+    readme, _ = ws.generate()
+    rows = table_rows(readme, '#### NER week-7 comparisons, part 1')
+    assert [r.split(' | ')[:3] for r in rows] == [
+        ['| CRF head + the consistency rule vs CRF head', 'leave one paper out', 'fine'],
+        ['| CRF head + the consistency rule vs CRF head', 'leave one paper out', 'coarse'],
+        ['| CRF head + the consistency rule vs CRF head', 'new random split per seed', 'fine'],
+        ['| multi-task vote + the consistency rule vs multi-task vote', 'leave one paper out',
+         'fine'],
+        ['| CRF head + the consistency rule with retyping vs CRF head', 'leave one paper out',
+         'coarse']]
+    assert [r.rsplit(' | ', 1)[1] for r in rows] == ['decision |', 'decision |', 'reported |',
+                                                     'decision |', 'reported |']
+    assert ('* NER week 7, part 1 (GPU runs; the consistency rule on the saved predictions of 10 '
+            'seeds), CRF head + the consistency rule vs the CRF head (paired micro-F1 difference, '
+            'leaving one paper out): fine-grained no significant change (+0.30, 95% CI [-0.35, '
+            '+0.95]') in readme
+    assert ('the pre-registered decision); coarse-grained improves (+0.12, 95% CI [+0.01, '
+            '+0.24]') in readme
+    assert '* NER week 7, part 1 (GPU runs; the consistency rule on the saved predictions of 10 ' \
+        'seeds), multi-task vote + the consistency rule vs the multi-task vote' in readme
+    # retyping is reported in the table only
+    assert 'retyping vs the CRF head' not in readme
+
+
+def test_week7_part2a_table_and_bullets(tmp_path):
+    """Week 7, part 2a: recall calibration gets a table of its own and a bullet per decision;
+    the bias chosen on validation is reported in the table only."""
+    ws = Workspace(tmp_path)
+    lopo = 'leave_one_paper_out'
+    for g, micro in (('fine', (1.50, 0.40, 2.60)), ('coarse', (0.20, -0.30, 0.70))):
+        ws.week4('crf_eb', 'crf', g, lopo, gpu=True, role='decision', micro=micro,
+                 score=(48.0, 44.0, 52.0), name=rr.WEEK7_FILE)
+    ws.week4('crf_eb_ens3', 'crf_mt_ens3', 'fine', lopo, gpu=True, role='decision',
+             micro=(-0.50, -2.00, 1.00), score=(51.0, 45.0, 57.0), name=rr.WEEK7_FILE)
+    ws.week4('crf_ebv', 'crf', 'fine', lopo, gpu=True, micro=(0.05, -0.10, 0.20),
+             score=(46.6, 42.0, 51.0), name=rr.WEEK7_FILE)
+    readme, _ = ws.generate()
+    rows = table_rows(readme, '#### NER week-7 comparisons, part 2a')
+    assert [r.split(' | ')[:3] for r in rows] == [
+        ['| CRF head + recall calibration vs CRF head', 'leave one paper out', 'fine'],
+        ['| CRF head + recall calibration vs CRF head', 'leave one paper out', 'coarse'],
+        ['| vote of the CRF head + recall calibration vs multi-task vote', 'leave one paper out',
+         'fine'],
+        ['| CRF head + recall calibration chosen on validation vs CRF head',
+         'leave one paper out', 'fine']]
+    assert [r.rsplit(' | ', 1)[1] for r in rows] == ['decision |'] * 3 + ['reported |']
+    assert ('* NER week 7, part 2a (GPU runs; recall calibration, its bias chosen on inner folds, '
+            '10 seeds), CRF head + recall calibration vs the CRF head (paired micro-F1 '
+            'difference, leaving one paper out): fine-grained improves (+1.50, 95% CI [+0.40, '
+            '+2.60]') in readme
+    assert ('* NER week 7, part 2a (GPU runs; recall calibration, its bias chosen on inner folds, '
+            '10 seeds), vote of the CRF head + recall calibration vs the multi-task vote') in readme
+    assert 'chosen on validation vs the CRF head' not in readme
+    assert '#### NER week-7 comparisons, part 1' not in readme
+
+
+def test_week6_screen_bullets_follow_the_screen_rule(tmp_path):
+    """A method stops unless a granularity's mean difference is above 0, whatever the CIs; the
+    screen's vote comparison rides along; a method with one granularity gets no bullet."""
+    ns = pytest.importorskip('ner_seedmeans')
+    ws = Workspace(tmp_path)
+    lopo = 'leave_one_paper_out'
+    for g, micro in (('fine', (-0.2, -0.4, -0.1)), ('coarse', (-3.0, -5.0, -1.0))):
+        ws.week4('crf_ctx', 'crf', g, lopo, gpu=True, role='screen', micro=micro,
+                 score=(50.0, 44.0, 56.0), name=rr.WEEK6_SCREEN_FILE)
+        ws.week4('crf_ctx_ens3', 'crf_ens3', g, lopo, gpu=True, role='reported',
+                 micro=(0.5, -0.5, 1.5), score=(52.0, 46.0, 58.0), name=rr.WEEK6_SCREEN_FILE)
+    ws.week4('crf_mt_st3', 'crf', 'fine', lopo, gpu=True, role='screen', micro=(4.0, 3.0, 5.0),
+             score=(50.0, 44.0, 56.0), name=rr.WEEK6_SCREEN_FILE)
+    readme, _ = ws.generate()
+    assert ('document context stops; against the CRF head fine-grained -0.20 [-0.40, -0.10], '
+            'coarse-grained -3.00 [-5.00, -1.00]; its vote against the 3-model seed ensemble '
+            'fine-grained +0.50 [-0.50, +1.50], coarse-grained +0.50 [-0.50, +1.50].\n') in readme
+    assert 'multi-task self-training goes' not in readme and 'improves' not in readme
+    screen = json.loads((ws.results / 'gpu' / rr.WEEK6_SCREEN_FILE).read_text())
+    assert ns.screen_verdicts(screen) == {'crf_ctx': 'stops (fine -0.20, coarse -3.00)',
+                                          'crf_mt_st3': 'incomplete'}
+
+
+def test_week7_mention_replacement_screen_and_decisions(tmp_path):
+    """Part 2b: mention replacement's screen gets a week-7 bullet (from its own file), and its
+    stage-2 decisions a bullet each, as the week-6 methods do."""
+    ns = pytest.importorskip('ner_seedmeans')
+    ws = Workspace(tmp_path)
+    lopo = 'leave_one_paper_out'
+    for g, micro in (('fine', (0.4, -1.0, 1.8)), ('coarse', (-0.3, -1.0, 0.4))):
+        ws.week4('crf_mr', 'crf', g, lopo, gpu=True, role='screen', micro=micro,
+                 score=(47.0, 40.0, 54.0), name=rr.WEEK7_SCREEN_FILE)
+    readme, _ = ws.generate()
+    assert ('* NER week 7, part 2b, the screen (GPU runs, seeds 0, 100 and 200, leaving one '
+            'paper out; mean paired micro-F1 difference [95% CI]; it decides only which methods '
+            'get 10 seeds): mention replacement goes to stage 2; against the CRF head '
+            'fine-grained +0.40 [-1.00, +1.80], coarse-grained -0.30 [-1.00, +0.40].\n') in readme
+    screen = json.loads((ws.results / 'gpu' / rr.WEEK7_SCREEN_FILE).read_text())
+    assert ns.screen_verdicts(screen, ns.WEEK7_METHODS) == {
+        'crf_mr': 'goes to stage 2 (fine +0.40, coarse -0.30)'}
+    for g in ('fine', 'coarse'):
+        ws.week4('crf_mr', 'crf', g, lopo, gpu=True, role='decision', micro=(0.2, -0.9, 1.3),
+                 score=(47.0, 40.0, 54.0), name=rr.WEEK7_FILE)
+    readme, _ = ws.generate()
+    assert ('* NER week 7, part 2b (GPU runs; mention replacement, 10 seeds), mention '
+            'replacement vs the CRF head (paired micro-F1 difference, leaving one paper out): '
+            'fine-grained no significant change') in readme
+
+
+def test_week9_table_and_bullets(tmp_path):
+    """Week 9: mention replacement on the multi-task model, a table of its comparisons and a
+    bullet per decision, from its own file."""
+    ws = Workspace(tmp_path)
+    lopo = 'leave_one_paper_out'
+    for g in ('fine', 'coarse'):
+        ws.week4('crf_mt_mr', 'crf_mt', g, lopo, gpu=True, role='decision',
+                 micro=(1.5, 0.4, 2.6), score=(51.0, 44.0, 58.0), name=rr.WEEK9_FILE)
+        ws.week4('crf_mt_mr', 'crf_mr', g, lopo, gpu=True, micro=(0.5, -0.4, 1.4),
+                 score=(51.0, 44.0, 58.0), name=rr.WEEK9_FILE)
+    ws.week4('crf_mt_mr_ens3', 'crf_mt_ens3', 'fine', lopo, gpu=True, role='decision',
+             micro=(0.9, -1.0, 2.8), score=(53.0, 45.0, 61.0), name=rr.WEEK9_FILE)
+    readme, _ = ws.generate()
+    assert ('* NER week 9 (GPU runs; mention replacement on the multi-task model, 10 seeds), '
+            'multi-task + mention replacement vs the multi-task (fine + coarse heads) (paired '
+            'micro-F1 difference, leaving one paper out): fine-grained improves') in readme
+    assert ('multi-task + mention-replacement vote vs the multi-task vote (paired micro-F1 '
+            'difference, leaving one paper out): fine-grained no significant change') in readme
+    assert '#### NER week-9 comparisons, mention replacement on the multi-task model' in readme
+    assert '| multi-task + mention replacement vs mention replacement |' in readme
+
+
+def test_week11_table_and_bullet(tmp_path):
+    """Week 11: mention replacement with silver names, a table of its MaterioMiner
+    comparisons and a bullet per granularity's decision, from its own file."""
+    ws = Workspace(tmp_path)
+    lopo = 'leave_one_paper_out'
+    for g in ('fine', 'coarse'):
+        ws.week4('crf_mrs', 'crf_mr', g, lopo, gpu=True, role='decision',
+                 micro=(0.8, 0.1, 1.5), score=(52.0, 45.0, 59.0), name=rr.WEEK11_FILE)
+        ws.week4('crf_mrs', 'crf', g, lopo, gpu=True, micro=(3.5, 2.0, 5.0),
+                 score=(52.0, 45.0, 59.0), name=rr.WEEK11_FILE)
+    readme, _ = ws.generate()
+    assert ('* NER week 11 (GPU runs; mention replacement with silver names, 10 seeds), '
+            'mention replacement with silver names vs the mention replacement (paired '
+            'micro-F1 difference, leaving one paper out): fine-grained improves') in readme
+    assert '#### NER week-11 comparisons, mention replacement with silver names' in readme
+    assert '| mention replacement with silver names vs CRF head |' in readme
+
+
+def test_a_week6_vote_that_passes_takes_the_unseen_slot(tmp_path):
+    ws = Workspace(tmp_path)
+    lopo = 'leave_one_paper_out'
+    for g in ('fine', 'coarse'):
+        ws.week4('crf_ens3', 'crf', g, 'random_split_vary', gpu=True, micro=(2.0, 1.0, 3.0),
+                 score=(80.5, 78.0, 83.0), name=rr.WEEK5_FILE)
+        ws.week4('crf_ens3', 'crf', g, lopo, gpu=True, micro=(2.0, 1.0, 3.0),
+                 score=(50.0, 44.0, 56.0), name=rr.WEEK5_FILE)
+    ws.week4('crf_mt_ens3', 'crf_ens3', 'fine', lopo, gpu=True, role='decision',
+             micro=(3.6, 0.5, 6.8), score=(52.5, 44.0, 61.0), name=rr.WEEK5_FILE)
+    readme, roadmap = ws.generate()
+    fine = next(r for r in glance(readme).split('\n') if 'fine-grained, reported' in r)
+    assert 'on unseen papers the multi-task vote `crf_mt_ens3`' in fine
+    assert '(week-5 protocol; 10 seeds, GPU runs)' in fine
+    # fine-grained, the document-context vote beats the multi-task vote (decision 2)
+    ws.week4('crf_ctx_ens3', 'crf_mt_ens3', 'fine', lopo, gpu=True, role='decision',
+             micro=(1.5, 0.3, 2.7), score=(54.0, 46.0, 62.0), name=rr.WEEK6_FILE)
+    # reported only: does not count
+    ws.week4('crf_deberta_ens3', 'crf_mt_ens3', 'coarse', lopo, gpu=True, role='reported',
+             micro=(5.0, 1.0, 9.0), score=(66.0, 60.0, 72.0), name=rr.WEEK6_FILE)
+    readme, roadmap = ws.generate()
+    rows = [r for r in glance(readme).split('\n') if 'reported system' in r]
+    assert ('(week-5 and week-6 protocols; 10 seeds, GPU runs): 3-model seed ensemble '
+            '`crf_ens3`; on unseen papers the document-context vote `crf_ctx_ens3` | micro F1 '
+            '80.50 [78.00, 83.00] over 5 random splits; 54.00 on an unseen paper') in rows[0]
+    assert 'on unseen papers' not in rows[1]                  # coarse keeps crf_ens3
+    standing = next(line for line in roadmap.split('\n') if 'reported system' in line)
+    assert standing.startswith('| NER, reported system (week-5 and week-6 protocols;')
+
+
+def test_sofc_slot_row_and_bullet(tmp_path):
+    """Week 7, part 2d: SOFC-Exp's slot level gets its own row and bullet (the CRF head
+    against plain MatSciBERT reported, not decided), and multi-task training decides on each
+    level, its votes reported against the CRF votes."""
+    ws = Workspace(tmp_path)
+    (ws.results / 'gpu').mkdir()
+    for variant, micro in ((None, (71.0, 70.0, 72.0)), ('crf', (72.5, 71.9, 73.1))):
+        (ws.results / 'gpu' / rr.ner_file('sofc_slot', 'published_split', variant)).write_text(
+            json.dumps({'summary': {'n_runs': 10, 'micro': {'mean': micro[0],
+                                                            'ci95': list(micro[1:])},
+                                    'macro': {'mean': micro[0] - 8, 'ci95': [0, 0]}}}))
+    readme, _ = ws.generate()
+    row = next(r for r in glance(readme).split('\n') if 'slot types' in r)
+    assert row == ("| NER on SOFC-Exp's slot types, the official split, 10 seeds (GPU runs) | "
+                   'plain MatSciBERT 71.00 [70.00, 72.00]; CRF head 72.50 [71.90, 73.10] (macro '
+                   '64.50) | published MatSciBERT-CRF of SOFC-Slot 72.85 micro, 65.35 macro '
+                   "(Gupta et al. 2022): within the CRF head's 95% CI (over seeds only) |")
+
+    def diff(mean, lo, hi, n=10):
+        return {'mean_diff': mean, 'ci95': [lo, hi], 'per_run': [mean] * n}
+    mt = {'micro': {'mean': 74.0, 'ci95': [73.4, 74.6]},
+          'minus_crf': {'micro': diff(1.5, 0.9, 2.1), 'micro_strict': diff(1.2, 0.6, 1.8)},
+          'n_pairs': 10, 'votes': {'micro': {'mean': 75.1, 'ci95': [74.0, 76.2]}},
+          'votes_minus_crf_votes': {'micro': diff(1.0, -0.5, 2.5, 3),
+                                    'micro_strict': diff(0.8, -0.7, 2.3, 3)}}
+    analysis = {'published_split': {'sofc_slot': {
+        'published': 72.85, 'published_macro': 65.35,
+        'baseline': {'micro': {'mean': 71.0, 'ci95': [70.0, 72.0]}},
+        'crf': {'micro': {'mean': 72.5, 'ci95': [71.9, 73.1]},
+                'macro': {'mean': 64.5, 'ci95': [63.0, 66.0]}},
+        'crf_minus_baseline': {'micro': diff(1.5, 0.5, 2.5), 'micro_strict': diff(1.0, 0.0, 2.0)},
+        'crf_votes': {'micro': {'mean': 74.1, 'ci95': [73.0, 75.2]}},
+        'methods': {'crf_mt': mt}}}}
+    (ws.results / 'gpu' / rr.WEEK5_ANALYSIS).write_text(json.dumps(analysis))
+    readme, _ = ws.generate()
+    assert ("* NER on SOFC-Exp's slot types (week 7, part 2d; the 17 slot types that its "
+            'evaluation scores, on the same sentences and official split; 10 model seeds, GPU '
+            'runs; the 95% CIs are over seeds): plain MatSciBERT 71.00 [70.00, 72.00], the CRF '
+            'head 72.50 [71.90, 73.10] (macro 64.50), against the published MatSciBERT-CRF of '
+            'SOFC-Slot 72.85 micro and 65.35 macro. The CRF head against plain MatSciBERT, paired '
+            'by seed: +1.50, 95% CI [+0.50, +2.50]; strict IOB2 +1.00 [+0.00, +2.00] (reported; '
+            'no decision); the CRF votes over the 3 seed triples score 74.10. Week 7, part 2d, '
+            'multi-task training on both levels against the CRF head, paired by seed: 74.00 '
+            '[73.40, 74.60], improves (+1.50, 95% CI [+0.90, +2.10]; strict IOB2 +1.20 [+0.60, '
+            '+1.80]); its votes over the 3 seed triples score 75.10, against the CRF votes, '
+            'paired by triple: +1.00, 95% CI [-0.50, +2.50]; strict IOB2 +0.80 [-0.70, +2.30] '
+            '(reported; no decision).\n') in readme
+    assert '* NER on SOFC-Exp (week 6' not in readme           # no entity-level results
+
+
+def test_sofc_row_and_bullet(tmp_path):
+    ws = Workspace(tmp_path)
+    (ws.results / 'gpu').mkdir()
+    for variant, micro in ((None, (80.5, 79.9, 81.1)), ('crf', (84.8, 84.3, 85.3))):
+        (ws.results / 'gpu' / rr.ner_file('sofc', 'published_split', variant)).write_text(
+            json.dumps({'summary': {'n_runs': 10, 'micro': {'mean': micro[0],
+                                                            'ci95': list(micro[1:])},
+                                    'macro': {'mean': micro[0] - 2, 'ci95': [0, 0]}}}))
+    readme, _ = ws.generate()
+    row = next(r for r in glance(readme).split('\n') if 'SOFC-Exp' in r)
+    assert row == ('| NER on SOFC-Exp, the official split, 10 seeds (GPU runs) | plain '
+                   'MatSciBERT 80.50 [79.90, 81.10]; CRF head 84.80 [84.30, 85.30] (macro 82.80) '
+                   '| published MatSciBERT-CRF 84.77 micro, 82.39 macro (Gupta et al. 2022): '
+                   "within the CRF head's 95% CI (over seeds only) |")
+    spread = {'mean': 84.8, 'ci95': [84.3, 85.3]}
+
+    def diff(mean, lo, hi, n=10):
+        return {'mean_diff': mean, 'ci95': [lo, hi], 'per_run': [mean] * n}
+    analysis = {'published_split': {'sofc': {
+        'published': 84.77, 'published_macro': 82.39,
+        'baseline': {'micro': {'mean': 80.5, 'ci95': [79.9, 81.1]}},
+        'crf': {'micro': spread, 'macro': {'mean': 82.8, 'ci95': [82.0, 83.6]}},
+        'crf_minus_baseline': {'micro': diff(4.3, 3.5, 5.1), 'micro_strict': diff(2.0, 1.0, 3.0)},
+        'crf_votes': {'micro': {'mean': 85.21, 'ci95': [84.0, 86.4]}},
+        'methods': {'crf_deberta': {'micro': {'mean': 84.4, 'ci95': [83.8, 85.0]},
+                                    'minus_crf': {'micro': diff(-0.4, -1.1, 0.3),
+                                                  'micro_strict': diff(-0.2, -0.9, 0.5)},
+                                    'n_pairs': 10},
+                    # an incomplete method (a session that stopped): reported, no verdict
+                    'crf_ctx': {'micro': {'mean': 86.0, 'ci95': [85.0, 87.0]},
+                                'minus_crf': {'micro': diff(1.2, 0.2, 2.2, 4),
+                                              'micro_strict': diff(1.0, 0.1, 1.9, 4)},
+                                'n_pairs': 4},
+                    # week 7: on SOFC-Exp both rules decide (the amendment to part 1)
+                    'crf_dc': {'micro': {'mean': 85.3, 'ci95': [84.8, 85.8]},
+                               'minus_crf': {'micro': diff(0.5, 0.2, 0.8),
+                                             'micro_strict': diff(0.4, 0.1, 0.7)},
+                               'n_pairs': 10},
+                    'crf_dcr': {'micro': {'mean': 85.2, 'ci95': [84.7, 85.7]},
+                                'minus_crf': {'micro': diff(0.4, 0.1, 0.7),
+                                              'micro_strict': diff(0.3, 0.0, 0.6)},
+                                'n_pairs': 10},
+                    # week 7, part 2a: recall calibration, chosen on the validation articles
+                    'crf_ebv': {'micro': {'mean': 85.0, 'ci95': [84.5, 85.5]},
+                                'minus_crf': {'micro': diff(0.2, -0.1, 0.5),
+                                              'micro_strict': diff(0.1, -0.2, 0.4)},
+                                'n_pairs': 10},
+                    # week 7, part 2e: the CRF head on the retokenized test articles
+                    'crf_cdetest': {'micro': {'mean': 85.7, 'ci95': [85.2, 86.2]},
+                                    'minus_crf': {'micro': diff(0.9, 0.4, 1.4),
+                                                  'micro_strict': diff(0.9, 0.4, 1.4)},
+                                    'n_pairs': 10}},
+        # and plain MatSciBERT on them (part 2e, decision 2)
+        'baseline_retokenized_test': {'micro': {'mean': 82.4, 'ci95': [81.9, 82.9]},
+                                      'minus_baseline': {'micro': diff(1.9, 1.3, 2.5),
+                                                         'micro_strict': diff(1.7, 1.2, 2.2)},
+                                      'n_pairs': 10}}}}
+    (ws.results / 'gpu' / rr.WEEK5_ANALYSIS).write_text(json.dumps(analysis))
+    readme, _ = ws.generate()
+    assert ('* NER on SOFC-Exp (week 6; its official split, 26 training, 8 development and 11 '
+            'test articles; 10 model seeds, GPU runs; the 95% CIs are over seeds): plain '
+            'MatSciBERT 80.50 [79.90, 81.10], the CRF head 84.80 [84.30, 85.30] (macro 82.80), '
+            'against the published MatSciBERT-CRF 84.77 micro and 82.39 macro. S1, the CRF head '
+            'against plain MatSciBERT, paired by seed: improves (+4.30, 95% CI [+3.50, +5.10]; '
+            'strict IOB2 +2.00 [+1.00, +3.00]); the CRF votes over the 3 seed triples score '
+            '85.21. S2, DeBERTa-v3-large against the CRF head, paired by seed: 84.40 [83.80, '
+            '85.00], no significant change (-0.40, 95% CI [-1.10, +0.30]; strict IOB2 -0.20 '
+            '[-0.90, +0.50]). S2, document context against the CRF head, paired by seed: 86.00 '
+            '[85.00, 87.00], +1.20, 95% CI [+0.20, +2.20]; strict IOB2 +1.00 [+0.10, +1.90] over '
+            '4 of the 10 seeds (reported; no decision). Week 7, the consistency rule on the CRF '
+            "head's predictions, paired by seed: 85.30 [84.80, 85.80], improves (+0.50, 95% CI "
+            '[+0.20, +0.80]; strict IOB2 +0.40 [+0.10, +0.70]). Week 7, the consistency rule with '
+            "retyping on the CRF head's predictions, paired by seed: 85.20 [84.70, 85.70], improves "
+            '(+0.40, 95% CI [+0.10, +0.70]; strict IOB2 +0.30 [+0.00, +0.60]). Week 7, part 2a, '
+            'recall calibration of the CRF head, its bias chosen on the validation articles, '
+            'against the CRF head, paired by seed: 85.00 [84.50, 85.50], no significant change '
+            '(+0.20, 95% CI [-0.10, +0.50]; strict IOB2 +0.10 [-0.20, +0.40]). Week 7, part 2e, '
+            'the CRF head on the test articles cut into words as the training articles are, '
+            'against the CRF head on the released ones, paired by seed: 85.70 [85.20, 86.20], '
+            'improves (+0.90, 95% CI [+0.40, +1.40]; strict IOB2 +0.90 [+0.40, +1.40]). Week 7, '
+            'part 2e, plain MatSciBERT on the retokenized test articles, against plain MatSciBERT '
+            'on the released ones, paired by seed: 82.40 [81.90, 82.90], improves (+1.90, 95% CI '
+            '[+1.30, +2.50]; strict IOB2 +1.70 [+1.20, +2.20]).\n') in readme
+
+
+def test_mulms_bullet(tmp_path):
+    """Week 10: the 2 decisions over the held-out subfields and the random pool splits; no
+    bullet until the held-out subfields are complete."""
+    ws = Workspace(tmp_path)
+    (ws.results / 'gpu').mkdir()
+
+    def diff(mean, lo, hi, n=7):
+        return {'mean_diff': mean, 'ci95': [lo, hi], 'per_run': [mean] * n}
+
+    def score(mean, lo, hi):
+        return {'micro': {'mean': mean, 'ci95': [lo, hi]}}
+    analysis = {'mulms': {'random_split_pool': {**score(70.1, 69.0, 71.2), 'n_splits': 5}}}
+    (ws.results / 'gpu' / rr.WEEK5_ANALYSIS).write_text(json.dumps(analysis))
+    readme, _ = ws.generate()
+    assert '* NER week 10' not in readme
+    analysis['mulms'].update({
+        'leave_one_subfield_out': {
+            'crf': score(55.2, 48.0, 62.4), 'crf_mr': score(57.0, 50.1, 63.9), 'n_subfields': 7,
+            'crf_mr_minus_crf': {'micro': diff(1.8, 0.6, 3.0), 'micro_strict': diff(1.7, 0.5, 2.9)},
+            'votes': {'crf': score(56.0, 49.0, 63.0), 'crf_mr': score(57.5, 50.5, 64.5),
+                      'crf_mr_minus_crf': {'micro': diff(1.5, -0.2, 3.2),
+                                           'micro_strict': diff(1.4, -0.3, 3.1)}}},
+        'gap': {'micro': 14.9}})
+    (ws.results / 'gpu' / rr.WEEK5_ANALYSIS).write_text(json.dumps(analysis))
+    readme, _ = ws.generate()
+    assert ('* NER week 10 (MuLMS, a third corpus: its outermost entities of 13 types; GPU runs, '
+            '10 model seeds; each of its 7 materials subfields held out in turn, 340 training and '
+            '60 validation sentences from the others; the 95% CIs are over the subfields): the '
+            'CRF head 55.20 [48.00, 62.40], mention replacement 57.00 [50.10, 63.90]. Decision 1, '
+            'mention replacement against the CRF head, paired by subfield: improves (+1.80, 95% '
+            'CI [+0.60, +3.00]; strict IOB2 +1.70 [+0.50, +2.90]). Decision 2, its votes over the '
+            '3 seed triples against the CRF votes (57.50 [50.50, 64.50] against 56.00 [49.00, '
+            '63.00]), paired by subfield: no significant change (+1.50, 95% CI [-0.20, +3.20]; '
+            'strict IOB2 +1.40 [-0.30, +3.10]). The CRF head on 5 random splits of the same size '
+            '(descriptive): 70.10 [69.00, 71.20], 14.90 points above the held-out '
+            'subfields.\n') in readme
+    analysis['mulms']['silver_names'] = {
+        'crf_mrs': score(58.0, 51.0, 65.0),
+        'minus_crf': {'micro': diff(2.8, 0.9, 4.7), 'micro_strict': diff(2.7, 0.8, 4.6)},
+        'minus_crf_mr': {'micro': diff(1.0, -0.4, 2.4), 'micro_strict': diff(0.9, -0.5, 2.3)},
+        'unseen_in_silver': 0.123}
+    (ws.results / 'gpu' / rr.WEEK5_ANALYSIS).write_text(json.dumps(analysis))
+    readme, _ = ws.generate()
+    assert ('14.90 points above the held-out subfields. Week 11, mention replacement with the '
+            "teachers' silver names in its pool (the fold's sentences outside its pool and test "
+            'set): 58.00 [51.00, 65.00]. Week-11 decision 1, against the CRF head, paired by '
+            'subfield: improves (+2.80, 95% CI [+0.90, +4.70]; strict IOB2 +2.70 [+0.80, '
+            '+4.60]). Week-11 decision 2, against mention replacement, paired by subfield: no '
+            'significant change (+1.00, 95% CI [-0.40, +2.40]; strict IOB2 +0.90 [-0.50, '
+            '+2.30]). 12.3% of the unseen test names are silver names.\n') in readme
+    # week 12: the screen of two variants (no verdict words), the decision for one of them
+    analysis['mulms']['week12'] = {
+        'crf_mr6': {'screen': {'seeds': [0, 100, 200], 'crf_mr6': score(57.1, 50.0, 64.2),
+                               'minus_crf': {'micro': diff(1.9, 0.5, 3.3)},
+                               'minus_crf_mr': {'micro': diff(0.1, -0.9, 1.1)}}},
+        'crf_mrm_topic': {
+            'screen': {'seeds': [0, 100, 200], 'crf_mrm_topic': score(59.0, 52.0, 66.0),
+                       'minus_crf': {'micro': diff(3.8, 1.5, 6.1)},
+                       'minus_crf_mr': {'micro': diff(2.0, 0.4, 3.6)}, 'unseen_in_silver': 0.41},
+            'decision': {'seeds': list(range(300, 1000, 100)),
+                         'crf_mrm_topic': score(59.2, 52.1, 66.3),
+                         'minus_crf': {'micro': diff(4.0, 1.9, 6.1),
+                                       'micro_strict': diff(3.9, 1.8, 6.0)},
+                         'minus_crf_mr': {'micro': diff(2.2, -0.1, 4.5),
+                                          'micro_strict': diff(2.1, -0.2, 4.4)},
+                         'unseen_in_silver': 0.434, 'decision_1': True, 'decision_2': False}}}
+    (ws.results / 'gpu' / rr.WEEK5_ANALYSIS).write_text(json.dumps(analysis))
+    readme, _ = ws.generate()
+    assert ('12.3% of the unseen test names are silver names. Week 12, names from the held-out '
+            "subfield's topic corpus, 6 copies (crf_mr6), the 3-seed screen against mention "
+            'replacement: +0.10 [-0.90, +1.10]. Week 12, names from the held-out subfield\'s '
+            'topic corpus, silver mentions (crf_mrm_topic), the 3-seed screen against mention '
+            'replacement: +2.00 [+0.40, +3.60]. Week-12 decision for silver mentions on seeds '
+            '300 to 900: 59.20 [52.10, 66.30]; decision 1, against the CRF head, paired by '
+            'subfield: improves (+4.00, 95% CI [+1.90, +6.10]; strict IOB2 +3.90 [+1.80, '
+            '+6.00]); decision 2, against mention replacement, paired by subfield: no '
+            'significant change (+2.20, 95% CI [-0.10, +4.50]; strict IOB2 +2.10 [-0.20, '
+            '+4.40]). 43.4% of the unseen test names are its silver names.\n') in readme
+
+
 def test_a_week3_file_that_is_not_an_object_is_reported(tmp_path, capsys):
     ws = Workspace(tmp_path)
     (ws.results / rr.WEEK3_FILE).write_text('[1, 2]')

@@ -1,0 +1,825 @@
+{
+  "granularity": "fine",
+  "protocol": "leave_one_paper_out",
+  "model": "m3rg-iitd/matscibert",
+  "labels": [
+    "Alloy",
+    "Crack",
+    "CrackInitation",
+    "DataSet",
+    "FatigueLifetime",
+    "FatigueTest",
+    "FatigueTestSpecimen",
+    "GrainBoundary",
+    "LoadingType",
+    "Location",
+    "MaterialClass",
+    "MechanicalProperty",
+    "MechanicalTestDataSet",
+    "MechanicalTreatment",
+    "Mechanism",
+    "Microstructure",
+    "MicrostructureEntity",
+    "StateDescriptor",
+    "StrainRate",
+    "StressAmplitude",
+    "TensileUltimateStrength",
+    "TensileYieldStrength",
+    "TestSpecimen",
+    "TestingMachine",
+    "TestingMedium",
+    "TwinBoundary",
+    "Value"
+  ],
+  "label_tie": {
+    "boundary_count": 24,
+    "tied_classes": [
+      "TensileYieldStrength",
+      "Dislocation"
+    ],
+    "kept_by_tiebreak": [
+      "TensileYieldStrength"
+    ]
+  },
+  "paper_test_f1": 69.92,
+  "variant": "crf_cf_m200",
+  "config": {
+    "input": "crf_m200",
+    "coarse_input": "crf_m200",
+    "rule": "coarse_to_fine_completion",
+    "min_spans": 10,
+    "share": 0.9
+  },
+  "runs": [
+    {
+      "f1": 50.37,
+      "precision": 45.33,
+      "recall": 56.67,
+      "f1_strict": 50.37,
+      "per_class": {
+        "Alloy": {
+          "precision": 0.6667,
+          "recall": 0.5,
+          "f1-score": 0.5714,
+          "support": 4.0
+        },
+        "Crack": {
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1-score": 0.6667,
+          "support": 4.0
+        },
+        "CrackInitation": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 2.0
+        },
+        "DataSet": {
+          "precision": 0.3077,
+          "recall": 0.3636,
+          "f1-score": 0.3333,
+          "support": 11.0
+        },
+        "FatigueTest": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "FatigueTestSpecimen": {
+          "precision": 0.3333,
+          "recall": 0.6667,
+          "f1-score": 0.4444,
+          "support": 3.0
+        },
+        "GrainBoundary": {
+          "precision": 0.1667,
+          "recall": 1.0,
+          "f1-score": 0.2857,
+          "support": 1.0
+        },
+        "LoadingType": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "Location": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 4.0
+        },
+        "MaterialClass": {
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1-score": 0.6667,
+          "support": 2.0
+        },
+        "MechanicalTreatment": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 1.0
+        },
+        "Mechanism": {
+          "precision": 0.3,
+          "recall": 0.5,
+          "f1-score": 0.375,
+          "support": 6.0
+        },
+        "Microstructure": {
+          "precision": 0.25,
+          "recall": 0.5,
+          "f1-score": 0.3333,
+          "support": 2.0
+        },
+        "MicrostructureEntity": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 1.0
+        },
+        "StateDescriptor": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 1.0
+        },
+        "StressAmplitude": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 1.0
+        },
+        "Value": {
+          "precision": 0.7692,
+          "recall": 0.7143,
+          "f1-score": 0.7407,
+          "support": 14.0
+        },
+        "micro avg": {
+          "precision": 0.4533,
+          "recall": 0.5667,
+          "f1-score": 0.5037,
+          "support": 60.0
+        },
+        "macro avg": {
+          "precision": 0.3408,
+          "recall": 0.485,
+          "f1-score": 0.3775,
+          "support": 60.0
+        },
+        "weighted avg": {
+          "precision": 0.4715,
+          "recall": 0.5667,
+          "f1-score": 0.4976,
+          "support": 60.0
+        }
+      },
+      "run_id": "10.1007_s11340-021-00758-x.conll",
+      "n_added": 2,
+      "n_unaligned": 2,
+      "input_f1": 51.13,
+      "input_f1_strict": 51.13,
+      "mapping": {
+        "ETP": "TestingMedium",
+        "MAC": "MaterialClass",
+        "MAT": "Alloy",
+        "STD": "StateDescriptor",
+        "VAL": "Value"
+      }
+    },
+    {
+      "f1": 42.39,
+      "precision": 46.61,
+      "recall": 38.87,
+      "f1_strict": 42.39,
+      "per_class": {
+        "Alloy": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 6.0
+        },
+        "Crack": {
+          "precision": 0.375,
+          "recall": 0.3913,
+          "f1-score": 0.383,
+          "support": 46.0
+        },
+        "CrackInitation": {
+          "precision": 0.7143,
+          "recall": 0.75,
+          "f1-score": 0.7317,
+          "support": 20.0
+        },
+        "DataSet": {
+          "precision": 1.0,
+          "recall": 0.8,
+          "f1-score": 0.8889,
+          "support": 10.0
+        },
+        "FatigueLifetime": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 2.0
+        },
+        "FatigueTest": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "FatigueTestSpecimen": {
+          "precision": 0.0625,
+          "recall": 1.0,
+          "f1-score": 0.1176,
+          "support": 1.0
+        },
+        "GrainBoundary": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 39.0
+        },
+        "LoadingType": {
+          "precision": 0.5,
+          "recall": 0.3333,
+          "f1-score": 0.4,
+          "support": 3.0
+        },
+        "Location": {
+          "precision": 0.75,
+          "recall": 0.3,
+          "f1-score": 0.4286,
+          "support": 10.0
+        },
+        "MaterialClass": {
+          "precision": 0.7857,
+          "recall": 0.8462,
+          "f1-score": 0.8148,
+          "support": 13.0
+        },
+        "MechanicalProperty": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 2.0
+        },
+        "MechanicalTestDataSet": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "MechanicalTreatment": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "Mechanism": {
+          "precision": 0.3214,
+          "recall": 0.3913,
+          "f1-score": 0.3529,
+          "support": 23.0
+        },
+        "Microstructure": {
+          "precision": 0.3077,
+          "recall": 0.5,
+          "f1-score": 0.381,
+          "support": 8.0
+        },
+        "MicrostructureEntity": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 3.0
+        },
+        "StateDescriptor": {
+          "precision": 0.4,
+          "recall": 1.0,
+          "f1-score": 0.5714,
+          "support": 4.0
+        },
+        "TensileUltimateStrength": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "TensileYieldStrength": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "TestSpecimen": {
+          "precision": 1.0,
+          "recall": 0.0588,
+          "f1-score": 0.1111,
+          "support": 17.0
+        },
+        "TestingMedium": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "TwinBoundary": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 26.0
+        },
+        "Value": {
+          "precision": 0.7586,
+          "recall": 0.6875,
+          "f1-score": 0.7213,
+          "support": 32.0
+        },
+        "micro avg": {
+          "precision": 0.4661,
+          "recall": 0.3887,
+          "f1-score": 0.4239,
+          "support": 265.0
+        },
+        "macro avg": {
+          "precision": 0.3323,
+          "recall": 0.3358,
+          "f1-score": 0.2876,
+          "support": 265.0
+        },
+        "weighted avg": {
+          "precision": 0.4511,
+          "recall": 0.3887,
+          "f1-score": 0.384,
+          "support": 265.0
+        }
+      },
+      "run_id": "10.1038_ncomms7164.conll",
+      "n_added": 6,
+      "n_unaligned": 4,
+      "input_f1": 42.92,
+      "input_f1_strict": 42.92,
+      "mapping": {
+        "ETP": "TestingMedium",
+        "MAC": "MaterialClass",
+        "MAT": "Alloy",
+        "STD": "StateDescriptor",
+        "VAL": "Value"
+      }
+    },
+    {
+      "f1": 47.31,
+      "precision": 56.28,
+      "recall": 40.81,
+      "f1_strict": 47.31,
+      "per_class": {
+        "Alloy": {
+          "precision": 0.7872,
+          "recall": 0.8409,
+          "f1-score": 0.8132,
+          "support": 44.0
+        },
+        "Crack": {
+          "precision": 0.5556,
+          "recall": 1.0,
+          "f1-score": 0.7143,
+          "support": 5.0
+        },
+        "CrackInitation": {
+          "precision": 0.5,
+          "recall": 0.5,
+          "f1-score": 0.5,
+          "support": 8.0
+        },
+        "DataSet": {
+          "precision": 0.5263,
+          "recall": 0.8333,
+          "f1-score": 0.6452,
+          "support": 12.0
+        },
+        "FatigueLifetime": {
+          "precision": 1.0,
+          "recall": 0.5385,
+          "f1-score": 0.7,
+          "support": 13.0
+        },
+        "FatigueTest": {
+          "precision": 0.6,
+          "recall": 0.5,
+          "f1-score": 0.5455,
+          "support": 12.0
+        },
+        "FatigueTestSpecimen": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 18.0
+        },
+        "GrainBoundary": {
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1-score": 0.6667,
+          "support": 9.0
+        },
+        "LoadingType": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 16.0
+        },
+        "Location": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 5.0
+        },
+        "MaterialClass": {
+          "precision": 0.5574,
+          "recall": 0.6939,
+          "f1-score": 0.6182,
+          "support": 49.0
+        },
+        "MechanicalProperty": {
+          "precision": 0.25,
+          "recall": 0.2069,
+          "f1-score": 0.2264,
+          "support": 29.0
+        },
+        "MechanicalTestDataSet": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 1.0
+        },
+        "MechanicalTreatment": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 31.0
+        },
+        "Mechanism": {
+          "precision": 0.3667,
+          "recall": 0.1833,
+          "f1-score": 0.2444,
+          "support": 60.0
+        },
+        "Microstructure": {
+          "precision": 0.9167,
+          "recall": 0.5,
+          "f1-score": 0.6471,
+          "support": 22.0
+        },
+        "MicrostructureEntity": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 46.0
+        },
+        "StateDescriptor": {
+          "precision": 0.9355,
+          "recall": 0.3152,
+          "f1-score": 0.4715,
+          "support": 92.0
+        },
+        "StrainRate": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 1.0
+        },
+        "StressAmplitude": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 21.0
+        },
+        "TensileUltimateStrength": {
+          "precision": 0.7647,
+          "recall": 0.7647,
+          "f1-score": 0.7647,
+          "support": 17.0
+        },
+        "TensileYieldStrength": {
+          "precision": 0.75,
+          "recall": 0.3158,
+          "f1-score": 0.4444,
+          "support": 19.0
+        },
+        "TestSpecimen": {
+          "precision": 0.1935,
+          "recall": 0.75,
+          "f1-score": 0.3077,
+          "support": 8.0
+        },
+        "TestingMachine": {
+          "precision": 0.4,
+          "recall": 0.6667,
+          "f1-score": 0.5,
+          "support": 3.0
+        },
+        "TestingMedium": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "TwinBoundary": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "Value": {
+          "precision": 0.5567,
+          "recall": 0.7297,
+          "f1-score": 0.6316,
+          "support": 74.0
+        },
+        "micro avg": {
+          "precision": 0.5628,
+          "recall": 0.4081,
+          "f1-score": 0.4731,
+          "support": 615.0
+        },
+        "macro avg": {
+          "precision": 0.4133,
+          "recall": 0.42,
+          "f1-score": 0.3867,
+          "support": 615.0
+        },
+        "weighted avg": {
+          "precision": 0.4999,
+          "recall": 0.4081,
+          "f1-score": 0.4147,
+          "support": 615.0
+        }
+      },
+      "run_id": "10.1038_s41467-020-19071-7.conll",
+      "n_added": 32,
+      "n_unaligned": 6,
+      "input_f1": 47.23,
+      "input_f1_strict": 47.23,
+      "mapping": {
+        "ETP": "TestingMedium",
+        "MAC": "MaterialClass",
+        "STD": "StateDescriptor",
+        "VAL": "Value"
+      }
+    },
+    {
+      "f1": 39.94,
+      "precision": 48.88,
+      "recall": 33.76,
+      "f1_strict": 39.94,
+      "per_class": {
+        "Alloy": {
+          "precision": 0.8,
+          "recall": 0.2353,
+          "f1-score": 0.3636,
+          "support": 17.0
+        },
+        "Crack": {
+          "precision": 0.8889,
+          "recall": 0.9412,
+          "f1-score": 0.9143,
+          "support": 17.0
+        },
+        "CrackInitation": {
+          "precision": 0.6667,
+          "recall": 0.5,
+          "f1-score": 0.5714,
+          "support": 4.0
+        },
+        "DataSet": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 5.0
+        },
+        "FatigueLifetime": {
+          "precision": 0.75,
+          "recall": 0.5455,
+          "f1-score": 0.6316,
+          "support": 11.0
+        },
+        "FatigueTest": {
+          "precision": 0.4,
+          "recall": 0.1111,
+          "f1-score": 0.1739,
+          "support": 18.0
+        },
+        "FatigueTestSpecimen": {
+          "precision": 0.7143,
+          "recall": 0.1852,
+          "f1-score": 0.2941,
+          "support": 27.0
+        },
+        "GrainBoundary": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "LoadingType": {
+          "precision": 0.0667,
+          "recall": 0.1667,
+          "f1-score": 0.0952,
+          "support": 6.0
+        },
+        "Location": {
+          "precision": 1.0,
+          "recall": 0.5833,
+          "f1-score": 0.7368,
+          "support": 12.0
+        },
+        "MaterialClass": {
+          "precision": 0.6,
+          "recall": 0.8571,
+          "f1-score": 0.7059,
+          "support": 14.0
+        },
+        "MechanicalProperty": {
+          "precision": 0.5,
+          "recall": 0.25,
+          "f1-score": 0.3333,
+          "support": 8.0
+        },
+        "MechanicalTestDataSet": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 25.0
+        },
+        "Mechanism": {
+          "precision": 0.5714,
+          "recall": 0.2963,
+          "f1-score": 0.3902,
+          "support": 54.0
+        },
+        "Microstructure": {
+          "precision": 1.0,
+          "recall": 0.6667,
+          "f1-score": 0.8,
+          "support": 3.0
+        },
+        "StateDescriptor": {
+          "precision": 0.069,
+          "recall": 0.2222,
+          "f1-score": 0.1053,
+          "support": 9.0
+        },
+        "StrainRate": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 26.0
+        },
+        "StressAmplitude": {
+          "precision": 0.1111,
+          "recall": 0.3333,
+          "f1-score": 0.1667,
+          "support": 3.0
+        },
+        "TensileUltimateStrength": {
+          "precision": 0.7273,
+          "recall": 1.0,
+          "f1-score": 0.8421,
+          "support": 8.0
+        },
+        "TensileYieldStrength": {
+          "precision": 0.6667,
+          "recall": 0.4,
+          "f1-score": 0.5,
+          "support": 5.0
+        },
+        "TestSpecimen": {
+          "precision": 0.0667,
+          "recall": 0.2,
+          "f1-score": 0.1,
+          "support": 5.0
+        },
+        "TestingMachine": {
+          "precision": 1.0,
+          "recall": 0.0286,
+          "f1-score": 0.0556,
+          "support": 35.0
+        },
+        "TestingMedium": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 29.0
+        },
+        "Value": {
+          "precision": 0.6613,
+          "recall": 0.8723,
+          "f1-score": 0.7523,
+          "support": 47.0
+        },
+        "micro avg": {
+          "precision": 0.4888,
+          "recall": 0.3376,
+          "f1-score": 0.3994,
+          "support": 388.0
+        },
+        "macro avg": {
+          "precision": 0.4692,
+          "recall": 0.3498,
+          "f1-score": 0.3555,
+          "support": 388.0
+        },
+        "weighted avg": {
+          "precision": 0.5188,
+          "recall": 0.3376,
+          "f1-score": 0.3504,
+          "support": 388.0
+        }
+      },
+      "run_id": "10.3390_met10111458.conll",
+      "n_added": 10,
+      "n_unaligned": 3,
+      "input_f1": 39.94,
+      "input_f1_strict": 39.94,
+      "mapping": {
+        "MAC": "MaterialClass",
+        "MAT": "Alloy",
+        "STD": "StateDescriptor",
+        "VAL": "Value"
+      }
+    }
+  ],
+  "test_f1_mean": 45.0,
+  "test_f1_std": 4.08,
+  "test_f1_strict_mean": 45.0,
+  "summary": {
+    "n_runs": 4,
+    "run_ids": [
+      "10.1007_s11340-021-00758-x.conll",
+      "10.1038_ncomms7164.conll",
+      "10.1038_s41467-020-19071-7.conll",
+      "10.3390_met10111458.conll"
+    ],
+    "micro": {
+      "mean": 45.0,
+      "pop_sd": 4.08,
+      "ci95": [
+        37.51,
+        52.5
+      ],
+      "per_run": [
+        50.37,
+        42.39,
+        47.31,
+        39.94
+      ]
+    },
+    "micro_strict": {
+      "mean": 45.0,
+      "pop_sd": 4.08,
+      "ci95": [
+        37.51,
+        52.5
+      ],
+      "per_run": [
+        50.37,
+        42.39,
+        47.31,
+        39.94
+      ]
+    },
+    "macro": {
+      "mean": 35.18,
+      "pop_sd": 3.88,
+      "ci95": [
+        28.06,
+        42.31
+      ],
+      "per_run": [
+        37.75,
+        28.76,
+        38.67,
+        35.55
+      ]
+    },
+    "weighted": {
+      "mean": 41.17,
+      "pop_sd": 5.46,
+      "ci95": [
+        31.14,
+        51.19
+      ],
+      "per_run": [
+        49.76,
+        38.4,
+        41.47,
+        35.04
+      ]
+    }
+  }
+}

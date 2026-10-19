@@ -1,5 +1,6 @@
 """Exploratory analyses of the week-5 10-seed runs (ner_seed_analysis.py). Pure Python; the
 tests that compute a confidence interval need scipy and skip without it."""
+import itertools
 import json
 
 import pytest
@@ -118,3 +119,393 @@ def test_published_split_analysis(tmp_path):
     assert entry['crf_minus_baseline']['micro']['mean_diff'] == 2.0
     assert entry['crf_votes']['micro']['mean'] == 100.0       # every member predicts the gold
     assert sa.analyse(str(tmp_path))['published_split'] == out
+
+
+def test_published_split_analysis_of_sofc_exp_and_a_method(tmp_path):
+    """SOFC-Exp's official split (week 6): plain MatSciBERT and the CRF head against the
+    published MatSciBERT-CRF scores, and DeBERTa-v3-large against the CRF head by seed."""
+    pytest.importorskip('scipy')
+    pytest.importorskip('seqeval')
+    gold = ['B-X O', 'O B-X']
+
+    def runs(shift, ids=range(10)):
+        out = []
+        for j in ids:
+            run = _run(f'seed{100 * j}', 80 + shift + j / 10)
+            run.update({'test_index': [0, 1], 'test_gold': gold, 'test_pred': gold})
+            out.append(run)
+        return {'runs': out}
+    for variant, shift in (('', 0), ('_crf', 4.4), ('_crf_deberta', 5.4)):
+        (tmp_path / f'ner_results_sofc_published_split{variant}.json').write_text(
+            json.dumps(runs(shift)))
+    out = sa.published_split(tmp_path)
+    assert list(out) == ['sofc']
+    sofc = out['sofc']
+    assert (sofc['published'], sofc['published_macro']) == (84.77, 82.39)
+    assert sofc['crf']['micro']['mean'] == 84.85 and sofc['crf']['published_lies'] == 'within'
+    assert sofc['baseline']['published_lies'] == 'above'           # 84.77 above 80.45's CI
+    deberta = sofc['methods']['crf_deberta']
+    assert deberta['micro']['mean'] == 85.85 and deberta['n_pairs'] == 10
+    assert deberta['minus_crf']['micro']['mean_diff'] == 1.0
+    assert 'crf_ctx' not in sofc['methods']
+    # a method with fewer seeds is paired on the seeds both have
+    (tmp_path / 'ner_results_sofc_published_split_crf_ctx.json').write_text(
+        json.dumps(runs(3.4, ids=range(3))))
+    ctx = sa.published_split(tmp_path)['sofc']['methods']['crf_ctx']
+    assert ctx['n_pairs'] == 3 and ctx['minus_crf']['micro']['mean_diff'] == -1.0
+    # week 7: the consistency rule on the CRF head's predictions, paired in the same way
+    (tmp_path / 'ner_results_sofc_published_split_crf_dc.json').write_text(
+        json.dumps(runs(4.9)))
+    methods = sa.published_split(tmp_path)['sofc']['methods']
+    assert list(methods) == ['crf_deberta', 'crf_ctx', 'crf_dc']
+    assert methods['crf_dc']['minus_crf']['micro']['mean_diff'] == 0.5
+    # week 7, part 2a: recall calibration, its bias chosen on the validation articles
+    (tmp_path / 'ner_results_sofc_published_split_crf_ebv.json').write_text(
+        json.dumps(runs(5.4)))
+    methods = sa.published_split(tmp_path)['sofc']['methods']
+    assert list(methods)[-1] == 'crf_ebv' and methods['crf_ebv']['minus_crf']['micro'][
+        'mean_diff'] == 1.0
+
+
+def test_published_split_of_sofc_exp_slots_and_multi_task(tmp_path):
+    """Week 7, part 2d: SOFC-Exp's slot level against the published SOFC-Slot scores, and
+    multi-task training against the CRF head, paired by seed and, for its votes over the seed
+    triples, by triple."""
+    pytest.importorskip('scipy')
+    pytest.importorskip('seqeval')
+    gold = ['B-anode_material O', 'O B-working_temperature']
+    miss = ['B-anode_material O', 'O O']
+
+    def runs(shift, pred):
+        out = []
+        for j in range(10):
+            run = _run(f'seed{100 * j}', 70 + shift + j / 10)
+            run.update({'test_index': [0, 1], 'test_gold': gold, 'test_pred': pred})
+            out.append(run)
+        return {'runs': out}
+    for variant, shift, pred in (('', 0, gold), ('_crf', 2, gold), ('_crf_mt', 3, miss)):
+        (tmp_path / f'ner_results_sofc_slot_published_split{variant}.json').write_text(
+            json.dumps(runs(shift, pred)))
+    slot = sa.published_split(tmp_path)['sofc_slot']
+    assert (slot['published'], slot['published_macro']) == (72.85, 65.35)
+    assert slot['crf']['published_lies'] == 'above'           # 72.85 above 72.45's CI
+    mt = slot['methods']['crf_mt']
+    assert mt['n_pairs'] == 10 and mt['minus_crf']['micro']['mean_diff'] == 1.0
+    # every CRF vote finds both entities; every multi-task vote one of the two
+    assert slot['crf_votes']['micro']['mean'] == 100.0
+    assert mt['votes']['micro']['mean'] == pytest.approx(66.67, abs=0.01)
+    assert mt['votes_minus_crf_votes']['micro']['mean_diff'] == pytest.approx(-33.33, abs=0.01)
+    assert len(mt['votes_minus_crf_votes']['micro']['per_run']) == 3
+    # per type, the most frequent first, every system's mean F1 over its seeds
+    assert slot['types'] == {'MAT': {'support': 10, 'baseline': 100.0, 'crf': 100.0,
+                                     'crf_mt': 100.0},
+                             'PRO': {'support': 2, 'baseline': 50.0, 'crf': 50.0,
+                                     'crf_mt': 50.0}}
+    # the other methods are not voted
+    (tmp_path / 'ner_results_sofc_slot_published_split_crf_ebv.json').write_text(
+        json.dumps(runs(2.5, gold)))
+    assert 'votes' not in sa.published_split(tmp_path)['sofc_slot']['methods']['crf_ebv']
+
+
+def test_split_types_mean_f1_per_type_and_system():
+    """Per type of a published split: the support and each system's mean F1 over its seeds;
+    a type that only a prediction has (support 0) is left out."""
+    def runs(*f1s):
+        return {f'seed{100 * j}': _run(f'seed{100 * j}', 70, {'MAT': (f, 3), 'PRO': (0.5, 7),
+                                                               'XYZ': (0.0, 0)})
+                for j, f in enumerate(f1s)}
+    types = sa.split_types({'crf': runs(0.6, 0.8), 'crf_mt': runs(0.9, 0.9, 0.6)})
+    assert list(types) == ['PRO', 'MAT']
+    assert types['MAT'] == {'support': 3, 'crf': 70.0, 'crf_mt': 80.0}
+    assert types['PRO'] == {'support': 7, 'crf': 50.0, 'crf_mt': 50.0}
+
+
+def test_retokenized_test_of_sofc_exp(tmp_path):
+    """Week 7, part 2e: the CRF head and plain MatSciBERT scored on the retokenized test
+    articles, each against the same model on the released test articles, paired by seed."""
+    pytest.importorskip('scipy')
+
+    pytest.importorskip('seqeval')
+    gold = ['B-MATERIAL O', 'O B-VALUE']
+
+    def runs(shift):
+        out = []
+        for j in range(10):
+            run = _run(f'seed{100 * j}', 80 + shift + j / 10)
+            run.update({'test_index': [0, 1], 'test_gold': gold, 'test_pred': gold})
+            out.append(run)
+        return {'runs': out}
+    for variant, shift in (('', 0), ('_crf', 1), ('_crf_cdetest', 1.5), ('_cdetest', 0.25)):
+        (tmp_path / f'ner_results_sofc_published_split{variant}.json').write_text(
+            json.dumps(runs(shift)))
+    sofc = sa.published_split(tmp_path)['sofc']
+    crf = sofc['methods']['crf_cdetest']
+    assert crf['n_pairs'] == 10 and crf['minus_crf']['micro']['mean_diff'] == 0.5
+    plain = sofc['baseline_retokenized_test']
+    assert plain['n_pairs'] == 10 and plain['minus_baseline']['micro']['mean_diff'] == 0.25
+    # per type, only the runs on the released test articles
+    assert set(sofc['types']['MAT']) == {'support', 'baseline', 'crf'}
+
+
+def test_week6_type_differences_pair_seeds_and_papers(tmp_path, capsys):
+    """Per entity type, a week-6 method against the CRF head on the held-out papers, paired by
+    seed offset and paper over the pairs whose test set has the type (reported alongside the
+    week-6 decisions, no decision); a method missing a seed is left out."""
+    pytest.importorskip('scipy')
+
+    def write(system, classes):
+        for j, name in enumerate(ns.file_names('fine', 'leave_one_paper_out', system,
+                                               {system: ns.seed_family(system)})):
+            runs = [_run(p, 70, classes(j, p)) for p in ('p1', 'p2')]
+            (tmp_path / name).write_text(json.dumps({'runs': runs}))
+    # PRO is predicted on p2 but absent from its test set: no pair there
+    write('crf', lambda j, p: ({'MAT': (0.8 - j / 100, 10), 'PRO': (0.5, 2)} if p == 'p1' else
+                               {'MAT': (0.6, 20), 'PRO': (0.0, 0)}))
+    write('crf_ctx', lambda j, p: ({'MAT': (0.9 - j / 100, 10), 'PRO': (0.75, 2)} if p == 'p1'
+                                   else {'MAT': (0.6, 20), 'PRO': (0.5, 0)}))
+    write('crf_deberta', lambda j, p: {'MAT': (0.5, 10)})
+    (tmp_path / ns.file_names('fine', 'leave_one_paper_out', 'crf_deberta',
+                              {'crf_deberta': ns.seed_family('crf_deberta')})[9]).unlink()
+    out = sa.week6_type_differences(tmp_path)
+    assert list(out) == ['fine'] and list(out['fine']) == ['crf_ctx']
+    mat, pro = out['fine']['crf_ctx'].values()
+    assert list(out['fine']['crf_ctx']) == ['MAT', 'PRO']          # most frequent first
+    assert mat == {'crf': 67.75, 'method': 72.75, 'diff': 5.0, 'n_splits': 2,
+                   'support_per_split': 15.0}
+    assert pro == {'crf': 50.0, 'method': 75.0, 'diff': 25.0, 'n_splits': 1,
+                   'support_per_split': 2.0}
+    assert sa.main(['--results', str(tmp_path)])['week6_types'] == out
+    assert 'crf_ctx, fine-grained, per type' in capsys.readouterr().out
+
+
+def test_type_differences_cover_multi_task_and_mention_replacement(tmp_path):
+    """Multi-task training (whose seed 0 has no m0 tag) and mention replacement are compared
+    per type with the CRF head as the week-6 methods are."""
+    pytest.importorskip('scipy')
+
+    def write(system, family, f1):
+        for name in ns.file_names('fine', 'leave_one_paper_out', system, {system: family}):
+            (tmp_path / name).write_text(json.dumps(
+                {'runs': [_run(p, 70, {'MAT': (f1, 10)}) for p in ('p1', 'p2')]}))
+    write('crf', ns.WEEK5_SYSTEMS['crf'], 0.5)
+    write('crf_mt', ns.WEEK5_SYSTEMS['crf_mt'], 0.6)
+    write('crf_mr', ns.seed_family('crf_mr'), 0.75)
+    out = sa.week6_type_differences(tmp_path)['fine']
+    assert list(out) == ['crf_mt', 'crf_mr']
+    assert out['crf_mt']['MAT']['diff'] == 10.0 and out['crf_mr']['MAT']['diff'] == 25.0
+
+
+def test_error_kinds_of_the_crf_head():
+    """Each gold entity is correct, missed (no overlapping prediction), of the right span and
+    the wrong type, or a boundary error (of the right or of another type); each prediction
+    without any overlapping gold entity is spurious."""
+    gold = ['B-A I-A O B-B O B-A O B-B I-B O B-A', 'O O']
+    pred = ['B-A I-A O B-A O O O B-B O O O', 'B-A O']
+    out = sa.error_kinds([{'runs': [{'test_gold': gold, 'test_pred': pred}]}])
+    # gold: A(0,2) correct, B(3,4) wrong type, A(5,6) missed, B(7,9) boundary, A(10,11) missed
+    assert out == {'n_gold': 5, 'n_pred': 4, 'correct': 0.2, 'missed': 0.4, 'wrong_type': 0.2,
+                   'boundary': 0.2, 'boundary_and_type': 0.0, 'spurious': 0.25}
+
+
+@pytest.mark.filterwarnings('ignore:Precision is ill-defined')      # a vote of all O
+@pytest.mark.filterwarnings('ignore:Recall is ill-defined')
+def test_sofc_splits_random_against_article_folds(tmp_path):
+    """Week 8, part 1: the CRF head's 10-seed means per split on both protocols, its votes,
+    and the gap. Seeds with an even index tag the entity, odd ones miss it."""
+    pytest.importorskip('scipy')
+    for protocol, base, name in (('random_split_vary', 85, 'seed'),
+                                 ('document_folds', 80, 'fold')):
+        for j, off in enumerate(range(0, 1000, 100)):
+            runs = []
+            for k in range(5):
+                run = _run(f'{name}{k}', base + k + j / 10)
+                run.update({'test_index': [0], 'test_gold': ['B-MAT O'],
+                            'test_pred': ['B-MAT O' if j % 2 == 0 else 'O O']})
+                runs.append(run)
+            (tmp_path / f'ner_results_sofc_{protocol}_crf_m{off}.json').write_text(
+                json.dumps({'runs': runs}))
+    out = sa.sofc_splits(tmp_path)
+    assert out['random_split_vary']['micro']['mean'] == 87.45     # 85 + 2 + 0.45
+    assert out['document_folds']['micro']['mean'] == 82.45 and out['gap']['micro'] == 5.0
+    assert out['document_folds']['n_splits'] == 5
+    # triples 0-200 and 600-800 have 2 seeds that tag it, 300-500 one: votes 100, 0, 100
+    assert out['random_split_vary']['crf_votes']['micro']['mean'] == pytest.approx(66.67)
+    (tmp_path / 'ner_results_sofc_document_folds_crf_m900.json').unlink()
+    assert set(sa.sofc_splits(tmp_path)) == {'random_split_vary'}
+
+
+def test_sofc_draws_mention_replacement_on_ten_articles(tmp_path):
+    """Week 9, part 2: per draw the 10-seed means of the CRF head and mention replacement,
+    their difference over the 5 draws, and the CRF head on 10 articles against all 26."""
+    pytest.importorskip('scipy')
+    for j, off in enumerate(range(0, 1000, 100)):
+        for system, gain in (('crf', 0.0), ('crf_mr', 2.0)):
+            runs = [_run(f'draw{k}', 70 + k + j / 10 + gain + (k % 2) / 2) for k in range(5)]
+            (tmp_path / f'ner_results_sofc_article_draws_{system}_m{off}.json').write_text(
+                json.dumps({'runs': runs}))
+    official = [_run(f'seed{off}', 80 + j / 10) for j, off in enumerate(range(0, 1000, 100))]
+    (tmp_path / 'ner_results_sofc_published_split_crf.json').write_text(
+        json.dumps({'runs': official}))
+    out = sa.sofc_draws(tmp_path)
+    assert out['n_draws'] == 5 and out['passes']
+    assert out['crf']['micro']['mean'] == 72.65                  # 70 + 2 + 0.45 + 0.2
+    assert out['crf_mr_minus_crf']['micro']['mean_diff'] == 2.0
+    assert out['crf_mr_minus_crf']['micro']['per_run'] == [2.0] * 5
+    # per seed: the mean over the draws (72.2 + j / 10) minus the official run (80 + j / 10)
+    assert out['ten_minus_all_articles']['mean_diff'] == -7.8
+    (tmp_path / 'ner_results_sofc_article_draws_crf_mr_m900.json').unlink()
+    assert sa.sofc_draws(tmp_path) == {}
+
+
+def test_mulms_held_out_subfields_and_pool_splits(tmp_path):
+    """Week 10: per held-out subfield the 10-seed means of the CRF head and mention
+    replacement (decision 1), their votes over the seed triples (decision 2), the CRF head on
+    the random pool splits and the gap. The CRF seeds with an even index tag the entity, odd
+    ones miss it; mention replacement always tags it."""
+    pytest.importorskip('scipy')
+    subfields = ['alpha', 'beta', 'gamma', 'delta', 'eps', 'zeta', 'eta']
+    for j, off in enumerate(range(0, 1000, 100)):
+        for system, gain in (('crf', 0.0), ('crf_mr', 1.0)):
+            runs = []
+            for k, name in enumerate(subfields):
+                run = _run(name, 50 + k + j / 10 + gain + (k % 2) / 2)
+                hit = system == 'crf_mr' or j % 2 == 0
+                run.update({'test_index': [0], 'test_gold': ['B-MAT O'],
+                            'test_pred': ['B-MAT O' if hit else 'O O']})
+                runs.append(run)
+            (tmp_path / f'ner_results_mulms_leave_one_subfield_out_{system}_m{off}.json'
+             ).write_text(json.dumps({'runs': runs}))
+        pool = [_run(f'seed{k}', 70 + k + j / 10) for k in range(5)]
+        for run in pool:
+            run.update({'test_index': [0], 'test_gold': ['B-MAT O'],
+                        'test_pred': ['B-MAT O' if j % 2 == 0 else 'O O']})
+        (tmp_path / f'ner_results_mulms_random_split_pool_crf_m{off}.json').write_text(
+            json.dumps({'runs': pool}))
+    out = sa.mulms(tmp_path)
+    held = out['leave_one_subfield_out']
+    assert held['n_subfields'] == 7 and held['passes']
+    assert held['crf_mr_minus_crf']['micro']['per_run'] == [1.0] * 7
+    assert held['subfields']['alpha'] == {'crf': 50.45, 'crf_mr': 51.45}
+    # CRF votes: triples 0-200 and 600-800 have 2 seeds that tag it, 300-500 one
+    assert held['votes']['crf']['micro']['mean'] == pytest.approx(66.67)
+    assert held['votes']['crf_mr']['micro']['mean'] == 100.0 and held['votes']['passes']
+    assert out['random_split_pool']['micro']['mean'] == 72.45
+    assert out['random_split_pool']['n_splits'] == 5
+    assert out['random_split_pool']['crf_votes']['micro']['mean'] == pytest.approx(66.67)
+    assert out['gap']['micro'] == round(72.45 - held['crf']['micro']['mean'], 2)
+    assert 'silver_names' not in out
+    # week 11: crf_mrs gains 0.5 over mention replacement on every subfield
+    for j, off in enumerate(range(0, 1000, 100)):
+        runs = []
+        for k, name in enumerate(subfields):
+            run = _run(name, 50 + k + j / 10 + 1.5 + (k % 2) / 2)
+            run.update({'test_index': [0], 'test_gold': ['B-MAT O'], 'test_pred': ['B-MAT O'],
+                        'self_training': {'names': {'n_test_unseen': 10,
+                                                    'n_test_unseen_in_silver': k}}})
+            runs.append(run)
+        (tmp_path / f'ner_results_mulms_leave_one_subfield_out_crf_mrs_m{off}.json'
+         ).write_text(json.dumps({'runs': runs}))
+    names = sa.mulms(tmp_path)['silver_names']
+    assert names['n_subfields'] == 7 and names['subfields']['alpha'] == 51.95
+    assert names['minus_crf']['micro']['per_run'] == [1.5] * 7 and names['decision_1']
+    assert names['minus_crf_mr']['micro']['per_run'] == [0.5] * 7 and names['decision_2']
+    assert names['votes']['minus_crf']['micro']['mean_diff'] == pytest.approx(33.33)
+    assert names['votes']['minus_crf_mr']['micro']['mean_diff'] == 0.0
+    assert names['unseen_in_silver'] == round(sum(range(7)) / 70, 3)
+    assert 'week12' not in sa.mulms(tmp_path)
+    # week 12: a topic-name variant screened on 3 seeds (gains 2 over the CRF head, with the
+    # mention-level filter), and 6 copies on all 10 seeds (0.3 over the CRF head, no teachers)
+    for j, off in enumerate(range(0, 1000, 100)):
+        variants = [('crf_mr6', 0.3)] + ([('crf_mrm_topic', 2.0)] if off <= 200 else [])
+        for system, gain in variants:
+            runs = []
+            for k, name in enumerate(subfields):
+                run = _run(name, 50 + k + j / 10 + gain + (k % 2) / 2)
+                run.update({'test_index': [0], 'test_gold': ['B-MAT O'], 'test_pred': ['B-MAT O']})
+                if system == 'crf_mrm_topic':
+                    run['self_training'] = {'silver_filter': 'mentions', 'names': {
+                        'n_test_unseen': 10, 'n_test_unseen_in_silver': 2 * k}}
+                runs.append(run)
+            (tmp_path / f'ner_results_mulms_leave_one_subfield_out_{system}_m{off}.json'
+             ).write_text(json.dumps({'runs': runs}))
+    week12 = sa.mulms(tmp_path)['week12']
+    assert set(week12) == {'crf_mr6', 'crf_mrm_topic'}
+    assert set(week12['crf_mrm_topic']) == {'screen'}       # seeds 0-200 only
+    screen = week12['crf_mrm_topic']['screen']
+    assert screen['seeds'] == [0, 100, 200] and screen['n_subfields'] == 7
+    assert screen['minus_crf']['micro']['per_run'] == [2.0] * 7
+    assert screen['minus_crf_mr']['micro']['per_run'] == [1.0] * 7
+    assert 'decision_1' not in screen and 'decision_2' not in screen
+    assert screen['subfields']['alpha'] == 52.1                      # 50 + 0.1 (seeds 0-200) + 2
+    assert screen['silver_filter'] == 'mentions' and screen['unseen_in_silver'] == 0.6
+    # the screen's votes: the triple 0-200 only, where 2 of the 3 CRF seeds tag the entity
+    assert screen['votes']['minus_crf']['micro']['mean_diff'] == 0.0
+    six = week12['crf_mr6']
+    assert set(six) == {'screen', 'decision', 'ten_seeds'}
+    decision = six['decision']
+    assert decision['seeds'] == list(range(300, 1000, 100))
+    assert (decision['decision_1'], decision['decision_2']) == (True, False)
+    assert decision['minus_crf_mr']['micro']['per_run'] == [-0.7] * 7
+    assert decision['subfields']['alpha'] == 50.9                    # 50 + 0.6 (seeds 300-900) + 0.3
+    assert six['ten_seeds']['subfields']['alpha'] == 50.75 and 'decision_1' not in six['ten_seeds']
+    assert 'names' not in decision and 'silver_filter' not in decision
+    (tmp_path / 'ner_results_mulms_leave_one_subfield_out_crf_mr_m900.json').unlink()
+    out = sa.mulms(tmp_path)          # each part needs the references at its offsets only
+    assert set(out) == {'random_split_pool', 'week12'}
+    assert {v: set(parts) for v, parts in out['week12'].items()} == {
+        'crf_mrm_topic': {'screen'}, 'crf_mr6': {'screen'}}
+
+
+def test_paper_count_compares_two_and_three_training_papers(tmp_path):
+    """A third training paper: per held-out paper, F1 trained on 2 papers (the inner folds'
+    counts at D = 0) against F1 trained on 3 (leave-one-paper-out), over the 4 papers."""
+    pytest.importorskip('scipy')
+    papers = ['a.conll', 'b.conll', 'c.conll', 'd.conll']
+    for off in (0, 100, 200):
+        folds = [{'run_id': f'{p}+{q}', 'bias_test': {'0': {p: [4, 10, 10], q: [5, 10, 10]}}}
+                 for p, q in itertools.combinations(papers, 2)]
+        (tmp_path / f'ner_results_fine_leave_two_papers_out_crf_bias_m{off}.json').write_text(
+            json.dumps({'runs': folds}))
+        lopo = [_run(p, 50.0 + 10 * k) for k, p in enumerate(papers)]
+        (tmp_path / f'ner_results_fine_leave_one_paper_out_crf_m{off}.json').write_text(
+            json.dumps({'runs': lopo}))
+    out = sa.paper_count(tmp_path)
+    assert set(out) == {'fine'}
+    # paper a is the first of its 3 pairs (F1 40 each time), d the second (50); b is first
+    # in 2 of its pairs (40, 40, 50), c in 1 (50, 50, 40)
+    assert {p: r['two'] for p, r in out['fine']['papers'].items()} == {
+        'a.conll': 40.0, 'b.conll': 43.33, 'c.conll': 46.67, 'd.conll': 50.0}
+    assert out['fine']['papers']['a.conll'] == {'two': 40.0, 'three': 50.0, 'n_two': 9,
+                                                'n_three': 3}
+    assert out['fine']['three']['mean'] == 65.0
+    assert out['fine']['three_minus_two']['mean_diff'] == pytest.approx(65.0 - 45.0)
+
+
+def test_paper_diversity_three_papers_at_the_size_of_two(tmp_path):
+    """Week 8, part 2: per held-out paper, two papers (inner folds), three papers at the size
+    of two (crf_p3n2, folds P|Q+R) and three papers; diversity and size over the 4 papers."""
+    pytest.importorskip('scipy')
+    papers = ['a.conll', 'b.conll', 'c.conll', 'd.conll']
+    for off in (0, 100, 200):
+        folds = [{'run_id': f'{p}+{q}', 'bias_test': {'0': {p: [4, 10, 10], q: [4, 10, 10]}}}
+                 for p, q in itertools.combinations(papers, 2)]           # F1 40 everywhere
+        (tmp_path / f'ner_results_fine_leave_two_papers_out_crf_bias_m{off}.json').write_text(
+            json.dumps({'runs': folds}))
+        sized = [_run(f"{p}|{'+'.join(pair)}", 45.0 + k)
+                 for k, p in enumerate(papers)
+                 for pair in itertools.combinations([q for q in papers if q != p], 2)]
+        (tmp_path / f'ner_results_fine_leave_one_paper_out_crf_p3n2_m{off}.json').write_text(
+            json.dumps({'runs': sized}))
+        full = [_run(p, 50.0 + 2 * k) for k, p in enumerate(papers)]
+        (tmp_path / f'ner_results_fine_leave_one_paper_out_crf_m{off}.json').write_text(
+            json.dumps({'runs': full}))
+    out = sa.paper_diversity(tmp_path)
+    assert set(out) == {'fine'}
+    assert out['fine']['papers']['b.conll'] == {'two': 40.0, 'three_at_two': 46.0,
+                                                'three': 52.0}
+    assert out['fine']['diversity']['mean_diff'] == 6.5           # 45 to 48 against 40
+    assert out['fine']['size']['mean_diff'] == 6.5                # 50 to 56 against 45 to 48
+    assert out['fine']['diversity']['passes']
+    (tmp_path / 'ner_results_fine_leave_one_paper_out_crf_p3n2_m200.json').write_text(
+        json.dumps({'runs': sized[:-1]}))                         # a pair missing: left out
+    assert sa.paper_diversity(tmp_path) == {}

@@ -1,0 +1,3973 @@
+{
+  "script": "src/graph/build_topic_corpus.py",
+  "protocol": "docs/ROADMAP.md \u00a74, week 12: mention replacement with names from in-topic text",
+  "topic": "steel",
+  "selection": {
+    "source": "Europe PMC REST API",
+    "search_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+    "fulltext_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/{pmcid}/fullTextXML",
+    "result_type": "core",
+    "topic": "steel",
+    "query": "OPEN_ACCESS:y AND HAS_FT:y AND TITLE:(\"steel\" OR \"steels\" OR \"stainless\" OR \"martensitic\" OR \"austenitic\" OR \"bainitic\" OR \"ferritic\")",
+    "title_terms": [
+      "steel",
+      "steels",
+      "stainless",
+      "martensitic",
+      "austenitic",
+      "bainitic",
+      "ferritic"
+    ],
+    "exclude_title_terms": [
+      "author correction",
+      "correction",
+      "erratum",
+      "corrigendum",
+      "retraction"
+    ],
+    "excluded_pmcids": [
+      "PMC3990421",
+      "PMC4772004",
+      "PMC5700654",
+      "PMC6247067",
+      "PMC6418911",
+      "PMC6631236",
+      "PMC6650920",
+      "PMC7180721",
+      "PMC7231364",
+      "PMC7254350",
+      "PMC7361982",
+      "PMC7435395",
+      "PMC7529785",
+      "PMC7532522",
+      "PMC7590506",
+      "PMC7766479"
+    ],
+    "local_filters": [
+      "a PMCID",
+      "not one of MuLMS's articles",
+      "language eng",
+      "a title term in the title",
+      "no exclusion term in the title"
+    ],
+    "order": "PMCIDs sorted as strings, then random.Random(0).shuffle",
+    "superscripts": "inline, as in the SOFC corpus",
+    "words": "chem_tokenize.ChemWordTokenizer (ChemDataExtractor 1.3.0), then ASCII hyphens inside a word made words of their own, space-separated"
+  },
+  "settings": {
+    "seed": 0,
+    "target_pool": 60000,
+    "max_sentences": 40000,
+    "chunk": 10,
+    "min_words": 5,
+    "max_words": 120,
+    "min_alpha_fraction": 0.5,
+    "max_inline_formula_chars": 30,
+    "ngram": 8,
+    "language": "eng",
+    "page_size": 500,
+    "min_request_interval_seconds": 0.25,
+    "timeout_seconds": 60,
+    "retries": 4,
+    "backoff_seconds": 2.0,
+    "abbreviations": [
+      "approx",
+      "at",
+      "ca",
+      "cf",
+      "eq",
+      "eqs",
+      "fig",
+      "figs",
+      "no",
+      "nos",
+      "pp",
+      "ref",
+      "refs",
+      "resp",
+      "sec",
+      "sect",
+      "vol",
+      "vs",
+      "wt",
+      "et al"
+    ],
+    "dotted_abbreviations": "(?:[A-Za-z]{1,2}\\.)+[A-Za-z]{1,2}",
+    "skipped_sections": "^[\\d.\\s]*(acknowledg|funding|conflicts? of interest|competing interests?|author contributions?|data availability|availability of data|ethic|abbreviations|nomenclature|supplementary|references|declarations?|disclosure)",
+    "splitter": "build_fatigue_corpus.split_sentences"
+  },
+  "counts": {
+    "hits": 7994,
+    "api_hit_count": 7994,
+    "hits_rejected": 99,
+    "eligible_articles": 7895,
+    "articles_used": 310,
+    "articles_downloaded": 309,
+    "failed_downloads": 0,
+    "articles_without_text": 1,
+    "target_reached": true,
+    "paragraphs": 13523,
+    "raw_sentences": 63926,
+    "cut_by_formula": 2758,
+    "length_filtered": 594,
+    "length_filtered_by": {
+      "too_short": 516,
+      "too_long": 11,
+      "non_alphabetic": 67
+    },
+    "after_length_filter": 60574,
+    "duplicates_dropped": 148,
+    "overlap_dropped": 341,
+    "pool": 60080,
+    "kept": 40000,
+    "shingle_dropped": 5,
+    "articles_dropped_by_shingles": 0
+  },
+  "rejected_by_reason": {
+    "title_term:correction": 37,
+    "title_term:retraction": 18,
+    "no_pmcid": 5,
+    "title_term:author correction": 21,
+    "title_term:corrigendum": 6,
+    "not_english": 2,
+    "title_term:erratum": 4,
+    "mulms_article": 3,
+    "no_title_term": 3
+  },
+  "excluded_by_title": [
+    {
+      "pmcid": "PMC13334531",
+      "term": "correction",
+      "title": "Correction: Evaluation of novel multifunctional polymeric Schiff bases as anticorrosive agents for the medical grade 316L stainless steel."
+    },
+    {
+      "pmcid": "PMC12630048",
+      "term": "retraction",
+      "title": "Evaluation and Comparison of Rate of Canine Retraction Between Titanium Dioxide Nanocoated Stainless Steel Archwire Segments and Uncoated Stainless Steel Archwire Segments: An In Vivo Split Mouth Study."
+    },
+    {
+      "pmcid": "PMC13613867",
+      "term": "retraction",
+      "title": "Retraction of \"Research on the Effects of Environmentally Friendly Additives on Mild Steel Electroless Plating\"."
+    },
+    {
+      "pmcid": "PMC12405481",
+      "term": "retraction",
+      "title": "Retraction Note: Investigation of laser factors influence on strength of laser spot welding of 316 stainless steel using the designing experiments method."
+    },
+    {
+      "pmcid": "PMC13354791",
+      "term": "correction",
+      "title": "Correction: Hybrid intelligent RSM-ANN modeling and optimization of precision turning of CK45 steel for calibration devices."
+    },
+    {
+      "pmcid": "PMC11272636",
+      "term": "correction",
+      "title": "Maintenance of acetabular correction following PAO: a multicenter study comparing stainless-steel and titanium screws."
+    },
+    {
+      "pmcid": "PMC13608258",
+      "term": "correction",
+      "title": "Correction: Youssef et al. The Influences of Nb Microalloying and Grain Refinement Thermal Cycling on Microstructure and Tribological Properties of Armor Steel. Materials 2023, 16, 7485."
+    },
+    {
+      "pmcid": "PMC13009145",
+      "term": "retraction",
+      "title": "Retraction Note: Verbena officinalis (VO) leaf extract as an anti-corrosion inhibitor for carbon steel in acidic environment."
+    },
+    {
+      "pmcid": "PMC12812156",
+      "term": "author correction",
+      "title": "Author Correction: Experimental and numerical study on flexural behavior of steel fiber reinforced high-strength concrete (SFRHC) beams."
+    },
+    {
+      "pmcid": "PMC13048412",
+      "term": "retraction",
+      "title": "Retraction: Sulfate activation of wheat straw ash to enhance the properties of high-performance concrete with recycled aggregates and waste tire steel fibers."
+    },
+    {
+      "pmcid": "PMC11466911",
+      "term": "correction",
+      "title": "Correction: Microstructural, mechanical, and electrochemical analysis of carbon doped AISI carbon steels."
+    },
+    {
+      "pmcid": "PMC12343863",
+      "term": "retraction",
+      "title": "Retraction Note: Electrochemical and hot corrosion behaviour of annealed AlCoCrFeNi HEA coating over steel."
+    },
+    {
+      "pmcid": "PMC12147092",
+      "term": "retraction",
+      "title": "Retraction: Application of magnetite nano-hybrid epoxy as protective marine coatings for steel."
+    },
+    {
+      "pmcid": "PMC13258382",
+      "term": "correction",
+      "title": "Correction: Li et al. Effect of Interlayer Temperature-Controlled Thermal Cycling on the Microstructure and Mechanical Properties of Wire Arc Directed Energy Deposition H13 Steel. Materials 2026, 19, 111."
+    },
+    {
+      "pmcid": "PMC13413048",
+      "term": "correction",
+      "title": "Correction: Rothen-Chaja et al. The Effect of In Situ Heat Treatment on the Microstructure and Mechanical Properties of H13 Tool Steel Specimens Produced by Laser-Engineered Net Shaping (LENS\u00ae). Materials 2025, 18, 5164."
+    },
+    {
+      "pmcid": "PMC10579232",
+      "term": "correction",
+      "title": "Thermal-structural hybrid Lagrangian solver and numerical simulation-based correction of shape deformation of stainless-steel parts produced by laser powder bed fusion."
+    },
+    {
+      "pmcid": "PMC12412314",
+      "term": "retraction",
+      "title": "Statement of Retraction: Electrochemical and hot corrosion behaviour of steel reinforced with AlSiBeTiV high entropy alloy using friction stir processing."
+    },
+    {
+      "pmcid": "PMC8595728",
+      "term": "author correction",
+      "title": "Author Correction: Microscale residual stresses in additively manufactured stainless steel."
+    },
+    {
+      "pmcid": "PMC12941402",
+      "term": "correction",
+      "title": "Correction: Adamczak-Bugno et al. Evaluation of the Effect of Temperature (20-700 \u00b0C) on the Properties of Prestressing Steel Using AE Signals and FEM Analysis. Materials 2026, 19, 23."
+    },
+    {
+      "pmcid": "PMC12324122",
+      "term": "retraction",
+      "title": "Retraction: A hybrid PSO-FFNN approach for optimized seismic design and accurate structural response prediction in steel moment-resisting frames."
+    },
+    {
+      "pmcid": "PMC9674937",
+      "term": "retraction",
+      "title": "Stainless steel vs. titanium miniscrew implants: Evaluation of stability during retraction of maxillary and mandibular anterior teeth."
+    },
+    {
+      "pmcid": "PMC12032305",
+      "term": "author correction",
+      "title": "Author Correction: Experimental and theoretical investigation of cyclohexanone derivative (CHD) as a corrosion inhibitor for mild steel in 1 M HCl."
+    },
+    {
+      "pmcid": "PMC12132023",
+      "term": "retraction",
+      "title": "Retraction of \"New Epoxy and Hardener System Based on an Imidazolium Ionic Liquid as an Anticorrosive Coating for Steel in the Marine Environment\"."
+    },
+    {
+      "pmcid": "PMC12153690",
+      "term": "retraction",
+      "title": "Retraction: Experimental and surface morphological studies of corrosion inhibition on carbon steel in HCl solution using some new hydrazide derivatives."
+    },
+    {
+      "pmcid": "PMC12159724",
+      "term": "retraction",
+      "title": "Retraction: Effectiveness of some novel heterocyclic compounds as corrosion inhibitors for carbon steel in 1 M HCl using practical and theoretical methods."
+    },
+    {
+      "pmcid": "PMC12565715",
+      "term": "correction",
+      "title": "Correction: Wang et al. Comparison of Microstructure and Mechanical Properties of Ultra-Narrow Gap-Welded and Submerged Arc-Welded Q355E HSLA Steel. Materials 2025, 18, 2805."
+    },
+    {
+      "pmcid": "PMC11511903",
+      "term": "author correction",
+      "title": "Author Correction: Electrochemical and hot corrosion behaviour of annealed AlCoCrFeNi HEA coating over steel."
+    },
+    {
+      "pmcid": "PMC11231269",
+      "term": "author correction",
+      "title": "Author Correction: Ballistic analysis of high-performance armor steel by numerical simulation."
+    },
+    {
+      "pmcid": "PMC10935231",
+      "term": "correction",
+      "title": "Correction: Li et al. Numerical Study on the Axial Compressive Behavior of Steel-Tube-Confined Concrete-Filled Steel Tubes. Materials 2024, 17, 155."
+    },
+    {
+      "pmcid": "PMC10052372",
+      "term": "retraction",
+      "title": "Retraction: Investigation of anticorrosive, antibacterial and in vitro biological properties of a sulphonated poly(etheretherketone)/strontium, cerium co-substituted hydroxyapatite composite coating developed on surface treated surgical grade stainless steel for orthopedic applications."
+    },
+    {
+      "pmcid": "PMC11574048",
+      "term": "correction",
+      "title": "Publisher Correction: Synergistic inhibition effect of Chlorella sp. and benzotriazole on the corrosion of Q235 carbon steel in alkaline artificial seawater."
+    },
+    {
+      "pmcid": "PMC11676892",
+      "term": "correction",
+      "title": "Correction: Sulfate activation of wheat straw ash to enhance the properties of high-performance concrete with recycled aggregates and waste tire steel fibers."
+    },
+    {
+      "pmcid": "PMC11125553",
+      "term": "correction",
+      "title": "Study on uneven settlement and correction of steel frame structures based on numerical simulation method."
+    },
+    {
+      "pmcid": "PMC9147159",
+      "term": "correction",
+      "title": "Correction: P\u00e9rez et al. Use of Nanotechnology to Mitigate Biofouling in Stainless Steel Devices Used in Food Processing, Healthcare, and Marine Environments. Toxics 2022, 10, 35."
+    },
+    {
+      "pmcid": "PMC5787701",
+      "term": "corrigendum",
+      "title": "Corrigendum: Dislocation Strengthening without Ductility Trade-off in Metastable Austenitic Steels."
+    },
+    {
+      "pmcid": "PMC11630296",
+      "term": "correction",
+      "title": "Correction to: Observation and quantitative analysis of dislocations in steel using electron channeling contrast imaging method with precise control of electron beam incident direction."
+    },
+    {
+      "pmcid": "PMC11634955",
+      "term": "retraction",
+      "title": "Retraction Note: Flawless polyaniline coating for preservation and corrosion protection of ancient steel spearheads: an archaeological study from military museum, Al-Qala, Egypt."
+    },
+    {
+      "pmcid": "PMC11698728",
+      "term": "author correction",
+      "title": "Author Correction: Multi-method evaluation of a 2-(1,3,4-thiadiazole-2-yl)pyrrolidine corrosion inhibitor for mild steel in HCl: combining gravimetric, electrochemical, and DFT approaches."
+    },
+    {
+      "pmcid": "PMC8062565",
+      "term": "author correction",
+      "title": "Author Correction: Grain boundary oxidation of proton-irradiated nuclear grade stainless steel in simulated primary water of pressurized water reactor."
+    },
+    {
+      "pmcid": "PMC10993378",
+      "term": "correction",
+      "title": "Correction to \"Anticorrosion Agents for Carbon Steel in Acidic Environments: Synthesis and Quantum Chemical Analysis of New Schiff Base Compounds with Benzylidene\"."
+    },
+    {
+      "pmcid": "PMC11018623",
+      "term": "author correction",
+      "title": "Author Correction: Effects of the addition of short straight steel fibers on the strength and strains of high-strength concrete during compression."
+    },
+    {
+      "pmcid": "PMC8509833",
+      "term": "correction",
+      "title": "Correction: Liu et al. Microstructure and Properties of SUS304 Stainless Steel Joints Brazed with Electrodeposited Ni-Cr-P Alloy Coatings. Materials 2021, 14, 4216."
+    },
+    {
+      "pmcid": "PMC10567737",
+      "term": "author correction",
+      "title": "Author Correction: MXene/graphene oxide nanocomposites for friction and wear reduction of rough steel surfaces."
+    },
+    {
+      "pmcid": "PMC10664835",
+      "term": "correction",
+      "title": "Correction: Bia\u0142obrzeska, B.; Jasi\u0144ski, R. Resistance to Abrasive Wear with Regards to Mechanical Properties Using Low-Alloy Cast Steels Examined with the Use of a Dry Sand/Rubber Wheel Tester. Materials 2023, 16, 3052"
+    },
+    {
+      "pmcid": "PMC10779683",
+      "term": "correction",
+      "title": "Correction: Bysiec et al. Numerical Analysis of Steel Geodesic Dome under Seismic Excitations. Materials 2021, 14, 4493."
+    },
+    {
+      "pmcid": "PMC11051157",
+      "term": "correction",
+      "title": "Correction: Chen et al. Evolution of Microstructure in Welding Heat-Affected Zone of G115 Steel with the Different Content of Boron. Materials 2022, 15, 2053."
+    },
+    {
+      "pmcid": "PMC10366083",
+      "term": "author correction",
+      "title": "Author Correction: Feasibility of orbital friction stir welding on clad pipes of API X65 steel and Inconel 625."
+    },
+    {
+      "pmcid": "PMC10394040",
+      "term": "correction",
+      "title": "Publisher Correction: Synthesis and characterization of novel acrylamide derivatives and their use as corrosion inhibitors for carbon steel in hydrochloric acid solution."
+    },
+    {
+      "pmcid": "PMC9575945",
+      "term": "correction",
+      "title": "Correction: Jovi\u010devi\u0107-Klug et al. Effect of Deep Cryogenic Treatment on Wear and Galling Properties of High-Speed Steels. Materials 2021, 14, 7561."
+    },
+    {
+      "pmcid": "PMC10115786",
+      "term": "author correction",
+      "title": "Author Correction: Theoretical and electrochemical evaluation of tetra-cationic surfactant as corrosion inhibitor for carbon steel in 1 M HCl."
+    },
+    {
+      "pmcid": "PMC7727800",
+      "term": "correction",
+      "title": "Correction: Lara-Banda, M., et al. Alternative to Nitric Acid Passivation of 15-5 and 17-4PH Stainless Steel Using Electrochemical Techniques. Materials 2020, 13, 2836."
+    },
+    {
+      "pmcid": "PMC9359974",
+      "term": "author correction",
+      "title": "Author Correction: Pile caps with inclined shear reinforcement and steel fibers."
+    },
+    {
+      "pmcid": "PMC10412528",
+      "term": "author correction",
+      "title": "Author Correction: Fabrication of biochar-based superhydrophobic coating on steel substrate and its UV resistance, anti-scaling, and corrosion resistance performance."
+    },
+    {
+      "pmcid": "PMC9837123",
+      "term": "author correction",
+      "title": "Author Correction: Utilizing birch leaf extract in pickling liquid as a sustainable source of corrosion inhibitor for pipeline steel."
+    },
+    {
+      "pmcid": "PMC10923606",
+      "term": "erratum",
+      "title": "Erratum for the Research Article: \"Revolutionizing Car Body Manufacturing using a Novel Unified Steel Metallurgy Concept\"."
+    },
+    {
+      "pmcid": "PMC10856280",
+      "term": "correction",
+      "title": "Correction: Krbata et al. Effect of Supercritical Bending on the Mechanical & Tribological Properties of Inconel 625 Welded Using the Cold Metal Transfer Method on a 16Mo3 Steel Pipe. Materials 2023, 16, 5014."
+    },
+    {
+      "pmcid": "PMC9902463",
+      "term": "author correction",
+      "title": "Author Correction: Adsorption, thermodynamic, and quantum chemical investigations of an ionic liquid that inhibits corrosion of carbon steel in chloride solutions."
+    },
+    {
+      "pmcid": "PMC9537516",
+      "term": "author correction",
+      "title": "Author Correction: Green and sustainable chitosan-gum Arabic nanocomposites as efficient anticorrosive coatings for mild steel in saline media."
+    },
+    {
+      "pmcid": "PMC6608638",
+      "term": "corrigendum",
+      "title": "Room-temperature photo-induced martensitic transformation in a protein crystal. Corrigendum."
+    },
+    {
+      "pmcid": "PMC6803959",
+      "term": "correction",
+      "title": "Correction: Li, P., et al. Research on Erosion-Corrosion Rate of 304 Stainless Steel in Acidic Slurry via Experimental Design Method. Materials 2019, 12, 2330."
+    },
+    {
+      "pmcid": "PMC9553942",
+      "term": "author correction",
+      "title": "Author Correction: Adsorption, thermodynamic, and quantum chemical investigations of an ionic liquid that inhibits corrosion of carbon steel in chloride solutions."
+    },
+    {
+      "pmcid": "PMC9519958",
+      "term": "retraction",
+      "title": "Retraction Note: Chemical, electrochemical and surface studies of new metal-organic frameworks (MOF) as corrosion inhibitors for carbon steel in sulfuric acid environment."
+    },
+    {
+      "pmcid": "PMC9522783",
+      "term": "correction",
+      "title": "Correction to: Long-term follow-up results of medial opening wedge high tibia osteotomy with a pre-countered non-locking steel plate."
+    },
+    {
+      "pmcid": "PMC9921341",
+      "term": "correction",
+      "title": "Correction: Heller et al. Characterization Methods along the Process Chain of Electrical Steel Sheet-From Best Practices to Advanced Characterization. Materials 2022, 15, 32."
+    },
+    {
+      "pmcid": "PMC8674246",
+      "term": "author correction",
+      "title": "Author Correction: A theoretical approach for estimating the effect of water-jet quenching on low-carbon steel beams."
+    },
+    {
+      "pmcid": "PMC8192007",
+      "term": "correction",
+      "title": "Correction: Evaluation of biological and enzymatic quorum quencher coating additives to reduce biocorrosion of steel."
+    },
+    {
+      "pmcid": "PMC7560600",
+      "term": "correction",
+      "title": "Publisher Correction: Rapid Thermal Processing to Enhance Steel Toughness."
+    },
+    {
+      "pmcid": "PMC9324446",
+      "term": "correction",
+      "title": "Correction: Xie et al. Synergistic Effect of MoS2 and SiO2 Nanoparticles as Lubricant Additives for Magnesium Alloy-Steel Contacts. Nanomaterials 2017, 7, 154."
+    },
+    {
+      "pmcid": "PMC8999354",
+      "term": "correction",
+      "title": "Correction: Zhang, H.; Ling, Z. Finite Element Modeling on Shear Performance of Grouted Stud Connectors for Steel-Timber Composite Beams. Materials 2022, 15, 1196."
+    },
+    {
+      "pmcid": "PMC8398577",
+      "term": "erratum",
+      "title": "Erratum: \u010capek et al. On the Weldability of Thick P355NL1 Pressure Vessel Steel Plates Using Laser Welding. Materials 2021, 14, 131."
+    },
+    {
+      "pmcid": "PMC4533759",
+      "term": "corrigendum",
+      "title": "Corrigendum: Vacancy-controlled ultrastable nanoclusters in nanostructured ferritic alloys."
+    },
+    {
+      "pmcid": "PMC5179476",
+      "term": "erratum",
+      "title": "Erratum to: Description of full-range strain hardening behavior of steels."
+    },
+    {
+      "pmcid": "PMC7090053",
+      "term": "author correction",
+      "title": "Author Correction: BiVO4-rGO with a novel structure on steel fabric used as high-performance photocatalysts."
+    },
+    {
+      "pmcid": "PMC4192525",
+      "term": "retraction",
+      "title": "En-masse retraction with a preformed nickel-titanium and stainless steel archwire assembly and temporary skeletal anchorage devices without posterior bonding."
+    },
+    {
+      "pmcid": "PMC6594979",
+      "term": "author correction",
+      "title": "Author Correction: Effects of Precipitates Evolution on Low Stress Creep Properties in P92 Heat-resistant Steel."
+    },
+    {
+      "pmcid": "PMC5762680",
+      "term": "correction",
+      "title": "Publisher Correction: Superplasticity in a lean Fe-Mn-Al steel."
+    },
+    {
+      "pmcid": "PMC4327313",
+      "term": "corrigendum",
+      "title": "Corrigendum: Inclusion flotation-driven channel segregation in solidifying steels."
+    },
+    {
+      "pmcid": "PMC7766687",
+      "term": "correction",
+      "title": "Correction: Murugesan, M., et al. Johnson Cook Material and Failure Model Parameters Estimation of AISI-1045 Medium Carbon Steel for Metal Forming Applications. Materials 2019, 12, 609."
+    },
+    {
+      "pmcid": "PMC6458127",
+      "term": "author correction",
+      "title": "Author Correction: Systematic in vivo evaluation of the time-dependent inflammatory response to steel and Teflon insulin infusion catheters."
+    },
+    {
+      "pmcid": "PMC6653810",
+      "term": "corrigendum",
+      "title": "Corrigendum: Microbiologically Influenced Corrosion of Carbon Steel Beneath a Deposit in CO2-saturated Formation Water Containing Desulfotomaculum nigrificans."
+    },
+    {
+      "pmcid": "PMC7002602",
+      "term": "correction",
+      "title": "Publisher Correction: Eco-friendly 2-Thiobarbituric acid as a corrosion inhibitor for API 5L X60 steel in simulated sweet oilfield environment: Electrochemical and surface analysis studies."
+    },
+    {
+      "pmcid": "PMC9060936",
+      "term": "correction",
+      "title": "Correction: Synthesis, characterization and electrochemical analysis of cysteine modified polymers for corrosion inhibition of mild steel in aqueous 1 M HCl."
+    },
+    {
+      "pmcid": "PMC5532404",
+      "term": "erratum",
+      "title": "Erratum to: Understanding dual precipitation strengthening in ultra-high strength low carbon steel containing nano-sized copper precipitates and carbides."
+    },
+    {
+      "pmcid": "PMC5043410",
+      "term": "corrigendum",
+      "title": "Corrigendum: Novel technique to suppress hydrocarbon contamination for high accuracy determination of carbon content in steel by FE-EPMA."
+    },
+    {
+      "pmcid": "PMC5456780",
+      "term": "retraction",
+      "title": "Retraction: Sun L. et al. Porosity Defect Remodeling and Tensile Analysis of Cast Steel. Materials 2016, 9, 119, doi:10.3390/ma9020119"
+    },
+    {
+      "pmcid": "PMC5458853",
+      "term": "correction",
+      "title": "Correction: Electrochemical Investigation of the Corrosion of Different Microstructural Phases of X65 Pipeline Steel under Saturated Carbon Dioxide Conditions. Materials 2015, 8, 2635\u20132649"
+    }
+  ],
+  "failed": [
+    {
+      "pmcid": "PMC9679837",
+      "status": "no_text",
+      "error": "no body paragraphs"
+    }
+  ],
+  "articles": [
+    {
+      "pmcid": "PMC7408227",
+      "doi": "10.1021/acsomega.0c02312",
+      "year": "2020",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "Corrosion Behavior and In Vitro Cytotoxicity of Ni-Ti and Stainless Steel Arch Wires Exposed to Lysozyme, Ovalbumin, and Bovine Serum Albumin.",
+      "pool_sentences": 205,
+      "corpus_sentences": 134
+    },
+    {
+      "pmcid": "PMC5459199",
+      "doi": "10.3390/ma10020106",
+      "year": "2017",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Microstructure and Mechanical Properties of Narrow Gap Laser-Arc Hybrid Welded 40 mm Thick Mild Steel.",
+      "pool_sentences": 103,
+      "corpus_sentences": 81
+    },
+    {
+      "pmcid": "PMC11396049",
+      "doi": "10.3390/ma17174216",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Analysis of the Suitability of Ultrasonic Testing for Verification of Nonuniform Welded Joints of Austenitic-Ferritic Sheets.",
+      "pool_sentences": 482,
+      "corpus_sentences": 328
+    },
+    {
+      "pmcid": "PMC12030439",
+      "doi": "10.3390/polym17081082",
+      "year": "2025",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Enhancing the Adhesion of Polyaniline on Steel Substrates Without a Binding Agent: Evaluated by ASTM D 3359 Tape Test and Sodium Chloride (NaCl) Exposure.",
+      "pool_sentences": 157,
+      "corpus_sentences": 101
+    },
+    {
+      "pmcid": "PMC5086005",
+      "doi": "10.5005/jp-journals-10005-1363",
+      "year": "2016",
+      "journal": "International journal of clinical pediatric dentistry",
+      "license": "cc by",
+      "title": "In vitro Evaluation of Stainless Steel Crowns cemented with Resin-modified Glass Ionomer and Two New Self-adhesive Resin Cements.",
+      "pool_sentences": 79,
+      "corpus_sentences": 53
+    },
+    {
+      "pmcid": "PMC10573705",
+      "doi": "10.3390/ma16196430",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Advanced Heat Treatment of Pearlitic Rail Steel.",
+      "pool_sentences": 167,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC8746057",
+      "doi": "10.3390/ma15010118",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Identification of Grain Oriented SiFe Steels Based on Imaging the Instantaneous Dynamics of Magnetic Barkhausen Noise Using Short-Time Fourier Transform and Deep Convolutional Neural Network.",
+      "pool_sentences": 221,
+      "corpus_sentences": 155
+    },
+    {
+      "pmcid": "PMC11076116",
+      "doi": "10.1098/rsos.231229",
+      "year": "2024",
+      "journal": "Royal Society open science",
+      "license": "cc by",
+      "title": "Bis(dimethylpyrazolyl)-aniline-s-triazine derivatives as efficient corrosion inhibitors for C-steel and computational studies.",
+      "pool_sentences": 328,
+      "corpus_sentences": 224
+    },
+    {
+      "pmcid": "PMC6691106",
+      "doi": "10.1038/s41598-019-48284-0",
+      "year": "2019",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Epoxy pre-polymers as new and effective materials for corrosion inhibition of carbon steel in acidic medium: Computational and experimental studies.",
+      "pool_sentences": 190,
+      "corpus_sentences": 127
+    },
+    {
+      "pmcid": "PMC12735311",
+      "doi": "10.3390/ma18245487",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Hydrogen Damage Behavior of X80 Pipeline Steel Under AC Interference.",
+      "pool_sentences": 180,
+      "corpus_sentences": 120
+    },
+    {
+      "pmcid": "PMC3467908",
+      "doi": "10.4103/0975-7406.100203",
+      "year": "2012",
+      "journal": "Journal of pharmacy & bioallied sciences",
+      "license": "cc by-nc-sa",
+      "title": "The comparison of frictional resistance in titanium, self-ligating stainless steel, and stainless steel brackets using stainless steel and TMA archwires: An in vitro study.",
+      "pool_sentences": 162,
+      "corpus_sentences": 100
+    },
+    {
+      "pmcid": "PMC7335088",
+      "doi": "10.1038/s41598-020-68114-y",
+      "year": "2020",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Iron and manganese migration in \"soil-plant\" system in Scots pine stands in conditions of contamination by the steel plant's emissions.",
+      "pool_sentences": 129,
+      "corpus_sentences": 96
+    },
+    {
+      "pmcid": "PMC11820220",
+      "doi": "10.3390/s25030769",
+      "year": "2025",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Novel YOLOv10-Based Algorithm for Accurate Steel Surface Defect Detection.",
+      "pool_sentences": 302,
+      "corpus_sentences": 202
+    },
+    {
+      "pmcid": "PMC7079595",
+      "doi": "10.3390/ma13040958",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Dilatometric Study of Phase Transformations in 5 Mn Steel Subjected to Different Heat Treatments.",
+      "pool_sentences": 188,
+      "corpus_sentences": 130
+    },
+    {
+      "pmcid": "PMC7345226",
+      "doi": "10.3390/ma13122680",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Load Direction-Dependent Influence of Forming-Induced Initial Damage on the Fatigue Performance of 16MnCrS5 Steel.",
+      "pool_sentences": 261,
+      "corpus_sentences": 178
+    },
+    {
+      "pmcid": "PMC12429338",
+      "doi": "10.3390/ma18174002",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Comparative Analysis of Microstructure and Properties of Wear-Resistant Structural Steels.",
+      "pool_sentences": 132,
+      "corpus_sentences": 77
+    },
+    {
+      "pmcid": "PMC9064207",
+      "doi": "10.1039/c9ra01672d",
+      "year": "2019",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Adsorption and anticorrosive behavior of aromatic epoxy monomers on carbon steel corrosion in acidic solution: computational studies and sustained experimental studies.",
+      "pool_sentences": 150,
+      "corpus_sentences": 93
+    },
+    {
+      "pmcid": "PMC12218377",
+      "doi": "10.1038/s41598-025-05546-4",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Shear and flexural performance of reinforced geopolymer concrete beams cured under ambient and oven conditions with environmentally friendly waste steel tire wire additives.",
+      "pool_sentences": 297,
+      "corpus_sentences": 180
+    },
+    {
+      "pmcid": "PMC13608715",
+      "doi": "10.3390/ma19183982",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Nb Microalloying on the Dynamic Recrystallization, Bainitic Microstructure, and Mechanical Properties of Hot-Rolled Bainitic Steels.",
+      "pool_sentences": 157,
+      "corpus_sentences": 104
+    },
+    {
+      "pmcid": "PMC9442508",
+      "doi": "10.21037/jtd-22-189",
+      "year": "2022",
+      "journal": "Journal of thoracic disease",
+      "license": "cc by-nc-nd",
+      "title": "Minimally invasive repair of pectus carinatum with a new steel bar.",
+      "pool_sentences": 168,
+      "corpus_sentences": 117
+    },
+    {
+      "pmcid": "PMC12736593",
+      "doi": "10.3390/s25247527",
+      "year": "2025",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "An Efficient Lightweight Method for Steel Surface Defect Detection.",
+      "pool_sentences": 253,
+      "corpus_sentences": 176
+    },
+    {
+      "pmcid": "PMC8469944",
+      "doi": "10.3390/ma14185282",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Hydrogen-Induced Cracking Caused by Galvanic Corrosion of Steel Weld in a Sour Environment.",
+      "pool_sentences": 75,
+      "corpus_sentences": 56
+    },
+    {
+      "pmcid": "PMC8954067",
+      "doi": "10.3390/ma15062023",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Organic Compounds as Corrosion Inhibitors for Carbon Steel in HCl Solution: A Comprehensive Review.",
+      "pool_sentences": 515,
+      "corpus_sentences": 352
+    },
+    {
+      "pmcid": "PMC9182330",
+      "doi": "10.3390/ma15113978",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Efficiency of Tool Steel Cutting by Water Jet with Recycled Abrasive Materials.",
+      "pool_sentences": 175,
+      "corpus_sentences": 114
+    },
+    {
+      "pmcid": "PMC6416717",
+      "doi": "10.3390/ma12040609",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Johnson Cook Material and Failure Model Parameters Estimation of AISI-1045 Medium Carbon Steel for Metal Forming Applications.",
+      "pool_sentences": 129,
+      "corpus_sentences": 92
+    },
+    {
+      "pmcid": "PMC11172590",
+      "doi": "10.3390/ma17112472",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Corrosion Behavior and Mechanical Property of 5182 Aluminum/DP780 Steel Resistance Spot Welding Joints.",
+      "pool_sentences": 163,
+      "corpus_sentences": 104
+    },
+    {
+      "pmcid": "PMC5455938",
+      "doi": "10.3390/ma7064755",
+      "year": "2014",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "UNS S31603 Stainless Steel Tungsten Inert Gas Welds Made with Microparticle and Nanoparticle Oxides.",
+      "pool_sentences": 221,
+      "corpus_sentences": 143
+    },
+    {
+      "pmcid": "PMC13667623",
+      "doi": null,
+      "year": "2026",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "SA-DETR: Lightweight Structure-Aware Defect Detection Model for Sustainable Low-Carbon Steel Manufacturing Based on RT-DETR-L",
+      "pool_sentences": 385,
+      "corpus_sentences": 251
+    },
+    {
+      "pmcid": "PMC10607988",
+      "doi": "10.3390/ma16206783",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Kinetics of Nickel Diffusion into Austenitic Stainless Steels AISI 304 and 316L and Calculation of Diffusion Coefficients.",
+      "pool_sentences": 225,
+      "corpus_sentences": 162
+    },
+    {
+      "pmcid": "PMC4828477",
+      "doi": "10.1007/s00706-016-1688-8",
+      "year": "2016",
+      "journal": "Monatshefte fur chemie",
+      "license": "cc by",
+      "title": "Electrochemical dissolution of steel as a typical catalyst for electro-Fenton oxidation.",
+      "pool_sentences": 123,
+      "corpus_sentences": 78
+    },
+    {
+      "pmcid": "PMC7475901",
+      "doi": "10.3390/ma13163509",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The Research of the Rolling Speed Influence on the Mechanism of Strip Breaks in the Steel Rolling Process.",
+      "pool_sentences": 193,
+      "corpus_sentences": 131
+    },
+    {
+      "pmcid": "PMC12608760",
+      "doi": "10.3390/ma18214865",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Analysis of Failure Cause in Steel Wire-Reinforced Thermoplastic Composite Pipes for Sour Gas Field Water Transportation.",
+      "pool_sentences": 208,
+      "corpus_sentences": 149
+    },
+    {
+      "pmcid": "PMC9267231",
+      "doi": "10.3390/ma15134565",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Using Steel Bar Reinforcement on Concrete Quality by Ultrasonic Pulse Velocity Measurements.",
+      "pool_sentences": 224,
+      "corpus_sentences": 162
+    },
+    {
+      "pmcid": "PMC11525975",
+      "doi": "10.1038/s41598-024-75382-5",
+      "year": "2024",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Effect of induction heat treatment on microstructure, mechanical and corrosion properties of stainless steel 308 L fabricated using wire arc additive manufacturing.",
+      "pool_sentences": 142,
+      "corpus_sentences": 93
+    },
+    {
+      "pmcid": "PMC6025001",
+      "doi": "10.3390/ma11060884",
+      "year": "2018",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Large Area Synthesis of Vertical Aligned Metal Oxide Nanosheets by Thermal Oxidation of Stainless Steel Mesh and Foil.",
+      "pool_sentences": 96,
+      "corpus_sentences": 68
+    },
+    {
+      "pmcid": "PMC9607063",
+      "doi": "10.3390/ma15207123",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Elastocaloric Properties of Polycrystalline Samples of NiMnGaCu Ferromagnetic Shape Memory Alloy under Compression: Effect of Improvement of Thermoelastic Martensitic Transformation.",
+      "pool_sentences": 143,
+      "corpus_sentences": 96
+    },
+    {
+      "pmcid": "PMC12618735",
+      "doi": "10.1177/0734242x251350541",
+      "year": "2025",
+      "journal": "Waste management & research : the journal of the International Solid Wastes and Public Cleansing Association, ISWA",
+      "license": "cc by",
+      "title": "Lost in the shuffle: A taxonomy for the accumulation of unwanted elements in steel recycling.",
+      "pool_sentences": 214,
+      "corpus_sentences": 140
+    },
+    {
+      "pmcid": "PMC8509469",
+      "doi": "10.3390/ma14195595",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Inconel 625/AISI 413 Stainless Steel Functionally Graded Material Produced by Direct Laser Deposition.",
+      "pool_sentences": 163,
+      "corpus_sentences": 104
+    },
+    {
+      "pmcid": "PMC8434350",
+      "doi": "10.3390/ma14174970",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Comparative Evaluation of Third-Generation Advanced High-Strength Steels for Automotive Forming and Crash Applications.",
+      "pool_sentences": 299,
+      "corpus_sentences": 192
+    },
+    {
+      "pmcid": "PMC12242662",
+      "doi": "10.1021/acsomega.5c03111",
+      "year": "2025",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Influence of H2S on the Hydrogen Embrittlement Susceptibility of X80 Pipeline Steel in Hydrogen-Doped Natural Gas.",
+      "pool_sentences": 173,
+      "corpus_sentences": 108
+    },
+    {
+      "pmcid": "PMC9685761",
+      "doi": "10.1021/acsomega.2c06017",
+      "year": "2022",
+      "journal": "ACS omega",
+      "license": "cc by",
+      "title": "Reformative Effects of Intumescent Coating on the Structural Characteristics of Cold-Formed Steel.",
+      "pool_sentences": 159,
+      "corpus_sentences": 98
+    },
+    {
+      "pmcid": "PMC8002108",
+      "doi": "10.3390/ma14061376",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Post-Processing and Surface Characterization of Additively Manufactured Stainless Steel 316L Lattice: Implications for BioMedical Use.",
+      "pool_sentences": 198,
+      "corpus_sentences": 139
+    },
+    {
+      "pmcid": "PMC13514338",
+      "doi": "10.3390/ma19163390",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Competitive Meso-Damage Model Dependent on Stress State for Advanced High-Strength Steels.",
+      "pool_sentences": 157,
+      "corpus_sentences": 117
+    },
+    {
+      "pmcid": "PMC11509439",
+      "doi": "10.3390/ma17205004",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Three-Dimensional Micromechanical Modeling of Martensite Particle Size Effects on the Deformation Behavior of Dual-Phase Steels.",
+      "pool_sentences": 121,
+      "corpus_sentences": 75
+    },
+    {
+      "pmcid": "PMC8539532",
+      "doi": "10.3390/ma14206159",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Abrasive Wear of High-Carbon Low-Alloyed Austenite Steel: Microhardness, Microstructure and X-ray Characteristics of Worn Surface.",
+      "pool_sentences": 244,
+      "corpus_sentences": 167
+    },
+    {
+      "pmcid": "PMC6374330",
+      "doi": "10.3389/fmicb.2019.00170",
+      "year": "2019",
+      "journal": "Frontiers in microbiology",
+      "license": "cc by",
+      "title": "Electroactive Bacteria Associated With Stainless Steel Ennoblement in Seawater.",
+      "pool_sentences": 156,
+      "corpus_sentences": 108
+    },
+    {
+      "pmcid": "PMC8912072",
+      "doi": "10.3390/ma15051869",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Use of Fumed Silica Nanostructured Additives in Selective Laser Melting and Fabrication of Steel Matrix Nanocomposites.",
+      "pool_sentences": 125,
+      "corpus_sentences": 84
+    },
+    {
+      "pmcid": "PMC8067851",
+      "doi": "10.3390/ma14081828",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Laboratory Investigation and Numerical Modelling of Concrete Reinforced with Recycled Steel Fibers.",
+      "pool_sentences": 159,
+      "corpus_sentences": 104
+    },
+    {
+      "pmcid": "PMC4223752",
+      "doi": "10.1186/1476-069x-13-85",
+      "year": "2014",
+      "journal": "Environmental health : a global access science source",
+      "license": "cc by",
+      "title": "Spatiotemporal association between birth outcomes and coke production and steel making facilities in Alabama, USA: a cross-sectional study.",
+      "pool_sentences": 92,
+      "corpus_sentences": 66
+    },
+    {
+      "pmcid": "PMC8877111",
+      "doi": "10.3390/mi13020190",
+      "year": "2022",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Influence of Current on Soil Corrosion of Galvanized Steel of Grounding Grids.",
+      "pool_sentences": 124,
+      "corpus_sentences": 80
+    },
+    {
+      "pmcid": "PMC11313517",
+      "doi": "10.3390/ma17153806",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Comparative Analysis of Friction and Energy Losses in Hydrogen and CNG Fueled Engines: Implications on the Top Compression Ring Design Using Steel, Cast Iron, and Silicon Nitride Materials.",
+      "pool_sentences": 230,
+      "corpus_sentences": 152
+    },
+    {
+      "pmcid": "PMC13028541",
+      "doi": "10.3390/ma19061184",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Influence of Substrate Manufacturing Route on HiPIMS TiAlSiN-Coated AISI 316L Stainless Steel Produced by Laser Powder Bed Fusion.",
+      "pool_sentences": 272,
+      "corpus_sentences": 180
+    },
+    {
+      "pmcid": "PMC10254360",
+      "doi": "10.3390/ma16113981",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Microstructural Understanding of Flow Accelerated Corrosion of SA106B Carbon Steel in High-Temperature Water with Different Flow Velocities.",
+      "pool_sentences": 261,
+      "corpus_sentences": 184
+    },
+    {
+      "pmcid": "PMC9964733",
+      "doi": "10.3390/ma16041629",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Experimental Investigation of the Effect of Steel Fibers on the Flexural Behavior of Corroded Prestressed Reinforced Concrete Beams.",
+      "pool_sentences": 201,
+      "corpus_sentences": 136
+    },
+    {
+      "pmcid": "PMC10254621",
+      "doi": "10.3390/ma16114014",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Influence of PBF-LB Process Atmosphere on the Fatigue Strength of Hot Isostatically Post-Densified Duplex Steel Parts Produced via the Shell Core Approach.",
+      "pool_sentences": 302,
+      "corpus_sentences": 197
+    },
+    {
+      "pmcid": "PMC9503358",
+      "doi": "10.3390/mi13091411",
+      "year": "2022",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Highly Durable Antimicrobial Tantalum Nitride/Copper Coatings on Stainless Steel Deposited by Pulsed Magnetron Sputtering.",
+      "pool_sentences": 173,
+      "corpus_sentences": 118
+    },
+    {
+      "pmcid": "PMC7476538",
+      "doi": "10.1080/14686996.2020.1746196",
+      "year": "2020",
+      "journal": "Science and technology of advanced materials",
+      "license": "cc by",
+      "title": "Corrosion rate prediction and influencing factors evaluation of low-alloy steels in marine atmosphere using machine learning approach.",
+      "pool_sentences": 183,
+      "corpus_sentences": 123
+    },
+    {
+      "pmcid": "PMC12735319",
+      "doi": "10.3390/ma18245524",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "B2-NiAl Strengthened PH 13-8 Mo Steel Under Fe+ Ion Irradiation: Precipitate Stability and Interaction with Damage Defects.",
+      "pool_sentences": 127,
+      "corpus_sentences": 93
+    },
+    {
+      "pmcid": "PMC12347515",
+      "doi": "10.3390/ma18153445",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Microscopy Study of (Ti,Nb)(C,N) Precipitation in Microalloyed Steels Under Continuous Casting Conditions.",
+      "pool_sentences": 141,
+      "corpus_sentences": 96
+    },
+    {
+      "pmcid": "PMC12431451",
+      "doi": "10.3390/polym17172365",
+      "year": "2025",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Numerical Analysis on Mechanical Properties of Different Fiber-Reinforced Cold-Formed Steel-Concrete Composite Corner Columns.",
+      "pool_sentences": 228,
+      "corpus_sentences": 164
+    },
+    {
+      "pmcid": "PMC11051401",
+      "doi": "10.3390/ma17081710",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Full-Scale Model Tests of Two Box-Type Soil-Steel Structures with Different Crown and Haunch Radii.",
+      "pool_sentences": 253,
+      "corpus_sentences": 156
+    },
+    {
+      "pmcid": "PMC9304329",
+      "doi": "10.1038/s41598-022-16348-3",
+      "year": "2022",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Robust corrosion guard, mechanical and UV aging properties of metal complex/epoxy hybrid composite coating for C-steel applications.",
+      "pool_sentences": 240,
+      "corpus_sentences": 159
+    },
+    {
+      "pmcid": "PMC6164248",
+      "doi": "10.3390/insects9030087",
+      "year": "2018",
+      "journal": "Insects",
+      "license": "cc by",
+      "title": "Testing the Insecticidal Activity of Nanostructured Alumina on Sitophilus oryzae (L.) (Coleoptera: Curculionidae) Under Laboratory Conditions Using Galvanized Steel Containers.",
+      "pool_sentences": 108,
+      "corpus_sentences": 77
+    },
+    {
+      "pmcid": "PMC6803868",
+      "doi": "10.3390/ma12193124",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Controlling Grain Sizes of 42CrMo Steel by Pre-Stress Hardening Grinding.",
+      "pool_sentences": 143,
+      "corpus_sentences": 92
+    },
+    {
+      "pmcid": "PMC6609794",
+      "doi": "10.1016/j.heliyon.2019.e02002",
+      "year": "2019",
+      "journal": "Heliyon",
+      "license": "cc by",
+      "title": "Simple 3D printed stainless steel microreactors for online mass spectrometric analysis.",
+      "pool_sentences": 136,
+      "corpus_sentences": 93
+    },
+    {
+      "pmcid": "PMC3821689",
+      "doi": "10.4161/bact.25697",
+      "year": "2013",
+      "journal": "Bacteriophage",
+      "license": "cc by-nc",
+      "title": "Bacteriophages lytic for Salmonella rapidly reduce Salmonella contamination on glass and stainless steel surfaces.",
+      "pool_sentences": 115,
+      "corpus_sentences": 70
+    },
+    {
+      "pmcid": "PMC10017817",
+      "doi": "10.1038/s41598-023-31156-z",
+      "year": "2023",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Utilization possibilities of steel slag as backfill material in coastal structures.",
+      "pool_sentences": 190,
+      "corpus_sentences": 128
+    },
+    {
+      "pmcid": "PMC6641366",
+      "doi": "10.1021/acsomega.8b00083",
+      "year": "2018",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "Donor-\u03c0-Acceptor-Type Configured, Dimethylamino-Based Organic Push-Pull Chromophores for Effective Reduction of Mild Steel Corrosion Loss in 1 M HCl.",
+      "pool_sentences": 243,
+      "corpus_sentences": 161
+    },
+    {
+      "pmcid": "PMC9330091",
+      "doi": "10.1021/acsomega.2c02744",
+      "year": "2022",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Rapid Vanadium Extraction from Roasted Vanadium Steel Slag via a H2SO4-H2O2 System: Process and Mechanism.",
+      "pool_sentences": 162,
+      "corpus_sentences": 101
+    },
+    {
+      "pmcid": "PMC10362090",
+      "doi": "10.1016/j.heliyon.2023.e17698",
+      "year": "2023",
+      "journal": "Heliyon",
+      "license": "cc by-nc-nd",
+      "title": "3D-printed metals: Process parameters effects on mechanical properties of 17-4 P H stainless steel.",
+      "pool_sentences": 273,
+      "corpus_sentences": 177
+    },
+    {
+      "pmcid": "PMC10141885",
+      "doi": "10.3390/ma16082981",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Study on Fatigue Crack Growth in Rail Steel at Numerical and Experimental Approaches.",
+      "pool_sentences": 174,
+      "corpus_sentences": 115
+    },
+    {
+      "pmcid": "PMC3926566",
+      "doi": "10.3390/s140100431",
+      "year": "2013",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The performance analysis of distributed Brillouin corrosion sensors for steel reinforced concrete structures.",
+      "pool_sentences": 141,
+      "corpus_sentences": 89
+    },
+    {
+      "pmcid": "PMC9057760",
+      "doi": "10.1039/d0ra06742c",
+      "year": "2020",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "Experimental and theoretical investigations of benzoic acid derivatives as corrosion inhibitors for AISI 316 stainless steel in hydrochloric acid medium: DFT and Monte Carlo simulations on the Fe (110) surface.",
+      "pool_sentences": 265,
+      "corpus_sentences": 180
+    },
+    {
+      "pmcid": "PMC13117724",
+      "doi": "10.3390/ma19081592",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Prediction of Hole Expansion Ratio in Advanced High-Strength Steels Using Physics-Informed Machine Learning.",
+      "pool_sentences": 428,
+      "corpus_sentences": 271
+    },
+    {
+      "pmcid": "PMC8510501",
+      "doi": "10.3390/ma14195712",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Improving the Performance of Steel Machining Processes through Cutting by Vibration Control.",
+      "pool_sentences": 202,
+      "corpus_sentences": 137
+    },
+    {
+      "pmcid": "PMC6427471",
+      "doi": "10.3390/ma12050823",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Remaining Life Assessment for Steel After Low-Cycle Fatigue by Surface Crack Image.",
+      "pool_sentences": 124,
+      "corpus_sentences": 83
+    },
+    {
+      "pmcid": "PMC5458860",
+      "doi": "10.3390/ma8125467",
+      "year": "2015",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "An Evaluation of Global and Local Tensile Properties of Friction-Stir Welded DP980 Dual-Phase Steel Joints Using a Digital Image Correlation Method.",
+      "pool_sentences": 134,
+      "corpus_sentences": 94
+    },
+    {
+      "pmcid": "PMC9185267",
+      "doi": "10.3390/s22114257",
+      "year": "2022",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Enhancing Precision with an Ensemble Generative Adversarial Network for Steel Surface Defect Detectors (EnsGAN-SDD).",
+      "pool_sentences": 183,
+      "corpus_sentences": 129
+    },
+    {
+      "pmcid": "PMC10056784",
+      "doi": "10.3390/ma16062299",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Mn Content on the Toughness and Plasticity of Hot-Rolled High-Carbon Medium Manganese Steel.",
+      "pool_sentences": 161,
+      "corpus_sentences": 101
+    },
+    {
+      "pmcid": "PMC9785634",
+      "doi": "10.3390/ma15248927",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Hot Deformation Parameters on Heat-Treated Microstructures and Mechanical Properties of 300M Steel.",
+      "pool_sentences": 113,
+      "corpus_sentences": 71
+    },
+    {
+      "pmcid": "PMC10125753",
+      "doi": "10.1155/2023/9565903",
+      "year": "2023",
+      "journal": "Scanning",
+      "license": "cc by",
+      "title": "Characterization of Retained Austenite in Advanced High-Strength Steel.",
+      "pool_sentences": 136,
+      "corpus_sentences": 91
+    },
+    {
+      "pmcid": "PMC11759979",
+      "doi": "10.1371/journal.pone.0317353",
+      "year": "2025",
+      "journal": "PloS one",
+      "license": "cc by",
+      "title": "Structural design and safety performance of a novel high-strength steel lightweight guardrail.",
+      "pool_sentences": 154,
+      "corpus_sentences": 101
+    },
+    {
+      "pmcid": "PMC8839734",
+      "doi": "10.3390/polym14030551",
+      "year": "2022",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Improving Ductility for Composite Beams Reinforced with GFRP Tubes by Using Rebars/Steel Angles.",
+      "pool_sentences": 165,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC8105635",
+      "doi": "10.1016/j.heliyon.2021.e06840",
+      "year": "2021",
+      "journal": "Heliyon",
+      "license": "cc by-nc-nd",
+      "title": "Corchorus olitorius stem as corrosion inhibitor on mild steel in sulphuric acid.",
+      "pool_sentences": 90,
+      "corpus_sentences": 57
+    },
+    {
+      "pmcid": "PMC9181953",
+      "doi": "10.3390/ma15113900",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Nano-SiO2/PVA on Corrosion Behavior of Steel Rebar Embedded in High-Volume Fly Ash Mortar under Accelerated Chloride Attack.",
+      "pool_sentences": 171,
+      "corpus_sentences": 119
+    },
+    {
+      "pmcid": "PMC5377273",
+      "doi": "10.1021/acsomega.6b00395",
+      "year": "2017",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "Electroformation of Giant Unilamellar Vesicles on Stainless Steel Electrodes.",
+      "pool_sentences": 158,
+      "corpus_sentences": 98
+    },
+    {
+      "pmcid": "PMC11436628",
+      "doi": "10.1038/s41598-024-74263-1",
+      "year": "2024",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Effect of the gas layer evolution on electrolytic plasma polishing of stainless steel.",
+      "pool_sentences": 137,
+      "corpus_sentences": 95
+    },
+    {
+      "pmcid": "PMC9505950",
+      "doi": "10.3390/ma15186261",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "New SHapley Additive ExPlanations (SHAP) Approach to Evaluate the Raw Materials Interactions of Steel-Fiber-Reinforced Concrete.",
+      "pool_sentences": 148,
+      "corpus_sentences": 98
+    },
+    {
+      "pmcid": "PMC4642314",
+      "doi": "10.1038/srep16591",
+      "year": "2015",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Integration of coal gasification and waste heat recovery from high temperature steel slags: an emerging strategy to emission reduction.",
+      "pool_sentences": 134,
+      "corpus_sentences": 81
+    },
+    {
+      "pmcid": "PMC9965140",
+      "doi": "10.3390/molecules28041581",
+      "year": "2023",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Coco Monoethanolamide Surfactant as a Sustainable Corrosion Inhibitor for Mild Steel: Theoretical and Experimental Investigations.",
+      "pool_sentences": 229,
+      "corpus_sentences": 154
+    },
+    {
+      "pmcid": "PMC11356248",
+      "doi": "10.3390/ma17164159",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Temperature Effect on Deformation Mechanisms and Mechanical Properties of Welded High-Mn Steels for Cryogenic Applications.",
+      "pool_sentences": 257,
+      "corpus_sentences": 169
+    },
+    {
+      "pmcid": "PMC6947436",
+      "doi": "10.3390/ma12244243",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Strain Range Dependent Cyclic Hardening of 08Ch18N10T Stainless Steel-Experiments and Simulations.",
+      "pool_sentences": 171,
+      "corpus_sentences": 112
+    },
+    {
+      "pmcid": "PMC12551445",
+      "doi": "10.1039/d5ra06768e",
+      "year": "2025",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "Hydrometallurgical recycling of steel grinding swarf via oxidative leaching using ferric chloride.",
+      "pool_sentences": 292,
+      "corpus_sentences": 200
+    },
+    {
+      "pmcid": "PMC3840348",
+      "doi": "10.1136/bmjopen-2013-003819",
+      "year": "2013",
+      "journal": "BMJ open",
+      "license": "cc by-nc",
+      "title": "Cancer incidence among Finnish ferrochromium and stainless steel production workers in 1967-2011: a cohort study.",
+      "pool_sentences": 159,
+      "corpus_sentences": 110
+    },
+    {
+      "pmcid": "PMC10059253",
+      "doi": "10.3390/mi14030643",
+      "year": "2023",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "The Process Parameters of Micro Particle Bombarding (MPB) for Surface Integrity Enhancement of Cermet Material and Tool Steel.",
+      "pool_sentences": 103,
+      "corpus_sentences": 79
+    },
+    {
+      "pmcid": "PMC11084378",
+      "doi": "10.3390/ma17091936",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Study on the Performance of a High-Speed Motor, Considering the Effect of Temperature on the Properties of High-Strength Non-Oriented Silicon Steel.",
+      "pool_sentences": 222,
+      "corpus_sentences": 149
+    },
+    {
+      "pmcid": "PMC8481298",
+      "doi": "10.1038/s41598-021-98875-z",
+      "year": "2021",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Investigating the dislocation reactions on \u03a33{111} twin boundary during deformation twin nucleation process in an ultrafine-grained high-manganese steel.",
+      "pool_sentences": 156,
+      "corpus_sentences": 107
+    },
+    {
+      "pmcid": "PMC12744497",
+      "doi": "10.6026/973206300213031",
+      "year": "2025",
+      "journal": "Bioinformation",
+      "license": "cc by",
+      "title": "Efficacy, precision and ease of 3D-printed versus conventional endodontic instruments compared to conventional stainless steel and nickel-titanium files in root canal preparation.",
+      "pool_sentences": 43,
+      "corpus_sentences": 26
+    },
+    {
+      "pmcid": "PMC10933831",
+      "doi": "10.3390/ma17051158",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Crevice Corrosion Behavior of 201 Stainless Steel in NaCl Solutions with Different pH Values by In Situ Monitoring.",
+      "pool_sentences": 216,
+      "corpus_sentences": 140
+    },
+    {
+      "pmcid": "PMC12429578",
+      "doi": "10.3390/ma18173945",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Reoxidation of IF Steel Caused by Cr2O3-Based Stuffing Sand and Its Optimization.",
+      "pool_sentences": 155,
+      "corpus_sentences": 104
+    },
+    {
+      "pmcid": "PMC12842648",
+      "doi": "10.3390/ma19020372",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Review of the Parameters Controlling Crack Growth in AM Steels and Its Implications for Limited-Life AM and CSAM Parts.",
+      "pool_sentences": 300,
+      "corpus_sentences": 198
+    },
+    {
+      "pmcid": "PMC12858862",
+      "doi": "10.1038/s41598-025-34291-x",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Shaking table tests and analysis of the seismic behavior of external steel frames with viscoelastic nodal dampers.",
+      "pool_sentences": 202,
+      "corpus_sentences": 144
+    },
+    {
+      "pmcid": "PMC13208445",
+      "doi": "10.3390/ma19102088",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Finite Element Simulation-Informed Machine Learning Framework for Screening Average Thermal Stress Responses in SLM-Fabricated 316L Stainless Steel.",
+      "pool_sentences": 272,
+      "corpus_sentences": 175
+    },
+    {
+      "pmcid": "PMC7503622",
+      "doi": "10.3390/ma13173712",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Numerical Evaluation on Analysis Methods of Trapping Site Density in Steels Based on Hydrogen Permeation Curve.",
+      "pool_sentences": 95,
+      "corpus_sentences": 60
+    },
+    {
+      "pmcid": "PMC5512526",
+      "doi": "10.3390/ma9080704",
+      "year": "2016",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Hybrid Effect Evaluation of Steel Fiber and Carbon Fiber on the Performance of the Fiber Reinforced Concrete.",
+      "pool_sentences": 109,
+      "corpus_sentences": 75
+    },
+    {
+      "pmcid": "PMC7527798",
+      "doi": "10.1016/j.conbuildmat.2020.120892",
+      "year": "2021",
+      "journal": "Construction and building materials",
+      "license": null,
+      "title": "Experimental investigation on the long-term behaviour of prefabricated timber-concrete composite beams with steel plate connections.",
+      "pool_sentences": 272,
+      "corpus_sentences": 174
+    },
+    {
+      "pmcid": "PMC5004110",
+      "doi": "10.1038/srep32395",
+      "year": "2016",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Introducing Mg-4Zn-3Gd-1Ca/ZnO nanocomposite with compressive strengths matching/exceeding that of mild steel.",
+      "pool_sentences": 66,
+      "corpus_sentences": 47
+    },
+    {
+      "pmcid": "PMC9127118",
+      "doi": "10.1038/s41598-022-12698-0",
+      "year": "2022",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Theoretical analysis of the deformation for steel gas pipes taking into account shear effects under surface explosion loads.",
+      "pool_sentences": 128,
+      "corpus_sentences": 89
+    },
+    {
+      "pmcid": "PMC8472777",
+      "doi": "10.3390/ma14185216",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "High Temperature Dry Tribological Behavior of Nb-Microalloyed Bearing Steel 100Cr6.",
+      "pool_sentences": 147,
+      "corpus_sentences": 98
+    },
+    {
+      "pmcid": "PMC9867134",
+      "doi": "10.3390/ma16020588",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The Effect of Temperatures on the Passivation Behavior of Q235 Steel in the Simulated Concrete Pore Solution.",
+      "pool_sentences": 141,
+      "corpus_sentences": 92
+    },
+    {
+      "pmcid": "PMC10465545",
+      "doi": "10.1038/s41598-023-40710-8",
+      "year": "2023",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Optimization with artificial intelligence of the machinability of Hardox steel, which is exposed to different processes.",
+      "pool_sentences": 266,
+      "corpus_sentences": 175
+    },
+    {
+      "pmcid": "PMC3995252",
+      "doi": "10.1136/acupmed-2013-010472",
+      "year": "2014",
+      "journal": "Acupuncture in medicine : journal of the British Medical Acupuncture Society",
+      "license": "cc by-nc",
+      "title": "Examination of surface conditions and other physical properties of commonly used stainless steel acupuncture needles.",
+      "pool_sentences": 147,
+      "corpus_sentences": 89
+    },
+    {
+      "pmcid": "PMC6518284",
+      "doi": "10.3390/microorganisms7040095",
+      "year": "2019",
+      "journal": "Microorganisms",
+      "license": "cc by",
+      "title": "Biofilm Formation by Shiga Toxin-Producing Escherichia coli on Stainless Steel Coupons as Affected by Temperature and Incubation Time.",
+      "pool_sentences": 123,
+      "corpus_sentences": 75
+    },
+    {
+      "pmcid": "PMC11174035",
+      "doi": "10.3390/ma17112708",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Vibration-Assisted Welding of 42CrMo4 Steel: Optimizing Parameters for Improved Properties and Weldability.",
+      "pool_sentences": 247,
+      "corpus_sentences": 157
+    },
+    {
+      "pmcid": "PMC9703613",
+      "doi": "10.1016/j.heliyon.2022.e11807",
+      "year": "2022",
+      "journal": "Heliyon",
+      "license": "cc by",
+      "title": "Differentiation of specific wear rates of AISI 304 austenitic and AISI 2205 duplex stainless steels at room and high temperatures.",
+      "pool_sentences": 101,
+      "corpus_sentences": 66
+    },
+    {
+      "pmcid": "PMC10984981",
+      "doi": "10.1038/s41598-024-57990-3",
+      "year": "2024",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Surface defect detection of hot rolled steel based on multi-scale feature fusion and attention mechanism residual block.",
+      "pool_sentences": 227,
+      "corpus_sentences": 153
+    },
+    {
+      "pmcid": "PMC11915413",
+      "doi": "10.5005/jp-journals-10005-3026",
+      "year": "2025",
+      "journal": "International journal of clinical pediatric dentistry",
+      "license": "cc by-nc",
+      "title": "Comparative Evaluation of the Bond Strength Between Bioflx, Stainless Steel Crowns, and Stainless Steel Bands Using Type 1 Glass Ionomer Cement and Resin-modified Glass Ionomer Cement as Luting Agents: An In Vitro Study.",
+      "pool_sentences": 113,
+      "corpus_sentences": 73
+    },
+    {
+      "pmcid": "PMC13514429",
+      "doi": "10.3390/ma19163443",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Simulation Analysis on the Fracture Failure of S2 Alloy Steel Screwdriver Bits.",
+      "pool_sentences": 185,
+      "corpus_sentences": 132
+    },
+    {
+      "pmcid": "PMC12251240",
+      "doi": "10.3390/ma18133041",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Control of the Nitriding Process of AISI 52100 Steel in the NH3/N2 Atmosphere.",
+      "pool_sentences": 234,
+      "corpus_sentences": 158
+    },
+    {
+      "pmcid": "PMC8953602",
+      "doi": "10.3390/ma15062204",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Characterization of Microstructure, Phase Composition, and Mechanical Behavior of Ballistic Steels.",
+      "pool_sentences": 164,
+      "corpus_sentences": 111
+    },
+    {
+      "pmcid": "PMC10254662",
+      "doi": "10.3390/ma16114096",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Impact Behaviour of Steel-Fibre-Reinforced Alkali-Activated Slag Concrete Exposed to Elevated Temperatures.",
+      "pool_sentences": 265,
+      "corpus_sentences": 179
+    },
+    {
+      "pmcid": "PMC13165068",
+      "doi": "10.3390/ma19091836",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Impact of Ferrite-Cementite Microstructure on Tensile and Cutting Behaviour of C75S Steel.",
+      "pool_sentences": 252,
+      "corpus_sentences": 161
+    },
+    {
+      "pmcid": "PMC13421772",
+      "doi": "10.1371/journal.pone.0352316",
+      "year": "2026",
+      "journal": "PloS one",
+      "license": "cc by",
+      "title": "Optimization of CNC milling parameters for YXR-7 tool steel using fuzzy MARCOS: A multi-response approach to improve machining productivity.",
+      "pool_sentences": 225,
+      "corpus_sentences": 152
+    },
+    {
+      "pmcid": "PMC13172429",
+      "doi": "10.1038/s41598-026-50293-9",
+      "year": "2026",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Experimental and theoretical insights into the inhibitory capabilities of polythiophene and polypyrrole molecules for protecting mild steel from corrosion in sulfuric acid.",
+      "pool_sentences": 232,
+      "corpus_sentences": 157
+    },
+    {
+      "pmcid": "PMC8815042",
+      "doi": "10.1021/acsami.1c19573",
+      "year": "2022",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "Environmentally Friendly Layered Double Hydroxide Conversion Layers: Formation Kinetics on Zn-Al-Mg-Coated Steel.",
+      "pool_sentences": 243,
+      "corpus_sentences": 153
+    },
+    {
+      "pmcid": "PMC11990905",
+      "doi": "10.3390/ma18071613",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Distinguishing the Contribution of Extracellular Electron Transfer in the Desulfovibrio caledoniensis-Induced Total Corrosion of Q235 Carbon Steel.",
+      "pool_sentences": 194,
+      "corpus_sentences": 124
+    },
+    {
+      "pmcid": "PMC9227098",
+      "doi": "10.3390/molecules27123826",
+      "year": "2022",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Cucumber (Cucumis sativus L.) Leaf Extract as a Green Corrosion Inhibitor for Carbon Steel in Acidic Solution: Electrochemical, Functional and Molecular Analysis.",
+      "pool_sentences": 185,
+      "corpus_sentences": 127
+    },
+    {
+      "pmcid": "PMC12525378",
+      "doi": "10.3390/ma18194450",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Xanthan Gum as an Eco-Friendly Corrosion Inhibitor for N80 Carbon Steel Under High Pressure and High Temperature in Saline CO2-Saturated Solution.",
+      "pool_sentences": 287,
+      "corpus_sentences": 195
+    },
+    {
+      "pmcid": "PMC11795641",
+      "doi": "10.1021/acssuschemeng.4c04908",
+      "year": "2025",
+      "journal": "ACS sustainable chemistry & engineering",
+      "license": "cc by",
+      "title": "Multienzymatic Platform for Coupling a CCU Strategy to Waste Valorization: CO2 from the Iron and Steel Industry and Crude Glycerol from Biodiesel Production.",
+      "pool_sentences": 235,
+      "corpus_sentences": 166
+    },
+    {
+      "pmcid": "PMC8707221",
+      "doi": "10.3390/s21248250",
+      "year": "2021",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Bendductor-Transformer Steel Magnetomechanical Force Sensor.",
+      "pool_sentences": 125,
+      "corpus_sentences": 84
+    },
+    {
+      "pmcid": "PMC8746055",
+      "doi": "10.3390/ma15010252",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Production, Mechanical Properties and Biomedical Characterization of ZrTi-Based Bulk Metallic Glasses in Comparison with 316L Stainless Steel and Ti6Al4V Alloy.",
+      "pool_sentences": 188,
+      "corpus_sentences": 124
+    },
+    {
+      "pmcid": "PMC12898575",
+      "doi": "10.3390/ma19030567",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Milling Parameters and Quality of Machined Surface of Wire Arc Additive Manufactured AISI 321 Steel.",
+      "pool_sentences": 194,
+      "corpus_sentences": 126
+    },
+    {
+      "pmcid": "PMC12622806",
+      "doi": "10.1371/journal.pone.0336842",
+      "year": "2025",
+      "journal": "PloS one",
+      "license": "cc by",
+      "title": "17-4PH stainless steel fastener for high salt fog open-air marine coupling.",
+      "pool_sentences": 161,
+      "corpus_sentences": 110
+    },
+    {
+      "pmcid": "PMC11211483",
+      "doi": "10.1038/s41598-024-64214-1",
+      "year": "2024",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Unsupervised learning-enabled pulsed infrared thermographic microscopy of subsurface defects in stainless steel.",
+      "pool_sentences": 267,
+      "corpus_sentences": 173
+    },
+    {
+      "pmcid": "PMC9280939",
+      "doi": "10.1021/acsomega.2c01629",
+      "year": "2022",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Corrosion Mitigation Performance of N80 Steel in 5% Sulfamic Acid Medium by Applying Novel Tetrahydro-1,2,4-triazines Including Triazene Moieties: Electrochemical and Theoretical Approaches.",
+      "pool_sentences": 141,
+      "corpus_sentences": 95
+    },
+    {
+      "pmcid": "PMC10707072",
+      "doi": "10.3390/ma16237286",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Structural, Microstructural and Compositional Changes of the AISI 314 Steel Used in the Sintering Furnace Belt Depending on the Operating Time.",
+      "pool_sentences": 132,
+      "corpus_sentences": 88
+    },
+    {
+      "pmcid": "PMC10820627",
+      "doi": "10.3390/ma17020439",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Micro-Scale Deformation Aspects of Additively Fabricated Stainless Steel 316L under Compression.",
+      "pool_sentences": 150,
+      "corpus_sentences": 87
+    },
+    {
+      "pmcid": "PMC6560796",
+      "doi": "10.1007/s10853-017-1978-5",
+      "year": "2018",
+      "journal": "Journal of materials science",
+      "license": "cc by",
+      "title": "Understanding and mitigating hydrogen embrittlement of steels: a review of experimental, modelling and design progress from atomistic to continuum.",
+      "pool_sentences": 665,
+      "corpus_sentences": 424
+    },
+    {
+      "pmcid": "PMC12408385",
+      "doi": "10.1038/s41586-025-09300-8",
+      "year": "2025",
+      "journal": "Nature",
+      "license": "cc by",
+      "title": "Latent resistance mechanisms of steel truss bridges after critical failures.",
+      "pool_sentences": 203,
+      "corpus_sentences": 133
+    },
+    {
+      "pmcid": "PMC12609529",
+      "doi": "10.3390/ma18214992",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Study on Process Parameters and Lap Ratio for Laser Cladding IN718 Repair of EA4T Steel.",
+      "pool_sentences": 299,
+      "corpus_sentences": 206
+    },
+    {
+      "pmcid": "PMC12565937",
+      "doi": "10.3390/ma18204660",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "High-Strength Low-Alloy Steels for Automobiles: Microstructure and Mechanical Properties.",
+      "pool_sentences": 157,
+      "corpus_sentences": 107
+    },
+    {
+      "pmcid": "PMC11044215",
+      "doi": "10.1021/acsomega.4c01226",
+      "year": "2024",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Chemical States of Stainless Steel in nm to Several Tens of nm Region from Surface Observed by the Depth-Resolved X-ray Absorption Spectroscopy.",
+      "pool_sentences": 89,
+      "corpus_sentences": 62
+    },
+    {
+      "pmcid": "PMC11940300",
+      "doi": "10.3390/biomimetics10030169",
+      "year": "2025",
+      "journal": "Biomimetics (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Cytocompatibility Study of Stainless Steel 316l Against Differentiated SH-SY5Y Cells.",
+      "pool_sentences": 192,
+      "corpus_sentences": 132
+    },
+    {
+      "pmcid": "PMC8783211",
+      "doi": "10.5005/jp-journals-10005-2003",
+      "year": "2021",
+      "journal": "International journal of clinical pediatric dentistry",
+      "license": "cc by-nc",
+      "title": "Comparative Evaluation of Bond Strength of Different Luting Cements for Cementation of Stainless Steel Bands on Primary Molar Crowns (Stainless Steel and Zirconia Crowns): An In Vitro Study.",
+      "pool_sentences": 105,
+      "corpus_sentences": 76
+    },
+    {
+      "pmcid": "PMC12624107",
+      "doi": "10.1038/s41598-025-24065-w",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "The effect of QPQ treatment on the wear and corrosion resistance of 42CrMo bearing steel.",
+      "pool_sentences": 172,
+      "corpus_sentences": 105
+    },
+    {
+      "pmcid": "PMC12159102",
+      "doi": "10.1007/s11340-025-01177-y",
+      "year": "2025",
+      "journal": "Experimental mechanics",
+      "license": "cc by",
+      "title": "An In-Situ Corrosion Small Punch Test for Developing Stress Corrosion Cracking in Stainless Steel.",
+      "pool_sentences": 188,
+      "corpus_sentences": 133
+    },
+    {
+      "pmcid": "PMC12074384",
+      "doi": "10.3390/s25092812",
+      "year": "2025",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Quantitative Prediction of Residual Stress, Surface Hardness, and Case Depth in Medium Carbon Steel Plate Based on Multifunctional Magnetic Testing Techniques.",
+      "pool_sentences": 202,
+      "corpus_sentences": 123
+    },
+    {
+      "pmcid": "PMC9182440",
+      "doi": "10.3390/ma15113980",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Numerical Simulation Study of Expanding Fracture of 45 Steel Cylindrical Shell under Different Detonation Pressure.",
+      "pool_sentences": 165,
+      "corpus_sentences": 108
+    },
+    {
+      "pmcid": "PMC6821927",
+      "doi": "10.1038/s41598-019-52228-z",
+      "year": "2019",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Effect of selective-precipitations process on the corrosion resistance and hardness of dual-phase high-carbon steel.",
+      "pool_sentences": 134,
+      "corpus_sentences": 82
+    },
+    {
+      "pmcid": "PMC8072966",
+      "doi": "10.3390/ma14082015",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Wear Resistance of Medium Carbon Steel with Different Microstructures.",
+      "pool_sentences": 152,
+      "corpus_sentences": 95
+    },
+    {
+      "pmcid": "PMC9612154",
+      "doi": "10.3390/ma15207227",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Enhanced Strength-Ductility Synergy Properties in Selective Laser Melted 316L Stainless Steel by Strengthening Grinding Process.",
+      "pool_sentences": 156,
+      "corpus_sentences": 97
+    },
+    {
+      "pmcid": "PMC13164498",
+      "doi": "10.3390/ma19091679",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Tempering Temperature on Microstructural Evolution and Mechanical Properties of Cr-Ni-Mo-V Steel for Pressure Vessel Applications.",
+      "pool_sentences": 266,
+      "corpus_sentences": 160
+    },
+    {
+      "pmcid": "PMC9062505",
+      "doi": "10.1039/c8ra09618j",
+      "year": "2019",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "4-(Pyridin-4-yl)thiazol-2-amine as an efficient non-toxic inhibitor for mild steel in hydrochloric acid solutions.",
+      "pool_sentences": 163,
+      "corpus_sentences": 102
+    },
+    {
+      "pmcid": "PMC7476017",
+      "doi": "10.3390/ma13163482",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fabricating Pyramidal Lattice Structures of 304 L Stainless Steel by Wire Arc Additive Manufacturing.",
+      "pool_sentences": 174,
+      "corpus_sentences": 120
+    },
+    {
+      "pmcid": "PMC8621289",
+      "doi": "10.3390/ma14226822",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Influence of Process Parameters on Grain Size and Texture Evolution of Fe-3.2 wt.-% Si Non-Oriented Electrical Steels.",
+      "pool_sentences": 349,
+      "corpus_sentences": 230
+    },
+    {
+      "pmcid": "PMC7013410",
+      "doi": "10.3390/ma13020461",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Study of Characteristics of Aluminum Bronze Coatings Applied to Steel Using Additive Technologies.",
+      "pool_sentences": 104,
+      "corpus_sentences": 65
+    },
+    {
+      "pmcid": "PMC13294893",
+      "doi": "10.1021/acsomega.5c12820",
+      "year": "2026",
+      "journal": "ACS omega",
+      "license": "cc by",
+      "title": "Experimental-Numerical Evaluation of Crack Growth in FeB/Fe2B Layers on AISI 316L Steel under Spherical Indentation.",
+      "pool_sentences": 171,
+      "corpus_sentences": 114
+    },
+    {
+      "pmcid": "PMC9002498",
+      "doi": "10.3390/polym14071419",
+      "year": "2022",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Flexural Behavior on Damaged Steel Beams Strengthened with CFRP Sheets Subjected to Overloading.",
+      "pool_sentences": 198,
+      "corpus_sentences": 122
+    },
+    {
+      "pmcid": "PMC7360884",
+      "doi": "10.1016/j.heliyon.2020.e04440",
+      "year": "2020",
+      "journal": "Heliyon",
+      "license": "cc by-nc-nd",
+      "title": "On the effect of pre-strain and pre-fatigue on the monotonic behaviour of ultra-high strength steels.",
+      "pool_sentences": 128,
+      "corpus_sentences": 83
+    },
+    {
+      "pmcid": "PMC10667658",
+      "doi": "10.1111/1758-2229.13192",
+      "year": "2023",
+      "journal": "Environmental microbiology reports",
+      "license": "cc by",
+      "title": "Dehalococcoides mccartyi strain NIT01 grows more stably in vessels made of pure titanium rather than the stainless alloy SUS304.",
+      "pool_sentences": 146,
+      "corpus_sentences": 100
+    },
+    {
+      "pmcid": "PMC6119915",
+      "doi": "10.3390/ma11081437",
+      "year": "2018",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Electromagnetic Stirring on the Microstructure and Properties of Fe-Cr-Co Steel.",
+      "pool_sentences": 146,
+      "corpus_sentences": 89
+    },
+    {
+      "pmcid": "PMC2796760",
+      "doi": "10.4103/0019-5278.43264",
+      "year": "2008",
+      "journal": "Indian journal of occupational and environmental medicine",
+      "license": "cc by",
+      "title": "Investigation of respirable particulate matter pollutants on air-breathing zone workers in the Beam Rolling Mills Factory (Iran National Steel Industrial Group), Ahvaz, Iran.",
+      "pool_sentences": 59,
+      "corpus_sentences": 34
+    },
+    {
+      "pmcid": "PMC10779903",
+      "doi": "10.3390/ma17010223",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Exploring Inhibition Mechanism of Si on Cementite Nucleation in Hypereutectoid Steel: Experiments and First-Principles Calculations.",
+      "pool_sentences": 179,
+      "corpus_sentences": 120
+    },
+    {
+      "pmcid": "PMC10143417",
+      "doi": "10.3390/ma16083055",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Experimental Investigation on Shear Capacity of Steel-Fiber-Reinforced High-Strength Concrete Corbels.",
+      "pool_sentences": 173,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC13666047",
+      "doi": null,
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Volume Stabilization of Steel Slag for Low-Carbon Construction Materials: Mechanisms, Treatment Technologies, and Engineering Application Pathways",
+      "pool_sentences": 325,
+      "corpus_sentences": 211
+    },
+    {
+      "pmcid": "PMC6119942",
+      "doi": "10.3390/ma11081327",
+      "year": "2018",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effects of Processing Conditions on Texture and Microstructure Evolution in Extra-Low Carbon Steel during Multi-Pass Asymmetric Rolling.",
+      "pool_sentences": 221,
+      "corpus_sentences": 154
+    },
+    {
+      "pmcid": "PMC13117994",
+      "doi": "10.3390/ma19081606",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Design of CoNiCrFeCu-xSc High-Entropy Alloy Fillers for Braze-Welding of WC-Co to Steel.",
+      "pool_sentences": 265,
+      "corpus_sentences": 174
+    },
+    {
+      "pmcid": "PMC12986447",
+      "doi": "10.3390/ma19051001",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Study on Pitting Corrosion Simulation of Steel Plates Based on Cellular Automaton-Finite Element Coupling.",
+      "pool_sentences": 340,
+      "corpus_sentences": 206
+    },
+    {
+      "pmcid": "PMC10179863",
+      "doi": "10.3390/ma16093419",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Shear Behavior of Reinforced Concrete Beam Retrofitted with Modularized Steel Plates.",
+      "pool_sentences": 128,
+      "corpus_sentences": 81
+    },
+    {
+      "pmcid": "PMC6272354",
+      "doi": "10.3390/molecules200611131",
+      "year": "2015",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A New Green Ionic Liquid-Based Corrosion Inhibitor for Steel in Acidic Environments.",
+      "pool_sentences": 202,
+      "corpus_sentences": 134
+    },
+    {
+      "pmcid": "PMC13027666",
+      "doi": "10.3390/ma19061248",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Hybrid Steel Fiber Design in Ultra-High-Performance Concrete Containing Coarse Aggregate Using Pore Size Distribution Within Coarse Aggregate Skeleton.",
+      "pool_sentences": 149,
+      "corpus_sentences": 99
+    },
+    {
+      "pmcid": "PMC9862269",
+      "doi": "10.3390/mi14010028",
+      "year": "2022",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Magnetic Harvester for an Autonomous Steel Health Monitoring System Based on Hall Effect Measurements.",
+      "pool_sentences": 131,
+      "corpus_sentences": 84
+    },
+    {
+      "pmcid": "PMC5666995",
+      "doi": "10.3390/ma10101189",
+      "year": "2017",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Antibacterial and Tribological Performance of Carbonitride Coatings Doped with W, Ti, Zr, or Cr Deposited on AISI 316L Stainless Steel.",
+      "pool_sentences": 250,
+      "corpus_sentences": 172
+    },
+    {
+      "pmcid": "PMC10779644",
+      "doi": "10.3390/ma17010155",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Numerical Study on the Axial Compressive Behavior of Steel-Tube-Confined Concrete-Filled Steel Tubes.",
+      "pool_sentences": 247,
+      "corpus_sentences": 161
+    },
+    {
+      "pmcid": "PMC6471288",
+      "doi": "10.3390/s19061443",
+      "year": "2019",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Use of Time-Dependent Multispectral Representation of Magnetic Barkhausen Noise Signals for the Needs of Non-Destructive Evaluation of Steel Materials.",
+      "pool_sentences": 338,
+      "corpus_sentences": 219
+    },
+    {
+      "pmcid": "PMC13594918",
+      "doi": "10.1016/j.psj.2026.107612",
+      "year": "2026",
+      "journal": "Poultry science",
+      "license": "cc by-nc-nd",
+      "title": "Antibiofilm activity of thymol against Salmonella Infantis on polystyrene and stainless steel surfaces.",
+      "pool_sentences": 281,
+      "corpus_sentences": 175
+    },
+    {
+      "pmcid": "PMC5562793",
+      "doi": "10.1038/s41598-017-07925-y",
+      "year": "2017",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Green Br\u00f6nsted acid ionic liquids as novel corrosion inhibitors for carbon steel in acidic medium.",
+      "pool_sentences": 144,
+      "corpus_sentences": 98
+    },
+    {
+      "pmcid": "PMC10934120",
+      "doi": "10.3390/ma17050976",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of In Situ NbC-Cr7C3@graphene/Fe Nanocomposite Inoculant Modification and Refinement on the Microstructure and Properties of W18Cr4V High-Speed Steel.",
+      "pool_sentences": 181,
+      "corpus_sentences": 113
+    },
+    {
+      "pmcid": "PMC6475830",
+      "doi": "10.1016/j.heliyon.2019.e01347",
+      "year": "2019",
+      "journal": "Heliyon",
+      "license": "cc by-nc-nd",
+      "title": "Two flow stress models for describing hot deformation behavior of AISI-1045 medium carbon steel at elevated temperatures.",
+      "pool_sentences": 133,
+      "corpus_sentences": 96
+    },
+    {
+      "pmcid": "PMC9060584",
+      "doi": "10.1039/c8ra09446b",
+      "year": "2019",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "Rheological, electrochemical, surface, DFT and molecular dynamics simulation studies on the anticorrosive properties of new epoxy monomer compound for steel in 1 M HCl solution.",
+      "pool_sentences": 176,
+      "corpus_sentences": 118
+    },
+    {
+      "pmcid": "PMC9105650",
+      "doi": "10.3390/ma15093274",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Method of Iterative Determination of the Polarized Area of Steel Reinforcement in Concrete Applied in the EIS Measurements.",
+      "pool_sentences": 218,
+      "corpus_sentences": 136
+    },
+    {
+      "pmcid": "PMC12689860",
+      "doi": "10.1038/s41598-025-28422-7",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Enhancement of tribological behavior and microhardness of AISI H13 tool steel by electrochemical boriding.",
+      "pool_sentences": 227,
+      "corpus_sentences": 149
+    },
+    {
+      "pmcid": "PMC10358616",
+      "doi": "10.1177/00368504231175712",
+      "year": "2023",
+      "journal": "Science progress",
+      "license": "cc by-nc",
+      "title": "Fire resistance of low alloy Q420d high-strength steel column under high-temperature creep.",
+      "pool_sentences": 126,
+      "corpus_sentences": 90
+    },
+    {
+      "pmcid": "PMC9656331",
+      "doi": "10.3390/ma15217697",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Advantageous Implications of Reversed Austenite for the Tensile Properties of Super 13Cr Martensitic Stainless Steel.",
+      "pool_sentences": 137,
+      "corpus_sentences": 87
+    },
+    {
+      "pmcid": "PMC12072917",
+      "doi": "10.3390/ma18092078",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Electrochemical Investigations of Galium verum Ethanolic Extract as a Steel Corrosion Eco-Inhibitor in the Acid Media: An Unexpected Versatility of Plant Chemistry.",
+      "pool_sentences": 270,
+      "corpus_sentences": 189
+    },
+    {
+      "pmcid": "PMC12651424",
+      "doi": "10.1016/j.mex.2025.103706",
+      "year": "2025",
+      "journal": "MethodsX",
+      "license": "cc by",
+      "title": "I-Kaz methodology for predicting tool life of AlCrN-Coated WC-Co inserts in the machining of AISI 304 steel.",
+      "pool_sentences": 135,
+      "corpus_sentences": 94
+    },
+    {
+      "pmcid": "PMC13195859",
+      "doi": "10.1186/s12889-026-27229-z",
+      "year": "2026",
+      "journal": "BMC public health",
+      "license": "cc by-nc-nd",
+      "title": "Development and validation of an Occupational Hazards Index (OHI) and its association with hypertension-diabetes comorbidity in steel workers: a prospective cohort study.",
+      "pool_sentences": 275,
+      "corpus_sentences": 192
+    },
+    {
+      "pmcid": "PMC8780259",
+      "doi": "10.3390/ma15020479",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Modeling the Hydrogen Redistribution at the Grain Boundary of Misoriented Bicrystals in Austenite Stainless Steel.",
+      "pool_sentences": 123,
+      "corpus_sentences": 83
+    },
+    {
+      "pmcid": "PMC7040734",
+      "doi": "10.3390/ma13030634",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The Impact of Isothermal Treatment on the Microstructural Evolution and the Precipitation Behavior in High Strength Linepipe Steel.",
+      "pool_sentences": 204,
+      "corpus_sentences": 133
+    },
+    {
+      "pmcid": "PMC13412141",
+      "doi": "10.3390/jimaging12070312",
+      "year": "2026",
+      "journal": "Journal of imaging",
+      "license": "cc by",
+      "title": "A2S2C-Det: Dual-Path Adaptive Aggregation with Spatial-Semantic Compensation for Strip Steel Surface Defect Detection.",
+      "pool_sentences": 261,
+      "corpus_sentences": 167
+    },
+    {
+      "pmcid": "PMC7608441",
+      "doi": "10.1038/s41431-020-0632-x",
+      "year": "2020",
+      "journal": "European journal of human genetics : EJHG",
+      "license": "cc by",
+      "title": "Functional biology of the Steel syndrome founder allele and evidence for clan genomics derivation of COL27A1 pathogenic alleles worldwide.",
+      "pool_sentences": 250,
+      "corpus_sentences": 185
+    },
+    {
+      "pmcid": "PMC10223585",
+      "doi": "10.3390/ma16103892",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Development of an Instantaneous Loading Impact Test System for Containment of a Nuclear Power Plant during Aircraft Impact on Steel Bar Joints.",
+      "pool_sentences": 155,
+      "corpus_sentences": 104
+    },
+    {
+      "pmcid": "PMC8540612",
+      "doi": "10.3390/ma14205943",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Surface Roughness Analysis of H13 Steel during Electrical Discharge Machining Process Using Cu-TiC Sintered Electrode.",
+      "pool_sentences": 156,
+      "corpus_sentences": 106
+    },
+    {
+      "pmcid": "PMC9607126",
+      "doi": "10.3390/ma15207192",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Simulation of Melting Efficiency in Laser Cutting of Hardox 400 Steel.",
+      "pool_sentences": 492,
+      "corpus_sentences": 328
+    },
+    {
+      "pmcid": "PMC13133470",
+      "doi": "10.1177/00368504261447149",
+      "year": "2026",
+      "journal": "Science progress",
+      "license": "cc by-nc",
+      "title": "Advanced ultrasonic characterization of recycled steel fiber-reinforced mortars: Integrating nonlinear parameters for optimal fiber dosage determination.",
+      "pool_sentences": 424,
+      "corpus_sentences": 291
+    },
+    {
+      "pmcid": "PMC10779859",
+      "doi": "10.3390/ma17010183",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Comparison of Thermal Behaviors of Carbon and Stainless Steel Billets during the Heating Process.",
+      "pool_sentences": 185,
+      "corpus_sentences": 133
+    },
+    {
+      "pmcid": "PMC8585231",
+      "doi": "10.3390/ma14216426",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "An In-Situ Electrochemical Nanoindentation (ECNI) Study on the Effect of Hydrogen on the Mechanical Properties of 316L Austenitic Stainless Steel.",
+      "pool_sentences": 228,
+      "corpus_sentences": 155
+    },
+    {
+      "pmcid": "PMC13164885",
+      "doi": "10.3390/ma19091891",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Paste-Level Evaluation of a Hybrid Silicomanganese Slag-Steel Slag-OPC-Activated Binder: Mechanical Performance, Simplified Carbon Footprint and Mn Leaching Reduction.",
+      "pool_sentences": 311,
+      "corpus_sentences": 201
+    },
+    {
+      "pmcid": "PMC12529203",
+      "doi": "10.1021/acsomega.5c03599",
+      "year": "2025",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Unravelling Adsorption and Interaction of Synthesized Chlorinated Cyclic Imide Derivative on the Corrosion of C\u2011Steel in H2SO4 Solution: Experimental Control and Mathematical Calculations.",
+      "pool_sentences": 281,
+      "corpus_sentences": 191
+    },
+    {
+      "pmcid": "PMC12156057",
+      "doi": "10.3390/ma18112488",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Rapid Heating-Driven Variant Selection and Martensitic Refinement for Superior Strength-Ductility Synergy.",
+      "pool_sentences": 187,
+      "corpus_sentences": 123
+    },
+    {
+      "pmcid": "PMC12245112",
+      "doi": "10.1002/advs.202503226",
+      "year": "2025",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Twin Toughening-Driven Martensitic Transformation Strategy Synergistic Improvement for Plasticity-Thermal Shock Resistance of (Hf\u2500Zr\u2500Ti)C Ceramic Coating in Severe Thermal Environments.",
+      "pool_sentences": 154,
+      "corpus_sentences": 97
+    },
+    {
+      "pmcid": "PMC12941763",
+      "doi": "10.3390/ma19040795",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Strength Prediction of Cement-Stabilized Steel Slag Using Deep Learning and SHAP Analysis.",
+      "pool_sentences": 263,
+      "corpus_sentences": 183
+    },
+    {
+      "pmcid": "PMC11278548",
+      "doi": "10.3390/mi15070926",
+      "year": "2024",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "An Experimental Study in Laser-Assisted Machining of AerMet100 Steel.",
+      "pool_sentences": 147,
+      "corpus_sentences": 95
+    },
+    {
+      "pmcid": "PMC10303070",
+      "doi": "10.3390/ma16124253",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Process Parameters on the Formability, Microstructure, and Mechanical Properties of Laser-Arc Hybrid Welding of Q355B Steel.",
+      "pool_sentences": 111,
+      "corpus_sentences": 78
+    },
+    {
+      "pmcid": "PMC11937405",
+      "doi": "10.1038/s41598-025-95104-9",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Comprehensive evaluation of 5-imino-1,2,4-dithiazolidine-3-thione as a corrosion inhibitor for mild steel in hydrochloric acid solution.",
+      "pool_sentences": 296,
+      "corpus_sentences": 202
+    },
+    {
+      "pmcid": "PMC4293913",
+      "doi": "10.1016/j.jare.2013.09.003",
+      "year": "2014",
+      "journal": "Journal of advanced research",
+      "license": "cc by-nc-nd",
+      "title": "Inhibitory action of quaternary ammonium bromide on mild steel and synergistic effect with other halide ions in 0.5 M H2SO4.",
+      "pool_sentences": 158,
+      "corpus_sentences": 108
+    },
+    {
+      "pmcid": "PMC10285953",
+      "doi": "10.1021/acsomega.3c00741",
+      "year": "2023",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Corrosion Inhibition of Azo Compounds Derived from Schiff Bases on Mild Steel (XC70) in (HCl, 1 M DMSO) Medium: An Experimental and Theoretical Study.",
+      "pool_sentences": 159,
+      "corpus_sentences": 102
+    },
+    {
+      "pmcid": "PMC12300612",
+      "doi": "10.3390/ma18143406",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Buckling Performance of Prefabricated Light-Gauge Steel Frame Materials Under Combined Random Defects During Construction: A CRITIC-Based Analysis.",
+      "pool_sentences": 277,
+      "corpus_sentences": 173
+    },
+    {
+      "pmcid": "PMC10975896",
+      "doi": "10.3390/polym16060809",
+      "year": "2024",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "A Review of Antimicrobial Polymer Coatings on Steel for the Food Processing Industry.",
+      "pool_sentences": 268,
+      "corpus_sentences": 177
+    },
+    {
+      "pmcid": "PMC7515860",
+      "doi": "10.1038/s41598-020-72787-w",
+      "year": "2020",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Anticorrosive non-crystalline coating prepared by plasma electrolytic oxidation for ship low carbon steel pipes.",
+      "pool_sentences": 140,
+      "corpus_sentences": 91
+    },
+    {
+      "pmcid": "PMC6720947",
+      "doi": "10.3390/ma12162522",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "FEM-Based Study of Precision Hard Turning of Stainless Steel 316L.",
+      "pool_sentences": 192,
+      "corpus_sentences": 119
+    },
+    {
+      "pmcid": "PMC6005923",
+      "doi": "10.1016/j.shaw.2017.07.003",
+      "year": "2018",
+      "journal": "Safety and health at work",
+      "license": "cc by-nc-nd",
+      "title": "Assessment of Semen Quality among Workers Exposed to Heat Stress: A Cross-Sectional Study in a Steel Industry.",
+      "pool_sentences": 73,
+      "corpus_sentences": 48
+    },
+    {
+      "pmcid": "PMC13514585",
+      "doi": "10.3390/ma19163521",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Corrosion of Embedded Carbon Steels, Carbonation and Chloride Diffusion in Low-Clinker Hybrid and LC3-50 Cements: A Critical Review.",
+      "pool_sentences": 302,
+      "corpus_sentences": 210
+    },
+    {
+      "pmcid": "PMC8541131",
+      "doi": "10.3390/ma14206209",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The Influence of the Type of Electrolyte in the Modifying Solution on the Protective Properties of Vinyltrimethoysilane/Ethanol-Based Coatings Formed on Stainless Steel X20Cr13.",
+      "pool_sentences": 185,
+      "corpus_sentences": 118
+    },
+    {
+      "pmcid": "PMC13608533",
+      "doi": "10.3390/ma19184007",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Comparative Study of Microstructure, Phase Composition, Hardness, and Tribological Behavior of Low-Carbon Steel After Electrolytic-Plasma and Laser Surface Hardening.",
+      "pool_sentences": 221,
+      "corpus_sentences": 151
+    },
+    {
+      "pmcid": "PMC10222114",
+      "doi": "10.3390/ma16103852",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Mechanical Properties of High Carbon Low-Density Steels.",
+      "pool_sentences": 296,
+      "corpus_sentences": 201
+    },
+    {
+      "pmcid": "PMC7579034",
+      "doi": "10.3390/ma13194339",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Laboratory and Numerical Analysis of Steel Cold-Formed Sigma Beams Retrofitted by Bonded CFRP Tapes.",
+      "pool_sentences": 160,
+      "corpus_sentences": 108
+    },
+    {
+      "pmcid": "PMC5456157",
+      "doi": "10.3390/ma7096632",
+      "year": "2014",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Corrosion Resistance of a Sand Particle-Modified Enamel Coating Applied to Smooth Steel Bars.",
+      "pool_sentences": 144,
+      "corpus_sentences": 91
+    },
+    {
+      "pmcid": "PMC11857781",
+      "doi": "10.3390/ma18040868",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Experimental Investigation and FEM Simulation of the Tensile Behavior of Hot-Rolled Quenching and Partitioning 5Mn Steel.",
+      "pool_sentences": 236,
+      "corpus_sentences": 162
+    },
+    {
+      "pmcid": "PMC5456005",
+      "doi": "10.3390/ma7107130",
+      "year": "2014",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Application of Various NDT Methods for the Evaluation of Building Steel Structures for Reuse.",
+      "pool_sentences": 150,
+      "corpus_sentences": 111
+    },
+    {
+      "pmcid": "PMC13157503",
+      "doi": "10.1038/s41598-026-49485-0",
+      "year": "2026",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Robust ZIF-67/AC/PDMS hybrid nanocomposite for superhydrophobic steel protection.",
+      "pool_sentences": 178,
+      "corpus_sentences": 130
+    },
+    {
+      "pmcid": "PMC5459100",
+      "doi": "10.3390/ma10020139",
+      "year": "2017",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Creep Rupture of the Simulated HAZ of T92 Steel Compared to that of a T91 Steel.",
+      "pool_sentences": 164,
+      "corpus_sentences": 112
+    },
+    {
+      "pmcid": "PMC9000599",
+      "doi": "10.3390/ma15072589",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Tempering Temperature on Microstructure and Sulfide Stress Cracking of 125 Ksi Grade Casing Steel.",
+      "pool_sentences": 137,
+      "corpus_sentences": 81
+    },
+    {
+      "pmcid": "PMC6539813",
+      "doi": "10.3390/ma12091455",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Hot Deformation Process Parameters on Microstructure and Corrosion Behavior of 35CrMoV Steel.",
+      "pool_sentences": 212,
+      "corpus_sentences": 140
+    },
+    {
+      "pmcid": "PMC12250636",
+      "doi": "10.3390/ma18133008",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Influence of Recycled Tire Steel Fibers on the Mechanical Properties and Carbon Emissions of High-Performance Cement-Based Materials.",
+      "pool_sentences": 206,
+      "corpus_sentences": 129
+    },
+    {
+      "pmcid": "PMC13362920",
+      "doi": "10.3390/ma19132727",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Structural Characteristics and Properties of Zinc Coatings on Steel Structural Elements.",
+      "pool_sentences": 170,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC8433828",
+      "doi": "10.3390/ma14175084",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Grain Size on the Corrosion Behavior of Fe-3wt.%Si-1wt.%Al Electrical Steels in Pure Water Saturated with CO2.",
+      "pool_sentences": 154,
+      "corpus_sentences": 102
+    },
+    {
+      "pmcid": "PMC6356225",
+      "doi": "10.3390/ma12020279",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Microstructure and Mechanical Properties of 34CrNiMo6 Steel Repaired by Friction Stir Processing.",
+      "pool_sentences": 161,
+      "corpus_sentences": 113
+    },
+    {
+      "pmcid": "PMC13412899",
+      "doi": "10.3390/ma19142971",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Electrical Resistance-Based Characterization of Carbon Steel Using Controlled Current Injection and Parameter Estimation.",
+      "pool_sentences": 220,
+      "corpus_sentences": 149
+    },
+    {
+      "pmcid": "PMC9074232",
+      "doi": "10.1039/c9ra07378g",
+      "year": "2019",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Surface modification of ZnMgAl-coated steel by dielectric-barrier discharge plasma.",
+      "pool_sentences": 262,
+      "corpus_sentences": 173
+    },
+    {
+      "pmcid": "PMC12103574",
+      "doi": "10.1038/s41598-025-03366-0",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Bond slip behavior of light steel and foamed concrete under freeze-thaw cycles.",
+      "pool_sentences": 283,
+      "corpus_sentences": 171
+    },
+    {
+      "pmcid": "PMC10856393",
+      "doi": "10.3390/ma17030695",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Microstructure and Mechanical Properties of IN690 Ni-Based Alloy/316LN Stainless-Steel Dissimilar Ring Joint Welded by Inertia Friction Welding.",
+      "pool_sentences": 266,
+      "corpus_sentences": 185
+    },
+    {
+      "pmcid": "PMC5455723",
+      "doi": null,
+      "year": "2015",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Adsorption, Thermodynamic and Quantum Chemical Studies of 1-hexyl-3-methylimidazolium Based Ionic Liquids as Corrosion Inhibitors for Mild Steel in HCl",
+      "pool_sentences": 183,
+      "corpus_sentences": 116
+    },
+    {
+      "pmcid": "PMC12030155",
+      "doi": "10.3390/polym17081072",
+      "year": "2025",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Study on the Influence and Mechanism of Steel, Polyvinyl Alcohol, and Polyethylene Fibers on Slag-Yellow River Sediment Geopolymers.",
+      "pool_sentences": 268,
+      "corpus_sentences": 185
+    },
+    {
+      "pmcid": "PMC10617017",
+      "doi": "10.1039/d3ra04518h",
+      "year": "2023",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Synthesis, characterization, and evaluation of polymeric surfactants derived from PET plastic waste as green corrosion inhibitor of steel surfaces in marine environment for heavy industry.",
+      "pool_sentences": 291,
+      "corpus_sentences": 208
+    },
+    {
+      "pmcid": "PMC10632433",
+      "doi": "10.1038/s41597-023-02662-6",
+      "year": "2023",
+      "journal": "Scientific data",
+      "license": "cc by",
+      "title": "DOES - A multimodal dataset for supervised and unsupervised analysis of steel scrap.",
+      "pool_sentences": 206,
+      "corpus_sentences": 131
+    },
+    {
+      "pmcid": "PMC8069775",
+      "doi": "10.3390/e23040462",
+      "year": "2021",
+      "journal": "Entropy (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The Influence of Martensitic Intercalations in Magnetic Shape Memory NiCoMnAl Multilayered Films.",
+      "pool_sentences": 132,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC2660664",
+      "doi": "10.3390/ijms10020559",
+      "year": "2009",
+      "journal": "International journal of molecular sciences",
+      "license": "cc by",
+      "title": "Evaluation of various metallic coatings on steel to mitigate biofilm formation.",
+      "pool_sentences": 175,
+      "corpus_sentences": 113
+    },
+    {
+      "pmcid": "PMC12074131",
+      "doi": "10.3390/s25092769",
+      "year": "2025",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Harmonic Distortion Measurements for Non-Destructive Evaluation of Steel Strips.",
+      "pool_sentences": 357,
+      "corpus_sentences": 239
+    },
+    {
+      "pmcid": "PMC11767545",
+      "doi": "10.3390/molecules30020272",
+      "year": "2025",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Investigating the Adsorption and Corrosion Protection Efficacy and Mechanism of Marjoram Extract on Mild Steel in HCl Medium.",
+      "pool_sentences": 195,
+      "corpus_sentences": 134
+    },
+    {
+      "pmcid": "PMC13443028",
+      "doi": "10.13004/kjnt.2026.22.e25",
+      "year": "2026",
+      "journal": "Korean journal of neurotrauma",
+      "license": "cc by-nc",
+      "title": "Delayed Diagnosis of Pyogenic Spondylitis After Impalement by Steel Rods: Case Report.",
+      "pool_sentences": 99,
+      "corpus_sentences": 63
+    },
+    {
+      "pmcid": "PMC8510239",
+      "doi": "10.3390/ma14195886",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Comparison of Microstructure and Mechanical Properties of High Strength and Toughness Ship Plate Steel.",
+      "pool_sentences": 194,
+      "corpus_sentences": 130
+    },
+    {
+      "pmcid": "PMC8586948",
+      "doi": "10.3390/s21217364",
+      "year": "2021",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Analysis of Double Elastic Steel Wind Driven Magneto-Electric Vibration Energy Harvesting System.",
+      "pool_sentences": 229,
+      "corpus_sentences": 167
+    },
+    {
+      "pmcid": "PMC11402685",
+      "doi": "10.1016/j.heliyon.2024.e37125",
+      "year": "2024",
+      "journal": "Heliyon",
+      "license": "cc by-nc",
+      "title": "Nickel release from 316L stainless steel following a Ni-free electroplating cycle.",
+      "pool_sentences": 222,
+      "corpus_sentences": 144
+    },
+    {
+      "pmcid": "PMC9866091",
+      "doi": "10.3390/ma16020800",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Determination of Johnson-Cook Constitutive of 15-5 PH Steel Processed by Selective Laser Melting.",
+      "pool_sentences": 248,
+      "corpus_sentences": 169
+    },
+    {
+      "pmcid": "PMC9457931",
+      "doi": "10.3390/nano12172924",
+      "year": "2022",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Nanoporous Stainless Steel Materials for Body Implants-Review of Synthesizing Procedures.",
+      "pool_sentences": 215,
+      "corpus_sentences": 144
+    },
+    {
+      "pmcid": "PMC9992942",
+      "doi": "10.1039/d3ra00148b",
+      "year": "2023",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Electrochemical study on the effect of polar and non-polar extract of Artemisia vulgaris on the corrosion inhibition of mild-steel in an acidic medium.",
+      "pool_sentences": 195,
+      "corpus_sentences": 136
+    },
+    {
+      "pmcid": "PMC12942722",
+      "doi": "10.3390/mi17020212",
+      "year": "2026",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Machine Learning-Enabled Prognostication of Tensile Strength in 316L Stainless Steel Through Additive Manufacturing Processes.",
+      "pool_sentences": 177,
+      "corpus_sentences": 111
+    },
+    {
+      "pmcid": "PMC10143210",
+      "doi": "10.3390/ma16083150",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Parameterized Leblond-Devaux Equation for Predicting Phase Evolution during Welding E36 and E36Nb Marine Steels.",
+      "pool_sentences": 138,
+      "corpus_sentences": 94
+    },
+    {
+      "pmcid": "PMC6515415",
+      "doi": "10.3390/ma12081339",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Experimental and Theoretical Studies on the Corrosion Inhibition of Carbon Steel by Two Indazole Derivatives in HCl Medium.",
+      "pool_sentences": 105,
+      "corpus_sentences": 66
+    },
+    {
+      "pmcid": "PMC11720852",
+      "doi": "10.3390/ma18010069",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Ce Content on Modification Behavior of Inclusions and Corrosion Resistance of 316L Stainless Steel.",
+      "pool_sentences": 155,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC7452479",
+      "doi": "10.1016/j.dib.2020.106159",
+      "year": "2020",
+      "journal": "Data in brief",
+      "license": "cc by",
+      "title": "Evaluation of the corrosion resistance of a Ni-P coating deposited on additive manufacturing steel: A dataset.",
+      "pool_sentences": 27,
+      "corpus_sentences": 23
+    },
+    {
+      "pmcid": "PMC3338472",
+      "doi": "10.1371/journal.pone.0035987",
+      "year": "2012",
+      "journal": "PloS one",
+      "license": "cc by",
+      "title": "Analysis of transformation plasticity in steel using a finite element method coupled with a phase field model.",
+      "pool_sentences": 160,
+      "corpus_sentences": 105
+    },
+    {
+      "pmcid": "PMC5087438",
+      "doi": "10.3390/s16101650",
+      "year": "2016",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Steel Wire Stress Measuring Sensor Based on the Static Magnetization by Permanent Magnets.",
+      "pool_sentences": 271,
+      "corpus_sentences": 179
+    },
+    {
+      "pmcid": "PMC8472821",
+      "doi": "10.3390/ma14185274",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Simulation of Subrapid Solidification and Secondary Cooling for the Strip Casting of IF Steel.",
+      "pool_sentences": 197,
+      "corpus_sentences": 125
+    },
+    {
+      "pmcid": "PMC8123778",
+      "doi": "10.3390/ma14092241",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Oxygen Content on Microstructure and Tensile Properties of a 22Cr-5Al ODS Steel.",
+      "pool_sentences": 109,
+      "corpus_sentences": 69
+    },
+    {
+      "pmcid": "PMC8067560",
+      "doi": "10.3390/polym13081181",
+      "year": "2021",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Moment Redistribution in Continuous Externally CFRP Prestressed Beams with Steel and FRP Rebars.",
+      "pool_sentences": 151,
+      "corpus_sentences": 98
+    },
+    {
+      "pmcid": "PMC7477601",
+      "doi": "10.1016/j.techsoc.2020.101375",
+      "year": "2020",
+      "journal": "Technology in society",
+      "license": "cc by",
+      "title": "The 'Industrial Enlightenment' and technological paradigms of the modern steel industry.",
+      "pool_sentences": 132,
+      "corpus_sentences": 93
+    },
+    {
+      "pmcid": "PMC12505161",
+      "doi": "10.2340/biid.v12.44819",
+      "year": "2025",
+      "journal": "Biomaterial investigations in dentistry",
+      "license": "cc by",
+      "title": "Antibacterial effect of titanium oxide and cobalt-doped zinc ferrite coated stainless steel orthodontic brackets against Streptococcus mutans - an in-vitro study.",
+      "pool_sentences": 128,
+      "corpus_sentences": 91
+    },
+    {
+      "pmcid": "PMC8540404",
+      "doi": "10.3390/ma14206033",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Elucidating the Effect of Step Cooling Heat Treatment on the Properties of 2.25 Cr-1.0 Mo Steel Welded with a Combination of GMAW Techniques Incorporating Metal-Cored Wires.",
+      "pool_sentences": 158,
+      "corpus_sentences": 98
+    },
+    {
+      "pmcid": "PMC9329007",
+      "doi": "10.1155/2022/2156921",
+      "year": "2022",
+      "journal": "International journal of analytical chemistry",
+      "license": "cc by",
+      "title": "Mechanical Performance Test and Numerical Simulation Analysis of Building Steel Plate and Concrete Composite Structure.",
+      "pool_sentences": 154,
+      "corpus_sentences": 99
+    },
+    {
+      "pmcid": "PMC11767137",
+      "doi": "10.3390/ma18020450",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Experimental Study on Flexural Behaviour of Prefabricated Steel-Concrete Composite I-Beams Under Negative Bending Moment: Comparative Study.",
+      "pool_sentences": 195,
+      "corpus_sentences": 133
+    },
+    {
+      "pmcid": "PMC10696042",
+      "doi": "10.1038/s41598-023-48754-6",
+      "year": "2023",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Friction taper stitch welding of a duplex stainless steel.",
+      "pool_sentences": 140,
+      "corpus_sentences": 92
+    },
+    {
+      "pmcid": "PMC10689471",
+      "doi": "10.1038/s41467-023-43752-8",
+      "year": "2023",
+      "journal": "Nature communications",
+      "license": "cc by",
+      "title": "Design for improving corrosion resistance of duplex stainless steels by wrapping inclusions with niobium armour.",
+      "pool_sentences": 232,
+      "corpus_sentences": 160
+    },
+    {
+      "pmcid": "PMC9145048",
+      "doi": "10.3390/ma15103550",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Dynamic Compressive Mechanical Behavior and Microstructure Evolution of Rolled Fe-28Mn-10Al-1.2C Low-Density Steel.",
+      "pool_sentences": 137,
+      "corpus_sentences": 86
+    },
+    {
+      "pmcid": "PMC11991359",
+      "doi": "10.3390/polym17070846",
+      "year": "2025",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Theoretical Prediction Method for Tensile Properties of High-Strength Steel/Carbon Fiber-Reinforced Polymer Laminates.",
+      "pool_sentences": 157,
+      "corpus_sentences": 110
+    },
+    {
+      "pmcid": "PMC10608100",
+      "doi": "10.3390/ma16206824",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Study on Surface Hardening and Wear Resistance of AISI 52100 Steel by Ultrasonic Nanocrystal Surface Modification and Electrolytic Plasma Surface Modification Technologies.",
+      "pool_sentences": 162,
+      "corpus_sentences": 108
+    },
+    {
+      "pmcid": "PMC8621913",
+      "doi": "10.3390/nano11112859",
+      "year": "2021",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The Influence of Metastable Cellular Structure on Deformation Behavior in Laser Additively Manufactured 316L Stainless Steel.",
+      "pool_sentences": 143,
+      "corpus_sentences": 93
+    },
+    {
+      "pmcid": "PMC11643918",
+      "doi": "10.3390/ma17235963",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Dynamic Variation in the Semiconductive Tendency of the Passive Film on Duplex Stainless Steel in Corrosion Environments.",
+      "pool_sentences": 188,
+      "corpus_sentences": 115
+    },
+    {
+      "pmcid": "PMC6525313",
+      "doi": "10.1016/j.heliyon.2019.e01720",
+      "year": "2019",
+      "journal": "Heliyon",
+      "license": "cc by-nc-nd",
+      "title": "Carbon steel corrosion controlled by vegetable polyol phosphate, in medium containing chloride and glyoxal: influence of phosphate content and CO2.",
+      "pool_sentences": 145,
+      "corpus_sentences": 96
+    },
+    {
+      "pmcid": "PMC6321393",
+      "doi": "10.3390/molecules23123270",
+      "year": "2018",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Experimental and Theoretical Study on the Synergistic Inhibition Effect of Pyridine Derivatives and Sulfur-Containing Compounds on the Corrosion of Carbon Steel in CO\u2082-Saturated 3.5 wt.% NaCl Solution.",
+      "pool_sentences": 188,
+      "corpus_sentences": 131
+    },
+    {
+      "pmcid": "PMC11639692",
+      "doi": "10.1016/j.heliyon.2023.e23666",
+      "year": "2024",
+      "journal": "Heliyon",
+      "license": "cc by",
+      "title": "Parametric investigation of rectangular CFRP-confined concrete columns reinforced by inner elliptical steel tubes using finite element and machine learning models.",
+      "pool_sentences": 317,
+      "corpus_sentences": 220
+    },
+    {
+      "pmcid": "PMC8509466",
+      "doi": "10.3390/ma14195506",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Influence of Polypropylene and Steel Fibers on the Performance and Crack Repair of Self-Compacting Concrete.",
+      "pool_sentences": 165,
+      "corpus_sentences": 112
+    },
+    {
+      "pmcid": "PMC7475978",
+      "doi": "10.3390/ma13163526",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Laser Ablated Periodic Nanostructures on Titanium and Steel Implants Influence Adhesion and Osteogenic Differentiation of Mesenchymal Stem Cells.",
+      "pool_sentences": 195,
+      "corpus_sentences": 145
+    },
+    {
+      "pmcid": "PMC9608684",
+      "doi": "10.3390/ma15207157",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Investigation of Impact Resistance of High-Strength Portland Cement Concrete Containing Steel Fibers.",
+      "pool_sentences": 220,
+      "corpus_sentences": 153
+    },
+    {
+      "pmcid": "PMC11944016",
+      "doi": "10.3390/ma18061209",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Improved Wire Quality of Twinning-Induced Plasticity Steel During Wire Drawing Through Temperature Gradient with Warm Die.",
+      "pool_sentences": 176,
+      "corpus_sentences": 121
+    },
+    {
+      "pmcid": "PMC5978165",
+      "doi": "10.3390/ma11050788",
+      "year": "2018",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Cementite on the Hydrogen Diffusion/Trap Characteristics of 2.25Cr-1Mo-0.25V Steel with and without Annealing.",
+      "pool_sentences": 174,
+      "corpus_sentences": 112
+    },
+    {
+      "pmcid": "PMC4633603",
+      "doi": "10.1038/srep16081",
+      "year": "2015",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Nano-sized precipitate stability and its controlling factors in a NiAl-strengthened ferritic alloy.",
+      "pool_sentences": 121,
+      "corpus_sentences": 86
+    },
+    {
+      "pmcid": "PMC6480645",
+      "doi": "10.3390/ma12071024",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Research on a New Localized Induction Heating Process for Hot Stamping Steel Blanks.",
+      "pool_sentences": 176,
+      "corpus_sentences": 122
+    },
+    {
+      "pmcid": "PMC12615634",
+      "doi": "10.1038/s41598-025-23512-y",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Research on the performance of different waterproof bonding layer materials for steel bridge decks.",
+      "pool_sentences": 142,
+      "corpus_sentences": 102
+    },
+    {
+      "pmcid": "PMC11432998",
+      "doi": "10.3390/jfb15090268",
+      "year": "2024",
+      "journal": "Journal of functional biomaterials",
+      "license": "cc by",
+      "title": "Stress Distribution of Pediatric Zirconia and Stainless Steel Crowns after Pulpotomy Procedure under Vertical Loading: A Patient-Specific Finite Element Analysis.",
+      "pool_sentences": 240,
+      "corpus_sentences": 157
+    },
+    {
+      "pmcid": "PMC9145818",
+      "doi": "10.3390/polym14101933",
+      "year": "2022",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Mechanical Performance of RPC and Steel-RPC Composite Structure with Different Fiber Parameters: Experimental and Theoretical Research.",
+      "pool_sentences": 189,
+      "corpus_sentences": 135
+    },
+    {
+      "pmcid": "PMC6566340",
+      "doi": "10.3390/ma12101714",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Mechanical Properties and Fracture Behavior of an EBW T2 Copper-45 Steel Joint.",
+      "pool_sentences": 131,
+      "corpus_sentences": 79
+    },
+    {
+      "pmcid": "PMC13362862",
+      "doi": "10.3390/ma19132779",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Microstructural Evolution and Mechanical Response of UHPS Incorporating Steel Slag Fine Aggregate and Different Morphology Steel Fibers.",
+      "pool_sentences": 304,
+      "corpus_sentences": 203
+    },
+    {
+      "pmcid": "PMC12250987",
+      "doi": "10.3390/ma18132968",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Experimental Testing and PSO-Enhanced Neural Networks for Impact Failure Analysis of H-Section Steel Members.",
+      "pool_sentences": 165,
+      "corpus_sentences": 105
+    },
+    {
+      "pmcid": "PMC11180168",
+      "doi": "10.1038/s41598-024-64719-9",
+      "year": "2024",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Study on the effect of rubber content on the frost resistance of steel fiber reinforced rubber concrete.",
+      "pool_sentences": 236,
+      "corpus_sentences": 148
+    },
+    {
+      "pmcid": "PMC8469965",
+      "doi": "10.3390/ma14185403",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Amorphous Metallic Fibers on Strength and Drying Shrinkage of Mortars with Steel Slag Aggregate.",
+      "pool_sentences": 94,
+      "corpus_sentences": 64
+    },
+    {
+      "pmcid": "PMC11683325",
+      "doi": "10.1016/j.dib.2024.111172",
+      "year": "2024",
+      "journal": "Data in brief",
+      "license": "cc by",
+      "title": "Collected data on bending, vibration, and push-out tests of shallow steel-timber composite beams-Nordic system.",
+      "pool_sentences": 139,
+      "corpus_sentences": 94
+    },
+    {
+      "pmcid": "PMC11356488",
+      "doi": "10.3390/ma17164020",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Enhancing High-Alloy Steel Cutting with Abrasive Water Injection Jet (AWIJ) Technology: An Approach Using the Response Surface Methodology (RSM).",
+      "pool_sentences": 149,
+      "corpus_sentences": 102
+    },
+    {
+      "pmcid": "PMC12692917",
+      "doi": "10.3390/ma18235262",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Research on High-Temperature Damage Behavior of Super Martensitic Stainless Steel 04Cr13Ni5Mo Based on Finite Element Simulation.",
+      "pool_sentences": 155,
+      "corpus_sentences": 111
+    },
+    {
+      "pmcid": "PMC11433562",
+      "doi": "10.3390/ma17184574",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The Utilization of Carbonated Steel Slag as a Supplementary Cementitious Material in Cement.",
+      "pool_sentences": 289,
+      "corpus_sentences": 191
+    },
+    {
+      "pmcid": "PMC7578970",
+      "doi": "10.3390/ma13194424",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Influence of Steel Structure on Machinability by Abrasive Water Jet.",
+      "pool_sentences": 171,
+      "corpus_sentences": 111
+    },
+    {
+      "pmcid": "PMC5453367",
+      "doi": "10.3390/ma7043176",
+      "year": "2014",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Corrosion Behavior of Steel Reinforcement in Concrete with Recycled Aggregates, Fly Ash and Spent Cracking Catalyst.",
+      "pool_sentences": 220,
+      "corpus_sentences": 155
+    },
+    {
+      "pmcid": "PMC10650780",
+      "doi": "10.3390/ma16216926",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effects of Pre-Stretching on the Mechanical Behavior of Cold-Rolled 5%Mn Medium Manganese Steel.",
+      "pool_sentences": 154,
+      "corpus_sentences": 106
+    },
+    {
+      "pmcid": "PMC8851608",
+      "doi": "10.1021/acsomega.1c04969",
+      "year": "2022",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Optimization of the Forming Method on Torsion Defect in Cold-Roll Forming of Z Section Steel.",
+      "pool_sentences": 188,
+      "corpus_sentences": 133
+    },
+    {
+      "pmcid": "PMC8745850",
+      "doi": "10.3390/ma15010276",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Characterization of the Stretch Flangeabitity of High-Strength Bainitic Steel: The Significance of Variant Pairs.",
+      "pool_sentences": 187,
+      "corpus_sentences": 128
+    },
+    {
+      "pmcid": "PMC5452849",
+      "doi": "10.3390/ma6104847",
+      "year": "2013",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Shear Behavior Models of Steel Fiber Reinforced Concrete Beams Modifying Softened Truss Model Approaches.",
+      "pool_sentences": 121,
+      "corpus_sentences": 80
+    },
+    {
+      "pmcid": "PMC10489109",
+      "doi": "10.3390/ma16175888",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Ultrasonic-Assisted Surface Finishing of STAVAX Mold Steel Using Lab-Made Polishing Balls on a 5-Axis CNC Machining Center.",
+      "pool_sentences": 130,
+      "corpus_sentences": 92
+    },
+    {
+      "pmcid": "PMC5544716",
+      "doi": "10.1038/s41598-017-06976-5",
+      "year": "2017",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Multiscale correlative tomography: an investigation of creep cavitation in 316 stainless steel.",
+      "pool_sentences": 166,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC9768052",
+      "doi": "10.1186/s42649-022-00083-0",
+      "year": "2022",
+      "journal": "Applied microscopy",
+      "license": "cc by",
+      "title": "EPMA quantification on the chemical composition of retained austenite in a Fe-Mn-Si-C-based multi-phase steel.",
+      "pool_sentences": 110,
+      "corpus_sentences": 77
+    },
+    {
+      "pmcid": "PMC6695827",
+      "doi": "10.3390/ma12152468",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Selective Laser Melting of Duplex Stainless Steel 2205: Effect of Post-Processing Heat Treatment on Microstructure, Mechanical Properties, and Corrosion Resistance.",
+      "pool_sentences": 188,
+      "corpus_sentences": 127
+    },
+    {
+      "pmcid": "PMC8125484",
+      "doi": "10.3390/ma14092309",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Comparison on Tensile Characteristics of Plain C-Mn Steel with Ultrafine Grained Ferrite/Cementite Microstructure and Coarse Grained Ferrite/Pearlite Microstructure.",
+      "pool_sentences": 100,
+      "corpus_sentences": 71
+    },
+    {
+      "pmcid": "PMC11621017",
+      "doi": "10.1038/s41529-024-00542-x",
+      "year": "2024",
+      "journal": "Npj Materials degradation",
+      "license": "cc by",
+      "title": "Dual anaerobic reactor model to study biofilm and microbiologically influenced corrosion interactions on carbon steel.",
+      "pool_sentences": 397,
+      "corpus_sentences": 256
+    },
+    {
+      "pmcid": "PMC7143298",
+      "doi": "10.3390/ma13061449",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Influence of Selective Laser Melting Technological Parameters on the Mechanical Properties of Additively Manufactured Elements Using 316L Austenitic Steel.",
+      "pool_sentences": 202,
+      "corpus_sentences": 135
+    },
+    {
+      "pmcid": "PMC10303719",
+      "doi": "10.3390/ma16124485",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Study on Quasi-Static Axial Compression Performance and Energy Absorption of Aluminum Foam-Filled Steel Tubes.",
+      "pool_sentences": 175,
+      "corpus_sentences": 115
+    },
+    {
+      "pmcid": "PMC12250842",
+      "doi": "10.3390/ma18133079",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Metallurgy, Properties and Applications of Superaustenitic Stainless Steels-SASSs.",
+      "pool_sentences": 397,
+      "corpus_sentences": 257
+    },
+    {
+      "pmcid": "PMC8126214",
+      "doi": "10.3390/s21093294",
+      "year": "2021",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fatigue Crack Monitoring of T-Type Joints in Steel Offshore Oil and Gas Jacket Platform.",
+      "pool_sentences": 276,
+      "corpus_sentences": 179
+    },
+    {
+      "pmcid": "PMC9664208",
+      "doi": "10.1039/d2ra05165f",
+      "year": "2022",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Corrosion behavior of 316 stainless steel arc parts in liquid lead at 650 \u00b0C under high oxygen concentrations.",
+      "pool_sentences": 168,
+      "corpus_sentences": 108
+    },
+    {
+      "pmcid": "PMC7795462",
+      "doi": "10.3390/ma14010127",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Phase Transformation in 316L Austenitic Steel Induced by Fracture at Cryogenic Temperatures: Experiment and Modelling.",
+      "pool_sentences": 430,
+      "corpus_sentences": 277
+    }
+  ],
+  "leakage": {
+    "mulms_sentences": 10184,
+    "mulms_ngrams": 222977,
+    "overlap_by_document": {
+      "semi_06": 5,
+      "sofc_03": 4,
+      "graphene_01": 39,
+      "oastm_09": 17,
+      "electrolysis_03": 25,
+      "graphene_02": 43,
+      "electrolysis_04": 16,
+      "oastm_01": 10,
+      "steel_05": 11,
+      "oastm_05": 10,
+      "pemfc_07": 16,
+      "electrolysis_01": 7,
+      "steel_04": 10,
+      "steel_11": 39,
+      "sofc_01": 18,
+      "steel_03": 14,
+      "pemfc_04": 4,
+      "steel_06": 28,
+      "oastm_02": 10,
+      "poly_05": 2,
+      "oastm_04": 7,
+      "semi_03": 10,
+      "pemfc_03": 5,
+      "pemfc_13": 1,
+      "poly_01": 4,
+      "electrolysis_02": 7,
+      "poly_11": 3,
+      "oastm_11": 10,
+      "sofc_02": 12,
+      "sofc_04": 17,
+      "oastm_10": 2,
+      "pemfc_08": 4,
+      "pemfc_02": 3,
+      "oastm_08": 10,
+      "semi_04": 5,
+      "semi_05": 5,
+      "steel_08": 3,
+      "pemfc_14": 2,
+      "oastm_06": 1,
+      "poly_02": 3,
+      "semi_08": 1,
+      "semi_02": 1
+    },
+    "overlap_examples": [
+      {
+        "sentence": "The authors declare no competing financial interest.",
+        "ngram": "the authors declare no competing financial interest .",
+        "docs": [
+          "semi_06",
+          "sofc_03"
+        ]
+      },
+      {
+        "sentence": "Chemical compositions of weld local areas were examined by energy dispersive X-ray spectroscopy (EDS) at 20 kV.",
+        "ngram": "by energy dispersive x - ray spectroscopy (",
+        "docs": [
+          "graphene_01"
+        ]
+      },
+      {
+        "sentence": "On the other hand, from the measurements made on the 13CrMo4-5 steel side (Figure 13B), it can be seen that the amplitude exceeded the value of 20% SH for only two points (2-weld face B and 3-weld face B).",
+        "ngram": ") , it can be seen that the",
+        "docs": [
+          "oastm_09"
+        ]
+      },
+      {
+        "sentence": "In the synthesis process, a solution was prepared by mixing 20 mL of 1 N HCl (prepared by dilution of concentrated hydrochloric acid (36%) with deionized water) with 180 mL of deionized (DI) water, and 2.7 mL (0.03 mol) of aniline was dissolved in the acidic solution.",
+        "ngram": "ml of deionized ( di ) water ,",
+        "docs": [
+          "electrolysis_03"
+        ]
+      },
+      {
+        "sentence": "The scanning electron microscope (SEM) images were captured using the JEOL JSM IT500 HR (JEOL Ltd., Tokyo, Japan) at the Research Resources Center lab at the University of Illinois at Chicago, to observe the surface morphology, adhesion, and interaction between polyaniline (PANI) and a steel substrate under various experimental conditions.",
+        "ngram": "the scanning electron microscope ( sem ) images",
+        "docs": [
+          "graphene_02"
+        ]
+      },
+      {
+        "sentence": "The X-ray diffraction (XRD) phase analysis was conducted using X-ray tube CuK\u03b1, operating at the voltage of 35 kV, current 45 mA and a Bragg\u2013Brentano geometry (X\u2019Pert\u2013PRO, Panalytical, Almelo, The Netherlands).",
+        "ngram": "the x - ray diffraction ( xrd )",
+        "docs": [
+          "electrolysis_04"
+        ]
+      },
+      {
+        "sentence": "After the dilatometry tests, the specimens were prepared for light microscopy (LM) and scanning electron microscopy (SEM) observations according to standard metallographic procedures.",
+        "ngram": ") and scanning electron microscopy ( sem )",
+        "docs": [
+          "oastm_01",
+          "steel_05"
+        ]
+      },
+      {
+        "sentence": "According to Figure 3 (theoretical calculations) during continuous cooling, the ferrite should start forming at a cooling rate of 0.1 \u00b0C/s.",
+        "ngram": "rate of 0 . 1 \u00b0 c /",
+        "docs": [
+          "oastm_05"
+        ]
+      },
+      {
+        "sentence": "This means that, in the case of this steel, manganese is a dominant element influencing the driving force.",
+        "ngram": "this means that , in the case of",
+        "docs": [
+          "pemfc_07"
+        ]
+      },
+      {
+        "sentence": "The initial state, as well as the material states after distinct cyclic loading cycles, has been characterized using the methodology of scanning electron microscopy (SEM) using secondary electron (SE) analysis, energy dispersive x-ray spectroscopy (EDS) and electron backscatter diffraction (EBSD).",
+        "ngram": "energy dispersive x - ray spectroscopy ( eds",
+        "docs": [
+          "electrolysis_04"
+        ]
+      },
+      {
+        "sentence": "As shown by Hering et al., the pore content as an indicator for initial damage detected by an electron dispersive x-ray spectroscopy (EDS)-based particle identification method decreased from Ain,d = 84 \u00b5m2 (E.530) to Ain,d = 302 \u00b5m2 (E.590).",
+        "ngram": "dispersive x - ray spectroscopy ( eds )",
+        "docs": [
+          "electrolysis_01",
+          "electrolysis_04",
+          "steel_04"
+        ]
+      },
+      {
+        "sentence": "The negative quadratic coefficient in Equations (2) and (3) indicates a decrease in the growth rate of wear intensity at higher sandpaper granulations, which is also visible from Figure 11 and indicates the existence of a critical abrasive grain size.",
+        "ngram": "equations ( 2 ) and ( 3 )",
+        "docs": [
+          "steel_11"
+        ]
+      },
+      {
+        "sentence": "The other study was performed by Xu et al. Steel slag (0%, 10%, 20%, 30%, and 40%) and steel fiber (0%, 1%, 2%, and 3%) additives were employed in the investigation to examine the mechanical properties of ultra-high-performance GPC.",
+        "ngram": "% , 1 % , 2 % ,",
+        "docs": [
+          "graphene_02"
+        ]
+      },
+      {
+        "sentence": "For this investigation, WSW is to be included at concentrations of 0%, 1%, 2%, and 3%, respectively.",
+        "ngram": "% , 1 % , 2 % ,",
+        "docs": [
+          "graphene_02"
+        ]
+      },
+      {
+        "sentence": "The amount of WSW increased by 0%, 1%, 2%, and 3% in the beam where stirrups were attached at intervals of 270 mm, whereas the GBFS ratio in the concrete stayed unchanged at 0% for the first four shear beam.",
+        "ngram": "% , 1 % , 2 % ,",
+        "docs": [
+          "graphene_02"
+        ]
+      },
+      {
+        "sentence": "This research examined the shear and flexural behaviors of GP-RCB specimens by varying the GBFS ratio in concrete to 0%, 10%, and 20% and varying the WSW ratio to 0%, 1%, 2%, and 3% with varying stirrup spacings.",
+        "ngram": "% , 1 % , 2 % ,",
+        "docs": [
+          "graphene_02"
+        ]
+      },
+      {
+        "sentence": "The phase constitution and microstructures of the 0Nb and 03Nb steels were characterized by X-ray diffraction (XRD), scanning electron microscopy (SEM), electron backscatter diffraction (EBSD), and transmission electron microscopy (TEM).",
+        "ngram": "by x - ray diffraction ( xrd )",
+        "docs": [
+          "sofc_01",
+          "steel_03"
+        ]
+      },
+      {
+        "sentence": "In addition, as shown in Figure 3b\u2013d, the average PAGs of the 0Nb steel after deformation at 1000 \u00b0C, 1050 \u00b0C, and 1100 \u00b0C were 19.53 \u03bcm, 23.68 \u03bcm, and 30.79 \u03bcm, respectively, which were comparable to those of the 03Nb steel under the corresponding deformation conditions.",
+        "ngram": ", respectively , which were comparable to those",
+        "docs": [
+          "sofc_01"
+        ]
+      },
+      {
+        "sentence": "However, the work-hardening rate of the 03Nb steel decreased more slowly than that of the 0Nb steel within the true-strain range of 0.05\u20130.10.",
+        "ngram": "range of 0 . 05 - 0 .",
+        "docs": [
+          "pemfc_04"
+        ]
+      },
+      {
+        "sentence": "This process can be formalized as shown in Equations (1) and (2).",
+        "ngram": "equations ( 1 ) and ( 2 )",
+        "docs": [
+          "steel_06"
+        ]
+      }
+    ],
+    "duplicate_examples": [
+      {
+        "sentence": "For 316L steel, values below 20% SH were obtained for two positions: 2-weld root B and 4-weld root B.",
+        "duplicate_of": 527
+      },
+      {
+        "sentence": "The highest amplitudes were recorded for discontinuities located in the following measurement areas: 4-gradient A (96% SH) and 1-gradient B (101% SH).",
+        "duplicate_of": 528
+      },
+      {
+        "sentence": "Reference reflector number 1 is well detectable from both sides tested.",
+        "duplicate_of": 532
+      },
+      {
+        "sentence": "Round wires, of course, eliminate friction caused by active torque.",
+        "duplicate_of": 2200
+      },
+      {
+        "sentence": "Friction as a result of two-point contact is largely independent of wire stiffness or cross section and so is likely to be little affected by the choice of round or rectangular wire.",
+        "duplicate_of": 2202
+      },
+      {
+        "sentence": "Orthodontic brackets are an important constituent of an orthodontic appliance.",
+        "duplicate_of": 2191
+      },
+      {
+        "sentence": "The archwires are fitted in the bracket and sliding mechanics require either the bracket or the archwires to slide through the bracket slot.",
+        "duplicate_of": 2192
+      },
+      {
+        "sentence": "The resulting frictional resistance is an important consideration in appliance design.",
+        "duplicate_of": 2193
+      },
+      {
+        "sentence": "Of all the different materials tested so far, stainless steel brackets are preferred for their low frictional force values.",
+        "duplicate_of": 2194
+      },
+      {
+        "sentence": "However, concerns have been expressed about the nickel content in the stainless steel causing hypersensitivity and corrosion in the oral environment.",
+        "duplicate_of": 2195
+      },
+      {
+        "sentence": "In addition, there are instances where MRI or CT imaging may have been distorted because of the stainless steel alloys.",
+        "duplicate_of": 2196
+      },
+      {
+        "sentence": "To overcome these difficulties, pure titanium brackets have been made available.",
+        "duplicate_of": 2197
+      },
+      {
+        "sentence": "These brackets have excellent corrosion resistance and are biocompatible, but have not been subjected to studies related to the frictional resistance force an orthodontist may encounter during sliding mechanics.",
+        "duplicate_of": 2198
+      },
+      {
+        "sentence": "So, for this study, we preferred the rectangular wires.",
+        "duplicate_of": 2203
+      },
+      {
+        "sentence": "Very few studies have been conducted and discussed in the literature about corrosion and sensitivity to the nickel present and stainless steel brackets.",
+        "duplicate_of": 2204
+      },
+      {
+        "sentence": "Titanium has heralded as a material totally compatible in the oral environment and superior in structural integrity compared to stainless steel.",
+        "duplicate_of": 2205
+      },
+      {
+        "sentence": "The friction-free self-ligating brackets produce reduced friction.",
+        "duplicate_of": 2206
+      },
+      {
+        "sentence": "Failure or distortion of orthodontic brackets during treatment minimizes control of tooth movement.",
+        "duplicate_of": 2207
+      },
+      {
+        "sentence": "The study was designed to compare the frictional properties of stainless steel, titanium, and self-ligating brackets in 0.018 and 0.022 slots, in 0.017 \u00d7 0.025 and 0.019 \u00d7 0.025 stainless steel and TMA archwires with second-order angulations, ligated with elastic modules to the brackets slot.",
+        "duplicate_of": 2208
+      },
+      {
+        "sentence": "In this study, Tidy's protocol was followed because it closely approximated the clinical situation.",
+        "duplicate_of": 2209
+      }
+    ],
+    "shingle": {
+      "characters": 50,
+      "article_overlap": 5,
+      "sentences_dropped": 5,
+      "by_article": {
+        "PMC13172429": 1,
+        "PMC9060584": 1,
+        "PMC12072917": 1,
+        "PMC6525313": 1,
+        "PMC12250987": 1
+      },
+      "articles_dropped": []
+    }
+  },
+  "corpus": {
+    "path": "data/processed/corpus/topic_steel_sentences.txt",
+    "sentences": 40000,
+    "words": 1116433,
+    "sha256": "29d4ece525d4d8c0acea397401541323de314e3e877b34f383d6cb69d5443339"
+  },
+  "run": {
+    "search_retrieved": "2026-10-18T09:39:29Z",
+    "started": "2026-10-18T10:48:28Z",
+    "finished": "2026-10-18T10:49:20Z",
+    "seconds": 52.5,
+    "used_articles_downloaded_now": 0,
+    "http_requests": 0,
+    "cache_dir": "data/processed/corpus/europepmc_topic_steel"
+  }
+}

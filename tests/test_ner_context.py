@@ -29,6 +29,22 @@ def test_contexts_are_the_same_paper_and_part_nearest_first():
     assert out[5] == ([], [words[5]])
 
 
+def test_contexts_from_the_whole_text_when_a_document_is_wholly_in_the_part():
+    """SOFC-Exp annotates only some sentences; its context.json gives every sentence. A
+    document whose annotated sentences all lie in the part takes its context from there."""
+    texts = {'a': {'sentences': [['t0'], DATA[0][0], ['t2'], DATA[1][0], DATA[2][0],
+                                 DATA[3][0], ['t6']],
+                   'annotated': [1, 3, 4, 5]}}
+    whole = nb.part_contexts(DATA, [0, 1, 2, 3, 4], texts)
+    assert whole[0] == ([['t0']], [['t2'], DATA[1][0], DATA[2][0], DATA[3][0], ['t6']])
+    assert whole[1] == ([['t2'], DATA[0][0], ['t0']], [DATA[2][0], DATA[3][0], ['t6']])
+    assert whole[4] == nb.part_contexts(DATA, [0, 1, 2, 3, 4])[4]       # b has no text
+    # a document split over parts keeps the same-part rule
+    split = nb.part_contexts(DATA, [0, 2], texts)
+    assert split == nb.part_contexts(DATA, [0, 2])
+    assert nb.load_full_texts('fine') is None
+
+
 def test_context_parser_checks(capsys):
     args = nb.parse_args(['--crf', '--context', '64', '--leave-one-paper-out'])
     assert args.context == 64 and nb.variant_name(args) == 'crf_ctx'
@@ -36,10 +52,15 @@ def test_context_parser_checks(capsys):
     tagged = nb.parse_args(['--crf', '--context', '64', '--tag', 'm100', '--seed-offset', '100'])
     assert nb.variant_name(tagged) == 'crf_ctx_m100'
     assert 'context' not in vars(nb.parse_args(['--crf']))      # other configs unchanged
+    both = nb.parse_args(['--crf', '--multi-task', '--context', '64', '--tag', 'm100',
+                          '--seed-offset', '100', '--leave-one-paper-out'])
+    assert nb.variant_name(both) == 'crf_mt_ctx_m100'
+    assert nb.reference_variant('crf_mt_ctx_m100') == 'crf'
     for argv, error in ((['--context', '64'], '--context needs --crf'),
                         (['--crf', '--context', '0'], 'at least 1 subword'),
-                        (['--crf', '--context', '8', '--multi-task'], 'not available with'),
                         (['--crf', '--context', '8', '--label-semantics'], 'not available with'),
+                        (['--crf', '--context', '8', '--multi-task', '--teachers', '3',
+                          '--self-train', __file__], 'not available with'),
                         (['--crf', '--tag', 'ctx'], 'would overwrite')):
         with pytest.raises(SystemExit):
             nb.parse_args(argv)
@@ -141,5 +162,71 @@ def test_context_run(tmp_path, monkeypatch):
             assert len(feature['input_ids']) <= 64
     # the test sentences (paper b) see each other: some input is longer than its sentence
     _, _, test_features = encoded[2]
+    assert any(len(f['input_ids']) > sum(x != -100 for x in f['labels']) + 3
+               for f in test_features)
+
+
+def test_multitask_examples_take_their_corpus_context():
+    fine = [(['a', 'b'], ['O', 'O'], 'p'), (['c-d'], ['O'], 'p'), (['e'], ['O'], 'p')]
+    coarse = [(['a', 'b'], ['O', 'O'], 'p'), (['c', '-', 'd'], ['O'] * 3, 'p'),
+              (['e'], ['O'], 'p')]
+    contexts = {'fine': [('f0',), ('f1',), ('f2',)], 'coarse': [('c0',), ('c1',), ('c2',)]}
+    examples = nb.multitask_examples(fine, coarse)
+    got = nb.multitask_contexts(fine, coarse, contexts)
+    # the second sentence is tokenised differently: two examples, each with its own context
+    assert [tokens for tokens, _ in examples] == [['a', 'b'], ['c-d'], ['c', '-', 'd'], ['e']]
+    assert got == [('f0',), ('f1',), ('c1',), ('f2',)]
+
+
+def _toy_both(granularity):
+    coarse = {'B-MAT': 'B-M', 'I-MAT': 'I-M', 'B-PROP': 'B-P', 'I-PROP': 'I-P', 'B-COND': 'B-C',
+              'I-COND': 'I-C', 'O': 'O'}
+    return [(words, tags if granularity == 'fine' else [coarse[t] for t in tags], doc)
+            for words, tags, doc in _toy_ner_corpus()]
+
+
+def test_multitask_context_run(tmp_path, monkeypatch):
+    """A tiny --multi-task --context run: both files (crf_mt_ctx), and every head's training,
+    validation and test inputs with their context, only the sentence labelled."""
+    torch = pytest.importorskip('torch')
+    transformers = pytest.importorskip('transformers')
+    pytest.importorskip('seqeval')
+    pytest.importorskip('scipy')
+    path = tmp_path / 'tiny'
+    vocab = ['[PAD]', '[UNK]', '[CLS]', '[SEP]', '[MASK]', *WORDS, '##s']
+    path.mkdir()
+    (path / 'vocab.txt').write_text('\n'.join(vocab) + '\n')
+    transformers.BertTokenizerFast(str(path / 'vocab.txt')).save_pretrained(path)
+    torch.manual_seed(0)
+    transformers.BertModel(transformers.BertConfig(
+        vocab_size=len(vocab), hidden_size=16, num_hidden_layers=1, num_attention_heads=2,
+        intermediate_size=32, max_position_embeddings=64)).save_pretrained(path)
+    monkeypatch.setattr(nb, 'PROCESSED_DIR', str(tmp_path))
+    monkeypatch.setattr(nb, 'load_split_corpus', _toy_both)
+    encoded, encode = [], nb.encode
+
+    def spy(tok, sentences, label2id, max_length=512, contexts=None, budget=0):
+        out = encode(tok, sentences, label2id, max_length, contexts, budget)
+        encoded.append((sentences, contexts, budget, out))
+        return out
+    monkeypatch.setattr(nb, 'encode', spy)
+    nb.run(nb.parse_args(['--top-k', '2', '--model', str(path), '--epochs', '2', '--threads',
+                          '1', '--device', 'cpu', '--crf', '--multi-task', '--context', '8',
+                          '--leave-one-paper-out', '--seeds', '0', '--papers', 'b',
+                          '--save-predictions']))
+    for g in ('fine', 'coarse'):
+        res = json.loads((tmp_path / 'ner' / f'ner_results_{g}_leave_one_paper_out_crf_mt_ctx.json')
+                         .read_text())
+        assert res['variant'] == 'crf_mt_ctx' and res['config']['context'] == 8
+        (run,) = res['runs']
+        assert run['run_id'] == 'b.conll' and len(run['test_pred']) == 6
+    assert len(encoded) == 6                    # train, then validation and test, per head
+    for sentences, contexts, budget, features in encoded:
+        assert budget == 8 and contexts is not None and len(contexts) == len(sentences)
+        for (words, _), feature in zip(sentences, features):
+            assert sum(x != -100 for x in feature['labels']) in (0, len(words))
+            assert len(feature['input_ids']) <= 64
+    # the test sentences (paper b) see each other: some input is longer than its sentence
+    test_features = encoded[-1][3]
     assert any(len(f['input_ids']) > sum(x != -100 for x in f['labels']) + 3
                for f in test_features)

@@ -1,0 +1,4732 @@
+{
+ "rule": {
+  "unseen": "a test entity whose words are no entity of the training sentences (ner_mentions.py)",
+  "leaked": "a corpus sentence sharing a run of 50 characters without spaces, in lower case, with a sentence of the held-out subfield's documents; left out",
+  "exact": "the name's words in a row in a remaining sentence, the corpus cut with MuLMS's hyphen rule; names of more than 8 words count as absent",
+  "loose": "the name without spaces, in lower case, inside a remaining sentence without spaces"
+ },
+ "corpora": {
+  "topic_electrolysis": {
+   "path": "data/processed/corpus/topic_electrolysis_sentences.txt",
+   "raw_sentences": false,
+   "sentences": 40000,
+   "sha256": "8722375b63c3b822fee02cbc417525ea228f85784062f656157607ac2062285f"
+  },
+  "topic_graphene": {
+   "path": "data/processed/corpus/topic_graphene_sentences.txt",
+   "raw_sentences": false,
+   "sentences": 40000,
+   "sha256": "a319667fd44aae392d9bee2635213798fc4f6647e359c1dec263adb55cfdd418"
+  },
+  "topic_pemfc": {
+   "path": "data/processed/corpus/topic_pemfc_sentences.txt",
+   "raw_sentences": false,
+   "sentences": 40000,
+   "sha256": "13ac1709715feee76cd50204df3674a58ec268a44d8042561a49080e66b79c55"
+  },
+  "topic_poly": {
+   "path": "data/processed/corpus/topic_poly_sentences.txt",
+   "raw_sentences": false,
+   "sentences": 40000,
+   "sha256": "f10decea53f50587415a0cf94692b94cee36c7bc00cee65ce50c2408704f663d"
+  },
+  "topic_semi": {
+   "path": "data/processed/corpus/topic_semi_sentences.txt",
+   "raw_sentences": false,
+   "sentences": 40000,
+   "sha256": "447c2524303a6fd89eb239b068bbb1b1a0a9e1a2b9c8fa91c831d91efe8def3f"
+  },
+  "topic_sofc": {
+   "path": "data/processed/corpus/topic_sofc_sentences.txt",
+   "raw_sentences": false,
+   "sentences": 40000,
+   "sha256": "3d16de660dfa13a4daf629c406340eef70a524dbb3d43386171c0680d3c51819"
+  },
+  "topic_steel": {
+   "path": "data/processed/corpus/topic_steel_sentences.txt",
+   "raw_sentences": false,
+   "sentences": 40000,
+   "sha256": "29d4ece525d4d8c0acea397401541323de314e3e877b34f383d6cb69d5443339"
+  },
+  "sofc": {
+   "path": "data/processed/corpus/sofc_sentences.txt",
+   "raw_sentences": false,
+   "sentences": 40000,
+   "sha256": "1b6a00d2b22d46dd190771156a2d06446cd9edf4dfea755df51a052e73d9be47"
+  },
+  "fatigue": {
+   "path": "data/processed/corpus/fatigue_sentences.txt",
+   "raw_sentences": true,
+   "sentences": 40000,
+   "sha256": "7eaf1e79f7d43e52d7ef96c8afbeddede0c9b8ca71a3b1e9cf7a64d59eea3162"
+  }
+ },
+ "subfields": {
+  "electrolysis": {
+   "n_test": 3787,
+   "n_unseen": 3156,
+   "unseen_share": 0.833,
+   "corpora": {
+    "topic_electrolysis": {
+     "leaked": 0,
+     "exact": 0.707,
+     "exact_distinct": 0.558,
+     "loose": 0.756,
+     "loose_distinct": 0.621,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 95,
+       "exact": 0.463,
+       "loose": 0.537
+      },
+      "DEV": {
+       "n_unseen": 108,
+       "exact": 0.667,
+       "loose": 0.722
+      },
+      "FORM": {
+       "n_unseen": 504,
+       "exact": 0.847,
+       "loose": 0.873
+      },
+      "INSTRUMENT": {
+       "n_unseen": 55,
+       "exact": 0.291,
+       "loose": 0.309
+      },
+      "MAT": {
+       "n_unseen": 1167,
+       "exact": 0.799,
+       "loose": 0.829
+      },
+      "MEASUREMENT": {
+       "n_unseen": 179,
+       "exact": 0.922,
+       "loose": 0.95
+      },
+      "NUM": {
+       "n_unseen": 37,
+       "exact": 0.865,
+       "loose": 0.973
+      },
+      "PROPERTY": {
+       "n_unseen": 269,
+       "exact": 0.613,
+       "loose": 0.662
+      },
+      "RANGE": {
+       "n_unseen": 5,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "SAMPLE": {
+       "n_unseen": 109,
+       "exact": 0.193,
+       "loose": 0.33
+      },
+      "TECHNIQUE": {
+       "n_unseen": 89,
+       "exact": 0.551,
+       "loose": 0.629
+      },
+      "UNIT": {
+       "n_unseen": 3,
+       "exact": 0.667,
+       "loose": 0.667
+      },
+      "VALUE": {
+       "n_unseen": 536,
+       "exact": 0.571,
+       "loose": 0.662
+      }
+     }
+    },
+    "topic_graphene": {
+     "leaked": 0,
+     "exact": 0.638,
+     "exact_distinct": 0.494,
+     "loose": 0.694,
+     "loose_distinct": 0.55,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 95,
+       "exact": 0.453,
+       "loose": 0.484
+      },
+      "DEV": {
+       "n_unseen": 108,
+       "exact": 0.25,
+       "loose": 0.269
+      },
+      "FORM": {
+       "n_unseen": 504,
+       "exact": 0.798,
+       "loose": 0.849
+      },
+      "INSTRUMENT": {
+       "n_unseen": 55,
+       "exact": 0.2,
+       "loose": 0.2
+      },
+      "MAT": {
+       "n_unseen": 1167,
+       "exact": 0.732,
+       "loose": 0.771
+      },
+      "MEASUREMENT": {
+       "n_unseen": 179,
+       "exact": 0.922,
+       "loose": 0.95
+      },
+      "NUM": {
+       "n_unseen": 37,
+       "exact": 0.865,
+       "loose": 0.973
+      },
+      "PROPERTY": {
+       "n_unseen": 269,
+       "exact": 0.546,
+       "loose": 0.591
+      },
+      "RANGE": {
+       "n_unseen": 5,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "SAMPLE": {
+       "n_unseen": 109,
+       "exact": 0.174,
+       "loose": 0.422
+      },
+      "TECHNIQUE": {
+       "n_unseen": 89,
+       "exact": 0.573,
+       "loose": 0.596
+      },
+      "UNIT": {
+       "n_unseen": 3,
+       "exact": 0.667,
+       "loose": 1.0
+      },
+      "VALUE": {
+       "n_unseen": 536,
+       "exact": 0.489,
+       "loose": 0.576
+      }
+     }
+    },
+    "topic_pemfc": {
+     "leaked": 0,
+     "exact": 0.666,
+     "exact_distinct": 0.508,
+     "loose": 0.722,
+     "loose_distinct": 0.575,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 95,
+       "exact": 0.453,
+       "loose": 0.6
+      },
+      "DEV": {
+       "n_unseen": 108,
+       "exact": 0.583,
+       "loose": 0.667
+      },
+      "FORM": {
+       "n_unseen": 504,
+       "exact": 0.794,
+       "loose": 0.841
+      },
+      "INSTRUMENT": {
+       "n_unseen": 55,
+       "exact": 0.255,
+       "loose": 0.273
+      },
+      "MAT": {
+       "n_unseen": 1167,
+       "exact": 0.748,
+       "loose": 0.792
+      },
+      "MEASUREMENT": {
+       "n_unseen": 179,
+       "exact": 0.944,
+       "loose": 0.961
+      },
+      "NUM": {
+       "n_unseen": 37,
+       "exact": 0.838,
+       "loose": 0.946
+      },
+      "PROPERTY": {
+       "n_unseen": 269,
+       "exact": 0.539,
+       "loose": 0.599
+      },
+      "RANGE": {
+       "n_unseen": 5,
+       "exact": 0.2,
+       "loose": 0.2
+      },
+      "SAMPLE": {
+       "n_unseen": 109,
+       "exact": 0.193,
+       "loose": 0.202
+      },
+      "TECHNIQUE": {
+       "n_unseen": 89,
+       "exact": 0.607,
+       "loose": 0.618
+      },
+      "UNIT": {
+       "n_unseen": 3,
+       "exact": 0.667,
+       "loose": 1.0
+      },
+      "VALUE": {
+       "n_unseen": 536,
+       "exact": 0.535,
+       "loose": 0.631
+      }
+     }
+    },
+    "topic_poly": {
+     "leaked": 0,
+     "exact": 0.564,
+     "exact_distinct": 0.426,
+     "loose": 0.655,
+     "loose_distinct": 0.491,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 95,
+       "exact": 0.453,
+       "loose": 0.474
+      },
+      "DEV": {
+       "n_unseen": 108,
+       "exact": 0.148,
+       "loose": 0.269
+      },
+      "FORM": {
+       "n_unseen": 504,
+       "exact": 0.742,
+       "loose": 0.839
+      },
+      "INSTRUMENT": {
+       "n_unseen": 55,
+       "exact": 0.164,
+       "loose": 0.182
+      },
+      "MAT": {
+       "n_unseen": 1167,
+       "exact": 0.633,
+       "loose": 0.731
+      },
+      "MEASUREMENT": {
+       "n_unseen": 179,
+       "exact": 0.933,
+       "loose": 0.944
+      },
+      "NUM": {
+       "n_unseen": 37,
+       "exact": 0.838,
+       "loose": 0.946
+      },
+      "PROPERTY": {
+       "n_unseen": 269,
+       "exact": 0.375,
+       "loose": 0.465
+      },
+      "RANGE": {
+       "n_unseen": 5,
+       "exact": 0.2,
+       "loose": 0.2
+      },
+      "SAMPLE": {
+       "n_unseen": 109,
+       "exact": 0.303,
+       "loose": 0.56
+      },
+      "TECHNIQUE": {
+       "n_unseen": 89,
+       "exact": 0.292,
+       "loose": 0.382
+      },
+      "UNIT": {
+       "n_unseen": 3,
+       "exact": 0.667,
+       "loose": 1.0
+      },
+      "VALUE": {
+       "n_unseen": 536,
+       "exact": 0.444,
+       "loose": 0.519
+      }
+     }
+    },
+    "topic_semi": {
+     "leaked": 0,
+     "exact": 0.631,
+     "exact_distinct": 0.472,
+     "loose": 0.695,
+     "loose_distinct": 0.532,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 95,
+       "exact": 0.463,
+       "loose": 0.474
+      },
+      "DEV": {
+       "n_unseen": 108,
+       "exact": 0.333,
+       "loose": 0.565
+      },
+      "FORM": {
+       "n_unseen": 504,
+       "exact": 0.835,
+       "loose": 0.859
+      },
+      "INSTRUMENT": {
+       "n_unseen": 55,
+       "exact": 0.2,
+       "loose": 0.218
+      },
+      "MAT": {
+       "n_unseen": 1167,
+       "exact": 0.71,
+       "loose": 0.768
+      },
+      "MEASUREMENT": {
+       "n_unseen": 179,
+       "exact": 0.922,
+       "loose": 0.95
+      },
+      "NUM": {
+       "n_unseen": 37,
+       "exact": 0.838,
+       "loose": 0.946
+      },
+      "PROPERTY": {
+       "n_unseen": 269,
+       "exact": 0.476,
+       "loose": 0.546
+      },
+      "RANGE": {
+       "n_unseen": 5,
+       "exact": 0.2,
+       "loose": 0.2
+      },
+      "SAMPLE": {
+       "n_unseen": 109,
+       "exact": 0.174,
+       "loose": 0.294
+      },
+      "TECHNIQUE": {
+       "n_unseen": 89,
+       "exact": 0.506,
+       "loose": 0.573
+      },
+      "UNIT": {
+       "n_unseen": 3,
+       "exact": 0.667,
+       "loose": 1.0
+      },
+      "VALUE": {
+       "n_unseen": 536,
+       "exact": 0.489,
+       "loose": 0.571
+      }
+     }
+    },
+    "topic_sofc": {
+     "leaked": 0,
+     "exact": 0.614,
+     "exact_distinct": 0.46,
+     "loose": 0.684,
+     "loose_distinct": 0.53,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 95,
+       "exact": 0.463,
+       "loose": 0.526
+      },
+      "DEV": {
+       "n_unseen": 108,
+       "exact": 0.528,
+       "loose": 0.556
+      },
+      "FORM": {
+       "n_unseen": 504,
+       "exact": 0.73,
+       "loose": 0.808
+      },
+      "INSTRUMENT": {
+       "n_unseen": 55,
+       "exact": 0.145,
+       "loose": 0.164
+      },
+      "MAT": {
+       "n_unseen": 1167,
+       "exact": 0.694,
+       "loose": 0.75
+      },
+      "MEASUREMENT": {
+       "n_unseen": 179,
+       "exact": 0.922,
+       "loose": 0.939
+      },
+      "NUM": {
+       "n_unseen": 37,
+       "exact": 0.838,
+       "loose": 0.973
+      },
+      "PROPERTY": {
+       "n_unseen": 269,
+       "exact": 0.431,
+       "loose": 0.517
+      },
+      "RANGE": {
+       "n_unseen": 5,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "SAMPLE": {
+       "n_unseen": 109,
+       "exact": 0.394,
+       "loose": 0.413
+      },
+      "TECHNIQUE": {
+       "n_unseen": 89,
+       "exact": 0.517,
+       "loose": 0.607
+      },
+      "UNIT": {
+       "n_unseen": 3,
+       "exact": 0.667,
+       "loose": 0.667
+      },
+      "VALUE": {
+       "n_unseen": 536,
+       "exact": 0.465,
+       "loose": 0.588
+      }
+     }
+    },
+    "topic_steel": {
+     "leaked": 0,
+     "exact": 0.553,
+     "exact_distinct": 0.419,
+     "loose": 0.643,
+     "loose_distinct": 0.48,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 95,
+       "exact": 0.453,
+       "loose": 0.463
+      },
+      "DEV": {
+       "n_unseen": 108,
+       "exact": 0.139,
+       "loose": 0.222
+      },
+      "FORM": {
+       "n_unseen": 504,
+       "exact": 0.671,
+       "loose": 0.772
+      },
+      "INSTRUMENT": {
+       "n_unseen": 55,
+       "exact": 0.164,
+       "loose": 0.164
+      },
+      "MAT": {
+       "n_unseen": 1167,
+       "exact": 0.625,
+       "loose": 0.723
+      },
+      "MEASUREMENT": {
+       "n_unseen": 179,
+       "exact": 0.927,
+       "loose": 0.95
+      },
+      "NUM": {
+       "n_unseen": 37,
+       "exact": 0.838,
+       "loose": 0.946
+      },
+      "PROPERTY": {
+       "n_unseen": 269,
+       "exact": 0.368,
+       "loose": 0.465
+      },
+      "RANGE": {
+       "n_unseen": 5,
+       "exact": 0.2,
+       "loose": 0.2
+      },
+      "SAMPLE": {
+       "n_unseen": 109,
+       "exact": 0.229,
+       "loose": 0.486
+      },
+      "TECHNIQUE": {
+       "n_unseen": 89,
+       "exact": 0.427,
+       "loose": 0.438
+      },
+      "UNIT": {
+       "n_unseen": 3,
+       "exact": 0.667,
+       "loose": 1.0
+      },
+      "VALUE": {
+       "n_unseen": 536,
+       "exact": 0.463,
+       "loose": 0.547
+      }
+     }
+    },
+    "sofc": {
+     "leaked": 5,
+     "exact": 0.622,
+     "exact_distinct": 0.459,
+     "loose": 0.69,
+     "loose_distinct": 0.536,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 95,
+       "exact": 0.453,
+       "loose": 0.537
+      },
+      "DEV": {
+       "n_unseen": 108,
+       "exact": 0.546,
+       "loose": 0.63
+      },
+      "FORM": {
+       "n_unseen": 504,
+       "exact": 0.677,
+       "loose": 0.748
+      },
+      "INSTRUMENT": {
+       "n_unseen": 55,
+       "exact": 0.145,
+       "loose": 0.145
+      },
+      "MAT": {
+       "n_unseen": 1167,
+       "exact": 0.725,
+       "loose": 0.782
+      },
+      "MEASUREMENT": {
+       "n_unseen": 179,
+       "exact": 0.922,
+       "loose": 0.944
+      },
+      "NUM": {
+       "n_unseen": 37,
+       "exact": 0.838,
+       "loose": 0.973
+      },
+      "PROPERTY": {
+       "n_unseen": 269,
+       "exact": 0.442,
+       "loose": 0.528
+      },
+      "RANGE": {
+       "n_unseen": 5,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "SAMPLE": {
+       "n_unseen": 109,
+       "exact": 0.394,
+       "loose": 0.404
+      },
+      "TECHNIQUE": {
+       "n_unseen": 89,
+       "exact": 0.528,
+       "loose": 0.64
+      },
+      "UNIT": {
+       "n_unseen": 3,
+       "exact": 0.667,
+       "loose": 1.0
+      },
+      "VALUE": {
+       "n_unseen": 536,
+       "exact": 0.483,
+       "loose": 0.58
+      }
+     }
+    },
+    "fatigue": {
+     "leaked": 1,
+     "exact": 0.462,
+     "exact_distinct": 0.348,
+     "loose": 0.577,
+     "loose_distinct": 0.421,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 95,
+       "exact": 0.442,
+       "loose": 0.474
+      },
+      "DEV": {
+       "n_unseen": 108,
+       "exact": 0.028,
+       "loose": 0.074
+      },
+      "FORM": {
+       "n_unseen": 504,
+       "exact": 0.671,
+       "loose": 0.768
+      },
+      "INSTRUMENT": {
+       "n_unseen": 55,
+       "exact": 0.145,
+       "loose": 0.182
+      },
+      "MAT": {
+       "n_unseen": 1167,
+       "exact": 0.512,
+       "loose": 0.63
+      },
+      "MEASUREMENT": {
+       "n_unseen": 179,
+       "exact": 0.922,
+       "loose": 0.927
+      },
+      "NUM": {
+       "n_unseen": 37,
+       "exact": 0.946,
+       "loose": 0.946
+      },
+      "PROPERTY": {
+       "n_unseen": 269,
+       "exact": 0.294,
+       "loose": 0.361
+      },
+      "RANGE": {
+       "n_unseen": 5,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "SAMPLE": {
+       "n_unseen": 109,
+       "exact": 0.239,
+       "loose": 0.505
+      },
+      "TECHNIQUE": {
+       "n_unseen": 89,
+       "exact": 0.27,
+       "loose": 0.315
+      },
+      "UNIT": {
+       "n_unseen": 3,
+       "exact": 0.667,
+       "loose": 1.0
+      },
+      "VALUE": {
+       "n_unseen": 536,
+       "exact": 0.261,
+       "loose": 0.472
+      }
+     }
+    }
+   }
+  },
+  "graphene": {
+   "n_test": 1549,
+   "n_unseen": 1255,
+   "unseen_share": 0.81,
+   "corpora": {
+    "topic_electrolysis": {
+     "leaked": 0,
+     "exact": 0.673,
+     "exact_distinct": 0.637,
+     "loose": 0.724,
+     "loose_distinct": 0.702,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 73,
+       "exact": 0.616,
+       "loose": 0.699
+      },
+      "DEV": {
+       "n_unseen": 40,
+       "exact": 0.65,
+       "loose": 0.7
+      },
+      "FORM": {
+       "n_unseen": 104,
+       "exact": 0.885,
+       "loose": 0.904
+      },
+      "INSTRUMENT": {
+       "n_unseen": 27,
+       "exact": 0.333,
+       "loose": 0.444
+      },
+      "MAT": {
+       "n_unseen": 323,
+       "exact": 0.833,
+       "loose": 0.913
+      },
+      "MEASUREMENT": {
+       "n_unseen": 88,
+       "exact": 0.932,
+       "loose": 0.977
+      },
+      "NUM": {
+       "n_unseen": 3,
+       "exact": 1.0,
+       "loose": 1.0
+      },
+      "PROPERTY": {
+       "n_unseen": 191,
+       "exact": 0.723,
+       "loose": 0.764
+      },
+      "RANGE": {
+       "n_unseen": 3,
+       "exact": 0.667,
+       "loose": 0.667
+      },
+      "SAMPLE": {
+       "n_unseen": 143,
+       "exact": 0.203,
+       "loose": 0.203
+      },
+      "TECHNIQUE": {
+       "n_unseen": 91,
+       "exact": 0.659,
+       "loose": 0.714
+      },
+      "UNIT": {
+       "n_unseen": 7,
+       "exact": 0.714,
+       "loose": 0.857
+      },
+      "VALUE": {
+       "n_unseen": 162,
+       "exact": 0.519,
+       "loose": 0.562
+      }
+     }
+    },
+    "topic_graphene": {
+     "leaked": 0,
+     "exact": 0.64,
+     "exact_distinct": 0.591,
+     "loose": 0.68,
+     "loose_distinct": 0.637,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 73,
+       "exact": 0.616,
+       "loose": 0.63
+      },
+      "DEV": {
+       "n_unseen": 40,
+       "exact": 0.7,
+       "loose": 0.725
+      },
+      "FORM": {
+       "n_unseen": 104,
+       "exact": 0.856,
+       "loose": 0.875
+      },
+      "INSTRUMENT": {
+       "n_unseen": 27,
+       "exact": 0.222,
+       "loose": 0.333
+      },
+      "MAT": {
+       "n_unseen": 323,
+       "exact": 0.808,
+       "loose": 0.879
+      },
+      "MEASUREMENT": {
+       "n_unseen": 88,
+       "exact": 0.932,
+       "loose": 0.966
+      },
+      "NUM": {
+       "n_unseen": 3,
+       "exact": 1.0,
+       "loose": 1.0
+      },
+      "PROPERTY": {
+       "n_unseen": 191,
+       "exact": 0.644,
+       "loose": 0.691
+      },
+      "RANGE": {
+       "n_unseen": 3,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "SAMPLE": {
+       "n_unseen": 143,
+       "exact": 0.182,
+       "loose": 0.189
+      },
+      "TECHNIQUE": {
+       "n_unseen": 91,
+       "exact": 0.67,
+       "loose": 0.714
+      },
+      "UNIT": {
+       "n_unseen": 7,
+       "exact": 0.571,
+       "loose": 0.714
+      },
+      "VALUE": {
+       "n_unseen": 162,
+       "exact": 0.463,
+       "loose": 0.481
+      }
+     }
+    },
+    "topic_pemfc": {
+     "leaked": 0,
+     "exact": 0.609,
+     "exact_distinct": 0.568,
+     "loose": 0.665,
+     "loose_distinct": 0.637,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 73,
+       "exact": 0.603,
+       "loose": 0.781
+      },
+      "DEV": {
+       "n_unseen": 40,
+       "exact": 0.55,
+       "loose": 0.6
+      },
+      "FORM": {
+       "n_unseen": 104,
+       "exact": 0.846,
+       "loose": 0.875
+      },
+      "INSTRUMENT": {
+       "n_unseen": 27,
+       "exact": 0.259,
+       "loose": 0.37
+      },
+      "MAT": {
+       "n_unseen": 323,
+       "exact": 0.793,
+       "loose": 0.873
+      },
+      "MEASUREMENT": {
+       "n_unseen": 88,
+       "exact": 0.909,
+       "loose": 0.955
+      },
+      "NUM": {
+       "n_unseen": 3,
+       "exact": 1.0,
+       "loose": 1.0
+      },
+      "PROPERTY": {
+       "n_unseen": 191,
+       "exact": 0.639,
+       "loose": 0.675
+      },
+      "RANGE": {
+       "n_unseen": 3,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "SAMPLE": {
+       "n_unseen": 143,
+       "exact": 0.063,
+       "loose": 0.063
+      },
+      "TECHNIQUE": {
+       "n_unseen": 91,
+       "exact": 0.582,
+       "loose": 0.681
+      },
+      "UNIT": {
+       "n_unseen": 7,
+       "exact": 0.571,
+       "loose": 0.714
+      },
+      "VALUE": {
+       "n_unseen": 162,
+       "exact": 0.469,
+       "loose": 0.488
+      }
+     }
+    },
+    "topic_poly": {
+     "leaked": 0,
+     "exact": 0.544,
+     "exact_distinct": 0.494,
+     "loose": 0.621,
+     "loose_distinct": 0.558,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 73,
+       "exact": 0.616,
+       "loose": 0.671
+      },
+      "DEV": {
+       "n_unseen": 40,
+       "exact": 0.325,
+       "loose": 0.675
+      },
+      "FORM": {
+       "n_unseen": 104,
+       "exact": 0.846,
+       "loose": 0.865
+      },
+      "INSTRUMENT": {
+       "n_unseen": 27,
+       "exact": 0.074,
+       "loose": 0.185
+      },
+      "MAT": {
+       "n_unseen": 323,
+       "exact": 0.762,
+       "loose": 0.851
+      },
+      "MEASUREMENT": {
+       "n_unseen": 88,
+       "exact": 0.909,
+       "loose": 0.943
+      },
+      "NUM": {
+       "n_unseen": 3,
+       "exact": 1.0,
+       "loose": 1.0
+      },
+      "PROPERTY": {
+       "n_unseen": 191,
+       "exact": 0.487,
+       "loose": 0.539
+      },
+      "RANGE": {
+       "n_unseen": 3,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "SAMPLE": {
+       "n_unseen": 143,
+       "exact": 0.063,
+       "loose": 0.196
+      },
+      "TECHNIQUE": {
+       "n_unseen": 91,
+       "exact": 0.396,
+       "loose": 0.462
+      },
+      "UNIT": {
+       "n_unseen": 7,
+       "exact": 0.429,
+       "loose": 0.571
+      },
+      "VALUE": {
+       "n_unseen": 162,
+       "exact": 0.401,
+       "loose": 0.432
+      }
+     }
+    },
+    "topic_semi": {
+     "leaked": 0,
+     "exact": 0.566,
+     "exact_distinct": 0.521,
+     "loose": 0.633,
+     "loose_distinct": 0.589,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 73,
+       "exact": 0.603,
+       "loose": 0.63
+      },
+      "DEV": {
+       "n_unseen": 40,
+       "exact": 0.35,
+       "loose": 0.675
+      },
+      "FORM": {
+       "n_unseen": 104,
+       "exact": 0.856,
+       "loose": 0.875
+      },
+      "INSTRUMENT": {
+       "n_unseen": 27,
+       "exact": 0.222,
+       "loose": 0.296
+      },
+      "MAT": {
+       "n_unseen": 323,
+       "exact": 0.737,
+       "loose": 0.848
+      },
+      "MEASUREMENT": {
+       "n_unseen": 88,
+       "exact": 0.943,
+       "loose": 0.977
+      },
+      "NUM": {
+       "n_unseen": 3,
+       "exact": 1.0,
+       "loose": 1.0
+      },
+      "PROPERTY": {
+       "n_unseen": 191,
+       "exact": 0.565,
+       "loose": 0.613
+      },
+      "RANGE": {
+       "n_unseen": 3,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "SAMPLE": {
+       "n_unseen": 143,
+       "exact": 0.056,
+       "loose": 0.063
+      },
+      "TECHNIQUE": {
+       "n_unseen": 91,
+       "exact": 0.527,
+       "loose": 0.615
+      },
+      "UNIT": {
+       "n_unseen": 7,
+       "exact": 0.429,
+       "loose": 0.714
+      },
+      "VALUE": {
+       "n_unseen": 162,
+       "exact": 0.407,
+       "loose": 0.444
+      }
+     }
+    },
+    "topic_sofc": {
+     "leaked": 0,
+     "exact": 0.535,
+     "exact_distinct": 0.51,
+     "loose": 0.615,
+     "loose_distinct": 0.581,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 73,
+       "exact": 0.603,
+       "loose": 0.726
+      },
+      "DEV": {
+       "n_unseen": 40,
+       "exact": 0.325,
+       "loose": 0.65
+      },
+      "FORM": {
+       "n_unseen": 104,
+       "exact": 0.846,
+       "loose": 0.856
+      },
+      "INSTRUMENT": {
+       "n_unseen": 27,
+       "exact": 0.185,
+       "loose": 0.259
+      },
+      "MAT": {
+       "n_unseen": 323,
+       "exact": 0.613,
+       "loose": 0.768
+      },
+      "MEASUREMENT": {
+       "n_unseen": 88,
+       "exact": 0.92,
+       "loose": 0.955
+      },
+      "NUM": {
+       "n_unseen": 3,
+       "exact": 1.0,
+       "loose": 1.0
+      },
+      "PROPERTY": {
+       "n_unseen": 191,
+       "exact": 0.55,
+       "loose": 0.613
+      },
+      "RANGE": {
+       "n_unseen": 3,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "SAMPLE": {
+       "n_unseen": 143,
+       "exact": 0.063,
+       "loose": 0.07
+      },
+      "TECHNIQUE": {
+       "n_unseen": 91,
+       "exact": 0.527,
+       "loose": 0.593
+      },
+      "UNIT": {
+       "n_unseen": 7,
+       "exact": 0.714,
+       "loose": 0.857
+      },
+      "VALUE": {
+       "n_unseen": 162,
+       "exact": 0.444,
+       "loose": 0.463
+      }
+     }
+    },
+    "topic_steel": {
+     "leaked": 0,
+     "exact": 0.513,
+     "exact_distinct": 0.467,
+     "loose": 0.575,
+     "loose_distinct": 0.529,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 73,
+       "exact": 0.616,
+       "loose": 0.63
+      },
+      "DEV": {
+       "n_unseen": 40,
+       "exact": 0.2,
+       "loose": 0.5
+      },
+      "FORM": {
+       "n_unseen": 104,
+       "exact": 0.808,
+       "loose": 0.817
+      },
+      "INSTRUMENT": {
+       "n_unseen": 27,
+       "exact": 0.074,
+       "loose": 0.222
+      },
+      "MAT": {
+       "n_unseen": 323,
+       "exact": 0.675,
+       "loose": 0.771
+      },
+      "MEASUREMENT": {
+       "n_unseen": 88,
+       "exact": 0.909,
+       "loose": 0.943
+      },
+      "NUM": {
+       "n_unseen": 3,
+       "exact": 1.0,
+       "loose": 1.0
+      },
+      "PROPERTY": {
+       "n_unseen": 191,
+       "exact": 0.487,
+       "loose": 0.545
+      },
+      "RANGE": {
+       "n_unseen": 3,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "SAMPLE": {
+       "n_unseen": 143,
+       "exact": 0.063,
+       "loose": 0.063
+      },
+      "TECHNIQUE": {
+       "n_unseen": 91,
+       "exact": 0.418,
+       "loose": 0.495
+      },
+      "UNIT": {
+       "n_unseen": 7,
+       "exact": 0.286,
+       "loose": 0.714
+      },
+      "VALUE": {
+       "n_unseen": 162,
+       "exact": 0.383,
+       "loose": 0.414
+      }
+     }
+    },
+    "sofc": {
+     "leaked": 1,
+     "exact": 0.557,
+     "exact_distinct": 0.514,
+     "loose": 0.625,
+     "loose_distinct": 0.589,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 73,
+       "exact": 0.589,
+       "loose": 0.699
+      },
+      "DEV": {
+       "n_unseen": 40,
+       "exact": 0.325,
+       "loose": 0.65
+      },
+      "FORM": {
+       "n_unseen": 104,
+       "exact": 0.837,
+       "loose": 0.856
+      },
+      "INSTRUMENT": {
+       "n_unseen": 27,
+       "exact": 0.148,
+       "loose": 0.259
+      },
+      "MAT": {
+       "n_unseen": 323,
+       "exact": 0.697,
+       "loose": 0.793
+      },
+      "MEASUREMENT": {
+       "n_unseen": 88,
+       "exact": 0.92,
+       "loose": 0.966
+      },
+      "NUM": {
+       "n_unseen": 3,
+       "exact": 1.0,
+       "loose": 1.0
+      },
+      "PROPERTY": {
+       "n_unseen": 191,
+       "exact": 0.565,
+       "loose": 0.618
+      },
+      "RANGE": {
+       "n_unseen": 3,
+       "exact": 0.333,
+       "loose": 0.333
+      },
+      "SAMPLE": {
+       "n_unseen": 143,
+       "exact": 0.063,
+       "loose": 0.07
+      },
+      "TECHNIQUE": {
+       "n_unseen": 91,
+       "exact": 0.549,
+       "loose": 0.626
+      },
+      "UNIT": {
+       "n_unseen": 7,
+       "exact": 0.571,
+       "loose": 0.714
+      },
+      "VALUE": {
+       "n_unseen": 162,
+       "exact": 0.438,
+       "loose": 0.475
+      }
+     }
+    },
+    "fatigue": {
+     "leaked": 0,
+     "exact": 0.425,
+     "exact_distinct": 0.383,
+     "loose": 0.499,
+     "loose_distinct": 0.451,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 73,
+       "exact": 0.534,
+       "loose": 0.589
+      },
+      "DEV": {
+       "n_unseen": 40,
+       "exact": 0.1,
+       "loose": 0.1
+      },
+      "FORM": {
+       "n_unseen": 104,
+       "exact": 0.798,
+       "loose": 0.817
+      },
+      "INSTRUMENT": {
+       "n_unseen": 27,
+       "exact": 0.111,
+       "loose": 0.185
+      },
+      "MAT": {
+       "n_unseen": 323,
+       "exact": 0.554,
+       "loose": 0.659
+      },
+      "MEASUREMENT": {
+       "n_unseen": 88,
+       "exact": 0.92,
+       "loose": 0.92
+      },
+      "NUM": {
+       "n_unseen": 3,
+       "exact": 1.0,
+       "loose": 1.0
+      },
+      "PROPERTY": {
+       "n_unseen": 191,
+       "exact": 0.377,
+       "loose": 0.44
+      },
+      "RANGE": {
+       "n_unseen": 3,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "SAMPLE": {
+       "n_unseen": 143,
+       "exact": 0.063,
+       "loose": 0.063
+      },
+      "TECHNIQUE": {
+       "n_unseen": 91,
+       "exact": 0.352,
+       "loose": 0.451
+      },
+      "UNIT": {
+       "n_unseen": 7,
+       "exact": 0.571,
+       "loose": 0.571
+      },
+      "VALUE": {
+       "n_unseen": 162,
+       "exact": 0.148,
+       "loose": 0.333
+      }
+     }
+    }
+   }
+  },
+  "pemfc": {
+   "n_test": 7238,
+   "n_unseen": 6279,
+   "unseen_share": 0.868,
+   "corpora": {
+    "topic_electrolysis": {
+     "leaked": 0,
+     "exact": 0.695,
+     "exact_distinct": 0.468,
+     "loose": 0.747,
+     "loose_distinct": 0.524,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 148,
+       "exact": 0.351,
+       "loose": 0.385
+      },
+      "DEV": {
+       "n_unseen": 163,
+       "exact": 0.853,
+       "loose": 0.945
+      },
+      "FORM": {
+       "n_unseen": 245,
+       "exact": 0.943,
+       "loose": 0.955
+      },
+      "INSTRUMENT": {
+       "n_unseen": 59,
+       "exact": 0.068,
+       "loose": 0.085
+      },
+      "MAT": {
+       "n_unseen": 3245,
+       "exact": 0.814,
+       "loose": 0.866
+      },
+      "MEASUREMENT": {
+       "n_unseen": 254,
+       "exact": 0.886,
+       "loose": 0.917
+      },
+      "NUM": {
+       "n_unseen": 55,
+       "exact": 0.873,
+       "loose": 0.909
+      },
+      "PROPERTY": {
+       "n_unseen": 744,
+       "exact": 0.621,
+       "loose": 0.648
+      },
+      "RANGE": {
+       "n_unseen": 2,
+       "exact": 0.5,
+       "loose": 0.5
+      },
+      "SAMPLE": {
+       "n_unseen": 172,
+       "exact": 0.029,
+       "loose": 0.157
+      },
+      "TECHNIQUE": {
+       "n_unseen": 175,
+       "exact": 0.554,
+       "loose": 0.669
+      },
+      "UNIT": {
+       "n_unseen": 23,
+       "exact": 0.652,
+       "loose": 0.696
+      },
+      "VALUE": {
+       "n_unseen": 994,
+       "exact": 0.448,
+       "loose": 0.505
+      }
+     }
+    },
+    "topic_graphene": {
+     "leaked": 0,
+     "exact": 0.621,
+     "exact_distinct": 0.405,
+     "loose": 0.677,
+     "loose_distinct": 0.458,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 148,
+       "exact": 0.345,
+       "loose": 0.365
+      },
+      "DEV": {
+       "n_unseen": 163,
+       "exact": 0.546,
+       "loose": 0.675
+      },
+      "FORM": {
+       "n_unseen": 245,
+       "exact": 0.939,
+       "loose": 0.959
+      },
+      "INSTRUMENT": {
+       "n_unseen": 59,
+       "exact": 0.102,
+       "loose": 0.119
+      },
+      "MAT": {
+       "n_unseen": 3245,
+       "exact": 0.724,
+       "loose": 0.794
+      },
+      "MEASUREMENT": {
+       "n_unseen": 254,
+       "exact": 0.878,
+       "loose": 0.909
+      },
+      "NUM": {
+       "n_unseen": 55,
+       "exact": 0.891,
+       "loose": 0.909
+      },
+      "PROPERTY": {
+       "n_unseen": 744,
+       "exact": 0.512,
+       "loose": 0.56
+      },
+      "RANGE": {
+       "n_unseen": 2,
+       "exact": 0.5,
+       "loose": 0.5
+      },
+      "SAMPLE": {
+       "n_unseen": 172,
+       "exact": 0.029,
+       "loose": 0.029
+      },
+      "TECHNIQUE": {
+       "n_unseen": 175,
+       "exact": 0.543,
+       "loose": 0.617
+      },
+      "UNIT": {
+       "n_unseen": 23,
+       "exact": 0.696,
+       "loose": 0.696
+      },
+      "VALUE": {
+       "n_unseen": 994,
+       "exact": 0.406,
+       "loose": 0.442
+      }
+     }
+    },
+    "topic_pemfc": {
+     "leaked": 0,
+     "exact": 0.739,
+     "exact_distinct": 0.525,
+     "loose": 0.783,
+     "loose_distinct": 0.594,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 148,
+       "exact": 0.345,
+       "loose": 0.574
+      },
+      "DEV": {
+       "n_unseen": 163,
+       "exact": 0.914,
+       "loose": 0.945
+      },
+      "FORM": {
+       "n_unseen": 245,
+       "exact": 0.951,
+       "loose": 0.959
+      },
+      "INSTRUMENT": {
+       "n_unseen": 59,
+       "exact": 0.153,
+       "loose": 0.153
+      },
+      "MAT": {
+       "n_unseen": 3245,
+       "exact": 0.87,
+       "loose": 0.902
+      },
+      "MEASUREMENT": {
+       "n_unseen": 254,
+       "exact": 0.886,
+       "loose": 0.917
+      },
+      "NUM": {
+       "n_unseen": 55,
+       "exact": 0.891,
+       "loose": 0.909
+      },
+      "PROPERTY": {
+       "n_unseen": 744,
+       "exact": 0.703,
+       "loose": 0.761
+      },
+      "RANGE": {
+       "n_unseen": 2,
+       "exact": 0.5,
+       "loose": 0.5
+      },
+      "SAMPLE": {
+       "n_unseen": 172,
+       "exact": 0.047,
+       "loose": 0.052
+      },
+      "TECHNIQUE": {
+       "n_unseen": 175,
+       "exact": 0.646,
+       "loose": 0.714
+      },
+      "UNIT": {
+       "n_unseen": 23,
+       "exact": 0.87,
+       "loose": 0.87
+      },
+      "VALUE": {
+       "n_unseen": 994,
+       "exact": 0.441,
+       "loose": 0.506
+      }
+     }
+    },
+    "topic_poly": {
+     "leaked": 0,
+     "exact": 0.544,
+     "exact_distinct": 0.353,
+     "loose": 0.611,
+     "loose_distinct": 0.408,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 148,
+       "exact": 0.351,
+       "loose": 0.358
+      },
+      "DEV": {
+       "n_unseen": 163,
+       "exact": 0.485,
+       "loose": 0.509
+      },
+      "FORM": {
+       "n_unseen": 245,
+       "exact": 0.857,
+       "loose": 0.947
+      },
+      "INSTRUMENT": {
+       "n_unseen": 59,
+       "exact": 0.102,
+       "loose": 0.119
+      },
+      "MAT": {
+       "n_unseen": 3245,
+       "exact": 0.627,
+       "loose": 0.7
+      },
+      "MEASUREMENT": {
+       "n_unseen": 254,
+       "exact": 0.87,
+       "loose": 0.898
+      },
+      "NUM": {
+       "n_unseen": 55,
+       "exact": 0.945,
+       "loose": 0.945
+      },
+      "PROPERTY": {
+       "n_unseen": 744,
+       "exact": 0.431,
+       "loose": 0.5
+      },
+      "RANGE": {
+       "n_unseen": 2,
+       "exact": 0.5,
+       "loose": 0.5
+      },
+      "SAMPLE": {
+       "n_unseen": 172,
+       "exact": 0.029,
+       "loose": 0.029
+      },
+      "TECHNIQUE": {
+       "n_unseen": 175,
+       "exact": 0.389,
+       "loose": 0.509
+      },
+      "UNIT": {
+       "n_unseen": 23,
+       "exact": 0.652,
+       "loose": 0.696
+      },
+      "VALUE": {
+       "n_unseen": 994,
+       "exact": 0.352,
+       "loose": 0.43
+      }
+     }
+    },
+    "topic_semi": {
+     "leaked": 0,
+     "exact": 0.522,
+     "exact_distinct": 0.365,
+     "loose": 0.637,
+     "loose_distinct": 0.425,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 148,
+       "exact": 0.338,
+       "loose": 0.351
+      },
+      "DEV": {
+       "n_unseen": 163,
+       "exact": 0.362,
+       "loose": 0.503
+      },
+      "FORM": {
+       "n_unseen": 245,
+       "exact": 0.935,
+       "loose": 0.951
+      },
+      "INSTRUMENT": {
+       "n_unseen": 59,
+       "exact": 0.102,
+       "loose": 0.102
+      },
+      "MAT": {
+       "n_unseen": 3245,
+       "exact": 0.583,
+       "loose": 0.754
+      },
+      "MEASUREMENT": {
+       "n_unseen": 254,
+       "exact": 0.878,
+       "loose": 0.913
+      },
+      "NUM": {
+       "n_unseen": 55,
+       "exact": 0.927,
+       "loose": 0.945
+      },
+      "PROPERTY": {
+       "n_unseen": 744,
+       "exact": 0.438,
+       "loose": 0.493
+      },
+      "RANGE": {
+       "n_unseen": 2,
+       "exact": 0.5,
+       "loose": 0.5
+      },
+      "SAMPLE": {
+       "n_unseen": 172,
+       "exact": 0.023,
+       "loose": 0.029
+      },
+      "TECHNIQUE": {
+       "n_unseen": 175,
+       "exact": 0.411,
+       "loose": 0.531
+      },
+      "UNIT": {
+       "n_unseen": 23,
+       "exact": 0.609,
+       "loose": 0.696
+      },
+      "VALUE": {
+       "n_unseen": 994,
+       "exact": 0.355,
+       "loose": 0.418
+      }
+     }
+    },
+    "topic_sofc": {
+     "leaked": 0,
+     "exact": 0.585,
+     "exact_distinct": 0.413,
+     "loose": 0.696,
+     "loose_distinct": 0.479,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 148,
+       "exact": 0.351,
+       "loose": 0.459
+      },
+      "DEV": {
+       "n_unseen": 163,
+       "exact": 0.767,
+       "loose": 0.847
+      },
+      "FORM": {
+       "n_unseen": 245,
+       "exact": 0.935,
+       "loose": 0.943
+      },
+      "INSTRUMENT": {
+       "n_unseen": 59,
+       "exact": 0.119,
+       "loose": 0.136
+      },
+      "MAT": {
+       "n_unseen": 3245,
+       "exact": 0.64,
+       "loose": 0.804
+      },
+      "MEASUREMENT": {
+       "n_unseen": 254,
+       "exact": 0.886,
+       "loose": 0.917
+      },
+      "NUM": {
+       "n_unseen": 55,
+       "exact": 0.891,
+       "loose": 0.909
+      },
+      "PROPERTY": {
+       "n_unseen": 744,
+       "exact": 0.534,
+       "loose": 0.595
+      },
+      "RANGE": {
+       "n_unseen": 2,
+       "exact": 0.5,
+       "loose": 0.5
+      },
+      "SAMPLE": {
+       "n_unseen": 172,
+       "exact": 0.029,
+       "loose": 0.035
+      },
+      "TECHNIQUE": {
+       "n_unseen": 175,
+       "exact": 0.446,
+       "loose": 0.577
+      },
+      "UNIT": {
+       "n_unseen": 23,
+       "exact": 0.652,
+       "loose": 0.652
+      },
+      "VALUE": {
+       "n_unseen": 994,
+       "exact": 0.419,
+       "loose": 0.471
+      }
+     }
+    },
+    "topic_steel": {
+     "leaked": 0,
+     "exact": 0.52,
+     "exact_distinct": 0.355,
+     "loose": 0.592,
+     "loose_distinct": 0.409,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 148,
+       "exact": 0.345,
+       "loose": 0.372
+      },
+      "DEV": {
+       "n_unseen": 163,
+       "exact": 0.503,
+       "loose": 0.509
+      },
+      "FORM": {
+       "n_unseen": 245,
+       "exact": 0.841,
+       "loose": 0.927
+      },
+      "INSTRUMENT": {
+       "n_unseen": 59,
+       "exact": 0.068,
+       "loose": 0.102
+      },
+      "MAT": {
+       "n_unseen": 3245,
+       "exact": 0.576,
+       "loose": 0.664
+      },
+      "MEASUREMENT": {
+       "n_unseen": 254,
+       "exact": 0.858,
+       "loose": 0.886
+      },
+      "NUM": {
+       "n_unseen": 55,
+       "exact": 0.909,
+       "loose": 0.945
+      },
+      "PROPERTY": {
+       "n_unseen": 744,
+       "exact": 0.461,
+       "loose": 0.513
+      },
+      "RANGE": {
+       "n_unseen": 2,
+       "exact": 0.5,
+       "loose": 0.5
+      },
+      "SAMPLE": {
+       "n_unseen": 172,
+       "exact": 0.029,
+       "loose": 0.035
+      },
+      "TECHNIQUE": {
+       "n_unseen": 175,
+       "exact": 0.394,
+       "loose": 0.531
+      },
+      "UNIT": {
+       "n_unseen": 23,
+       "exact": 0.609,
+       "loose": 0.652
+      },
+      "VALUE": {
+       "n_unseen": 994,
+       "exact": 0.357,
+       "loose": 0.42
+      }
+     }
+    },
+    "sofc": {
+     "leaked": 1,
+     "exact": 0.598,
+     "exact_distinct": 0.415,
+     "loose": 0.702,
+     "loose_distinct": 0.484,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 148,
+       "exact": 0.345,
+       "loose": 0.459
+      },
+      "DEV": {
+       "n_unseen": 163,
+       "exact": 0.785,
+       "loose": 0.834
+      },
+      "FORM": {
+       "n_unseen": 245,
+       "exact": 0.922,
+       "loose": 0.931
+      },
+      "INSTRUMENT": {
+       "n_unseen": 59,
+       "exact": 0.136,
+       "loose": 0.153
+      },
+      "MAT": {
+       "n_unseen": 3245,
+       "exact": 0.67,
+       "loose": 0.813
+      },
+      "MEASUREMENT": {
+       "n_unseen": 254,
+       "exact": 0.878,
+       "loose": 0.913
+      },
+      "NUM": {
+       "n_unseen": 55,
+       "exact": 0.891,
+       "loose": 0.909
+      },
+      "PROPERTY": {
+       "n_unseen": 744,
+       "exact": 0.539,
+       "loose": 0.606
+      },
+      "RANGE": {
+       "n_unseen": 2,
+       "exact": 0.5,
+       "loose": 0.5
+      },
+      "SAMPLE": {
+       "n_unseen": 172,
+       "exact": 0.023,
+       "loose": 0.035
+      },
+      "TECHNIQUE": {
+       "n_unseen": 175,
+       "exact": 0.451,
+       "loose": 0.606
+      },
+      "UNIT": {
+       "n_unseen": 23,
+       "exact": 0.609,
+       "loose": 0.652
+      },
+      "VALUE": {
+       "n_unseen": 994,
+       "exact": 0.397,
+       "loose": 0.472
+      }
+     }
+    },
+    "fatigue": {
+     "leaked": 0,
+     "exact": 0.461,
+     "exact_distinct": 0.295,
+     "loose": 0.566,
+     "loose_distinct": 0.362,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 148,
+       "exact": 0.426,
+       "loose": 0.453
+      },
+      "DEV": {
+       "n_unseen": 163,
+       "exact": 0.35,
+       "loose": 0.35
+      },
+      "FORM": {
+       "n_unseen": 245,
+       "exact": 0.833,
+       "loose": 0.922
+      },
+      "INSTRUMENT": {
+       "n_unseen": 59,
+       "exact": 0.068,
+       "loose": 0.085
+      },
+      "MAT": {
+       "n_unseen": 3245,
+       "exact": 0.53,
+       "loose": 0.667
+      },
+      "MEASUREMENT": {
+       "n_unseen": 254,
+       "exact": 0.886,
+       "loose": 0.89
+      },
+      "NUM": {
+       "n_unseen": 55,
+       "exact": 0.927,
+       "loose": 0.945
+      },
+      "PROPERTY": {
+       "n_unseen": 744,
+       "exact": 0.355,
+       "loose": 0.407
+      },
+      "RANGE": {
+       "n_unseen": 2,
+       "exact": 0.5,
+       "loose": 0.5
+      },
+      "SAMPLE": {
+       "n_unseen": 172,
+       "exact": 0.029,
+       "loose": 0.035
+      },
+      "TECHNIQUE": {
+       "n_unseen": 175,
+       "exact": 0.297,
+       "loose": 0.463
+      },
+      "UNIT": {
+       "n_unseen": 23,
+       "exact": 0.565,
+       "loose": 0.652
+      },
+      "VALUE": {
+       "n_unseen": 994,
+       "exact": 0.237,
+       "loose": 0.353
+      }
+     }
+    }
+   }
+  },
+  "poly": {
+   "n_test": 5430,
+   "n_unseen": 4658,
+   "unseen_share": 0.858,
+   "corpora": {
+    "topic_electrolysis": {
+     "leaked": 0,
+     "exact": 0.46,
+     "exact_distinct": 0.355,
+     "loose": 0.536,
+     "loose_distinct": 0.407,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 180,
+       "exact": 0.0,
+       "loose": 0.067
+      },
+      "DEV": {
+       "n_unseen": 2,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "FORM": {
+       "n_unseen": 644,
+       "exact": 0.899,
+       "loose": 0.91
+      },
+      "INSTRUMENT": {
+       "n_unseen": 56,
+       "exact": 0.125,
+       "loose": 0.125
+      },
+      "MAT": {
+       "n_unseen": 1340,
+       "exact": 0.442,
+       "loose": 0.583
+      },
+      "MEASUREMENT": {
+       "n_unseen": 243,
+       "exact": 0.897,
+       "loose": 0.905
+      },
+      "NUM": {
+       "n_unseen": 49,
+       "exact": 0.98,
+       "loose": 1.0
+      },
+      "PROPERTY": {
+       "n_unseen": 861,
+       "exact": 0.347,
+       "loose": 0.403
+      },
+      "RANGE": {
+       "n_unseen": 4,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "SAMPLE": {
+       "n_unseen": 363,
+       "exact": 0.113,
+       "loose": 0.198
+      },
+      "TECHNIQUE": {
+       "n_unseen": 148,
+       "exact": 0.23,
+       "loose": 0.257
+      },
+      "UNIT": {
+       "n_unseen": 17,
+       "exact": 0.588,
+       "loose": 0.765
+      },
+      "VALUE": {
+       "n_unseen": 751,
+       "exact": 0.421,
+       "loose": 0.497
+      }
+     }
+    },
+    "topic_graphene": {
+     "leaked": 0,
+     "exact": 0.553,
+     "exact_distinct": 0.418,
+     "loose": 0.61,
+     "loose_distinct": 0.474,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 180,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "DEV": {
+       "n_unseen": 2,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "FORM": {
+       "n_unseen": 644,
+       "exact": 0.929,
+       "loose": 0.939
+      },
+      "INSTRUMENT": {
+       "n_unseen": 56,
+       "exact": 0.143,
+       "loose": 0.143
+      },
+      "MAT": {
+       "n_unseen": 1340,
+       "exact": 0.61,
+       "loose": 0.693
+      },
+      "MEASUREMENT": {
+       "n_unseen": 243,
+       "exact": 0.893,
+       "loose": 0.901
+      },
+      "NUM": {
+       "n_unseen": 49,
+       "exact": 1.0,
+       "loose": 1.0
+      },
+      "PROPERTY": {
+       "n_unseen": 861,
+       "exact": 0.487,
+       "loose": 0.546
+      },
+      "RANGE": {
+       "n_unseen": 4,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "SAMPLE": {
+       "n_unseen": 363,
+       "exact": 0.121,
+       "loose": 0.223
+      },
+      "TECHNIQUE": {
+       "n_unseen": 148,
+       "exact": 0.358,
+       "loose": 0.412
+      },
+      "UNIT": {
+       "n_unseen": 17,
+       "exact": 0.765,
+       "loose": 0.824
+      },
+      "VALUE": {
+       "n_unseen": 751,
+       "exact": 0.474,
+       "loose": 0.538
+      }
+     }
+    },
+    "topic_pemfc": {
+     "leaked": 0,
+     "exact": 0.541,
+     "exact_distinct": 0.389,
+     "loose": 0.628,
+     "loose_distinct": 0.452,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 180,
+       "exact": 0.006,
+       "loose": 0.322
+      },
+      "DEV": {
+       "n_unseen": 2,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "FORM": {
+       "n_unseen": 644,
+       "exact": 0.905,
+       "loose": 0.935
+      },
+      "INSTRUMENT": {
+       "n_unseen": 56,
+       "exact": 0.161,
+       "loose": 0.161
+      },
+      "MAT": {
+       "n_unseen": 1340,
+       "exact": 0.601,
+       "loose": 0.715
+      },
+      "MEASUREMENT": {
+       "n_unseen": 243,
+       "exact": 0.893,
+       "loose": 0.901
+      },
+      "NUM": {
+       "n_unseen": 49,
+       "exact": 0.98,
+       "loose": 0.98
+      },
+      "PROPERTY": {
+       "n_unseen": 861,
+       "exact": 0.411,
+       "loose": 0.49
+      },
+      "RANGE": {
+       "n_unseen": 4,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "SAMPLE": {
+       "n_unseen": 363,
+       "exact": 0.333,
+       "loose": 0.488
+      },
+      "TECHNIQUE": {
+       "n_unseen": 148,
+       "exact": 0.23,
+       "loose": 0.291
+      },
+      "UNIT": {
+       "n_unseen": 17,
+       "exact": 0.706,
+       "loose": 0.765
+      },
+      "VALUE": {
+       "n_unseen": 751,
+       "exact": 0.446,
+       "loose": 0.499
+      }
+     }
+    },
+    "topic_poly": {
+     "leaked": 0,
+     "exact": 0.659,
+     "exact_distinct": 0.473,
+     "loose": 0.699,
+     "loose_distinct": 0.528,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 180,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "DEV": {
+       "n_unseen": 2,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "FORM": {
+       "n_unseen": 644,
+       "exact": 0.938,
+       "loose": 0.946
+      },
+      "INSTRUMENT": {
+       "n_unseen": 56,
+       "exact": 0.179,
+       "loose": 0.214
+      },
+      "MAT": {
+       "n_unseen": 1340,
+       "exact": 0.8,
+       "loose": 0.852
+      },
+      "MEASUREMENT": {
+       "n_unseen": 243,
+       "exact": 0.905,
+       "loose": 0.909
+      },
+      "NUM": {
+       "n_unseen": 49,
+       "exact": 1.0,
+       "loose": 1.0
+      },
+      "PROPERTY": {
+       "n_unseen": 861,
+       "exact": 0.577,
+       "loose": 0.633
+      },
+      "RANGE": {
+       "n_unseen": 4,
+       "exact": 0.25,
+       "loose": 0.25
+      },
+      "SAMPLE": {
+       "n_unseen": 363,
+       "exact": 0.479,
+       "loose": 0.529
+      },
+      "TECHNIQUE": {
+       "n_unseen": 148,
+       "exact": 0.378,
+       "loose": 0.419
+      },
+      "UNIT": {
+       "n_unseen": 17,
+       "exact": 0.706,
+       "loose": 0.824
+      },
+      "VALUE": {
+       "n_unseen": 751,
+       "exact": 0.498,
+       "loose": 0.545
+      }
+     }
+    },
+    "topic_semi": {
+     "leaked": 0,
+     "exact": 0.516,
+     "exact_distinct": 0.397,
+     "loose": 0.571,
+     "loose_distinct": 0.444,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 180,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "DEV": {
+       "n_unseen": 2,
+       "exact": 0.5,
+       "loose": 0.5
+      },
+      "FORM": {
+       "n_unseen": 644,
+       "exact": 0.907,
+       "loose": 0.916
+      },
+      "INSTRUMENT": {
+       "n_unseen": 56,
+       "exact": 0.161,
+       "loose": 0.161
+      },
+      "MAT": {
+       "n_unseen": 1340,
+       "exact": 0.51,
+       "loose": 0.61
+      },
+      "MEASUREMENT": {
+       "n_unseen": 243,
+       "exact": 0.909,
+       "loose": 0.918
+      },
+      "NUM": {
+       "n_unseen": 49,
+       "exact": 1.0,
+       "loose": 1.0
+      },
+      "PROPERTY": {
+       "n_unseen": 861,
+       "exact": 0.475,
+       "loose": 0.531
+      },
+      "RANGE": {
+       "n_unseen": 4,
+       "exact": 0.25,
+       "loose": 0.25
+      },
+      "SAMPLE": {
+       "n_unseen": 363,
+       "exact": 0.14,
+       "loose": 0.196
+      },
+      "TECHNIQUE": {
+       "n_unseen": 148,
+       "exact": 0.291,
+       "loose": 0.331
+      },
+      "UNIT": {
+       "n_unseen": 17,
+       "exact": 0.647,
+       "loose": 0.765
+      },
+      "VALUE": {
+       "n_unseen": 751,
+       "exact": 0.454,
+       "loose": 0.505
+      }
+     }
+    },
+    "topic_sofc": {
+     "leaked": 0,
+     "exact": 0.484,
+     "exact_distinct": 0.381,
+     "loose": 0.54,
+     "loose_distinct": 0.431,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 180,
+       "exact": 0.0,
+       "loose": 0.083
+      },
+      "DEV": {
+       "n_unseen": 2,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "FORM": {
+       "n_unseen": 644,
+       "exact": 0.798,
+       "loose": 0.811
+      },
+      "INSTRUMENT": {
+       "n_unseen": 56,
+       "exact": 0.179,
+       "loose": 0.179
+      },
+      "MAT": {
+       "n_unseen": 1340,
+       "exact": 0.45,
+       "loose": 0.549
+      },
+      "MEASUREMENT": {
+       "n_unseen": 243,
+       "exact": 0.909,
+       "loose": 0.918
+      },
+      "NUM": {
+       "n_unseen": 49,
+       "exact": 0.98,
+       "loose": 1.0
+      },
+      "PROPERTY": {
+       "n_unseen": 861,
+       "exact": 0.453,
+       "loose": 0.501
+      },
+      "RANGE": {
+       "n_unseen": 4,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "SAMPLE": {
+       "n_unseen": 363,
+       "exact": 0.185,
+       "loose": 0.226
+      },
+      "TECHNIQUE": {
+       "n_unseen": 148,
+       "exact": 0.27,
+       "loose": 0.297
+      },
+      "UNIT": {
+       "n_unseen": 17,
+       "exact": 0.647,
+       "loose": 0.765
+      },
+      "VALUE": {
+       "n_unseen": 751,
+       "exact": 0.466,
+       "loose": 0.518
+      }
+     }
+    },
+    "topic_steel": {
+     "leaked": 0,
+     "exact": 0.533,
+     "exact_distinct": 0.414,
+     "loose": 0.6,
+     "loose_distinct": 0.473,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 180,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "DEV": {
+       "n_unseen": 2,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "FORM": {
+       "n_unseen": 644,
+       "exact": 0.879,
+       "loose": 0.89
+      },
+      "INSTRUMENT": {
+       "n_unseen": 56,
+       "exact": 0.125,
+       "loose": 0.161
+      },
+      "MAT": {
+       "n_unseen": 1340,
+       "exact": 0.503,
+       "loose": 0.665
+      },
+      "MEASUREMENT": {
+       "n_unseen": 243,
+       "exact": 0.93,
+       "loose": 0.938
+      },
+      "NUM": {
+       "n_unseen": 49,
+       "exact": 0.98,
+       "loose": 1.0
+      },
+      "PROPERTY": {
+       "n_unseen": 861,
+       "exact": 0.546,
+       "loose": 0.584
+      },
+      "RANGE": {
+       "n_unseen": 4,
+       "exact": 0.25,
+       "loose": 0.25
+      },
+      "SAMPLE": {
+       "n_unseen": 363,
+       "exact": 0.171,
+       "loose": 0.22
+      },
+      "TECHNIQUE": {
+       "n_unseen": 148,
+       "exact": 0.331,
+       "loose": 0.392
+      },
+      "UNIT": {
+       "n_unseen": 17,
+       "exact": 0.706,
+       "loose": 0.765
+      },
+      "VALUE": {
+       "n_unseen": 751,
+       "exact": 0.487,
+       "loose": 0.521
+      }
+     }
+    },
+    "sofc": {
+     "leaked": 0,
+     "exact": 0.486,
+     "exact_distinct": 0.384,
+     "loose": 0.544,
+     "loose_distinct": 0.436,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 180,
+       "exact": 0.0,
+       "loose": 0.133
+      },
+      "DEV": {
+       "n_unseen": 2,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "FORM": {
+       "n_unseen": 644,
+       "exact": 0.809,
+       "loose": 0.817
+      },
+      "INSTRUMENT": {
+       "n_unseen": 56,
+       "exact": 0.143,
+       "loose": 0.143
+      },
+      "MAT": {
+       "n_unseen": 1340,
+       "exact": 0.455,
+       "loose": 0.553
+      },
+      "MEASUREMENT": {
+       "n_unseen": 243,
+       "exact": 0.909,
+       "loose": 0.918
+      },
+      "NUM": {
+       "n_unseen": 49,
+       "exact": 0.98,
+       "loose": 1.0
+      },
+      "PROPERTY": {
+       "n_unseen": 861,
+       "exact": 0.461,
+       "loose": 0.512
+      },
+      "RANGE": {
+       "n_unseen": 4,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "SAMPLE": {
+       "n_unseen": 363,
+       "exact": 0.185,
+       "loose": 0.226
+      },
+      "TECHNIQUE": {
+       "n_unseen": 148,
+       "exact": 0.257,
+       "loose": 0.284
+      },
+      "UNIT": {
+       "n_unseen": 17,
+       "exact": 0.588,
+       "loose": 0.765
+      },
+      "VALUE": {
+       "n_unseen": 751,
+       "exact": 0.455,
+       "loose": 0.514
+      }
+     }
+    },
+    "fatigue": {
+     "leaked": 0,
+     "exact": 0.535,
+     "exact_distinct": 0.407,
+     "loose": 0.597,
+     "loose_distinct": 0.463,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 180,
+       "exact": 0.161,
+       "loose": 0.161
+      },
+      "DEV": {
+       "n_unseen": 2,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "FORM": {
+       "n_unseen": 644,
+       "exact": 0.873,
+       "loose": 0.879
+      },
+      "INSTRUMENT": {
+       "n_unseen": 56,
+       "exact": 0.143,
+       "loose": 0.179
+      },
+      "MAT": {
+       "n_unseen": 1340,
+       "exact": 0.522,
+       "loose": 0.65
+      },
+      "MEASUREMENT": {
+       "n_unseen": 243,
+       "exact": 0.909,
+       "loose": 0.914
+      },
+      "NUM": {
+       "n_unseen": 49,
+       "exact": 0.98,
+       "loose": 1.0
+      },
+      "PROPERTY": {
+       "n_unseen": 861,
+       "exact": 0.501,
+       "loose": 0.552
+      },
+      "RANGE": {
+       "n_unseen": 4,
+       "exact": 0.25,
+       "loose": 0.25
+      },
+      "SAMPLE": {
+       "n_unseen": 363,
+       "exact": 0.209,
+       "loose": 0.242
+      },
+      "TECHNIQUE": {
+       "n_unseen": 148,
+       "exact": 0.331,
+       "loose": 0.392
+      },
+      "UNIT": {
+       "n_unseen": 17,
+       "exact": 0.765,
+       "loose": 0.824
+      },
+      "VALUE": {
+       "n_unseen": 751,
+       "exact": 0.469,
+       "loose": 0.531
+      }
+     }
+    }
+   }
+  },
+  "semi": {
+   "n_test": 5400,
+   "n_unseen": 5152,
+   "unseen_share": 0.954,
+   "corpora": {
+    "topic_electrolysis": {
+     "leaked": 0,
+     "exact": 0.611,
+     "exact_distinct": 0.418,
+     "loose": 0.675,
+     "loose_distinct": 0.488,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 280,
+       "exact": 0.421,
+       "loose": 0.464
+      },
+      "DEV": {
+       "n_unseen": 182,
+       "exact": 0.181,
+       "loose": 0.209
+      },
+      "FORM": {
+       "n_unseen": 648,
+       "exact": 0.92,
+       "loose": 0.94
+      },
+      "INSTRUMENT": {
+       "n_unseen": 69,
+       "exact": 0.246,
+       "loose": 0.304
+      },
+      "MAT": {
+       "n_unseen": 1951,
+       "exact": 0.788,
+       "loose": 0.824
+      },
+      "MEASUREMENT": {
+       "n_unseen": 236,
+       "exact": 0.822,
+       "loose": 0.907
+      },
+      "NUM": {
+       "n_unseen": 40,
+       "exact": 0.725,
+       "loose": 0.9
+      },
+      "PROPERTY": {
+       "n_unseen": 622,
+       "exact": 0.35,
+       "loose": 0.442
+      },
+      "SAMPLE": {
+       "n_unseen": 317,
+       "exact": 0.233,
+       "loose": 0.527
+      },
+      "TECHNIQUE": {
+       "n_unseen": 124,
+       "exact": 0.347,
+       "loose": 0.395
+      },
+      "UNIT": {
+       "n_unseen": 9,
+       "exact": 0.444,
+       "loose": 0.667
+      },
+      "VALUE": {
+       "n_unseen": 674,
+       "exact": 0.424,
+       "loose": 0.482
+      }
+     }
+    },
+    "topic_graphene": {
+     "leaked": 0,
+     "exact": 0.628,
+     "exact_distinct": 0.428,
+     "loose": 0.697,
+     "loose_distinct": 0.49,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 280,
+       "exact": 0.425,
+       "loose": 0.45
+      },
+      "DEV": {
+       "n_unseen": 182,
+       "exact": 0.396,
+       "loose": 0.593
+      },
+      "FORM": {
+       "n_unseen": 648,
+       "exact": 0.877,
+       "loose": 0.912
+      },
+      "INSTRUMENT": {
+       "n_unseen": 69,
+       "exact": 0.174,
+       "loose": 0.261
+      },
+      "MAT": {
+       "n_unseen": 1951,
+       "exact": 0.818,
+       "loose": 0.865
+      },
+      "MEASUREMENT": {
+       "n_unseen": 236,
+       "exact": 0.831,
+       "loose": 0.911
+      },
+      "NUM": {
+       "n_unseen": 40,
+       "exact": 0.6,
+       "loose": 0.825
+      },
+      "PROPERTY": {
+       "n_unseen": 622,
+       "exact": 0.383,
+       "loose": 0.455
+      },
+      "SAMPLE": {
+       "n_unseen": 317,
+       "exact": 0.189,
+       "loose": 0.454
+      },
+      "TECHNIQUE": {
+       "n_unseen": 124,
+       "exact": 0.363,
+       "loose": 0.395
+      },
+      "UNIT": {
+       "n_unseen": 9,
+       "exact": 0.444,
+       "loose": 0.444
+      },
+      "VALUE": {
+       "n_unseen": 674,
+       "exact": 0.444,
+       "loose": 0.491
+      }
+     }
+    },
+    "topic_pemfc": {
+     "leaked": 0,
+     "exact": 0.579,
+     "exact_distinct": 0.389,
+     "loose": 0.653,
+     "loose_distinct": 0.467,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 280,
+       "exact": 0.418,
+       "loose": 0.579
+      },
+      "DEV": {
+       "n_unseen": 182,
+       "exact": 0.148,
+       "loose": 0.198
+      },
+      "FORM": {
+       "n_unseen": 648,
+       "exact": 0.847,
+       "loose": 0.886
+      },
+      "INSTRUMENT": {
+       "n_unseen": 69,
+       "exact": 0.159,
+       "loose": 0.174
+      },
+      "MAT": {
+       "n_unseen": 1951,
+       "exact": 0.719,
+       "loose": 0.803
+      },
+      "MEASUREMENT": {
+       "n_unseen": 236,
+       "exact": 0.852,
+       "loose": 0.932
+      },
+      "NUM": {
+       "n_unseen": 40,
+       "exact": 0.7,
+       "loose": 0.925
+      },
+      "PROPERTY": {
+       "n_unseen": 622,
+       "exact": 0.307,
+       "loose": 0.383
+      },
+      "SAMPLE": {
+       "n_unseen": 317,
+       "exact": 0.479,
+       "loose": 0.552
+      },
+      "TECHNIQUE": {
+       "n_unseen": 124,
+       "exact": 0.315,
+       "loose": 0.355
+      },
+      "UNIT": {
+       "n_unseen": 9,
+       "exact": 0.444,
+       "loose": 0.667
+      },
+      "VALUE": {
+       "n_unseen": 674,
+       "exact": 0.39,
+       "loose": 0.432
+      }
+     }
+    },
+    "topic_poly": {
+     "leaked": 0,
+     "exact": 0.568,
+     "exact_distinct": 0.382,
+     "loose": 0.643,
+     "loose_distinct": 0.445,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 280,
+       "exact": 0.421,
+       "loose": 0.45
+      },
+      "DEV": {
+       "n_unseen": 182,
+       "exact": 0.132,
+       "loose": 0.187
+      },
+      "FORM": {
+       "n_unseen": 648,
+       "exact": 0.873,
+       "loose": 0.903
+      },
+      "INSTRUMENT": {
+       "n_unseen": 69,
+       "exact": 0.13,
+       "loose": 0.188
+      },
+      "MAT": {
+       "n_unseen": 1951,
+       "exact": 0.681,
+       "loose": 0.799
+      },
+      "MEASUREMENT": {
+       "n_unseen": 236,
+       "exact": 0.826,
+       "loose": 0.907
+      },
+      "NUM": {
+       "n_unseen": 40,
+       "exact": 0.65,
+       "loose": 0.875
+      },
+      "PROPERTY": {
+       "n_unseen": 622,
+       "exact": 0.318,
+       "loose": 0.412
+      },
+      "SAMPLE": {
+       "n_unseen": 317,
+       "exact": 0.53,
+       "loose": 0.546
+      },
+      "TECHNIQUE": {
+       "n_unseen": 124,
+       "exact": 0.315,
+       "loose": 0.331
+      },
+      "UNIT": {
+       "n_unseen": 9,
+       "exact": 0.444,
+       "loose": 0.444
+      },
+      "VALUE": {
+       "n_unseen": 674,
+       "exact": 0.371,
+       "loose": 0.408
+      }
+     }
+    },
+    "topic_semi": {
+     "leaked": 0,
+     "exact": 0.693,
+     "exact_distinct": 0.477,
+     "loose": 0.745,
+     "loose_distinct": 0.545,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 280,
+       "exact": 0.418,
+       "loose": 0.432
+      },
+      "DEV": {
+       "n_unseen": 182,
+       "exact": 0.753,
+       "loose": 0.753
+      },
+      "FORM": {
+       "n_unseen": 648,
+       "exact": 0.957,
+       "loose": 0.981
+      },
+      "INSTRUMENT": {
+       "n_unseen": 69,
+       "exact": 0.319,
+       "loose": 0.319
+      },
+      "MAT": {
+       "n_unseen": 1951,
+       "exact": 0.854,
+       "loose": 0.895
+      },
+      "MEASUREMENT": {
+       "n_unseen": 236,
+       "exact": 0.822,
+       "loose": 0.907
+      },
+      "NUM": {
+       "n_unseen": 40,
+       "exact": 0.625,
+       "loose": 0.875
+      },
+      "PROPERTY": {
+       "n_unseen": 622,
+       "exact": 0.453,
+       "loose": 0.531
+      },
+      "SAMPLE": {
+       "n_unseen": 317,
+       "exact": 0.492,
+       "loose": 0.593
+      },
+      "TECHNIQUE": {
+       "n_unseen": 124,
+       "exact": 0.435,
+       "loose": 0.516
+      },
+      "UNIT": {
+       "n_unseen": 9,
+       "exact": 0.444,
+       "loose": 0.667
+      },
+      "VALUE": {
+       "n_unseen": 674,
+       "exact": 0.433,
+       "loose": 0.504
+      }
+     }
+    },
+    "topic_sofc": {
+     "leaked": 0,
+     "exact": 0.565,
+     "exact_distinct": 0.397,
+     "loose": 0.649,
+     "loose_distinct": 0.464,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 280,
+       "exact": 0.425,
+       "loose": 0.525
+      },
+      "DEV": {
+       "n_unseen": 182,
+       "exact": 0.242,
+       "loose": 0.297
+      },
+      "FORM": {
+       "n_unseen": 648,
+       "exact": 0.906,
+       "loose": 0.935
+      },
+      "INSTRUMENT": {
+       "n_unseen": 69,
+       "exact": 0.13,
+       "loose": 0.159
+      },
+      "MAT": {
+       "n_unseen": 1951,
+       "exact": 0.691,
+       "loose": 0.786
+      },
+      "MEASUREMENT": {
+       "n_unseen": 236,
+       "exact": 0.826,
+       "loose": 0.907
+      },
+      "NUM": {
+       "n_unseen": 40,
+       "exact": 0.575,
+       "loose": 0.925
+      },
+      "PROPERTY": {
+       "n_unseen": 622,
+       "exact": 0.302,
+       "loose": 0.368
+      },
+      "SAMPLE": {
+       "n_unseen": 317,
+       "exact": 0.246,
+       "loose": 0.498
+      },
+      "TECHNIQUE": {
+       "n_unseen": 124,
+       "exact": 0.347,
+       "loose": 0.379
+      },
+      "UNIT": {
+       "n_unseen": 9,
+       "exact": 0.444,
+       "loose": 0.667
+      },
+      "VALUE": {
+       "n_unseen": 674,
+       "exact": 0.404,
+       "loose": 0.447
+      }
+     }
+    },
+    "topic_steel": {
+     "leaked": 0,
+     "exact": 0.579,
+     "exact_distinct": 0.379,
+     "loose": 0.638,
+     "loose_distinct": 0.437,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 280,
+       "exact": 0.418,
+       "loose": 0.432
+      },
+      "DEV": {
+       "n_unseen": 182,
+       "exact": 0.302,
+       "loose": 0.346
+      },
+      "FORM": {
+       "n_unseen": 648,
+       "exact": 0.877,
+       "loose": 0.912
+      },
+      "INSTRUMENT": {
+       "n_unseen": 69,
+       "exact": 0.159,
+       "loose": 0.174
+      },
+      "MAT": {
+       "n_unseen": 1951,
+       "exact": 0.706,
+       "loose": 0.787
+      },
+      "MEASUREMENT": {
+       "n_unseen": 236,
+       "exact": 0.818,
+       "loose": 0.894
+      },
+      "NUM": {
+       "n_unseen": 40,
+       "exact": 0.625,
+       "loose": 0.9
+      },
+      "PROPERTY": {
+       "n_unseen": 622,
+       "exact": 0.326,
+       "loose": 0.399
+      },
+      "SAMPLE": {
+       "n_unseen": 317,
+       "exact": 0.426,
+       "loose": 0.451
+      },
+      "TECHNIQUE": {
+       "n_unseen": 124,
+       "exact": 0.306,
+       "loose": 0.355
+      },
+      "UNIT": {
+       "n_unseen": 9,
+       "exact": 0.444,
+       "loose": 0.667
+      },
+      "VALUE": {
+       "n_unseen": 674,
+       "exact": 0.38,
+       "loose": 0.411
+      }
+     }
+    },
+    "sofc": {
+     "leaked": 2,
+     "exact": 0.557,
+     "exact_distinct": 0.399,
+     "loose": 0.649,
+     "loose_distinct": 0.468,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 280,
+       "exact": 0.425,
+       "loose": 0.514
+      },
+      "DEV": {
+       "n_unseen": 182,
+       "exact": 0.253,
+       "loose": 0.308
+      },
+      "FORM": {
+       "n_unseen": 648,
+       "exact": 0.894,
+       "loose": 0.917
+      },
+      "INSTRUMENT": {
+       "n_unseen": 69,
+       "exact": 0.13,
+       "loose": 0.159
+      },
+      "MAT": {
+       "n_unseen": 1951,
+       "exact": 0.669,
+       "loose": 0.782
+      },
+      "MEASUREMENT": {
+       "n_unseen": 236,
+       "exact": 0.839,
+       "loose": 0.915
+      },
+      "NUM": {
+       "n_unseen": 40,
+       "exact": 0.575,
+       "loose": 0.975
+      },
+      "PROPERTY": {
+       "n_unseen": 622,
+       "exact": 0.312,
+       "loose": 0.378
+      },
+      "SAMPLE": {
+       "n_unseen": 317,
+       "exact": 0.249,
+       "loose": 0.517
+      },
+      "TECHNIQUE": {
+       "n_unseen": 124,
+       "exact": 0.355,
+       "loose": 0.379
+      },
+      "UNIT": {
+       "n_unseen": 9,
+       "exact": 0.444,
+       "loose": 0.667
+      },
+      "VALUE": {
+       "n_unseen": 674,
+       "exact": 0.396,
+       "loose": 0.453
+      }
+     }
+    },
+    "fatigue": {
+     "leaked": 0,
+     "exact": 0.501,
+     "exact_distinct": 0.33,
+     "loose": 0.607,
+     "loose_distinct": 0.406,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 280,
+       "exact": 0.407,
+       "loose": 0.443
+      },
+      "DEV": {
+       "n_unseen": 182,
+       "exact": 0.104,
+       "loose": 0.126
+      },
+      "FORM": {
+       "n_unseen": 648,
+       "exact": 0.904,
+       "loose": 0.921
+      },
+      "INSTRUMENT": {
+       "n_unseen": 69,
+       "exact": 0.087,
+       "loose": 0.101
+      },
+      "MAT": {
+       "n_unseen": 1951,
+       "exact": 0.598,
+       "loose": 0.744
+      },
+      "MEASUREMENT": {
+       "n_unseen": 236,
+       "exact": 0.839,
+       "loose": 0.898
+      },
+      "NUM": {
+       "n_unseen": 40,
+       "exact": 0.625,
+       "loose": 0.925
+      },
+      "PROPERTY": {
+       "n_unseen": 622,
+       "exact": 0.265,
+       "loose": 0.365
+      },
+      "SAMPLE": {
+       "n_unseen": 317,
+       "exact": 0.237,
+       "loose": 0.508
+      },
+      "TECHNIQUE": {
+       "n_unseen": 124,
+       "exact": 0.274,
+       "loose": 0.298
+      },
+      "UNIT": {
+       "n_unseen": 9,
+       "exact": 0.444,
+       "loose": 0.444
+      },
+      "VALUE": {
+       "n_unseen": 674,
+       "exact": 0.279,
+       "loose": 0.366
+      }
+     }
+    }
+   }
+  },
+  "sofc": {
+   "n_test": 3854,
+   "n_unseen": 3587,
+   "unseen_share": 0.931,
+   "corpora": {
+    "topic_electrolysis": {
+     "leaked": 0,
+     "exact": 0.712,
+     "exact_distinct": 0.487,
+     "loose": 0.755,
+     "loose_distinct": 0.554,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 163,
+       "exact": 0.724,
+       "loose": 0.773
+      },
+      "DEV": {
+       "n_unseen": 214,
+       "exact": 0.682,
+       "loose": 0.706
+      },
+      "FORM": {
+       "n_unseen": 406,
+       "exact": 0.882,
+       "loose": 0.926
+      },
+      "INSTRUMENT": {
+       "n_unseen": 16,
+       "exact": 0.25,
+       "loose": 0.25
+      },
+      "MAT": {
+       "n_unseen": 1623,
+       "exact": 0.778,
+       "loose": 0.821
+      },
+      "MEASUREMENT": {
+       "n_unseen": 169,
+       "exact": 0.953,
+       "loose": 0.953
+      },
+      "NUM": {
+       "n_unseen": 19,
+       "exact": 0.947,
+       "loose": 1.0
+      },
+      "PROPERTY": {
+       "n_unseen": 305,
+       "exact": 0.6,
+       "loose": 0.662
+      },
+      "RANGE": {
+       "n_unseen": 1,
+       "exact": 1.0,
+       "loose": 1.0
+      },
+      "SAMPLE": {
+       "n_unseen": 12,
+       "exact": 0.583,
+       "loose": 0.667
+      },
+      "TECHNIQUE": {
+       "n_unseen": 85,
+       "exact": 0.506,
+       "loose": 0.576
+      },
+      "UNIT": {
+       "n_unseen": 15,
+       "exact": 0.8,
+       "loose": 0.933
+      },
+      "VALUE": {
+       "n_unseen": 559,
+       "exact": 0.429,
+       "loose": 0.474
+      }
+     }
+    },
+    "topic_graphene": {
+     "leaked": 0,
+     "exact": 0.575,
+     "exact_distinct": 0.448,
+     "loose": 0.698,
+     "loose_distinct": 0.509,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 163,
+       "exact": 0.712,
+       "loose": 0.767
+      },
+      "DEV": {
+       "n_unseen": 214,
+       "exact": 0.257,
+       "loose": 0.458
+      },
+      "FORM": {
+       "n_unseen": 406,
+       "exact": 0.887,
+       "loose": 0.906
+      },
+      "INSTRUMENT": {
+       "n_unseen": 16,
+       "exact": 0.188,
+       "loose": 0.188
+      },
+      "MAT": {
+       "n_unseen": 1623,
+       "exact": 0.535,
+       "loose": 0.739
+      },
+      "MEASUREMENT": {
+       "n_unseen": 169,
+       "exact": 0.953,
+       "loose": 0.953
+      },
+      "NUM": {
+       "n_unseen": 19,
+       "exact": 0.947,
+       "loose": 1.0
+      },
+      "PROPERTY": {
+       "n_unseen": 305,
+       "exact": 0.548,
+       "loose": 0.603
+      },
+      "RANGE": {
+       "n_unseen": 1,
+       "exact": 1.0,
+       "loose": 1.0
+      },
+      "SAMPLE": {
+       "n_unseen": 12,
+       "exact": 0.583,
+       "loose": 0.583
+      },
+      "TECHNIQUE": {
+       "n_unseen": 85,
+       "exact": 0.447,
+       "loose": 0.529
+      },
+      "UNIT": {
+       "n_unseen": 15,
+       "exact": 0.8,
+       "loose": 0.933
+      },
+      "VALUE": {
+       "n_unseen": 559,
+       "exact": 0.456,
+       "loose": 0.501
+      }
+     }
+    },
+    "topic_pemfc": {
+     "leaked": 0,
+     "exact": 0.644,
+     "exact_distinct": 0.455,
+     "loose": 0.703,
+     "loose_distinct": 0.533,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 163,
+       "exact": 0.699,
+       "loose": 0.822
+      },
+      "DEV": {
+       "n_unseen": 214,
+       "exact": 0.678,
+       "loose": 0.701
+      },
+      "FORM": {
+       "n_unseen": 406,
+       "exact": 0.85,
+       "loose": 0.909
+      },
+      "INSTRUMENT": {
+       "n_unseen": 16,
+       "exact": 0.125,
+       "loose": 0.188
+      },
+      "MAT": {
+       "n_unseen": 1623,
+       "exact": 0.637,
+       "loose": 0.702
+      },
+      "MEASUREMENT": {
+       "n_unseen": 169,
+       "exact": 0.935,
+       "loose": 0.935
+      },
+      "NUM": {
+       "n_unseen": 19,
+       "exact": 0.947,
+       "loose": 1.0
+      },
+      "PROPERTY": {
+       "n_unseen": 305,
+       "exact": 0.63,
+       "loose": 0.675
+      },
+      "RANGE": {
+       "n_unseen": 1,
+       "exact": 1.0,
+       "loose": 1.0
+      },
+      "SAMPLE": {
+       "n_unseen": 12,
+       "exact": 0.583,
+       "loose": 0.583
+      },
+      "TECHNIQUE": {
+       "n_unseen": 85,
+       "exact": 0.424,
+       "loose": 0.553
+      },
+      "UNIT": {
+       "n_unseen": 15,
+       "exact": 0.733,
+       "loose": 0.8
+      },
+      "VALUE": {
+       "n_unseen": 559,
+       "exact": 0.442,
+       "loose": 0.494
+      }
+     }
+    },
+    "topic_poly": {
+     "leaked": 0,
+     "exact": 0.539,
+     "exact_distinct": 0.418,
+     "loose": 0.681,
+     "loose_distinct": 0.481,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 163,
+       "exact": 0.718,
+       "loose": 0.761
+      },
+      "DEV": {
+       "n_unseen": 214,
+       "exact": 0.243,
+       "loose": 0.575
+      },
+      "FORM": {
+       "n_unseen": 406,
+       "exact": 0.847,
+       "loose": 0.869
+      },
+      "INSTRUMENT": {
+       "n_unseen": 16,
+       "exact": 0.188,
+       "loose": 0.188
+      },
+      "MAT": {
+       "n_unseen": 1623,
+       "exact": 0.503,
+       "loose": 0.741
+      },
+      "MEASUREMENT": {
+       "n_unseen": 169,
+       "exact": 0.923,
+       "loose": 0.923
+      },
+      "NUM": {
+       "n_unseen": 19,
+       "exact": 0.947,
+       "loose": 1.0
+      },
+      "PROPERTY": {
+       "n_unseen": 305,
+       "exact": 0.505,
+       "loose": 0.544
+      },
+      "RANGE": {
+       "n_unseen": 1,
+       "exact": 1.0,
+       "loose": 1.0
+      },
+      "SAMPLE": {
+       "n_unseen": 12,
+       "exact": 0.5,
+       "loose": 0.583
+      },
+      "TECHNIQUE": {
+       "n_unseen": 85,
+       "exact": 0.506,
+       "loose": 0.553
+      },
+      "UNIT": {
+       "n_unseen": 15,
+       "exact": 0.733,
+       "loose": 0.867
+      },
+      "VALUE": {
+       "n_unseen": 559,
+       "exact": 0.376,
+       "loose": 0.411
+      }
+     }
+    },
+    "topic_semi": {
+     "leaked": 0,
+     "exact": 0.594,
+     "exact_distinct": 0.443,
+     "loose": 0.694,
+     "loose_distinct": 0.499,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 163,
+       "exact": 0.706,
+       "loose": 0.761
+      },
+      "DEV": {
+       "n_unseen": 214,
+       "exact": 0.238,
+       "loose": 0.458
+      },
+      "FORM": {
+       "n_unseen": 406,
+       "exact": 0.869,
+       "loose": 0.901
+      },
+      "INSTRUMENT": {
+       "n_unseen": 16,
+       "exact": 0.125,
+       "loose": 0.188
+      },
+      "MAT": {
+       "n_unseen": 1623,
+       "exact": 0.603,
+       "loose": 0.75
+      },
+      "MEASUREMENT": {
+       "n_unseen": 169,
+       "exact": 0.941,
+       "loose": 0.941
+      },
+      "NUM": {
+       "n_unseen": 19,
+       "exact": 0.947,
+       "loose": 1.0
+      },
+      "PROPERTY": {
+       "n_unseen": 305,
+       "exact": 0.515,
+       "loose": 0.567
+      },
+      "RANGE": {
+       "n_unseen": 1,
+       "exact": 1.0,
+       "loose": 1.0
+      },
+      "SAMPLE": {
+       "n_unseen": 12,
+       "exact": 0.583,
+       "loose": 0.583
+      },
+      "TECHNIQUE": {
+       "n_unseen": 85,
+       "exact": 0.494,
+       "loose": 0.529
+      },
+      "UNIT": {
+       "n_unseen": 15,
+       "exact": 0.733,
+       "loose": 0.733
+      },
+      "VALUE": {
+       "n_unseen": 559,
+       "exact": 0.422,
+       "loose": 0.476
+      }
+     }
+    },
+    "topic_sofc": {
+     "leaked": 0,
+     "exact": 0.808,
+     "exact_distinct": 0.576,
+     "loose": 0.839,
+     "loose_distinct": 0.643,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 163,
+       "exact": 0.699,
+       "loose": 0.81
+      },
+      "DEV": {
+       "n_unseen": 214,
+       "exact": 0.944,
+       "loose": 0.967
+      },
+      "FORM": {
+       "n_unseen": 406,
+       "exact": 0.906,
+       "loose": 0.921
+      },
+      "INSTRUMENT": {
+       "n_unseen": 16,
+       "exact": 0.25,
+       "loose": 0.25
+      },
+      "MAT": {
+       "n_unseen": 1623,
+       "exact": 0.902,
+       "loose": 0.924
+      },
+      "MEASUREMENT": {
+       "n_unseen": 169,
+       "exact": 0.941,
+       "loose": 0.941
+      },
+      "NUM": {
+       "n_unseen": 19,
+       "exact": 0.947,
+       "loose": 1.0
+      },
+      "PROPERTY": {
+       "n_unseen": 305,
+       "exact": 0.741,
+       "loose": 0.79
+      },
+      "RANGE": {
+       "n_unseen": 1,
+       "exact": 1.0,
+       "loose": 1.0
+      },
+      "SAMPLE": {
+       "n_unseen": 12,
+       "exact": 0.583,
+       "loose": 0.583
+      },
+      "TECHNIQUE": {
+       "n_unseen": 85,
+       "exact": 0.588,
+       "loose": 0.671
+      },
+      "UNIT": {
+       "n_unseen": 15,
+       "exact": 0.733,
+       "loose": 0.8
+      },
+      "VALUE": {
+       "n_unseen": 559,
+       "exact": 0.492,
+       "loose": 0.528
+      }
+     }
+    },
+    "topic_steel": {
+     "leaked": 0,
+     "exact": 0.543,
+     "exact_distinct": 0.413,
+     "loose": 0.641,
+     "loose_distinct": 0.466,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 163,
+       "exact": 0.706,
+       "loose": 0.767
+      },
+      "DEV": {
+       "n_unseen": 214,
+       "exact": 0.248,
+       "loose": 0.453
+      },
+      "FORM": {
+       "n_unseen": 406,
+       "exact": 0.803,
+       "loose": 0.823
+      },
+      "INSTRUMENT": {
+       "n_unseen": 16,
+       "exact": 0.188,
+       "loose": 0.188
+      },
+      "MAT": {
+       "n_unseen": 1623,
+       "exact": 0.518,
+       "loose": 0.669
+      },
+      "MEASUREMENT": {
+       "n_unseen": 169,
+       "exact": 0.935,
+       "loose": 0.935
+      },
+      "NUM": {
+       "n_unseen": 19,
+       "exact": 0.947,
+       "loose": 1.0
+      },
+      "PROPERTY": {
+       "n_unseen": 305,
+       "exact": 0.475,
+       "loose": 0.544
+      },
+      "RANGE": {
+       "n_unseen": 1,
+       "exact": 1.0,
+       "loose": 1.0
+      },
+      "SAMPLE": {
+       "n_unseen": 12,
+       "exact": 0.583,
+       "loose": 0.583
+      },
+      "TECHNIQUE": {
+       "n_unseen": 85,
+       "exact": 0.447,
+       "loose": 0.529
+      },
+      "UNIT": {
+       "n_unseen": 15,
+       "exact": 0.733,
+       "loose": 0.733
+      },
+      "VALUE": {
+       "n_unseen": 559,
+       "exact": 0.413,
+       "loose": 0.44
+      }
+     }
+    },
+    "sofc": {
+     "leaked": 3,
+     "exact": 0.806,
+     "exact_distinct": 0.576,
+     "loose": 0.836,
+     "loose_distinct": 0.64,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 163,
+       "exact": 0.699,
+       "loose": 0.791
+      },
+      "DEV": {
+       "n_unseen": 214,
+       "exact": 0.953,
+       "loose": 0.967
+      },
+      "FORM": {
+       "n_unseen": 406,
+       "exact": 0.914,
+       "loose": 0.941
+      },
+      "INSTRUMENT": {
+       "n_unseen": 16,
+       "exact": 0.188,
+       "loose": 0.188
+      },
+      "MAT": {
+       "n_unseen": 1623,
+       "exact": 0.893,
+       "loose": 0.913
+      },
+      "MEASUREMENT": {
+       "n_unseen": 169,
+       "exact": 0.953,
+       "loose": 0.953
+      },
+      "NUM": {
+       "n_unseen": 19,
+       "exact": 0.947,
+       "loose": 1.0
+      },
+      "PROPERTY": {
+       "n_unseen": 305,
+       "exact": 0.728,
+       "loose": 0.777
+      },
+      "RANGE": {
+       "n_unseen": 1,
+       "exact": 1.0,
+       "loose": 1.0
+      },
+      "SAMPLE": {
+       "n_unseen": 12,
+       "exact": 0.583,
+       "loose": 0.583
+      },
+      "TECHNIQUE": {
+       "n_unseen": 85,
+       "exact": 0.576,
+       "loose": 0.647
+      },
+      "UNIT": {
+       "n_unseen": 15,
+       "exact": 0.733,
+       "loose": 0.867
+      },
+      "VALUE": {
+       "n_unseen": 559,
+       "exact": 0.501,
+       "loose": 0.54
+      }
+     }
+    },
+    "fatigue": {
+     "leaked": 0,
+     "exact": 0.491,
+     "exact_distinct": 0.334,
+     "loose": 0.626,
+     "loose_distinct": 0.409,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 163,
+       "exact": 0.644,
+       "loose": 0.699
+      },
+      "DEV": {
+       "n_unseen": 214,
+       "exact": 0.229,
+       "loose": 0.43
+      },
+      "FORM": {
+       "n_unseen": 406,
+       "exact": 0.85,
+       "loose": 0.887
+      },
+      "INSTRUMENT": {
+       "n_unseen": 16,
+       "exact": 0.125,
+       "loose": 0.188
+      },
+      "MAT": {
+       "n_unseen": 1623,
+       "exact": 0.476,
+       "loose": 0.692
+      },
+      "MEASUREMENT": {
+       "n_unseen": 169,
+       "exact": 0.935,
+       "loose": 0.935
+      },
+      "NUM": {
+       "n_unseen": 19,
+       "exact": 1.0,
+       "loose": 1.0
+      },
+      "PROPERTY": {
+       "n_unseen": 305,
+       "exact": 0.351,
+       "loose": 0.413
+      },
+      "RANGE": {
+       "n_unseen": 1,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "SAMPLE": {
+       "n_unseen": 12,
+       "exact": 0.5,
+       "loose": 0.5
+      },
+      "TECHNIQUE": {
+       "n_unseen": 85,
+       "exact": 0.247,
+       "loose": 0.341
+      },
+      "UNIT": {
+       "n_unseen": 15,
+       "exact": 0.733,
+       "loose": 0.733
+      },
+      "VALUE": {
+       "n_unseen": 559,
+       "exact": 0.297,
+       "loose": 0.365
+      }
+     }
+    }
+   }
+  },
+  "steel": {
+   "n_test": 4694,
+   "n_unseen": 4043,
+   "unseen_share": 0.861,
+   "corpora": {
+    "topic_electrolysis": {
+     "leaked": 0,
+     "exact": 0.416,
+     "exact_distinct": 0.347,
+     "loose": 0.49,
+     "loose_distinct": 0.4,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 259,
+       "exact": 0.004,
+       "loose": 0.058
+      },
+      "DEV": {
+       "n_unseen": 26,
+       "exact": 0.038,
+       "loose": 0.038
+      },
+      "FORM": {
+       "n_unseen": 221,
+       "exact": 0.602,
+       "loose": 0.611
+      },
+      "INSTRUMENT": {
+       "n_unseen": 83,
+       "exact": 0.108,
+       "loose": 0.133
+      },
+      "MAT": {
+       "n_unseen": 1175,
+       "exact": 0.576,
+       "loose": 0.601
+      },
+      "MEASUREMENT": {
+       "n_unseen": 244,
+       "exact": 0.914,
+       "loose": 0.914
+      },
+      "NUM": {
+       "n_unseen": 16,
+       "exact": 0.812,
+       "loose": 0.875
+      },
+      "PROPERTY": {
+       "n_unseen": 738,
+       "exact": 0.362,
+       "loose": 0.428
+      },
+      "RANGE": {
+       "n_unseen": 3,
+       "exact": 0.333,
+       "loose": 0.333
+      },
+      "SAMPLE": {
+       "n_unseen": 255,
+       "exact": 0.047,
+       "loose": 0.631
+      },
+      "TECHNIQUE": {
+       "n_unseen": 183,
+       "exact": 0.268,
+       "loose": 0.344
+      },
+      "UNIT": {
+       "n_unseen": 17,
+       "exact": 0.647,
+       "loose": 0.824
+      },
+      "VALUE": {
+       "n_unseen": 823,
+       "exact": 0.346,
+       "loose": 0.391
+      }
+     }
+    },
+    "topic_graphene": {
+     "leaked": 0,
+     "exact": 0.475,
+     "exact_distinct": 0.386,
+     "loose": 0.539,
+     "loose_distinct": 0.435,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 259,
+       "exact": 0.004,
+       "loose": 0.015
+      },
+      "DEV": {
+       "n_unseen": 26,
+       "exact": 0.115,
+       "loose": 0.154
+      },
+      "FORM": {
+       "n_unseen": 221,
+       "exact": 0.86,
+       "loose": 0.864
+      },
+      "INSTRUMENT": {
+       "n_unseen": 83,
+       "exact": 0.181,
+       "loose": 0.217
+      },
+      "MAT": {
+       "n_unseen": 1175,
+       "exact": 0.614,
+       "loose": 0.659
+      },
+      "MEASUREMENT": {
+       "n_unseen": 244,
+       "exact": 0.926,
+       "loose": 0.926
+      },
+      "NUM": {
+       "n_unseen": 16,
+       "exact": 0.812,
+       "loose": 0.875
+      },
+      "PROPERTY": {
+       "n_unseen": 738,
+       "exact": 0.48,
+       "loose": 0.537
+      },
+      "RANGE": {
+       "n_unseen": 3,
+       "exact": 0.0,
+       "loose": 0.333
+      },
+      "SAMPLE": {
+       "n_unseen": 255,
+       "exact": 0.055,
+       "loose": 0.475
+      },
+      "TECHNIQUE": {
+       "n_unseen": 183,
+       "exact": 0.322,
+       "loose": 0.366
+      },
+      "UNIT": {
+       "n_unseen": 17,
+       "exact": 0.765,
+       "loose": 0.824
+      },
+      "VALUE": {
+       "n_unseen": 823,
+       "exact": 0.377,
+       "loose": 0.426
+      }
+     }
+    },
+    "topic_pemfc": {
+     "leaked": 0,
+     "exact": 0.437,
+     "exact_distinct": 0.349,
+     "loose": 0.53,
+     "loose_distinct": 0.416,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 259,
+       "exact": 0.008,
+       "loose": 0.224
+      },
+      "DEV": {
+       "n_unseen": 26,
+       "exact": 0.038,
+       "loose": 0.038
+      },
+      "FORM": {
+       "n_unseen": 221,
+       "exact": 0.86,
+       "loose": 0.864
+      },
+      "INSTRUMENT": {
+       "n_unseen": 83,
+       "exact": 0.096,
+       "loose": 0.12
+      },
+      "MAT": {
+       "n_unseen": 1175,
+       "exact": 0.58,
+       "loose": 0.635
+      },
+      "MEASUREMENT": {
+       "n_unseen": 244,
+       "exact": 0.914,
+       "loose": 0.914
+      },
+      "NUM": {
+       "n_unseen": 16,
+       "exact": 0.812,
+       "loose": 0.875
+      },
+      "PROPERTY": {
+       "n_unseen": 738,
+       "exact": 0.379,
+       "loose": 0.449
+      },
+      "RANGE": {
+       "n_unseen": 3,
+       "exact": 0.0,
+       "loose": 0.0
+      },
+      "SAMPLE": {
+       "n_unseen": 255,
+       "exact": 0.047,
+       "loose": 0.667
+      },
+      "TECHNIQUE": {
+       "n_unseen": 183,
+       "exact": 0.273,
+       "loose": 0.322
+      },
+      "UNIT": {
+       "n_unseen": 17,
+       "exact": 0.706,
+       "loose": 0.941
+      },
+      "VALUE": {
+       "n_unseen": 823,
+       "exact": 0.357,
+       "loose": 0.395
+      }
+     }
+    },
+    "topic_poly": {
+     "leaked": 0,
+     "exact": 0.457,
+     "exact_distinct": 0.373,
+     "loose": 0.538,
+     "loose_distinct": 0.429,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 259,
+       "exact": 0.004,
+       "loose": 0.019
+      },
+      "DEV": {
+       "n_unseen": 26,
+       "exact": 0.038,
+       "loose": 0.038
+      },
+      "FORM": {
+       "n_unseen": 221,
+       "exact": 0.855,
+       "loose": 0.864
+      },
+      "INSTRUMENT": {
+       "n_unseen": 83,
+       "exact": 0.12,
+       "loose": 0.133
+      },
+      "MAT": {
+       "n_unseen": 1175,
+       "exact": 0.568,
+       "loose": 0.624
+      },
+      "MEASUREMENT": {
+       "n_unseen": 244,
+       "exact": 0.91,
+       "loose": 0.91
+      },
+      "NUM": {
+       "n_unseen": 16,
+       "exact": 0.812,
+       "loose": 0.875
+      },
+      "PROPERTY": {
+       "n_unseen": 738,
+       "exact": 0.47,
+       "loose": 0.543
+      },
+      "RANGE": {
+       "n_unseen": 3,
+       "exact": 0.333,
+       "loose": 0.333
+      },
+      "SAMPLE": {
+       "n_unseen": 255,
+       "exact": 0.055,
+       "loose": 0.659
+      },
+      "TECHNIQUE": {
+       "n_unseen": 183,
+       "exact": 0.322,
+       "loose": 0.41
+      },
+      "UNIT": {
+       "n_unseen": 17,
+       "exact": 0.765,
+       "loose": 0.824
+      },
+      "VALUE": {
+       "n_unseen": 823,
+       "exact": 0.379,
+       "loose": 0.413
+      }
+     }
+    },
+    "topic_semi": {
+     "leaked": 0,
+     "exact": 0.481,
+     "exact_distinct": 0.385,
+     "loose": 0.553,
+     "loose_distinct": 0.438,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 259,
+       "exact": 0.004,
+       "loose": 0.023
+      },
+      "DEV": {
+       "n_unseen": 26,
+       "exact": 0.077,
+       "loose": 0.077
+      },
+      "FORM": {
+       "n_unseen": 221,
+       "exact": 0.869,
+       "loose": 0.891
+      },
+      "INSTRUMENT": {
+       "n_unseen": 83,
+       "exact": 0.193,
+       "loose": 0.217
+      },
+      "MAT": {
+       "n_unseen": 1175,
+       "exact": 0.656,
+       "loose": 0.695
+      },
+      "MEASUREMENT": {
+       "n_unseen": 244,
+       "exact": 0.93,
+       "loose": 0.93
+      },
+      "NUM": {
+       "n_unseen": 16,
+       "exact": 0.812,
+       "loose": 0.875
+      },
+      "PROPERTY": {
+       "n_unseen": 738,
+       "exact": 0.454,
+       "loose": 0.519
+      },
+      "RANGE": {
+       "n_unseen": 3,
+       "exact": 0.333,
+       "loose": 0.667
+      },
+      "SAMPLE": {
+       "n_unseen": 255,
+       "exact": 0.063,
+       "loose": 0.576
+      },
+      "TECHNIQUE": {
+       "n_unseen": 183,
+       "exact": 0.301,
+       "loose": 0.35
+      },
+      "UNIT": {
+       "n_unseen": 17,
+       "exact": 0.706,
+       "loose": 0.941
+      },
+      "VALUE": {
+       "n_unseen": 823,
+       "exact": 0.368,
+       "loose": 0.417
+      }
+     }
+    },
+    "topic_sofc": {
+     "leaked": 0,
+     "exact": 0.466,
+     "exact_distinct": 0.37,
+     "loose": 0.544,
+     "loose_distinct": 0.425,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 259,
+       "exact": 0.0,
+       "loose": 0.093
+      },
+      "DEV": {
+       "n_unseen": 26,
+       "exact": 0.038,
+       "loose": 0.038
+      },
+      "FORM": {
+       "n_unseen": 221,
+       "exact": 0.851,
+       "loose": 0.855
+      },
+      "INSTRUMENT": {
+       "n_unseen": 83,
+       "exact": 0.12,
+       "loose": 0.145
+      },
+      "MAT": {
+       "n_unseen": 1175,
+       "exact": 0.63,
+       "loose": 0.67
+      },
+      "MEASUREMENT": {
+       "n_unseen": 244,
+       "exact": 0.914,
+       "loose": 0.914
+      },
+      "NUM": {
+       "n_unseen": 16,
+       "exact": 0.812,
+       "loose": 0.875
+      },
+      "PROPERTY": {
+       "n_unseen": 738,
+       "exact": 0.412,
+       "loose": 0.481
+      },
+      "RANGE": {
+       "n_unseen": 3,
+       "exact": 0.333,
+       "loose": 0.333
+      },
+      "SAMPLE": {
+       "n_unseen": 255,
+       "exact": 0.063,
+       "loose": 0.671
+      },
+      "TECHNIQUE": {
+       "n_unseen": 183,
+       "exact": 0.306,
+       "loose": 0.361
+      },
+      "UNIT": {
+       "n_unseen": 17,
+       "exact": 0.706,
+       "loose": 0.824
+      },
+      "VALUE": {
+       "n_unseen": 823,
+       "exact": 0.389,
+       "loose": 0.417
+      }
+     }
+    },
+    "topic_steel": {
+     "leaked": 0,
+     "exact": 0.55,
+     "exact_distinct": 0.428,
+     "loose": 0.63,
+     "loose_distinct": 0.487,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 259,
+       "exact": 0.0,
+       "loose": 0.039
+      },
+      "DEV": {
+       "n_unseen": 26,
+       "exact": 0.077,
+       "loose": 0.077
+      },
+      "FORM": {
+       "n_unseen": 221,
+       "exact": 0.928,
+       "loose": 0.932
+      },
+      "INSTRUMENT": {
+       "n_unseen": 83,
+       "exact": 0.108,
+       "loose": 0.169
+      },
+      "MAT": {
+       "n_unseen": 1175,
+       "exact": 0.768,
+       "loose": 0.8
+      },
+      "MEASUREMENT": {
+       "n_unseen": 244,
+       "exact": 0.93,
+       "loose": 0.93
+      },
+      "NUM": {
+       "n_unseen": 16,
+       "exact": 0.812,
+       "loose": 0.938
+      },
+      "PROPERTY": {
+       "n_unseen": 738,
+       "exact": 0.534,
+       "loose": 0.612
+      },
+      "RANGE": {
+       "n_unseen": 3,
+       "exact": 0.0,
+       "loose": 0.667
+      },
+      "SAMPLE": {
+       "n_unseen": 255,
+       "exact": 0.094,
+       "loose": 0.706
+      },
+      "TECHNIQUE": {
+       "n_unseen": 183,
+       "exact": 0.404,
+       "loose": 0.47
+      },
+      "UNIT": {
+       "n_unseen": 17,
+       "exact": 0.706,
+       "loose": 0.824
+      },
+      "VALUE": {
+       "n_unseen": 823,
+       "exact": 0.441,
+       "loose": 0.484
+      }
+     }
+    },
+    "sofc": {
+     "leaked": 0,
+     "exact": 0.457,
+     "exact_distinct": 0.362,
+     "loose": 0.542,
+     "loose_distinct": 0.421,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 259,
+       "exact": 0.004,
+       "loose": 0.154
+      },
+      "DEV": {
+       "n_unseen": 26,
+       "exact": 0.038,
+       "loose": 0.038
+      },
+      "FORM": {
+       "n_unseen": 221,
+       "exact": 0.864,
+       "loose": 0.869
+      },
+      "INSTRUMENT": {
+       "n_unseen": 83,
+       "exact": 0.12,
+       "loose": 0.133
+      },
+      "MAT": {
+       "n_unseen": 1175,
+       "exact": 0.628,
+       "loose": 0.666
+      },
+      "MEASUREMENT": {
+       "n_unseen": 244,
+       "exact": 0.906,
+       "loose": 0.906
+      },
+      "NUM": {
+       "n_unseen": 16,
+       "exact": 0.812,
+       "loose": 0.812
+      },
+      "PROPERTY": {
+       "n_unseen": 738,
+       "exact": 0.382,
+       "loose": 0.47
+      },
+      "RANGE": {
+       "n_unseen": 3,
+       "exact": 0.333,
+       "loose": 0.667
+      },
+      "SAMPLE": {
+       "n_unseen": 255,
+       "exact": 0.055,
+       "loose": 0.667
+      },
+      "TECHNIQUE": {
+       "n_unseen": 183,
+       "exact": 0.306,
+       "loose": 0.361
+      },
+      "UNIT": {
+       "n_unseen": 17,
+       "exact": 0.647,
+       "loose": 0.824
+      },
+      "VALUE": {
+       "n_unseen": 823,
+       "exact": 0.377,
+       "loose": 0.405
+      }
+     }
+    },
+    "fatigue": {
+     "leaked": 0,
+     "exact": 0.565,
+     "exact_distinct": 0.414,
+     "loose": 0.637,
+     "loose_distinct": 0.472,
+     "per_type": {
+      "CITE": {
+       "n_unseen": 259,
+       "exact": 0.069,
+       "loose": 0.089
+      },
+      "DEV": {
+       "n_unseen": 26,
+       "exact": 0.038,
+       "loose": 0.038
+      },
+      "FORM": {
+       "n_unseen": 221,
+       "exact": 0.891,
+       "loose": 0.9
+      },
+      "INSTRUMENT": {
+       "n_unseen": 83,
+       "exact": 0.229,
+       "loose": 0.229
+      },
+      "MAT": {
+       "n_unseen": 1175,
+       "exact": 0.825,
+       "loose": 0.854
+      },
+      "MEASUREMENT": {
+       "n_unseen": 244,
+       "exact": 0.918,
+       "loose": 0.922
+      },
+      "NUM": {
+       "n_unseen": 16,
+       "exact": 0.875,
+       "loose": 0.938
+      },
+      "PROPERTY": {
+       "n_unseen": 738,
+       "exact": 0.627,
+       "loose": 0.659
+      },
+      "RANGE": {
+       "n_unseen": 3,
+       "exact": 0.0,
+       "loose": 0.333
+      },
+      "SAMPLE": {
+       "n_unseen": 255,
+       "exact": 0.102,
+       "loose": 0.706
+      },
+      "TECHNIQUE": {
+       "n_unseen": 183,
+       "exact": 0.459,
+       "loose": 0.503
+      },
+      "UNIT": {
+       "n_unseen": 17,
+       "exact": 0.706,
+       "loose": 0.706
+      },
+      "VALUE": {
+       "n_unseen": 823,
+       "exact": 0.312,
+       "loose": 0.386
+      }
+     }
+    }
+   }
+  }
+ }
+}

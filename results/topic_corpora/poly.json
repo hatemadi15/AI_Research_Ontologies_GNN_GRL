@@ -1,0 +1,3984 @@
+{
+  "script": "src/graph/build_topic_corpus.py",
+  "protocol": "docs/ROADMAP.md \u00a74, week 12: mention replacement with names from in-topic text",
+  "topic": "poly",
+  "selection": {
+    "source": "Europe PMC REST API",
+    "search_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+    "fulltext_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/{pmcid}/fullTextXML",
+    "result_type": "core",
+    "topic": "poly",
+    "query": "OPEN_ACCESS:y AND HAS_FT:y AND TITLE:(\"thermoplastic\" OR \"thermoplastics\" OR \"epoxy\" OR \"polyurethane\" OR \"polyurethanes\" OR \"polypropylene\" OR \"elastomer\" OR \"elastomers\" OR \"polymer melt\" OR \"polymer melts\" OR \"injection molding\" OR \"injection moulding\" OR \"polymer composite\" OR \"polymer composites\")",
+    "title_terms": [
+      "thermoplastic",
+      "thermoplastics",
+      "epoxy",
+      "polyurethane",
+      "polyurethanes",
+      "polypropylene",
+      "elastomer",
+      "elastomers",
+      "polymer melt",
+      "polymer melts",
+      "injection molding",
+      "injection moulding",
+      "polymer composite",
+      "polymer composites"
+    ],
+    "exclude_title_terms": [
+      "author correction",
+      "correction",
+      "erratum",
+      "corrigendum",
+      "retraction"
+    ],
+    "excluded_pmcids": [
+      "PMC3990421",
+      "PMC4772004",
+      "PMC5700654",
+      "PMC6247067",
+      "PMC6418911",
+      "PMC6631236",
+      "PMC6650920",
+      "PMC7180721",
+      "PMC7231364",
+      "PMC7254350",
+      "PMC7361982",
+      "PMC7435395",
+      "PMC7529785",
+      "PMC7532522",
+      "PMC7590506",
+      "PMC7766479"
+    ],
+    "local_filters": [
+      "a PMCID",
+      "not one of MuLMS's articles",
+      "language eng",
+      "a title term in the title",
+      "no exclusion term in the title"
+    ],
+    "order": "PMCIDs sorted as strings, then random.Random(0).shuffle",
+    "superscripts": "inline, as in the SOFC corpus",
+    "words": "chem_tokenize.ChemWordTokenizer (ChemDataExtractor 1.3.0), then ASCII hyphens inside a word made words of their own, space-separated"
+  },
+  "settings": {
+    "seed": 0,
+    "target_pool": 60000,
+    "max_sentences": 40000,
+    "chunk": 10,
+    "min_words": 5,
+    "max_words": 120,
+    "min_alpha_fraction": 0.5,
+    "max_inline_formula_chars": 30,
+    "ngram": 8,
+    "language": "eng",
+    "page_size": 500,
+    "min_request_interval_seconds": 0.25,
+    "timeout_seconds": 60,
+    "retries": 4,
+    "backoff_seconds": 2.0,
+    "abbreviations": [
+      "approx",
+      "at",
+      "ca",
+      "cf",
+      "eq",
+      "eqs",
+      "fig",
+      "figs",
+      "no",
+      "nos",
+      "pp",
+      "ref",
+      "refs",
+      "resp",
+      "sec",
+      "sect",
+      "vol",
+      "vs",
+      "wt",
+      "et al"
+    ],
+    "dotted_abbreviations": "(?:[A-Za-z]{1,2}\\.)+[A-Za-z]{1,2}",
+    "skipped_sections": "^[\\d.\\s]*(acknowledg|funding|conflicts? of interest|competing interests?|author contributions?|data availability|availability of data|ethic|abbreviations|nomenclature|supplementary|references|declarations?|disclosure)",
+    "splitter": "build_fatigue_corpus.split_sentences"
+  },
+  "counts": {
+    "hits": 11153,
+    "api_hit_count": 11153,
+    "hits_rejected": 140,
+    "eligible_articles": 11013,
+    "articles_used": 311,
+    "articles_downloaded": 309,
+    "failed_downloads": 1,
+    "articles_without_text": 1,
+    "target_reached": true,
+    "paragraphs": 12350,
+    "raw_sentences": 62948,
+    "cut_by_formula": 1457,
+    "length_filtered": 768,
+    "length_filtered_by": {
+      "too_short": 634,
+      "too_long": 14,
+      "non_alphabetic": 120
+    },
+    "after_length_filter": 60723,
+    "duplicates_dropped": 131,
+    "overlap_dropped": 408,
+    "pool": 60183,
+    "kept": 40000,
+    "shingle_dropped": 1,
+    "articles_dropped_by_shingles": 0
+  },
+  "rejected_by_reason": {
+    "title_term:correction": 50,
+    "title_term:retraction": 15,
+    "no_title_term": 23,
+    "no_pmcid": 20,
+    "not_english": 6,
+    "title_term:corrigendum": 3,
+    "title_term:author correction": 13,
+    "mulms_article": 4,
+    "title_term:erratum": 6
+  },
+  "excluded_by_title": [
+    {
+      "pmcid": "PMC12340765",
+      "term": "correction",
+      "title": "Correction to \"Melt Spinning of Thermoplastic Polyurethane-Based Bulk Ionofibers Filled with Carbon Nanotubes\"."
+    },
+    {
+      "pmcid": "PMC13046131",
+      "term": "retraction",
+      "title": "Retraction: An eel-like robot based on a dielectric elastomer."
+    },
+    {
+      "pmcid": "PMC13022052",
+      "term": "correction",
+      "title": "Correction: Self-powered mechanoluminescent elastomer for solar-blind ultraviolet emission."
+    },
+    {
+      "pmcid": "PMC13418588",
+      "term": "correction",
+      "title": "Correction: Bavanam Nagaraja Reddy et al. Development and Evaluation of a Polymer Composite Material Reinforced by Tectona Grandis Fiber, with Static Analysis. Polymers 2025, 17, 634."
+    },
+    {
+      "pmcid": "PMC12625568",
+      "term": "correction",
+      "title": "Correction: Shape programming of liquid crystal elastomers by two-stage wavelength-selective photopolymerization."
+    },
+    {
+      "pmcid": "PMC8698148",
+      "term": "retraction",
+      "title": "Retraction: A versatile strategy for alternately arranging the foam ratio layers of multilayer graphene/thermoplastic polyurethane composite foams towards lightweight and broadband electromagnetic wave absorption"
+    },
+    {
+      "pmcid": "PMC12824869",
+      "term": "correction",
+      "title": "Correction: Chemically-informed active learning enables data-efficient multi-objective optimization of self-healing polyurethanes."
+    },
+    {
+      "pmcid": "PMC12909788",
+      "term": "correction",
+      "title": "Correction: A stretchable and biomimetic polyurethane membrane for lung alveolar in vitro modelling."
+    },
+    {
+      "pmcid": "PMC13052858",
+      "term": "retraction",
+      "title": "Retraction: Experimental study on the properties of ultra-high-strength geopolymer concrete with polypropylene fibers and nano-silica."
+    },
+    {
+      "pmcid": "PMC11548611",
+      "term": "correction",
+      "title": "Correction: Ibar, J.P. Raising Two More Fundamental Questions Regarding the Classical Views on the Rheology of Polymer Melts. Polymers 2024, 16, 2042."
+    },
+    {
+      "pmcid": "PMC13159277",
+      "term": "retraction",
+      "title": "Retraction Note: Efficacy of using adipose-derived stem cells and PRP on regeneration of 40 -mm long sciatic nerve defect bridged by polyglycolic-polypropylene mesh in canine model."
+    },
+    {
+      "pmcid": "PMC13023082",
+      "term": "retraction",
+      "title": "Retraction notice to \"Development data associated with effects of stiffness softening of 3D-TIPS elastomer nanohybrid scaffolds on tissue ingrowth, vascularization and inflammation in vivo\" [Data in Brief 22(2019) 885 - 902]."
+    },
+    {
+      "pmcid": "PMC12423801",
+      "term": "correction",
+      "title": "Correction to \"In Situ Preparation of Composite Scaffolds Based on Polyurethane and Hydroxyapatite Particles for Bone Tissue Engineering\"."
+    },
+    {
+      "pmcid": "PMC13584128",
+      "term": "corrigendum",
+      "title": "Corrigendum to \"Thermomechanical characterisation data of 30 g/m2 and 150 g/m2 cured unidirectional carbon/epoxy tape prepreg TP 402/T700S\" [Data in Brief, volume 47, April 2023, 108966]."
+    },
+    {
+      "pmcid": "PMC12153693",
+      "term": "retraction",
+      "title": "Retraction: Epoxy coating with embedded self-healing networks formed by nanogel particles."
+    },
+    {
+      "pmcid": "PMC13165200",
+      "term": "correction",
+      "title": "Correction: Wang et al. Study on the Preparation and Process Parameter-Mechanical Property Relationships of Carbon Fiber Fabric Reinforced Poly(Ether Ether Ketone) Thermoplastic Composites. Polymers 2024, 16, 897."
+    },
+    {
+      "pmcid": "PMC12147092",
+      "term": "retraction",
+      "title": "Retraction: Application of magnetite nano-hybrid epoxy as protective marine coatings for steel."
+    },
+    {
+      "pmcid": "PMC12592543",
+      "term": "correction",
+      "title": "Correction: Preparation and characterization of a novel rechargeable antibacterial polyurethane sponge foam substrate modified with chlorinated N-halamine for efficient disinfection."
+    },
+    {
+      "pmcid": "PMC11948458",
+      "term": "correction",
+      "title": "Correction to \"Synthesis, Morphology, and Particle Size Control of Acidic Aqueous Polyurethane Dispersions\"."
+    },
+    {
+      "pmcid": "PMC12143249",
+      "term": "correction",
+      "title": "Correction: Synthesis and characterization of novel post-chain extension flame retardant waterborne polyurethane."
+    },
+    {
+      "pmcid": "PMC12320223",
+      "term": "correction",
+      "title": "Correction: A polypropylene mesh coated with interpenetrating double network hydrogel for local drug delivery in temporary closure of open abdomen."
+    },
+    {
+      "pmcid": "PMC12260202",
+      "term": "retraction",
+      "title": "Retraction: Novel electrospun polyurethane grafts for vascular access in rats."
+    },
+    {
+      "pmcid": "PMC12504567",
+      "term": "correction",
+      "title": "Correction: Environmentally sustainable epoxy nanocomposite coating reinforced with chitosan derived nitrogen doped graphene for enhanced corrosion resistance and mechanical performance."
+    },
+    {
+      "pmcid": "PMC10830549",
+      "term": "author correction",
+      "title": "Author Correction: 3D-printed liquid metal polymer composites as NIR-responsive 4D printing soft robot."
+    },
+    {
+      "pmcid": "PMC12844095",
+      "term": "correction",
+      "title": "Correction: Yang et al. Synthesis and Fungicidal Activities of (Z/E)-3,7-Dimethyl-2,6-octadienamide and Its 6,7-Epoxy Analogues. Molecules 2015, 20, 21023-21036."
+    },
+    {
+      "pmcid": "PMC9072405",
+      "term": "correction",
+      "title": "Publisher Correction: Self-healing polyurethane-elastomer with mechanical tunability for multiple biomedical applications in vivo."
+    },
+    {
+      "pmcid": "PMC12132023",
+      "term": "retraction",
+      "title": "Retraction of \"New Epoxy and Hardener System Based on an Imidazolium Ionic Liquid as an Anticorrosive Coating for Steel in the Marine Environment\"."
+    },
+    {
+      "pmcid": "PMC11863405",
+      "term": "correction",
+      "title": "Correction: AFM-IR investigation of thin PECVD SiO x films on a polypropylene substrate in the surface-sensitive mode."
+    },
+    {
+      "pmcid": "PMC10900197",
+      "term": "retraction",
+      "title": "Retraction of \"Hydrogenolysis of Polyethylene and Polypropylene into Propane over Cobalt-Based Catalysts\"."
+    },
+    {
+      "pmcid": "PMC9240084",
+      "term": "author correction",
+      "title": "Author Correction: Stretchable nanofibers of polyvinylidenefluoride (PVDF)/thermoplastic polyurethane (TPU) nanocomposite to support piezoelectric response via mechanical elasticity."
+    },
+    {
+      "pmcid": "PMC10436239",
+      "term": "correction",
+      "title": "Correction to \"Improving Deformability and Recovery Moment of Shape Memory Polymer Composites for Bending Actuators: Multiple Neutral Axis Skins and Deployable Core\"."
+    },
+    {
+      "pmcid": "PMC11886904",
+      "term": "retraction",
+      "title": "Retraction of \"Effect of TiO2 Nanofillers on the Mechanical and Abrasive Wear Properties of Epoxy Reinforced with Carbon Fabric Hybrid Composites\"."
+    },
+    {
+      "pmcid": "PMC12195569",
+      "term": "correction",
+      "title": "Correction: Stachak et al. Recent Advances in Fabrication of Non-Isocyanate Polyurethane-Based Composite Materials. Materials 2021, 14, 3497."
+    },
+    {
+      "pmcid": "PMC11662009",
+      "term": "correction",
+      "title": "Correction: Antibacterial and Cytotoxicity characteristics of experimental epoxy -based endodontic sealer loaded with silver gold nanoparticles: in vitro study."
+    },
+    {
+      "pmcid": "PMC11034358",
+      "term": "correction",
+      "title": "Correction: Unravelling potential reaction intermediates during catalytic pyrolysis of polypropylene with microscopy and spectroscopy."
+    },
+    {
+      "pmcid": "PMC11751444",
+      "term": "retraction",
+      "title": "Retraction Note: Multivariate optimization of removing of cobalt(II) with an efficient aminated-GMA polypropylene adsorbent by induced-grafted polymerization under simultaneous gamma-ray irradiation."
+    },
+    {
+      "pmcid": "PMC8697835",
+      "term": "retraction",
+      "title": "Retraction: The influence of gradient and porous configurations on the microwave absorbing performance of multilayered graphene/thermoplastic polyurethane composite foams."
+    },
+    {
+      "pmcid": "PMC11991460",
+      "term": "correction",
+      "title": "Correction: Takayama et al. Polyvinyl Butyral Addition Effects on Notched Charpy Impact Strength of Injection-Molded Glass Fiber-Reinforced Polypropylene. Polymers 2024, 16, 3472."
+    },
+    {
+      "pmcid": "PMC10302015",
+      "term": "correction",
+      "title": "Correction: Troschitz et al. Joining Processes for Fibre-Reinforced Thermoplastics: Phenomena and Characterisation. Materials 2022, 15, 5454."
+    },
+    {
+      "pmcid": "PMC10621007",
+      "term": "correction",
+      "title": "Correction: Effects of graphene oxide size on curing kinetics of epoxy resin."
+    },
+    {
+      "pmcid": "PMC11902437",
+      "term": "correction",
+      "title": "Correction: Staszczak et al. Nucleation, Development and Healing of Micro-Cracks in Shape Memory Polyurethane Subjected to Subsequent Tension Cycles. Polymers 2024, 16, 1930."
+    },
+    {
+      "pmcid": "PMC9800564",
+      "term": "author correction",
+      "title": "Author Correction: Degradation and fragmentation behavior of polypropylene and polystyrene in water."
+    },
+    {
+      "pmcid": "PMC11548445",
+      "term": "correction",
+      "title": "Correction: El-Hefnawy et al. Fabrication of Nanofibers Based on Hydroxypropyl Starch/Polyurethane Loaded with the Biosynthesized Silver Nanoparticles for the Treatment of Pathogenic Microbes in Wounds. Polymers 2022, 14, 318."
+    },
+    {
+      "pmcid": "PMC11276026",
+      "term": "correction",
+      "title": "Correction: Norjeli et al. Additive Manufacturing Polyurethane Acrylate via Stereolithography for 3D Structure Polymer Electrolyte Application. Gels 2022, 8, 589."
+    },
+    {
+      "pmcid": "PMC10291561",
+      "term": "correction",
+      "title": "Correction: From micro/nano structured isotactic polypropylene to a multifunctional low-density nanoporous medium."
+    },
+    {
+      "pmcid": "PMC11275215",
+      "term": "correction",
+      "title": "Correction: De La Franier et al. Long-Term Reduction of Bacterial Adhesion on Polyurethane by an Ultra-Thin Surface Modifier. Biomedicines 2022, 10, 979."
+    },
+    {
+      "pmcid": "PMC9638221",
+      "term": "correction",
+      "title": "Correction to: SARS-CoV-2 removal with a polyurethane foam composite."
+    },
+    {
+      "pmcid": "PMC9156714",
+      "term": "author correction",
+      "title": "Author Correction: Retention and deformation of the blue phases in liquid crystalline elastomers."
+    },
+    {
+      "pmcid": "PMC7603299",
+      "term": "author correction",
+      "title": "Author Correction: Dynamic response of the nonlocal strain-stress gradient in laminated polymer composites microtubes."
+    },
+    {
+      "pmcid": "PMC10688892",
+      "term": "correction",
+      "title": "Correction: Evaluation of push-out bond strength, dentinal tubule penetration and adhesive pattern of bio-ceramic and epoxy resin-based root canal sealers."
+    },
+    {
+      "pmcid": "PMC9877003",
+      "term": "author correction",
+      "title": "Author Correction: Addressing diffusion behavior and impact in an epoxy-amine cure system using molecular dynamics simulations."
+    },
+    {
+      "pmcid": "PMC11397855",
+      "term": "correction",
+      "title": "Correction: Bibi et al. Valorization of Agricultural Waste as a Chemiresistor H2S-Gas Sensor: A Composite of Biodegradable-Electroactive Polyurethane-Urea and Activated-Carbon Composite Derived from Coconut-Shell Waste. Polymers 2023, 15, 685."
+    },
+    {
+      "pmcid": "PMC10056401",
+      "term": "retraction",
+      "title": "Retraction: Shen et al. Investigation of the Ordered Structure in Partially Melted Isotactic Polypropylene. Polymers 2021, 13, 3354."
+    },
+    {
+      "pmcid": "PMC12755371",
+      "term": "erratum",
+      "title": "\"Evaluating the biocompatibility and biological performance of FePt-decorated nano-epoxy nanoparticles in mesenchymal stem cells\": Erratum."
+    },
+    {
+      "pmcid": "PMC9525327",
+      "term": "correction",
+      "title": "Correction to: Force delivery modification of removable thermoplastic appliances using Hilliard precision thermopliers for tipping an upper central incisor."
+    },
+    {
+      "pmcid": "PMC10535404",
+      "term": "correction",
+      "title": "Correction: Jia et al. Exposure to Polypropylene Microplastics via Oral Ingestion Induces Colonic Apoptosis and Intestinal Barrier Damage through Oxidative Stress and Inflammation in Mice. Toxics 2023, 11, 127."
+    },
+    {
+      "pmcid": "PMC7142452",
+      "term": "correction",
+      "title": "Correction: Speranza, V. et al. Hierarchical Structure of iPP During Injection Molding Process with Fast Mold Temperature Evolution. Materials 2019, 12, 424."
+    },
+    {
+      "pmcid": "PMC7539068",
+      "term": "corrigendum",
+      "title": "Corrigendum to \"Evaluation of Some Mechanical Properties of a Maxillofacial Silicon Elastomer Reinforced with Polyester Powder\"."
+    },
+    {
+      "pmcid": "PMC9658180",
+      "term": "correction",
+      "title": "Correction: Wu et al. 3D Thermal Network Supported by CF Felt for Improving the Thermal Performance of CF/C/Epoxy Composites. Polymers 2021, 13, 980."
+    },
+    {
+      "pmcid": "PMC9183152",
+      "term": "correction",
+      "title": "Correction: Gostev et al. In Vivo Stability of Polyurethane-Based Electrospun Vascular Grafts in Terms of Chemistry and Mechanics. Polymers 2020, 12, 845."
+    },
+    {
+      "pmcid": "PMC8067035",
+      "term": "correction",
+      "title": "Removing of the Sulfur Compounds by Impregnated Polypropylene Fibers with Silver Nanoparticles-Cellulose Derivatives for Air Odor Correction."
+    },
+    {
+      "pmcid": "PMC8839055",
+      "term": "correction",
+      "title": "Correction: Sa\u0142asi\u0144ska et al. Burning Behaviour of Rigid Polyurethane Foams with Histidine and Modified Graphene Oxide. Materials 2021, 14, 1184."
+    },
+    {
+      "pmcid": "PMC9694213",
+      "term": "correction",
+      "title": "Correction: Sinchuk et al. Variational and Deep Learning Segmentation of Very-Low-Contrast X-ray Computed Tomography Images of Carbon/Epoxy Woven Composites. Materials 2020, 13, 936."
+    },
+    {
+      "pmcid": "PMC7829875",
+      "term": "correction",
+      "title": "Correction: Borin, D., et al. Magnetorheological Effect of Magnetoactive Elastomer with a Permalloy Filler. Polymers 2020, 12, 2371."
+    },
+    {
+      "pmcid": "PMC9368990",
+      "term": "correction",
+      "title": "Correction: Bok et al. Super-Toughened Fumed-Silica-Reinforced Thiol-Epoxy Composites Containing Epoxide-Terminated Polydimethylsiloxanes. Int. J. Mol. Sci. 2021, 22, 8097."
+    },
+    {
+      "pmcid": "PMC9237265",
+      "term": "erratum",
+      "title": "Erratum to 'The Patient With Chronic Total Hip Arthroplasty Dislocations: A Case Series of Five Patients Who Underwent Revision THA Using Polypropylene Mesh for Capsular Reconstruction' [Arthroplasty Today 6 (2020) 655-661]."
+    },
+    {
+      "pmcid": "PMC7200673",
+      "term": "author correction",
+      "title": "Author Correction: Solvent-free bulk polymerization of lignin-polycaprolactone (PCL) copolymer and its thermoplastic characteristics."
+    },
+    {
+      "pmcid": "PMC6930313",
+      "term": "author correction",
+      "title": "Author Correction: Epoxy toughening through high pressure and shear rate preprocessing."
+    },
+    {
+      "pmcid": "PMC7148368",
+      "term": "author correction",
+      "title": "Author Correction: Various nanoparticle morphologies and surface properties of waterborne polyurethane controlled by water."
+    },
+    {
+      "pmcid": "PMC7064566",
+      "term": "author correction",
+      "title": "Author Correction: Synthesis and characterization of polyethylene glycol-phenol-formaldehyde based polyurethane composite."
+    },
+    {
+      "pmcid": "PMC9049974",
+      "term": "correction",
+      "title": "Correction: Synthesis of a furfural-based DOPO-containing co-curing agent for fire-safe epoxy resins."
+    },
+    {
+      "pmcid": "PMC7755897",
+      "term": "author correction",
+      "title": "Author Correction: Improving the thermal conductivity of epoxy composites using a combustion-synthesized aggregated \u03b2-Si3N4 filler with randomly oriented grains."
+    },
+    {
+      "pmcid": "PMC9049781",
+      "term": "correction",
+      "title": "Correction: Gamma ray assisted modification of carbon quantum dot/polyurethane nanocomposites: structural, mechanical and photocatalytic study."
+    },
+    {
+      "pmcid": "PMC5814769",
+      "term": "corrigendum",
+      "title": "Corrigendum: Dynamics of supersonic microparticle impact on elastomers revealed by real-time multi-frame imaging."
+    },
+    {
+      "pmcid": "PMC5851984",
+      "term": "author correction",
+      "title": "Author Correction: Liquid crystal elastomer coatings with programmed response of surface profile."
+    },
+    {
+      "pmcid": "PMC7466582",
+      "term": "erratum",
+      "title": "Erratum: Borges, I., et al. Exposure of Smaller and Oxidized Graphene on Polyurethane Surface Improves its Antimicrobial Performance. Nanomaterials 2020, 10, 349."
+    },
+    {
+      "pmcid": "PMC6839346",
+      "term": "erratum",
+      "title": "Erratum: Retrorectal onlay mesh repair using polypropylene mesh: Cost-effective approach for laparoscopic treatment of ventral abdominal wall hernias."
+    },
+    {
+      "pmcid": "PMC6524045",
+      "term": "erratum",
+      "title": "Erratum: Electrostatic-Interaction-Driven Assembly of Binary Hybrids towards Fire-Safe Epoxy Resin Nanocomposites. Polymers 2019, 11, 229."
+    },
+    {
+      "pmcid": "PMC5943257",
+      "term": "author correction",
+      "title": "Author Correction: Role of the particle size polydispersity in the electrical conductivity of carbon nanotube-epoxy composites."
+    },
+    {
+      "pmcid": "PMC6063157",
+      "term": "correction",
+      "title": "Correction: Carbon nanotube-vitrimer composite for facile and efficient photo-welding of epoxy."
+    },
+    {
+      "pmcid": "PMC5139110",
+      "term": "erratum",
+      "title": "Erratum to: Physical, morphological, and wound healing properties of a polyurethane foam-film dressing."
+    },
+    {
+      "pmcid": "PMC4778897",
+      "term": "correction",
+      "title": "Usefulness of Titanized Polypropylene Mesh and an Anchor System for Correction of Lower Lid Retraction."
+    },
+    {
+      "pmcid": "PMC5633704",
+      "term": "correction",
+      "title": "Comparison of Polypropylene Sling with Combined Transconjunctival Retractor Plication and Lateral Tarsal Strip for Correction of Involutional Lower Eye Lid Ectropion."
+    },
+    {
+      "pmcid": "PMC6515309",
+      "term": "retraction",
+      "title": "Retraction: Kim, J.R. and Kim, J.J. Epoxy Resins Toughened with Surface Modified Epoxidized Natural Rubber Fibers by One-Step Electrospinning. Materials 2017, 10, 464, doi:10.3390/ma10050464."
+    },
+    {
+      "pmcid": "PMC6739206",
+      "term": "correction",
+      "title": "Significant Improvement in Quality of Life, Positive Effect on Sexuality, Lasting Reconstructive Result and Low Rate of Complications Following Cystocele Correction Using a Lightweight, Large-Pore, Titanised Polypropylene Mesh: Final Results of a National, Multicentre Observational Study."
+    },
+    {
+      "pmcid": "PMC3236398",
+      "term": "correction",
+      "title": "Incidence of extrusion following type I polypropylene mesh \"kit\" repairs in the correction of pelvic organ prolapse."
+    },
+    {
+      "pmcid": "PMC4030903",
+      "term": "correction",
+      "title": "Correction: Koh, L.B., et al. Epoxy Cross-Linked Collagen and Collagen-Laminin Peptide Hydrogels as Corneal Substitutes. J. Funct. Biomater. 2013, 4, 162-177"
+    }
+  ],
+  "failed": [
+    {
+      "pmcid": "PMC2109844",
+      "status": "no_text",
+      "error": "no body paragraphs"
+    },
+    {
+      "pmcid": "PMC7027376",
+      "status": "failed",
+      "error": "not cached (offline)"
+    }
+  ],
+  "articles": [
+    {
+      "pmcid": "PMC10828071",
+      "doi": "10.1016/j.heliyon.2024.e24686",
+      "year": "2024",
+      "journal": "Heliyon",
+      "license": "cc by-nc-nd",
+      "title": "Evaluation of properties of concrete coating composites based on polyurethane and reinforcing fibers.",
+      "pool_sentences": 158,
+      "corpus_sentences": 107
+    },
+    {
+      "pmcid": "PMC6431909",
+      "doi": "10.3390/polym9020065",
+      "year": "2017",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Degradation of Polyester Polyurethane by Bacterial Polyester Hydrolases.",
+      "pool_sentences": 108,
+      "corpus_sentences": 75
+    },
+    {
+      "pmcid": "PMC12944178",
+      "doi": "10.3390/polym18040434",
+      "year": "2026",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Measurement Methods for Fiber Volume Fraction of Fiber-Reinforced Polymer Composites.",
+      "pool_sentences": 129,
+      "corpus_sentences": 86
+    },
+    {
+      "pmcid": "PMC6680602",
+      "doi": "10.3390/polym11071188",
+      "year": "2019",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Plasma Nanocoatings Developed to Control the Shear Strength of Polymer Composites.",
+      "pool_sentences": 166,
+      "corpus_sentences": 118
+    },
+    {
+      "pmcid": "PMC11433383",
+      "doi": "10.3390/ma17184529",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Experimental and Modeling Analysis of Polypropylene Fiber Reinforced Concrete Subjected to Alkali Attack and Freeze-Thaw Cycling Effect.",
+      "pool_sentences": 189,
+      "corpus_sentences": 131
+    },
+    {
+      "pmcid": "PMC10999438",
+      "doi": "10.1038/s41598-024-58709-0",
+      "year": "2024",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "A multi-element flame retardant containing boron and double-bond structure for enhancing mechanical properties and flame retardancy of epoxy resins.",
+      "pool_sentences": 171,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC11478847",
+      "doi": "10.3390/polym16192759",
+      "year": "2024",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Preparation and Application of a Novel Liquid Oxygen-Compatible Epoxy Resin of Fluorinated Glycidyl Amine with Low Viscosity.",
+      "pool_sentences": 253,
+      "corpus_sentences": 168
+    },
+    {
+      "pmcid": "PMC6404130",
+      "doi": "10.3390/polym10060681",
+      "year": "2018",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Fabric Coated with Shape Memory Polyurethane and Its Properties.",
+      "pool_sentences": 192,
+      "corpus_sentences": 133
+    },
+    {
+      "pmcid": "PMC9740668",
+      "doi": "10.3390/polym14235322",
+      "year": "2022",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Curing Kinetics of Bioderived Furan-Based Epoxy Resins: Study on the Effect of the Epoxy Monomer/Hardener Ratio.",
+      "pool_sentences": 158,
+      "corpus_sentences": 104
+    },
+    {
+      "pmcid": "PMC11265880",
+      "doi": "10.55730/1300-0527.3656",
+      "year": "2024",
+      "journal": "Turkish journal of chemistry",
+      "license": "cc by",
+      "title": "Phosphorus and nitrogen-containing soybean oil polyols: Effect on the mechanical properties and flame retardancy of polyurethane foam.",
+      "pool_sentences": 231,
+      "corpus_sentences": 163
+    },
+    {
+      "pmcid": "PMC7462533",
+      "doi": null,
+      "year": "2020",
+      "journal": "Additives for Polymers",
+      "license": null,
+      "title": "Milliken aids manufacturers to utilize polypropylene for protective face shields",
+      "pool_sentences": 12,
+      "corpus_sentences": 10
+    },
+    {
+      "pmcid": "PMC10537108",
+      "doi": "10.3390/polym15183807",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Damping and Stiffness Analysis of Sandwich Beam with 3D-Printed Honeycomb Core Filled with Magnetorheological Elastomer (MRE): An Experimental Approach.",
+      "pool_sentences": 167,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC10674896",
+      "doi": "10.3390/polym15224346",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "The Design, Synthesis, and Characterization of Epoxy Vitrimers with Enhanced Glass Transition Temperatures.",
+      "pool_sentences": 136,
+      "corpus_sentences": 92
+    },
+    {
+      "pmcid": "PMC9037798",
+      "doi": "10.1039/d1ra04057j",
+      "year": "2021",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Novel bio-based filler: hyperbranched polymer modified leather buffing dust and its influence on the porous structure and mechanical properties of polyurethane film.",
+      "pool_sentences": 216,
+      "corpus_sentences": 137
+    },
+    {
+      "pmcid": "PMC6644468",
+      "doi": "10.1021/acsomega.8b01950",
+      "year": "2018",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "Self-Protecting Epoxy Coatings with Anticorrosion Microcapsules.",
+      "pool_sentences": 171,
+      "corpus_sentences": 118
+    },
+    {
+      "pmcid": "PMC11105003",
+      "doi": "10.1021/acsomega.3c09550",
+      "year": "2024",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Higher-Order Structural Analysis of a Transparent and Flexible High Thermal Conductive Liquid Crystalline Elastomer Sheet and Its Composite.",
+      "pool_sentences": 132,
+      "corpus_sentences": 87
+    },
+    {
+      "pmcid": "PMC12816673",
+      "doi": "10.1038/s41598-025-32130-7",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Tensile and thermal properties of ceramic particulate and natural seaweed reinforced hybrid particulate polymer composites using the Taguchi approach.",
+      "pool_sentences": 187,
+      "corpus_sentences": 131
+    },
+    {
+      "pmcid": "PMC13611583",
+      "doi": "10.3390/polym18182294",
+      "year": "2026",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Alizarin Red S-Functionalized Polyurethane Coatings as Passive Colorimetric Interfaces for Visual Heavy-Metal Screening in Simulated Seawater.",
+      "pool_sentences": 217,
+      "corpus_sentences": 148
+    },
+    {
+      "pmcid": "PMC7285236",
+      "doi": "10.3390/polym12051197",
+      "year": "2020",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "An Insight into the Structural Diversity and Clinical Applicability of Polyurethanes in Biomedicine.",
+      "pool_sentences": 286,
+      "corpus_sentences": 188
+    },
+    {
+      "pmcid": "PMC7254190",
+      "doi": "10.3390/ma13092165",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Healable Carbon Fiber-Reinforced Epoxy/Cyclic Olefin Copolymer Composites.",
+      "pool_sentences": 180,
+      "corpus_sentences": 108
+    },
+    {
+      "pmcid": "PMC11722612",
+      "doi": "10.3390/polym17010086",
+      "year": "2024",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Differences in Rejuvenation Mechanisms and Physical Properties of Aged Styrene-Butadiene-Styrene (SBS)-Modified Bitumen by Mono-Epoxy and Di-Epoxy Compounds.",
+      "pool_sentences": 256,
+      "corpus_sentences": 153
+    },
+    {
+      "pmcid": "PMC9079675",
+      "doi": "10.1039/c8ra02140f",
+      "year": "2018",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "A bidirectional growth mechanism for a stable lithium anode by a platinum nanolayer sputtered on a polypropylene separator.",
+      "pool_sentences": 126,
+      "corpus_sentences": 87
+    },
+    {
+      "pmcid": "PMC8269497",
+      "doi": "10.3390/ma14133521",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Simultaneously Enhanced Thermal Conductivity and Breakdown Performance of Micro/Nano-BN Co-Doped Epoxy Composites.",
+      "pool_sentences": 167,
+      "corpus_sentences": 111
+    },
+    {
+      "pmcid": "PMC7435486",
+      "doi": "10.3390/ma13153247",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fabrication of Micro Ultrasonic Powder Molding Polypropylene Part with Hydrophobic Patterned Surface.",
+      "pool_sentences": 172,
+      "corpus_sentences": 121
+    },
+    {
+      "pmcid": "PMC10383284",
+      "doi": "10.3390/vetsci10070480",
+      "year": "2023",
+      "journal": "Veterinary sciences",
+      "license": "cc by",
+      "title": "Prospective Study Comparing Outcome following Complete Polypropylene Suture Ligation versus Partial Thin Film Band Attenuation of Congenital Portosystemic Shunts in Dogs.",
+      "pool_sentences": 179,
+      "corpus_sentences": 122
+    },
+    {
+      "pmcid": "PMC9043587",
+      "doi": "10.1039/d1ra07433d",
+      "year": "2021",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Functionalized epoxy with adjustable fluorescence and UV-shielding enabled by reactive addition of 9-anthracenemethoxyl glycidyl ether.",
+      "pool_sentences": 153,
+      "corpus_sentences": 111
+    },
+    {
+      "pmcid": "PMC10611047",
+      "doi": "10.3390/polym15204148",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Biorenewable Oxypropylated Pentane-1,2,5-triol as a Source for Incorporation in Rigid Polyurethane Foams.",
+      "pool_sentences": 116,
+      "corpus_sentences": 78
+    },
+    {
+      "pmcid": "PMC9468385",
+      "doi": "10.1016/j.heliyon.2022.e10484",
+      "year": "2022",
+      "journal": "Heliyon",
+      "license": "cc by",
+      "title": "The characterization of unidirectional and woven water hyacinth fiber reinforced with epoxy resin composites.",
+      "pool_sentences": 113,
+      "corpus_sentences": 76
+    },
+    {
+      "pmcid": "PMC12137528",
+      "doi": "10.1007/s13346-024-01744-1",
+      "year": "2025",
+      "journal": "Drug delivery and translational research",
+      "license": "cc by",
+      "title": "3D-printing of dipyridamole/thermoplastic polyurethane materials for bone regeneration.",
+      "pool_sentences": 256,
+      "corpus_sentences": 165
+    },
+    {
+      "pmcid": "PMC11292825",
+      "doi": "10.1021/acsomega.4c04128",
+      "year": "2024",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Water Impact Dynamics and Mechanism Analysis of Polypropylene and Polypropylene/poly(ethylene-co-octene) Replica Surfaces with Nanowires under Low Temperature Conditions.",
+      "pool_sentences": 122,
+      "corpus_sentences": 84
+    },
+    {
+      "pmcid": "PMC9314360",
+      "doi": "10.1038/s41598-022-16156-9",
+      "year": "2022",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Repulsive segregation of fluoroalkyl side chains turns a cohesive polymer into a mechanically tough, ultrafast self-healable, nonsticky elastomer.",
+      "pool_sentences": 166,
+      "corpus_sentences": 113
+    },
+    {
+      "pmcid": "PMC10073223",
+      "doi": "10.1038/s41598-023-32522-7",
+      "year": "2023",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Grafting red clay with Bi2O3 nanoparticles into epoxy resin for gamma-ray shielding applications.",
+      "pool_sentences": 135,
+      "corpus_sentences": 89
+    },
+    {
+      "pmcid": "PMC10254938",
+      "doi": "10.3390/molecules28114519",
+      "year": "2023",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Thermogravimetric, Morphological and Infrared Analysis of Blends Involving Thermoplastic Starch and Poly(ethylene-co-methacrylic acid) and Its Ionomer Form.",
+      "pool_sentences": 318,
+      "corpus_sentences": 212
+    },
+    {
+      "pmcid": "PMC4506972",
+      "doi": "10.1016/j.jare.2014.01.010",
+      "year": "2015",
+      "journal": "Journal of advanced research",
+      "license": "cc by-nc-nd",
+      "title": "The role of MgBr2 to enhance the ionic conductivity of PVA/PEDOT:PSS polymer composite.",
+      "pool_sentences": 95,
+      "corpus_sentences": 59
+    },
+    {
+      "pmcid": "PMC7825443",
+      "doi": "10.3390/ma14020249",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Static Mechanical Properties of Expanded Polypropylene Crushable Foam.",
+      "pool_sentences": 174,
+      "corpus_sentences": 115
+    },
+    {
+      "pmcid": "PMC12783937",
+      "doi": "10.1002/adma.202503094",
+      "year": "2026",
+      "journal": "Advanced materials (Deerfield Beach, Fla.)",
+      "license": "cc by-nc",
+      "title": "Bio-Inspired Artificial Muscle-Tendon Complex of Liquid Crystal Elastomer for Bidirectional Afferent-Efferent Signaling.",
+      "pool_sentences": 259,
+      "corpus_sentences": 173
+    },
+    {
+      "pmcid": "PMC3605430",
+      "doi": "10.1371/journal.pone.0059424",
+      "year": "2013",
+      "journal": "PloS one",
+      "license": "cc by",
+      "title": "Computer-assisted photo identification outperforms visible implant elastomers in an endangered salamander, Eurycea tonkawae.",
+      "pool_sentences": 153,
+      "corpus_sentences": 107
+    },
+    {
+      "pmcid": "PMC6606969",
+      "doi": "10.1016/j.wnsx.2019.100039",
+      "year": "2019",
+      "journal": "World neurosurgery: X",
+      "license": "cc by-nc-nd",
+      "title": "The Microneurosurgical Training Model for Intrinsic and Extrinsic Brain Tumor Surgery Using Polyurethane Foam and Fresh Cadaveric Cow Brain: An Experimental Study.",
+      "pool_sentences": 97,
+      "corpus_sentences": 63
+    },
+    {
+      "pmcid": "PMC8953204",
+      "doi": "10.3390/polym14061230",
+      "year": "2022",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Shape-Memory Composites Based on Ionic Elastomers.",
+      "pool_sentences": 199,
+      "corpus_sentences": 143
+    },
+    {
+      "pmcid": "PMC11520320",
+      "doi": "10.1039/d4ra04688a",
+      "year": "2024",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Recovery of uranium using epoxy-modified phosphorus pentasulfide as an efficient adsorbent for uranium extraction from aquatic environments.",
+      "pool_sentences": 149,
+      "corpus_sentences": 106
+    },
+    {
+      "pmcid": "PMC10675535",
+      "doi": "10.3390/polym15224462",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Enhancing Railway Track Stabilization with Epoxy Resin and Crumb Rubber Powder-Modified Cement Asphalt Mortar.",
+      "pool_sentences": 383,
+      "corpus_sentences": 266
+    },
+    {
+      "pmcid": "PMC12654177",
+      "doi": "10.3390/ma18225199",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Reply to Bernardo-Filho et al. Comment on \"Chwalik-Pilszyk et al. Application of Polyurethane Foam as a Material for Reducing Vibration of Wheelchair User. Materials 2025, 18, 1280\".",
+      "pool_sentences": 36,
+      "corpus_sentences": 25
+    },
+    {
+      "pmcid": "PMC6874574",
+      "doi": "10.1038/s41598-019-53881-0",
+      "year": "2019",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Epoxy toughening through high pressure and shear rate preprocessing.",
+      "pool_sentences": 129,
+      "corpus_sentences": 83
+    },
+    {
+      "pmcid": "PMC10488899",
+      "doi": "10.3390/ma16176067",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effects of Recycled Polymer on Melt Viscosity and Crystallization Temperature of Polyester Elastomer Blends.",
+      "pool_sentences": 166,
+      "corpus_sentences": 110
+    },
+    {
+      "pmcid": "PMC9695794",
+      "doi": "10.3390/ma15228062",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Exploiting Partial Solubility in Partially Fluorinated Thermoplastic Blends to Improve Adhesion during Fused Deposition Modeling.",
+      "pool_sentences": 230,
+      "corpus_sentences": 143
+    },
+    {
+      "pmcid": "PMC6473743",
+      "doi": "10.3390/polym11030523",
+      "year": "2019",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Detection of Delamination in Polymer Composites by Digital Image Correlation-Experimental Test.",
+      "pool_sentences": 197,
+      "corpus_sentences": 126
+    },
+    {
+      "pmcid": "PMC12567306",
+      "doi": "10.3390/polym17202740",
+      "year": "2025",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Synergistic Effects of Artichoke Stem Waste and TiO2 Nanoparticles in Additively Manufactured Hybrid Polymer Composites.",
+      "pool_sentences": 113,
+      "corpus_sentences": 68
+    },
+    {
+      "pmcid": "PMC8147765",
+      "doi": "10.3390/nano11051213",
+      "year": "2021",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Epoxy Nanocomposites with Carbon Nanotubes Produced by Floating Catalyst CVD.",
+      "pool_sentences": 110,
+      "corpus_sentences": 72
+    },
+    {
+      "pmcid": "PMC5397889",
+      "doi": "10.1038/srep46442",
+      "year": "2017",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "In plastico: laboratory material newness affects growth and reproduction of Daphnia magna reared in 50-ml polypropylene tubes.",
+      "pool_sentences": 225,
+      "corpus_sentences": 145
+    },
+    {
+      "pmcid": "PMC10458347",
+      "doi": "10.3390/polym15163433",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Effect of Janus Nanosheets in Polypropylene on Rheological Properties and Autoclave Foam Performance.",
+      "pool_sentences": 158,
+      "corpus_sentences": 119
+    },
+    {
+      "pmcid": "PMC5951320",
+      "doi": "10.3390/ma11040474",
+      "year": "2018",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Preparation and Sound Absorption Properties of a Barium Titanate/Nitrile Butadiene Rubber-Polyurethane Foam Composite with Multilayered Structure.",
+      "pool_sentences": 67,
+      "corpus_sentences": 47
+    },
+    {
+      "pmcid": "PMC7463498",
+      "doi": "10.3390/polym12081685",
+      "year": "2020",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Effect of Injection Molding Conditions on Crystalline Structure and Electrical Resistivity of PP/MWCNT Nanocomposites.",
+      "pool_sentences": 156,
+      "corpus_sentences": 100
+    },
+    {
+      "pmcid": "PMC9821894",
+      "doi": "10.3390/ma16010178",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Mechanical and Water Absorption Properties of Waterborne Polyurethane/Graphene Oxide Composites.",
+      "pool_sentences": 132,
+      "corpus_sentences": 97
+    },
+    {
+      "pmcid": "PMC8659891",
+      "doi": "10.3390/polym13234183",
+      "year": "2021",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Analysing Powder Injection Moulding of a Helix Geometry Using Soft Tooling.",
+      "pool_sentences": 96,
+      "corpus_sentences": 59
+    },
+    {
+      "pmcid": "PMC9228969",
+      "doi": "10.3390/polym14122394",
+      "year": "2022",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Blending Modification of Alicyclic Resin and Bisphenol A Epoxy Resin to Enhance Salt Aging Resistance for Composite Core Rods.",
+      "pool_sentences": 164,
+      "corpus_sentences": 117
+    },
+    {
+      "pmcid": "PMC13165225",
+      "doi": "10.3390/molecules31091426",
+      "year": "2026",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Design, Synthesis and Thermal Energy Storage Properties of Polyurethane-Based Solid-Solid Phase Change Materials Using Trihydroxy Compounds as Chain Extenders.",
+      "pool_sentences": 130,
+      "corpus_sentences": 81
+    },
+    {
+      "pmcid": "PMC10935195",
+      "doi": "10.3390/polym16050690",
+      "year": "2024",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Investigation of Physical Properties of Polymer Composites Filled with Sheep Wool.",
+      "pool_sentences": 271,
+      "corpus_sentences": 183
+    },
+    {
+      "pmcid": "PMC11525740",
+      "doi": "10.1021/acsomega.4c06328",
+      "year": "2024",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Mechanism and Performance Evaluation of a Strain Sensor Made from a Composite Hydrogel Containing Conductive Fibers of Thermoplastic Polyurethane and Polyvinyl Alcohol.",
+      "pool_sentences": 217,
+      "corpus_sentences": 151
+    },
+    {
+      "pmcid": "PMC7820568",
+      "doi": "10.1016/j.heliyon.2021.e05959",
+      "year": "2021",
+      "journal": "Heliyon",
+      "license": "cc by",
+      "title": "Remarkable enhancement of thermal stability of epoxy resin through the incorporation of mesoporous silica micro-filler.",
+      "pool_sentences": 151,
+      "corpus_sentences": 95
+    },
+    {
+      "pmcid": "PMC13417147",
+      "doi": "10.3390/polym18141735",
+      "year": "2026",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Regiochemical Control in a Thiol-Epoxy 'Click' Reaction: Synthesis of Cysteine and Glutathione Chain-End Functionalized Polyethylene Glycols.",
+      "pool_sentences": 120,
+      "corpus_sentences": 79
+    },
+    {
+      "pmcid": "PMC11277700",
+      "doi": "10.3390/ma17143473",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Thermal and Combustion Properties of Biomass-Based Flame-Retardant Polyurethane Foams Containing P and N.",
+      "pool_sentences": 202,
+      "corpus_sentences": 130
+    },
+    {
+      "pmcid": "PMC12694413",
+      "doi": "10.3390/polym17233172",
+      "year": "2025",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Hydrophobic Properties of Pine Wood Coatings Based on Epoxy Varnish and (Fluoro)Alkyl Methacrylate Copolymers.",
+      "pool_sentences": 182,
+      "corpus_sentences": 131
+    },
+    {
+      "pmcid": "PMC10459782",
+      "doi": "10.3390/polym15163329",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Synthesis and Application of ZSM-5 Catalyst Supported with Zinc and/or Nickel in the Conversion of Pyrolytic Gases from Recycled Polypropylene and Polystyrene Mixtures under Hydrogen Atmosphere.",
+      "pool_sentences": 128,
+      "corpus_sentences": 84
+    },
+    {
+      "pmcid": "PMC12180519",
+      "doi": "10.1039/d5ra02611c",
+      "year": "2025",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "Nano-engineering of a thermoplastic compound with CuO nanoparticles for the development of safe antimicrobial and anti-biofouling fish cage nets.",
+      "pool_sentences": 249,
+      "corpus_sentences": 165
+    },
+    {
+      "pmcid": "PMC11013440",
+      "doi": "10.3390/polym16070883",
+      "year": "2024",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Improving the Accuracy of the Evaluation Method for the Interfacial Shear Strength of Fiber-Reinforced Thermoplastic Polymers through the Short Beam Shear Test.",
+      "pool_sentences": 204,
+      "corpus_sentences": 138
+    },
+    {
+      "pmcid": "PMC13376522",
+      "doi": "10.1038/s41598-026-53330-9",
+      "year": "2026",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Machine learning approach for mechanical property assessment of industrial waste-filled epoxy-jute composites.",
+      "pool_sentences": 188,
+      "corpus_sentences": 124
+    },
+    {
+      "pmcid": "PMC7040632",
+      "doi": "10.3390/ma13030698",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The Structure and Mechanical Properties of the Surface Layer of Polypropylene Polymers with Talc Additions.",
+      "pool_sentences": 139,
+      "corpus_sentences": 100
+    },
+    {
+      "pmcid": "PMC3286383",
+      "doi": "10.1186/1477-3155-10-2",
+      "year": "2012",
+      "journal": "Journal of nanobiotechnology",
+      "license": "cc by",
+      "title": "Novel water-soluble polyurethane nanomicelles for cancer chemotherapy: physicochemical characterization and cellular activities.",
+      "pool_sentences": 190,
+      "corpus_sentences": 134
+    },
+    {
+      "pmcid": "PMC8025628",
+      "doi": "10.1016/j.sna.2021.112742",
+      "year": "2021",
+      "journal": "Sensors and actuators. A, Physical",
+      "license": null,
+      "title": "Design and finite element simulation of metal-core piezoelectric fiber/epoxy matrix composites for virus detection.",
+      "pool_sentences": 150,
+      "corpus_sentences": 104
+    },
+    {
+      "pmcid": "PMC9057045",
+      "doi": "10.1039/d0ra07008d",
+      "year": "2020",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Bio-elastomer nanocomposites reinforced with surface-modified graphene oxide prepared via in situ coordination polymerization.",
+      "pool_sentences": 159,
+      "corpus_sentences": 107
+    },
+    {
+      "pmcid": "PMC11052209",
+      "doi": "10.3390/ma17081880",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Compatibilization of Polyamide 6/Cyclic Olefinic Copolymer Blends for the Development of Multifunctional Thermoplastic Composites with Self-Healing Capability.",
+      "pool_sentences": 214,
+      "corpus_sentences": 135
+    },
+    {
+      "pmcid": "PMC12858857",
+      "doi": "10.1038/s41598-025-33849-z",
+      "year": "2026",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Designing an eco-friendly graphene oxide-based titanium tetra-acetoximate modified epoxy coating for anti-corrosion properties of aluminium.",
+      "pool_sentences": 208,
+      "corpus_sentences": 139
+    },
+    {
+      "pmcid": "PMC8537354",
+      "doi": "10.3390/ma14206022",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The Use of the ATD Technique to Measure the Gelation Time of Epoxy Resins.",
+      "pool_sentences": 136,
+      "corpus_sentences": 89
+    },
+    {
+      "pmcid": "PMC7009420",
+      "doi": "10.2903/j.efsa.2018.5117",
+      "year": "2018",
+      "journal": "EFSA journal. European Food Safety Authority",
+      "license": "cc by-nd",
+      "title": "Safety assessment of the process 'Morssinkhof Plastics', used to recycle high-density polyethylene and polypropylene crates for use as food contact materials.",
+      "pool_sentences": 102,
+      "corpus_sentences": 71
+    },
+    {
+      "pmcid": "PMC13088313",
+      "doi": "10.1002/advs.202524271",
+      "year": "2026",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Beyond Cartilage-Inspired Supramolecular Polyurethane for Adaptive Impact-Resistant Protection with Robustness, Self-Healing, and Recyclability.",
+      "pool_sentences": 173,
+      "corpus_sentences": 114
+    },
+    {
+      "pmcid": "PMC10220618",
+      "doi": "10.3390/polym15102370",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Effects of Orientation and Dispersion on Electrical Conductivity and Mechanical Properties of Carbon Nanotube/Polypropylene Composite.",
+      "pool_sentences": 213,
+      "corpus_sentences": 137
+    },
+    {
+      "pmcid": "PMC7600126",
+      "doi": "10.3390/ma13204508",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Micromechanical Model and Thermal Properties of Dry-Friction Hybrid Polymer Composite Clutch Facings.",
+      "pool_sentences": 229,
+      "corpus_sentences": 143
+    },
+    {
+      "pmcid": "PMC11991337",
+      "doi": "10.3390/polym17070892",
+      "year": "2025",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Potential Use of Castor Oil-Based Polyurethane Matrix Composite with Miriti Fiber Filling as Thermal Insulation Applied to Metal Tiles.",
+      "pool_sentences": 286,
+      "corpus_sentences": 193
+    },
+    {
+      "pmcid": "PMC6401993",
+      "doi": "10.3390/polym10121293",
+      "year": "2018",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Additive Manufacturing of Polypropylene: A Screening Design of Experiment Using Laser-Based Powder Bed Fusion.",
+      "pool_sentences": 197,
+      "corpus_sentences": 122
+    },
+    {
+      "pmcid": "PMC11077665",
+      "doi": "10.1002/advs.202400557",
+      "year": "2024",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Novel Biomimetic \"Spider Web\" Robust, Super-Contractile Liquid Crystal Elastomer Active Yarn Soft Actuator.",
+      "pool_sentences": 182,
+      "corpus_sentences": 127
+    },
+    {
+      "pmcid": "PMC9958844",
+      "doi": "10.3390/s23041825",
+      "year": "2023",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Parametric Model for the Analysis of the Impedance Spectra of Dielectric Sensors in Curing Epoxy Resins.",
+      "pool_sentences": 313,
+      "corpus_sentences": 204
+    },
+    {
+      "pmcid": "PMC9408875",
+      "doi": "10.3390/ijms23169145",
+      "year": "2022",
+      "journal": "International journal of molecular sciences",
+      "license": "cc by",
+      "title": "Phytic Acid-Iron/Laponite Coatings for Enhanced Flame Retardancy, Antidripping and Mechanical Properties of Flexible Polyurethane Foam.",
+      "pool_sentences": 166,
+      "corpus_sentences": 106
+    },
+    {
+      "pmcid": "PMC5708361",
+      "doi": "10.1039/c7ra07435b",
+      "year": "2017",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "Stability of UV/ozone-treated thermoplastics under different storage conditions for microfluidic analytical devices.",
+      "pool_sentences": 113,
+      "corpus_sentences": 71
+    },
+    {
+      "pmcid": "PMC8586937",
+      "doi": "10.3390/polym13213803",
+      "year": "2021",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Preparation and Characterization of Self-Healing Polyurethane Powder Coating Using Diels-Alder Reaction.",
+      "pool_sentences": 195,
+      "corpus_sentences": 131
+    },
+    {
+      "pmcid": "PMC11125218",
+      "doi": "10.3390/polym16101432",
+      "year": "2024",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Development and Validation of a 1D Dynamic Model of an Injection Moulding Process and Design of a Model-Based Nozzle Pressure Controller.",
+      "pool_sentences": 280,
+      "corpus_sentences": 181
+    },
+    {
+      "pmcid": "PMC13052713",
+      "doi": "10.1021/polymscitech.5c00023",
+      "year": "2025",
+      "journal": "Polymer science & technology (Washington, D.C.)",
+      "license": "cc by-nc-nd",
+      "title": "Models and Theories Regarding the Brittle-Ductile Transition of Rubber-Toughened Thermoplastics and Their Application in the Design of High-Impact Polymer Composites with Balanced Toughness and Rigidity.",
+      "pool_sentences": 246,
+      "corpus_sentences": 169
+    },
+    {
+      "pmcid": "PMC12526179",
+      "doi": "10.3390/ma18194570",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Flammability and Thermal Properties of Rigid Polyurethane Foams Modified with Waste Biomass and Ash.",
+      "pool_sentences": 201,
+      "corpus_sentences": 140
+    },
+    {
+      "pmcid": "PMC9961383",
+      "doi": "10.3390/polym15040936",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "An Approach to the Impact Simulation on Foamed Injection Molded Polypropylene Parts: An Example of Application in the Automotive Industry.",
+      "pool_sentences": 218,
+      "corpus_sentences": 136
+    },
+    {
+      "pmcid": "PMC9048581",
+      "doi": "10.1039/c9ra10569g",
+      "year": "2020",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "Light-printable epoxy oligomer wrinkle-forming surface for rewritable information storage.",
+      "pool_sentences": 98,
+      "corpus_sentences": 68
+    },
+    {
+      "pmcid": "PMC4554348",
+      "doi": "10.1186/s13014-015-0484-7",
+      "year": "2015",
+      "journal": "Radiation oncology (London, England)",
+      "license": "cc by",
+      "title": "Comparative analysis of thermoplastic masks versus vacuum cushions in stereotactic body radiotherapy.",
+      "pool_sentences": 135,
+      "corpus_sentences": 86
+    },
+    {
+      "pmcid": "PMC8540794",
+      "doi": "10.3390/polym13203474",
+      "year": "2021",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Construction of a TTT-\u03b7 Diagram of High-Refractive Polyurethane Based on Curing Kinetics.",
+      "pool_sentences": 150,
+      "corpus_sentences": 92
+    },
+    {
+      "pmcid": "PMC6561520",
+      "doi": "10.7759/cureus.4440",
+      "year": "2019",
+      "journal": "Cureus",
+      "license": "cc by",
+      "title": "A Feasibility Study for the Production of Three-dimensional-printed Spine Models Using Simultaneously Extruded Thermoplastic Polymers.",
+      "pool_sentences": 63,
+      "corpus_sentences": 42
+    },
+    {
+      "pmcid": "PMC12157741",
+      "doi": "10.3390/polym17111516",
+      "year": "2025",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Optimizing Anticorrosion Coating Performance: Synthesis of Polyurethane/Epoxy Hybrids.",
+      "pool_sentences": 163,
+      "corpus_sentences": 104
+    },
+    {
+      "pmcid": "PMC8780289",
+      "doi": "10.3390/molecules27020426",
+      "year": "2022",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Evaluation of Thermal Properties of Composites Prepared from Pistachio Shell Particles Treated Chemically and Polypropylene.",
+      "pool_sentences": 126,
+      "corpus_sentences": 92
+    },
+    {
+      "pmcid": "PMC10707293",
+      "doi": "10.3390/ma16237282",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The Magneto-Mechanical Hyperelastic Property of Isotropic Magnetorheological Elastomers with Hybrid-Size Magnetic Particles.",
+      "pool_sentences": 183,
+      "corpus_sentences": 114
+    },
+    {
+      "pmcid": "PMC11509589",
+      "doi": "10.3390/mi15101266",
+      "year": "2024",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Mechanical Property of Thermoplastic Polyurethane Vascular Stents Fabricated by Fused Filament Fabrication.",
+      "pool_sentences": 264,
+      "corpus_sentences": 178
+    },
+    {
+      "pmcid": "PMC8876485",
+      "doi": "10.3390/nano12040685",
+      "year": "2022",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Nanocomposites of Rigid Polyurethane Foam and Graphene Nanoplates Obtained by Exfoliation of Natural Graphite in Polymeric 4,4'-Diphenylmethane Diisocyanate.",
+      "pool_sentences": 186,
+      "corpus_sentences": 118
+    },
+    {
+      "pmcid": "PMC12156129",
+      "doi": "10.3390/ma18112549",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Study on the Self-Healing Performance of Polyurethane/Graphene Oxide-Modified Asphalt Based on Dynamic Disulfide Bonds.",
+      "pool_sentences": 229,
+      "corpus_sentences": 148
+    },
+    {
+      "pmcid": "PMC10422261",
+      "doi": "10.3390/polym15153263",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Study on Blending Modification of Bisphenol A Epoxy.",
+      "pool_sentences": 172,
+      "corpus_sentences": 117
+    },
+    {
+      "pmcid": "PMC12786518",
+      "doi": "10.3390/ma19010127",
+      "year": "2025",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Tensile and Structural Performance of Annealed 3D-Printed Polymer Composite Impellers for Pump-as-Turbine Applications in District Heating Networks.",
+      "pool_sentences": 375,
+      "corpus_sentences": 249
+    },
+    {
+      "pmcid": "PMC10490488",
+      "doi": "10.3390/nano13172429",
+      "year": "2023",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Amino-Alcohol Organic-Inorganic Hybrid Sol-Gel Materials Based on an Epoxy Bicyclic Silane: Synthesis and Characterization.",
+      "pool_sentences": 173,
+      "corpus_sentences": 120
+    },
+    {
+      "pmcid": "PMC11013364",
+      "doi": "10.3390/polym16070972",
+      "year": "2024",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Carbon Fiber Reinforced Recycled Polypropylene/Polyolefin Elastomer Composites with High Mechanical Properties.",
+      "pool_sentences": 198,
+      "corpus_sentences": 143
+    },
+    {
+      "pmcid": "PMC7866088",
+      "doi": "10.3390/ma14030543",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Assessment of Morphological, Physical, Thermal, and Thermal Conductivity Properties of Polypropylene/Lignosulfonate Blends.",
+      "pool_sentences": 127,
+      "corpus_sentences": 82
+    },
+    {
+      "pmcid": "PMC8512435",
+      "doi": "10.3390/polym13193236",
+      "year": "2021",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Multi-Scale Simulation of Injection Molding Process with Micro-Features Replication: Relevance of Rheological Behaviour and Crystallization.",
+      "pool_sentences": 193,
+      "corpus_sentences": 140
+    },
+    {
+      "pmcid": "PMC9571037",
+      "doi": "10.3390/ma15196862",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Experimental Investigation of the Deformed Stagger-Jointed Segmental Tunnel Linings Strengthened by Epoxy-Bonded Filament Wound Profiles.",
+      "pool_sentences": 200,
+      "corpus_sentences": 129
+    },
+    {
+      "pmcid": "PMC7865446",
+      "doi": "10.3390/polym13030346",
+      "year": "2021",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Experimental Study on the Thermoplastic Dripping and Flame Spread Behaviors of Energized Electrical Wire under Reduced Atmospheric Pressure.",
+      "pool_sentences": 146,
+      "corpus_sentences": 91
+    },
+    {
+      "pmcid": "PMC13209950",
+      "doi": "10.3390/molecules31101615",
+      "year": "2026",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Bimodal Interphase Architecture in Filled Elastomers: Molecular Dynamics Evidence and Experimental Signatures.",
+      "pool_sentences": 230,
+      "corpus_sentences": 151
+    },
+    {
+      "pmcid": "PMC9951242",
+      "doi": "10.1021/acs.nanolett.2c04213",
+      "year": "2023",
+      "journal": "Nano letters",
+      "license": "cc by",
+      "title": "Soft Character of Star-Like Polymer Melts: From Linear-Like Chains to Impenetrable Nanoparticles.",
+      "pool_sentences": 108,
+      "corpus_sentences": 69
+    },
+    {
+      "pmcid": "PMC12251922",
+      "doi": "10.3390/polym17131834",
+      "year": "2025",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Computational Study of Catalytic Poisoning Mechanisms in Polypropylene Polymerization: The Impact of Dimethylamine and Diethylamine on the Deactivation of Ziegler-Natta Catalysts and Co-Catalysts.",
+      "pool_sentences": 144,
+      "corpus_sentences": 104
+    },
+    {
+      "pmcid": "PMC11755147",
+      "doi": "10.1021/acsomega.4c10167",
+      "year": "2025",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Enhancing EMI Shielding Efficiency of Polyurethane Foam by Incorporating MWCNT-Decorated Hollow Glass Microspheres.",
+      "pool_sentences": 218,
+      "corpus_sentences": 146
+    },
+    {
+      "pmcid": "PMC9605040",
+      "doi": "10.3390/ma15207079",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Post-Molding Shrinkage, Structure and Properties of Cellular Injection-Molded Polypropylene.",
+      "pool_sentences": 204,
+      "corpus_sentences": 135
+    },
+    {
+      "pmcid": "PMC9319047",
+      "doi": "10.3390/polym14142936",
+      "year": "2022",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Recovery of Green Polyols from Rigid Polyurethane Waste by Catalytic Depolymerization.",
+      "pool_sentences": 290,
+      "corpus_sentences": 195
+    },
+    {
+      "pmcid": "PMC12029195",
+      "doi": "10.3390/molecules30081847",
+      "year": "2025",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Tuning 2,3-Bis(arylimino)butane-nickel Precatalysts for High-Molecular-Weight Polyethylene Elastomers.",
+      "pool_sentences": 160,
+      "corpus_sentences": 98
+    },
+    {
+      "pmcid": "PMC10707784",
+      "doi": "10.3390/polym15234487",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "A Fluorine-Containing Main-Chain Benzoxazine/Epoxy Co-Curing System with Low Dielectric Constants and High Thermal Stability.",
+      "pool_sentences": 175,
+      "corpus_sentences": 126
+    },
+    {
+      "pmcid": "PMC11209689",
+      "doi": "10.1021/acsomega.3c10076",
+      "year": "2024",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Compressive Properties of Basalt Fibers and Polypropylene Fiber-Reinforced Lightweight Concrete.",
+      "pool_sentences": 204,
+      "corpus_sentences": 131
+    },
+    {
+      "pmcid": "PMC10610327",
+      "doi": "10.3390/polym15204071",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Electrode Impact on the Electrical Breakdown of Dielectric Elastomer Thin Films.",
+      "pool_sentences": 267,
+      "corpus_sentences": 173
+    },
+    {
+      "pmcid": "PMC10422265",
+      "doi": "10.3390/polym15153228",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Characteristics of Components and Density of Rigid Nanoclay-Filled Medium-Density Polyurethane Foams Produced in a Sealed Mould.",
+      "pool_sentences": 165,
+      "corpus_sentences": 116
+    },
+    {
+      "pmcid": "PMC7040678",
+      "doi": "10.3390/ma13030520",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The Influence of Environmentally Friendly Flame Retardants on the Thermal Stability of Phase Change Polyurethane Foams.",
+      "pool_sentences": 120,
+      "corpus_sentences": 65
+    },
+    {
+      "pmcid": "PMC12070413",
+      "doi": "10.1021/acsestair.5c00013",
+      "year": "2025",
+      "journal": "ACS ES&T air",
+      "license": "cc by",
+      "title": "Tire-Derived Organic Chemicals in Urban Air at the Source-Sector Scale and Guidance on the Application of Polyurethane Foam Disk Passive Air Samplers.",
+      "pool_sentences": 296,
+      "corpus_sentences": 196
+    },
+    {
+      "pmcid": "PMC9964604",
+      "doi": "10.3390/polym15040972",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Characterization of Thermoplastic Starch Plasticized with Ternary Urea-Polyols Deep Eutectic Solvent with Two Selected Fillers: Microcrystalline Cellulose and Montmorillonite.",
+      "pool_sentences": 148,
+      "corpus_sentences": 88
+    },
+    {
+      "pmcid": "PMC8200980",
+      "doi": "10.3390/ijms22116134",
+      "year": "2021",
+      "journal": "International journal of molecular sciences",
+      "license": "cc by",
+      "title": "Silver- and Zinc-Decorated Polyurethane Ionomers with Tunable Hard/Soft Phase Segregation.",
+      "pool_sentences": 185,
+      "corpus_sentences": 117
+    },
+    {
+      "pmcid": "PMC12771042",
+      "doi": "10.1021/acsomega.5c06277",
+      "year": "2025",
+      "journal": "ACS omega",
+      "license": "cc by",
+      "title": "pH-Responsive Epoxy Coating Incorporating a Novel Schiff Base-Loaded UiO-66-NH2 with an Encapsulated Shell for Long-Term Steel Corrosion Protection.",
+      "pool_sentences": 346,
+      "corpus_sentences": 234
+    },
+    {
+      "pmcid": "PMC12074191",
+      "doi": "10.3390/polym17091181",
+      "year": "2025",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Dynamic Compressive Behavior of a Novel Bioinspired Gradient Negative Poisson's Ratio Sign-Switching Metamaterial Made of Thermoplastic Polyurethane.",
+      "pool_sentences": 173,
+      "corpus_sentences": 122
+    },
+    {
+      "pmcid": "PMC11644164",
+      "doi": "10.3390/polym16233259",
+      "year": "2024",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Investigation of Wettability, Thermal Stability, and Solar Behavior of Composite Films Based on Thermoplastic Polyurethane and Barium Titanate Nanoparticles.",
+      "pool_sentences": 200,
+      "corpus_sentences": 136
+    },
+    {
+      "pmcid": "PMC6641722",
+      "doi": "10.1021/acsomega.6b00517",
+      "year": "2017",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "Infusion of Graphene Quantum Dots to Create Stronger, Tougher, and Brighter Polymer Composites.",
+      "pool_sentences": 109,
+      "corpus_sentences": 67
+    },
+    {
+      "pmcid": "PMC8512748",
+      "doi": "10.3390/polym13193368",
+      "year": "2021",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Material Anisotropy in Additively Manufactured Polymers and Polymer Composites: A Review.",
+      "pool_sentences": 305,
+      "corpus_sentences": 203
+    },
+    {
+      "pmcid": "PMC9028771",
+      "doi": "10.3390/membranes12040364",
+      "year": "2022",
+      "journal": "Membranes",
+      "license": "cc by",
+      "title": "Preparation and Dielectric Sensitivity of Polyurethane Composite Fiber Membrane Filled with BaTiO3.",
+      "pool_sentences": 114,
+      "corpus_sentences": 73
+    },
+    {
+      "pmcid": "PMC11124946",
+      "doi": "10.3390/polym16101374",
+      "year": "2024",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Investigation of Macroscopic Mechanical Behavior of Magnetorheological Elastomers under Shear Deformation Using Microscale Representative Volume Element Approach.",
+      "pool_sentences": 261,
+      "corpus_sentences": 174
+    },
+    {
+      "pmcid": "PMC12030393",
+      "doi": "10.3390/polym17081064",
+      "year": "2025",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Research on the Thermal Aging Characteristics of Cured Epoxy Resin Insulating Materials for DC Bushings.",
+      "pool_sentences": 192,
+      "corpus_sentences": 136
+    },
+    {
+      "pmcid": "PMC6432601",
+      "doi": "10.3390/polym8030094",
+      "year": "2016",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Rheological and Mechanical Behavior of Silk Fibroin Reinforced Waterborne Polyurethane.",
+      "pool_sentences": 245,
+      "corpus_sentences": 156
+    },
+    {
+      "pmcid": "PMC8401536",
+      "doi": "10.3390/ma14164712",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effects of Modified Al2O3-Decorated Ionic Liquid on the Mechanical Properties and Impact Resistance of a Polyurethane Elastomer.",
+      "pool_sentences": 176,
+      "corpus_sentences": 113
+    },
+    {
+      "pmcid": "PMC7397011",
+      "doi": "10.3390/molecules25143236",
+      "year": "2020",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Bio-Based Thermoplastic Starch Composites Reinforced by Dialdehyde Lignocellulose.",
+      "pool_sentences": 130,
+      "corpus_sentences": 82
+    },
+    {
+      "pmcid": "PMC7700353",
+      "doi": "10.3390/ma13225281",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Assessment of the Piezoelectric Response of an Epoxy Resin/SbSINanowires Composite Filling FDM Printed Grid.",
+      "pool_sentences": 169,
+      "corpus_sentences": 117
+    },
+    {
+      "pmcid": "PMC11678795",
+      "doi": "10.3390/molecules29245870",
+      "year": "2024",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fabrication of Polyurethane-Polyacrylate Hybrid Latexes with High Organosilicon Content via Phase Inversion Emulsion Polymerization.",
+      "pool_sentences": 211,
+      "corpus_sentences": 145
+    },
+    {
+      "pmcid": "PMC11530496",
+      "doi": "10.1007/s10029-024-03110-z",
+      "year": "2024",
+      "journal": "Hernia : the journal of hernias and abdominal wall surgery",
+      "license": "cc by",
+      "title": "Polypropylene vs. stainless-steel wire suture: short-term recurrence rate after shouldice primary inguinal hernia repair, a non-inferior analysis among 1120 patients. A case-control study.",
+      "pool_sentences": 151,
+      "corpus_sentences": 101
+    },
+    {
+      "pmcid": "PMC12196751",
+      "doi": "10.3390/polym17121630",
+      "year": "2025",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Relation Between Injection Molding Conditions, Fiber Length, and Mechanical Properties of Highly Reinforced Long Fiber Polypropylene: Part II Long-Term Creep Performance.",
+      "pool_sentences": 157,
+      "corpus_sentences": 108
+    },
+    {
+      "pmcid": "PMC7182947",
+      "doi": "10.3390/polym12030622",
+      "year": "2020",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Mechanical and Dielectric Strength of Laminated Epoxy Dielectric Graded Materials.",
+      "pool_sentences": 214,
+      "corpus_sentences": 140
+    },
+    {
+      "pmcid": "PMC11955918",
+      "doi": "10.1039/d4na00904e",
+      "year": "2025",
+      "journal": "Nanoscale advances",
+      "license": "cc by-nc",
+      "title": "'Vitrimer nanocomposites' derived from graphene oxide and post-consumer recycled polypropylene.",
+      "pool_sentences": 202,
+      "corpus_sentences": 132
+    },
+    {
+      "pmcid": "PMC5978978",
+      "doi": "10.1002/advs.201800101",
+      "year": "2018",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Realizing Crack Diagnosing and Self-Healing by Electricity with a Dynamic Crosslinked Flexible Polyurethane Composite.",
+      "pool_sentences": 192,
+      "corpus_sentences": 134
+    },
+    {
+      "pmcid": "PMC12243730",
+      "doi": "10.1002/adma.202418709",
+      "year": "2025",
+      "journal": "Advanced materials (Deerfield Beach, Fla.)",
+      "license": "cc by",
+      "title": "Carbon Fiber Reinforced Thermoplastics: From Materials to Manufacturing and Applications.",
+      "pool_sentences": 706,
+      "corpus_sentences": 455
+    },
+    {
+      "pmcid": "PMC9611184",
+      "doi": "10.3390/ma15207357",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Reliability Assessment of Thermocompressed Epoxy Molding Compound through Glass via Interposer Architecture by the Submodeling Simulation Approach.",
+      "pool_sentences": 122,
+      "corpus_sentences": 71
+    },
+    {
+      "pmcid": "PMC11675100",
+      "doi": "10.3390/gels10120827",
+      "year": "2024",
+      "journal": "Gels (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Lignin Polyurethane Aerogels: Influence of Solvent on Textural Properties.",
+      "pool_sentences": 304,
+      "corpus_sentences": 186
+    },
+    {
+      "pmcid": "PMC11435416",
+      "doi": "10.3390/polym16182602",
+      "year": "2024",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Bio-Epoxy Resins Based on Lignin and Tannic Acids as Wood Adhesives-Characterization and Bonding Properties.",
+      "pool_sentences": 197,
+      "corpus_sentences": 141
+    },
+    {
+      "pmcid": "PMC9079759",
+      "doi": "10.1039/c8ra00982a",
+      "year": "2018",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Fast and simple transesterification of epoxidized soybean oil to prepare epoxy methyl esters at room temperature.",
+      "pool_sentences": 112,
+      "corpus_sentences": 82
+    },
+    {
+      "pmcid": "PMC7412035",
+      "doi": "10.3390/ma13143080",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Influence of Aluminum Surface Treatment on Tensile and Fatigue Behavior of Thermoplastic-Based Hybrid Laminates.",
+      "pool_sentences": 188,
+      "corpus_sentences": 122
+    },
+    {
+      "pmcid": "PMC8949861",
+      "doi": "10.3390/polym14061073",
+      "year": "2022",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Numerical Simulation on the Acoustic Streaming Driven Mixing in Ultrasonic Plasticizing of Thermoplastic Polymers.",
+      "pool_sentences": 131,
+      "corpus_sentences": 84
+    },
+    {
+      "pmcid": "PMC9785013",
+      "doi": "10.3390/polym14245468",
+      "year": "2022",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Evaluation of the Shape Memory Effect of Random and Aligned Electrospun Polyurethane Mats with Different Fibers Diameter.",
+      "pool_sentences": 169,
+      "corpus_sentences": 106
+    },
+    {
+      "pmcid": "PMC10099127",
+      "doi": "10.1021/acsomega.2c06947",
+      "year": "2023",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Biobased Epoxy Composites Reinforced with Acetylated Corn Straw.",
+      "pool_sentences": 187,
+      "corpus_sentences": 134
+    },
+    {
+      "pmcid": "PMC11608349",
+      "doi": "10.1038/s41598-024-80405-2",
+      "year": "2024",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Single and multi-objective real-time optimisation of an industrial injection moulding process via a Bayesian adaptive design of experiment approach.",
+      "pool_sentences": 207,
+      "corpus_sentences": 139
+    },
+    {
+      "pmcid": "PMC9076489",
+      "doi": "10.1039/c9ra08098h",
+      "year": "2019",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "High residue bio-based structural-functional integration epoxy and intrinsic flame retardant mechanism study.",
+      "pool_sentences": 192,
+      "corpus_sentences": 127
+    },
+    {
+      "pmcid": "PMC9921177",
+      "doi": "10.3390/polym15030735",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Analysis of an Adaptive Periodic Low-Frequency Wave Filter Featuring Magnetorheological Elastomers.",
+      "pool_sentences": 208,
+      "corpus_sentences": 134
+    },
+    {
+      "pmcid": "PMC9965535",
+      "doi": "10.3390/ma16041633",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The Role of Diisocyanate Structure to Modify Properties of Segmented Polyurethanes.",
+      "pool_sentences": 194,
+      "corpus_sentences": 118
+    },
+    {
+      "pmcid": "PMC8472922",
+      "doi": "10.3390/polym13183162",
+      "year": "2021",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Development and Characterization of a 3D Printed Cocoa Bean Shell Filled Recycled Polypropylene for Sustainable Composites.",
+      "pool_sentences": 205,
+      "corpus_sentences": 119
+    },
+    {
+      "pmcid": "PMC6431927",
+      "doi": "10.3390/polym8040144",
+      "year": "2016",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Rapid Hydrophilization of Model Polyurethane/Urea (PURPEG) Polymer Scaffolds Using Oxygen Plasma Treatment.",
+      "pool_sentences": 256,
+      "corpus_sentences": 165
+    },
+    {
+      "pmcid": "PMC9733754",
+      "doi": "10.1186/s40580-022-00346-2",
+      "year": "2022",
+      "journal": "Nano convergence",
+      "license": "cc by",
+      "title": "Self-assembled wide bandgap nanocoatings enabled outstanding dielectric characteristics in the sandwich-like structure polymer composites.",
+      "pool_sentences": 164,
+      "corpus_sentences": 109
+    },
+    {
+      "pmcid": "PMC8912632",
+      "doi": "10.3390/polym14050903",
+      "year": "2022",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "The Effect of Phenyl Content on the Liquid Crystal-Based Organosilicone Elastomers with Mechanical Adaptability.",
+      "pool_sentences": 132,
+      "corpus_sentences": 87
+    },
+    {
+      "pmcid": "PMC8512835",
+      "doi": "10.3390/polym13193296",
+      "year": "2021",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Effect of Silica Nanoparticles Blocked with Epoxy Groups on the Crosslinking and Surface Properties of PEG Hydrogel Films.",
+      "pool_sentences": 110,
+      "corpus_sentences": 65
+    },
+    {
+      "pmcid": "PMC8152679",
+      "doi": "10.1039/c9sc06582b",
+      "year": "2020",
+      "journal": "Chemical science",
+      "license": "cc by-nc",
+      "title": "Base-triggered self-amplifying degradable polyurethanes with the ability to translate local stimulation to continuous long-range degradation.",
+      "pool_sentences": 78,
+      "corpus_sentences": 47
+    },
+    {
+      "pmcid": "PMC12232269",
+      "doi": "10.1021/acsami.5c06610",
+      "year": "2025",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "Single-Layer and Stack Dielectric Elastomer Actuators Using Polysiloxanes Modified with Ethylsulfonyl Groups.",
+      "pool_sentences": 239,
+      "corpus_sentences": 144
+    },
+    {
+      "pmcid": "PMC10673499",
+      "doi": "10.3390/ma16227231",
+      "year": "2023",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The Effect of Plasma Treatment on the Mechanical and Biological Properties of Polyurethane Artificial Blood Vessel.",
+      "pool_sentences": 150,
+      "corpus_sentences": 100
+    },
+    {
+      "pmcid": "PMC12710605",
+      "doi": "10.1039/d5ra05789b",
+      "year": "2025",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "Study of microstructure formation in epoxy based systems using small angle neutron scattering.",
+      "pool_sentences": 181,
+      "corpus_sentences": 114
+    },
+    {
+      "pmcid": "PMC9371043",
+      "doi": "10.3390/polym14153183",
+      "year": "2022",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Preparation and Characterisation of Wood Polymer Composites Using Sustainable Raw Materials.",
+      "pool_sentences": 199,
+      "corpus_sentences": 126
+    },
+    {
+      "pmcid": "PMC3830874",
+      "doi": "10.1155/2013/354093",
+      "year": "2013",
+      "journal": "TheScientificWorldJournal",
+      "license": "cc by",
+      "title": "Optical properties of polypropylene upon recycling.",
+      "pool_sentences": 97,
+      "corpus_sentences": 69
+    },
+    {
+      "pmcid": "PMC8984817",
+      "doi": "10.1039/d1ra09401g",
+      "year": "2022",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "High performance flame-retardant organic-inorganic hybrid epoxy composites with POSS and DOPO-based co-curing agent.",
+      "pool_sentences": 127,
+      "corpus_sentences": 76
+    },
+    {
+      "pmcid": "PMC12354880",
+      "doi": "10.1038/s41467-025-62883-8",
+      "year": "2025",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "Geometrically insensitive deform-and-go liquid crystal elastomer actuators through controlled radical diffusion.",
+      "pool_sentences": 218,
+      "corpus_sentences": 144
+    },
+    {
+      "pmcid": "PMC8199638",
+      "doi": "10.3390/polym13111845",
+      "year": "2021",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Transcutaneous Drug Delivery Systems Based on Collagen/Polyurethane Composites Reinforced with Cellulose.",
+      "pool_sentences": 131,
+      "corpus_sentences": 90
+    },
+    {
+      "pmcid": "PMC11013755",
+      "doi": "10.3390/polym16070942",
+      "year": "2024",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Rigid Polyurethane Foams' Development and Optimization from Polyols Based on Depolymerized Suberin and Tall Oil Fatty Acids.",
+      "pool_sentences": 299,
+      "corpus_sentences": 198
+    },
+    {
+      "pmcid": "PMC7957740",
+      "doi": "10.3390/polym13050750",
+      "year": "2021",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Preparation of a Dmap-Catalysis Lignin Epoxide and the Study of Its High Mechanical-Strength Epoxy Resins with High-Biomass Content.",
+      "pool_sentences": 203,
+      "corpus_sentences": 130
+    },
+    {
+      "pmcid": "PMC6566908",
+      "doi": "10.3390/nano9050798",
+      "year": "2019",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Interfacial Engineering of Graphene Nanosheets at MgO Particles for Thermal Conductivity Enhancement of Polymer Composites.",
+      "pool_sentences": 92,
+      "corpus_sentences": 59
+    },
+    {
+      "pmcid": "PMC5054863",
+      "doi": "10.1002/advs.201500268",
+      "year": "2016",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Janus Separator of Polypropylene-Supported Cellular Graphene Framework for Sulfur Cathodes with High Utilization in Lithium-Sulfur Batteries.",
+      "pool_sentences": 210,
+      "corpus_sentences": 145
+    },
+    {
+      "pmcid": "PMC7077387",
+      "doi": "10.3390/polym12020278",
+      "year": "2020",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "The Effect of Glycidyl Azide Polymer Grafted Tetrafunctional Isocyanate on Polytriazole Polyethylene Oxide-Tetrahydrofuran Elastomer and its Propellant Properties.",
+      "pool_sentences": 148,
+      "corpus_sentences": 97
+    },
+    {
+      "pmcid": "PMC9002640",
+      "doi": "10.3390/polym14071288",
+      "year": "2022",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Biodegradable and Biocompatible Thermoplastic Poly(Ester-Urethane)s Based on Poly(\u03b5-Caprolactone) and Novel 1,3-Propanediol Bis(4-Isocyanatobenzoate) Diisocyanate: Synthesis and Characterization.",
+      "pool_sentences": 269,
+      "corpus_sentences": 185
+    },
+    {
+      "pmcid": "PMC13611715",
+      "doi": "10.3390/polym18182282",
+      "year": "2026",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "High-Temperature Tensile and Creep Behavior of Polypropylene/Poly(butylene terephthalate) Blends: Matrix Fibrillation and Interfacial Debonding.",
+      "pool_sentences": 229,
+      "corpus_sentences": 147
+    },
+    {
+      "pmcid": "PMC8197149",
+      "doi": "10.3390/polym13111707",
+      "year": "2021",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Development and Characterization of Polypropylene Waste from Personal Protective Equipment (PPE)-Derived Char-Filled Sugar Palm Starch Biocomposite Briquettes.",
+      "pool_sentences": 155,
+      "corpus_sentences": 99
+    },
+    {
+      "pmcid": "PMC9166807",
+      "doi": "10.1038/s41598-022-13493-7",
+      "year": "2022",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Stress concentration-relocating interposer in electronic textile packaging using thermoplastic elastic polyurethane film with via holes for bearing textile stretch.",
+      "pool_sentences": 165,
+      "corpus_sentences": 105
+    },
+    {
+      "pmcid": "PMC13667692",
+      "doi": null,
+      "year": "2026",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Immediate Effects of a Wearable Thermoplastic Polyurethane Arch Pad Sock on Lower-Extremity Muscle Activity in Adults with Flexible Flatfoot",
+      "pool_sentences": 293,
+      "corpus_sentences": 201
+    },
+    {
+      "pmcid": "PMC8046759",
+      "doi": "10.1038/s41598-021-87567-3",
+      "year": "2021",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Design new epoxy nanocomposite coatings based on metal vanadium oxy-phosphate M0.5VOPO4 for anti-corrosion applications.",
+      "pool_sentences": 107,
+      "corpus_sentences": 70
+    },
+    {
+      "pmcid": "PMC6960902",
+      "doi": "10.3390/polym11121927",
+      "year": "2019",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Development of Nontoxic Biodegradable Polyurethanes Based on Polyhydroxyalkanoate and L-lysine Diisocyanate with Improved Mechanical Properties as New Elastomers Scaffolds.",
+      "pool_sentences": 233,
+      "corpus_sentences": 159
+    },
+    {
+      "pmcid": "PMC6432204",
+      "doi": "10.3390/polym8080300",
+      "year": "2016",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Well-Defined Polypropylene/Polypropylene-Grafted Silica Nanocomposites: Roles of Number and Molecular Weight of Grafted Chains on Mechanistic Reinforcement.",
+      "pool_sentences": 146,
+      "corpus_sentences": 96
+    },
+    {
+      "pmcid": "PMC9823892",
+      "doi": "10.3390/s23010063",
+      "year": "2022",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Flexible SbSI/Polyurethane Nanocomposite for Sensing and Energy Harvesting.",
+      "pool_sentences": 144,
+      "corpus_sentences": 95
+    },
+    {
+      "pmcid": "PMC8747091",
+      "doi": "10.3390/polym14010023",
+      "year": "2021",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Effects of Injection Molding Parameters on Properties of Insert-Injection Molded Polypropylene Single-Polymer Composites.",
+      "pool_sentences": 251,
+      "corpus_sentences": 170
+    },
+    {
+      "pmcid": "PMC8126013",
+      "doi": "10.3390/ma14092459",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Fabrication of Polyurethane/Polylactide (PU/PLDL) Nanofibers Using Electrospinning Method.",
+      "pool_sentences": 146,
+      "corpus_sentences": 91
+    },
+    {
+      "pmcid": "PMC13029698",
+      "doi": "10.3390/plants15060910",
+      "year": "2026",
+      "journal": "Plants (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Polypropylene and Polylactic Acid Microplastics Alter Plateau Wetland Seed Bank Emergence and Community Assembly: A Greenhouse Stress Test Experiment.",
+      "pool_sentences": 342,
+      "corpus_sentences": 222
+    },
+    {
+      "pmcid": "PMC12395011",
+      "doi": "10.1039/d5ra04620c",
+      "year": "2025",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "Brassica carinata and Camelina sativa oils as renewable raw materials for producing viscoelastic polyurethane foams.",
+      "pool_sentences": 348,
+      "corpus_sentences": 225
+    },
+    {
+      "pmcid": "PMC8271570",
+      "doi": "10.3390/polym13132150",
+      "year": "2021",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "New Star-Shaped Polyether-Pentols (PEPOs) for Fabrication of Crosslinked Polyurethanes-Synthesis and Characterization.",
+      "pool_sentences": 201,
+      "corpus_sentences": 146
+    },
+    {
+      "pmcid": "PMC12189316",
+      "doi": "10.3390/antibiotics14060595",
+      "year": "2025",
+      "journal": "Antibiotics (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Epoxy-Functionalized Isatin Derivative: Synthesis, Computational Evaluation, and Antibacterial Analysis.",
+      "pool_sentences": 225,
+      "corpus_sentences": 148
+    },
+    {
+      "pmcid": "PMC12564599",
+      "doi": "10.3390/gels11100842",
+      "year": "2025",
+      "journal": "Gels (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Formulation of Sustainable Materials from Agar/Glycerol/Water Gels: An Alternative to Polyurethane Foams in Single-Use Applications.",
+      "pool_sentences": 277,
+      "corpus_sentences": 173
+    },
+    {
+      "pmcid": "PMC11946259",
+      "doi": "10.3390/nano15060443",
+      "year": "2025",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Anisotropic Swelling Behavior of Liquid Crystal Elastomers in Isotropic Solvents.",
+      "pool_sentences": 204,
+      "corpus_sentences": 133
+    },
+    {
+      "pmcid": "PMC9104946",
+      "doi": "10.3390/ijms23094944",
+      "year": "2022",
+      "journal": "International journal of molecular sciences",
+      "license": "cc by",
+      "title": "Microrheological Phenomenon and Mechanical Properties of High-Aspect-Ratio Microgroove Injection Moulding of Kaolin/PP Composites.",
+      "pool_sentences": 271,
+      "corpus_sentences": 186
+    },
+    {
+      "pmcid": "PMC10625685",
+      "doi": "10.4317/jced.60920",
+      "year": "2023",
+      "journal": "Journal of clinical and experimental dentistry",
+      "license": "cc by",
+      "title": "Comparison of the push-out bond strength of two hydraulic calcium silicate-based endodontic sealers and an epoxy resin-based sealer.",
+      "pool_sentences": 102,
+      "corpus_sentences": 63
+    },
+    {
+      "pmcid": "PMC6630713",
+      "doi": "10.3390/polym11060975",
+      "year": "2019",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Molecular Dynamics Simulation and Experimental Studies on the Thermomechanical Properties of Epoxy Resin with Different Anhydride Curing Agents.",
+      "pool_sentences": 161,
+      "corpus_sentences": 120
+    },
+    {
+      "pmcid": "PMC9264045",
+      "doi": "10.21037/jtd-21-1559",
+      "year": "2022",
+      "journal": "Journal of thoracic disease",
+      "license": "cc by-nc-nd",
+      "title": "Serial evaluation of segmental esophageal reconstruction using a polyurethane scaffold in a pig model.",
+      "pool_sentences": 145,
+      "corpus_sentences": 97
+    },
+    {
+      "pmcid": "PMC13414068",
+      "doi": "10.3390/ma19143147",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Comparative Review of Multi-Walled Carbon Nanotube-Reinforced Thermoplastic Petroleum-Based (PET, PBT) and Bio-Based (PLA, PBS) Polyester Systems.",
+      "pool_sentences": 518,
+      "corpus_sentences": 349
+    },
+    {
+      "pmcid": "PMC6780306",
+      "doi": "10.3390/polym11091522",
+      "year": "2019",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "PPG-Terminated Tetra-Carbamates as the Toughening Additive for Bis-A Epoxy Resin.",
+      "pool_sentences": 129,
+      "corpus_sentences": 84
+    },
+    {
+      "pmcid": "PMC13117074",
+      "doi": "10.3390/jcm15083110",
+      "year": "2026",
+      "journal": "Journal of clinical medicine",
+      "license": "cc by",
+      "title": "Pre-Pectoral Polyurethane Implant Reconstruction Following Batwing Skin-Reducing Mastectomy: A Single-Center Study.",
+      "pool_sentences": 199,
+      "corpus_sentences": 129
+    },
+    {
+      "pmcid": "PMC10478173",
+      "doi": "10.1088/1758-5090/acf39e",
+      "year": "2023",
+      "journal": "Biofabrication",
+      "license": "cc by",
+      "title": "A scalable human iPSC-based neuromuscular disease model on suspended biobased elastomer nanofiber scaffolds.",
+      "pool_sentences": 180,
+      "corpus_sentences": 119
+    },
+    {
+      "pmcid": "PMC7830891",
+      "doi": "10.3390/polym13020274",
+      "year": "2021",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Improving the Tensile and Tear Properties of Thermoplastic Starch/Dolomite Biocomposite Film through Sonication Process.",
+      "pool_sentences": 262,
+      "corpus_sentences": 174
+    },
+    {
+      "pmcid": "PMC4180807",
+      "doi": "10.1038/srep06479",
+      "year": "2014",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Mechanical properties of carbon nanotube/polymer composites.",
+      "pool_sentences": 131,
+      "corpus_sentences": 93
+    },
+    {
+      "pmcid": "PMC9456715",
+      "doi": "10.3390/ma15175848",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Experimental Investigation on the Strengthening of Reinforced Concrete Beams Using Externally Bonded and Near-Surface Mounted Natural Fibre Reinforced Polymer Composites-A Review.",
+      "pool_sentences": 286,
+      "corpus_sentences": 191
+    },
+    {
+      "pmcid": "PMC13317553",
+      "doi": "10.1002/advs.75129",
+      "year": "2026",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Toward Flexible Printed Electronics: A Spider-Silk-Inspired, Strong and Tough Thermoplastic Polyamide Elastomer.",
+      "pool_sentences": 269,
+      "corpus_sentences": 180
+    },
+    {
+      "pmcid": "PMC10972207",
+      "doi": "10.3390/ma17061396",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Development of a Polyethylene Glycol/Polymethyl Methacrylate-Based Binder System for a Borosilicate Glass Filler Suitable for Injection Molding.",
+      "pool_sentences": 322,
+      "corpus_sentences": 218
+    },
+    {
+      "pmcid": "PMC6473489",
+      "doi": "10.3390/polym11030516",
+      "year": "2019",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Slow Dynamics of Ring Polymer Melts by Asymmetric Interaction of Threading Configuration: Monte Carlo Study of a Dynamically Constrained Lattice Model.",
+      "pool_sentences": 191,
+      "corpus_sentences": 112
+    },
+    {
+      "pmcid": "PMC9864393",
+      "doi": "10.3390/polym15020350",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Enhancement of Thermal Behaviour of Flax with a Ramie Fibre-Reinforced Polymer Composite.",
+      "pool_sentences": 254,
+      "corpus_sentences": 175
+    },
+    {
+      "pmcid": "PMC11722786",
+      "doi": "10.3390/polym17010101",
+      "year": "2025",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Comparison of the Influence of Polypropylene (PP) or Polybutylene Terephthalate (PBT)-Based Meltblown and Polyester/Polyamide-Based Hydroentangled Inner Layers on the Sound and Thermal Insulation Properties of Layered Nonwoven Composite Structures.",
+      "pool_sentences": 273,
+      "corpus_sentences": 179
+    },
+    {
+      "pmcid": "PMC11010252",
+      "doi": "10.1021/acspolymersau.3c00033",
+      "year": "2024",
+      "journal": "ACS polymers Au",
+      "license": "cc by-nc-nd",
+      "title": "Continuous Polymer Synthesis and Manufacturing of Polyurethane Elastomers Enabled by Automation.",
+      "pool_sentences": 140,
+      "corpus_sentences": 89
+    },
+    {
+      "pmcid": "PMC11595944",
+      "doi": "10.3390/ma17225641",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Polyurethane Nanocomposites with Open-Cell Structure Modified with Aluminosilicate Nano-Filler.",
+      "pool_sentences": 323,
+      "corpus_sentences": 222
+    },
+    {
+      "pmcid": "PMC9146507",
+      "doi": "10.3390/ma15103469",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Scale-Up and Testing of Polyurethane Bio-Foams as Potential Cryogenic Insulation Materials.",
+      "pool_sentences": 133,
+      "corpus_sentences": 85
+    },
+    {
+      "pmcid": "PMC8954459",
+      "doi": "10.3390/polym14061255",
+      "year": "2022",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Determination of Mechanical Properties of Epoxy Composite Materials Reinforced with Silicate Nanofillers Using Digital Image Correlation (DIC).",
+      "pool_sentences": 212,
+      "corpus_sentences": 151
+    },
+    {
+      "pmcid": "PMC9850774",
+      "doi": "10.1021/acsomega.2c05817",
+      "year": "2023",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "The Effect of Polyepoxyphenylsilsesquioxane and Diethyl Bis(2-hydroxyethyl)aminomethylphosphonate on the Thermal Stability of Epoxy Resin.",
+      "pool_sentences": 115,
+      "corpus_sentences": 80
+    },
+    {
+      "pmcid": "PMC12658700",
+      "doi": "10.1021/acsomega.5c06453",
+      "year": "2025",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Elastomer-Based Vitrimers\ue5f8A Review of the Preparation, Characterization, and Applications.",
+      "pool_sentences": 571,
+      "corpus_sentences": 397
+    },
+    {
+      "pmcid": "PMC10020256",
+      "doi": "10.1007/s11274-023-03558-8",
+      "year": "2023",
+      "journal": "World journal of microbiology & biotechnology",
+      "license": "cc by",
+      "title": "Solving the plastic dilemma: the fungal and bacterial biodegradability of polyurethanes.",
+      "pool_sentences": 166,
+      "corpus_sentences": 110
+    },
+    {
+      "pmcid": "PMC5792896",
+      "doi": "10.1098/rsos.171070",
+      "year": "2018",
+      "journal": "Royal Society open science",
+      "license": "cc by",
+      "title": "Preparation of polypropylene/Mg-Al layered double hydroxides nanocomposites through wet pan-milling: non-isothermal crystallization behaviour.",
+      "pool_sentences": 179,
+      "corpus_sentences": 119
+    },
+    {
+      "pmcid": "PMC9267293",
+      "doi": "10.3390/ma15134592",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "A Sequenced Study of Improved Dielectric Properties of Carbon Nanotubes and Metal Oxide-Reinforced Polymer Composites.",
+      "pool_sentences": 160,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC8948952",
+      "doi": "10.3390/polym14061199",
+      "year": "2022",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Biodegradable, Stretchable and Transparent Plastic Films from Modified Waterborne Polyurethane Dispersions.",
+      "pool_sentences": 211,
+      "corpus_sentences": 141
+    },
+    {
+      "pmcid": "PMC12073596",
+      "doi": "10.3390/polym17091158",
+      "year": "2025",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Preparation of Polypyrrole/Montmorillonite/Polypropylene Composite Membranes and Investigation of Their Adsorption Performance for Methyl Orange and Pb2.",
+      "pool_sentences": 230,
+      "corpus_sentences": 155
+    },
+    {
+      "pmcid": "PMC10007341",
+      "doi": "10.3390/polym15051102",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Damping Properties of Large-Scale Overlap Joints Bonded with Epoxy Hybrid Resin or Polyurethanes: Experimental Characterisation and Analytical Description.",
+      "pool_sentences": 302,
+      "corpus_sentences": 197
+    },
+    {
+      "pmcid": "PMC12656003",
+      "doi": "10.3390/polym17222990",
+      "year": "2025",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Preparation and Performance Study of Silicone-Oligomer Composite-Modified Polyurethane Sealant.",
+      "pool_sentences": 177,
+      "corpus_sentences": 119
+    },
+    {
+      "pmcid": "PMC12038929",
+      "doi": "10.1186/s13014-025-02648-1",
+      "year": "2025",
+      "journal": "Radiation oncology (London, England)",
+      "license": "cc by-nc-nd",
+      "title": "The investigation of opening modes of head and neck thermoplastic mask for radiotherapy based on finite element analysis.",
+      "pool_sentences": 232,
+      "corpus_sentences": 146
+    },
+    {
+      "pmcid": "PMC13165048",
+      "doi": "10.3390/ma19091729",
+      "year": "2026",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Comparative Study on Injection Molding and Performance of Glass Fiber-Reinforced PET and PA6 Thermoplastic Insulators.",
+      "pool_sentences": 194,
+      "corpus_sentences": 132
+    },
+    {
+      "pmcid": "PMC13208525",
+      "doi": "10.3390/medicina62050803",
+      "year": "2026",
+      "journal": "Medicina (Kaunas, Lithuania)",
+      "license": "cc by",
+      "title": "Intraperitoneal Polypropylene Mesh in Clean, Potentially Septic, and Controlled Contamination Fields: An Experimental Rat Study.",
+      "pool_sentences": 238,
+      "corpus_sentences": 164
+    },
+    {
+      "pmcid": "PMC8271754",
+      "doi": "10.3390/polym13132035",
+      "year": "2021",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Improved Ablative Properties of Nanodiamond-Reinforced Carbon Fiber-Epoxy Matrix Composites.",
+      "pool_sentences": 117,
+      "corpus_sentences": 75
+    },
+    {
+      "pmcid": "PMC11477963",
+      "doi": "10.3390/molecules29194735",
+      "year": "2024",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Ultrasonic-Assisted Marine Antifouling Strategy on Gel-like Epoxy Primer.",
+      "pool_sentences": 182,
+      "corpus_sentences": 128
+    },
+    {
+      "pmcid": "PMC12608210",
+      "doi": "10.3390/polym17212891",
+      "year": "2025",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Effects of Propylene Carbonate on the Properties of Epoxy Resin/Carbon Fiber Multilayer Material Used for Underwater Artifact Extraction.",
+      "pool_sentences": 207,
+      "corpus_sentences": 130
+    },
+    {
+      "pmcid": "PMC7765676",
+      "doi": "10.3390/mi11121115",
+      "year": "2020",
+      "journal": "Micromachines",
+      "license": "cc by",
+      "title": "Functional Analysis Validation of Micro and Conventional Injection Molding Machines Performances Based on Process Precision and Accuracy for Micro Manufacturing.",
+      "pool_sentences": 206,
+      "corpus_sentences": 145
+    },
+    {
+      "pmcid": "PMC10022895",
+      "doi": "10.1126/sciadv.add6947",
+      "year": "2023",
+      "journal": "Science advances",
+      "license": "cc by",
+      "title": "Radiation and electrostatic resistance for ultra-stable polymer composites reinforced with carbon fibers.",
+      "pool_sentences": 160,
+      "corpus_sentences": 111
+    },
+    {
+      "pmcid": "PMC11723291",
+      "doi": "10.3390/polym17010061",
+      "year": "2024",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Enhanced Mechanical and Acoustic Properties of Basalt Fiber/Polyurethane Composites by Silane Coupling Agents.",
+      "pool_sentences": 180,
+      "corpus_sentences": 139
+    },
+    {
+      "pmcid": "PMC3304149",
+      "doi": "10.3390/s120201950",
+      "year": "2012",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Electrical model of a carbon-polymer composite (CPC) collision detector.",
+      "pool_sentences": 186,
+      "corpus_sentences": 123
+    },
+    {
+      "pmcid": "PMC10934557",
+      "doi": "10.3390/polym16050662",
+      "year": "2024",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Techno-Environmental Evaluation of Alkaline Treatment in Flax Reinforced Thermoplastics.",
+      "pool_sentences": 163,
+      "corpus_sentences": 107
+    },
+    {
+      "pmcid": "PMC13325862",
+      "doi": "10.1021/acs.langmuir.6c00484",
+      "year": "2026",
+      "journal": "Langmuir : the ACS journal of surfaces and colloids",
+      "license": "cc by",
+      "title": "Covalent Grafting of Cationic Polythiophene Nanowires onto a Polyurethane Interface via Surface-Assisted Polymerization.",
+      "pool_sentences": 164,
+      "corpus_sentences": 110
+    },
+    {
+      "pmcid": "PMC9977942",
+      "doi": "10.1038/s41598-023-30622-y",
+      "year": "2023",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Application and characterization of a novel PVDF-HFP/PVP polymer composite with MoO3 nanowires as a protective coating for wood.",
+      "pool_sentences": 224,
+      "corpus_sentences": 151
+    },
+    {
+      "pmcid": "PMC11678775",
+      "doi": "10.3390/polym16243535",
+      "year": "2024",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Study on Mechanical Properties and Carbon Emission Analysis of Polypropylene Fiber-Reinforced Brick Aggregate Concrete.",
+      "pool_sentences": 167,
+      "corpus_sentences": 105
+    },
+    {
+      "pmcid": "PMC10180543",
+      "doi": "10.3390/polym15092148",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Part B: Improvement of the Optical Properties of Cellulose Nanocrystals Reinforced Thermoplastic Starch Bio-Composite Films by Ex Situ Incorporation of Green Silver Nanoparticles from Chaetomorpha linum.",
+      "pool_sentences": 186,
+      "corpus_sentences": 137
+    },
+    {
+      "pmcid": "PMC10334419",
+      "doi": "10.1039/d3na00130j",
+      "year": "2023",
+      "journal": "Nanoscale advances",
+      "license": "cc by-nc",
+      "title": "Structural design and preparation of Ti3C2Tx MXene/polymer composites for absorption-dominated electromagnetic interference shielding.",
+      "pool_sentences": 502,
+      "corpus_sentences": 326
+    },
+    {
+      "pmcid": "PMC10649546",
+      "doi": "10.3390/polym15214220",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Approaches for Numerical Modeling and Simulation of the Filling Phase in Injection Molding: A Review.",
+      "pool_sentences": 341,
+      "corpus_sentences": 214
+    },
+    {
+      "pmcid": "PMC6272972",
+      "doi": "10.3390/molecules21060796",
+      "year": "2016",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Construction of an Immobilized Thermophilic Esterase on Epoxy Support for Poly(\u03b5-caprolactone) Synthesis.",
+      "pool_sentences": 101,
+      "corpus_sentences": 66
+    },
+    {
+      "pmcid": "PMC12197117",
+      "doi": "10.3390/polym17121665",
+      "year": "2025",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Biodegradable, Wear-Resistant and Resilient Thermoplastic Polycarbonate-Based Polyurethane with Nanoscale Microphase Structure.",
+      "pool_sentences": 164,
+      "corpus_sentences": 108
+    },
+    {
+      "pmcid": "PMC7014061",
+      "doi": "10.3390/ma13020422",
+      "year": "2020",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Comparative Screening of the Structural and Thermomechanical Properties of FDM Filaments Comprising Thermoplastics Loaded with Cellulose, Carbon and Glass Fibers.",
+      "pool_sentences": 182,
+      "corpus_sentences": 126
+    },
+    {
+      "pmcid": "PMC7905813",
+      "doi": "10.1021/acsomega.0c05506",
+      "year": "2021",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Fluorinated Polyurethane-Based Enameled Wires with a Low Friction Coefficient.",
+      "pool_sentences": 153,
+      "corpus_sentences": 102
+    },
+    {
+      "pmcid": "PMC8587051",
+      "doi": "10.3390/ma14216618",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "The Influence of the Microstructure of Ceramic-Elastomer Composites on Their Energy Absorption Capability.",
+      "pool_sentences": 136,
+      "corpus_sentences": 94
+    },
+    {
+      "pmcid": "PMC12649998",
+      "doi": "10.3390/biomimetics10110785",
+      "year": "2025",
+      "journal": "Biomimetics (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Three-Dimensional Printing Parameter Assessment of Elastomers for Tendon Graft Applications.",
+      "pool_sentences": 192,
+      "corpus_sentences": 134
+    },
+    {
+      "pmcid": "PMC9051554",
+      "doi": "10.1039/d0ra01394c",
+      "year": "2020",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Advances in intrinsic self-healing polyurethanes and related composites.",
+      "pool_sentences": 315,
+      "corpus_sentences": 198
+    },
+    {
+      "pmcid": "PMC10222079",
+      "doi": "10.3390/medicina59050820",
+      "year": "2023",
+      "journal": "Medicina (Kaunas, Lithuania)",
+      "license": "cc by",
+      "title": "Simultaneous Inguinal Hernia Repair with Monofilament Polypropylene Mesh during Robot-Assisted Radical Prostatectomy: Results from a Single Institute Series.",
+      "pool_sentences": 95,
+      "corpus_sentences": 69
+    },
+    {
+      "pmcid": "PMC6404063",
+      "doi": "10.3390/polym10070706",
+      "year": "2018",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Effects of Surface Functionalization of Lignin on Synthesis and Properties of Rigid Bio-Based Polyurethanes Foams.",
+      "pool_sentences": 182,
+      "corpus_sentences": 119
+    },
+    {
+      "pmcid": "PMC8914697",
+      "doi": "10.3390/polym14051011",
+      "year": "2022",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Investigating the Recyclability of Laser PP CP 75 Polypropylene Powder in Laser Powder Bed Fusion (L-PBF).",
+      "pool_sentences": 222,
+      "corpus_sentences": 153
+    },
+    {
+      "pmcid": "PMC11510462",
+      "doi": "10.3390/molecules29204905",
+      "year": "2024",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Enhancement and Compatibilization of Waste-Sourced Biocomposites Through Elastomer Blending and Matrix Grafting Modification.",
+      "pool_sentences": 208,
+      "corpus_sentences": 140
+    },
+    {
+      "pmcid": "PMC10535287",
+      "doi": "10.3390/polym15183775",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "The Influence of Thermoplastic Composite Recycling on the Additive Manufacturing Process and In-Use Phase as Candidate Materials for Wearable Devices Applications.",
+      "pool_sentences": 191,
+      "corpus_sentences": 127
+    },
+    {
+      "pmcid": "PMC9034089",
+      "doi": "10.1039/d1ra01312b",
+      "year": "2021",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Gel-polymer electrolytes based on polyurethane ionomers for lithium power sources.",
+      "pool_sentences": 193,
+      "corpus_sentences": 124
+    },
+    {
+      "pmcid": "PMC9269058",
+      "doi": "10.3390/polym14132567",
+      "year": "2022",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Effective Aging Inhibition of the Thermoplastic Corn Starch Films through the Use of Green Hybrid Filler.",
+      "pool_sentences": 336,
+      "corpus_sentences": 236
+    },
+    {
+      "pmcid": "PMC10819366",
+      "doi": "10.3390/polym16020219",
+      "year": "2024",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Investigation of Shape Memory Polyurethane Properties in Cold Programming Process Towards Its Applications.",
+      "pool_sentences": 231,
+      "corpus_sentences": 144
+    },
+    {
+      "pmcid": "PMC9634718",
+      "doi": "10.1039/d2ra05401a",
+      "year": "2022",
+      "journal": "RSC advances",
+      "license": "cc by",
+      "title": "Fluorene intercalated graphene oxide based CoQ10 imprinted polymer composite as a selective platform for electrochemical sensing of CoQ10.",
+      "pool_sentences": 215,
+      "corpus_sentences": 152
+    },
+    {
+      "pmcid": "PMC6644892",
+      "doi": "10.1021/acsomega.8b00966",
+      "year": "2018",
+      "journal": "ACS omega",
+      "license": null,
+      "title": "Faster and Greener Chemical Reaction Workup Using Silicone Elastomer-Coated Glass Powders.",
+      "pool_sentences": 176,
+      "corpus_sentences": 122
+    },
+    {
+      "pmcid": "PMC7922925",
+      "doi": "10.3390/ma14040949",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Large Deformation Finite Element Analyses for 3D X-ray CT Scanned Microscopic Structures of Polyurethane Foams.",
+      "pool_sentences": 190,
+      "corpus_sentences": 125
+    },
+    {
+      "pmcid": "PMC9319815",
+      "doi": "10.3390/polym14142843",
+      "year": "2022",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "On the Use of Dolomite as a Mineral Filler and Co-Filler in the Field of Polymer Composites: A Review.",
+      "pool_sentences": 448,
+      "corpus_sentences": 278
+    },
+    {
+      "pmcid": "PMC6384597",
+      "doi": "10.3390/ma12030545",
+      "year": "2019",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Enhanced Thermal Stability of Thermoplastic Polymer Nanostructures for Nanoimprint Lithography.",
+      "pool_sentences": 145,
+      "corpus_sentences": 99
+    },
+    {
+      "pmcid": "PMC9062440",
+      "doi": "10.1016/j.mtbio.2022.100268",
+      "year": "2022",
+      "journal": "Materials today. Bio",
+      "license": "cc by-nc-nd",
+      "title": "The impact of bacterial contamination on the host response towards fully absorbable poly-4-hydroxybutyrate and nonabsorbable polypropylene pelvic floor implants.",
+      "pool_sentences": 188,
+      "corpus_sentences": 130
+    },
+    {
+      "pmcid": "PMC9071818",
+      "doi": "10.1039/c9ra05493f",
+      "year": "2019",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Property improvement of multi-walled carbon nanotubes/polypropylene composites with high filler loading via interfacial modification.",
+      "pool_sentences": 138,
+      "corpus_sentences": 99
+    },
+    {
+      "pmcid": "PMC6432218",
+      "doi": "10.3390/polym8070252",
+      "year": "2016",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Thermo-Responsive Polyurethane Hydrogels Based on Poly(\u03b5-caprolactone) Diol and Amphiphilic Polylactide-Poly(Ethylene Glycol) Block Copolymers.",
+      "pool_sentences": 231,
+      "corpus_sentences": 161
+    },
+    {
+      "pmcid": "PMC8269880",
+      "doi": "10.3390/ma14133682",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Ethoxylated Butoxyethanol-BADGE Adducts-New Potential Migrants from Epoxy Resin Can Coating Material.",
+      "pool_sentences": 70,
+      "corpus_sentences": 40
+    },
+    {
+      "pmcid": "PMC11881676",
+      "doi": "10.1002/adma.202414695",
+      "year": "2025",
+      "journal": "Advanced materials (Deerfield Beach, Fla.)",
+      "license": "cc by",
+      "title": "Synergistic Adhesion and Shape Deformation in Nanowire-Structured Liquid Crystal Elastomers.",
+      "pool_sentences": 136,
+      "corpus_sentences": 88
+    },
+    {
+      "pmcid": "PMC11508964",
+      "doi": "10.3390/jfb15100309",
+      "year": "2024",
+      "journal": "Journal of functional biomaterials",
+      "license": "cc by",
+      "title": "A Polyurethane Electrospun Membrane Loaded with Bismuth Lipophilic Nanoparticles (BisBAL NPs): Proliferation, Bactericidal, and Antitumor Properties, and Effects on MRSA and Human Breast Cancer Cells.",
+      "pool_sentences": 201,
+      "corpus_sentences": 130
+    },
+    {
+      "pmcid": "PMC11064022",
+      "doi": "10.1021/acsomega.3c07830",
+      "year": "2024",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Effect of TiO2 Nanofillers on the Mechanical and Abrasive Wear Properties of Epoxy Reinforced with Carbon Fabric Hybrid Composites.",
+      "pool_sentences": 139,
+      "corpus_sentences": 91
+    },
+    {
+      "pmcid": "PMC7052101",
+      "doi": "10.1186/s11671-020-3282-6",
+      "year": "2020",
+      "journal": "Nanoscale research letters",
+      "license": "cc by",
+      "title": "Nanoscale Effect of Zirconia Filler Surface on Mechanical Tensile Strength of Polymer Composites.",
+      "pool_sentences": 121,
+      "corpus_sentences": 84
+    },
+    {
+      "pmcid": "PMC12732371",
+      "doi": "10.3390/gels11120946",
+      "year": "2025",
+      "journal": "Gels (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Enhancing Solid-State Li-Ion Batteries with MOF-Polymer Composite Electrolytes-Effect Mechanisms and Interface Engineering.",
+      "pool_sentences": 293,
+      "corpus_sentences": 201
+    },
+    {
+      "pmcid": "PMC9415902",
+      "doi": "10.3390/polym14163240",
+      "year": "2022",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Multi-Scale Modelling of Plastic Deformation, Damage and Relaxation in Epoxy Resins.",
+      "pool_sentences": 156,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC10181392",
+      "doi": "10.3390/polym15092026",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Preparation and Properties of Poly(butylene adipate-co-terephthalate)/thermoplastic Hydroxypropyl Starch Composite Films Reinforced with Nano-Silica.",
+      "pool_sentences": 149,
+      "corpus_sentences": 94
+    },
+    {
+      "pmcid": "PMC10221596",
+      "doi": "10.3390/polym15102400",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Robust, Flame-Retardant, and Anti-Corrosive Waterborne Polyurethane Enabled by a PN Synergistic Flame-Retardant Containing Benzimidazole and Phosphinate Groups.",
+      "pool_sentences": 174,
+      "corpus_sentences": 120
+    },
+    {
+      "pmcid": "PMC12171350",
+      "doi": "10.1002/anie.202503497",
+      "year": "2025",
+      "journal": "Angewandte Chemie (International ed. in English)",
+      "license": "cc by",
+      "title": "Reduction of the Thermal Conductivity of Polyurethanes by Fluorination: Impact of Crystallinity, Atomic Density, and Sound Velocity.",
+      "pool_sentences": 243,
+      "corpus_sentences": 152
+    },
+    {
+      "pmcid": "PMC7558300",
+      "doi": "10.3390/nano10091670",
+      "year": "2020",
+      "journal": "Nanomaterials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Enhanced Mechanical Properties of Multiscale Carbon Fiber/Epoxy Unidirectional Composites with Different Dimensional Carbon Nanofillers.",
+      "pool_sentences": 104,
+      "corpus_sentences": 75
+    },
+    {
+      "pmcid": "PMC11174009",
+      "doi": "10.3390/ma17112655",
+      "year": "2024",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "On the Crush Behavior and Energy Absorption of Sustainable Beverage Cans and Their Polyurethane Foam-Filled Structures: An Experimental Study.",
+      "pool_sentences": 272,
+      "corpus_sentences": 184
+    },
+    {
+      "pmcid": "PMC10574921",
+      "doi": "10.3390/polym15193856",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Role of Bio-Based and Fossil-Based Reactive Diluents in Epoxy Coatings with Amine and Phenalkamine Crosslinker.",
+      "pool_sentences": 224,
+      "corpus_sentences": 145
+    },
+    {
+      "pmcid": "PMC9630436",
+      "doi": "10.1038/s41598-022-23435-y",
+      "year": "2022",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Degradation and fragmentation behavior of polypropylene and polystyrene in water.",
+      "pool_sentences": 126,
+      "corpus_sentences": 84
+    },
+    {
+      "pmcid": "PMC11244397",
+      "doi": "10.3390/polym16131897",
+      "year": "2024",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Investigation of Friction Stir Welding of Additively Manufactured Biocompatible Thermoplastics Using Stationary Shoulder and Assisted Heating.",
+      "pool_sentences": 230,
+      "corpus_sentences": 156
+    },
+    {
+      "pmcid": "PMC11314693",
+      "doi": "10.3390/s24154793",
+      "year": "2024",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Flexible Strain Sensors Based on Thermoplastic Polyurethane Fabricated by Electrospinning: A Review.",
+      "pool_sentences": 343,
+      "corpus_sentences": 242
+    },
+    {
+      "pmcid": "PMC6661823",
+      "doi": "10.1186/s13065-019-0534-6",
+      "year": "2019",
+      "journal": "BMC chemistry",
+      "license": "cc by",
+      "title": "Enhancing the mechanical and thermal properties of polypropylene composite by encapsulating styrene acrylonitrile with ammonium polyphosphate.",
+      "pool_sentences": 165,
+      "corpus_sentences": 115
+    },
+    {
+      "pmcid": "PMC7764777",
+      "doi": "10.3390/polym12122957",
+      "year": "2020",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "The Impact of the Acidic Environment on the Mechanical Properties of Epoxy Compounds in Different Conditions.",
+      "pool_sentences": 235,
+      "corpus_sentences": 170
+    },
+    {
+      "pmcid": "PMC6751803",
+      "doi": "10.35371/aoem.2019.31.e9",
+      "year": "2019",
+      "journal": "Annals of occupational and environmental medicine",
+      "license": "cc by-nc",
+      "title": "A case of acute organic solvent poisoning during epoxy coating.",
+      "pool_sentences": 167,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC4669395",
+      "doi": "10.1128/genomea.01399-15",
+      "year": "2015",
+      "journal": "Genome announcements",
+      "license": "cc by",
+      "title": "Complete Genome Sequence of Polypropylene Glycol- and Polyethylene Glycol-Degrading Sphingopyxis macrogoltabida Strain EY-1.",
+      "pool_sentences": 16,
+      "corpus_sentences": 12
+    },
+    {
+      "pmcid": "PMC12244507",
+      "doi": "10.1002/smsc.202400470",
+      "year": "2025",
+      "journal": "Small science",
+      "license": "cc by",
+      "title": "Enhanced Gamma Ray Radiation Resistance of Silicone Elastomers via Trace Addition of Perovskite Nanocrystals for Free Radicals Scavenging.",
+      "pool_sentences": 169,
+      "corpus_sentences": 125
+    },
+    {
+      "pmcid": "PMC6342876",
+      "doi": "10.1007/s00414-018-1832-6",
+      "year": "2019",
+      "journal": "International journal of legal medicine",
+      "license": "cc by",
+      "title": "Assessment of polyurethane spheres as surrogates for military ballistic head injury.",
+      "pool_sentences": 62,
+      "corpus_sentences": 38
+    },
+    {
+      "pmcid": "PMC6563430",
+      "doi": "10.1002/mame.201600011",
+      "year": "2016",
+      "journal": "Macromolecular materials and engineering",
+      "license": "cc by",
+      "title": "Injection Molding Micro- and Nanostructures in Thermoplastic Elastomers.",
+      "pool_sentences": 112,
+      "corpus_sentences": 78
+    },
+    {
+      "pmcid": "PMC6539751",
+      "doi": "10.3390/s19092096",
+      "year": "2019",
+      "journal": "Sensors (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Monitoring of Epoxy-Grouted Bonding Strength Development between an Anchored Steel Bar and Concrete, Using PZT-Enabled Active Sensing.",
+      "pool_sentences": 131,
+      "corpus_sentences": 91
+    },
+    {
+      "pmcid": "PMC8028171",
+      "doi": "10.1021/acsomega.1c00688",
+      "year": "2021",
+      "journal": "ACS omega",
+      "license": "cc by-nc-nd",
+      "title": "Tribological Performance Studies of Waterborne Polyurethane Coatings with Aligned Modified Graphene Oxide@Fe3O4.",
+      "pool_sentences": 201,
+      "corpus_sentences": 141
+    },
+    {
+      "pmcid": "PMC9656058",
+      "doi": "10.3390/ma15217502",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Effect of Core-Shell Rubber Nanoparticles on the Mechanical Properties of Epoxy and Epoxy-Based CFRP.",
+      "pool_sentences": 149,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC9101473",
+      "doi": "10.3390/ma15093165",
+      "year": "2022",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Influence of Woven-Fabric Type on the Efficiency of Fabric-Reinforced Polymer Composites.",
+      "pool_sentences": 158,
+      "corpus_sentences": 103
+    },
+    {
+      "pmcid": "PMC7284781",
+      "doi": "10.3390/polym12051037",
+      "year": "2020",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Fabrication of High-Quality Polymer Composite Frame by a New Method of Fiber Winding Process.",
+      "pool_sentences": 279,
+      "corpus_sentences": 201
+    },
+    {
+      "pmcid": "PMC5629837",
+      "doi": "10.4103/jrms.jrms_1037_16",
+      "year": "2017",
+      "journal": "Journal of research in medical sciences : the official journal of Isfahan University of Medical Sciences",
+      "license": "cc by-nc-sa",
+      "title": "Effects of nanozeolite/starch thermoplastic hydrogels on wound healing.",
+      "pool_sentences": 178,
+      "corpus_sentences": 117
+    },
+    {
+      "pmcid": "PMC8152058",
+      "doi": "10.3390/ma14102521",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Disassembly Study of Ultrasonically Welded Thermoplastic Composite Joints via Resistance Heating.",
+      "pool_sentences": 227,
+      "corpus_sentences": 146
+    },
+    {
+      "pmcid": "PMC13210967",
+      "doi": "10.3390/polym18101189",
+      "year": "2026",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Experimental Investigation on Thermo-Mechanical, Visco-Elastic, and Acoustic Properties of Hibiscus rosa-sinensis Plant Fiber-Reinforced Polymer Composites.",
+      "pool_sentences": 384,
+      "corpus_sentences": 251
+    },
+    {
+      "pmcid": "PMC9050425",
+      "doi": "10.1039/d0ra00202j",
+      "year": "2020",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Nano-modified epoxy: the effect of GO-based complex structures on mechanical performance.",
+      "pool_sentences": 174,
+      "corpus_sentences": 116
+    },
+    {
+      "pmcid": "PMC13578263",
+      "doi": "10.1038/s41467-026-77396-1",
+      "year": "2026",
+      "journal": "Nature communications",
+      "license": "cc by-nc-nd",
+      "title": "Lignin-dynamic networks break the strength-toughness trade-off in thermoplastic elastomers.",
+      "pool_sentences": 248,
+      "corpus_sentences": 170
+    },
+    {
+      "pmcid": "PMC9036032",
+      "doi": "10.1002/advs.202105742",
+      "year": "2022",
+      "journal": "Advanced science (Weinheim, Baden-Wurttemberg, Germany)",
+      "license": "cc by",
+      "title": "Tough, Instant, and Repeatable Adhesion of Self-Healable Elastomers to Diverse Soft and Hard Surfaces.",
+      "pool_sentences": 260,
+      "corpus_sentences": 167
+    },
+    {
+      "pmcid": "PMC7240510",
+      "doi": "10.3390/polym12040782",
+      "year": "2020",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Water Absorption and Hygrothermal Aging Behavior of Wood-Polypropylene Composites.",
+      "pool_sentences": 152,
+      "corpus_sentences": 100
+    },
+    {
+      "pmcid": "PMC9401186",
+      "doi": "10.1371/journal.pone.0267777",
+      "year": "2022",
+      "journal": "PloS one",
+      "license": "cc by",
+      "title": "A standardized assessment of moldability parameters of thermoplastic materials used in orthotic manufacturing.",
+      "pool_sentences": 151,
+      "corpus_sentences": 106
+    },
+    {
+      "pmcid": "PMC7866417",
+      "doi": "10.3390/polym13030432",
+      "year": "2021",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Synthesis of Waterborne Polyurethane Using Phosphorus-Modified Rigid Polyol and its Physical Properties.",
+      "pool_sentences": 77,
+      "corpus_sentences": 50
+    },
+    {
+      "pmcid": "PMC12897631",
+      "doi": "10.3390/ijms27031328",
+      "year": "2026",
+      "journal": "International journal of molecular sciences",
+      "license": "cc by",
+      "title": "Covalently Immobilized Mitomycin C on Polypropylene Sutures Creates a Non-Releasing Bioactive Interface That Modulates Vascular Smooth Muscle Cell Fate and Prevents Intimal Hyperplasia.",
+      "pool_sentences": 166,
+      "corpus_sentences": 107
+    },
+    {
+      "pmcid": "PMC7830580",
+      "doi": "10.3390/ma14020434",
+      "year": "2021",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Magneto-Mechanical Coupling in Magneto-Active Elastomers.",
+      "pool_sentences": 326,
+      "corpus_sentences": 220
+    },
+    {
+      "pmcid": "PMC13328742",
+      "doi": "10.1038/s41598-026-51511-0",
+      "year": "2026",
+      "journal": "Scientific reports",
+      "license": "cc by-nc-nd",
+      "title": "Thermomechanical properties of bio-based epoxy biocomposites reinforced with Dracaena draco fibrils and biochar: performance optimization using artificial neural networks.",
+      "pool_sentences": 300,
+      "corpus_sentences": 191
+    },
+    {
+      "pmcid": "PMC6403884",
+      "doi": "10.3390/polym10101170",
+      "year": "2018",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Synthesis and Characterization of Isosorbide-Based Polyurethanes Exhibiting Low Cytotoxicity Towards HaCaT Human Skin Cells.",
+      "pool_sentences": 173,
+      "corpus_sentences": 112
+    },
+    {
+      "pmcid": "PMC7599930",
+      "doi": "10.3390/polym12102215",
+      "year": "2020",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Influence of Repetitive Square Voltage Duty Cycle on the Electrical Tree Characteristics of Epoxy Resin.",
+      "pool_sentences": 138,
+      "corpus_sentences": 92
+    },
+    {
+      "pmcid": "PMC9962720",
+      "doi": "10.3390/molecules28041688",
+      "year": "2023",
+      "journal": "Molecules (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Biomimetic Liquid Metal-Elastomer Composited Foam with Adjustable Thermal Conductivity for Heat Control.",
+      "pool_sentences": 164,
+      "corpus_sentences": 106
+    },
+    {
+      "pmcid": "PMC11548648",
+      "doi": "10.3390/polym16213013",
+      "year": "2024",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Synthesis and Evaluation of Starch-Grafted-Poly[(Acrylic Acid)-Co-Acrylamide] Based Nanoclay Polymer Composite Fertilizers for Slow Release of Nitrogen in Soil.",
+      "pool_sentences": 242,
+      "corpus_sentences": 155
+    },
+    {
+      "pmcid": "PMC13202523",
+      "doi": "10.1039/d6ra02282k",
+      "year": "2026",
+      "journal": "RSC advances",
+      "license": "cc by-nc",
+      "title": "Covalently silane-bridged e-graphene oxide nanosheets toward year-long dispersion-stable epoxy nanocomposites with superior corrosion protection.",
+      "pool_sentences": 283,
+      "corpus_sentences": 181
+    },
+    {
+      "pmcid": "PMC10222506",
+      "doi": "10.3390/polym15102297",
+      "year": "2023",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "Multifunctional Properties of Polyhedral Oligomeric Silsesquioxanes (POSS)-Based Epoxy Nanocomposites.",
+      "pool_sentences": 140,
+      "corpus_sentences": 90
+    },
+    {
+      "pmcid": "PMC9613992",
+      "doi": "10.1038/s41598-022-22200-5",
+      "year": "2022",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Insights on metallic particle bonding to thermoplastic polymeric substrates during cold spray.",
+      "pool_sentences": 265,
+      "corpus_sentences": 171
+    },
+    {
+      "pmcid": "PMC11310906",
+      "doi": "10.1021/acsami.4c06417",
+      "year": "2024",
+      "journal": "ACS applied materials & interfaces",
+      "license": "cc by",
+      "title": "Unraveling the Impact of Boron Nitride and Silicon Nitride Nanoparticles on Thermoplastic Polyurethane Fibers and Mats for Advanced Heat Management.",
+      "pool_sentences": 223,
+      "corpus_sentences": 147
+    },
+    {
+      "pmcid": "PMC12030100",
+      "doi": "10.3390/polym17081096",
+      "year": "2025",
+      "journal": "Polymers",
+      "license": "cc by",
+      "title": "From Manual to Automated: Exploring the Evolution of Switchover Methods in Injection Molding Processes-A Review.",
+      "pool_sentences": 340,
+      "corpus_sentences": 221
+    },
+    {
+      "pmcid": "PMC5458966",
+      "doi": "10.3390/ma5050741",
+      "year": "2012",
+      "journal": "Materials (Basel, Switzerland)",
+      "license": "cc by",
+      "title": "Kinetics of Holographic Recording and Spontaneous Erasure Processes in Light-Sensitive Liquid Crystal Elastomers.",
+      "pool_sentences": 135,
+      "corpus_sentences": 85
+    },
+    {
+      "pmcid": "PMC12069536",
+      "doi": "10.1038/s41598-025-01264-z",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Unveiling the flexural strength of corroded prestressed self compacting concrete beams enhanced with M-sand and polypropylene fibres.",
+      "pool_sentences": 286,
+      "corpus_sentences": 190
+    },
+    {
+      "pmcid": "PMC12368276",
+      "doi": "10.1038/s41598-025-11204-6",
+      "year": "2025",
+      "journal": "Scientific reports",
+      "license": "cc by",
+      "title": "Environmentally sustainable epoxy nanocomposite coating reinforced with chitosan derived nitrogen doped graphene for enhanced corrosion resistance and mechanical performance.",
+      "pool_sentences": 322,
+      "corpus_sentences": 209
+    }
+  ],
+  "leakage": {
+    "mulms_sentences": 10184,
+    "mulms_ngrams": 222977,
+    "overlap_by_document": {
+      "pemfc_10": 2,
+      "electrolysis_03": 12,
+      "oastm_09": 18,
+      "poly_05": 12,
+      "oastm_01": 11,
+      "oastm_08": 10,
+      "sofc_04": 17,
+      "steel_11": 40,
+      "graphene_02": 62,
+      "pemfc_14": 21,
+      "pemfc_02": 4,
+      "steel_06": 8,
+      "steel_05": 7,
+      "electrolysis_02": 14,
+      "semi_06": 4,
+      "sofc_03": 6,
+      "steel_04": 11,
+      "electrolysis_01": 14,
+      "graphene_01": 20,
+      "oastm_10": 3,
+      "oastm_05": 23,
+      "oastm_02": 15,
+      "poly_04": 6,
+      "oastm_11": 10,
+      "sofc_01": 43,
+      "pemfc_07": 21,
+      "pemfc_04": 9,
+      "oastm_07": 2,
+      "electrolysis_04": 13,
+      "oastm_04": 10,
+      "sofc_02": 11,
+      "poly_01": 9,
+      "pemfc_03": 8,
+      "pemfc_13": 5,
+      "pemfc_08": 4,
+      "semi_05": 3,
+      "poly_02": 3,
+      "semi_04": 1,
+      "semi_03": 5,
+      "poly_07": 2,
+      "poly_11": 3,
+      "steel_03": 8,
+      "semi_08": 3,
+      "oastm_06": 1
+    },
+    "overlap_examples": [
+      {
+        "sentence": "The FTIR spectra of the resin, curing agent, and PU samples are shown in Fig. 1.",
+        "ngram": "samples are shown in fig . 1 .",
+        "docs": [
+          "pemfc_10"
+        ]
+      },
+      {
+        "sentence": "It can be concluded that the PU is fully cured, indicating that the crosslinking reactions were complete, which is consistent with the results of Geng et al. The \u2013CC- stretching bands, which typically occur in pairs and are displayed at 1602 cm\u22121 and 1460 cm\u22121, indicate a possible aromatic ring structure present in both the curing agent and the PU, according to Rashvand and Ranjbar and Pavia et al. This result suggests that the commercial isocyanate used has an aromatic structure and was incorporated into the PU during the curing reaction.",
+        "ngram": ", which is consistent with the results of",
+        "docs": [
+          "electrolysis_03"
+        ]
+      },
+      {
+        "sentence": "The TGA curves of PU (resin, curing agent, and PU) were obtained, as shown in Fig. 2.",
+        "ngram": ", as shown in fig . 2 .",
+        "docs": [
+          "oastm_09"
+        ]
+      },
+      {
+        "sentence": "The dynamic mechanical thermal analyzer (DMA Q800, TA Instrument) was used to perform the dynamic mechanical analysis (DMA).",
+        "ngram": "the dynamic mechanical analysis ( dma ) .",
+        "docs": [
+          "poly_05"
+        ]
+      },
+      {
+        "sentence": "The FITR was used to characterize the structure of DOPO-KhCPA, as shown in Fig. 2.",
+        "ngram": ", as shown in fig . 2 .",
+        "docs": [
+          "oastm_09"
+        ]
+      },
+      {
+        "sentence": "As shown in Fig. 6, the pure EP burns quickly after ignition.",
+        "ngram": "as shown in fig . 6 , the",
+        "docs": [
+          "oastm_01"
+        ]
+      },
+      {
+        "sentence": "Wu et al. modified diglycidyl ether of bisphenol A (DGEBA) by adding bromide tetrabromobisphenol A (TBBPA), and this resin system is compatible with liquid oxygen.",
+        "ngram": "diglycidyl ether of bisphenol a ( dgeba )",
+        "docs": [
+          "oastm_08"
+        ]
+      },
+      {
+        "sentence": "At present, epoxy resins compatible with liquid oxygen are mainly glycidyl ether-type epoxy resins, which is one of the reasons for their high viscosity.",
+        "ngram": ", which is one of the reasons for",
+        "docs": [
+          "sofc_04"
+        ]
+      },
+      {
+        "sentence": "ECH, m-TFMA, sodium methoxide solution (30% wt), and DDM were purchased from Shanghai Macklin Biochemical Co., Ltd., Shanghai, China.",
+        "ngram": "co . , ltd . , shanghai ,",
+        "docs": [
+          "steel_11"
+        ]
+      },
+      {
+        "sentence": "Methanol was purchased from Sinopharm Chemical Reagent Co., Ltd., Shanghai, China DGEBF (commercial mark 830) was purchased from Nantong Xingchen Synthetic Material Co., Ltd., Nantong, China.",
+        "ngram": "co . , ltd . , shanghai ,",
+        "docs": [
+          "steel_11"
+        ]
+      },
+      {
+        "sentence": "Fourier transform infrared spectroscopy (FTIR) of the TFEPA monomer and m-TFMA were performed using a ThermoFisher 6700 spectrometer (Thermo Fisher Scientific, Waltham, MA, USA) with a resolution of 4 cm\u22121 in the wavenumber range from 4000 cm\u22121 to 500 cm\u22121.",
+        "ngram": "scientific , waltham , ma , usa )",
+        "docs": [
+          "graphene_02"
+        ]
+      },
+      {
+        "sentence": "Liquid chromatography-mass spectrometry (LC-MS) analysis was obtained on Q Exactive (Thermo Fisher Scientific, Waltham, MA, USA).",
+        "ngram": "scientific , waltham , ma , usa )",
+        "docs": [
+          "graphene_02"
+        ]
+      },
+      {
+        "sentence": "DSC tests were performed on uncured FEP, EP0, and EP1, respectively, at different heating rates, and the results are shown in Figure 5a\u2013c.",
+        "ngram": ", and the results are shown in figure",
+        "docs": [
+          "steel_11"
+        ]
+      },
+      {
+        "sentence": "The flexural properties of the CF/EP composites were tested, and the results are shown in Figure 11.",
+        "ngram": ", and the results are shown in figure",
+        "docs": [
+          "steel_11"
+        ]
+      },
+      {
+        "sentence": "When dealing with the non-isothermal mode, the formalism implied for the expression of the conversion rate in the case of the isothermal analysis (Equation (3)) can be adopted in the same way to express the functional dependencies.",
+        "ngram": "( equation ( 3 ) ) can be",
+        "docs": [
+          "pemfc_14"
+        ]
+      },
+      {
+        "sentence": "Additionally, the density and morphological properties of the end product were investigated using scanning electron microscopy (SEM).",
+        "ngram": "were investigated using scanning electron microscopy ( sem",
+        "docs": [
+          "pemfc_02"
+        ]
+      },
+      {
+        "sentence": "Equations (1) and (2) were used to the temporal signal shown in Figure 5 to determine the logarithmic decrement and damping ratio of the proposed structures when exposed to varying magnetic intensities.",
+        "ngram": "equations ( 1 ) and ( 2 )",
+        "docs": [
+          "steel_06"
+        ]
+      },
+      {
+        "sentence": "The surface morphology was examined using a scanning electron microscope (SEM, Quattro C, Thermo Fisher Scientific, Waltham, MA, USA).",
+        "ngram": "scientific , waltham , ma , usa )",
+        "docs": [
+          "graphene_02"
+        ]
+      },
+      {
+        "sentence": "And the dosage of HBD was 0%, 1%, 2%, 3% and 4% of PU resin respectively.",
+        "ngram": "% , 1 % , 2 % ,",
+        "docs": [
+          "graphene_02"
+        ]
+      },
+      {
+        "sentence": "Optical (Figure 3a) and scanning electron microscopy (SEM) cross section (Figure 3b) images of microcapsules were used to measure the average capsule diameter (Figure 3c) and shell wall thickness (Figure 3d), respectively.",
+        "ngram": ") and scanning electron microscopy ( sem )",
+        "docs": [
+          "oastm_01",
+          "steel_05"
+        ]
+      }
+    ],
+    "duplicate_examples": [
+      {
+        "sentence": "At least 5 experiments were conducted for each group, and the final results were the average of the data.",
+        "duplicate_of": 1031
+      },
+      {
+        "sentence": "The authors declare no competing financial interest.",
+        "duplicate_of": 2479
+      },
+      {
+        "sentence": "The micro-groove arrays in micro-structured core insert can also be designed into desired shapes, such as triangles, rectangles and circles.",
+        "duplicate_of": 4098
+      },
+      {
+        "sentence": "The authors declare no competing financial interest.",
+        "duplicate_of": 2479
+      },
+      {
+        "sentence": "All chemicals were used as received without further purification.",
+        "duplicate_of": 4419
+      },
+      {
+        "sentence": "The suitability of the experiment for training model was evaluated as bad in 1 (10%) of the fresh cadaveric cow brains.",
+        "duplicate_of": 6523
+      },
+      {
+        "sentence": "The suitability was found as good in 6 (60%) of the procedures.",
+        "duplicate_of": 6524
+      },
+      {
+        "sentence": "In the remaining 3 (30%) brain dissections, the suitability of the experiment was evaluated as perfect.",
+        "duplicate_of": 6525
+      },
+      {
+        "sentence": "This was confirmed by the results shown in Figure S18.",
+        "duplicate_of": 7760
+      },
+      {
+        "sentence": "The first three phases (\u03b1, \u03b2,) are the most commonly studied, with the \u03b1-phase being the most thermodynamically preferred.",
+        "duplicate_of": 7659
+      },
+      {
+        "sentence": "The decrease in apparent viscosity only occurs when the Janus nanosheet thickness is below a particular threshold.",
+        "duplicate_of": 8625
+      },
+      {
+        "sentence": "Mechanical test data show a significant effect of GO particle sizes on the mechanical properties of the composites.",
+        "duplicate_of": 9022
+      },
+      {
+        "sentence": "The authors declare no competing financial interest.",
+        "duplicate_of": 2479
+      },
+      {
+        "sentence": "Subsequently, the reaction mixture was analyzed by NMR spectroscopy.",
+        "duplicate_of": 10123
+      },
+      {
+        "sentence": "Subsequently, the reaction mixture was analyzed by NMR spectroscopy.",
+        "duplicate_of": 10123
+      },
+      {
+        "sentence": "In contrast, brush-applied coatings achieve a highly hydrophobic state, with contact angles up to 138\u00b0.",
+        "duplicate_of": 10545
+      },
+      {
+        "sentence": "The white part in the X-CT image is the fiber, and the black part is the matrix.",
+        "duplicate_of": 11104
+      },
+      {
+        "sentence": "Table 3 presents the results of IFSS determination and earlier findings for these specimens, along with their percentages of deviation.",
+        "duplicate_of": 11092
+      },
+      {
+        "sentence": "Submitted by \u2018Morssinkhof Plastics\u2019 Lichtenvoorde B.V., the Netherlands.",
+        "duplicate_of": 12682
+      },
+      {
+        "sentence": "The study revealed that increasing energy density allows obtaining a higher tensile strength at the cost of decreasing the elongation at break.",
+        "duplicate_of": 13615
+      }
+    ],
+    "shingle": {
+      "characters": 50,
+      "article_overlap": 5,
+      "sentences_dropped": 1,
+      "by_article": {
+        "PMC9079675": 1
+      },
+      "articles_dropped": []
+    }
+  },
+  "corpus": {
+    "path": "data/processed/corpus/topic_poly_sentences.txt",
+    "sentences": 40000,
+    "words": 1134787,
+    "sha256": "f10decea53f50587415a0cf94692b94cee36c7bc00cee65ce50c2408704f663d"
+  },
+  "run": {
+    "search_retrieved": "2026-10-18T09:56:48Z",
+    "started": "2026-10-18T10:48:28Z",
+    "finished": "2026-10-18T10:49:25Z",
+    "seconds": 57.6,
+    "used_articles_downloaded_now": 0,
+    "http_requests": 0,
+    "cache_dir": "data/processed/corpus/europepmc_topic_poly"
+  }
+}
