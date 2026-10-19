@@ -3681,6 +3681,7 @@ stay local.
 | Subfield | Teachers' test F1 (CPU) | Sentence filter 0.9: names, coverage, fill | Mention filter 0.9: names, coverage, fill | Mention filter 0.7: coverage, fill | Gold unseen names: fill / override |
 |---|---|---|---|---|---|
 | pemfc | 44.4, 51.1, 52.9 | 300, 19.2%, +3.16 | 6,259, 29.4%, +3.97 | 37.6%, −0.44 | −10.51 / −5.91 |
+| poly | 45.6, 52.5, 53.8 | 854, 8.0%, −0.25 | 9,194, 18.3%, −3.31 | 23.4%, −9.91 | −3.63 / +2.22 |
 | sofc | 53.4, 51.9, 51.2 | 340, 25.8%, +5.79 | 4,344, 34.4%, +5.91 | 45.8%, +5.96 | +15.16 / +27.06 |
 | steel | 55.2, 58.2, 58.6 | 667, 13.3%, +0.01 | 7,913, 25.0%, −10.03 | 32.5%, −13.18 | −1.82 / +4.13 |
 
@@ -3735,6 +3736,20 @@ the right end of its range on every subfield seen (0.7 helps only on
 sofc); the agreement filter selects what a gold list cannot; the two
 filters are not yet separable (the mention filter at 0.9 is at least as
 good as the sentence filter on sofc and pemfc, both are harmful on steel).
+
+*Reading, poly.* Steel's pattern, with less of the names. The corpus holds
+65.9% of poly's unseen test names, the lowest share but steel's; the
+mention filter at 0.9 admits 18.3% (9,194 names; 17,217 MAT and
+14,024 VALUE mentions among 32,236), the sentence filter 8.0%
+(854 names). Every dictionary hurts the held-out CRF head (10 seeds:
+precision 55.9, recall 48.7, F1 52.0): the 0.9 mention lexicon fills to
+precision 47.4 and recall 50.1 (-3.3; 0 of 10 seeds up), the 0.9 sentence
+lexicon -0.2, every looser lexicon and every override worse, and the gold
+unseen names fill to -3.6 (override +2.2). *So far (4 of 7).* Two
+subfields where a 0.9 lexicon helps as a dictionary (sofc +5.9, pemfc
++4.0), two where it hurts (steel −10.0, poly −3.3); on all four, 0.9 beats
+0.7 and 0.5, and the sentence filter loses less where the lexicon hurts
+and gains about the same where it helps.
 
 ### Week 12 protocol: names from a topic corpus (fixed before any run)
 
