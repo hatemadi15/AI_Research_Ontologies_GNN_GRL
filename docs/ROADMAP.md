@@ -3553,6 +3553,34 @@ F1: `w11b` tests that on MaterioMiner, and the silver filter (every tag of
 a sentence confident under three teachers) may admit few of them, so a
 mention-level filter is a candidate for the screen.
 
+### Session notes, 19 October (the plan, amendment 1, the probe, the TPU port)
+
+- `docs/METHODS_PLAN.md` (09ac262): the plan toward a methods paper, with
+  the compute (GPU, TPU, this environment's CPU), the schedule and the stop
+  rules.
+- Amendment 1 of the week-12 protocol (77c37be, before any run): the screen
+  gains `crf_mrm_topic6` and `crf_st3_topic`. The bundle from 77c37be is the
+  version of `ner-gpu-bundle-3` that `w11b`, `w12a` and `w12b:<variant>`
+  run from after the reset.
+- The CPU probe (`silver_lexicon.py`): its smoke run on sofc (teachers of 1
+  epoch on 32 sentences, 300 corpus sentences) exercised every part in 11
+  minutes; its lexicons were empty, as such teachers' must be, but the
+  ceilings stand: on week 10's CRF predictions of sofc (10 seeds), the gold
+  unseen names as a dictionary gain +15.16 F1 where the model tagged O and
+  +27.06 overriding its tags; all gold test names +13.52 and +25.31. The real
+  probe started at about 17:40 UTC on two CPU lanes (sofc, pemfc,
+  electrolysis, graphene; steel, poly, semi), 2 threads each; a subfield
+  takes about 3 hours (3 teachers of 15–25 minutes, 40,000 sentences tagged
+  in about 40 minutes per teacher).
+- The TPU port (66f4ef3, 068ad97, ca69981): `--device xla` with fixed-shape
+  batching; on XLA over the CPU (torch 2.9, torch_xla 2.9, PJRT_DEVICE=CPU)
+  a tiny-model CRF run repeats exactly and gives the CPU path's scores; the
+  CPU path itself repeats the pre-port files byte for byte apart from
+  `runtime_sec` on every tiny-model option. TPU batches (`tpu-smoke1`: one
+  job on one chip; `tpu-smoke`: the same job on all 8 chips) run on
+  Kaggle's TPU v5e-8 from a bundle of ca69981; their results go to
+  `results/tpu/`, a family of their own.
+
 ### Week 12 protocol: names from a topic corpus (fixed before any run)
 
 Fixed on 18 October, after phase 0's gate above and before any run of week
