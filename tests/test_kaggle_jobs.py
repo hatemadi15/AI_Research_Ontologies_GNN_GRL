@@ -956,6 +956,9 @@ def test_tpu_smoke_batch_metadata_and_lane_environment(monkeypatch, tmp_path):
     env = rj.job_env(1, tmp_path)
     assert env['CUDA_VISIBLE_DEVICES'] == '1' and 'TPU_VISIBLE_CHIPS' not in env
     assert 'tpu-smoke' in kj.BATCHES and kj.batch_name('tpu-smoke') == 'tpu-smoke'
+    (lane,) = _parsed(kj.batch_lanes('tpu-smoke1'))
+    assert len(lane) == 1 and lane[0].tag == 'tpu1' and lane[0].device == 'xla'
+    assert kj.batch_spec('tpu-smoke1')['device'] == 'xla'
 
 
 def test_build_bundle_with_the_mulms_files(tmp_path):

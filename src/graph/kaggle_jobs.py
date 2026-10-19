@@ -152,9 +152,10 @@ bundle as topic_<topic>_sentences.txt; the screen, then the decision for its win
 
 The TPU spike (docs/METHODS_PLAN.md §5; every batch named tpu... runs on the TPU v5e-8, one
 lane per chip, its jobs with --device xla, its results in results/tpu/, a family of their own):
-  tpu-smoke  the same fine-grained CRF job (the 4 held-out papers, seed 0) on all 8 chips at
-          once (crf_tpua to crf_tpuh): the wall time per run on one chip while 8 run, and
-          whether the 8 files are identical
+  tpu-smoke1  one fine-grained CRF job (the 4 held-out papers, seed 0) on one chip (crf_tpu1):
+          does the XLA path run on the TPU, and how long is a run
+  tpu-smoke  the same job on all 8 chips at once (crf_tpua to crf_tpuh): the wall time per
+          run on one chip while 8 run, and whether the 8 files are identical
 
 Usage:
   python src/graph/kaggle_jobs.py quota
@@ -675,10 +676,14 @@ def batch_lanes(name):
         return [[repeat + ['--tag', 'smokeam']] +
                 [mrs_mulms_job(s, MRS_LANES[0]) for s in MULMS_SUBFIELD_NAMES],
                 [mrs_mulms_job(s, MRS_LANES[1]) for s in MULMS_SUBFIELD_NAMES]]
+    if name == 'tpu-smoke1':
+        # the TPU spike, first session: one fine-grained CRF job (the 4 held-out papers, seed
+        # 0) on one chip, as crf_tpu1: does the XLA path run on the TPU, and how long is a run
+        return [[job('fine', 'leave_one_paper_out', '--device', 'xla', tag='tpu1')]]
     if name == 'tpu-smoke':
-        # the TPU spike: the same fine-grained CRF job (the 4 held-out papers, seed 0) on every
-        # chip at once, as crf_tpua to crf_tpuh: the wall time per run on one chip while 8 run,
-        # and whether the 8 files are identical
+        # the TPU spike, second session: the same job on every chip at once, as crf_tpua to
+        # crf_tpuh: the wall time per run on one chip while 8 run, and whether the 8 files
+        # are identical (and equal to crf_tpu1's)
         return [[job('fine', 'leave_one_paper_out', '--device', 'xla', tag=f'tpu{letter}')]
                 for letter in 'abcdefgh'[:TPU_LANES]]
     if name == 'w11b':
@@ -728,7 +733,7 @@ def batch_lanes(name):
 BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'item3r',
            'smoke4', 'w5a', 'w5b', 'w5c', 'smoke5', 'smoke6', 'w6a', 'w6b', 'w7a', 'w7b',
            'w7c', 'w7d', 'w7e', 'w8a', 'w8b', 'w9a', 'w9b', 'w10a', 'w11a', 'w11b', 'w12a',
-           *(f'w12b:{v}' for v in WEEK12_VARIANTS), 'tpu-smoke')
+           *(f'w12b:{v}' for v in WEEK12_VARIANTS), 'tpu-smoke1', 'tpu-smoke')
 
 
 def batch_extras(name):
