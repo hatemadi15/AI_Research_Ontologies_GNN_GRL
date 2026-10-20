@@ -150,7 +150,9 @@ bundle as topic_<topic>_sentences.txt; the screen, then the decision for its win
           the topic corpus and the students train the plain CRF head with the silver names
           as a match feature (--names-feature, no copies: with --silver-mentions
           crf_gzm_topic_m<N>, with the sentence filter crf_gzs_topic_m<N>), seed offsets 0 to
-          200, 7 jobs per lane
+          200, a variant per lane (7 jobs)
+  w12e    w12a's four names variants again after the resume fix of 20 October (smokeas; the
+          6-copy jobs of the first w12a session stand): lane 0 V1 and V4, lane 1 V2 and V6
   w12b:V  the decision for the screen's winner V (mrs, mrm, mrm6, st3, gzm, gzs or mr6): seed
           offsets 300 to 900; the teacher variants as in w12a with each lane training the
           teachers and 3 or 4 of the students (offsets 300-500 and 600-900), mr6 one job
@@ -762,11 +764,18 @@ def batch_lanes(name):
         # the screen of the gazetteer-feature variants: the names of the mention filter
         # (amendment 2, crf_gzm_topic) and of the sentence filter (amendment 3,
         # crf_gzs_topic) as a match feature of the plain CRF head, seed offsets 0 to 200;
-        # each variant's jobs over both lanes (each job trains its own teachers; the lanes
-        # write different files)
+        # a variant per lane (its jobs extend the same files, a run per subfield)
         gzm = [topic_variant_job('gzm', s, OFFSETS) for s in MULMS_SUBFIELD_NAMES]
         gzs = [topic_variant_job('gzs', s, OFFSETS) for s in MULMS_SUBFIELD_NAMES]
-        return [[repeat + ['--tag', 'smokeaq']] + gzm[:4] + gzs[4:], gzm[4:] + gzs[:4]]
+        return [[repeat + ['--tag', 'smokeaq']] + gzm, gzs]
+    if name == 'w12e':
+        # w12a's names variants again (the first session's later jobs failed on the resume
+        # check, fixed since): the 6-copy jobs of that session stand
+        return [[repeat + ['--tag', 'smokeas']]
+                + [topic_variant_job(v, s, OFFSETS) for v in ('mrs', 'mrm6')
+                   for s in MULMS_SUBFIELD_NAMES],
+                [topic_variant_job(v, s, OFFSETS) for v in ('mrm', 'st3')
+                 for s in MULMS_SUBFIELD_NAMES]]
     if name.startswith('w12d:'):
         # week 12's MaterioMiner analogue of the screen's winner, 10 seeds, one lane per
         # granularity: a job per held-out paper (the teacher variants) or per seed offset
@@ -810,6 +819,7 @@ def batch_lanes(name):
 BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'item3r',
            'smoke4', 'w5a', 'w5b', 'w5c', 'smoke5', 'smoke6', 'w6a', 'w6b', 'w7a', 'w7b',
            'w7c', 'w7d', 'w7e', 'w8a', 'w8b', 'w9a', 'w9b', 'w10a', 'w11a', 'w11b', 'w12a', 'w12c',
+           'w12e',
            *(f'w12b:{v}' for v in WEEK12_VARIANTS), *(f'w12d:{v}' for v in WEEK12_ANALOGUES),
            'tpu-smoke1', 'tpu-smoke')
 

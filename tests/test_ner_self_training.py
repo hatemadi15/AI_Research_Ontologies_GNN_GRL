@@ -182,6 +182,47 @@ def test_runs_from_another_corpus_are_not_resumed(tmp_path):
         'self_train_sha256': None}
 
 
+def test_runs_with_a_corpus_each_are_kept_and_resumed_by_run_id(tmp_path):
+    """Week 12 (--subfields, a topic corpus per held-out subfield): a file's runs record their
+    own corpus; when the file's corpus differs, a run of another subfield is kept, a run of
+    this invocation's subfield is resumed only from the same corpus and otherwise refused."""
+    path = tmp_path / 'ner_results_mulms_leave_one_subfield_out_crf_gzm_topic_m0.json'
+    runs = [{'run_id': 'electrolysis', 'self_train_sha256': 'a' * 64},
+            {'run_id': 'graphene', 'self_train_sha256': 'b' * 64}]
+    path.write_text(json.dumps({'labels': ['A'], 'model': 'm', 'variant': 'crf_gzm_topic_m0',
+                                'config': {'seed_offset': 0, 'self_train_sha256': 'b' * 64},
+                                'runs': runs}))
+    same = {'labels': ['A'], 'model': 'm', 'variant': 'crf_gzm_topic_m0'}
+    # a third subfield's job: both runs are kept, none resumed
+    assert nb.resumable_runs(str(path), **same, self_train_sha256='c' * 64,
+                             run_ids={'pemfc'}) == runs
+    nb.check_overwrite(str(path), **same, self_train_sha256='c' * 64, run_ids={'pemfc'})
+    # the same subfield again from the same corpus: resumed (and the other kept)
+    assert nb.resumable_runs(str(path), **same, self_train_sha256='a' * 64,
+                             run_ids={'electrolysis'}) == runs
+    # the same subfield from another corpus: its run would be replaced, so refused
+    assert nb.resumable_runs(str(path), **same, self_train_sha256='d' * 64,
+                             run_ids={'electrolysis'}) == runs[1:]
+    with pytest.raises(nb.OverwriteError, match='self_train_sha256'):
+        nb.check_overwrite(str(path), **same, self_train_sha256='d' * 64,
+                           run_ids={'electrolysis'})
+    # without named run ids (every other protocol) the old rule holds: another corpus
+    # resumes nothing; runs without their own corpus are never kept across corpora
+    assert nb.resumable_runs(str(path), **same, self_train_sha256='c' * 64) == []
+    path.write_text(json.dumps({'labels': ['A'], 'model': 'm', 'variant': 'crf_gzm_topic_m0',
+                                'config': {'seed_offset': 0, 'self_train_sha256': 'b' * 64},
+                                'runs': [{'run_id': 'graphene'}]}))
+    assert nb.resumable_runs(str(path), **same, self_train_sha256='c' * 64,
+                             run_ids={'pemfc'}) == []
+    assert nb.trained_run_ids(nb.SimpleNamespace(subfields=['pemfc'])) == {'pemfc'}
+    assert nb.trained_run_ids(nb.SimpleNamespace()) is None
+    assert nb.per_run_corpus(nb.SimpleNamespace(subfields=['pemfc']),
+                             {'self_train_sha256': 'c' * 64}) == 'c' * 64
+    assert nb.per_run_corpus(nb.SimpleNamespace(subfields=['pemfc']),
+                             {'self_train_sha256': None}) is None
+    assert nb.per_run_corpus(nb.SimpleNamespace(), {'self_train_sha256': 'c' * 64}) is None
+
+
 def test_run_resumes_only_runs_of_the_same_corpus(tmp_path, monkeypatch):
     """run() wiring, with the training replaced: config, resume and the overwrite guard."""
     monkeypatch.setattr(nb, 'PROCESSED_DIR', str(tmp_path))

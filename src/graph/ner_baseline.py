@@ -2110,21 +2110,32 @@ def stored_settings(results):
 
 
 def resumable_runs(path, labels, model, variant, seed_offset=0, save_predictions=False,
-                   self_train_sha256=None):
-    """Runs of an earlier invocation that this one may reuse.
+                   self_train_sha256=None, run_ids=None):
+    """Runs of an earlier invocation that this one may reuse (or must keep).
 
     Only runs with the same labels, model, training variant, seed offset and
     self-training corpus count (see stored_settings). With `save_predictions`,
-    runs that did not store their predictions are not reused.
+    runs that did not store their predictions are not reused. run_ids (the run
+    ids this invocation trains; --subfields): a file whose corpus differs may
+    still hold runs made from their own corpora (`self_train_sha256` per run,
+    week 12's topic corpora, one per held-out subfield); such a run is kept when
+    its id is not trained now, and resumed when it is and its corpus is this one.
     """
     if not os.path.exists(path):
         return []
     with open(path) as f:
         previous = json.load(f)
-    same = stored_settings(previous) == {'labels': labels, 'model': model, 'variant': variant,
-                                         'seed_offset': seed_offset,
-                                         'self_train_sha256': self_train_sha256}
-    runs = previous.get('runs', []) if same else []
+    stored = stored_settings(previous)
+    now = {'labels': labels, 'model': model, 'variant': variant, 'seed_offset': seed_offset,
+           'self_train_sha256': self_train_sha256}
+    if {k: v for k, v in stored.items() if k != 'self_train_sha256'} != {
+            k: v for k, v in now.items() if k != 'self_train_sha256'}:
+        return []
+    runs = previous.get('runs', [])
+    if stored['self_train_sha256'] != self_train_sha256:
+        runs = [r for r in runs if r.get('self_train_sha256') is not None
+                and ((run_ids is not None and r.get('run_id') not in run_ids)
+                     or r.get('self_train_sha256') == self_train_sha256)]
     return [r for r in runs if 'test_pred' in r] if save_predictions else runs
 
 
@@ -2143,7 +2154,7 @@ def setting_change(name, stored, now):
 
 
 def check_overwrite(path, labels, model, variant, seed_offset=0, save_predictions=False,
-                    self_train_sha256=None):
+                    self_train_sha256=None, run_ids=None):
     """Raise OverwriteError if `path` holds runs that resumable_runs would not reuse.
 
     A run writes its results file anew, so those runs would be lost: runs made
@@ -2156,7 +2167,7 @@ def check_overwrite(path, labels, model, variant, seed_offset=0, save_prediction
         previous = json.load(f)
     held = previous.get('runs', [])
     kept = resumable_runs(path, labels, model, variant, seed_offset, save_predictions,
-                          self_train_sha256)
+                          self_train_sha256, run_ids)
     if len(kept) >= len(held):
         return
     stored = stored_settings(previous)
@@ -2182,7 +2193,23 @@ def check_results_files(args, files, self_train_sha256=None):
         return
     for path, labels in files:
         check_overwrite(path, labels, args.model, variant_name(args), args.seed_offset,
-                        args.save_predictions, self_train_sha256)
+                        args.save_predictions, self_train_sha256, trained_run_ids(args))
+
+
+def trained_run_ids(args):
+    """The run ids an invocation trains when it names them (--subfields: the held-out
+    subfields), else None (every run id of the protocol)."""
+    subfields = getattr(args, 'subfields', None)
+    return set(subfields) if subfields else None
+
+
+def per_run_corpus(args, corpus):
+    """The corpus SHA-256 a run records as its own (`self_train_sha256`): with --subfields and
+    a self-training corpus file, so that the runs of a file may come from a corpus each
+    (resumable_runs); None otherwise (nothing is recorded)."""
+    if trained_run_ids(args) is None:
+        return None
+    return corpus.get('self_train_sha256')
 
 
 def summarize(results):
@@ -2705,7 +2732,8 @@ def run(args):
                    'paper_test_f1': PAPER_F1[granularity], 'config': stored_config(args),
                    'runs': resumable_runs(out_path, labels, args.model, variant,
                                           args.seed_offset, args.save_predictions,
-                                          corpus.get('self_train_sha256'))}
+                                          corpus.get('self_train_sha256'),
+                                          trained_run_ids(args))}
         if semantics:
             results['config']['label_descriptions_sha256'] = ner_label_text.descriptions_sha256(
                 labels, descriptions[granularity])
@@ -2762,6 +2790,8 @@ def run(args):
             res['runtime_sec'] = round(time.time() - start, 1)
             if environment:
                 res['environment'] = environment
+            if per_run_corpus(args, corpus):
+                res['self_train_sha256'] = per_run_corpus(args, corpus)
             results['runs'].append(res)
             summarize(results)
             with open(out_path, 'w') as f:
@@ -2931,7 +2961,8 @@ def run_teachers(args, out_dir):
                             'config': {**stored_config(view), **corpus},
                             'runs': resumable_runs(paths[off], labels, args.model, variant, off,
                                                    args.save_predictions,
-                                                   corpus['self_train_sha256'])}
+                                                   corpus['self_train_sha256'],
+                                                   trained_run_ids(args))}
         done_by = {off: {r.get('run_id') for r in results[off]['runs']}
                    for off in student_offsets}
         done = set.intersection(*done_by.values())
@@ -2977,6 +3008,8 @@ def run_teachers(args, out_dir):
                 res['runtime_sec'] = runtime      # teachers and these students together
                 if environment:
                     res['environment'] = environment
+                if per_run_corpus(args, corpus):
+                    res['self_train_sha256'] = per_run_corpus(args, corpus)
                 results[off]['runs'].append(res)
                 done_by[off].add(run_id)
             changed.update(records)

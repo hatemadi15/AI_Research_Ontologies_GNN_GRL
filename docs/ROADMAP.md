@@ -3708,6 +3708,28 @@ mention-level filter is a candidate for the screen.
   02:34 on its own and lands about 05:30, after which the seven-subfield
   reading is written. The six subfields in hand fixed amendment 3 and kept
   the threshold, so the screen did not wait for graphene.
+- *03:56–04:10: the screen's first sessions fail on the resume check.*
+  `w12c` completed in 59 minutes with 4 of its 14 topic jobs done and 10
+  failed in 0.01 minutes: a results file (`crf_gzm_topic_m<N>.json`, a run
+  per subfield) stores one corpus SHA-256, and each held-out subfield has
+  its own topic corpus, so the second subfield's job found a file "from
+  another corpus" and refused to resume it (the overwrite guard of week 3,
+  right for every earlier protocol, where a file's runs share a corpus).
+  `w12a`, still running, loses every names job but the first of each
+  variant the same way; its `crf_mr6` jobs (no corpus) run. The fix
+  (`ner_baseline.py`): with `--subfields`, a run records its own corpus
+  (`self_train_sha256` per run); a file whose corpus differs keeps the runs
+  of other subfields, resumes this subfield's run only from the same corpus
+  and refuses another corpus for it as before; files of the other protocols
+  are byte-identical to 77c37be (the tiny identity check, 8 configurations)
+  and a tiny end-to-end run shows two subfields extending one file, a
+  repeat resuming and another corpus refused. `w12c` also put each feature
+  variant's jobs in both lanes, which would have made the lanes write the
+  same files at once; a variant per lane now (`w12a`'s rule). `w12e` is
+  `w12a` without the `crf_mr6` jobs. Both are pushed again from a bundle
+  built on the fix. The probe's container was restarted three times in the
+  night (02:20, 03:10, 04:00), killing the graphene probe each time; the
+  probe now caches each teacher's votes locally and resumes from them.
 - *21:06: `w11b` pushed* to `ner-gpu-jobs-d` (version 6) from bundle
   77c37be, 5 jobs in lane 0 (the smoke4 repeat `smokean` and the 4
   fine-grained held-out papers) and 4 in lane 1 (the coarse ones), about

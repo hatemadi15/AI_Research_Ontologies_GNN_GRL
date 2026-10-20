@@ -1130,7 +1130,8 @@ def test_week12_gazetteer_feature_batches(monkeypatch, tmp_path):
     for name in ('crf_gzm_topic', 'crf_gzs_topic'):
         assert sorted(a.subfields for a in jobs if kind(a) == name) == sorted(
             [s] for s in kj.MULMS_SUBFIELD_NAMES)
-    assert [kind(a) for a in lane0[1:]] == ['crf_gzm_topic'] * 4 + ['crf_gzs_topic'] * 3
+    assert [kind(a) for a in lane0[1:]] == ['crf_gzm_topic'] * 7
+    assert [kind(a) for a in lane1] == ['crf_gzs_topic'] * 7
     for a in jobs:
         assert a.names_feature and getattr(a, 'silver_mentions', False) == (
             kind(a) == 'crf_gzm_topic')
@@ -1145,6 +1146,12 @@ def test_week12_gazetteer_feature_batches(monkeypatch, tmp_path):
         for a in lane:
             assert kind(a) == 'crf_gzm_topic' and a.student_offsets == offsets
     assert 'w12c' in kj.BATCHES and {'w12b:gzm', 'w12b:gzs'} <= set(kj.BATCHES)
+    # w12e: w12a's names variants without the 6-copy jobs, a variant's jobs in one lane
+    lane0, lane1 = _parsed(kj.batch_lanes('w12e'))
+    assert lane0[0].tag == 'smokeas' and (len(lane0), len(lane1)) == (15, 14)
+    assert [kind(a) for a in lane0[1:]] == ['crf_mrs_topic'] * 7 + ['crf_mrm_topic6'] * 7
+    assert [kind(a) for a in lane1] == ['crf_mrm_topic'] * 7 + ['crf_st3_topic'] * 7
+    assert 'w12e' in kj.BATCHES
     lane0, lane1 = _parsed(kj.batch_lanes('w12b:gzs'))
     assert all(kind(a) == 'crf_gzs_topic' and not hasattr(a, 'silver_mentions')
                for a in lane0[1:] + lane1)
