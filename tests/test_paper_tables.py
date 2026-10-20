@@ -98,6 +98,60 @@ def test_table5_lists_the_probe_per_subfield_with_a_mean():
     assert lines[2].startswith('| subfield | corpus holds (%) |')
 
 
+def test_table6_lists_the_held_out_decisions():
+    """Table 6: every pre-registered decision on held-out documents, in week order, the
+    reported comparisons and the screen's losers left out; the pooled decision needs every
+    corpus not to lose."""
+    def d(mean, lo, hi):
+        return {'micro': _spread(mean, lo, hi, 'mean_diff')}
+    held = {'n_subfields': 7, 'passes': False, 'crf_mr_minus_crf': d(2.1, -0.31, 4.51),
+            'votes': {'passes': True, 'crf_mr_minus_crf': d(2.71, 0.22, 5.2)}}
+    names = {'n_subfields': 7, 'minus_crf': d(2.04, -0.85, 4.92), 'decision_1': False,
+             'minus_crf_mr': d(-0.06, -1.09, 0.96), 'decision_2': False}
+    part = {'n_subfields': 7, 'minus_crf': d(3.0, 1.0, 5.0), 'decision_1': True,
+            'minus_crf_mr': d(1.0, -0.5, 2.5), 'decision_2': False}
+    week12 = {'crf_mrm_topic': {'decision': part}, 'crf_mr6': {'decision': part}}
+    consistency = {
+        'mulms': {'crf_dc': {'decision': '13.1a', 'passes': True, 'n_units': 7,
+                             'minus_input': d(0.82, 0.18, 1.46)},
+                  'crf_dcr': {'n_units': 7, 'minus_input': d(1.01, 0.28, 1.74)}},
+        'coarse': {'crf_dc': {'decision': 'week 7', 'passes': True, 'n_units': 4,
+                              'minus_input': d(0.12, 0.01, 0.24)}}}
+    folds = {'crf_mr': {'decision': '13.3a', 'passes': False, 'n_units': 5,
+                        'minus_crf': d(0.3, -0.2, 0.8)}}
+    pooled = {'crf_mrm_topic': {'status': 'decision', 'passes': True, 'no_corpus_loses': False,
+                                'n_units': 11, 'minus_crf': _spread(2.0, 0.5, 3.5, 'mean_diff'),
+                                'corpora': {'mulms': {'n_units': 7}, 'fine': {'n_units': 4}}},
+              'crf_mr': {'status': 'reported', 'passes': True, 'no_corpus_loses': True,
+                         'n_units': 11, 'minus_crf': _spread(2.3, 0.9, 3.7, 'mean_diff'),
+                         'corpora': {'mulms': {'n_units': 7}, 'fine': {'n_units': 4}}}}
+    analysis = {'mulms': {'leave_one_subfield_out': held, 'silver_names': names,
+                          'week12': week12},
+                'week13': {'consistency': consistency, 'week12_winner': 'crf_mrm_topic',
+                           'folds': folds, 'pooled': pooled}}
+    rows = pt.held_out_rows(analysis)
+    assert [r[0] for r in rows] == [7, 10, 10, 11, 11, 12, 12, 13, 13, 13]
+    table = pt.table6(rows)
+    assert table.startswith('Table 6. Pre-registered decisions on held-out documents')
+    assert ('| 7 | MaterioMiner coarse-grained, unseen papers | `crf_dc` vs `crf` | week 7 '
+            '(recomputed) | 4 | +0.12 [+0.01, +0.24] | passes |') in table
+    assert ('| 10 | MuLMS, held-out subfields | `crf_mr` votes vs `crf` votes | week 10, '
+            'decision 2 | 7 | +2.71 [+0.22, +5.20] | passes |') in table
+    assert ('| 11 | MuLMS, held-out subfields | `crf_mrs` vs `crf_mr` | week 11, decision 2 '
+            '| 7 | \u22120.06 [\u22121.09, +0.96] | no |') in table
+    assert ('| 12 | MuLMS, held-out subfields | `crf_mrm_topic` vs `crf_mr` | week 12, '
+            'decision 2 | 7 | +1.00 [\u22120.50, +2.50] | no |') in table
+    assert ('| 13 | MuLMS, held-out subfields | `crf_dc` vs `crf` | week 13, 13.1a | 7 | '
+            '+0.82 [+0.18, +1.46] | passes |') in table
+    assert ('| 13 | SOFC-Exp, article folds | `crf_mr` vs `crf` | week 13, 13.3a | 5 | '
+            '+0.30 [\u22120.20, +0.80] | no |') in table
+    assert ('| 13 | pooled: MuLMS, held-out subfields (7) + MaterioMiner fine-grained, unseen '
+            'papers (4) | `crf_mrm_topic` vs `crf` | week 13, 13.2, a corpus loses | 11 | '
+            '+2.00 [+0.50, +3.50] | no |') in table
+    assert 'crf_dcr' not in table and 'crf_mr6' not in table and table.count('`crf_mr` vs') == 2
+    assert pt.held_out_rows({}) == [] and pt.held_out_rows({'week13': {}}) == []
+
+
 def test_main_writes_what_it_has(tmp_path, capsys):
     results = tmp_path / 'results'
     (results / 'gpu').mkdir(parents=True)
@@ -111,4 +165,5 @@ def test_main_writes_what_it_has(tmp_path, capsys):
     out = capsys.readouterr().out
     assert 'table 4: no mention or matching analysis' in out
     assert 'table 5: no probe reports' in out
+    assert 'table 6: no held-out decisions' in out
     assert (tmp_path / 'tables' / 'table2_decisions.md').read_text().count('| 5 | GPU |') == 1

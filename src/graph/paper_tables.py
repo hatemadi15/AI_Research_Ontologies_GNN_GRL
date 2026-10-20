@@ -20,6 +20,11 @@ docs/tables/:
       names (mulms_coverage.json) and what the two silver filters admit at 0.9, the held-out
       CRF head's precision and recall, the dictionary rule's F1 change with each 0.9 lexicon
       and with the gold unseen names (silver_lexicons/<subfield>.json).
+  table6_held_out_decisions.md (C22-C25): every pre-registered decision on held-out
+      documents of the three corpora (ner_week5_seed_analysis.json): MuLMS's held-out
+      subfields (weeks 10 to 12), the consistency rule of weeks 7 and 13, SOFC-Exp's article
+      folds (13.3) and the pooled decision 13.2; its units, the mean paired difference of
+      micro F1 with its 95% CI, and whether the CI lies above 0.
   tableA1_all_comparisons.md: every comparison of the comparisons files, the reported and
       descriptive ones too.
 A table whose results are missing is skipped (and named on stdout).
@@ -136,6 +141,83 @@ def table2(rows, title='Table 2. Pre-registered decisions and screens on Materio
               'pairs', 'Δ micro F1 [95% CI]', 'CI above 0']
     return (f'{title}: mean paired difference of micro F1 over splits or held-out papers, '
             f'each side the mean over its seeds.\n\n' + markdown(header, out))
+
+
+HELD_OUT_CORPORA = {'mulms': 'MuLMS, held-out subfields',
+                    'fine': 'MaterioMiner fine-grained, unseen papers',
+                    'coarse': 'MaterioMiner coarse-grained, unseen papers',
+                    'sofc_folds': 'SOFC-Exp, article folds'}
+
+
+def held_out_rows(analysis):
+    """The rows of Table 6 from the week-5 analyses file, in week order: every pre-registered
+    decision on held-out documents (MuLMS's decisions of weeks 10 and 11, the week-12
+    winner's, the consistency rule's of weeks 7 and 13, 13.3's on SOFC-Exp's folds, and the
+    pooled decision 13.2), with its units, difference and verdict; reported comparisons are
+    left out."""
+    rows = []
+
+    def row(week, corpus, comparison, decision, units, diff, passes):
+        rows.append([week, corpus, comparison, decision, units,
+                     interval(diff, 'mean_diff', signed=True), 'passes' if passes else 'no'])
+
+    mulms = analysis.get('mulms') or {}
+    held = mulms.get('leave_one_subfield_out')
+    if held:
+        row(10, HELD_OUT_CORPORA['mulms'], '`crf_mr` vs `crf`', 'week 10, decision 1',
+            held['n_subfields'], held['crf_mr_minus_crf']['micro'], held['passes'])
+        votes = held.get('votes')
+        if votes:
+            row(10, HELD_OUT_CORPORA['mulms'], '`crf_mr` votes vs `crf` votes',
+                'week 10, decision 2', held['n_subfields'], votes['crf_mr_minus_crf']['micro'],
+                votes['passes'])
+    names = mulms.get('silver_names')
+    if names:
+        for reference, key, label in (('crf', 'decision_1', 'week 11, decision 1'),
+                                      ('crf_mr', 'decision_2', 'week 11, decision 2')):
+            row(11, HELD_OUT_CORPORA['mulms'], f'`crf_mrs` vs `{reference}`', label,
+                names['n_subfields'], names[f'minus_{reference}']['micro'], names[key])
+    week13 = analysis.get('week13') or {}
+    winner = week13.get('week12_winner')
+    part = ((mulms.get('week12') or {}).get(winner) or {}).get('decision') if winner else None
+    if part:
+        for reference, key, label in (('crf', 'decision_1', 'week 12, decision 1'),
+                                      ('crf_mr', 'decision_2', 'week 12, decision 2')):
+            row(12, HELD_OUT_CORPORA['mulms'], f'`{winner}` vs `{reference}`', label,
+                part['n_subfields'], part[f'minus_{reference}']['micro'], part[key])
+    for corpus, entries in (week13.get('consistency') or {}).items():
+        for variant, e in entries.items():
+            if 'decision' not in e:
+                continue
+            system = variant.rpartition('_')[0]
+            recomputed = e['decision'] == 'week 7'
+            row(7 if recomputed else 13, HELD_OUT_CORPORA.get(corpus, corpus),
+                f'`{variant}` vs `{system}`',
+                'week 7 (recomputed)' if recomputed else f"week 13, {e['decision']}",
+                e['n_units'], e['minus_input']['micro'], e['passes'])
+    for method, e in (week13.get('folds') or {}).items():
+        row(13, HELD_OUT_CORPORA['sofc_folds'], f'`{method}` vs `crf`',
+            f"week 13, {e['decision']}", e['n_units'], e['minus_crf']['micro'], e['passes'])
+    for method, e in (week13.get('pooled') or {}).items():
+        if e.get('status') != 'decision':
+            continue
+        corpora = ' + '.join(f"{HELD_OUT_CORPORA.get(c, c)} ({v['n_units']})"
+                             for c, v in e['corpora'].items())
+        row(13, f'pooled: {corpora}', f'`{method}` vs `crf`',
+            'week 13, 13.2' + ('' if e['no_corpus_loses'] else ', a corpus loses'),
+            e['n_units'], e['minus_crf'], e['passes'] and e['no_corpus_loses'])
+    rows.sort(key=lambda r: r[0])
+    return rows
+
+
+def table6(rows):
+    """Table 6 from held_out_rows."""
+    header = ['week', 'corpus, protocol', 'comparison', 'decision', 'units',
+              'Δ micro F1 [95% CI]', 'CI above 0']
+    return ('Table 6. Pre-registered decisions on held-out documents of three corpora (GPU '
+            'runs, 10 model seeds; a unit is a held-out subfield, paper or article fold, each '
+            'side the mean over its seeds): mean paired difference of micro F1 over the units '
+            'with its 95% CI, and whether the CI lies above 0.\n\n' + markdown(header, rows))
 
 
 def table3(published):
@@ -273,6 +355,11 @@ def main(argv=None):
                                                                     'mulms_coverage.json'))))
     else:
         print('table 5: no probe reports')
+    rows = held_out_rows(analysis)
+    if rows:
+        write('table6_held_out_decisions.md', table6(rows))
+    else:
+        print('table 6: no held-out decisions')
     print(f"wrote {', '.join(written) or 'nothing'} to {args.out}")
     return written
 
