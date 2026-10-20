@@ -15,7 +15,8 @@ size (ROADMAP §4, week 9, part 2). On a third corpus, MuLMS, whose
 held-out subfields differ in topic as MaterioMiner's papers do, its single
 model does not pass and its votes do (C22), so by the pre-registered
 criterion it stays a MaterioMiner result. With names from unlabeled text
-added to its pool (Section 6.7), it fails both MuLMS decisions as well (C23);
+added to its pool (Section 6.7), it fails both MuLMS decisions and both
+MaterioMiner decisions as well (C23);
 names from a corpus of the held-out subfield's own topic are the last
 pre-registered attempt (ROADMAP §4, week 12).
 The numbers come from `results/` through the claims table of `docs/PAPER.md`
@@ -725,10 +726,14 @@ names that three CRF teachers tag in unlabeled in-domain text.
     (1.0–7.8% per subfield). The other subfields' names are not the held-out
     subfield's, so the copies show the model hardly any of the names it
     misses.
-  - On MaterioMiner, 49–65% of a held-out paper's unseen test names occur
-    somewhere in the fatigue corpus. So decisions 3 and 4 test the method
-    where its names can reach the test papers (after 24 October). They
-    cannot change the methods claim, which needed decision 1.
+- *Result on MaterioMiner (C23): no gain either.* Over 10 seeds paired by
+  paper it scores 49.45 fine-grained and 60.49 coarse-grained: +0.23 [−0.69,
+  +1.14] and +0.61 [−0.96, +2.18] against mention replacement (decisions 3
+  and 4), +3.00 [+1.98, +4.02] and +1.89 [−0.31, +4.10] against the CRF
+  head. The fatigue corpus holds 49–65% of a held-out paper's unseen test
+  names, but the teachers' silver sentences hold 2–9% of them (549–907
+  distinct names per paper fine-grained): the sentence filter, not the
+  corpus, is the bottleneck.
 - *Week 12 (pre-registered, ROADMAP §4; runs after 24 October):* the names
   come from a corpus of the held-out subfield's own topic, 40,000 sentences
   of open-access papers per subfield found by title terms on Europe PMC,

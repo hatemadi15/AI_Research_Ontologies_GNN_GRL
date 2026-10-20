@@ -971,6 +971,101 @@
           "f1": 54.73,
           "share": 1.0
         }
+      },
+      "crf_mrs": {
+        "seeds": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "n_runs": 40,
+        "seen": {
+          "n_gold": 2210,
+          "n_pred": 2638,
+          "n_correct": 1671,
+          "recall": 75.61,
+          "precision": 63.34,
+          "f1": 68.94,
+          "share": 0.166
+        },
+        "seen_other": {
+          "n_gold": 280,
+          "n_pred": 102,
+          "n_correct": 40,
+          "recall": 14.29,
+          "precision": 39.22,
+          "f1": 20.94,
+          "share": 0.021
+        },
+        "unseen": {
+          "n_gold": 10790,
+          "n_pred": 8317,
+          "n_correct": 4241,
+          "recall": 39.3,
+          "precision": 50.99,
+          "f1": 44.39,
+          "share": 0.812
+        },
+        "all": {
+          "n_gold": 13280,
+          "n_pred": 11057,
+          "n_correct": 5952,
+          "recall": 44.82,
+          "precision": 53.83,
+          "f1": 48.91,
+          "share": 1.0
+        }
+      },
+      "crf_mrs_ens3": {
+        "seeds": [
+          0,
+          300,
+          600
+        ],
+        "n_runs": 12,
+        "seen": {
+          "n_gold": 663,
+          "n_pred": 777,
+          "n_correct": 508,
+          "recall": 76.62,
+          "precision": 65.38,
+          "f1": 70.56,
+          "share": 0.166
+        },
+        "seen_other": {
+          "n_gold": 84,
+          "n_pred": 17,
+          "n_correct": 12,
+          "recall": 14.29,
+          "precision": 70.59,
+          "f1": 23.76,
+          "share": 0.021
+        },
+        "unseen": {
+          "n_gold": 3237,
+          "n_pred": 2123,
+          "n_correct": 1290,
+          "recall": 39.85,
+          "precision": 60.76,
+          "f1": 48.13,
+          "share": 0.812
+        },
+        "all": {
+          "n_gold": 3984,
+          "n_pred": 2917,
+          "n_correct": 1810,
+          "recall": 45.43,
+          "precision": 62.05,
+          "f1": 52.46,
+          "share": 1.0
+        }
       }
     },
     "coarse_random_split_vary": {
@@ -1937,6 +2032,101 @@
           "recall": 60.38,
           "precision": 62.27,
           "f1": 61.31,
+          "share": 1.0
+        }
+      },
+      "crf_mrs": {
+        "seeds": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "n_runs": 40,
+        "seen": {
+          "n_gold": 4390,
+          "n_pred": 4676,
+          "n_correct": 3662,
+          "recall": 83.42,
+          "precision": 78.31,
+          "f1": 80.79,
+          "share": 0.2
+        },
+        "seen_other": {
+          "n_gold": 260,
+          "n_pred": 192,
+          "n_correct": 61,
+          "recall": 23.46,
+          "precision": 31.77,
+          "f1": 26.99,
+          "share": 0.012
+        },
+        "unseen": {
+          "n_gold": 17290,
+          "n_pred": 17410,
+          "n_correct": 9332,
+          "recall": 53.97,
+          "precision": 53.6,
+          "f1": 53.79,
+          "share": 0.788
+        },
+        "all": {
+          "n_gold": 21940,
+          "n_pred": 22278,
+          "n_correct": 13055,
+          "recall": 59.5,
+          "precision": 58.6,
+          "f1": 59.05,
+          "share": 1.0
+        }
+      },
+      "crf_mrs_ens3": {
+        "seeds": [
+          0,
+          300,
+          600
+        ],
+        "n_runs": 12,
+        "seen": {
+          "n_gold": 1317,
+          "n_pred": 1393,
+          "n_correct": 1119,
+          "recall": 84.97,
+          "precision": 80.33,
+          "f1": 82.58,
+          "share": 0.2
+        },
+        "seen_other": {
+          "n_gold": 78,
+          "n_pred": 45,
+          "n_correct": 17,
+          "recall": 21.79,
+          "precision": 37.78,
+          "f1": 27.64,
+          "share": 0.012
+        },
+        "unseen": {
+          "n_gold": 5187,
+          "n_pred": 4804,
+          "n_correct": 2841,
+          "recall": 54.77,
+          "precision": 59.14,
+          "f1": 56.87,
+          "share": 0.788
+        },
+        "all": {
+          "n_gold": 6582,
+          "n_pred": 6242,
+          "n_correct": 3977,
+          "recall": 60.42,
+          "precision": 63.71,
+          "f1": 62.02,
           "share": 1.0
         }
       }
@@ -4899,6 +5089,89 @@
           ],
           "n_pairs": 4
         }
+      },
+      "crf_mrs": {
+        "reference": "crf",
+        "seeds": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "seen": {
+          "method": 68.38,
+          "reference": 65.72,
+          "mean_diff": 2.66,
+          "ci95": [
+            0.03,
+            5.29
+          ],
+          "n_pairs": 4
+        },
+        "unseen": {
+          "method": 44.55,
+          "reference": 41.36,
+          "mean_diff": 3.19,
+          "ci95": [
+            2.03,
+            4.35
+          ],
+          "n_pairs": 4
+        },
+        "all": {
+          "method": 49.45,
+          "reference": 46.46,
+          "mean_diff": 3.0,
+          "ci95": [
+            1.98,
+            4.02
+          ],
+          "n_pairs": 4
+        }
+      },
+      "crf_mrs_ens3": {
+        "reference": "crf_ens3",
+        "seeds": [
+          0,
+          300,
+          600
+        ],
+        "seen": {
+          "method": 70.05,
+          "reference": 67.0,
+          "mean_diff": 3.05,
+          "ci95": [
+            -1.56,
+            7.65
+          ],
+          "n_pairs": 4
+        },
+        "unseen": {
+          "method": 48.14,
+          "reference": 43.88,
+          "mean_diff": 4.26,
+          "ci95": [
+            2.31,
+            6.22
+          ],
+          "n_pairs": 4
+        },
+        "all": {
+          "method": 52.86,
+          "reference": 48.81,
+          "mean_diff": 4.05,
+          "ci95": [
+            3.03,
+            5.07
+          ],
+          "n_pairs": 4
+        }
       }
     },
     "coarse_random_split_vary": {
@@ -5578,6 +5851,89 @@
           "ci95": [
             -0.47,
             3.78
+          ],
+          "n_pairs": 4
+        }
+      },
+      "crf_mrs": {
+        "reference": "crf",
+        "seeds": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "seen": {
+          "method": 80.04,
+          "reference": 79.41,
+          "mean_diff": 0.63,
+          "ci95": [
+            -1.49,
+            2.75
+          ],
+          "n_pairs": 4
+        },
+        "unseen": {
+          "method": 55.44,
+          "reference": 53.23,
+          "mean_diff": 2.21,
+          "ci95": [
+            -0.28,
+            4.7
+          ],
+          "n_pairs": 4
+        },
+        "all": {
+          "method": 60.49,
+          "reference": 58.6,
+          "mean_diff": 1.89,
+          "ci95": [
+            -0.31,
+            4.1
+          ],
+          "n_pairs": 4
+        }
+      },
+      "crf_mrs_ens3": {
+        "reference": "crf_ens3",
+        "seeds": [
+          0,
+          300,
+          600
+        ],
+        "seen": {
+          "method": 81.75,
+          "reference": 80.2,
+          "mean_diff": 1.54,
+          "ci95": [
+            -0.58,
+            3.67
+          ],
+          "n_pairs": 4
+        },
+        "unseen": {
+          "method": 58.75,
+          "reference": 55.96,
+          "mean_diff": 2.79,
+          "ci95": [
+            0.35,
+            5.24
+          ],
+          "n_pairs": 4
+        },
+        "all": {
+          "method": 63.6,
+          "reference": 61.1,
+          "mean_diff": 2.5,
+          "ci95": [
+            0.48,
+            4.51
           ],
           "n_pairs": 4
         }

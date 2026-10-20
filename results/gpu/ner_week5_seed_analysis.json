@@ -10515,7 +10515,8 @@
           "n_test_unseen_in_silver": 319
         }
       },
-      "unseen_in_silver": 0.044
+      "unseen_in_silver": 0.044,
+      "silver_filter": null
     }
   },
   "paper_count": {
