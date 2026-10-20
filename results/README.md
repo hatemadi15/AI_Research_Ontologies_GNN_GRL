@@ -189,6 +189,28 @@ sentences; the official validation and test articles), with predictions.
 by draw, each the mean of its 10 seeds) and the CRF head on 10 articles
 against all 26 (`ten_minus_all_articles`, paired by seed).
 
+Week 13, 13.1 (the consistency rule on held-out documents; protocol, amendment
+and outcome in ROADMAP §4; no training): `ner_consistency.py`, with and without
+`--retype`, on the saved 10-seed predictions of the CRF head and mention
+replacement on MuLMS's held-out subfields
+(`gpu/ner_results_mulms_leave_one_subfield_out_{crf,crf_mr}_{dc,dcr}_m<N>.json`,
+run ids the subfields; CC BY-SA 4.0), of the CRF head on SOFC-Exp's 5 article
+folds (`gpu/ner_results_sofc_document_folds_crf_{dc,dcr}_m<N>.json`, run ids
+`fold0` to `fold4`) and of mention replacement and its multi-task combination
+on MaterioMiner's held-out papers
+(`gpu/ner_results_{fine,coarse}_leave_one_paper_out_{crf_mr,crf_mt_mr}_{dc,dcr}_m<N>.json`),
+N = 0 to 900; each run keeps the entities added and retyped, the input's F1
+and, unlike week 7's files, the new predictions (`--save-predictions`).
+`gpu/ner_week5_seed_analysis.json` (`week13`, `consistency`) holds every
+output against its input, paired over the subfields, papers or folds, with
+its verdict where the comparison is a decision (13.1a, 13.1b, 13.1d, and
+week 7's on the CRF head on MaterioMiner, recomputed), and (`week13`,
+`pooled`) the pooled estimates across corpora of 13.2 and 13.3
+(`week12_winner` names the screen's winner once the screen is complete).
+Batch `w13a` (13.3) runs after 24 October and will write
+`gpu/ner_results_sofc_document_folds_crf_mr_m<N>.json` and
+`gpu/ner_results_sofc{,_slot}_document_folds_crf_mt_mr_m<N>.json`.
+
 Week 11 (mention replacement with silver names; protocol and the outcome of part
 `w11a` in ROADMAP §4; batch `w11a` from 427e34c, `w11b` from 77c37be): `w11a`
 (Kaggle session of 18 October, `ner-gpu-jobs-d` version 5) wrote
