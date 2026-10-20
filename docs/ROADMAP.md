@@ -3735,6 +3735,8 @@ mention-level filter is a candidate for the screen.
   `ner-gpu-bundle-3`; `w12c` is pushed to `ner-gpu-jobs-c` 30 minutes
   later, `w12e` to `ner-gpu-jobs-d` once the first `w12a` session there
   completes and is pulled.
+- *04:49: `w12c` pushed again* to `ner-gpu-jobs-c` (version 4) from bundle
+  3ac85a8, V7's 7 jobs in lane 0 after the smoke repeat and V8's in lane 1.
 - *21:06: `w11b` pushed* to `ner-gpu-jobs-d` (version 6) from bundle
   77c37be, 5 jobs in lane 0 (the smoke4 repeat `smokean` and the 4
   fine-grained held-out papers) and 4 in lane 1 (the coarse ones), about
