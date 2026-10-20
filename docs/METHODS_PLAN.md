@@ -224,6 +224,19 @@ mechanism has no ceiling on MuLMS and the route ends there, with the GPU
 hours saved for the evaluation paper's remaining items. Cost: about 2.5–4
 hours per subfield on 2 lanes; all 7 by about 22 October.
 
+**Outcome of the probe (20 October).** Seven subfields in
+`results/silver_lexicons/`, the reading in ROADMAP §4 ("The seven
+subfields"): the mention filter at 0.9 admits 9–34% of the unseen test
+names and the sentence filter 5–26%; as a dictionary the lexicon helps
+where the held-out head's recall gap is 15 points or more (sofc +5.9,
+pemfc +4.0, semi +2.3) and hurts elsewhere (steel −10.0, graphene −5.1,
+poly −3.3), averaging −1.0 (mention) and +1.1 (sentence) over the seven;
+0.9 is the right threshold for both filters; the agreement filter picks
+context-free names (pemfc: silver +4.0 against gold −10.5). No amendment
+of the threshold; amendments 2 and 3 (the feature on both lexicons) are
+the probe's consequence. The dictionary rule per subfield is the baseline
+reported beside the screen.
+
 ### C. If names pass: the ablations that make the paper
 
 On the TPU if the spike succeeds (its own references), else on the GPU in

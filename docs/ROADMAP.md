@@ -3782,6 +3782,7 @@ stay local.
 | Subfield | Teachers' test F1 (CPU) | Sentence filter 0.9: names, coverage, fill | Mention filter 0.9: names, coverage, fill | Mention filter 0.7: coverage, fill | Gold unseen names: fill / override |
 |---|---|---|---|---|---|
 | electrolysis | 56.3, 50.2, 57.2 | 300, 12.5%, +0.85 | 7,895, 29.9%, −0.77 | 35.5%, −3.78 | −6.85 / +4.47 |
+| graphene | 46.7, 49.3, 49.0 | 1,221, 15.3%, −2.86 | 14,322, 28.8%, −5.07 | 32.8%, −6.51 | +9.11 / +24.32 |
 | pemfc | 44.4, 51.1, 52.9 | 300, 19.2%, +3.16 | 6,259, 29.4%, +3.97 | 37.6%, −0.44 | −10.51 / −5.91 |
 | poly | 45.6, 52.5, 53.8 | 854, 8.0%, −0.25 | 9,194, 18.3%, −3.31 | 23.4%, −9.91 | −3.63 / +2.22 |
 | semi | 32.8, 35.0, 34.3 | 379, 4.6%, +1.20 | 5,713, 9.4%, +2.27 | 20.4%, −0.76 | +17.29 / +22.00 |
@@ -3889,6 +3890,57 @@ the sentence filter at 0.7 gains more than at 0.9 on sofc (+7.2), pemfc
 (+2.4 against +3.2, less), semi (+3.6) and loses on poly (−2.5) and
 electrolysis (−0.3): the sentence filter admits so few names that
 loosening it costs little where the lexicon helps.
+
+*Reading, graphene.* Every dictionary hurts, the gold one helps most. The
+corpus holds 64.0% of graphene's unseen test names; the mention filter at
+0.9 admits 28.8% (14,322 names; 34,118 MAT and 16,320 VALUE mentions
+among 56,421, the largest lexicon of the seven), the sentence filter
+15.3% (1,221 names). The held-out CRF head (10 seeds: precision 56.8,
+recall 44.9, F1 50.0) loses with every silver lexicon on every seed (the
+0.9 sentence lexicon −2.9, the 0.9 mention lexicon −5.1, looser ones and
+overrides more), while the gold unseen names fill to +9.1 and override to
++24.3: graphene's names are in the corpus and the teachers find them, but
+the strings they agree on (graphene itself, GO, its oxides and values)
+occur as often outside entities as inside them in the test documents.
+
+**The seven subfields** (the probe's reading, 20 October, 07:00 UTC;
+`results/silver_lexicons/*.json`):
+- *What the filters admit.* Of the unseen test names, which the corpora
+  hold at 55–81%, the mention filter at 0.9 admits 9–34% (semi 9.4,
+  poly 18.3, steel 25.0, graphene 28.8, pemfc 29.4, electrolysis 29.9,
+  sofc 34.4) and the sentence filter 5–26% (semi 4.6, poly 8.0,
+  electrolysis 12.5, steel 13.3, graphene 15.3, pemfc 19.2, sofc 25.8);
+  week 11's cross-subfield names held 4.4%. On semi the teachers' recall,
+  not the corpus, is the bottleneck.
+- *As a dictionary, the lexicon's value tracks the held-out head's
+  recall gap.* Filling the CRF head's O tags from the 0.9 mention
+  lexicon gains where recall trails precision by 15 points or more (sofc
+  +5.9, pemfc +4.0, semi +2.3; gaps of 22, 18 and 30) and loses where
+  the head is nearer balance (steel −10.0, poly −3.3, graphene −5.1,
+  electrolysis −0.8; gaps of 8, 7, 12 and 2). Over the seven subfields
+  the 0.9 mention lexicon averages −1.0 as a fill and the 0.9 sentence
+  lexicon +1.1 (never below −2.9, a gain on five); these are the
+  dictionary baselines the week-12 variants must beat, reported per
+  subfield beside them.
+- *The threshold.* 0.9 is the right end of the range for both filters:
+  at 0.7 and 0.5 every mention lexicon loses on five or more subfields
+  and every override loses on most; the sentence filter at 0.7 gains
+  more than at 0.9 only on sofc and semi and loses on poly, steel,
+  graphene and electrolysis. No amendment of the threshold.
+- *The agreement filter selects what a gold list cannot.* On pemfc the
+  gold unseen names fill to −10.5 while the teachers' 0.9 names fill to
+  +4.0: the names three teachers agree on at 0.9 are the strings that are
+  entities wherever they occur, which a complete name list is not. On
+  graphene even that selection fails (−5.1 against +9.1 for the gold
+  names), on steel both fail.
+- *What this says for the screen.* The lexicon alone can decide an
+  unseen subfield for the worse as easily as for the better, so a names
+  method must let the model weigh it: that is amendment 2's and 3's
+  feature (V7, V8), with mention replacement (V1, V2, V4) keeping the
+  context's say by construction. If no variant passes decision 1, the
+  probe's table is the paper's explanation of why: the recall gap, the
+  admission rates and the precision of a harvested lexicon vary by
+  subfield more than any one injection can absorb.
 
 ### Week 12 protocol: names from a topic corpus (fixed before any run)
 

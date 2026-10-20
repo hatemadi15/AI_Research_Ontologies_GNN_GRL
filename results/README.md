@@ -227,8 +227,8 @@ variants `crf_mrs_topic`, `crf_mrm_topic`, `crf_mrm_topic6`, `crf_st3_topic`,
 `crf_mr6` (run ids the subfields; CC BY-SA 4.0);
 `gpu/ner_week5_seed_analysis.json` (`mulms`, `week12`) will hold the screen
 and the decisions. `silver_lexicons/<subfield>.json` (`silver_lexicon.py`,
-the CPU probe of `docs/METHODS_PLAN.md` §4B, no decision) records per
-subfield the lexicons' sizes and their coverage of the unseen test names
+the CPU probe of `docs/METHODS_PLAN.md` §4B, no decision; all 7 subfields,
+19–20 October) records per subfield the lexicons' sizes and their coverage of the unseen test names
 under both silver filters at three thresholds, and the dictionary rule's
 effect on week 10's saved predictions with the gold-name ceilings; the names
 themselves stay local.
