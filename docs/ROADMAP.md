@@ -3733,6 +3733,7 @@ stay local.
 | electrolysis | 56.3, 50.2, 57.2 | 300, 12.5%, +0.85 | 7,895, 29.9%, −0.77 | 35.5%, −3.78 | −6.85 / +4.47 |
 | pemfc | 44.4, 51.1, 52.9 | 300, 19.2%, +3.16 | 6,259, 29.4%, +3.97 | 37.6%, −0.44 | −10.51 / −5.91 |
 | poly | 45.6, 52.5, 53.8 | 854, 8.0%, −0.25 | 9,194, 18.3%, −3.31 | 23.4%, −9.91 | −3.63 / +2.22 |
+| semi | 32.8, 35.0, 34.3 | 379, 4.6%, +1.20 | 5,713, 9.4%, +2.27 | 20.4%, −0.76 | +17.29 / +22.00 |
 | sofc | 53.4, 51.9, 51.2 | 340, 25.8%, +5.79 | 4,344, 34.4%, +5.91 | 45.8%, +5.96 | +15.16 / +27.06 |
 | steel | 55.2, 58.2, 58.6 | 667, 13.3%, +0.01 | 7,913, 25.0%, −10.03 | 32.5%, −13.18 | −1.82 / +4.13 |
 
@@ -3818,6 +3819,25 @@ is nearly balanced (steel, poly, electrolysis); 0.9 beats 0.7 and 0.5
 everywhere; as a dictionary the sentence filter is the safer (never below
 −0.3 at 0.9) and the mention filter the richer (18–34% of the unseen
 names against 8–26%).
+
+*Reading, semi.* The weakest head and the thinnest lexicon. The corpus
+holds 69.3% of semi's unseen test names, but the mention filter at 0.9
+admits 9.4% (5,713 names; 7,783 of its 10,145 mentions are VALUE, 863
+MAT) and the sentence filter 4.6% (379 names): the teachers, at 33–35
+test F1, seldom agree confidently on semi's materials, so here the
+teachers' recall, not the corpus, is the bottleneck. The held-out CRF head
+(10 seeds: precision 54.0, recall 23.5, F1 32.5) gains from whatever is
+admitted: the 0.9 mention lexicon fills to +2.3 (on all 10 seeds), the 0.9
+sentence lexicon to +1.2 (all 10), the 0.7 sentence lexicon to +3.6 (all
+10); the 0.7 and 0.5 mention lexicons and every override but the sentence
+ones at 0.9 and 0.7 lose. The gold unseen names fill to +17.3 and
+override to +22.0, the largest ceilings of the seven. *So far (6 of 7).*
+The recall-gap rule holds (semi's gap is 30 points and the dictionary
+helps); the 0.9 threshold holds for the mention filter everywhere, while
+the sentence filter at 0.7 gains more than at 0.9 on sofc (+7.2), pemfc
+(+2.4 against +3.2, less), semi (+3.6) and loses on poly (−2.5) and
+electrolysis (−0.3): the sentence filter admits so few names that
+loosening it costs little where the lexicon helps.
 
 ### Week 12 protocol: names from a topic corpus (fixed before any run)
 
