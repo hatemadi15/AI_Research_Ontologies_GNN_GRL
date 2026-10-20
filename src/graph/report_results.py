@@ -214,6 +214,14 @@ WEEK7_SYSTEM_NAMES = {**WEEK6_NAMES, **{
     'crf_mt_mr_ens3': 'multi-task + mention-replacement vote',
     'crf_mrs': 'mention replacement with silver names',
     'crf_mrs_ens3': 'silver-name mention-replacement vote',
+    'crf_mrm': 'mention replacement with silver mentions',
+    'crf_mrm_ens3': 'silver-mention mention-replacement vote',
+    'crf_mrm6': 'mention replacement with silver mentions, 6 copies',
+    'crf_mrm6_ens3': 'silver-mention 6-copy vote',
+    'crf_gzm': 'CRF head + silver mentions as a match feature',
+    'crf_gzm_ens3': 'match-feature vote',
+    'crf_mr6': 'mention replacement, 6 copies', 'crf_mr6_ens3': '6-copy mention-replacement vote',
+    'crf_st3_ens3': 'self-training vote',
     **{v: f'{WEEK6_NAMES[ref]} + coarse-to-fine completion'
        for v, ref in WEEK7C_COMPARISONS}}
 # Week 9 (week-9 protocol): mention replacement on the multi-task model, as in
@@ -230,6 +238,16 @@ WEEK11_COMPARISONS = (('crf_mrs', 'crf_mr'), ('crf_mrs', 'crf'), ('crf_mrs_ens3'
                       *(('crf_mrs_ens3', ref)
                         for ref in dict.fromkeys(('crf_ens3', *UNSEEN_BEST.values()))))
 WEEK11_DECISIONS = WEEK11_COMPARISONS[:1]
+# Week 12 (week-12 protocol): the MaterioMiner analogue of the screen's winner, as in
+# ner_seedmeans.WEEK12_COMPARISONS; the first five decide (the MuLMS screen and decisions
+# are in mulms_note)
+WEEK12_FILE = 'ner_week12_comparisons.json'
+WEEK12_ANALOGUE_VARIANTS = ('crf_mrm', 'crf_mrm6', 'crf_gzm', 'crf_st3', 'crf_mr6')
+WEEK12_COMPARISONS = (*((v, 'crf') for v in WEEK12_ANALOGUE_VARIANTS),
+                      *((v, 'crf_mr') for v in WEEK12_ANALOGUE_VARIANTS),
+                      *((f'{v}_ens3', 'crf_ens3') for v in WEEK12_ANALOGUE_VARIANTS),
+                      *((f'{v}_ens3', 'crf_mr_ens3') for v in WEEK12_ANALOGUE_VARIANTS))
+WEEK12_DECISIONS = WEEK12_COMPARISONS[:len(WEEK12_ANALOGUE_VARIANTS)]
 # the label of a week-7 method in the SOFC-Exp bullet (both parts decide on SOFC-Exp)
 WEEK7_SOFC_LABELS = {**{m: f"Week 7, {name} on the CRF head's predictions"
                         for m, name in WEEK7_NAMES.items()},
@@ -861,6 +879,18 @@ WEEK11_INTRO = (
     "against mention replacement (do the silver names add?); its MuLMS decisions are in the "
     "week-10 bullet. The other rows are reported without a decision.\n")
 
+WEEK12_INTRO = (
+    "Δ = with the change − without it, on the same held-out paper, GPU runs only, 10 model "
+    "seeds: a model scores the mean of its 10 runs, a vote the mean of its votes over 3 "
+    "disjoint seed triples. Week-12 protocol, the MaterioMiner analogue of the screen's "
+    "winner: the 3 CRF teachers tag the 40,000-sentence fatigue corpus and the names of the "
+    "spans they tag alike and confidently (`--silver-mentions`) enter the student's training "
+    "in the winner's way (the replacement pool, 3 or 6 copies; or a match feature of the CRF "
+    "head). Pre-registered rule: a change improves on its reference only if the 95% Student-t "
+    "CI of the mean micro-F1 difference lies entirely above 0. Decision per granularity on the "
+    "4 held-out papers: against the CRF head; the MuLMS screen and decisions are in the "
+    "week-10 bullet. The other rows are reported without a decision.\n")
+
 
 def ner_week7_table(res, comparisons=WEEK7_COMPARISONS,
                     title='part 1 (the consistency rule, 10-seed means, GPU runs)',
@@ -908,7 +938,10 @@ def build_tables(res):
                              'runs)', WEEK9_INTRO, file=WEEK9_FILE, week='9')
            + ner_week7_table(res, WEEK11_COMPARISONS,
                              'mention replacement with silver names (10-seed means, GPU runs)',
-                             WEEK11_INTRO, file=WEEK11_FILE, week='11'))
+                             WEEK11_INTRO, file=WEEK11_FILE, week='11')
+           + ner_week7_table(res, WEEK12_COMPARISONS,
+                             "the MaterioMiner analogue of the screen's winner (10-seed means, "
+                             'GPU runs)', WEEK12_INTRO, file=WEEK12_FILE, week='12'))
     return '\n'.join(out).strip()
 
 
@@ -1114,6 +1147,11 @@ def ner_notes(res):
         note += week6_verdict_line(week11, variant, reference,
                                    'mention replacement with silver names, 10 seeds',
                                    week='11', names=WEEK7_SYSTEM_NAMES)
+    week12 = res.comparisons(GPU_PREFIX + WEEK12_FILE)
+    for variant, reference in WEEK12_DECISIONS:
+        note += week6_verdict_line(week12, variant, reference,
+                                   "the MaterioMiner analogue of the screen's winner, 10 seeds",
+                                   week='12', names=WEEK7_SYSTEM_NAMES)
     return note + sofc_note(analysis) + mulms_note(analysis)
 
 

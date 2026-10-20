@@ -94,7 +94,8 @@ def test_week4_systems_and_comparisons_follow_the_week4_protocol():
     assert ns.OUT_NAMES == {3: 'ner_week3_comparisons.json', 4: 'ner_week4_comparisons.json',
                             5: 'ner_week5_comparisons.json', 6: 'ner_week6_comparisons.json',
                             7: 'ner_week7_comparisons.json', 9: 'ner_week9_comparisons.json',
-                            11: 'ner_week11_comparisons.json'}
+                            11: 'ner_week11_comparisons.json',
+                            12: 'ner_week12_comparisons.json'}
 
 
 def test_week5_systems_and_comparisons_follow_the_week5_protocol():
@@ -417,6 +418,36 @@ def test_week11_silver_names_against_mention_replacement(tmp_path):
     assert comps[key.format('fine', lopo, 'crf_mrs_vs_crf_mr')]['micro']['mean_diff'] == 1.0
     assert comps[key.format('coarse', lopo, 'crf_mrs')]['micro']['mean_diff'] == 2.5
     assert (tmp_path / 'ner_week11_comparisons.json').exists()
+
+
+def test_week12_analogue_systems_and_comparisons(tmp_path):
+    """Week 12 on MaterioMiner: the analogue variants are 10-seed families with votes; each is
+    decided against the CRF head on the held-out papers and reported against mention
+    replacement, the votes against both votes; comparisons without files are skipped. Its
+    own file."""
+    pytest.importorskip('scipy')
+    lopo = 'leave_one_paper_out'
+    systems = ns.system_list(12)
+    for v in ('crf_mrm', 'crf_mrm6', 'crf_gzm', 'crf_st3', 'crf_mr6'):
+        assert systems[v] == tuple(f'{v}_m{n}' for n in range(0, 1000, 100))
+        assert systems[f'{v}_ens3'] == (f'{v}_ens3', f'{v}_ens3_m300', f'{v}_ens3_m600')
+    comps = ns.comparison_list(12, gpu=True)
+    assert len(comps) == 20 and comps[2] == ('crf_gzm', 'crf', lopo)
+    assert ('crf_gzm', 'crf_mr', None) in comps and ('crf_gzm_ens3', 'crf_ens3', None) in comps
+    with pytest.raises(ValueError):
+        ns.comparison_list(12)
+    for g in ('fine', 'coarse'):
+        for stem, plus in (('crf', 0), ('crf_mr', 1.5), ('crf_gzm', 2.5)):
+            for name in systems[stem]:
+                _write(tmp_path, g, lopo, name, [x + plus for x in (50, 51, 52, 53)])
+    out = ns.main(['--results', str(tmp_path), '--week', '12', '--gpu'])
+    key = 'ner_results_{}_{}_{}'
+    assert {k: c['role'] for k, c in out.items()} == {
+        **{key.format(g, lopo, 'crf_gzm'): 'decision' for g in ('fine', 'coarse')},
+        **{key.format(g, lopo, 'crf_gzm_vs_crf_mr'): 'reported' for g in ('fine', 'coarse')}}
+    assert out[key.format('fine', lopo, 'crf_gzm')]['micro']['mean_diff'] == 2.5
+    assert out[key.format('coarse', lopo, 'crf_gzm_vs_crf_mr')]['micro']['mean_diff'] == 1.0
+    assert (tmp_path / 'ner_week12_comparisons.json').exists()
 
 
 def test_decides_on_one_protocol_or_several():

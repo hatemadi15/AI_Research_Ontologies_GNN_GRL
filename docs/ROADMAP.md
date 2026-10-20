@@ -3693,6 +3693,11 @@ mention-level filter is a candidate for the screen.
   if decision 1 passes, the MaterioMiner analogue, all this week (Kaggle
   charges session hours: `w11b`'s 3.4-hour session cost 3.4 of them, and
   about 11 are needed for the rest of week 12 against 12.7 left).
+- Prepared, 20 October, before the screen: the MaterioMiner analogue
+  batches `w12d:<variant>` and the week-12 comparisons of
+  `ner_seedmeans.py` and `report_results.py` (above, under the methods
+  criterion), with tests (575 in all), so that the analogue can run the
+  moment decision 1 passes.
 - *21:06: `w11b` pushed* to `ner-gpu-jobs-d` (version 6) from bundle
   77c37be, 5 jobs in lane 0 (the smoke4 repeat `smokean` and the 4
   fine-grained held-out papers) and 4 in lane 1 (the coarse ones), about
@@ -3887,6 +3892,14 @@ corpus with the sentence filter, decisions 3 and 4 of week 11); for V2 a
 batch of the same shape with `--silver-mentions` (`crf_mrm`, 10 seeds, both
 granularities); for V3 `crf_mr6` on the held-out papers. Each would be a
 decision against week 5's CRF head, pre-registered when it is reached.
+*(Prepared on 20 October, before the screen: the batches `w12d:<variant>`
+for V2 `crf_mrm`, V4 `crf_mrm6`, V7 `crf_gzm` and V3 `crf_mr6` (one lane
+per granularity, a job per held-out paper or per seed offset, the smoke
+repeat `smokear`), V6's analogue being week 4's `crf_st3` files; the
+decision against the CRF head per granularity and the reported
+comparisons against mention replacement and the votes are
+`ner_seedmeans.py --week 12` (`gpu/ner_week12_comparisons.json`), the
+report's week-12 table and bullets.)*
 
 *Attempts.* This is the third protocol that asks whether a method improves on
 the CRF head on MuLMS's held-out subfields (weeks 10, 11 and 12), and the

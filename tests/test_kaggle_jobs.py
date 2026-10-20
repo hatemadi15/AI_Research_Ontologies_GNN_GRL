@@ -1141,3 +1141,42 @@ def test_week12_gazetteer_feature_batches(monkeypatch, tmp_path):
         for a in lane:
             assert kind(a) == 'crf_gzm_topic' and a.student_offsets == offsets
     assert 'w12c' in kj.BATCHES and 'w12b:gzm' in kj.BATCHES
+
+
+def test_week12_analogue_batches(monkeypatch, tmp_path):
+    """w12d:<variant>: the MaterioMiner analogue of the screen's winner, one lane per
+    granularity, a job per held-out paper for the teacher variants (the mention-level silver
+    names in the pool with 3 or 6 copies, or as a match feature) and a job per seed offset
+    for crf_mr6; V1's analogue is w11b and V6's exists, so neither is a batch."""
+    monkeypatch.setattr(nb.os.path, 'isfile', lambda path: True)    # the corpus is not here
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda report=None: 'x' * 64)
+
+    def kind(a, tag='m300'):
+        return nb.variant_name(nb.SimpleNamespace(**{**vars(a), 'tag': tag}))
+    for variant, name, copies in (('mrm', 'crf_mrm', 3), ('mrm6', 'crf_mrm6', 6),
+                                  ('gzm', 'crf_gzm', 0)):
+        lane0, lane1 = _parsed(kj.batch_lanes(f'w12d:{variant}'))
+        assert lane0[0].tag == 'smokear' and lane0[0].granularity == 'fine'
+        for lane, g in ((lane0[1:], 'fine'), (lane1, 'coarse')):
+            assert [a.papers for a in lane] == [[p] for p in kj.PAPERS]
+            for a in lane:
+                assert (a.granularity, nb.protocol_name(a), a.self_train) == (
+                    g, 'leave_one_paper_out', kj.CORPUS)
+                assert (a.teachers, a.students, a.self_train_sample) == (3, 10, 0)
+                assert a.silver_mentions and a.crf and a.save_predictions
+                assert getattr(a, 'augment_mentions', 0) == copies
+                assert getattr(a, 'augment_names', False) == (variant != 'gzm')
+                assert getattr(a, 'names_feature', False) == (variant == 'gzm')
+                assert kind(a) == f'{name}_m300' and not hasattr(a, 'names_tag')
+    lane0, lane1 = _parsed(kj.batch_lanes('w12d:mr6'))
+    assert lane0[0].tag == 'smokear' and (len(lane0), len(lane1)) == (11, 10)
+    for lane, g in ((lane0[1:], 'fine'), (lane1, 'coarse')):
+        assert [a.tag for a in lane] == [f'm{off}' for off in range(0, 1000, 100)]
+        for a in lane:
+            assert (a.granularity, nb.protocol_name(a), a.augment_mentions) == (
+                g, 'leave_one_paper_out', 6)
+            assert not hasattr(a, 'self_train') and kind(a, a.tag) == f'crf_mr6_{a.tag}'
+    for name in ('w12d:mrs', 'w12d:st3', 'w12d:x'):
+        with pytest.raises(ValueError):
+            kj.batch_lanes(name)
+    assert {f'w12d:{v}' for v in ('mrm', 'mrm6', 'gzm', 'mr6')} <= set(kj.BATCHES)

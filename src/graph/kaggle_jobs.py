@@ -154,6 +154,13 @@ bundle as topic_<topic>_sentences.txt; the screen, then the decision for its win
           offsets 300 to 900; the teacher variants as in w12a with each lane training the
           teachers and 3 or 4 of the students (offsets 300-500 and 600-900), mr6 one job
           per offset over the lanes (smokeap)
+  w12d:V  the MaterioMiner analogue of the winner V (mrm, mrm6, gzm or mr6; V1's is w11b,
+          V6's the week-4 crf_st3 files), if decision 1 passes: the CRF run of smoke4
+          (smokear); one lane per granularity, a job per held-out paper in which the 3
+          teachers tag the fatigue corpus and the 10 students train the variant with the
+          mention-level silver names (crf_mrm_m<N>, crf_mrm6_m<N>, crf_gzm_m<N>), or for mr6
+          a job per seed offset (crf_mr6_m<N>); decided against the CRF head
+          (ner_seedmeans.py --week 12)
 
 The TPU spike (docs/METHODS_PLAN.md §5; every batch named tpu... runs on the TPU v5e-8, one
 lane per chip, its jobs with --device xla, its results in results/tpu/, a family of their own):
@@ -287,6 +294,9 @@ MR6_COPIES = 6               # week 12's copy-count variant (crf_mr6)
 # the screen's variants (amendment 1 added mrm6 and st3): w12b:<variant> decides one
 WEEK12_VARIANTS = ('mrs', 'mrm', 'mr6', 'mrm6', 'st3', 'gzm')   # gzm: w12c (amendment 2)
 DECISION_LANES = (OFFSETS_W5[:3], OFFSETS_W5[3:])   # w12b: the students per lane (seeds 300-900)
+# w12d:<variant>: the MaterioMiner analogue of the screen's winner (V1's is w11b, V6's the
+# week-4 crf_st3 files)
+WEEK12_ANALOGUES = ('mrm', 'mrm6', 'gzm', 'mr6')
 
 
 # ---------------------------------------------------------------------------
@@ -403,6 +413,29 @@ def mrs_paper_job(granularity, paper):
     corpus and the 10 students train mention replacement with their silver names."""
     return ['--granularity', granularity, '--leave-one-paper-out', '--papers', paper,
             '--self-train', CORPUS, '--self-train-sample', '0', *MRS_FLAGS]
+
+
+def analogue_paper_job(variant, granularity, paper):
+    """Week 12's MaterioMiner analogue (w12d) of a teacher variant: one held-out paper; the 3
+    teachers tag the whole fatigue corpus and the 10 students train the variant with the
+    mention-level silver names (--silver-mentions): in the pool with 3 copies (crf_mrm) or 6
+    (crf_mrm6), or as a match feature (crf_gzm, --names-feature, no copies)."""
+    job = ['--granularity', granularity, '--leave-one-paper-out', '--papers', paper,
+           '--self-train', CORPUS, '--self-train-sample', '0', '--silver-mentions']
+    if variant == 'gzm':
+        return job + ['--names-feature', '--crf', '--teachers', '3', '--students', '10',
+                      '--save-predictions', '--threads', str(THREADS)]
+    return job + [f if f != '3' or MRS_FLAGS[i - 1] != '--augment-mentions'
+                  else ('6' if variant == 'mrm6' else '3') for i, f in enumerate(MRS_FLAGS)]
+
+
+def week12_analogue(name):
+    """The variant of an analogue batch name 'w12d:V' (ValueError if unknown)."""
+    variant = name[len('w12d:'):]
+    if variant not in WEEK12_ANALOGUES:
+        raise ValueError(f'unknown week-12 analogue {name!r}; known: {WEEK12_ANALOGUES} '
+                         f"(V1's analogue is w11b, V6's the week-4 crf_st3 files)")
+    return variant
 
 
 def published_job(granularity, *flags):
@@ -729,6 +762,18 @@ def batch_lanes(name):
         # subfields over the two lanes (each job trains its own teachers)
         jobs = [topic_variant_job('gzm', s, OFFSETS) for s in MULMS_SUBFIELD_NAMES]
         return [[repeat + ['--tag', 'smokeaq']] + jobs[:4], jobs[4:]]
+    if name.startswith('w12d:'):
+        # week 12's MaterioMiner analogue of the screen's winner, 10 seeds, one lane per
+        # granularity: a job per held-out paper (the teacher variants) or per seed offset
+        # (crf_mr6, no teachers)
+        variant = week12_analogue(name)
+        if variant == 'mr6':
+            lanes = [[job(g, 'leave_one_paper_out', '--augment-mentions', str(MR6_COPIES),
+                          offset=off, tag=f'm{off}') for off in OFFSETS + OFFSETS_W5]
+                     for g in GRANULARITIES]
+        else:
+            lanes = [[analogue_paper_job(variant, g, p) for p in PAPERS] for g in GRANULARITIES]
+        return [[repeat + ['--tag', 'smokear']] + lanes[0], lanes[1]]
     if name.startswith('w12b:'):
         # week 12's decision on MuLMS for the screen's winner, seed offsets 300 to 900
         variant = week12_variant(name)
@@ -760,7 +805,8 @@ def batch_lanes(name):
 BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'item3r',
            'smoke4', 'w5a', 'w5b', 'w5c', 'smoke5', 'smoke6', 'w6a', 'w6b', 'w7a', 'w7b',
            'w7c', 'w7d', 'w7e', 'w8a', 'w8b', 'w9a', 'w9b', 'w10a', 'w11a', 'w11b', 'w12a', 'w12c',
-           *(f'w12b:{v}' for v in WEEK12_VARIANTS), 'tpu-smoke1', 'tpu-smoke')
+           *(f'w12b:{v}' for v in WEEK12_VARIANTS), *(f'w12d:{v}' for v in WEEK12_ANALOGUES),
+           'tpu-smoke1', 'tpu-smoke')
 
 
 def batch_extras(name):

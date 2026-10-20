@@ -135,7 +135,8 @@ RESULTS_DIR = Path(__file__).resolve().parents[2] / 'results'
 OUT_NAME = 'ner_week3_comparisons.json'
 OUT_NAMES = {3: OUT_NAME, 4: 'ner_week4_comparisons.json', 5: 'ner_week5_comparisons.json',
              6: 'ner_week6_comparisons.json', 7: 'ner_week7_comparisons.json',
-             9: 'ner_week9_comparisons.json', 11: 'ner_week11_comparisons.json'}
+             9: 'ner_week9_comparisons.json', 11: 'ner_week11_comparisons.json',
+             12: 'ner_week12_comparisons.json'}
 SCREEN_NAMES = {6: 'ner_week6_screen.json', 7: 'ner_week7_screen.json'}
 SCREEN_NAME = SCREEN_NAMES[6]
 
@@ -380,18 +381,37 @@ WEEK11_COMPARISONS = (
                                                             *UNSEEN_BEST.values()))),
 )
 
+# week 12: the MaterioMiner analogue of the screen's winner (w12d; crf_st3 from week 4's
+# files), 10 seeds on the held-out papers: decided against the CRF head, reported against
+# mention replacement, the votes against both votes
+WEEK12_VARIANTS = ('crf_mrm', 'crf_mrm6', 'crf_gzm', 'crf_st3', 'crf_mr6')
+WEEK12_SYSTEMS = {
+    **WEEK11_SYSTEMS,
+    **{v: seed_family(v) for v in WEEK12_VARIANTS if v not in WEEK11_SYSTEMS},
+    **{f'{v}_ens3': vote_family(v) for v in WEEK12_VARIANTS
+       if f'{v}_ens3' not in WEEK11_SYSTEMS},
+}
+WEEK12_COMPARISONS = (
+    *((v, 'crf', LOPO) for v in WEEK12_VARIANTS),
+    *((v, 'crf_mr', None) for v in WEEK12_VARIANTS),
+    *((f'{v}_ens3', 'crf_ens3', None) for v in WEEK12_VARIANTS),
+    *((f'{v}_ens3', 'crf_mr_ens3', None) for v in WEEK12_VARIANTS),
+)
+
 
 def comparison_list(week, gpu=False, screen=False):
     """The comparisons of a week's protocol: week 3, week 4 on the CPU or the GPU runs,
-    week 5, week 6 or week 7 (their stage-1 screens with screen=True), week 9 or week 11;
-    GPU runs only from week 5."""
+    week 5, week 6 or week 7 (their stage-1 screens with screen=True), week 9, week 11 or
+    week 12 (the MaterioMiner analogue); GPU runs only from week 5."""
     if week == 3:
         if gpu:
             raise ValueError('the week-3 comparisons are made on the CPU runs only')
         return COMPARISONS
-    if week in (5, 6, 7, 9, 11):
+    if week in (5, 6, 7, 9, 11, 12):
         if not gpu:
             raise ValueError(f'the week-{week} comparisons are made on the GPU runs only')
+        if week == 12:
+            return WEEK12_COMPARISONS
         if week == 11:
             return WEEK11_COMPARISONS
         if week == 9:
@@ -406,6 +426,8 @@ def comparison_list(week, gpu=False, screen=False):
 
 def system_list(week, screen=False):
     """The systems (name: the variants of its results files) of a week's protocol."""
+    if week == 12:
+        return WEEK12_SYSTEMS
     if week == 11:
         return WEEK11_SYSTEMS
     if week == 9:
