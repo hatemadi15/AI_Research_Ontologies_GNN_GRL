@@ -3730,6 +3730,11 @@ mention-level filter is a candidate for the screen.
   built on the fix. The probe's container was restarted three times in the
   night (02:20, 03:10, 04:00), killing the graphene probe each time; the
   probe now caches each teacher's votes locally and resumes from them.
+- *04:20: the bundle rebuilt* from 3ac85a8 (the fix; 413 GPU results files,
+  the 7 topic corpora, the 52 MuLMS files) as the new version of
+  `ner-gpu-bundle-3`; `w12c` is pushed to `ner-gpu-jobs-c` 30 minutes
+  later, `w12e` to `ner-gpu-jobs-d` once the first `w12a` session there
+  completes and is pulled.
 - *21:06: `w11b` pushed* to `ner-gpu-jobs-d` (version 6) from bundle
   77c37be, 5 jobs in lane 0 (the smoke4 repeat `smokean` and the 4
   fine-grained held-out papers) and 4 in lane 1 (the coarse ones), about
