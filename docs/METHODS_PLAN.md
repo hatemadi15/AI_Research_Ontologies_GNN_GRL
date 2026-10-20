@@ -125,7 +125,7 @@ one-hot match; one more variant, on the GPU, in §4C). Sources:
 [GEMNET](https://aclanthology.org/2021.naacl-main.118/),
 [Chen et al. 2021](https://arxiv.org/pdf/2109.01758).
 
-**Honest odds.** Decision 1 (against the CRF head) on MuLMS: about 0.45,
+**Honest odds, revised 20 October after the probe and the screen's first part.** The feature variants (V7, V8) and the copy control (V3) are not above mention replacement on the 3-seed screen, and the probe shows the lexicon's value swinging with the subfield's recall gap; decision 1 on MuLMS for one of V1, V2, V4 and V6 is now about 0.3, decision 2 about 0.15, a methods paper about 0.2. *As written on 19 October:* Decision 1 (against the CRF head) on MuLMS: about 0.45,
 because MR is already close to the line and the corpus holds the names.
 Decision 2 (names beyond MR): about 0.3. The MaterioMiner analogue, given a
 MuLMS pass: about 0.6. A methods paper overall: about 0.35–0.4. The CPU probe

@@ -749,6 +749,40 @@ names that three CRF teachers tag in unlabeled in-domain text.
   decision if that gain is above 0, on seeds the screen did not see: against
   the CRF head (decision 1) and mention replacement (decision 2). If no
   variant passes the screen, the methods route on MuLMS is exhausted.
+  Three amendments before any run (ROADMAP §4) added the mention-level
+  filter with 6 copies, self-training on the topic corpus (the baseline a
+  names method must beat), and the harvested names as a gazetteer match
+  feature of the plain CRF head rather than a replacement pool, with either
+  filter's lexicon (a term learned from zero on two columns per type, first
+  word and later words of every verbatim match): eight variants.
+- *What a harvested lexicon is worth as a dictionary (the CPU probe,
+  ROADMAP §4, no decision).* Before the screen, three CRF teachers trained
+  on the CPU tagged each subfield's corpus, and the lexicon of each filter
+  was applied to the held-out CRF head's saved predictions (10 seeds) as a
+  rule: every verbatim match of a name tagged as its type where the head
+  had tagged O. At the 0.9 threshold the mention-level filter admits 9–34%
+  of the held-out subfield's unseen test names and the sentence filter
+  5–26%, against 55–81% in the corpus. As a dictionary the lexicon helps
+  where the head's recall trails its precision by 15 points or more
+  (sofc +5.9, pemfc +4.0, semi +2.3 F1) and hurts where the head is nearer
+  balance (steel −10.0, graphene −5.1, poly −3.3, electrolysis −0.8),
+  averaging −1.0 over the seven subfields with the mention filter and +1.1
+  with the sentence filter. On pemfc the gold unseen names themselves hurt
+  (−10.5): a string that is an entity in one of its sentences is not one in
+  the next, and the names three teachers agree on at 0.9 are the ones that
+  are entities wherever they occur. 0.9 is the right threshold for both
+  filters; looser lexicons and overriding the head's tags lose almost
+  everywhere. The per-subfield rule is the free baseline the screen's
+  variants are reported against.
+- *Screen, part 1 (20 October; 3 seeds, 7 subfields, no decision):* the two
+  feature variants score 48.91 (mention filter) and 48.79 (sentence
+  filter), −0.03 [−2.02, +1.97] and −0.15 [−2.15, +1.86] against the CRF
+  head and −1.73 [−4.13, +0.67] and −1.85 [−3.59, −0.12] against mention
+  replacement; their learned term stays small (largest absolute weight
+  0.4–1.1 against emissions of several units). Six copies without names
+  score 50.44, −0.20 [−3.20, +2.80] against mention replacement with 3
+  copies. None can be the screen's winner; the four replacement-pool
+  variants run after 24 October.
 
 ## 7 Limitations
 
