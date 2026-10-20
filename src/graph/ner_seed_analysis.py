@@ -87,7 +87,8 @@ votes (ner_seedmeans.WEEK5_SYSTEMS) and writes ner_week5_seed_analysis.json next
     the unseen test entities whose name is a silver name, pooled over the subfields. week12
     (week 12; its screen and MuLMS decisions): every other mention replacement variant with
     files on the held-out subfields (crf_mr<...>: names from a topic corpus, crf_mrs_topic
-    and crf_mrm_topic, or more copies, crf_mr6), each analysed as crf_mrs is against the
+    and crf_mrm_topic, or more copies, crf_mr6; not the consistency rule's outputs _dc and
+    _dcr, which belong to week13), each analysed as crf_mrs is against the
     CRF head and mention replacement at the same seed offsets, in three parts, each present
     when the variant has every file of its offsets: screen, the offsets 0 to 200 (the means
     and CIs, no decision; the screen picks the variant by its mean minus mention
@@ -691,7 +692,8 @@ def names_variant(files, system, decide=True):
 def week12_variants(directory):
     """The week12 section of mulms: {variant: {part: names_variant(...)}} for every variant
     other than crf, crf_mr and crf_mrs with files on the held-out subfields (crf_mrs_topic,
-    crf_mrm_topic, crf_mrm_topic6, crf_st3_topic, crf_mr6);
+    crf_mrm_topic, crf_mrm_topic6, crf_st3_topic, crf_mr6); the consistency rule's outputs
+    (*_dc and *_dcr, no training; the week13 section) are not variants;
     the parts screen (SCREEN_OFFSETS, no decision), decision (DECISION_OFFSETS) and ten_seeds
     (WEEK5_OFFSETS, no decision), each present when the variant and both references have
     every file of its offsets."""
@@ -699,7 +701,8 @@ def week12_variants(directory):
     variants = set()
     for path in sorted(Path(directory).glob(f'{prefix}crf_*_m*.json')):
         variant, _, offset = path.name[len(prefix):-len('.json')].rpartition('_m')
-        if variant not in ('crf', 'crf_mr', 'crf_mrs') and offset.isdigit():
+        if (variant not in ('crf', 'crf_mr', 'crf_mrs') and offset.isdigit()
+                and variant.rpartition('_')[2] not in ('dc', 'dcr')):
             variants.add(variant)
     out = {}
     for variant in sorted(variants):

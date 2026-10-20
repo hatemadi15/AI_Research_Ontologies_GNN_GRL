@@ -428,6 +428,12 @@ def test_mulms_held_out_subfields_and_pool_splits(tmp_path):
                 runs.append(run)
             (tmp_path / f'ner_results_mulms_leave_one_subfield_out_{system}_m{off}.json'
              ).write_text(json.dumps({'runs': runs}))
+    # the consistency rule's outputs on the held-out subfields (week 13) are not variants
+    for system in ('crf_dc', 'crf_mr_dcr'):
+        for off in range(0, 1000, 100):
+            src = tmp_path / f'ner_results_mulms_leave_one_subfield_out_crf_mr6_m{off}.json'
+            (tmp_path / f'ner_results_mulms_leave_one_subfield_out_{system}_m{off}.json'
+             ).write_text(src.read_text())
     week12 = sa.mulms(tmp_path)['week12']
     assert set(week12) == {'crf_mr6', 'crf_mrm_topic'}
     assert set(week12['crf_mrm_topic']) == {'screen'}       # seeds 0-200 only
