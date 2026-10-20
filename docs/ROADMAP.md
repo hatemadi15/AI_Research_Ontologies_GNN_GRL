@@ -4058,4 +4058,8 @@ of `ner-gpu-bundle-3` (457 files: the code, the fatigue corpus, the 52
 MuLMS files, the 7 topic corpora with their SHA-256 in `BUNDLE.json`, and
 393 GPU results files); every upload succeeded at the first try. `w11b`,
 `w12a` and `w12b:<variant>` were to run from it after the reset on 24 October;
-amendment 2 replaces it by a bundle built after the probe (above).
+amendment 2 replaces it by a bundle built after the probe: rebuilt from
+47e2310 (amendments 1–3) on 20 October, ready at 02:02 UTC as the new version
+of `ner-gpu-bundle-3` (413 GPU results files, the 7 topic corpora and the 52
+MuLMS files with their SHA-256 in `BUNDLE.json`); every week-12 batch runs
+from it.
