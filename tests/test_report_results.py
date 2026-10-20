@@ -1664,3 +1664,62 @@ def test_real_results_regenerate_the_current_blocks(tmp_path):
                         f"`python src/graph/report_results.py`\n{diff[:3000]}")
         # everything outside the block is carried over untouched
         assert generated == text
+
+
+def test_week13_bullet(tmp_path):
+    """Week 13: the consistency rule's outputs against their inputs per corpus (a verdict
+    for a decision, reported otherwise), the screen's winner and the pooled estimates; no
+    bullet without the week13 section."""
+    ws = Workspace(tmp_path)
+    (ws.results / 'gpu').mkdir()
+
+    def diff(mean, lo, hi, n=7):
+        return {'mean_diff': mean, 'ci95': [lo, hi], 'per_run': [mean] * n}
+
+    def score(mean, lo, hi):
+        return {'micro': {'mean': mean, 'ci95': [lo, hi]}}
+
+    def entry(out, inp, mean, lo, hi, added, decision=None):
+        e = {'output': score(*out), 'input': score(*inp), 'n_units': 7,
+             'minus_input': {'micro': diff(mean, lo, hi), 'micro_strict': diff(mean, lo, hi)},
+             'n_added_per_seed': added, 'n_retyped_per_seed': 0.0}
+        if decision:
+            e.update({'decision': decision, 'passes': lo > 0})
+        return e
+    analysis = {'mulms': {}, 'week13': {'consistency': {}, 'week12_winner': None, 'pooled': {}}}
+    (ws.results / 'gpu' / rr.WEEK5_ANALYSIS).write_text(json.dumps(analysis))
+    readme, _ = ws.generate()
+    assert '* NER week 13' not in readme
+    analysis['week13'] = {
+        'consistency': {
+            'mulms': {'crf_dc': entry((49.47, 44.0, 55.0), (48.66, 43.0, 54.0), 0.82, 0.18, 1.46,
+                                      1213.0, '13.1a'),
+                      'crf_dcr': entry((49.7, 44.0, 55.0), (48.66, 43.0, 54.0), 1.01, 0.28, 1.74,
+                                       1213.0)},
+            'sofc_folds': {'crf_dc': entry((82.34, 78.0, 86.0), (82.79, 78.5, 87.0), -0.44,
+                                           -0.72, -0.16, 169.0)}},
+        'week12_winner': 'crf_mrm_topic',
+        'pooled': {'crf_mr': {
+            'corpora': {'mulms': {'variant': 'crf_mr', 'n_units': 7, 'loses': False,
+                                  'minus_crf': diff(2.1, -0.31, 4.51)},
+                        'fine': {'variant': 'crf_mr', 'n_units': 4, 'loses': False,
+                                 'minus_crf': diff(2.77, 1.51, 4.03, 4)}},
+            'n_units': 11, 'minus_crf': diff(2.34, 0.94, 3.75, 11), 'status': 'reported',
+            'passes': True, 'no_corpus_loses': True}}}
+    (ws.results / 'gpu' / rr.WEEK5_ANALYSIS).write_text(json.dumps(analysis))
+    readme, _ = ws.generate()
+    assert ("* NER week 13 (the consistency rule of week 7 on the saved 10-seed predictions of "
+            "held-out documents, no training; the 95% CIs are over the subfields, papers or "
+            "folds). MuLMS's 7 held-out subfields, on the CRF head: 49.47 [44.00, 55.00] against "
+            "48.66 [43.00, 54.00], 1213 entities added per seed; decision 13.1a, improves (+0.82, "
+            "95% CI [+0.18, +1.46]; strict IOB2 +0.82 [+0.18, +1.46]). MuLMS's 7 held-out "
+            "subfields, on the CRF head with retyping: 49.70 [44.00, 55.00] against 48.66 [43.00, "
+            "54.00], 1213 entities added per seed; +1.01, 95% CI [+0.28, +1.74]; strict IOB2 "
+            "+1.01 [+0.28, +1.74] (reported; no decision). SOFC-Exp's 5 article folds, on the CRF "
+            "head: 82.34 [78.00, 86.00] against 82.79 [78.50, 87.00], 169 entities added per "
+            "seed; -0.44, 95% CI [-0.72, -0.16]; strict IOB2 -0.44 [-0.72, -0.16] (reported; no "
+            "decision). The week-12 screen's winner: silver mentions (crf_mrm_topic). Pooled "
+            "over 11 held-out units, mention replacement against the CRF head: +2.34 [+0.94, "
+            "+3.75] (MuLMS's 7 held-out subfields +2.10 [-0.31, +4.51]; MaterioMiner's 4 "
+            "held-out papers +2.77 [+1.51, +4.03]), passes (reported; post hoc for plain "
+            "mention replacement until 13.3 runs).\n") in readme

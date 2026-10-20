@@ -68,7 +68,7 @@ Stand-alone baselines:
 | `data/processed/` | outputs of pipeline and baseline runs, corpora, Kaggle bundles and pulls (not versioned) |
 | `results/` | versioned JSON snapshots behind every number in this README (see [results/README.md](results/README.md)); `results/gpu/` holds the GPU runs and their analyses |
 | `docs/ROADMAP.md` | where the project stands, the prioritised next steps, and every week's protocol (§4), fixed before its runs |
-| `docs/PAPER.md`, `docs/PAPER_DRAFT.md` | the paper plan (claims C1–C19 with their evidence) and a draft of its sections |
+| `docs/PAPER.md`, `docs/PAPER_DRAFT.md` | the paper plan (claims C1–C25 with their evidence) and a draft of its sections |
 | `docs/figures/`, `docs/tables/` | the paper's figures and tables, generated from `results/` by `paper_figures.py` and `paper_tables.py` |
 | `tests/` | unit tests, run by CI |
 
@@ -772,7 +772,18 @@ stands (ROADMAP §4, weeks 6 to 9):
    papers per subfield (Europe PMC, titles with the subfield's terms, with
    MuLMS's own articles and sentences excluded), which hold 55–81% of a
    held-out subfield's unseen test names (`results/mulms_coverage.json`);
-   its screen and decision are pre-registered in ROADMAP §4.
+   its screen and decision are pre-registered in ROADMAP §4. Week 13
+   (pre-registered on 20 October) returned to the document consistency
+   rule of week 7 on MuLMS's held-out subfields: on the CRF head it gains
+   +0.82 [+0.18, +1.46], every subfield gaining, its second pre-registered
+   pass on held-out documents after coarse-grained MaterioMiner (+0.12),
+   while on SOFC-Exp's held-out articles it loses −0.44 [−0.72, −0.16] as
+   on the official split, where the annotators leave repeated mentions
+   untagged. It adds nothing to mention replacement on either corpus. A
+   scoped claim of two corpora, under a point, with a measured boundary
+   condition. Mention replacement itself goes to SOFC-Exp's article folds
+   after 24 October (13.3), with a pooled decision across corpora for the
+   week-12 winner (13.2).
 4. Why unseen papers are hard (exploratory, no GPU; `ner_mentions.py`):
    81% of a held-out paper's fine-grained entities are names that its
    three training papers never annotate with that type, against 35% on

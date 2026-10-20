@@ -93,6 +93,27 @@ votes (ner_seedmeans.WEEK5_SYSTEMS) and writes ner_week5_seed_analysis.json next
     and CIs, no decision; the screen picks the variant by its mean minus mention
     replacement); decision, the offsets 300 to 900, seeds the screen did not see (decision_1
     and decision_2); ten_seeds, all 10 offsets (reported).
+  - week13 (week 13, the methods push; its decisions 13.1a, 13.1b and 13.1d, and the pooled
+    estimates of 13.2 and 13.3): consistency, the document consistency rule of week 7
+    (ner_consistency.py; _dc, and _dcr with retyping) applied to the saved test predictions
+    of held-out documents, per corpus (MuLMS's held-out subfields, MaterioMiner's held-out
+    papers at both granularities, SOFC-Exp's article folds) and per input system (the CRF
+    head, mention replacement, its multi-task combination) with all 10 seed files of the
+    input and the output: per unit (a subfield, a paper, a fold) the 10-seed means of both,
+    the output minus the input with its mean and 95% CI over the units, the entities the
+    rule adds and retypes per seed, and, where the comparison is a pre-registered decision
+    (CONSISTENCY_DECISIONS: week 7 on the CRF head on MaterioMiner, 13.1a and 13.1b on
+    MuLMS, 13.1d on mention replacement on MaterioMiner), its verdict (passes: the CI above
+    0); the rest is reported. pooled: a method against the CRF head over the held-out units
+    of every corpus that has all 10 seed files of both (POOLED_METHODS names the method's
+    variant on each corpus: a MuLMS topic variant and its MaterioMiner analogue, mention
+    replacement and its multi-task combination on SOFC-Exp's folds as well), per corpus the
+    units' differences with their mean and 95% CI and whether the corpus loses (its CI below
+    0), and over all units the pooled mean and 95% CI (passes: above 0); the pooled
+    comparison is the decision 13.2 for the week-12 screen's winner only (week12_winner:
+    the screen variant with the largest 3-seed mean gain over mention replacement, named
+    once every variant has its screen, if that gain is above 0), reported for every other
+    method (plain mention replacement's pooled estimate is post hoc, ROADMAP §4, week 13).
   - sofc_splits (week 8, part 1; descriptive): SOFC-Exp beyond its official split. Per
     protocol, its 5 random sentence splits and its 5 article folds (--document-folds 5), the
     CRF head's 10-seed mean per split under every F1 average, with the mean and 95% CI over
@@ -139,6 +160,34 @@ ARTICLE_DRAWS = 'article_draws'                               # week 9, part 2
 MULMS_PROTOCOLS = ('leave_one_subfield_out', 'random_split_pool')   # week 10
 VOTED_METHODS = ('crf_mt', 'crf_mt_mr')
 TYPE_METHODS = WEEK6_METHODS + ('crf_mt', 'crf_mr', 'crf_mt_mr')   # week6_types
+# week 13: the consistency rule's inputs per corpus (the results-file prefix and the systems
+# it was applied to), the comparisons that are pre-registered decisions (the others are
+# reported), the corpora of the pooled estimates and each method's variant on them
+CONSISTENCY_CORPORA = {
+    'mulms': ('mulms_leave_one_subfield_out', ('crf', 'crf_mr')),
+    'fine': ('fine_leave_one_paper_out', ('crf', 'crf_mr', 'crf_mt_mr')),
+    'coarse': ('coarse_leave_one_paper_out', ('crf', 'crf_mr', 'crf_mt_mr')),
+    'sofc_folds': ('sofc_document_folds', ('crf',)),
+}
+CONSISTENCY_DECISIONS = {('mulms', 'crf'): '13.1a', ('mulms', 'crf_mr'): '13.1b',
+                         ('fine', 'crf'): 'week 7', ('coarse', 'crf'): 'week 7',
+                         ('fine', 'crf_mr'): '13.1d', ('coarse', 'crf_mr'): '13.1d'}
+POOLED_CORPORA = {'mulms': 'mulms_leave_one_subfield_out', 'fine': 'fine_leave_one_paper_out',
+                  'sofc_folds': 'sofc_document_folds'}
+POOLED_METHODS = {
+    'crf_mr': {'mulms': 'crf_mr', 'fine': 'crf_mr', 'sofc_folds': 'crf_mr'},
+    'crf_mt_mr': {'fine': 'crf_mt_mr', 'sofc_folds': 'crf_mt_mr'},
+    'crf_mrs': {'mulms': 'crf_mrs', 'fine': 'crf_mrs'},
+    'crf_mrs_topic': {'mulms': 'crf_mrs_topic', 'fine': 'crf_mrs'},     # V1's analogue: w11b
+    'crf_mrm_topic': {'mulms': 'crf_mrm_topic', 'fine': 'crf_mrm'},
+    'crf_mr6': {'mulms': 'crf_mr6', 'fine': 'crf_mr6'},
+    'crf_mrm_topic6': {'mulms': 'crf_mrm_topic6', 'fine': 'crf_mrm6'},
+    'crf_st3_topic': {'mulms': 'crf_st3_topic', 'fine': 'crf_st3'},     # V6's analogue: week 4
+    'crf_gzm_topic': {'mulms': 'crf_gzm_topic', 'fine': 'crf_gzm'},
+    'crf_gzs_topic': {'mulms': 'crf_gzs_topic', 'fine': 'crf_gzs'},
+}
+SCREEN_VARIANTS = ('crf_mrs_topic', 'crf_mrm_topic', 'crf_mr6', 'crf_mrm_topic6',
+                   'crf_st3_topic', 'crf_gzm_topic', 'crf_gzs_topic')     # the week-12 screen
 
 
 def load_files(directory, names):
@@ -667,6 +716,107 @@ def week12_variants(directory):
     return out
 
 
+def consistency_entry(inputs, outputs, decision=None):
+    """The rule's output family against its input family (10 seed files each, paired by
+    run_id): both families' means, the difference with its 95% CI over the units, the
+    entities added and retyped per seed, and the verdict when the comparison is a
+    decision (`decision` names it)."""
+    scores = {'input': system_scores(inputs), 'output': system_scores(outputs)}
+    ids = [i for i in scores['input'] if i in scores['output']]
+    entry = {side: {avg: spread([scores[side][i][avg] for i in ids]) for avg in F1_AVERAGES}
+             for side in scores}
+    entry['minus_input'] = {
+        avg: spread([scores['output'][i][avg] - scores['input'][i][avg] for i in ids],
+                    'mean_diff') for avg in F1_AVERAGES}
+    entry['units'] = {i: round(scores['output'][i]['micro'] - scores['input'][i]['micro'], 2)
+                      for i in ids}
+    entry['n_units'] = len(ids)
+    for key in ('n_added', 'n_retyped'):
+        entry[f'{key}_per_seed'] = round(sum(r.get(key, 0) for f in outputs for r in f['runs']
+                                             if r['run_id'] in ids) / len(outputs), 1)
+    if decision:
+        entry['decision'] = decision
+        entry['passes'] = entry['minus_input']['micro']['ci95'][0] > 0
+    return entry
+
+
+def consistency(directory):
+    """The consistency part of week13 (see the module docstring): {corpus: {output variant:
+    consistency_entry}} for every input system whose input and output families have all
+    their files; a corpus without any is left out."""
+    out = {}
+    for corpus, (prefix, systems) in CONSISTENCY_CORPORA.items():
+        for system in systems:
+            inputs = load_files(directory, [f'ner_results_{prefix}_{system}_m{off}.json'
+                                            for off in WEEK5_OFFSETS])
+            if not inputs:
+                continue
+            for rule in ('dc', 'dcr'):
+                outputs = load_files(directory, [f'ner_results_{prefix}_{system}_{rule}_m{off}.json'
+                                                 for off in WEEK5_OFFSETS])
+                if outputs:
+                    decision = CONSISTENCY_DECISIONS.get((corpus, system)) if rule == 'dc' else None
+                    out.setdefault(corpus, {})[f'{system}_{rule}'] = consistency_entry(
+                        inputs, outputs, decision)
+    return out
+
+
+def week12_winner(week12):
+    """The week-12 screen's winner (ROADMAP §4, week 12): the screen variant with the largest
+    3-seed mean micro-F1 gain over mention replacement, if that gain is above 0; None until
+    every variant of SCREEN_VARIANTS has its screen in the week12 section."""
+    gains = {v: week12[v]['screen']['minus_crf_mr']['micro']['mean_diff']
+             for v in SCREEN_VARIANTS if 'screen' in (week12 or {}).get(v, {})}
+    if len(gains) < len(SCREEN_VARIANTS):
+        return None
+    best = max(gains, key=gains.get)
+    return best if gains[best] > 0 else None
+
+
+def pooled(directory, winner=None):
+    """The pooled part of week13 (see the module docstring): {method: entry} for every method
+    of POOLED_METHODS with all 10 seed files of its variant and of the CRF head on two or
+    more of POOLED_CORPORA: per corpus its units' differences against the CRF head, and the
+    pooled difference over every unit; the entry is the decision 13.2 for `winner` (the
+    week-12 screen's winner), reported otherwise."""
+    out = {}
+    for method, variants in POOLED_METHODS.items():
+        corpora, diffs = {}, []
+        for corpus, variant in variants.items():
+            prefix = POOLED_CORPORA[corpus]
+            files = {s: load_files(directory, [f'ner_results_{prefix}_{s}_m{off}.json'
+                                               for off in WEEK5_OFFSETS])
+                     for s in ('crf', variant)}
+            if not all(files.values()):
+                continue
+            scores = {s: system_scores(f) for s, f in files.items()}
+            ids = [i for i in scores[variant] if i in scores['crf']]
+            units = [scores[variant][i]['micro'] - scores['crf'][i]['micro'] for i in ids]
+            entry = {'variant': variant, 'n_units': len(ids),
+                     'minus_crf': spread(units, 'mean_diff'),
+                     'units': {i: round(d, 2) for i, d in zip(ids, units)}}
+            entry['loses'] = entry['minus_crf']['ci95'][1] < 0
+            corpora[corpus] = entry
+            diffs.extend(units)
+        if len(corpora) < 2:
+            continue
+        entry = {'corpora': corpora, 'n_units': len(diffs),
+                 'minus_crf': spread(diffs, 'mean_diff'),
+                 'status': 'decision' if method == winner else 'reported'}
+        entry['passes'] = entry['minus_crf']['ci95'][0] > 0
+        entry['no_corpus_loses'] = not any(c['loses'] for c in corpora.values())
+        out[method] = entry
+    return out
+
+
+def week13(directory, week12=None):
+    """The week13 section (see the module docstring); week12 is the mulms section's week12
+    part, which names the screen's winner."""
+    winner = week12_winner(week12)
+    return {'consistency': consistency(directory), 'week12_winner': winner,
+            'pooled': pooled(directory, winner)}
+
+
 def analyse(directory):
     """The analyses for every protocol and granularity that has the files."""
     out = {'spread': {}, 'triples': {}, 'types': {}}
@@ -690,6 +840,7 @@ def analyse(directory):
     out['sofc_splits'] = sofc_splits(directory)
     out['sofc_draws'] = sofc_draws(directory)
     out['mulms'] = mulms(directory)
+    out['week13'] = week13(directory, out['mulms'].get('week12'))
     out['paper_count'] = paper_count(directory)
     out['paper_diversity'] = paper_diversity(directory)
     out['errors'] = {}
@@ -786,6 +937,24 @@ def main(argv=None):
             if 'unseen_in_silver' in entry:
                 print(f"    unseen test names among the silver names: "
                       f"{entry['unseen_in_silver']} ({entry.get('silver_filter')} filter)")
+    for corpus, entries in result['week13']['consistency'].items():
+        for variant, e in entries.items():
+            d = e['minus_input']['micro']
+            verdict = (f"{e['decision']}: {'passes' if e['passes'] else 'no'}"
+                       if 'decision' in e else 'reported')
+            print(f"  week 13, the consistency rule, {corpus}, {variant} ({e['n_units']} units): "
+                  f"{e['output']['micro']['mean']:.2f} against {e['input']['micro']['mean']:.2f}, "
+                  f"{d['mean_diff']:+.2f} {d['ci95']} ({verdict}); {e['n_added_per_seed']:.0f} "
+                  f"entities added per seed")
+    if result['week13']['week12_winner']:
+        print(f"  week 13, the week-12 screen's winner: {result['week13']['week12_winner']}")
+    for method, e in result['week13']['pooled'].items():
+        d = e['minus_crf']
+        parts = ', '.join(f"{c} {v['n_units']} units {v['minus_crf']['mean_diff']:+.2f}"
+                          f"{' (loses)' if v['loses'] else ''}" for c, v in e['corpora'].items())
+        print(f"  week 13, pooled over {e['n_units']} held-out units, {method} minus the CRF "
+              f"head: {d['mean_diff']:+.2f} {d['ci95']} ({e['status']}; "
+              f"{'passes' if e['passes'] else 'no'}; {parts})")
     if 'gap' in result['sofc_splits']:
         print(f"  SOFC-Exp, random splits minus article folds: "
               f"{result['sofc_splits']['gap']['micro']:+.2f} micro F1")

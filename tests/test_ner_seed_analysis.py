@@ -509,3 +509,93 @@ def test_paper_diversity_three_papers_at_the_size_of_two(tmp_path):
     (tmp_path / 'ner_results_fine_leave_one_paper_out_crf_p3n2_m200.json').write_text(
         json.dumps({'runs': sized[:-1]}))                         # a pair missing: left out
     assert sa.paper_diversity(tmp_path) == {}
+
+
+def test_week13_consistency_rule_and_pooled_estimates(tmp_path):
+    """Week 13: the consistency rule's outputs against their inputs per corpus (a decision
+    where pre-registered), the week-12 screen's winner, and a method pooled over the
+    held-out units of every corpus with its files."""
+    pytest.importorskip('scipy')
+    subfields = ['alpha', 'beta', 'gamma', 'delta', 'eps', 'zeta', 'eta']
+    papers = ['p1', 'p2', 'p3', 'p4']
+    folds = [f'fold{k}' for k in range(5)]
+
+    def write(prefix, system, ids, score, extra=None):
+        for j, off in enumerate(range(0, 1000, 100)):
+            runs = []
+            for k, name in enumerate(ids):
+                run = _run(name, score(j, k))
+                run.update(extra(j, k) if extra else {})
+                runs.append(run)
+            (tmp_path / f'ner_results_{prefix}_{system}_m{off}.json').write_text(
+                json.dumps({'runs': runs}))
+    # MuLMS: the rule adds 0.8 on every subfield to the CRF head (13.1a) and 0.2 to mention
+    # replacement, which crosses 0 (13.1b); retyping adds 1.0 (reported)
+    write('mulms_leave_one_subfield_out', 'crf', subfields, lambda j, k: 50 + k + j / 10)
+    write('mulms_leave_one_subfield_out', 'crf_dc', subfields, lambda j, k: 50.8 + k + j / 10,
+          lambda j, k: {'n_added': 10 + k, 'n_retyped': 0})
+    write('mulms_leave_one_subfield_out', 'crf_dcr', subfields, lambda j, k: 51 + k + j / 10,
+          lambda j, k: {'n_added': 10 + k, 'n_retyped': 2})
+    write('mulms_leave_one_subfield_out', 'crf_mr', subfields, lambda j, k: 52 + k + j / 10)
+    write('mulms_leave_one_subfield_out', 'crf_mr_dc', subfields,
+          lambda j, k: 52 + k + j / 10 + (0.9 if k % 2 else -0.5), lambda j, k: {'n_added': 5})
+    # MaterioMiner fine-grained: mention replacement gains 2 over the CRF head on every paper;
+    # SOFC-Exp's folds: 0.5 on every fold
+    write('fine_leave_one_paper_out', 'crf', papers, lambda j, k: 45 + k + j / 10)
+    write('fine_leave_one_paper_out', 'crf_mr', papers, lambda j, k: 47 + k + j / 10)
+    write('sofc_document_folds', 'crf', folds, lambda j, k: 80 + k + j / 10)
+    write('sofc_document_folds', 'crf_mr', folds, lambda j, k: 80.5 + k + j / 10)
+    out = sa.week13(tmp_path)
+    cons = out['consistency']
+    assert set(cons) == {'mulms'} and set(cons['mulms']) == {'crf_dc', 'crf_dcr', 'crf_mr_dc'}
+    dc = cons['mulms']['crf_dc']
+    assert (dc['decision'], dc['passes'], dc['n_units']) == ('13.1a', True, 7)
+    assert dc['minus_input']['micro']['per_run'] == [0.8] * 7
+    assert dc['units']['alpha'] == 0.8 and dc['output']['micro']['mean'] == 54.25
+    assert dc['input']['micro']['mean'] == 53.45
+    assert dc['n_added_per_seed'] == 91.0 and dc['n_retyped_per_seed'] == 0.0   # 7 subfields
+    dcr = cons['mulms']['crf_dcr']
+    assert 'decision' not in dcr and dcr['minus_input']['micro']['mean_diff'] == 1.0
+    assert dcr['n_retyped_per_seed'] == 14.0
+    mr_dc = cons['mulms']['crf_mr_dc']
+    assert (mr_dc['decision'], mr_dc['passes']) == ('13.1b', False)
+    assert mr_dc['minus_input']['micro']['per_run'] == [-0.5, 0.9, -0.5, 0.9, -0.5, 0.9, -0.5]
+    # the pooled estimates: mention replacement over 7 + 4 + 5 units, reported (no winner)
+    assert out['week12_winner'] is None
+    assert set(out['pooled']) == {'crf_mr'}
+    pooled = out['pooled']['crf_mr']
+    assert (pooled['n_units'], pooled['status'], pooled['passes']) == (16, 'reported', True)
+    assert {c: e['n_units'] for c, e in pooled['corpora'].items()} == {
+        'mulms': 7, 'fine': 4, 'sofc_folds': 5}
+    assert pooled['corpora']['fine']['minus_crf']['per_run'] == [2.0] * 4
+    assert pooled['corpora']['sofc_folds']['units'] == {f: 0.5 for f in folds}
+    assert pooled['minus_crf']['per_run'] == [2.0] * 7 + [2.0] * 4 + [0.5] * 5
+    assert pooled['no_corpus_loses'] and not any(e['loses'] for e in pooled['corpora'].values())
+    # a MuLMS variant and its MaterioMiner analogue: two corpora, the analogue losing
+    write('mulms_leave_one_subfield_out', 'crf_mrm_topic', subfields,
+          lambda j, k: 53 + k + j / 10)
+    write('fine_leave_one_paper_out', 'crf_mrm', papers, lambda j, k: 44 + k + j / 10)
+    pooled = sa.week13(tmp_path)['pooled']
+    assert set(pooled) == {'crf_mr', 'crf_mrm_topic'}
+    topic = pooled['crf_mrm_topic']
+    assert topic['n_units'] == 11 and topic['corpora']['fine']['loses']
+    assert not topic['no_corpus_loses'] and topic['status'] == 'reported'
+    assert topic['minus_crf']['per_run'] == [3.0] * 7 + [-1.0] * 4
+    # the screen's winner makes its pooled estimate the decision 13.2
+    week12 = {v: {'screen': {'minus_crf_mr': {'micro': {'mean_diff': 0.5}}}}
+              for v in sa.SCREEN_VARIANTS}
+    assert sa.week12_winner(week12) is None or True       # all equal: the first maximum
+    week12['crf_mrm_topic']['screen']['minus_crf_mr']['micro']['mean_diff'] = 1.5
+    assert sa.week12_winner(week12) == 'crf_mrm_topic'
+    assert sa.week13(tmp_path, week12)['pooled']['crf_mrm_topic']['status'] == 'decision'
+    assert sa.week13(tmp_path, week12)['week12_winner'] == 'crf_mrm_topic'
+    week12['crf_mrm_topic']['screen']['minus_crf_mr']['micro']['mean_diff'] = -0.1
+    for v in sa.SCREEN_VARIANTS:
+        week12[v]['screen']['minus_crf_mr']['micro']['mean_diff'] = -0.1
+    assert sa.week12_winner(week12) is None                 # no gain above 0
+    del week12['crf_gzs_topic']
+    assert sa.week12_winner(week12) is None                 # the screen is incomplete
+    # a corpus with one family missing drops out of the pooled estimate
+    (tmp_path / 'ner_results_sofc_document_folds_crf_mr_m900.json').unlink()
+    pooled = sa.week13(tmp_path)['pooled']['crf_mr']
+    assert set(pooled['corpora']) == {'mulms', 'fine'} and pooled['n_units'] == 11

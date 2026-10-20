@@ -167,6 +167,12 @@ bundle as topic_<topic>_sentences.txt; the screen, then the decision for its win
           mention-level silver names (crf_mrm_m<N>, crf_mrm6_m<N>, crf_gzm_m<N>), or for mr6
           a job per seed offset (crf_mr6_m<N>); decided against the CRF head
           (ner_seedmeans.py --week 12)
+Week 13 (13.3: mention replacement on SOFC-Exp's article folds):
+  w13a    the CRF run of smoke4 again (smokeav); then on SOFC-Exp's 5 article folds
+          (--document-folds 5, week 8's protocol) mention replacement (lane 0, crf_mr_m<N>)
+          and mention replacement on the multi-task model trained on both levels (lane 1,
+          --granularity sofc_both, crf_mt_mr_m<N>: a file per level), model seed offsets 0
+          to 900, one job per offset
 
 The TPU spike (docs/METHODS_PLAN.md §5; every batch named tpu... runs on the TPU v5e-8, one
 lane per chip, its jobs with --device xla, its results in results/tpu/, a family of their own):
@@ -462,12 +468,13 @@ def sofc_mtst_job(student_offsets):
             '--save-predictions', '--threads', str(THREADS)]
 
 
-def sofc_split_job(protocol, offset):
+def sofc_split_job(protocol, offset, *flags, granularity='sofc'):
     """The CRF head on SOFC-Exp's random splits or article folds (week 8, part 1), with the
-    model seeds of offset `offset` (crf_m<offset>)."""
-    return ['--granularity', 'sofc', *SOFC_SPLITS[protocol], '--crf', '--tag', f'm{offset}',
-            *(('--seed-offset', str(offset)) if offset else ()), '--save-predictions',
-            '--threads', str(THREADS)]
+    model seeds of offset `offset` (crf_m<offset>); `flags` add a method (week 13: mention
+    replacement, and with --multi-task on both levels, granularity sofc_both)."""
+    return ['--granularity', granularity, *SOFC_SPLITS[protocol], '--crf', *flags, '--tag',
+            f'm{offset}', *(('--seed-offset', str(offset)) if offset else ()),
+            '--save-predictions', '--threads', str(THREADS)]
 
 
 def stage2_methods(name):
@@ -786,6 +793,17 @@ def batch_lanes(name):
         return [[repeat + ['--tag', 'smokeat' if name == 'w12f' else 'smokeau']]
                 + [topic_variant_job(first, s, OFFSETS) for s in MULMS_SUBFIELD_NAMES],
                 [topic_variant_job(second, s, OFFSETS) for s in MULMS_SUBFIELD_NAMES]]
+    if name == 'w13a':
+        # week 13 (13.3): SOFC-Exp's 5 article folds (week 8's protocol), mention replacement
+        # (lane 0, crf_mr_m<N>, a job per seed offset) and mention replacement on the
+        # multi-task model trained on both levels (lane 1, sofc_both: crf_mt_mr_m<N>, a file
+        # per level), model seed offsets 0 to 900; first the repeat of the CRF run of smoke4
+        # (smokeav)
+        return [[repeat + ['--tag', 'smokeav']]
+                + [sofc_split_job('document_folds', off, *METHOD_FLAGS['mr'])
+                   for off in OFFSETS_PUBLISHED],
+                [sofc_split_job('document_folds', off, '--multi-task', *METHOD_FLAGS['mr'],
+                                granularity='sofc_both') for off in OFFSETS_PUBLISHED]]
     if name.startswith('w12d:'):
         # week 12's MaterioMiner analogue of the screen's winner, 10 seeds, one lane per
         # granularity: a job per held-out paper (the teacher variants) or per seed offset
@@ -829,7 +847,7 @@ def batch_lanes(name):
 BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'item3r',
            'smoke4', 'w5a', 'w5b', 'w5c', 'smoke5', 'smoke6', 'w6a', 'w6b', 'w7a', 'w7b',
            'w7c', 'w7d', 'w7e', 'w8a', 'w8b', 'w9a', 'w9b', 'w10a', 'w11a', 'w11b', 'w12a', 'w12c',
-           'w12e', 'w12f', 'w12g',
+           'w12e', 'w12f', 'w12g', 'w13a',
            *(f'w12b:{v}' for v in WEEK12_VARIANTS), *(f'w12d:{v}' for v in WEEK12_ANALOGUES),
            'tpu-smoke1', 'tpu-smoke')
 

@@ -1026,7 +1026,7 @@ chance at class level. For a Task C-style result:
 | 10 | Done: MuLMS as a third corpus (7 materials subfields, its outermost entities; `mulms.py`), mention replacement against the CRF head on held-out subfields with 400 training sentences, 10 seeds, and the CRF head on random splits of the same size; protocol committed before any run (a08356f; the batch `w10a` ran from that commit), protocol and outcome below | Mention replacement improves on the CRF head on held-out subfields (decision 1), and its votes on the CRF votes (decision 2). Decision 1 not met: +2.10 [−0.31, +4.51], six of the seven subfields gaining. Decision 2 met: +2.71 [+0.22, +5.20]. By the protocol, mention replacement and its combination (C20, C21) stay results for MaterioMiner |
 | 11 | Protocol committed before any run: mention replacement whose replacement pool also holds the names in the sentences that 3 CRF teachers tag alike and confidently in unlabeled in-domain text (`--augment-names`, variant `crf_mrs`), on MuLMS's 7 held-out subfields (`w11a`) and MaterioMiner's 4 held-out papers (`w11b`), 10 seeds; protocol below | It improves on the CRF head on MuLMS's held-out subfields (decision 1) and on mention replacement (decisions 2–4: MuLMS, MaterioMiner fine- and coarse-grained); a methods claim needs decision 1 and one of decisions 2–4. MuLMS (`w11a`): decisions 1 (+2.04 [−0.85, +4.92]) and 2 (−0.06 [−1.09, +0.96]) not met, so no methods claim; MaterioMiner (`w11b`, 19–20 October): decisions 3 (fine-grained, +0.23 [−0.69, +1.14]) and 4 (coarse-grained, +0.61 [−0.96, +2.18]) not met either; the method is closed on both corpora |
 | 12 | Protocol committed before any run: mention replacement whose replacement pool holds the names that 3 CRF teachers find in a corpus of the held-out subfield's own topic (40,000 open-access sentences per subfield, `build_topic_corpus.py`; phase 0's gate: they hold 55–81% of the unseen test names), on MuLMS's 7 held-out subfields; a 3-seed screen of seven variants (`w12a`: silver sentences `crf_mrs_topic`, silver mentions `crf_mrm_topic`, the same with 6 copies `crf_mrm_topic6`, 6 copies without names `crf_mr6`, self-training on the topic corpus `crf_st3_topic`; `w12c`: the silver mentions or sentences as a gazetteer match feature, `crf_gzm_topic` and `crf_gzs_topic`; amendments 1–3), then the 7-seed decision for the screen's winner on seeds the screen did not see (`w12b:<variant>`); protocol below, plan in `docs/METHODS_PLAN.md` | Screen: the variant with the largest mean gain over mention replacement goes on if it is above 0. Decision 1: it improves on the CRF head (paired by subfield); decision 2: on mention replacement. A methods claim needs decision 1 on MuLMS and the winner's MaterioMiner analogue passing against the CRF head. Runs after the reset on 24 October, after `w11b` |
-| 13 | Protocol committed before any run (20 October, on the user's directive to push for a methods paper; the plan's stop rule of a third protocol on MuLMS lifted, the count reported): 13.1 the document consistency rule of week 7 on MuLMS's saved 10-seed predictions (no training); 13.2 a pooled decision over MuLMS's 7 subfields and MaterioMiner's 4 papers for the week-12 winner; 13.3 mention replacement with and without multi-task training on SOFC-Exp's 5 article folds, 10 seeds (`w13a`); protocol below | Revised methods criterion: a pre-registered pass on held-out documents of two corpora, or the pooled decision over two or more corpora with no corpus losing; claims scoped to what passed | in progress |
+| 13 | Protocol committed before any run (20 October, on the user's directive to push for a methods paper; the plan's stop rule of a third protocol on MuLMS lifted, the count reported): 13.1 the document consistency rule of week 7 on MuLMS's saved 10-seed predictions (no training; amended the same day with SOFC-Exp's article folds, reported, and mention replacement on MaterioMiner, decisions); 13.2 a pooled decision over MuLMS's 7 subfields and MaterioMiner's 4 papers for the week-12 winner; 13.3 mention replacement with and without multi-task training on SOFC-Exp's 5 article folds, 10 seeds (`w13a`); protocol below | Revised methods criterion: a pre-registered pass on held-out documents of two corpora, or the pooled decision over two or more corpora with no corpus losing; claims scoped to what passed. 13.1 done: on the CRF head the rule passes on MuLMS (13.1a, +0.82 [+0.18, +1.46], every subfield gaining), its second corpus after coarse-grained MaterioMiner (week 7, +0.12), and loses on SOFC-Exp's folds (13.1c, −0.44 [−0.72, −0.16]); it adds nothing to mention replacement (13.1b +0.57 [−0.12, +1.25]; 13.1d +0.19 [−0.34, +0.73] fine-grained, +0.11 [−0.08, +0.31] coarse-grained): a scoped claim of two corpora, under a point, with a boundary condition. 13.2 and 13.3 after the reset of 24 October |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -4047,6 +4047,41 @@ predictions improves NER on held-out documents of consistently annotated
 corpora" (MuLMS +0.82, MaterioMiner coarse +0.12), which by the revised
 criterion is a methods claim of two corpora, scoped as such; its combination
 with mention replacement is reported against the CRF head on both corpora.
+
+*Outcome of 13.1c and 13.1d (20 October, 10:40 UTC;
+`ner_seed_analysis.py`, section `week13`, `consistency`).* 13.1c, reported:
+on SOFC-Exp's 5 article folds the rule loses, −0.44 [−0.72, −0.16] (82.34
+against 82.79; every fold loses, −0.17 to −0.75; 169 entities added per
+seed over the 5 folds) and −0.43 [−0.68, −0.18] with retyping: the
+boundary condition holds on held-out articles as on the official split.
+13.1d: neither decision passes. Fine-grained, `crf_mr_dc` against `crf_mr`
++0.19 [−0.34, +0.73] (49.42 against 49.23; three papers gain, the fourth
+loses 0.26; 54 entities added per seed over the 4 papers); coarse-grained
++0.11 [−0.08, +0.31] (60.00 against 59.89; every paper gains, +0.01 to
++0.27; 16 per seed). Reported: on the multi-task combination +0.31 [−0.47,
++1.09] fine-grained and +0.10 [−0.05, +0.25] coarse-grained; with retyping
++0.22 [−0.69, +1.12] and +0.63 [+0.13, +1.14] on mention replacement, +0.18
+[−1.11, +1.47] and +0.60 [−0.21, +1.41] on the combination. Week 7's
+figures recomputed from the same files agree (`crf_dc` against `crf` +0.30
+[−0.35, +0.95] fine-grained and +0.12 [+0.01, +0.24] coarse-grained;
+retyping +0.64 [+0.29, +1.00] coarse-grained).
+
+*What 13.1 supports.* On the CRF head the rule passes two pre-registered
+decisions on held-out documents of two corpora (MuLMS +0.82, MaterioMiner
+coarse-grained +0.12) and loses on the third (SOFC-Exp: −0.42 on the
+official split, −0.44 on the folds), so by the revised criterion
+"document-level propagation of a model's own predictions improves NER on
+held-out documents of corpora whose annotators tag repeated mentions
+consistently" is a methods claim of two corpora, scoped as such, with its
+boundary condition measured on the third. It does not add to mention
+replacement on either corpus (13.1b, 13.1d). Retyping, never a decision, is
+the larger effect wherever the rule helps (+1.01 on MuLMS; +0.64 and +0.63
+coarse-grained on MaterioMiner, on the CRF head and on mention replacement)
+and cannot be decided on a corpus that has not seen it: all three have. Of
+the rule's 10 pre-registered decisions (6 in week 7, 4 here) 2 pass, about
+0.25 expected by chance, on two corpora. The effect is under a point, so
+the paper reports it as a decode-time rule with a measured boundary
+condition beside mention replacement (13.2, 13.3), not as its main method.
 
 **13.2 The pooled decision for the week-12 winner.** If the week-12 screen
 names a winner (the largest mean gain over mention replacement, above 0,

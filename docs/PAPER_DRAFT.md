@@ -17,10 +17,17 @@ model does not pass and its votes do (C22), so by the pre-registered
 criterion it stays a MaterioMiner result. With names from unlabeled text
 added to its pool (Section 6.7), it fails both MuLMS decisions and both
 MaterioMiner decisions as well (C23);
-names from a corpus of the held-out subfield's own topic are the last
-pre-registered attempt (ROADMAP §4, week 12).
+names from a corpus of the held-out subfield's own topic are the next
+pre-registered attempt (ROADMAP §4, week 12). Week 13 (pre-registered on 20
+October, on the directive to push for a methods paper) returned to the
+document consistency rule of Section 5.5 on MuLMS's held-out subfields,
+where it passes (+0.82 [+0.18, +1.46], every subfield gaining), its second
+corpus after coarse-grained MaterioMiner, and loses on SOFC-Exp's held-out
+articles as on its official split (C25, Section 6.8); it adds nothing to
+mention replacement on either corpus. Mention replacement goes to SOFC-Exp's
+article folds and to a pooled decision across corpora after 24 October.
 The numbers come from `results/` through the claims table of `docs/PAPER.md`
-(C1–C23). References are keys of `docs/references.bib`.
+(C1–C25). References are keys of `docs/references.bib`.
 
 ---
 
@@ -303,10 +310,11 @@ Three more results:
   4.4 and 8.0 points on unseen papers, with similar validation scores on
   the training papers.
 - **Label consistency within a paper:** adds +0.30 and +0.12 on
-  MaterioMiner and scores −0.42 [−0.61, −0.22] on SOFC-Exp, whose annotators
-  leave 14% of a term's repeated occurrences untagged. Whether "one sense
-  per discourse" helps depends on how the annotation scheme treats repeated
-  mentions.
+  MaterioMiner (the coarse-grained decision passes) and scores −0.42 [−0.61,
+  −0.22] on SOFC-Exp, whose annotators leave 14% of a term's repeated
+  occurrences untagged. Whether "one sense per discourse" helps depends on
+  how the annotation scheme treats repeated mentions. Section 6.8 takes the
+  rule to a third corpus and to SOFC-Exp's held-out articles.
 - **Coarse-to-fine completion:** using the coarse-grained level to complete
   the fine-grained one adds +0.34 [−0.91, +1.59]; the entities it adds are
   right 39% of the time.
@@ -783,6 +791,46 @@ names that three CRF teachers tag in unlabeled in-domain text.
   score 50.44, −0.20 [−3.20, +2.80] against mention replacement with 3
   copies. None can be the screen's winner; the four replacement-pool
   variants run after 24 October.
+
+**6.8 Document-level propagation on held-out documents of three corpora
+(C25).** The rule of Section 5.5 (krishnan2006effective): within a document,
+a surface form that the model tags in most of its occurrences, with one
+most frequent type, is tagged in its untagged occurrences too, longest
+forms first; no prediction is removed or changed, so the rule can only add
+entities. It is applied to the saved test predictions of the 10-seed runs
+on the CPU, and decided like a trained method, paired over the held-out
+units.
+- *Decisions (pre-registered on 20 October, ROADMAP §4, week 13; the
+  MaterioMiner decisions on the CRF head are week 7's):* on MuLMS's 7
+  held-out subfields, the rule on the CRF head (13.1a) and on mention
+  replacement (13.1b); on MaterioMiner's 4 held-out papers, the rule on
+  mention replacement at each granularity (13.1d). Reported: SOFC-Exp's 5
+  article folds (13.1c; the official split had already shown a loss),
+  retyping (the tagged occurrences of a propagated form also take its
+  type), the multi-task combination.
+- *Result:* on the CRF head the rule passes on MuLMS, +0.82 [+0.18, +1.46]
+  (49.47 against 48.66; every subfield gains, +0.07 to +2.07; 1,213
+  entities added per seed), as it passed coarse-grained on MaterioMiner
+  (+0.12 [+0.01, +0.24]), and loses on SOFC-Exp's held-out articles, −0.44
+  [−0.72, −0.16] (every fold loses), as on its official split. Two
+  pre-registered passes on held-out documents of two corpora, with the
+  third corpus's loss explained by its convention on repeated mentions, is
+  the scoped claim; the effect is under a point.
+- *It does not add to mention replacement:* +0.57 [−0.12, +1.25] on MuLMS
+  and +0.19 [−0.34, +0.73] and +0.11 [−0.08, +0.31] on MaterioMiner (fine,
+  coarse). Mention replacement already teaches the model the forms it sees
+  again in a document, and the rule propagates the model's own errors as
+  readily as its hits: the entities it adds are right about as often as
+  the model's recall on unseen names.
+- *Retyping (reported only)* is the larger effect wherever the rule helps:
+  +1.01 [+0.28, +1.74] on MuLMS, +0.64 [+0.29, +1.00] coarse-grained on
+  MaterioMiner and +0.63 [+0.13, +1.14] on mention replacement there, and
+  it loses on SOFC-Exp too. It was never a decision, and every corpus has
+  now seen it, so it stays a reported figure.
+- *Count:* 2 of the rule's 10 pre-registered decisions pass (about 0.25
+  expected by chance), on two corpora; the rule is the fourth protocol to
+  ask a method to beat the CRF head on MuLMS's held-out subfields (weeks
+  10 to 13).
 
 ## 7 Limitations
 

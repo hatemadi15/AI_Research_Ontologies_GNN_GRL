@@ -1152,7 +1152,60 @@ def ner_notes(res):
         note += week6_verdict_line(week12, variant, reference,
                                    "the MaterioMiner analogue of the screen's winner, 10 seeds",
                                    week='12', names=WEEK7_SYSTEM_NAMES)
-    return note + sofc_note(analysis) + mulms_note(analysis)
+    return note + sofc_note(analysis) + mulms_note(analysis) + week13_note(analysis)
+
+
+WEEK13_CORPORA = {'mulms': "MuLMS's 7 held-out subfields",
+                  'fine': "MaterioMiner's 4 held-out papers, fine-grained",
+                  'coarse': "MaterioMiner's 4 held-out papers, coarse-grained",
+                  'sofc_folds': "SOFC-Exp's 5 article folds"}
+WEEK13_INPUTS = {'crf': 'the CRF head', 'crf_mr': 'mention replacement',
+                 'crf_mt_mr': 'mention replacement on the multi-task model'}
+WEEK13_POOLED = {'crf_mr': 'mention replacement',
+                 'crf_mt_mr': 'mention replacement on the multi-task model'}
+
+
+def week13_note(analysis):
+    """The week-13 bullet (ROADMAP §4, week 13) from the week-5 analyses file ('' without its
+    week13 section): the consistency rule's outputs against their inputs on the held-out
+    documents of every corpus that has them (a verdict where the comparison is a decision,
+    reported otherwise), the week-12 screen's winner, and the pooled estimates across
+    corpora."""
+    w = analysis.get('week13') or {}
+    consistency = w.get('consistency') or {}
+    if not consistency:
+        return ''
+    line = ("* NER week 13 (the consistency rule of week 7 on the saved 10-seed predictions of "
+            "held-out documents, no training; the 95% CIs are over the subfields, papers or "
+            "folds)")
+    for corpus, entries in consistency.items():
+        for variant, e in entries.items():
+            system, _, rule = variant.rpartition('_')
+            what = WEEK13_INPUTS.get(system, system)
+            if rule == 'dcr':
+                what += ' with retyping'
+            word, numbers = paired_verdict(e['minus_input'])
+            verdict = (f"decision {e['decision']}, {word} ({numbers})" if 'decision' in e
+                       else f"{numbers} (reported; no decision)")
+            line += (f". {WEEK13_CORPORA.get(corpus, corpus)}, on {what}: "
+                     f"{interval(e['output']['micro'])} against {interval(e['input']['micro'])}, "
+                     f"{e['n_added_per_seed']:.0f} entities added per seed; {verdict}")
+    winner = w.get('week12_winner')
+    if winner:
+        line += f". The week-12 screen's winner: {WEEK12_NAMES.get(winner, winner)} ({winner})"
+    for method, e in (w.get('pooled') or {}).items():
+        parts = '; '.join(f"{WEEK13_CORPORA.get(c, c).split(',')[0]} "
+                          f"{delta_cell(v['minus_crf'])}{' (loses)' if v['loses'] else ''}"
+                          for c, v in e['corpora'].items())
+        label = WEEK13_POOLED.get(method, WEEK12_NAMES.get(method, method))
+        status = ('decision 13.2' if e['status'] == 'decision'
+                  else 'reported; post hoc for plain mention replacement until 13.3 runs'
+                  if method == 'crf_mr' else 'reported; no decision')
+        line += (f". Pooled over {e['n_units']} held-out units, {label} against the CRF head: "
+                 f"{delta_cell(e['minus_crf'])} ({parts}), "
+                 f"{'passes' if e['passes'] else 'no'}"
+                 f"{'' if e['no_corpus_loses'] else ', a corpus loses'} ({status})")
+    return line + ".\n"
 
 
 def mulms_note(analysis):

@@ -1201,3 +1201,26 @@ def test_week12_analogue_batches(monkeypatch, tmp_path):
         with pytest.raises(ValueError):
             kj.batch_lanes(name)
     assert {f'w12d:{v}' for v in ('mrm', 'mrm6', 'gzm', 'mr6')} <= set(kj.BATCHES)
+
+
+def test_week13_sofc_folds_batch(monkeypatch):
+    """w13a (week 13, 13.3): a repeat, then on SOFC-Exp's 5 article folds mention replacement
+    (lane 0, crf_mr_m<N>) and mention replacement on the multi-task model trained on both
+    levels (lane 1, sofc_both, crf_mt_mr_m<N>), seed offsets 0 to 900."""
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda report=None: 'x' * 64)
+    lane0, lane1 = _parsed(kj.batch_lanes('w13a'))
+    assert lane0[0].tag == 'smokeav' and (len(lane0), len(lane1)) == (11, 10)
+    for lane, granularity, variant in ((lane0[1:], 'sofc', 'crf_mr'),
+                                       (lane1, 'sofc_both', 'crf_mt_mr')):
+        assert [a.seed_offset for a in lane] == list(range(0, 1000, 100))
+        for a in lane:
+            assert (a.granularity, nb.protocol_name(a), nb.variant_name(a)) == (
+                granularity, 'document_folds', f'{variant}_m{a.seed_offset}')
+            assert a.crf and a.augment_mentions == 3 and a.save_predictions
+            assert a.document_folds == 5 and a.seeds == [0, 1, 2, 3, 4]
+            assert _get(a, 'multi_task', False) == (granularity == 'sofc_both')
+    # week 8's jobs are unchanged
+    assert kj.sofc_split_job('document_folds', 300) == [
+        '--granularity', 'sofc', '--document-folds', '5', '--crf', '--tag', 'm300',
+        '--seed-offset', '300', '--save-predictions', '--threads', str(kj.THREADS)]
+    assert 'w13a' in kj.BATCHES and 'sofc_corpus_sha256' not in kj.batch_spec('w13a')

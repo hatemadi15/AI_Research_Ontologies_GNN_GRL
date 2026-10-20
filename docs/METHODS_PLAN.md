@@ -359,6 +359,16 @@ at least as good as mention replacement would be expected to show; the
 narrow miss of decision 1 on MuLMS (+2.10 [−0.31, +4.51]) is a power
 problem of 7 units, not a sign problem (6 of 7 subfields gain).
 
+*13.1 done (20 October).* The consistency rule on the CRF head passes on
+MuLMS (+0.82 [+0.18, +1.46], every subfield gaining) and, from week 7, on
+coarse-grained MaterioMiner (+0.12), and loses on SOFC-Exp's article folds
+(−0.44 [−0.72, −0.16]) as on its official split; it adds nothing to mention
+replacement on either corpus. By the revised criterion that is a methods
+claim of two corpora, scoped and under a point, with a boundary condition
+the annotation convention explains. It is not the paper's main method;
+13.2 and 13.3 (mention replacement pooled across corpora and on SOFC-Exp's
+folds) decide whether mention replacement joins it, after the reset.
+
 Stop rules (as written on 19 October): the methods route gets the two GPU weeks after the reset and
 route E at most; no fourth protocol on MuLMS. A pass on MuLMS alone (the
 MaterioMiner analogue failing) is reported as a scoped result inside the
