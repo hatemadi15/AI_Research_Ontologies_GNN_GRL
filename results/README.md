@@ -225,8 +225,14 @@ from a bundle rebuilt after the CPU probe (`ner-gpu-bundle-3`) and will write
 variants `crf_mrs_topic`, `crf_mrm_topic`, `crf_mrm_topic6`, `crf_st3_topic`,
 `crf_gzm_topic` and `crf_gzs_topic` (amendments 2 and 3, batch `w12c`) and
 `crf_mr6` (run ids the subfields; CC BY-SA 4.0);
-`gpu/ner_week5_seed_analysis.json` (`mulms`, `week12`) will hold the screen
-and the decisions. `silver_lexicons/<subfield>.json` (`silver_lexicon.py`,
+`gpu/ner_week5_seed_analysis.json` (`mulms`, `week12`) holds the screen
+and the decisions. In hand (20 October): `crf_gzm_topic_m<N>` and
+`crf_gzs_topic_m<N>` (the feature screen, `ner-gpu-jobs-c` version 4, bundle
+3ac85a8) and `crf_mr6_m<N>` (the first `w12a` session, `ner-gpu-jobs-d`
+version 7, bundle 47e2310), N in 0, 100, 200; each run of a topic variant
+records its corpus (`self_train_sha256`), its teachers and, for the feature
+variants, `names_feature` (the lexicon's size, the matches and the largest
+learned weight). `silver_lexicons/<subfield>.json` (`silver_lexicon.py`,
 the CPU probe of `docs/METHODS_PLAN.md` §4B, no decision; all 7 subfields,
 19–20 October) records per subfield the lexicons' sizes and their coverage of the unseen test names
 under both silver filters at three thresholds, and the dictionary rule's

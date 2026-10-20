@@ -3749,6 +3749,44 @@ mention-level filter is a candidate for the screen.
   on the website; `w12f` (V1 in lane 0, V2 in lane 1, about 3.7 hours) is
   pushed in its place and `w12g` (V4 and V6) runs after the reset of 24
   October with the decision batch.
+- *08:06: the feature screen done* (`w12c` on `ner-gpu-jobs-c`, version 4,
+  bundle 3ac85a8; 196.7 minutes, setup 26.8 of them; all 15 jobs, 21–28
+  minutes each). The repeat `smokeaq` is identical (77.95), so is `smokeao`
+  of the first `w12a` session; every teacher of every job scores exactly
+  as the stored week-10 CRF run of its seed, and every run records its own
+  corpus. Collected: `crf_gzm_topic_m<0,100,200>`, `crf_gzs_topic_m<N>` and
+  the three `crf_mr6_m<N>` files of the first `w12a` session (complete, 7
+  subfields each). The screen so far (`ner_seed_analysis.py`, `week12`,
+  3 seeds, 7 subfields; the decision rule is not applied to a screen):
+  V7 `crf_gzm_topic` 48.91, −0.03 [−2.02, +1.97] against the CRF head and
+  −1.73 [−4.13, +0.67] against mention replacement; V8 `crf_gzs_topic`
+  48.79, −0.15 [−2.15, +1.86] and −1.85 [−3.59, −0.12]; V3 `crf_mr6`
+  50.44, +1.50 [−1.65, +4.66] and −0.20 [−3.20, +2.80]. None is above
+  mention replacement, so none of the three can be the screen's winner;
+  V1, V2, V4 and V6 run after the reset. Per subfield (3-seed means):
+
+| Subfield | CRF head | MR | V3 `crf_mr6` (Δ vs CRF, Δ vs MR) | V7 `crf_gzm_topic` | V8 `crf_gzs_topic` |
+|---|---|---|---|---|---|
+| electrolysis | 56.20 | 57.13 | 59.17 (+2.97, +2.04) | 57.87 (+1.66, +0.73) | 55.86 (-0.35, -1.28) |
+| graphene | 49.20 | 50.83 | 51.46 (+2.25, +0.63) | 47.34 (-1.86, -3.49) | 49.40 (+0.20, -1.43) |
+| pemfc | 50.37 | 52.39 | 54.16 (+3.79, +1.76) | 49.36 (-1.01, -3.03) | 49.77 (-0.60, -2.63) |
+| poly | 53.47 | 49.48 | 50.02 (-3.45, +0.54) | 50.82 (-2.65, +1.34) | 49.91 (-3.56, +0.43) |
+| semi | 31.52 | 37.59 | 30.25 (-1.27, -7.35) | 31.71 (+0.19, -5.89) | 32.04 (+0.52, -5.55) |
+| sofc | 44.15 | 49.58 | 50.77 (+6.61, +1.19) | 47.83 (+3.68, -1.75) | 47.88 (+3.73, -1.70) |
+| steel | 57.61 | 57.45 | 57.24 (-0.37, -0.21) | 57.43 (-0.19, -0.03) | 56.65 (-0.96, -0.80) |
+| mean | 48.93 | 50.64 | 50.44 (+1.50, -0.20) | 48.91 (-0.03, -1.73) | 48.79 (-0.15, -1.85) |
+
+  The feature's learned term stayed small: the largest absolute weight per
+  run is 0.41–1.09 (mention lexicon) and 0.46–0.95 (sentence lexicon)
+  after 20 epochs at learning rate 1e-2, against emissions of several
+  units, with 850–8,660 (mention) and 356–3,668 (sentence) matched test
+  words per subfield; the model learned to trust the lexicon little, and
+  where the dictionary rule gained most (sofc, pemfc, semi) the feature
+  gained nothing beyond the CRF head's seed noise. The quota at 08:10 is
+  2.9 hours, which the running `w12e` session consumes until Kaggle stops
+  it; no batch fits before the reset, so cancelling it no longer changes
+  the plan: `w12e` runs after the reset of 24 October (about 8 hours),
+  then `w12b:<winner>` if a names variant beats mention replacement.
 - *21:06: `w11b` pushed* to `ner-gpu-jobs-d` (version 6) from bundle
   77c37be, 5 jobs in lane 0 (the smoke4 repeat `smokean` and the 4
   fine-grained held-out papers) and 4 in lane 1 (the coarse ones), about
