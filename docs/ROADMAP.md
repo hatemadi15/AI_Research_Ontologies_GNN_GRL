@@ -3685,14 +3685,14 @@ mention-level filter is a candidate for the screen.
   `w12a` 14.6, `w12c` 3.2, `w12b` 7, the MaterioMiner analogue 2.1), so
   the analogue would move to the following week. It is the user's call;
   nothing runs before 24 October either way.
-- The GPU quota was raised to 45 hours a week on 19 October (16.1 left
-  before the reset of 24 October). The order changes to use them: `w11b`
-  (bundle 77c37be, no dependency on the probe) is pushed at once; the names
-  variants of the screen (V1, V2, V4, V7) follow as soon as the probe's
+- The GPU quota was raised to 45 hours a week on 19 October. The order
+  changes to use it: `w11b` (bundle 77c37be, no dependency on the probe) is
+  pushed at once; `w12a` and `w12c` follow as soon as the probe's
   seven-subfield reading fixes the filter and threshold (a third amendment
-  if it changes them) and the bundle is rebuilt, in two sessions (`w12c`
-  and the names part of `w12a`); V6 and the `crf_mr6` jobs, the decision
-  batch and the analogue run after the reset.
+  if it changes them) and the bundle is rebuilt; then `w12b:<winner>` and,
+  if decision 1 passes, the MaterioMiner analogue, all this week (Kaggle
+  charges session hours: `w11b`'s 3.4-hour session cost 3.4 of them, and
+  about 11 are needed for the rest of week 12 against 12.7 left).
 - *21:06: `w11b` pushed* to `ner-gpu-jobs-d` (version 6) from bundle
   77c37be, 5 jobs in lane 0 (the smoke4 repeat `smokean` and the 4
   fine-grained held-out papers) and 4 in lane 1 (the coarse ones), about
@@ -3971,10 +3971,11 @@ selection rule and the same decisions for the winner:
 V7's option, variant and parser rules are in `ner_baseline.py` (48f37d3);
 its screen is the batch `w12c` (its 7 jobs over two lanes, about 3.2 GPU
 hours, after `w11b` on the lane `w12a` leaves free), its decision batch
-`w12b:gzm`. The budget is about 29 GPU hours in all (`w11b` 2.1, `w12a`
-14.6, `w12c` 3.2, `w12b` 7, the MaterioMiner analogue 2.1); the quota was
-raised to 45 hours a week on 19 October (16.1 of them left before the
-reset), so nothing waits for a later week. The paths the change does not touch were checked
+`w12b:gzm`. Kaggle charges session hours, not lane hours: from `w11a`'s
+job times the screen costs about 5 session hours (`w12a`) plus 2 (`w12c`),
+the decision about 2.5 and the MaterioMiner analogue about 1.1, within the
+12.7 hours left this week after `w11b` (the quota was raised to 45 hours a
+week on 19 October), so the whole of week 12 runs before the reset. The paths the change does not touch were checked
 byte-identical to 77c37be on the tiny corpora (`crf`, `mr`, `mt_mr`, `st3`,
 `mrs`, the MuLMS pool and unused-corpus runs), and the XLA path still
 repeats. The bundle of every week-12 batch is rebuilt from the commit

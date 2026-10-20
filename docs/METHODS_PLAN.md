@@ -186,9 +186,8 @@ mechanism or the lexicon carries the gain. If V7 wins the screen, the
 claim becomes "a lexicon harvested from the topic's unlabeled text,
 injected as a feature, improves NER on unseen topics", and mention
 replacement with the lexicon is its ablation; if an MR variant wins, V7 is
-the feature baseline the paper reports. Budget: about 29 hours in
-all (`w11b` 2.1, `w12a` 14.6, `w12c` 3.2, `w12b` 7, the analogue 2.1),
-within a quota raised to 45 hours a week on 19 October.
+the feature baseline the paper reports. Budget: about 2 session
+hours for `w12c` (§5), within the week's remaining quota.
 The bundle is rebuilt from the commit that closes the probe.
 
 ### B. The CPU probe (this week, before any GPU hour)
@@ -264,7 +263,7 @@ all tested or ruled out, in `ROADMAP.md`.
 
 | Resource | Capacity | Used for | Rules |
 |---|---|---|---|
-| Kaggle T4 GPU | 45 hours a week since 19 October (30 before; 16.1 left this week), reset Friday 00:00 UTC (next: 24 October); 12-hour sessions, 2 at a time | every pre-registered decision (comparable with the existing GPU references) | the existing bundle and batch rules |
+| Kaggle T4 GPU | 45 hours a week since 19 October (30 before), charged per session hour whatever the session's two GPUs do (`w11b`: 3.4 hours for a 3.4-hour session); reset Friday 00:00 UTC (next: 24 October); 12-hour sessions, 2 at a time; 12.7 hours left this week after `w11b` | every pre-registered decision (comparable with the existing GPU references) | the existing bundle and batch rules |
 | Kaggle TPU v5e-8 | 20 hours a week on paper; none attached in six sessions (19 October) | nothing for now (the spike's outcome below); the port stays | TPU numbers are compared only with TPU numbers (as CPU with CPU, GPU with GPU) |
 | this environment's CPU | 4 cores, 15 GB; 2 lanes of 2 threads as in weeks 2–3: a 340-sentence CRF run in 15–20 minutes, tagging 40,000 sentences in about 75 minutes per teacher | the probe (§4B), corpus building, every analysis, CRF-only references if needed | results written per run and committed daily (the container can be reclaimed) |
 
@@ -303,13 +302,17 @@ on the GPU, whose quota rose to 45 hours a week the same day. The XLA
 port stays in the code for a TPU Kaggle may attach another day
 (`tpu-smoke1`, `tpu-smoke`, the go/no-go rule above).
 
-**GPU budget, week of 24 October** (hours): `w11b` 2.1; `w12a` 14.6 (lane 0:
-V1 3.2, V4 3.2, one `crf_mr6` job 0.7; lane 1: V2 3.2, V6 3.0, two `crf_mr6`
-jobs 1.4; about 7.5 hours of wall time); `w12b` 7; the MaterioMiner analogue
-2.1 if decision 1 passes. Total about 29 with amendment 2, of a quota raised to 45
-hours on 19 October; its 16.1 hours left before the reset go to `w11b` at once and
-to the names variants of the screen as soon as the probe's reading fixes the
-filter, so that the decision batch can run on 24 October.
+**GPU budget** (session hours, which is what Kaggle charges; the earlier
+figures counted lane hours and doubled them). From `w11a`'s 7 MuLMS jobs of
+3 teachers and 10 students (16–31 minutes each) a screen job of 3 students
+takes about 16 minutes, a variant's 7 jobs about 1.9 hours of lane time:
+`w12a` about 5 hours (lane 0: V1, V4 and one `crf_mr6` job; lane 1: V2, V6
+and two `crf_mr6` jobs), `w12c` about 2 hours (V7 over two lanes with the
+smoke repeat), `w12b` about 2.5 hours (7 jobs of 3 or 4 students per lane),
+the MaterioMiner analogue about 1.1 hours. In all about 11 hours, within the
+12.7 left this week after `w11b` (3.4): the whole of week 12 runs before the
+reset, as soon as the probe's reading fixes the filter and the bundle is
+rebuilt.
 
 ## 6. Schedule and decision points
 
