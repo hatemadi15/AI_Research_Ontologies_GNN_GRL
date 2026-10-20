@@ -1126,10 +1126,14 @@ def test_week12_gazetteer_feature_batches(monkeypatch, tmp_path):
     lane0, lane1 = _parsed(kj.batch_lanes('w12c'))
     assert lane0[0].tag == 'smokeaq' and lane0[0].granularity == 'fine'
     jobs = lane0[1:] + lane1
-    assert (len(lane0), len(lane1)) == (5, 3)
-    assert [a.subfields for a in jobs] == [[s] for s in kj.MULMS_SUBFIELD_NAMES]
+    assert (len(lane0), len(lane1)) == (8, 7)
+    for name in ('crf_gzm_topic', 'crf_gzs_topic'):
+        assert sorted(a.subfields for a in jobs if kind(a) == name) == sorted(
+            [s] for s in kj.MULMS_SUBFIELD_NAMES)
+    assert [kind(a) for a in lane0[1:]] == ['crf_gzm_topic'] * 4 + ['crf_gzs_topic'] * 3
     for a in jobs:
-        assert kind(a) == 'crf_gzm_topic' and a.names_feature and a.silver_mentions
+        assert a.names_feature and getattr(a, 'silver_mentions', False) == (
+            kind(a) == 'crf_gzm_topic')
         assert not hasattr(a, 'augment_mentions') and not hasattr(a, 'augment_names')
         assert (a.teachers, a.students, a.student_offsets) == (3, 10, [0, 100, 200])
         assert a.self_train == f'data/processed/corpus/topic_{a.subfields[0]}_sentences.txt'
@@ -1140,7 +1144,10 @@ def test_week12_gazetteer_feature_batches(monkeypatch, tmp_path):
         assert [a.subfields for a in lane] == [[s] for s in kj.MULMS_SUBFIELD_NAMES]
         for a in lane:
             assert kind(a) == 'crf_gzm_topic' and a.student_offsets == offsets
-    assert 'w12c' in kj.BATCHES and 'w12b:gzm' in kj.BATCHES
+    assert 'w12c' in kj.BATCHES and {'w12b:gzm', 'w12b:gzs'} <= set(kj.BATCHES)
+    lane0, lane1 = _parsed(kj.batch_lanes('w12b:gzs'))
+    assert all(kind(a) == 'crf_gzs_topic' and not hasattr(a, 'silver_mentions')
+               for a in lane0[1:] + lane1)
 
 
 def test_week12_analogue_batches(monkeypatch, tmp_path):

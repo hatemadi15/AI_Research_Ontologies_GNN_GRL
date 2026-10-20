@@ -145,12 +145,13 @@ bundle as topic_<topic>_sentences.txt; the screen, then the decision for its win
           and mention replacement with 6 copies and no names (crf_mr6_m<N>, one job per seed
           offset, no teachers), one job in lane 0 and two in lane 1. The jobs of a variant
           share a lane: they extend the same files
-  w12c    the gazetteer-feature variant's screen (amendment 2): the CRF run of
-          smoke4 (smokeaq); then per subfield one job in which the 3 teachers tag the topic
-          corpus and the students train the plain CRF head with the mention-level silver
-          names as a match feature (--names-feature --silver-mentions, no copies:
-          crf_gzm_topic_m<N>), seed offsets 0 to 200, 4 subfields in lane 0 and 3 in lane 1
-  w12b:V  the decision for the screen's winner V (mrs, mrm, mrm6, st3, gzm or mr6): seed
+  w12c    the gazetteer-feature variants' screen (amendments 2 and 3): the CRF run of
+          smoke4 (smokeaq); then per subfield and filter one job in which the 3 teachers tag
+          the topic corpus and the students train the plain CRF head with the silver names
+          as a match feature (--names-feature, no copies: with --silver-mentions
+          crf_gzm_topic_m<N>, with the sentence filter crf_gzs_topic_m<N>), seed offsets 0 to
+          200, 7 jobs per lane
+  w12b:V  the decision for the screen's winner V (mrs, mrm, mrm6, st3, gzm, gzs or mr6): seed
           offsets 300 to 900; the teacher variants as in w12a with each lane training the
           teachers and 3 or 4 of the students (offsets 300-500 and 600-900), mr6 one job
           per offset over the lanes (smokeap)
@@ -292,7 +293,7 @@ MRS_FLAGS = ('--crf', '--teachers', '3', '--students', '10', '--augment-mentions
 TOPIC_TAG = 'topic'          # --names-tag of the topic-corpus variants (crf_mrs_topic, crf_mrm_topic)
 MR6_COPIES = 6               # week 12's copy-count variant (crf_mr6)
 # the screen's variants (amendment 1 added mrm6 and st3): w12b:<variant> decides one
-WEEK12_VARIANTS = ('mrs', 'mrm', 'mr6', 'mrm6', 'st3', 'gzm')   # gzm: w12c (amendment 2)
+WEEK12_VARIANTS = ('mrs', 'mrm', 'mr6', 'mrm6', 'st3', 'gzm', 'gzs')   # gzm, gzs: w12c
 DECISION_LANES = (OFFSETS_W5[:3], OFFSETS_W5[3:])   # w12b: the students per lane (seeds 300-900)
 # w12d:<variant>: the MaterioMiner analogue of the screen's winner (V1's is w11b, V6's the
 # week-4 crf_st3 files)
@@ -367,7 +368,8 @@ def topic_mulms_job(subfield, student_offsets, mentions=False, copies=3, names=T
     sentence, 6 for crf_mrm_topic6). Without `names` the students self-train on the silver
     sentences instead (week 4's method, 3 teachers: crf_st3_topic_m<N>). With `feature` the
     students train the plain CRF head with the names as a gazetteer match feature
-    (--names-feature, no copies: crf_gzm_topic_m<N> with `mentions`)."""
+    (--names-feature, no copies: crf_gzm_topic_m<N> with `mentions`, crf_gzs_topic_m<N>
+    without)."""
     job = ['--granularity', 'mulms', '--leave-one-subfield-out', '--train-pool',
            str(MULMS_POOL), '--subfields', subfield, '--self-train',
            TOPIC_CORPUS.format(topic=subfield), '--self-train-sample', '0',
@@ -388,7 +390,7 @@ def topic_variant_job(variant, subfield, student_offsets):
     """The job of a week-12 names or self-training variant (WEEK12_VARIANTS but mr6)."""
     return topic_mulms_job(subfield, student_offsets, mentions=variant in ('mrm', 'mrm6', 'gzm'),
                            copies=6 if variant == 'mrm6' else 3, names=variant != 'st3',
-                           feature=variant == 'gzm')
+                           feature=variant in ('gzm', 'gzs'))
 
 
 def mr6_mulms_job(offset):
@@ -757,11 +759,14 @@ def batch_lanes(name):
                  for s in MULMS_SUBFIELD_NAMES]
                 + [mr6_mulms_job(off) for off in (OFFSETS[1], OFFSETS[2])]]
     if name == 'w12c':
-        # the screen of the gazetteer-feature variant (amendment 2): the mention
-        # filter's names as a match feature of the plain CRF head, seed offsets 0 to 200, the
-        # subfields over the two lanes (each job trains its own teachers)
-        jobs = [topic_variant_job('gzm', s, OFFSETS) for s in MULMS_SUBFIELD_NAMES]
-        return [[repeat + ['--tag', 'smokeaq']] + jobs[:4], jobs[4:]]
+        # the screen of the gazetteer-feature variants: the names of the mention filter
+        # (amendment 2, crf_gzm_topic) and of the sentence filter (amendment 3,
+        # crf_gzs_topic) as a match feature of the plain CRF head, seed offsets 0 to 200;
+        # each variant's jobs over both lanes (each job trains its own teachers; the lanes
+        # write different files)
+        gzm = [topic_variant_job('gzm', s, OFFSETS) for s in MULMS_SUBFIELD_NAMES]
+        gzs = [topic_variant_job('gzs', s, OFFSETS) for s in MULMS_SUBFIELD_NAMES]
+        return [[repeat + ['--tag', 'smokeaq']] + gzm[:4] + gzs[4:], gzm[4:] + gzs[:4]]
     if name.startswith('w12d:'):
         # week 12's MaterioMiner analogue of the screen's winner, 10 seeds, one lane per
         # granularity: a job per held-out paper (the teacher variants) or per seed offset
