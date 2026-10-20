@@ -346,7 +346,20 @@ rebuilt.
 | 31 Oct–7 Nov | ablations (§4C) on the GPU; or route E; the evaluation paper's remaining items either way | the paper's claims |
 | 7–14 Nov | the paper assembled as what the results say; title and abstract fixed by 14 Nov | — |
 
-Stop rules: the methods route gets the two GPU weeks after the reset and
+**Revised on 20 October (the user's directive: push as hard as possible for
+a methods paper).** The stop rule below is lifted: week 13 (ROADMAP §4) adds
+the consistency rule on MuLMS (free), a pooled decision across corpora for
+the week-12 winner, and mention replacement with and without multi-task
+training on SOFC-Exp's article folds, with a revised methods criterion (two
+corpora, or a pooled decision with no corpus losing); the attempt count is
+reported in the paper. Post hoc, the pooled estimate for plain mention
+replacement over MaterioMiner's papers and MuLMS's subfields is +2.34
+[+0.94, +3.75] fine-grained, which is what a pooled decision for a variant
+at least as good as mention replacement would be expected to show; the
+narrow miss of decision 1 on MuLMS (+2.10 [−0.31, +4.51]) is a power
+problem of 7 units, not a sign problem (6 of 7 subfields gain).
+
+Stop rules (as written on 19 October): the methods route gets the two GPU weeks after the reset and
 route E at most; no fourth protocol on MuLMS. A pass on MuLMS alone (the
 MaterioMiner analogue failing) is reported as a scoped result inside the
 evaluation paper, not as a methods paper.
