@@ -4014,6 +4014,40 @@ retyping variants, the votes, per subfield. On MaterioMiner the rule gave
 repeated mentions and more unseen names, so the rule has more to
 propagate, but also more wrong predictions to propagate. Expected small.
 
+*Outcome of 13.1a and 13.1b (20 October, 09:50 UTC).* 13.1a passes:
+`crf_dc` against `crf`, +0.82 [+0.18, +1.46] (49.47 against 48.66; every
+subfield gains: electrolysis +0.54, graphene +0.47, pemfc +1.35, poly
++0.07, semi +0.93, sofc +2.07, steel +0.30; 1,213 entities added per seed
+over the 7 subfields). 13.1b does not: `crf_mr_dc` against `crf_mr`,
++0.57 [−0.12, +1.25] (51.32 against 50.76; six subfields gain, steel
+−0.04). Reported: with retyping, +1.01 [+0.28, +1.74] on the CRF head and
++0.88 [−0.01, +1.77] on mention replacement. The rule's earlier results:
+on MaterioMiner's held-out papers (week 7, part 1) it passed only the
+coarse-grained CRF head, +0.12 [+0.01, +0.24] (fine-grained −0.13 to
++0.14); on SOFC-Exp's official split it hurts, −0.42 [−0.61, −0.22],
+because SOFC-Exp's annotators leave 14% of a tagged term's occurrences
+untagged.
+
+**Amendment, after 13.1a and 13.1b and before any further number (20
+October, 09:55 UTC).** Two more applications of the same rule to saved
+predictions, neither seen:
+- 13.1c, *reported, not a decision*: `crf_dc` and `crf_dcr` against `crf`
+  on SOFC-Exp's 5 article folds (week 8's CRF head, 10 seeds, paired over
+  the folds). The official split says the rule hurts there, and the folds
+  carry the same annotation convention, so a loss is expected; it is
+  reported as the rule's boundary condition.
+- 13.1d, two decisions: `crf_mr_dc` against `crf_mr` on MaterioMiner's 4
+  held-out papers, fine-grained and coarse-grained (week 7's mention
+  replacement runs, 10 seeds, paired over the papers): does the rule add
+  to mention replacement where the rule alone added +0.12 coarse-grained?
+  Reported: `crf_mt_mr_dc` against `crf_mt_mr`; retyping.
+What the rule's results would support: a decode-time method with a
+boundary condition, "document-level propagation of a model's own
+predictions improves NER on held-out documents of consistently annotated
+corpora" (MuLMS +0.82, MaterioMiner coarse +0.12), which by the revised
+criterion is a methods claim of two corpora, scoped as such; its combination
+with mention replacement is reported against the CRF head on both corpora.
+
 **13.2 The pooled decision for the week-12 winner.** If the week-12 screen
 names a winner (the largest mean gain over mention replacement, above 0,
 among V1–V8 and V3), its decision batch `w12b:<winner>` (MuLMS, seeds
