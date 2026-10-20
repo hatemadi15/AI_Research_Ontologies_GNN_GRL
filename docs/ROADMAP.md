@@ -3698,6 +3698,16 @@ mention-level filter is a candidate for the screen.
   `ner_seedmeans.py` and `report_results.py` (above, under the methods
   criterion), with tests (575 in all), so that the analogue can run the
   moment decision 1 passes.
+- *02:35, 20 October: the screen pushed*, both sessions from bundle 47e2310
+  (ready since 02:02): `w12a` to `ner-gpu-jobs-d` (version 7; 16 jobs per
+  lane: the smoke repeat `smokeao`, V1, V4, V2, V6 and the three `crf_mr6`
+  jobs) and `w12c` to `ner-gpu-jobs-c` (version 3; 8 and 7 jobs: the
+  smoke repeat `smokeaq`, V7 and V8 over both lanes). The container of this
+  session was restarted at about 02:20, which killed the graphene probe
+  (its first teacher was tagging) and the waiters; the probe restarted at
+  02:34 on its own and lands about 05:30, after which the seven-subfield
+  reading is written. The six subfields in hand fixed amendment 3 and kept
+  the threshold, so the screen did not wait for graphene.
 - *21:06: `w11b` pushed* to `ner-gpu-jobs-d` (version 6) from bundle
   77c37be, 5 jobs in lane 0 (the smoke4 repeat `smokean` and the 4
   fine-grained held-out papers) and 4 in lane 1 (the coarse ones), about
