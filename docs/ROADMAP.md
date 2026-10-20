@@ -1025,7 +1025,7 @@ chance at class level. For a Task C-style result:
 | 9 | Part 1 done: mention replacement on the multi-task model (`crf_mt_mr`, 10 seeds on the held-out papers, S2 on SOFC-Exp's two levels; protocol below). 3 of 6 decisions pass: against the multi-task model +3.01 [+0.42, +5.60] fine-grained and +2.30 [+0.49, +4.10] coarse-grained, and its vote against the multi-task vote +2.86 [+0.18, +5.54] fine-grained, now the strongest fine-grained system on unseen papers (55.33); coarse-grained its vote does not beat the seed vote, and S2 fails at both levels, so no methods claim (C21). Part 2 done: on SOFC-Exp cut to MaterioMiner's size (10 of its 26 training articles, 5 draws), mention replacement scores +0.50 [−0.47, +1.46] against the CRF head and does not pass, so its MaterioMiner gain is not a matter of training size | Part 1: the combination's vote improves on the strongest system on unseen papers, and on SOFC-Exp. Part 2: mention replacement improves on the CRF head on a MaterioMiner-sized SOFC-Exp |
 | 10 | Done: MuLMS as a third corpus (7 materials subfields, its outermost entities; `mulms.py`), mention replacement against the CRF head on held-out subfields with 400 training sentences, 10 seeds, and the CRF head on random splits of the same size; protocol committed before any run (a08356f; the batch `w10a` ran from that commit), protocol and outcome below | Mention replacement improves on the CRF head on held-out subfields (decision 1), and its votes on the CRF votes (decision 2). Decision 1 not met: +2.10 [−0.31, +4.51], six of the seven subfields gaining. Decision 2 met: +2.71 [+0.22, +5.20]. By the protocol, mention replacement and its combination (C20, C21) stay results for MaterioMiner |
 | 11 | Protocol committed before any run: mention replacement whose replacement pool also holds the names in the sentences that 3 CRF teachers tag alike and confidently in unlabeled in-domain text (`--augment-names`, variant `crf_mrs`), on MuLMS's 7 held-out subfields (`w11a`) and MaterioMiner's 4 held-out papers (`w11b`), 10 seeds; protocol below | It improves on the CRF head on MuLMS's held-out subfields (decision 1) and on mention replacement (decisions 2–4: MuLMS, MaterioMiner fine- and coarse-grained); a methods claim needs decision 1 and one of decisions 2–4. MuLMS (`w11a`): decisions 1 (+2.04 [−0.85, +4.92]) and 2 (−0.06 [−1.09, +0.96]) not met, so no methods claim; MaterioMiner (`w11b`, 19–20 October): decisions 3 (fine-grained, +0.23 [−0.69, +1.14]) and 4 (coarse-grained, +0.61 [−0.96, +2.18]) not met either; the method is closed on both corpora |
-| 12 | Protocol committed before any run: mention replacement whose replacement pool holds the names that 3 CRF teachers find in a corpus of the held-out subfield's own topic (40,000 open-access sentences per subfield, `build_topic_corpus.py`; phase 0's gate: they hold 55–81% of the unseen test names), on MuLMS's 7 held-out subfields; a 3-seed screen of six variants (`w12a`: silver sentences `crf_mrs_topic`, silver mentions `crf_mrm_topic`, the same with 6 copies `crf_mrm_topic6`, 6 copies without names `crf_mr6`, self-training on the topic corpus `crf_st3_topic`; `w12c`: the silver mentions as a gazetteer match feature `crf_gzm_topic`; amendments 1 and 2), then the 7-seed decision for the screen's winner on seeds the screen did not see (`w12b:<variant>`); protocol below, plan in `docs/METHODS_PLAN.md` | Screen: the variant with the largest mean gain over mention replacement goes on if it is above 0. Decision 1: it improves on the CRF head (paired by subfield); decision 2: on mention replacement. A methods claim needs decision 1 on MuLMS and the winner's MaterioMiner analogue passing against the CRF head. Runs after the reset on 24 October, after `w11b` |
+| 12 | Protocol committed before any run: mention replacement whose replacement pool holds the names that 3 CRF teachers find in a corpus of the held-out subfield's own topic (40,000 open-access sentences per subfield, `build_topic_corpus.py`; phase 0's gate: they hold 55–81% of the unseen test names), on MuLMS's 7 held-out subfields; a 3-seed screen of seven variants (`w12a`: silver sentences `crf_mrs_topic`, silver mentions `crf_mrm_topic`, the same with 6 copies `crf_mrm_topic6`, 6 copies without names `crf_mr6`, self-training on the topic corpus `crf_st3_topic`; `w12c`: the silver mentions or sentences as a gazetteer match feature, `crf_gzm_topic` and `crf_gzs_topic`; amendments 1–3), then the 7-seed decision for the screen's winner on seeds the screen did not see (`w12b:<variant>`); protocol below, plan in `docs/METHODS_PLAN.md` | Screen: the variant with the largest mean gain over mention replacement goes on if it is above 0. Decision 1: it improves on the CRF head (paired by subfield); decision 2: on mention replacement. A methods claim needs decision 1 on MuLMS and the winner's MaterioMiner analogue passing against the CRF head. Runs after the reset on 24 October, after `w11b` |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -4032,6 +4032,26 @@ byte-identical to 77c37be on the tiny corpora (`crf`, `mr`, `mt_mr`, `st3`,
 repeats. The bundle of every week-12 batch is rebuilt from the commit
 that closes the CPU probe (a third amendment of the threshold or filter
 if the probe calls for one), before the reset.
+
+**Amendment 3 (20 October, before any run; on the CPU probe's first six
+subfields, graphene pending).** The screen gains an eighth variant, V8
+`crf_gzs_topic`: V7's match feature with the *sentence* filter's lexicon
+(`--names-feature` without `--silver-mentions`). The probe prices the two
+lexicons as dictionaries: at 0.9 the sentence filter's is the safer (fill
++1.8 on average over six subfields, never below −0.3, a gain on five), the
+mention filter's the richer (18–34% of the unseen test names against
+5–26%) but the more harmful where it harms (steel −10.0, poly −3.3; mean
+−0.3). V7 learns how far to trust the richer lexicon; V8 is the same
+mechanism on the safer one, for about 1.9 lane hours, so `w12c` carries
+both (7 jobs per lane). The threshold stays 0.9 for both filters: at 0.7
+and 0.5 every mention lexicon and every override lose on most subfields,
+and the sentence filter's gains at 0.7 (sofc, semi) come with losses
+elsewhere (poly, steel). Same 3-seed design, selection rule and decisions;
+`w12b:gzs` is V8's decision batch, `w12d:gzs` its MaterioMiner analogue
+is not prepared (the sentence filter's analogue on MaterioMiner is
+`w11b`'s lexicon as a feature; it would be added if V8 won). If V7 or V8
+wins, the finding is "the harvested lexicon as a feature", with the
+filter named.
 
 *Bundle.* Built from 40631ce on 18 October and uploaded as the new version
 of `ner-gpu-bundle-3` (457 files: the code, the fatigue corpus, the 52

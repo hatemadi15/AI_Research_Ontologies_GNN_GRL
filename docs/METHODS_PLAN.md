@@ -168,6 +168,7 @@ same 3-seed design and selection rule:
 | V4 `crf_mrm_topic6` | names by the mention filter, 6 copies | more exposure per name: with thousands of silver names and about 1,500 replacement slots per fold, 3 copies show most names never |
 | V6 `crf_st3_topic` | self-training on the topic corpus (silver sentences trained on, week 4's method) | the baseline a method must beat |
 | V7 `crf_gzm_topic` | V2's names as a gazetteer match feature of the plain CRF head (amendment 2) | the injection baseline the related work demands; a learned term can weigh a lexicon whose value swings by subfield |
+| V8 `crf_gzs_topic` | V1's names (the sentence filter) as the same match feature (amendment 3) | the probe finds the sentence filter's lexicon the safer dictionary and the mention filter's the richer; the feature is tried on both |
 
 Selection: the largest mean gain over mention replacement, if above 0, goes
 to the decision on seeds 300–900 (decisions 1 and 2 as fixed). If V6 wins,
@@ -189,6 +190,14 @@ replacement with the lexicon is its ablation; if an MR variant wins, V7 is
 the feature baseline the paper reports. Budget: about 2 session
 hours for `w12c` (§5), within the week's remaining quota.
 The bundle is rebuilt from the commit that closes the probe.
+
+**Amendment 3 (20 October, adopted; committed before any run).** V8
+`crf_gzs_topic`, the match feature on the sentence filter's lexicon, joins
+`w12c` (7 jobs per lane, about 3.5 session hours). The probe's six
+subfields price the sentence filter's 0.9 lexicon as the safer dictionary
+(mean fill +1.8, never below −0.3) and the mention filter's as the richer
+and the riskier (mean −0.3, steel −10.0); the feature learns its own
+trust, and the screen tries it on both. The threshold stays 0.9.
 
 ### B. The CPU probe (this week, before any GPU hour)
 
