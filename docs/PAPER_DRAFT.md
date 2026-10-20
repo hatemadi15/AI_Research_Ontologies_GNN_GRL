@@ -976,7 +976,10 @@ separately. Teachers have tagged unlabeled target text for a student in
 cross-lingual NER (wu2020teacher) and, with two teachers' agreement, in
 distantly supervised NER (qu2023adaptive); cross-domain NER is otherwise
 studied with domain-specific types and corpora (liu2021crossner;
-chen2021crossdomain). Section 6.7 harvests the lexicon of the held-out
+chen2021crossdomain); Cai et al. (cai2023graph) project the labels of
+annotated sentences onto related unlabeled text reached through Wikipedia
+anchors, and Hu et al. (hu2023entity) generate a context around an entity
+instead of replacing the entity. Section 6.7 harvests the lexicon of the held-out
 topic from that topic's own unlabeled text by the agreement of three
 teachers, injects it by mention replacement into gold contexts, and
 reports the same lexicon as a dictionary rule beside it.
