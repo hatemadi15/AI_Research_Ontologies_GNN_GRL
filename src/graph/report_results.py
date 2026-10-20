@@ -1160,7 +1160,9 @@ WEEK13_CORPORA = {'mulms': "MuLMS's 7 held-out subfields",
                   'coarse': "MaterioMiner's 4 held-out papers, coarse-grained",
                   'sofc_folds': "SOFC-Exp's 5 article folds"}
 WEEK13_INPUTS = {'crf': 'the CRF head', 'crf_mr': 'mention replacement',
-                 'crf_mt_mr': 'mention replacement on the multi-task model'}
+                 'crf_mt_mr': 'mention replacement on the multi-task model',
+                 'crf_mrm6': "mention replacement with the SOFC corpus's silver mentions and 6 "
+                             'copies (the week-12 winner\'s analogue)'}
 WEEK13_POOLED = {'crf_mr': 'mention replacement',
                  'crf_mt_mr': 'mention replacement on the multi-task model'}
 
@@ -1219,6 +1221,17 @@ def week13_note(analysis):
                  f"{delta_cell(e['minus_crf'])} ({parts}), "
                  f"{'passes' if e['passes'] else 'no'}"
                  f"{'' if e['no_corpus_loses'] else ', a corpus loses'} ({status})")
+        for key, w in e.items():
+            if not key.startswith('with_'):
+                continue
+            corpus = key[len('with_'):]
+            extra = w[corpus]
+            line += (f"; with {WEEK13_CORPORA.get(corpus, corpus)} ({extra['variant']}, "
+                     f"{delta_cell(extra['minus_crf'])}{' (loses)' if extra['loses'] else ''}): "
+                     f"{w['n_units']} units, {delta_cell(w['minus_crf'])}, "
+                     f"{'passes' if w['passes'] else 'no'}"
+                     f"{'' if w['no_corpus_loses'] else ', a corpus loses'} (reported; the "
+                     "three-corpus estimate of 13.4)")
     return line + ".\n"
 
 

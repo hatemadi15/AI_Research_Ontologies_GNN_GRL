@@ -596,12 +596,32 @@ def test_week13_consistency_rule_and_pooled_estimates(tmp_path):
     assert mt['minus_crf_mr']['micro']['per_run'] == [0.5] * 5
     assert mt['slot']['micro']['mean'] == 72.45 and mt['slot']['n_units'] == 5
     assert set(out['pooled']) == {'crf_mr'}        # crf_mt_mr: no MaterioMiner files yet
+    # 13.4: the winner's analogue on the folds (0.3 over the CRF head, -0.2 under mention
+    # replacement), and the winner's three-corpus estimate once its MuLMS and MaterioMiner
+    # files exist (7 + 4 + 5 units; reported, 13.2 stays the two-corpus decision)
+    write('sofc_document_folds', 'crf_mrm6', folds, lambda j, k: 80.3 + k + j / 10)
+    write('mulms_leave_one_subfield_out', 'crf_mrm_topic6', subfields,
+          lambda j, k: 53 + k + j / 10)
+    write('fine_leave_one_paper_out', 'crf_mrm6', papers, lambda j, k: 46 + k + j / 10)
+    out = sa.week13(tmp_path)
+    an = out['folds']['crf_mrm6']
+    assert (an['decision'], an['passes'], an['n_units']) == ('13.4', True, 5)
+    assert an['minus_crf']['micro']['per_run'] == [0.3] * 5
+    assert an['minus_crf_mr']['micro']['per_run'] == [-0.2] * 5
+    winner = out['pooled']['crf_mrm_topic6']
+    assert winner['n_units'] == 11 and set(winner['corpora']) == {'mulms', 'fine'}
+    three = winner['with_sofc_folds']
+    assert (three['n_units'], three['status'], three['passes']) == (16, 'reported', True)
+    assert three['sofc_folds']['units'] == {f: 0.3 for f in folds}
+    assert three['minus_crf']['per_run'] == [3.0] * 7 + [1.0] * 4 + [0.3] * 5
+    assert three['corpora']['sofc_folds'] == {'variant': 'crf_mrm6', 'n_units': 5}
+    assert 'with_sofc_folds' not in out['pooled']['crf_mr']
     # a MuLMS variant and its MaterioMiner analogue: two corpora, the analogue losing
     write('mulms_leave_one_subfield_out', 'crf_mrm_topic', subfields,
           lambda j, k: 53 + k + j / 10)
     write('fine_leave_one_paper_out', 'crf_mrm', papers, lambda j, k: 44 + k + j / 10)
     pooled = sa.week13(tmp_path)['pooled']
-    assert set(pooled) == {'crf_mr', 'crf_mrm_topic'}
+    assert set(pooled) == {'crf_mr', 'crf_mrm_topic', 'crf_mrm_topic6'}
     topic = pooled['crf_mrm_topic']
     assert topic['n_units'] == 11 and topic['corpora']['fine']['loses']
     assert not topic['no_corpus_loses'] and topic['status'] == 'reported'

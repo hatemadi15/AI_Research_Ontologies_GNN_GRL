@@ -120,7 +120,11 @@ votes (ner_seedmeans.WEEK5_SYSTEMS) and writes ner_week5_seed_analysis.json next
     CRF head on the folds, each with all 10 seed files of both: per fold the 10-seed means,
     the method minus the CRF head with its mean and 95% CI over the folds (passes: above 0),
     and, for the multi-task combination, its difference against mention replacement and its
-    slot level (sofc_slot_document_folds; reported).
+    slot level (sofc_slot_document_folds; reported); 13.4 (conditional on week 12's decision
+    1): the week-12 winner's analogue crf_mrm6 on the folds (batch w13b) against the CRF
+    head, decision 13.4, and against mention replacement (reported); the pooled entry of
+    the winner then carries with_sofc_folds, the three-corpus estimate (POOLED_EXTENSIONS;
+    reported, 13.2 stays the two-corpus decision).
   - sofc_splits (week 8, part 1; descriptive): SOFC-Exp beyond its official split. Per
     protocol, its 5 random sentence splits and its 5 article folds (--document-folds 5), the
     CRF head's 10-seed mean per split under every F1 average, with the mean and 95% CI over
@@ -726,7 +730,10 @@ def week12_variants(directory):
 
 
 FOLDS_PREFIX = 'sofc_document_folds'                   # week 8's article folds, fold0 to fold4
-FOLDS_DECISIONS = {'crf_mr': '13.3a', 'crf_mt_mr': '13.3b'}     # week 13, 13.3: against crf
+FOLDS_DECISIONS = {'crf_mr': '13.3a', 'crf_mt_mr': '13.3b',     # week 13, 13.3: against crf
+                   'crf_mrm6': '13.4'}                          # 13.4: the winner's analogue
+# the three-corpus estimate of a pooled method (reported): its variant on SOFC-Exp's folds
+POOLED_EXTENSIONS = {'crf_mrm_topic6': {'sofc_folds': 'crf_mrm6'}}
 
 
 def folds_entry(method_files, crf_files, decision):
@@ -764,12 +771,16 @@ def folds(directory):
                                                for off in WEEK5_OFFSETS])
         if files[method]:
             out[method] = folds_entry(files[method], crf, decision)
-    if all(files.values()):
-        scores = {m: system_scores(f) for m, f in files.items()}
-        ids = [i for i in scores['crf_mt_mr'] if i in scores['crf_mr']]
-        out['crf_mt_mr']['minus_crf_mr'] = {
-            avg: spread([scores['crf_mt_mr'][i][avg] - scores['crf_mr'][i][avg] for i in ids],
-                        'mean_diff') for avg in F1_AVERAGES}
+    if files.get('crf_mr'):
+        mr = system_scores(files['crf_mr'])
+        for method, f in files.items():
+            if method == 'crf_mr' or not f:
+                continue
+            scores = system_scores(f)
+            ids = [i for i in scores if i in mr]
+            out[method]['minus_crf_mr'] = {
+                avg: spread([scores[i][avg] - mr[i][avg] for i in ids], 'mean_diff')
+                for avg in F1_AVERAGES}
     slot = load_files(directory, [f'ner_results_sofc_slot_document_folds_crf_mt_mr_m{off}.json'
                                   for off in WEEK5_OFFSETS])
     if slot and 'crf_mt_mr' in out:
@@ -847,21 +858,11 @@ def pooled(directory, winner=None):
     for method, variants in POOLED_METHODS.items():
         corpora, diffs = {}, []
         for corpus, variant in variants.items():
-            prefix = POOLED_CORPORA[corpus]
-            files = {s: load_files(directory, [f'ner_results_{prefix}_{s}_m{off}.json'
-                                               for off in WEEK5_OFFSETS])
-                     for s in ('crf', variant)}
-            if not all(files.values()):
+            entry = pooled_corpus(directory, corpus, variant)
+            if entry is None:
                 continue
-            scores = {s: system_scores(f) for s, f in files.items()}
-            ids = [i for i in scores[variant] if i in scores['crf']]
-            units = [scores[variant][i]['micro'] - scores['crf'][i]['micro'] for i in ids]
-            entry = {'variant': variant, 'n_units': len(ids),
-                     'minus_crf': spread(units, 'mean_diff'),
-                     'units': {i: round(d, 2) for i, d in zip(ids, units)}}
-            entry['loses'] = entry['minus_crf']['ci95'][1] < 0
             corpora[corpus] = entry
-            diffs.extend(units)
+            diffs.extend(entry['units'].values())
         if len(corpora) < 2:
             continue
         entry = {'corpora': corpora, 'n_units': len(diffs),
@@ -869,8 +870,37 @@ def pooled(directory, winner=None):
                  'status': 'decision' if method == winner else 'reported'}
         entry['passes'] = entry['minus_crf']['ci95'][0] > 0
         entry['no_corpus_loses'] = not any(c['loses'] for c in corpora.values())
+        for corpus, variant in POOLED_EXTENSIONS.get(method, {}).items():
+            extra = pooled_corpus(directory, corpus, variant)
+            if extra is None:
+                continue
+            more = {**corpora, corpus: extra}
+            all_diffs = diffs + list(extra['units'].values())
+            entry[f'with_{corpus}'] = {
+                'corpora': {c: {'variant': v['variant'], 'n_units': v['n_units']} for c, v in more.items()},
+                corpus: extra, 'n_units': len(all_diffs),
+                'minus_crf': spread(all_diffs, 'mean_diff'), 'status': 'reported'}
+            entry[f'with_{corpus}']['passes'] = entry[f'with_{corpus}']['minus_crf']['ci95'][0] > 0
+            entry[f'with_{corpus}']['no_corpus_loses'] = not any(c['loses'] for c in more.values())
         out[method] = entry
     return out
+
+
+def pooled_corpus(directory, corpus, variant):
+    """A method's variant against the CRF head on one corpus of POOLED_CORPORA (the entry of
+    pooled's corpora), or None without all 10 seed files of both."""
+    prefix = POOLED_CORPORA[corpus]
+    files = {s: load_files(directory, [f'ner_results_{prefix}_{s}_m{off}.json'
+                                       for off in WEEK5_OFFSETS]) for s in ('crf', variant)}
+    if not all(files.values()):
+        return None
+    scores = {s: system_scores(f) for s, f in files.items()}
+    ids = [i for i in scores[variant] if i in scores['crf']]
+    units = [scores[variant][i]['micro'] - scores['crf'][i]['micro'] for i in ids]
+    entry = {'variant': variant, 'n_units': len(ids), 'minus_crf': spread(units, 'mean_diff'),
+             'units': {i: round(d, 2) for i, d in zip(ids, units)}}
+    entry['loses'] = entry['minus_crf']['ci95'][1] < 0
+    return entry
 
 
 def week13(directory, week12=None):
@@ -1031,6 +1061,13 @@ def main(argv=None):
         print(f"  week 13, pooled over {e['n_units']} held-out units, {method} minus the CRF "
               f"head: {d['mean_diff']:+.2f} {d['ci95']} ({e['status']}; "
               f"{'passes' if e['passes'] else 'no'}; {parts})")
+        for key, w in e.items():
+            if key.startswith('with_'):
+                d = w['minus_crf']
+                print(f"    with {key[5:]} ({w[key[5:]]['variant']}, {w[key[5:]]['n_units']} "
+                      f"units {w[key[5:]]['minus_crf']['mean_diff']:+.2f}): {w['n_units']} units, "
+                      f"{d['mean_diff']:+.2f} {d['ci95']} (reported; "
+                      f"{'passes' if w['passes'] else 'no'})")
     if 'gap' in result['sofc_splits']:
         print(f"  SOFC-Exp, random splits minus article folds: "
               f"{result['sofc_splits']['gap']['micro']:+.2f} micro F1")

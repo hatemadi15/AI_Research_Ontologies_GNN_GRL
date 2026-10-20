@@ -1224,3 +1224,21 @@ def test_week13_sofc_folds_batch(monkeypatch):
         '--granularity', 'sofc', '--document-folds', '5', '--crf', '--tag', 'm300',
         '--seed-offset', '300', '--save-predictions', '--threads', str(kj.THREADS)]
     assert 'w13a' in kj.BATCHES and 'sofc_corpus_sha256' not in kj.batch_spec('w13a')
+
+
+def test_week13_folds_analogue_batch(monkeypatch):
+    """w13b (13.4): a repeat, then the week-12 winner's analogue on SOFC-Exp's 5 article
+    folds, one job per lane with the lane's student seed offsets (0-400, 500-900): 3 teachers
+    tagging the whole SOFC corpus, mention replacement with the mention-level silver names
+    and 6 copies (crf_mrm6); the batch carries the SOFC corpus's SHA-256."""
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda report=None: 'x' * 64)
+    lane0, lane1 = _parsed(kj.batch_lanes('w13b'))
+    assert lane0[0].tag == 'smokeaw' and (len(lane0), len(lane1)) == (2, 1)
+    for a, offsets in ((lane0[1], [0, 100, 200, 300, 400]), (lane1[0], [500, 600, 700, 800, 900])):
+        assert (a.granularity, nb.protocol_name(a), nb.variant_name(a)) == (
+            'sofc', 'document_folds', 'crf_mrm6')
+        assert a.document_folds == 5 and a.student_offsets == offsets
+        assert a.self_train == kj.SOFC_CORPUS and a.self_train_sample == 0
+        assert a.teachers == 3 and a.students == 10 and a.silver_mentions
+        assert a.augment_mentions == 6 and a.augment_names and a.crf and a.save_predictions
+    assert 'w13b' in kj.BATCHES and 'sofc_corpus_sha256' in kj.batch_spec('w13b')

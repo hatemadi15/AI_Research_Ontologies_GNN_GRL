@@ -1754,3 +1754,36 @@ def test_week13_bullet(tmp_path):
             "+2.80] (MuLMS's 7 held-out subfields +2.10 [-0.31, +4.51]; MaterioMiner's 4 "
             "held-out papers +2.77 [+1.51, +4.03]; SOFC-Exp's 5 article folds +0.31 [-0.20, "
             "+0.82]), passes (reported; 13.3's pooled estimate, no decision).\n") in readme
+    # 13.4: the winner's analogue on the folds, and the winner's three-corpus estimate
+    analysis['week13']['folds'] = {
+        'crf_mrm6': folds_entry((83.0, 79.0, 87.0), 0.21, -0.3, 0.72, '13.4',
+                                minus_crf_mr={'micro': diff(-0.1, -0.6, 0.4, 5),
+                                              'micro_strict': diff(-0.1, -0.6, 0.4, 5)})}
+    analysis['week13']['pooled'] = {'crf_mrm_topic6': {
+        'corpora': {'mulms': {'variant': 'crf_mrm_topic6', 'n_units': 7, 'loses': False,
+                              'minus_crf': diff(3.1, 0.4, 5.8)},
+                    'fine': {'variant': 'crf_mrm6', 'n_units': 4, 'loses': False,
+                             'minus_crf': diff(2.0, 0.5, 3.5, 4)}},
+        'n_units': 11, 'minus_crf': diff(2.7, 1.1, 4.3, 11), 'status': 'decision',
+        'passes': True, 'no_corpus_loses': True,
+        'with_sofc_folds': {
+            'corpora': {'mulms': {'variant': 'crf_mrm_topic6', 'n_units': 7},
+                        'fine': {'variant': 'crf_mrm6', 'n_units': 4},
+                        'sofc_folds': {'variant': 'crf_mrm6', 'n_units': 5}},
+            'sofc_folds': {'variant': 'crf_mrm6', 'n_units': 5, 'loses': False,
+                           'minus_crf': diff(0.21, -0.3, 0.72, 5)},
+            'n_units': 16, 'minus_crf': diff(1.9, 0.8, 3.0, 16), 'status': 'reported',
+            'passes': True, 'no_corpus_loses': True}}}
+    (ws.results / 'gpu' / rr.WEEK5_ANALYSIS).write_text(json.dumps(analysis))
+    readme, _ = ws.generate()
+    assert ("SOFC-Exp's 5 article folds, decision 13.4, mention replacement with the SOFC "
+            "corpus's silver mentions and 6 copies (the week-12 winner's analogue) against the "
+            "CRF head, paired by fold: 83.00 [79.00, 87.00] against 82.79 [78.50, 87.00]; no "
+            "significant change (+0.21, 95% CI [-0.30, +0.72]; strict IOB2 +0.21 [-0.30, "
+            "+0.72]); against mention replacement -0.10 [-0.60, +0.40] (reported; no "
+            "decision). The week-12 screen's winner: silver mentions (crf_mrm_topic). Pooled "
+            "over 11 held-out units, silver mentions with 6 copies against the CRF head: +2.70 "
+            "[+1.10, +4.30] (MuLMS's 7 held-out subfields +3.10 [+0.40, +5.80]; MaterioMiner's "
+            "4 held-out papers +2.00 [+0.50, +3.50]), passes (decision 13.2); with SOFC-Exp's "
+            "5 article folds (crf_mrm6, +0.21 [-0.30, +0.72]): 16 units, +1.90 [+0.80, +3.00], "
+            "passes (reported; the three-corpus estimate of 13.4).\n") in readme

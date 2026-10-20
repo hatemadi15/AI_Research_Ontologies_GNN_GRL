@@ -28,7 +28,10 @@ mention replacement on either corpus. Mention replacement goes to SOFC-Exp's
 article folds and to a pooled decision across corpora after 24 October. The
 week-12 screen is complete (20 October): the mention-level filter with 6
 copies (V4) leads mention replacement by +1.45 and the CRF head by +3.16 on
-3 seeds and goes to its 7-seed decision after 24 October (Section 6.7).
+3 seeds and goes to its 7-seed decision after 24 October (Section 6.7); if
+that passes, its analogue also runs on SOFC-Exp's article folds (13.4,
+pre-registered on 20 October; the SOFC corpus holds 36% of the folds'
+unseen names, against 55–81% for MuLMS's topic corpora).
 The numbers come from `results/` through the claims table of `docs/PAPER.md`
 (C1–C25). References are keys of `docs/references.bib`.
 
@@ -810,7 +813,14 @@ names that three CRF teachers tag in unlabeled in-domain text.
   is V4's. The screen's own CI says what to expect: the design detects a
   mean gain of about 2.4–2.9 or more on 7 subfields, which +3.16 against
   the CRF head clears on these seeds and +1.45 against mention replacement
-  does not.
+  does not. A third corpus is pre-registered for a pass of decision 1
+  (13.4): the same analogue on SOFC-Exp's five article folds with the SOFC
+  corpus (40,000 open-access sentences on solid oxide fuel cells, built for
+  multi-task self-training on SOFC-Exp with SOFC-Exp's own articles excluded;
+  ROADMAP §4, week-6 amendment), which holds 36% of the folds' unseen
+  test names (27–43% per fold; MATERIAL 19–46%), measured before any run;
+  its decision is against the CRF head on the folds, and the three-corpus
+  pooled estimate is reported beside the two-corpus decision 13.2.
 
 **6.8 Document-level propagation on held-out documents of three corpora
 (C25).** The rule of Section 5.5 (krishnan2006effective): within a document,
