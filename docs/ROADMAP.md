@@ -3833,9 +3833,9 @@ mention filter at 0.9 admits 25.0% of them (7,913 names, 14,280 MAT and
 cross-subfield names held 4.4%). SAMPLE and DEV are absent from every
 lexicon (0 and 1 mentions at 0.9): the teachers do not find them in the
 corpus either. As a dictionary the lexicon is harmful: filling the CRF
-head's O tags with the 0.9 mention lexicon moves precision from 61.3 to
-39.7 and recall from 53.2 to 57.3 (−10.0 F1), and even the gold unseen
-names fill to 42.0 precision and 76.3 recall (−1.8; overriding, +4.1). A
+head's O tags with the 0.9 mention lexicon moves precision from 64.4 to
+40.3 and recall from 50.9 to 55.9 (−10.0 F1), and even the gold unseen
+names fill to 42.7 precision and 77.1 recall (−1.8; overriding, +4.1). A
 string that is an entity somewhere in steel's documents is usually not one
 where it occurs next, so no gazetteer can help there and a names method
 must keep the context's say; whether mention replacement, which swaps
