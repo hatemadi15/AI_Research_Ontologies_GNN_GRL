@@ -3730,6 +3730,7 @@ stay local.
 
 | Subfield | Teachers' test F1 (CPU) | Sentence filter 0.9: names, coverage, fill | Mention filter 0.9: names, coverage, fill | Mention filter 0.7: coverage, fill | Gold unseen names: fill / override |
 |---|---|---|---|---|---|
+| electrolysis | 56.3, 50.2, 57.2 | 300, 12.5%, +0.85 | 7,895, 29.9%, −0.77 | 35.5%, −3.78 | −6.85 / +4.47 |
 | pemfc | 44.4, 51.1, 52.9 | 300, 19.2%, +3.16 | 6,259, 29.4%, +3.97 | 37.6%, −0.44 | −10.51 / −5.91 |
 | poly | 45.6, 52.5, 53.8 | 854, 8.0%, −0.25 | 9,194, 18.3%, −3.31 | 23.4%, −9.91 | −3.63 / +2.22 |
 | sofc | 53.4, 51.9, 51.2 | 340, 25.8%, +5.79 | 4,344, 34.4%, +5.91 | 45.8%, +5.96 | +15.16 / +27.06 |
@@ -3800,6 +3801,23 @@ subfields where a 0.9 lexicon helps as a dictionary (sofc +5.9, pemfc
 +4.0), two where it hurts (steel −10.0, poly −3.3); on all four, 0.9 beats
 0.7 and 0.5, and the sentence filter loses less where the lexicon hurts
 and gains about the same where it helps.
+
+*Reading, electrolysis.* Near neutral. The corpus holds 70.7% of
+electrolysis's unseen test names; the mention filter at 0.9 admits 29.9%
+(7,895 names; 27,267 MAT and 9,061 VALUE mentions among 36,756), the
+sentence filter 12.5% (300 names). The held-out CRF head is the best
+balanced of the seven (10 seeds: precision 57.3, recall 54.8, F1 55.9),
+and a dictionary has little to add: the 0.9 sentence lexicon fills to
++0.9 (on all 10 seeds, +0.2 to +1.5), the 0.9 mention lexicon to −0.8 (on
+none), every looser lexicon and every override worse (the 0.7 mention
+lexicon −3.8); the gold unseen names fill to −6.9 and override to +4.5.
+*So far (5 of 7).* The dictionary's value tracks the head's recall gap:
+it helps where recall trails precision by 15 points or more (sofc 35
+against 58, pemfc 43 against 61) and hurts or does nothing where the head
+is nearly balanced (steel, poly, electrolysis); 0.9 beats 0.7 and 0.5
+everywhere; as a dictionary the sentence filter is the safer (never below
+−0.3 at 0.9) and the mention filter the richer (18–34% of the unseen
+names against 8–26%).
 
 ### Week 12 protocol: names from a topic corpus (fixed before any run)
 
