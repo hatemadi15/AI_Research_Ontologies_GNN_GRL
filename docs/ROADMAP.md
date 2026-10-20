@@ -4373,6 +4373,25 @@ training on the topic corpus (V6) stays at mention replacement's level
 mention filter admits 22.2% of the unseen test names, the sentence filter
 11.4% (the corpus holds 55–81%), as the probe measured.
 
+*Where the gain is* (`ner_mentions.py`, 20 October, the screen's 3 seeds
+pooled over the 7 subfields, where 88% of the test entities are names no
+training sentence annotates; exploratory, no decision). On the unseen
+names the CRF head recalls 39.4% at precision 55.8 (F1 46.2); mention
+replacement 43.2% at 54.3 (48.1); V4 48.1% at 50.0 (49.1), V2 46.4% at
+51.8 (48.9), V1 44.9% at 53.2 (48.7); self-training on the topic corpus
+(V6) 40.4% at 58.5 (47.8), the one variant that raises precision; the
+6-copy control 43.3% at 53.2 (47.8); the feature variants 40.5–40.8% at
+54.1–54.5 (46.3–46.7), the CRF head's figures. So the names buy recall on
+the unseen names, +8.8 points over the CRF head and +5.0 over mention
+replacement for V4, and pay 4–6 points of precision for it; on the seen
+names V4 recalls 76.2% (the CRF head 66.5, mention replacement 71.7) at
+66.0 precision (73.5, 69.6). Paired per subfield on the unseen names' F1
+against the CRF head at the same seeds: V4 +3.44 [−1.69, +8.56], V2 +2.77
+[−1.13, +6.67], V1 +2.70 [−1.86, +7.26], V6 +1.78 [+0.04, +3.53], V3 +1.64
+[−1.54, +4.82]; mention replacement with 10 seeds +2.19 [−0.25, +4.63].
+The mechanism is the one claimed, names reaching unseen entities, and its
+cost is precision: a model taught more names tags more spans.
+
 *Analysis.* `ner_seed_analysis.py` (`mulms`, `week12`: per variant the parts
 `screen`, `decision` and `ten_seeds`, each present when its files exist),
 `kaggle_jobs.py` batches `w12a` and `w12b:<variant>` (tested from the frozen

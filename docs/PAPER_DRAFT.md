@@ -823,7 +823,13 @@ names that three CRF teachers tag in unlabeled in-domain text.
   ROADMAP §4, week-6 amendment), which holds 36% of the folds' unseen
   test names (27–43% per fold; MATERIAL 19–46%), measured before any run;
   its decision is against the CRF head on the folds, and the three-corpus
-  pooled estimate is reported beside the two-corpus decision 13.2.
+  pooled estimate is reported beside the two-corpus decision 13.2. Where
+  the screen's gain is (the saved predictions, 3 seeds pooled over the
+  subfields; no decision): on the unseen names V4 recalls 48.1% against the
+  CRF head's 39.4% and mention replacement's 43.2%, at 50.0 precision
+  against 55.8 and 54.3 (F1 49.1 against 46.2 and 48.1); self-training on
+  the topic corpus raises precision instead (58.5 at 40.4% recall). The
+  names reach unseen entities and cost precision.
 
 **6.8 Document-level propagation on held-out documents of three corpora
 (C25).** The rule of Section 5.5 (krishnan2006effective): within a document,
