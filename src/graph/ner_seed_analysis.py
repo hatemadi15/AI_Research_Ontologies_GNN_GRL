@@ -115,6 +115,12 @@ votes (ner_seedmeans.WEEK5_SYSTEMS) and writes ner_week5_seed_analysis.json next
     the screen variant with the largest 3-seed mean gain over mention replacement, named
     once every variant has its screen, if that gain is above 0), reported for every other
     method (plain mention replacement's pooled estimate is post hoc, ROADMAP §4, week 13).
+    folds: 13.3, mention replacement (crf_mr, decision 13.3a) and its multi-task combination
+    (crf_mt_mr, decision 13.3b) on SOFC-Exp's 5 article folds (batch w13a) against week 8's
+    CRF head on the folds, each with all 10 seed files of both: per fold the 10-seed means,
+    the method minus the CRF head with its mean and 95% CI over the folds (passes: above 0),
+    and, for the multi-task combination, its difference against mention replacement and its
+    slot level (sofc_slot_document_folds; reported).
   - sofc_splits (week 8, part 1; descriptive): SOFC-Exp beyond its official split. Per
     protocol, its 5 random sentence splits and its 5 article folds (--document-folds 5), the
     CRF head's 10-seed mean per split under every F1 average, with the mean and 95% CI over
@@ -719,6 +725,61 @@ def week12_variants(directory):
     return out
 
 
+FOLDS_PREFIX = 'sofc_document_folds'                   # week 8's article folds, fold0 to fold4
+FOLDS_DECISIONS = {'crf_mr': '13.3a', 'crf_mt_mr': '13.3b'}     # week 13, 13.3: against crf
+
+
+def folds_entry(method_files, crf_files, decision):
+    """A method against the CRF head on the article folds (10 seed files each, paired by
+    fold): both means, the difference with its 95% CI over the folds, and the verdict of
+    `decision`."""
+    scores = {'system': system_scores(method_files), 'crf': system_scores(crf_files)}
+    ids = [i for i in scores['system'] if i in scores['crf']]
+    entry = {side: {avg: spread([scores[side][i][avg] for i in ids]) for avg in F1_AVERAGES}
+             for side in scores}
+    entry['minus_crf'] = {
+        avg: spread([scores['system'][i][avg] - scores['crf'][i][avg] for i in ids],
+                    'mean_diff') for avg in F1_AVERAGES}
+    entry['units'] = {i: round(scores['system'][i]['micro'] - scores['crf'][i]['micro'], 2)
+                      for i in ids}
+    entry['n_units'] = len(ids)
+    entry['decision'] = decision
+    entry['passes'] = entry['minus_crf']['micro']['ci95'][0] > 0
+    return entry
+
+
+def folds(directory):
+    """The folds part of week13 (see the module docstring): {method: entry} for every
+    method of FOLDS_DECISIONS with all 10 seed files on SOFC-Exp's article folds, against
+    the CRF head's; the multi-task combination's entry adds its difference against mention
+    replacement (minus_crf_mr) and its slot level (slot), reported, when their files
+    exist."""
+    crf = load_files(directory, [f'ner_results_{FOLDS_PREFIX}_crf_m{off}.json'
+                                 for off in WEEK5_OFFSETS])
+    out, files = {}, {}
+    if not crf:
+        return out
+    for method, decision in FOLDS_DECISIONS.items():
+        files[method] = load_files(directory, [f'ner_results_{FOLDS_PREFIX}_{method}_m{off}.json'
+                                               for off in WEEK5_OFFSETS])
+        if files[method]:
+            out[method] = folds_entry(files[method], crf, decision)
+    if all(files.values()):
+        scores = {m: system_scores(f) for m, f in files.items()}
+        ids = [i for i in scores['crf_mt_mr'] if i in scores['crf_mr']]
+        out['crf_mt_mr']['minus_crf_mr'] = {
+            avg: spread([scores['crf_mt_mr'][i][avg] - scores['crf_mr'][i][avg] for i in ids],
+                        'mean_diff') for avg in F1_AVERAGES}
+    slot = load_files(directory, [f'ner_results_sofc_slot_document_folds_crf_mt_mr_m{off}.json'
+                                  for off in WEEK5_OFFSETS])
+    if slot and 'crf_mt_mr' in out:
+        per_fold = system_scores(slot)
+        out['crf_mt_mr']['slot'] = {avg: spread([v[avg] for v in per_fold.values()])
+                                    for avg in F1_AVERAGES}
+        out['crf_mt_mr']['slot']['n_units'] = len(per_fold)
+    return out
+
+
 def consistency_entry(inputs, outputs, decision=None):
     """The rule's output family against its input family (10 seed files each, paired by
     run_id): both families' means, the difference with its 95% CI over the units, the
@@ -817,7 +878,7 @@ def week13(directory, week12=None):
     part, which names the screen's winner."""
     winner = week12_winner(week12)
     return {'consistency': consistency(directory), 'week12_winner': winner,
-            'pooled': pooled(directory, winner)}
+            'pooled': pooled(directory, winner), 'folds': folds(directory)}
 
 
 def analyse(directory):
@@ -949,6 +1010,18 @@ def main(argv=None):
                   f"{e['output']['micro']['mean']:.2f} against {e['input']['micro']['mean']:.2f}, "
                   f"{d['mean_diff']:+.2f} {d['ci95']} ({verdict}); {e['n_added_per_seed']:.0f} "
                   f"entities added per seed")
+    for method, e in result['week13'].get('folds', {}).items():
+        d = e['minus_crf']['micro']
+        print(f"  week 13, SOFC-Exp's article folds, {method} ({e['n_units']} units): "
+              f"{e['system']['micro']['mean']:.2f} against the CRF head "
+              f"{e['crf']['micro']['mean']:.2f}, {d['mean_diff']:+.2f} {d['ci95']} "
+              f"({e['decision']}: {'passes' if e['passes'] else 'no'})")
+        if 'minus_crf_mr' in e:
+            d = e['minus_crf_mr']['micro']
+            print(f"    against crf_mr: {d['mean_diff']:+.2f} {d['ci95']} (reported)")
+        if 'slot' in e:
+            print(f"    slot level: {e['slot']['micro']['mean']:.2f} {e['slot']['micro']['ci95']} "
+                  f"(reported)")
     if result['week13']['week12_winner']:
         print(f"  week 13, the week-12 screen's winner: {result['week13']['week12_winner']}")
     for method, e in result['week13']['pooled'].items():

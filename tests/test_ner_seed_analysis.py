@@ -566,6 +566,13 @@ def test_week13_consistency_rule_and_pooled_estimates(tmp_path):
     mr_dc = cons['mulms']['crf_mr_dc']
     assert (mr_dc['decision'], mr_dc['passes']) == ('13.1b', False)
     assert mr_dc['minus_input']['micro']['per_run'] == [-0.5, 0.9, -0.5, 0.9, -0.5, 0.9, -0.5]
+    # 13.3a: mention replacement on the article folds against the CRF head, paired by fold
+    assert set(out['folds']) == {'crf_mr'}
+    mr = out['folds']['crf_mr']
+    assert (mr['decision'], mr['passes'], mr['n_units']) == ('13.3a', True, 5)
+    assert mr['minus_crf']['micro']['per_run'] == [0.5] * 5 and mr['units'] == {f: 0.5 for f in folds}
+    assert mr['system']['micro']['mean'] == 82.95 and mr['crf']['micro']['mean'] == 82.45
+    assert 'minus_crf_mr' not in mr and 'slot' not in mr
     # the pooled estimates: mention replacement over 7 + 4 + 5 units, reported (no winner)
     assert out['week12_winner'] is None
     assert set(out['pooled']) == {'crf_mr'}
@@ -577,6 +584,18 @@ def test_week13_consistency_rule_and_pooled_estimates(tmp_path):
     assert pooled['corpora']['sofc_folds']['units'] == {f: 0.5 for f in folds}
     assert pooled['minus_crf']['per_run'] == [2.0] * 7 + [2.0] * 4 + [0.5] * 5
     assert pooled['no_corpus_loses'] and not any(e['loses'] for e in pooled['corpora'].values())
+    # 13.3b: the multi-task combination on the folds (1 over the CRF head, 0.5 over mention
+    # replacement), with its slot level
+    write('sofc_document_folds', 'crf_mt_mr', folds, lambda j, k: 81 + k + j / 10)
+    write('sofc_slot_document_folds', 'crf_mt_mr', folds, lambda j, k: 70 + k + j / 10)
+    out = sa.week13(tmp_path)
+    assert set(out['folds']) == {'crf_mr', 'crf_mt_mr'}
+    mt = out['folds']['crf_mt_mr']
+    assert (mt['decision'], mt['passes'], mt['n_units']) == ('13.3b', True, 5)
+    assert mt['minus_crf']['micro']['per_run'] == [1.0] * 5
+    assert mt['minus_crf_mr']['micro']['per_run'] == [0.5] * 5
+    assert mt['slot']['micro']['mean'] == 72.45 and mt['slot']['n_units'] == 5
+    assert set(out['pooled']) == {'crf_mr'}        # crf_mt_mr: no MaterioMiner files yet
     # a MuLMS variant and its MaterioMiner analogue: two corpora, the analogue losing
     write('mulms_leave_one_subfield_out', 'crf_mrm_topic', subfields,
           lambda j, k: 53 + k + j / 10)

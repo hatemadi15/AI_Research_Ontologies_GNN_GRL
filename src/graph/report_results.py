@@ -1169,8 +1169,9 @@ def week13_note(analysis):
     """The week-13 bullet (ROADMAP §4, week 13) from the week-5 analyses file ('' without its
     week13 section): the consistency rule's outputs against their inputs on the held-out
     documents of every corpus that has them (a verdict where the comparison is a decision,
-    reported otherwise), the week-12 screen's winner, and the pooled estimates across
-    corpora."""
+    reported otherwise), the decisions 13.3a and 13.3b on SOFC-Exp's article folds (with
+    the multi-task combination's slot level and its difference against mention replacement,
+    reported), the week-12 screen's winner, and the pooled estimates across corpora."""
     w = analysis.get('week13') or {}
     consistency = w.get('consistency') or {}
     if not consistency:
@@ -1190,6 +1191,17 @@ def week13_note(analysis):
             line += (f". {WEEK13_CORPORA.get(corpus, corpus)}, on {what}: "
                      f"{interval(e['output']['micro'])} against {interval(e['input']['micro'])}, "
                      f"{e['n_added_per_seed']:.0f} entities added per seed; {verdict}")
+    for method, e in (w.get('folds') or {}).items():
+        word, numbers = paired_verdict(e['minus_crf'])
+        line += (f". SOFC-Exp's {e['n_units']} article folds, decision {e['decision']}, "
+                 f"{WEEK13_INPUTS.get(method, method)} against the CRF head, paired by fold: "
+                 f"{interval(e['system']['micro'])} against {interval(e['crf']['micro'])}; "
+                 f"{word} ({numbers})")
+        if 'minus_crf_mr' in e:
+            line += (f"; against mention replacement {delta_cell(e['minus_crf_mr']['micro'])} "
+                     "(reported; no decision)")
+        if 'slot' in e:
+            line += f"; its slot level {interval(e['slot']['micro'])} (reported)"
     winner = w.get('week12_winner')
     if winner:
         line += f". The week-12 screen's winner: {WEEK12_NAMES.get(winner, winner)} ({winner})"
@@ -1199,6 +1211,8 @@ def week13_note(analysis):
                           for c, v in e['corpora'].items())
         label = WEEK13_POOLED.get(method, WEEK12_NAMES.get(method, method))
         status = ('decision 13.2' if e['status'] == 'decision'
+                  else "reported; 13.3's pooled estimate, no decision"
+                  if 'sofc_folds' in e['corpora']
                   else 'reported; post hoc for plain mention replacement until 13.3 runs'
                   if method == 'crf_mr' else 'reported; no decision')
         line += (f". Pooled over {e['n_units']} held-out units, {label} against the CRF head: "

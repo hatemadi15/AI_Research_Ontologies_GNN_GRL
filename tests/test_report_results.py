@@ -1723,3 +1723,34 @@ def test_week13_bullet(tmp_path):
             "+3.75] (MuLMS's 7 held-out subfields +2.10 [-0.31, +4.51]; MaterioMiner's 4 "
             "held-out papers +2.77 [+1.51, +4.03]), passes (reported; post hoc for plain "
             "mention replacement until 13.3 runs).\n") in readme
+    # 13.3: the folds' decisions, and the pooled estimate over three corpora is 13.3's
+    def folds_entry(system, mean, lo, hi, decision, **more):
+        return {'system': score(*system), 'crf': score(82.79, 78.5, 87.0), 'n_units': 5,
+                'minus_crf': {'micro': diff(mean, lo, hi, 5), 'micro_strict': diff(mean, lo, hi, 5)},
+                'units': {}, 'decision': decision, 'passes': lo > 0, **more}
+    analysis['week13']['folds'] = {
+        'crf_mr': folds_entry((83.1, 79.0, 87.0), 0.31, -0.2, 0.82, '13.3a'),
+        'crf_mt_mr': folds_entry((83.5, 79.0, 88.0), 0.71, 0.1, 1.32, '13.3b',
+                                 minus_crf_mr={'micro': diff(0.4, -0.1, 0.9, 5),
+                                               'micro_strict': diff(0.4, -0.1, 0.9, 5)},
+                                 slot={'micro': {'mean': 71.2, 'ci95': [68.0, 74.4]},
+                                       'n_units': 5})}
+    pooled = analysis['week13']['pooled']['crf_mr']
+    pooled['corpora']['sofc_folds'] = {'variant': 'crf_mr', 'n_units': 5, 'loses': False,
+                                       'minus_crf': diff(0.31, -0.2, 0.82, 5)}
+    pooled.update({'n_units': 16, 'minus_crf': diff(1.7, 0.6, 2.8, 16)})
+    (ws.results / 'gpu' / rr.WEEK5_ANALYSIS).write_text(json.dumps(analysis))
+    readme, _ = ws.generate()
+    assert ("(reported; no decision). SOFC-Exp's 5 article folds, decision 13.3a, mention "
+            "replacement against the CRF head, paired by fold: 83.10 [79.00, 87.00] against "
+            "82.79 [78.50, 87.00]; no significant change (+0.31, 95% CI [-0.20, +0.82]; strict "
+            "IOB2 +0.31 [-0.20, +0.82]). SOFC-Exp's 5 article folds, decision 13.3b, mention "
+            "replacement on the multi-task model against the CRF head, paired by fold: 83.50 "
+            "[79.00, 88.00] against 82.79 [78.50, 87.00]; improves (+0.71, 95% CI [+0.10, "
+            "+1.32]; strict IOB2 +0.71 [+0.10, +1.32]); against mention replacement +0.40 "
+            "[-0.10, +0.90] (reported; no decision); its slot level 71.20 [68.00, 74.40] "
+            "(reported). The week-12 screen's winner: silver mentions (crf_mrm_topic). Pooled "
+            "over 16 held-out units, mention replacement against the CRF head: +1.70 [+0.60, "
+            "+2.80] (MuLMS's 7 held-out subfields +2.10 [-0.31, +4.51]; MaterioMiner's 4 "
+            "held-out papers +2.77 [+1.51, +4.03]; SOFC-Exp's 5 article folds +0.31 [-0.20, "
+            "+0.82]), passes (reported; 13.3's pooled estimate, no decision).\n") in readme

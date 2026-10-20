@@ -209,7 +209,10 @@ week 7's on the CRF head on MaterioMiner, recomputed), and (`week13`,
 (`week12_winner` names the screen's winner once the screen is complete).
 Batch `w13a` (13.3) runs after 24 October and will write
 `gpu/ner_results_sofc_document_folds_crf_mr_m<N>.json` and
-`gpu/ner_results_sofc{,_slot}_document_folds_crf_mt_mr_m<N>.json`.
+`gpu/ner_results_sofc{,_slot}_document_folds_crf_mt_mr_m<N>.json`; (`week13`,
+`folds`) then holds the decisions 13.3a and 13.3b, each method paired over the
+folds against week 8's CRF head on them, and the multi-task combination's slot
+level and its difference against mention replacement (reported).
 
 Week 11 (mention replacement with silver names; protocol and the outcome of part
 `w11a` in ROADMAP §4; batch `w11a` from 427e34c, `w11b` from 77c37be): `w11a`
