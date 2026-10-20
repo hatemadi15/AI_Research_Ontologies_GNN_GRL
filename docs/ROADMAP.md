@@ -3737,6 +3737,18 @@ mention-level filter is a candidate for the screen.
   completes and is pulled.
 - *04:49: `w12c` pushed again* to `ner-gpu-jobs-c` (version 4) from bundle
   3ac85a8, V7's 7 jobs in lane 0 after the smoke repeat and V8's in lane 1.
+- *05:03: the first `w12a` session done* (137.6 minutes, 2.3 quota hours):
+  the smoke repeat, electrolysis for V1, V2, V4 and V6 (29–38 minutes
+  each) and the three `crf_mr6` jobs (31–37 minutes each; valid, kept);
+  pulled, and `w12e` pushed to `ner-gpu-jobs-d` (version 8) before the
+  quota was checked against the real job times: a 3-student topic job
+  takes about 30 minutes on a T4, a V6 job 38, so `w12e` needs about 8.1
+  hours and `w12c` 3.1, against 9.14 hours left in the week with both
+  sessions charged at once; Kaggle stops a session when the quota runs
+  out and keeps none of its outputs. The user is asked to cancel version 8
+  on the website; `w12f` (V1 in lane 0, V2 in lane 1, about 3.7 hours) is
+  pushed in its place and `w12g` (V4 and V6) runs after the reset of 24
+  October with the decision batch.
 - *21:06: `w11b` pushed* to `ner-gpu-jobs-d` (version 6) from bundle
   77c37be, 5 jobs in lane 0 (the smoke4 repeat `smokean` and the 4
   fine-grained held-out papers) and 4 in lane 1 (the coarse ones), about

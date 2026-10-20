@@ -153,6 +153,9 @@ bundle as topic_<topic>_sentences.txt; the screen, then the decision for its win
           200, a variant per lane (7 jobs)
   w12e    w12a's four names variants again after the resume fix of 20 October (smokeas; the
           6-copy jobs of the first w12a session stand): lane 0 V1 and V4, lane 1 V2 and V6
+  w12f    w12e's first half, V1 in lane 0 and V2 in lane 1 (smokeat); w12g its second half,
+          V4 and V6 (smokeau): a topic job takes about 30 minutes, so each half is a
+          session of about 3.5 to 4.5 hours
   w12b:V  the decision for the screen's winner V (mrs, mrm, mrm6, st3, gzm, gzs or mr6): seed
           offsets 300 to 900; the teacher variants as in w12a with each lane training the
           teachers and 3 or 4 of the students (offsets 300-500 and 600-900), mr6 one job
@@ -776,6 +779,13 @@ def batch_lanes(name):
                    for s in MULMS_SUBFIELD_NAMES],
                 [topic_variant_job(v, s, OFFSETS) for v in ('mrm', 'st3')
                  for s in MULMS_SUBFIELD_NAMES]]
+    if name in ('w12f', 'w12g'):
+        # w12e in two halves that the week's quota allows (a 3-student topic job takes about
+        # 30 minutes on a T4, a V6 job about 38): w12f V1 and V2, w12g V4 and V6
+        first, second = ('mrs', 'mrm') if name == 'w12f' else ('mrm6', 'st3')
+        return [[repeat + ['--tag', 'smokeat' if name == 'w12f' else 'smokeau']]
+                + [topic_variant_job(first, s, OFFSETS) for s in MULMS_SUBFIELD_NAMES],
+                [topic_variant_job(second, s, OFFSETS) for s in MULMS_SUBFIELD_NAMES]]
     if name.startswith('w12d:'):
         # week 12's MaterioMiner analogue of the screen's winner, 10 seeds, one lane per
         # granularity: a job per held-out paper (the teacher variants) or per seed offset
@@ -819,7 +829,7 @@ def batch_lanes(name):
 BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'item3r',
            'smoke4', 'w5a', 'w5b', 'w5c', 'smoke5', 'smoke6', 'w6a', 'w6b', 'w7a', 'w7b',
            'w7c', 'w7d', 'w7e', 'w8a', 'w8b', 'w9a', 'w9b', 'w10a', 'w11a', 'w11b', 'w12a', 'w12c',
-           'w12e',
+           'w12e', 'w12f', 'w12g',
            *(f'w12b:{v}' for v in WEEK12_VARIANTS), *(f'w12d:{v}' for v in WEEK12_ANALOGUES),
            'tpu-smoke1', 'tpu-smoke')
 

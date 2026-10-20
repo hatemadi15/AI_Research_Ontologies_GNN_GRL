@@ -1152,6 +1152,13 @@ def test_week12_gazetteer_feature_batches(monkeypatch, tmp_path):
     assert [kind(a) for a in lane0[1:]] == ['crf_mrs_topic'] * 7 + ['crf_mrm_topic6'] * 7
     assert [kind(a) for a in lane1] == ['crf_mrm_topic'] * 7 + ['crf_st3_topic'] * 7
     assert 'w12e' in kj.BATCHES
+    for name, smoke, kinds in (('w12f', 'smokeat', ('crf_mrs_topic', 'crf_mrm_topic')),
+                               ('w12g', 'smokeau', ('crf_mrm_topic6', 'crf_st3_topic'))):
+        lane0, lane1 = _parsed(kj.batch_lanes(name))
+        assert lane0[0].tag == smoke and (len(lane0), len(lane1)) == (8, 7)
+        assert [kind(a) for a in lane0[1:]] == [kinds[0]] * 7
+        assert [kind(a) for a in lane1] == [kinds[1]] * 7
+        assert name in kj.BATCHES
     lane0, lane1 = _parsed(kj.batch_lanes('w12b:gzs'))
     assert all(kind(a) == 'crf_gzs_topic' and not hasattr(a, 'silver_mentions')
                for a in lane0[1:] + lane1)
