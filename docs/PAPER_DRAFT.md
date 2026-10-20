@@ -29,7 +29,8 @@ article folds and to a pooled decision across corpora after 24 October. The
 week-12 screen is complete (20 October): the mention-level filter with 6
 copies (V4) leads mention replacement by +1.45 and the CRF head by +3.16 on
 3 seeds and goes to its 7-seed decision after 24 October (Section 6.7); if
-that passes, its analogue also runs on SOFC-Exp's article folds (13.4,
+that or the pooled decision passes, its analogue also runs on SOFC-Exp's
+article folds (13.4,
 pre-registered on 20 October; the SOFC corpus holds 36% of the folds'
 unseen names, against 55–81% for MuLMS's topic corpora).
 The numbers come from `results/` through the claims table of `docs/PAPER.md`
@@ -810,11 +811,13 @@ names that three CRF teachers tag in unlabeled in-domain text.
   7-seed decision on seeds the screen did not see, after 24 October; its
   MaterioMiner analogue (the mention filter, 6 copies, the fatigue corpus)
   runs if decision 1 passes, and the pooled decision across corpora (13.2)
-  is V4's. The screen's own CI says what to expect: the design detects a
-  mean gain of about 2.4–2.9 or more on 7 subfields, which +3.16 against
-  the CRF head clears on these seeds and +1.45 against mention replacement
-  does not. A third corpus is pre-registered for a pass of decision 1
-  (13.4): the same analogue on SOFC-Exp's five article folds with the SOFC
+  is V4's. The screen's own spread says what to expect: V4's gains over
+  the CRF head vary by 5.5 points between subfields (sofc +12.9, poly
+  −3.7), so the 7-subfield decision detects a mean near 5, which +3.16
+  does not reach unless the spread shrinks on 7 seeds per subfield; the
+  pooled decision over 11 units is better powered (a half-width near 2.9
+  for a pooled mean near 3). A third corpus is pre-registered for a pass
+  of decision 1 or of the pooled decision (13.4): the same analogue on SOFC-Exp's five article folds with the SOFC
   corpus (40,000 open-access sentences on solid oxide fuel cells, built for
   multi-task self-training on SOFC-Exp with SOFC-Exp's own articles excluded;
   ROADMAP §4, week-6 amendment), which holds 36% of the folds' unseen

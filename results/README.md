@@ -213,7 +213,7 @@ Batch `w13a` (13.3) runs after 24 October and will write
 `folds`) then holds the decisions 13.3a and 13.3b, each method paired over the
 folds against week 8's CRF head on them, and the multi-task combination's slot
 level and its difference against mention replacement (reported). Batch `w13b`
-(13.4, conditional on week 12's decision 1 passing) will write
+(13.4, conditional on a pass of week 12's decision 1 or of 13.2) will write
 `gpu/ner_results_sofc_document_folds_crf_mrm6_m<N>.json`, the week-12
 winner's analogue on the folds (the SOFC corpus's silver mentions, 6 copies):
 (`week13`, `folds`, `crf_mrm6`) its decision 13.4 and (`week13`, `pooled`,
