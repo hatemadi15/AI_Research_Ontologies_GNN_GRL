@@ -77,6 +77,27 @@ def test_table3_and_table4():
     assert 'random splits' not in t4.split('\n\n', 1)[1]     # settings without results left out
 
 
+def _probe(subfield, fill_s, fill_m, precision=60.0, recall=40.0):
+    seed = {'before': {'precision': precision, 'recall': recall, 'f1': 48.0}}
+    return {'subfield': subfield,
+            'lexicons': {'sentences_0.9': {'unseen_share_in_lexicon': 0.133},
+                         'mentions_0.9': {'unseen_share_in_lexicon': 0.25}},
+            'probe': {'sentences_0.9': {'fill': {'delta_f1': fill_s, 'per_seed': {'m0': seed}}},
+                      'mentions_0.9': {'fill': {'delta_f1': fill_m, 'per_seed': {'m0': seed}}},
+                      'ceiling_unseen_gold': {'fill': {'delta_f1': -1.82},
+                                              'override': {'delta_f1': 4.13}}}}
+
+
+def test_table5_lists_the_probe_per_subfield_with_a_mean():
+    coverage = {'subfields': {'steel': {'corpora': {'topic_steel': {'exact': 0.55}}}}}
+    t5 = pt.table5([_probe('steel', 0.01, -10.03), _probe('sofc', 5.79, 5.91)], coverage)
+    lines = t5.splitlines()
+    assert '| steel | 55.0 | 13.3 | 25.0 | 60.0 | 40.0 | +0.01 | −10.03 | −1.82 | +4.13 |' in lines
+    assert '| sofc |  | 13.3 | 25.0 | 60.0 | 40.0 | +5.79 | +5.91 | −1.82 | +4.13 |' in lines
+    assert lines[-1] == '| mean | 55.0 | 13.3 | 25.0 | 60.0 | 40.0 | +2.90 | −2.06 | −1.82 | +4.13 |'
+    assert lines[2].startswith('| subfield | corpus holds (%) |')
+
+
 def test_main_writes_what_it_has(tmp_path, capsys):
     results = tmp_path / 'results'
     (results / 'gpu').mkdir(parents=True)
@@ -87,5 +108,7 @@ def test_main_writes_what_it_has(tmp_path, capsys):
     written = pt.main(['--results', str(results), '--out', str(tmp_path / 'tables')])
     assert written == ['table1_published_split.md', 'table3_strict.md', 'table2_decisions.md',
                        'tableA1_all_comparisons.md']
-    assert 'table 4: no mention or matching analysis' in capsys.readouterr().out
+    out = capsys.readouterr().out
+    assert 'table 4: no mention or matching analysis' in out
+    assert 'table 5: no probe reports' in out
     assert (tmp_path / 'tables' / 'table2_decisions.md').read_text().count('| 5 | GPU |') == 1

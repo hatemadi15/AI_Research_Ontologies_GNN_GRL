@@ -16,6 +16,10 @@ docs/tables/:
   table4_unseen.md (C17, C18): per setting, the share of the gold test entities whose names
       are unseen in the training sentences, the CRF head's recall on seen and unseen names
       (ner_mentions.json), and its F1 under the four matching criteria (ner_matching.json).
+  table5_probe.md (C24): per MuLMS subfield, what the topic corpus holds of the unseen test
+      names (mulms_coverage.json) and what the two silver filters admit at 0.9, the held-out
+      CRF head's precision and recall, the dictionary rule's F1 change with each 0.9 lexicon
+      and with the gold unseen names (silver_lexicons/<subfield>.json).
   tableA1_all_comparisons.md: every comparison of the comparisons files, the reported and
       descriptive ones too.
 A table whose results are missing is skipped (and named on stdout).
@@ -170,6 +174,56 @@ def table4(mentions, matching):
             + markdown(header, rows))
 
 
+def probe_row(report, coverage=None):
+    """One row of table 5 from a probe report (silver_lexicon.py) and, if given, the
+    subfield's entry of mulms_coverage.json: the numbers as floats, the subfield first."""
+    sub = report['subfield']
+    held = None
+    if coverage:
+        own = coverage.get('corpora', {}).get(f'topic_{sub}', {})
+        held = own.get('exact')
+    before = [v['before'] for v in report['probe']['sentences_0.9']['fill']['per_seed'].values()]
+    precision = sum(b['precision'] for b in before) / len(before)
+    recall = sum(b['recall'] for b in before) / len(before)
+    return [sub, held, report['lexicons']['sentences_0.9']['unseen_share_in_lexicon'],
+            report['lexicons']['mentions_0.9']['unseen_share_in_lexicon'], precision, recall,
+            report['probe']['sentences_0.9']['fill']['delta_f1'],
+            report['probe']['mentions_0.9']['fill']['delta_f1'],
+            report['probe']['ceiling_unseen_gold']['fill']['delta_f1'],
+            report['probe']['ceiling_unseen_gold']['override']['delta_f1']]
+
+
+def table5(reports, coverage=None):
+    """Table 5: the CPU probe per held-out subfield, with a mean row."""
+    rows = [probe_row(r, (coverage or {}).get('subfields', {}).get(r['subfield']))
+            for r in sorted(reports, key=lambda r: r['subfield'])]
+
+    def cells(row):
+        sub, held, adm_s, adm_m, precision, recall, fill_s, fill_m, gold_fill, gold_over = row
+        return [sub, '' if held is None else f'{100 * held:.1f}', f'{100 * adm_s:.1f}',
+                f'{100 * adm_m:.1f}', f'{precision:.1f}', f'{recall:.1f}',
+                number(fill_s, signed=True), number(fill_m, signed=True),
+                number(gold_fill, signed=True), number(gold_over, signed=True)]
+    out = [cells(r) for r in rows]
+    if len(rows) > 1:
+        means = ['mean']
+        for k in range(1, len(rows[0])):
+            values = [r[k] for r in rows if r[k] is not None]
+            means.append(sum(values) / len(values) if values else None)
+        out.append(cells(means))
+    header = ['subfield', 'corpus holds (%)', 'sentence filter admits (%)',
+              'mention filter admits (%)', 'CRF precision', 'CRF recall',
+              'Δ F1, sentence lexicon', 'Δ F1, mention lexicon', 'Δ F1, gold names (fill)',
+              'Δ F1, gold names (override)']
+    return ('Table 5. The CPU probe (no decision): per held-out MuLMS subfield, the share of '
+            'the unseen test names that the topic corpus holds and that the two silver '
+            'filters admit at threshold 0.9; the held-out CRF head\'s precision and recall '
+            '(10 model seeds); and the change of its micro F1 when every verbatim match of a '
+            'lexicon name is tagged where it predicted O (fill), for each 0.9 lexicon and for '
+            'the gold unseen names themselves, which also override its tags in the last '
+            'column.\n\n' + markdown(header, out))
+
+
 def load(path):
     if not os.path.exists(path):
         return None
@@ -212,6 +266,13 @@ def main(argv=None):
         write('table4_unseen.md', table4(mentions, matching))
     else:
         print('table 4: no mention or matching analysis')
+    probe_dir = Path(args.results) / 'silver_lexicons'
+    reports = [load(str(path)) for path in sorted(probe_dir.glob('*.json'))]
+    if reports:
+        write('table5_probe.md', table5(reports, load(os.path.join(args.results,
+                                                                    'mulms_coverage.json'))))
+    else:
+        print('table 5: no probe reports')
     print(f"wrote {', '.join(written) or 'nothing'} to {args.out}")
     return written
 
