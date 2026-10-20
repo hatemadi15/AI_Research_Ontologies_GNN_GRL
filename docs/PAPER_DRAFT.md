@@ -25,7 +25,10 @@ where it passes (+0.82 [+0.18, +1.46], every subfield gaining), its second
 corpus after coarse-grained MaterioMiner, and loses on SOFC-Exp's held-out
 articles as on its official split (C25, Section 6.8); it adds nothing to
 mention replacement on either corpus. Mention replacement goes to SOFC-Exp's
-article folds and to a pooled decision across corpora after 24 October.
+article folds and to a pooled decision across corpora after 24 October. The
+week-12 screen is complete (20 October): the mention-level filter with 6
+copies (V4) leads mention replacement by +1.45 and the CRF head by +3.16 on
+3 seeds and goes to its 7-seed decision after 24 October (Section 6.7).
 The numbers come from `results/` through the claims table of `docs/PAPER.md`
 (C1–C25). References are keys of `docs/references.bib`.
 
@@ -789,8 +792,25 @@ names that three CRF teachers tag in unlabeled in-domain text.
   replacement; their learned term stays small (largest absolute weight
   0.4–1.1 against emissions of several units). Six copies without names
   score 50.44, −0.20 [−3.20, +2.80] against mention replacement with 3
-  copies. None can be the screen's winner; the four replacement-pool
-  variants run after 24 October.
+  copies. None can be the screen's winner.
+- *Screen, part 2 (20 October; 3 seeds, 7 subfields, no decision):* the
+  four replacement-pool variants. The mention-level filter with 6 copies
+  (V4) scores 52.09, +1.45 [−1.35, +4.25] against mention replacement and
+  +3.16 [−1.96, +8.28] against the CRF head; the mention filter with 3
+  copies 51.60, +0.97 [−0.91, +2.84]; the sentence filter 51.44, +0.80
+  [−0.91, +2.51]; self-training on the topic corpus 50.80, +0.16 [−2.31,
+  +2.63] (and +1.87 [+0.20, +3.53] against the CRF head, the one screen CI
+  above 0). The names move sofc most (+7.4 for V4) and graphene (+3.1) and
+  lose on steel (−1.8); the copy control (−0.20) and the 3-copy filter
+  (+0.97) bracket V4, so the copies alone add nothing and the names add
+  about 1 to 1.5 on these seeds. By the selection rule V4 goes to the
+  7-seed decision on seeds the screen did not see, after 24 October; its
+  MaterioMiner analogue (the mention filter, 6 copies, the fatigue corpus)
+  runs if decision 1 passes, and the pooled decision across corpora (13.2)
+  is V4's. The screen's own CI says what to expect: the design detects a
+  mean gain of about 2.4–2.9 or more on 7 subfields, which +3.16 against
+  the CRF head clears on these seeds and +1.45 against mention replacement
+  does not.
 
 **6.8 Document-level propagation on held-out documents of three corpora
 (C25).** The rule of Section 5.5 (krishnan2006effective): within a document,

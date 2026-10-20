@@ -243,9 +243,10 @@ is the gate: per held-out subfield and corpus, the share of the unseen test
 entities (and of their distinct names) whose words occur in a corpus sentence,
 exact and ignoring word boundaries and case, per type, with the sentences
 that share a shingle with the held-out documents left out (`leaked`, 0
-everywhere). The week-12 batches `w12a` and `w12c` (the screen, seven variants after
-amendments 1–3) and `w12b:<variant>` (the decision) run after 24 October
-from a bundle rebuilt after the CPU probe (`ner-gpu-bundle-3`) and will write
+everywhere). The week-12 batches `w12a`, `w12e` and `w12c` (the screen, seven variants
+after amendments 1–3; all run on 20 October) and `w12b:mrm6` (the decision for
+the screen's winner V4, after 24 October), from a bundle rebuilt after the CPU
+probe (`ner-gpu-bundle-3`), write
 `gpu/ner_results_mulms_leave_one_subfield_out_<variant>_m<N>.json` for the
 variants `crf_mrs_topic`, `crf_mrm_topic`, `crf_mrm_topic6`, `crf_st3_topic`,
 `crf_gzm_topic` and `crf_gzs_topic` (amendments 2 and 3, batch `w12c`) and
@@ -254,7 +255,10 @@ variants `crf_mrs_topic`, `crf_mrm_topic`, `crf_mrm_topic6`, `crf_st3_topic`,
 and the decisions. In hand (20 October): `crf_gzm_topic_m<N>` and
 `crf_gzs_topic_m<N>` (the feature screen, `ner-gpu-jobs-c` version 4, bundle
 3ac85a8) and `crf_mr6_m<N>` (the first `w12a` session, `ner-gpu-jobs-d`
-version 7, bundle 47e2310), N in 0, 100, 200; each run of a topic variant
+version 7, bundle 47e2310), and `crf_mrs_topic_m<N>`, `crf_mrm_topic_m<N>`,
+`crf_mrm_topic6_m<N>` and `crf_st3_topic_m<N>` (`w12e`, `ner-gpu-jobs-d`
+version 8, bundle 3ac85a8; the screen is complete), N in 0, 100, 200; each
+run of a topic variant
 records its corpus (`self_train_sha256`), its teachers and, for the feature
 variants, `names_feature` (the lexicon's size, the matches and the largest
 learned weight). `silver_lexicons/<subfield>.json` (`silver_lexicon.py`,
