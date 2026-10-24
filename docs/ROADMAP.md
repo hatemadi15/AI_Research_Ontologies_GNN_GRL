@@ -3862,6 +3862,15 @@ mention-level filter is a candidate for the screen.
   fewer than at 20:04, so the stuck session's hours were not charged.
   *20:12: `w12d:mrm6` pushed again* (version 12); its live log showed the
   setup within 4.3 minutes, so it runs (about 3 hours).
+- *20:25: what 13.2 needs, written before the analogue's results exist.*
+  V4's 10-seed MuLMS units against the CRF head (13.2's protocol: each unit
+  its 10-seed mean) are +2.39, +1.75, +2.94, −2.76, +6.20, +12.16 and
+  −0.40 (mean +3.18, sd 4.84). With 4 MaterioMiner papers spread as plain
+  mention replacement's are there (sd 0.8), the pooled 95% interval clears
+  0 when the analogue's mean gain over the CRF head is about +1.6 or more
+  (at +1.77 the 11 units give +2.67 [+0.09, +5.25]; at +1.27, +2.49
+  [−0.13, +5.11]); plain mention replacement gained +2.77 there. The
+  decision is the protocol's, whatever these scenarios say.
 - *21:06: `w11b` pushed* to `ner-gpu-jobs-d` (version 6) from bundle
   77c37be, 5 jobs in lane 0 (the smoke4 repeat `smokean` and the 4
   fine-grained held-out papers) and 4 in lane 1 (the coarse ones), about
