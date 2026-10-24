@@ -3857,6 +3857,11 @@ mention-level filter is a candidate for the screen.
   leaves RUNNING. `w13c`'s multi-task jobs take about 112 minutes each, not
   75 (setup 5.1 minutes), so its 5 jobs per lane end near 02:50 UTC, inside
   the 10-hour deadline. The quota at 20:04: 13.85 of 45 hours used.
+- *20:11: version 11 ends in ERROR* (the user saw it fail on the website):
+  an empty log, no manifest. The quota then read 12.05 hours used, 1.8
+  fewer than at 20:04, so the stuck session's hours were not charged.
+  *20:12: `w12d:mrm6` pushed again* (version 12); its live log showed the
+  setup within 4.3 minutes, so it runs (about 3 hours).
 - *21:06: `w11b` pushed* to `ner-gpu-jobs-d` (version 6) from bundle
   77c37be, 5 jobs in lane 0 (the smoke4 repeat `smokean` and the 4
   fine-grained held-out papers) and 4 in lane 1 (the coarse ones), about
