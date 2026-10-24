@@ -4479,7 +4479,12 @@ subfields mention replacement and its names variants have now taken 6
 pre-registered decisions (weeks 10–12); one passes (week 10's votes).
 13.2, the pooled decision over MuLMS and MaterioMiner's held-out papers,
 needs V4's MaterioMiner analogue (`w12d:mrm6`, pushed at 18:10) and is the
-remaining route; 13.4 runs only if 13.2 passes.
+remaining route; 13.4 runs only if 13.2 passes. On the unseen names, with
+all 10 seeds (`ner_mentions.py`, exploratory): V4 recalls 47.3% at 50.9
+precision (F1 49.0), the CRF head 39.4% at 55.8 (46.2), mention
+replacement 43.2% at 54.3 (48.1); paired per subfield, V4's unseen-name F1
+gain over the CRF head is +3.34 [−1.11, +7.79], and on the seen names
++2.24 [−2.38, +6.86]: the 3-seed reading of the mechanism holds.
 
 *Analysis.* `ner_seed_analysis.py` (`mulms`, `week12`: per variant the parts
 `screen`, `decision` and `ten_seeds`, each present when its files exist),
