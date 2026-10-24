@@ -24,8 +24,11 @@ document consistency rule of Section 5.5 on MuLMS's held-out subfields,
 where it passes (+0.82 [+0.18, +1.46], every subfield gaining), its second
 corpus after coarse-grained MaterioMiner, and loses on SOFC-Exp's held-out
 articles as on its official split (C25, Section 6.8); it adds nothing to
-mention replacement on either corpus. Mention replacement goes to SOFC-Exp's
-article folds and to a pooled decision across corpora after 24 October. The
+mention replacement on either corpus. On SOFC-Exp's held-out article folds
+(13.3a, 24 October) mention replacement does not pass either, −0.48 [−1.36,
++0.39] against the CRF head, where only 42–50% of the test names are new;
+pooled over the 16 held-out units of the three corpora it gains +1.46
+[+0.28, +2.64] (reported, no decision). The
 week-12 screen is complete (20 October): the mention-level filter with 6
 copies (V4) leads mention replacement by +1.45 and the CRF head by +3.16 on
 3 seeds and goes to its 7-seed decision after 24 October (Section 6.7); if
