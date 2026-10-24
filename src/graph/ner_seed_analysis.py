@@ -116,7 +116,7 @@ votes (ner_seedmeans.WEEK5_SYSTEMS) and writes ner_week5_seed_analysis.json next
     once every variant has its screen, if that gain is above 0), reported for every other
     method (plain mention replacement's pooled estimate is post hoc, ROADMAP §4, week 13).
     folds: 13.3, mention replacement (crf_mr, decision 13.3a) and its multi-task combination
-    (crf_mt_mr, decision 13.3b) on SOFC-Exp's 5 article folds (batch w13a) against week 8's
+    (crf_mt_mr, decision 13.3b) on SOFC-Exp's 5 article folds (batches w13a and w13c) against week 8's
     CRF head on the folds, each with all 10 seed files of both: per fold the 10-seed means,
     the method minus the CRF head with its mean and 95% CI over the folds (passes: above 0),
     and, for the multi-task combination, its difference against mention replacement and its

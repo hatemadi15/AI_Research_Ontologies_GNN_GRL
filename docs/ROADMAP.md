@@ -3800,6 +3800,29 @@ mention-level filter is a candidate for the screen.
   `crf_mrm_topic6` is the winner (outcome under the week-12 protocol);
   `w12b:mrm6` and `w13a` go together at the reset, `w12d:mrm6` after
   `w12b` if decision 1 passes.
+- *24 October, 12:16: the reset, 12 hours late.* The reminder set for
+  00:05 reached the session at 12:16 (the container had restarted). The
+  quota reads 0.00 of 45 GPU hours used: last week's 1.23-hour overrun was
+  not carried over. `ner-gpu-bundle-3`'s BUNDLE.json names 3ac85a8, the SOFC
+  corpus's SHA-256 (1b6a00d2) and the 7 topic corpora; `ner_baseline.py`,
+  `ner_consistency.py` and `kaggle/` are unchanged since, so the bundle
+  stays. Order as corrected on 20 October: `w12d:mrm6` follows `w12b`
+  whatever decision 1 says (13.2 needs it).
+- *12:22: `w12b:mrm6` pushed* to `ner-gpu-jobs-d` (version 9): lane 0 the
+  repeat `smokeap` and the 7 subfields' students 300–500, lane 1 the
+  students 600–900, each lane training the teachers (from `w12e`'s V4 jobs
+  of 28–42 minutes, about 5 hours).
+- *12:30: `w13a` split before its push.* Measured on the stored T4 runs, the
+  folds cost more than the protocol's line said: the CRF head took 2.9
+  hours for its 10 seeds on the 5 folds (week 8), and on the official split
+  mention replacement took 3.1 times the CRF head's run time and its
+  multi-task combination 4.3 times (weeks 7 and 9), so about 8.8 and 12.5
+  lane hours, not 4.5 and 7.5. One session of both lanes would have put
+  the multi-task lane past the runner's 10-hour deadline. `w13a` now runs
+  mention replacement over both lanes (offsets 0–400 and 500–900, about 5
+  hours) and the new batch `w13c` the multi-task combination likewise
+  (the repeat `smokeax`, about 7 hours), one after the other on
+  `ner-gpu-jobs-c`; the runs, their files and the analysis are unchanged.
 - *21:06: `w11b` pushed* to `ner-gpu-jobs-d` (version 6) from bundle
   77c37be, 5 jobs in lane 0 (the smoke4 repeat `smokean` and the 4
   fine-grained held-out papers) and 4 in lane 1 (the coarse ones), about
@@ -4131,10 +4154,13 @@ names are mostly seen, neither method gains (weeks 7 and 9), and the
 article folds hold out whole articles (the gap to random splits is 3.48
 points, against 17 on MuLMS), so the expected gain is small and the folds
 are a harder test than MaterioMiner's papers. Cost: about 4.5 lane hours
-for `crf_mr` and 7.5 for `crf_mt_mr` (one session of both lanes), after
+for `crf_mr` and 7.5 for `crf_mt_mr` (one session of both lanes; corrected
+on 24 October before any run to about 8.8 and 12.5, so `w13a` and a new
+`w13c` take a session each, the runs unchanged; session notes), after
 the reset of 24 October, beside `w12e`.
 
-*Order after the reset* (revised 20 October, 14:00 UTC, once `w12e` had
+*Order after the reset* (`w13a`'s multi-task half moved to its own batch
+`w13c` on 24 October, before any run, for the session deadline; revised 20 October, 14:00 UTC, once `w12e` had
 finished and the screen had chosen V4; corrected at 14:30, before any run:
 13.2 above needs the analogue whatever decision 1 says, so `w12d` is not
 gated on it, as the week-12 protocol alone would have had it): `w12b:mrm6`

@@ -207,9 +207,9 @@ its verdict where the comparison is a decision (13.1a, 13.1b, 13.1d, and
 week 7's on the CRF head on MaterioMiner, recomputed), and (`week13`,
 `pooled`) the pooled estimates across corpora of 13.2 and 13.3
 (`week12_winner` names the screen's winner once the screen is complete).
-Batch `w13a` (13.3) runs after 24 October and will write
-`gpu/ner_results_sofc_document_folds_crf_mr_m<N>.json` and
-`gpu/ner_results_sofc{,_slot}_document_folds_crf_mt_mr_m<N>.json`; (`week13`,
+Batches `w13a` and `w13c` (13.3) run after 24 October and will write
+`gpu/ner_results_sofc_document_folds_crf_mr_m<N>.json` (`w13a`) and
+`gpu/ner_results_sofc{,_slot}_document_folds_crf_mt_mr_m<N>.json` (`w13c`); (`week13`,
 `folds`) then holds the decisions 13.3a and 13.3b, each method paired over the
 folds against week 8's CRF head on them, and the multi-task combination's slot
 level and its difference against mention replacement (reported). Batch `w13b`

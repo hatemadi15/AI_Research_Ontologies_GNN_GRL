@@ -169,10 +169,11 @@ bundle as topic_<topic>_sentences.txt; the screen, then the decision for its win
           (ner_seedmeans.py --week 12)
 Week 13 (13.3: mention replacement on SOFC-Exp's article folds):
   w13a    the CRF run of smoke4 again (smokeav); then on SOFC-Exp's 5 article folds
-          (--document-folds 5, week 8's protocol) mention replacement (lane 0, crf_mr_m<N>)
-          and mention replacement on the multi-task model trained on both levels (lane 1,
-          --granularity sofc_both, crf_mt_mr_m<N>: a file per level), model seed offsets 0
-          to 900, one job per offset
+          (--document-folds 5, week 8's protocol) mention replacement (crf_mr_m<N>), model
+          seed offsets 0 to 900, one job per offset, offsets 0-400 in lane 0 and 500-900 in
+          lane 1
+  w13c    the same for mention replacement on the multi-task model trained on both levels
+          (--granularity sofc_both, crf_mt_mr_m<N>: a file per level), the repeat smokeax
   w13b    13.4 (conditional on week 12's decision 1 passing): the week-12 winner's analogue
           on SOFC-Exp's 5 article folds, mention replacement with the mention-level silver
           names of the SOFC corpus (SOFC_CORPUS, in the bundle) and 6 copies
@@ -814,17 +815,21 @@ def batch_lanes(name):
         return [[repeat + ['--tag', 'smokeat' if name == 'w12f' else 'smokeau']]
                 + [topic_variant_job(first, s, OFFSETS) for s in MULMS_SUBFIELD_NAMES],
                 [topic_variant_job(second, s, OFFSETS) for s in MULMS_SUBFIELD_NAMES]]
-    if name == 'w13a':
-        # week 13 (13.3): SOFC-Exp's 5 article folds (week 8's protocol), mention replacement
-        # (lane 0, crf_mr_m<N>, a job per seed offset) and mention replacement on the
-        # multi-task model trained on both levels (lane 1, sofc_both: crf_mt_mr_m<N>, a file
-        # per level), model seed offsets 0 to 900; first the repeat of the CRF run of smoke4
-        # (smokeav)
-        return [[repeat + ['--tag', 'smokeav']]
-                + [sofc_split_job('document_folds', off, *METHOD_FLAGS['mr'])
-                   for off in OFFSETS_PUBLISHED],
-                [sofc_split_job('document_folds', off, '--multi-task', *METHOD_FLAGS['mr'],
-                                granularity='sofc_both') for off in OFFSETS_PUBLISHED]]
+    if name in ('w13a', 'w13c'):
+        # week 13 (13.3): SOFC-Exp's 5 article folds (week 8's protocol), a job per model seed
+        # offset (0 to 900), the offsets split over the lanes (FOLDS_LANES; each job writes
+        # its own files): w13a mention replacement (crf_mr_m<N>), w13c mention replacement on
+        # the multi-task model trained on both levels (sofc_both: crf_mt_mr_m<N>, a file per
+        # level); first the repeat of the CRF run of smoke4 (smokeav, smokeax). One session
+        # each: on a T4 the two take about 8.8 and 12.5 lane hours (3.1 and 4.3 times the
+        # CRF head's 2.9 on the folds), more than one session's deadline holds
+        flags = (METHOD_FLAGS['mr'] if name == 'w13a'
+                 else ('--multi-task', *METHOD_FLAGS['mr']))
+        granularity = 'sofc' if name == 'w13a' else 'sofc_both'
+        lanes = [[sofc_split_job('document_folds', off, *flags, granularity=granularity)
+                  for off in offsets] for offsets in FOLDS_LANES]
+        return [[repeat + ['--tag', 'smokeav' if name == 'w13a' else 'smokeax']] + lanes[0],
+                lanes[1]]
     if name == 'w13b':
         # week 13, 13.4: the winner's analogue on SOFC-Exp's article folds, the students split
         # by seed offset over the lanes (each lane trains the teachers again; a check)
@@ -873,7 +878,7 @@ def batch_lanes(name):
 BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'item3r',
            'smoke4', 'w5a', 'w5b', 'w5c', 'smoke5', 'smoke6', 'w6a', 'w6b', 'w7a', 'w7b',
            'w7c', 'w7d', 'w7e', 'w8a', 'w8b', 'w9a', 'w9b', 'w10a', 'w11a', 'w11b', 'w12a', 'w12c',
-           'w12e', 'w12f', 'w12g', 'w13a', 'w13b',
+           'w12e', 'w12f', 'w12g', 'w13a', 'w13b', 'w13c',
            *(f'w12b:{v}' for v in WEEK12_VARIANTS), *(f'w12d:{v}' for v in WEEK12_ANALOGUES),
            'tpu-smoke1', 'tpu-smoke')
 
