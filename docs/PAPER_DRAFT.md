@@ -31,9 +31,11 @@ pooled over the 16 held-out units of the three corpora it gains +1.46
 [+0.28, +2.64] (reported, no decision). The
 week-12 screen is complete (20 October): the mention-level filter with 6
 copies (V4) leads mention replacement by +1.45 and the CRF head by +3.16 on
-3 seeds and goes to its 7-seed decision after 24 October (Section 6.7); if
-that or the pooled decision passes, its analogue also runs on SOFC-Exp's
-article folds (13.4,
+3 seeds, and on the 7 seeds the screen did not see (24 October) it gains
++3.19 [−1.13, +7.51] over the CRF head and +0.92 [−1.63, +3.48] over
+mention replacement, passing neither decision (Section 6.7); the pooled
+decision with MaterioMiner follows, and if it passes, the analogue also
+runs on SOFC-Exp's article folds (13.4,
 pre-registered on 20 October; the SOFC corpus holds 36% of the folds'
 unseen names, against 55–81% for MuLMS's topic corpora).
 The numbers come from `results/` through the claims table of `docs/PAPER.md`
@@ -833,6 +835,18 @@ names that three CRF teachers tag in unlabeled in-domain text.
   against 55.8 and 54.3 (F1 49.1 against 46.2 and 48.1); self-training on
   the topic corpus raises precision instead (58.5 at 40.4% recall). The
   names reach unseen entities and cost precision.
+- *Decision (24 October; seeds 300–900, which the screen did not see):* V4
+  scores 51.73 against the CRF head's 48.54 and mention replacement's
+  50.81. Neither decision passes: +3.19 [−1.13, +7.51] against the CRF
+  head, six of seven subfields gaining (sofc +11.9, semi +6.1, poly
+  −2.4), and +0.92 [−1.63, +3.48] against mention replacement. The
+  screen's +3.16 held on new seeds, so the selection did not inflate it;
+  the test lacks the power for a gain that varies this much between
+  subfields. On MuLMS's held-out subfields, mention replacement and its
+  name variants have taken six pre-registered decisions; one passes (the
+  votes of Section 6.6). The pooled decision over MuLMS and MaterioMiner's
+  held-out papers (13.2) needs V4's MaterioMiner analogue and is the
+  remaining test of the names method.
 
 **6.8 Document-level propagation on held-out documents of three corpora
 (C25).** The rule of Section 5.5 (krishnan2006effective): within a document,

@@ -252,7 +252,8 @@ exact and ignoring word boundaries and case, per type, with the sentences
 that share a shingle with the held-out documents left out (`leaked`, 0
 everywhere). The week-12 batches `w12a`, `w12e` and `w12c` (the screen, seven variants
 after amendments 1–3; all run on 20 October) and `w12b:mrm6` (the decision for
-the screen's winner V4, after 24 October), from a bundle rebuilt after the CPU
+the screen's winner V4: `crf_mrm_topic6_m<300..900>`, `ner-gpu-jobs-d` version
+10, 24 October; in hand), from a bundle rebuilt after the CPU
 probe (`ner-gpu-bundle-3`), write
 `gpu/ner_results_mulms_leave_one_subfield_out_<variant>_m<N>.json` for the
 variants `crf_mrs_topic`, `crf_mrm_topic`, `crf_mrm_topic6`, `crf_st3_topic`,
