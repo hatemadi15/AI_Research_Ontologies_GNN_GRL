@@ -3823,6 +3823,17 @@ mention-level filter is a candidate for the screen.
   hours) and the new batch `w13c` the multi-task combination likewise
   (the repeat `smokeax`, about 7 hours), one after the other on
   `ner-gpu-jobs-c`; the runs, their files and the analysis are unchanged.
+- *12:23: `w13a` pushed* to `ner-gpu-jobs-c` (version 5). Its live log
+  (`kaggle kernels logs -f`): setup in 3.3 minutes, the repeat in 1.2, and
+  mention replacement jobs of 55–65 minutes, as measured; about 5 hours.
+- *13:44: `w12b:mrm6` failed without a trace* (`ner-gpu-jobs-d` version 9,
+  82 minutes): status ERROR, an empty log, no manifest and no outputs, the
+  API's failure message empty, about 1.4 GPU hours charged. The runner never
+  exits with an error, so the container was stopped from outside. Its jobs
+  are `w12e`'s V4 jobs with other student seeds, and `w13a`, same image and
+  bundle, runs on. Pushed again unchanged at 13:49 (version 10); its live
+  log is now kept every 20 minutes, so that a second failure leaves its
+  last lines.
 - *21:06: `w11b` pushed* to `ner-gpu-jobs-d` (version 6) from bundle
   77c37be, 5 jobs in lane 0 (the smoke4 repeat `smokean` and the 4
   fine-grained held-out papers) and 4 in lane 1 (the coarse ones), about
