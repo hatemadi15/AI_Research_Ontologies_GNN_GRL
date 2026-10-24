@@ -3848,6 +3848,15 @@ mention-level filter is a candidate for the screen.
   `ner-gpu-jobs-d` (version 11; lane 0 the repeat `smokear` and the 4
   fine-grained papers, lane 1 the 4 coarse-grained ones; about 3 hours),
   as 13.2 needs it whatever decision 1 says.
+- *20:05: `w12d:mrm6` hangs; `w13c` is slower than estimated.* Version 11
+  of `ner-gpu-jobs-d` reports RUNNING but its live log has stayed empty
+  since its push at 18:10, where version 10 printed its setup within 6
+  minutes: hung before setup, as the sessions of week 8. It is to be
+  cancelled on the website; a push is refused while two sessions count as
+  running, and a watcher pushes `w12d:mrm6` again as soon as version 11
+  leaves RUNNING. `w13c`'s multi-task jobs take about 112 minutes each, not
+  75 (setup 5.1 minutes), so its 5 jobs per lane end near 02:50 UTC, inside
+  the 10-hour deadline. The quota at 20:04: 13.85 of 45 hours used.
 - *21:06: `w11b` pushed* to `ner-gpu-jobs-d` (version 6) from bundle
   77c37be, 5 jobs in lane 0 (the smoke4 repeat `smokean` and the 4
   fine-grained held-out papers) and 4 in lane 1 (the coarse ones), about
