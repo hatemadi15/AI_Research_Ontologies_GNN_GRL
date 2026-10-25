@@ -248,6 +248,13 @@ analogue decided against the CRF head per granularity, reported against
 mention replacement and with its votes against both votes; V6's analogue
 `crf_st3` (week 4's files) is reported there. The pooled decision 13.2 is in
 `gpu/ner_week5_seed_analysis.json` (`week13`, `pooled`, `crf_mrm_topic6`).
+Week 13, 13.4 (`w13b`, `ner-gpu-jobs-d` version 13, 25 October, bundle
+3ac85a8): `gpu/ner_results_sofc_document_folds_crf_mrm6_m<N>.json`, N = 0 to
+900, the analogue on SOFC-Exp's 5 article folds with the SOFC corpus (run ids
+`fold0` to `fold4`; each run records its teachers, the mention filter and the
+silver names' counts); (`week13`, `folds`, `crf_mrm6`) holds decision 13.4 and
+(`week13`, `pooled`, `crf_mrm_topic6`, `with_sofc_folds`) the three-corpus
+estimate.
 
 Week 12, phase 0 (names from a topic corpus; the gate in ROADMAP §4, no
 training): `mulms_articles.json` (`mulms_articles.py`) is the Europe PMC search

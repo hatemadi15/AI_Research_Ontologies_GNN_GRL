@@ -38,10 +38,13 @@ mention replacement, passing neither decision (Section 6.7). Its
 MaterioMiner analogue passes at both granularities (+4.27 [+1.39, +7.15]
 fine-grained, +1.77 [+0.67, +2.88] coarse-grained), and the pre-registered
 decision pooled over the two corpora passes: +3.58 [+0.95, +6.21] over 11
-held-out units against the CRF head, no corpus losing (C26). The third
-corpus runs: the analogue on SOFC-Exp's article folds (13.4,
-pre-registered on 20 October; the SOFC corpus holds 36% of the folds'
-unseen names, against 55–81% for MuLMS's topic corpora).
+held-out units against the CRF head, no corpus losing (C26). On the third
+corpus, SOFC-Exp's article folds with its own corpus (13.4, pre-registered
+on 20 October), the analogue does not pass: −0.04 [−1.21, +1.14] against
+the CRF head, though it gains +0.45 [+0.04, +0.86] over plain mention
+replacement (reported), which loses there; half of SOFC-Exp's test names
+are seen in training, against 81–88% unseen on the other two corpora.
+Pooled over the three corpora the gain is +2.45 [+0.50, +4.40] (reported).
 The numbers come from `results/` through the claims table of `docs/PAPER.md`
 (C1–C26). References are keys of `docs/references.bib`.
 
@@ -865,6 +868,18 @@ names that three CRF teachers tag in unlabeled in-domain text.
   CRF head. Against plain mention replacement the names add +1.23
   [−0.22, +2.68] pooled (post hoc) and pass no decision: most of the gain
   is mention replacement's, and the names' share is not established.
+- *The third corpus (13.4, 25 October):* the analogue on SOFC-Exp's five
+  article folds, with its own corpus of 40,000 sentences (36% of the
+  folds' unseen test names in it; the filter admits 20–33%), scores 82.75
+  against the CRF head's 82.79, −0.04 [−1.21, +1.14]: no. It gains +0.45
+  [+0.04, +0.86] over plain mention replacement on every fold (reported),
+  but mention replacement itself is below the CRF head there (−0.48), as on
+  SOFC-Exp's official split. The method needs test names that training has
+  not seen: 81–88% of the test names are new on held-out MuLMS subfields
+  and MaterioMiner papers, about half on SOFC-Exp's held-out articles.
+  Pooled over the 16 units of the three corpora the estimate is +2.45
+  [+0.50, +4.40] (reported); the claim stays on two corpora, with this
+  boundary condition.
 
 **6.8 Document-level propagation on held-out documents of three corpora
 (C25).** The rule of Section 5.5 (krishnan2006effective): within a document,

@@ -1026,7 +1026,7 @@ chance at class level. For a Task C-style result:
 | 10 | Done: MuLMS as a third corpus (7 materials subfields, its outermost entities; `mulms.py`), mention replacement against the CRF head on held-out subfields with 400 training sentences, 10 seeds, and the CRF head on random splits of the same size; protocol committed before any run (a08356f; the batch `w10a` ran from that commit), protocol and outcome below | Mention replacement improves on the CRF head on held-out subfields (decision 1), and its votes on the CRF votes (decision 2). Decision 1 not met: +2.10 [−0.31, +4.51], six of the seven subfields gaining. Decision 2 met: +2.71 [+0.22, +5.20]. By the protocol, mention replacement and its combination (C20, C21) stay results for MaterioMiner |
 | 11 | Protocol committed before any run: mention replacement whose replacement pool also holds the names in the sentences that 3 CRF teachers tag alike and confidently in unlabeled in-domain text (`--augment-names`, variant `crf_mrs`), on MuLMS's 7 held-out subfields (`w11a`) and MaterioMiner's 4 held-out papers (`w11b`), 10 seeds; protocol below | It improves on the CRF head on MuLMS's held-out subfields (decision 1) and on mention replacement (decisions 2–4: MuLMS, MaterioMiner fine- and coarse-grained); a methods claim needs decision 1 and one of decisions 2–4. MuLMS (`w11a`): decisions 1 (+2.04 [−0.85, +4.92]) and 2 (−0.06 [−1.09, +0.96]) not met, so no methods claim; MaterioMiner (`w11b`, 19–20 October): decisions 3 (fine-grained, +0.23 [−0.69, +1.14]) and 4 (coarse-grained, +0.61 [−0.96, +2.18]) not met either; the method is closed on both corpora |
 | 12 | Protocol committed before any run: mention replacement whose replacement pool holds the names that 3 CRF teachers find in a corpus of the held-out subfield's own topic (40,000 open-access sentences per subfield, `build_topic_corpus.py`; phase 0's gate: they hold 55–81% of the unseen test names), on MuLMS's 7 held-out subfields; a 3-seed screen of seven variants (`w12a`: silver sentences `crf_mrs_topic`, silver mentions `crf_mrm_topic`, the same with 6 copies `crf_mrm_topic6`, 6 copies without names `crf_mr6`, self-training on the topic corpus `crf_st3_topic`; `w12c`: the silver mentions or sentences as a gazetteer match feature, `crf_gzm_topic` and `crf_gzs_topic`; amendments 1–3), then the 7-seed decision for the screen's winner on seeds the screen did not see (`w12b:<variant>`); protocol below, plan in `docs/METHODS_PLAN.md` | Screen: the variant with the largest mean gain over mention replacement goes on if it is above 0. Decision 1: it improves on the CRF head (paired by subfield); decision 2: on mention replacement. A methods claim needs decision 1 on MuLMS and the winner's MaterioMiner analogue passing against the CRF head. Screen done (20 October; 3 seeds, 7 subfields; outcome below): V4 `crf_mrm_topic6`, the mention-level filter with 6 copies, 52.09, +1.45 [−1.35, +4.25] over mention replacement and +3.16 [−1.96, +8.28] over the CRF head, is the winner (V2 +0.97, V1 +0.80, V6 +0.16; V3, V7 and V8 below mention replacement). Decision done (24 October, seeds 300–900): +3.19 [−1.13, +7.51] against the CRF head and +0.92 [−1.63, +3.48] against mention replacement, neither passes (the screen's +3.16 held; the 7-subfield test lacks the power for V4's spread). The MaterioMiner analogue (25 October, `crf_mrm6`, 10 seeds) passes against the CRF head at both granularities: +4.27 [+1.39, +7.15] fine-grained and +1.77 [+0.67, +2.88] coarse-grained; with MuLMS it carries 13.2's pooled decision (week 13) |
-| 13 | Protocol committed before any run (20 October, on the user's directive to push for a methods paper; the plan's stop rule of a third protocol on MuLMS lifted, the count reported): 13.1 the document consistency rule of week 7 on MuLMS's saved 10-seed predictions (no training; amended the same day with SOFC-Exp's article folds, reported, and mention replacement on MaterioMiner, decisions); 13.2 a pooled decision over MuLMS's 7 subfields and MaterioMiner's 4 papers for the week-12 winner; 13.3 mention replacement with and without multi-task training on SOFC-Exp's 5 article folds, 10 seeds (`w13a`); 13.4 (amendment, conditional on a pass of week 12's decision 1 or of 13.2) the screen's winner on SOFC-Exp's folds (`w13b`); protocol below | Revised methods criterion: a pre-registered pass on held-out documents of two corpora, or the pooled decision over two or more corpora with no corpus losing; claims scoped to what passed. 13.1 done: on the CRF head the rule passes on MuLMS (13.1a, +0.82 [+0.18, +1.46], every subfield gaining), its second corpus after coarse-grained MaterioMiner (week 7, +0.12), and loses on SOFC-Exp's folds (13.1c, −0.44 [−0.72, −0.16]); it adds nothing to mention replacement (13.1b +0.57 [−0.12, +1.25]; 13.1d +0.19 [−0.34, +0.73] fine-grained, +0.11 [−0.08, +0.31] coarse-grained): a scoped claim of two corpora, under a point, with a boundary condition. 13.3a done (24 October): mention replacement on SOFC-Exp's folds −0.48 [−1.36, +0.39], no (pooled over three corpora, reported: +1.46 [+0.28, +2.64]); 13.2 done (25 October): V4 pooled over MuLMS's 7 subfields and MaterioMiner's 4 papers +3.58 [+0.95, +6.21] against the CRF head, no corpus losing: passes, the methods claim of two corpora (not over plain mention replacement: +1.23 [−0.22, +2.68], post hoc); 13.3b done (25 October): mention replacement on the multi-task model on SOFC-Exp's folds −0.11 [−0.69, +0.46], no; 13.4 (amendment of 20 October, conditional on a pass of week 12's decision 1 or of 13.2): V4's analogue on SOFC-Exp's folds with the SOFC corpus (`w13b`), a decision on a third corpus, the three-corpus estimate reported |
+| 13 | Protocol committed before any run (20 October, on the user's directive to push for a methods paper; the plan's stop rule of a third protocol on MuLMS lifted, the count reported): 13.1 the document consistency rule of week 7 on MuLMS's saved 10-seed predictions (no training; amended the same day with SOFC-Exp's article folds, reported, and mention replacement on MaterioMiner, decisions); 13.2 a pooled decision over MuLMS's 7 subfields and MaterioMiner's 4 papers for the week-12 winner; 13.3 mention replacement with and without multi-task training on SOFC-Exp's 5 article folds, 10 seeds (`w13a`); 13.4 (amendment, conditional on a pass of week 12's decision 1 or of 13.2) the screen's winner on SOFC-Exp's folds (`w13b`); protocol below | Revised methods criterion: a pre-registered pass on held-out documents of two corpora, or the pooled decision over two or more corpora with no corpus losing; claims scoped to what passed. 13.1 done: on the CRF head the rule passes on MuLMS (13.1a, +0.82 [+0.18, +1.46], every subfield gaining), its second corpus after coarse-grained MaterioMiner (week 7, +0.12), and loses on SOFC-Exp's folds (13.1c, −0.44 [−0.72, −0.16]); it adds nothing to mention replacement (13.1b +0.57 [−0.12, +1.25]; 13.1d +0.19 [−0.34, +0.73] fine-grained, +0.11 [−0.08, +0.31] coarse-grained): a scoped claim of two corpora, under a point, with a boundary condition. 13.3a done (24 October): mention replacement on SOFC-Exp's folds −0.48 [−1.36, +0.39], no (pooled over three corpora, reported: +1.46 [+0.28, +2.64]); 13.2 done (25 October): V4 pooled over MuLMS's 7 subfields and MaterioMiner's 4 papers +3.58 [+0.95, +6.21] against the CRF head, no corpus losing: passes, the methods claim of two corpora (not over plain mention replacement: +1.23 [−0.22, +2.68], post hoc); 13.3b done (25 October): mention replacement on the multi-task model on SOFC-Exp's folds −0.11 [−0.69, +0.46], no; 13.4 done (25 October): V4's analogue on SOFC-Exp's folds with the SOFC corpus −0.04 [−1.21, +1.14], no (+0.45 [+0.04, +0.86] over plain mention replacement, reported; three corpora pooled +2.45 [+0.50, +4.40], reported). Week 13: 8 decisions, 2 pass (13.1a, 13.2); the methods claim of two corpora (C26) stands, SOFC-Exp its boundary |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -3891,6 +3891,16 @@ mention-level filter is a candidate for the screen.
   predictions and a GPU environment; collected. 13.3b does not pass
   (outcome under the week-13 protocol). Kernel c stays free: no further
   batch is planned.
+- *11:24: `w13b` done* (`ner-gpu-jobs-d` version 13; 619.8 minutes, setup
+  3.3; lane 0's job 615.2 minutes and lane 1's 591.6, inside the
+  11.25-hour stop, so no fold was cut). The repeat `smokeaw` is identical
+  (77.95); in both lanes every fold's three teachers equal the stored
+  week-8 CRF runs of their seeds, and the two lanes harvest the same silver
+  mentions per fold (21,376–48,943, 4,835–9,290 distinct; 20.3–33.4% of
+  the fold's unseen test names), as the lanes repeat each other exactly
+  (`check_w13b.py`); the 10 files hold the 5 folds; collected. 13.4 does
+  not pass (outcome under amendment 13.4). Quota at 11:25: 33.31 of 45
+  hours. No session runs, and week 13's batches are all done.
 - *21:06: `w11b` pushed* to `ner-gpu-jobs-d` (version 6) from bundle
   77c37be, 5 jobs in lane 0 (the smoke4 repeat `smokean` and the 4
   fine-grained held-out papers) and 4 in lane 1 (the coarse ones), about
@@ -4330,6 +4340,29 @@ Smoke-tested on the CPU with a tiny model before this commit (`--max-train
 students run end to end, with and without `--student-offsets`, and write
 the files above with the teachers, the filter, the names and the
 predictions recorded.
+
+*Outcome of 13.4 (25 October, 11:30 UTC; `ner_seed_analysis.py`, `week13`,
+`folds` and `pooled`).* V4's analogue on SOFC-Exp's 5 article folds,
+against week 8's CRF head, each fold the mean of its 10 seeds: 82.75
+against 82.79, −0.04 [−1.21, +1.14], no (fold0 −0.25, fold1 +0.03, fold2
+−0.60, fold3 −0.88, fold4 +1.54). Reported: against plain mention
+replacement +0.45 [+0.04, +0.86], every fold gaining (+0.13 to +0.97), so
+the harvested names add to mention replacement on SOFC-Exp too, but
+mention replacement itself sits below the CRF head there (13.3a, −0.48)
+and the sum does not clear it. The three-corpus estimate (16 units,
+reported): +2.45 [+0.50, +4.40], no corpus's interval below 0 (MuLMS
++3.18, MaterioMiner +4.27, SOFC-Exp −0.04). What it means: the names
+method improves on held-out documents of the two corpora whose test names
+are mostly new to training (81–88% unseen), and adds nothing measurable on
+the corpus where half are seen; the claim stays the two-corpus one (C26),
+with SOFC-Exp as its boundary condition, which the paper states.
+
+*Week 13's tally.* 8 pre-registered decisions: 13.1a passes, 13.1b and the
+two of 13.1d fail, 13.2 passes, 13.3a, 13.3b and 13.4 fail. With week
+12's 4 (the MuLMS decisions 1 and 2 fail; the MaterioMiner analogue's two
+pass), the names method has taken 6 decisions in weeks 12–13, 3 passing:
+its MaterioMiner analogue at both granularities and the pooled decision
+that carries the claim.
 
 ### Week 12 protocol: names from a topic corpus (fixed before any run)
 
