@@ -26,9 +26,10 @@ corpus after coarse-grained MaterioMiner, and loses on SOFC-Exp's held-out
 articles as on its official split (C25, Section 6.8); it adds nothing to
 mention replacement on either corpus. On SOFC-Exp's held-out article folds
 (13.3a, 24 October) mention replacement does not pass either, −0.48 [−1.36,
-+0.39] against the CRF head, where only 42–50% of the test names are new;
-pooled over the 16 held-out units of the three corpora it gains +1.46
-[+0.28, +2.64] (reported, no decision). The
++0.39] against the CRF head, where only 42–50% of the test names are new,
+and neither does its multi-task combination (13.3b, −0.11 [−0.69, +0.46]);
+pooled over the 16 held-out units of the three corpora mention replacement
+gains +1.46 [+0.28, +2.64] (reported, no decision). The
 week-12 screen is complete (20 October): the mention-level filter with 6
 copies (V4) leads mention replacement by +1.45 and the CRF head by +3.16 on
 3 seeds, and on the 7 seeds the screen did not see (24 October) it gains

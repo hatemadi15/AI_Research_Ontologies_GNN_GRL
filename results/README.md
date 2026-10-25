@@ -211,7 +211,8 @@ Batches `w13a` and `w13c` (13.3) write
 `gpu/ner_results_sofc_document_folds_crf_mr_m<N>.json` (`w13a`,
 `ner-gpu-jobs-c` version 5, 24 October, bundle 3ac85a8; in hand, run ids
 `fold0` to `fold4`, with predictions) and
-`gpu/ner_results_sofc{,_slot}_document_folds_crf_mt_mr_m<N>.json` (`w13c`); (`week13`,
+`gpu/ner_results_sofc{,_slot}_document_folds_crf_mt_mr_m<N>.json` (`w13c`,
+`ner-gpu-jobs-c` version 6, 24–25 October; in hand, a file per level); (`week13`,
 `folds`) then holds the decisions 13.3a and 13.3b, each method paired over the
 folds against week 8's CRF head on them, and the multi-task combination's slot
 level and its difference against mention replacement (reported). Batch `w13b`
