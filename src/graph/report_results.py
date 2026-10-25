@@ -239,15 +239,16 @@ WEEK11_COMPARISONS = (('crf_mrs', 'crf_mr'), ('crf_mrs', 'crf'), ('crf_mrs_ens3'
                         for ref in dict.fromkeys(('crf_ens3', *UNSEEN_BEST.values()))))
 WEEK11_DECISIONS = WEEK11_COMPARISONS[:1]
 # Week 12 (week-12 protocol): the MaterioMiner analogue of the screen's winner, as in
-# ner_seedmeans.WEEK12_COMPARISONS; the first five decide (the MuLMS screen and decisions
-# are in mulms_note)
+# ner_seedmeans.WEEK12_COMPARISONS; only the winner's analogue (V4's, crf_mrm6) decides,
+# against the CRF head (the MuLMS screen and decisions are in mulms_note)
 WEEK12_FILE = 'ner_week12_comparisons.json'
 WEEK12_ANALOGUE_VARIANTS = ('crf_mrm', 'crf_mrm6', 'crf_gzm', 'crf_st3', 'crf_mr6')
+WEEK12_WINNER_ANALOGUE = 'crf_mrm6'
 WEEK12_COMPARISONS = (*((v, 'crf') for v in WEEK12_ANALOGUE_VARIANTS),
                       *((v, 'crf_mr') for v in WEEK12_ANALOGUE_VARIANTS),
                       *((f'{v}_ens3', 'crf_ens3') for v in WEEK12_ANALOGUE_VARIANTS),
                       *((f'{v}_ens3', 'crf_mr_ens3') for v in WEEK12_ANALOGUE_VARIANTS))
-WEEK12_DECISIONS = WEEK12_COMPARISONS[:len(WEEK12_ANALOGUE_VARIANTS)]
+WEEK12_DECISIONS = ((WEEK12_WINNER_ANALOGUE, 'crf'),)
 # the label of a week-7 method in the SOFC-Exp bullet (both parts decide on SOFC-Exp)
 WEEK7_SOFC_LABELS = {**{m: f"Week 7, {name} on the CRF head's predictions"
                         for m, name in WEEK7_NAMES.items()},

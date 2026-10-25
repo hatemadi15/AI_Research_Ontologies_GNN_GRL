@@ -236,6 +236,18 @@ and the unseen test entities that are silver names); no name is stored.
 `gpu/ner_week5_seed_analysis.json` (`mulms`, `silver_names`) holds the MuLMS
 decisions, and `gpu/ner_week11_comparisons.json` will hold the MaterioMiner ones.
 
+Week 12, the MaterioMiner analogue of the screen's winner (`w12d:mrm6`,
+`ner-gpu-jobs-d` version 12, 24–25 October, bundle 3ac85a8; outcome in
+ROADMAP §4): `gpu/ner_results_{fine,coarse}_leave_one_paper_out_crf_mrm6_m<N>.json`,
+N = 0 to 900 (run ids the held-out papers; each run records its teachers,
+the mention filter and the silver names' counts), the votes of the three
+seed triples `..._crf_mrm6_ens3{,_m300,_m600}.json` (`ner_ensemble.py`), and
+`gpu/ner_week12_comparisons.json` (`ner_seedmeans.py --week 12 --gpu`): the
+analogue decided against the CRF head per granularity, reported against
+mention replacement and with its votes against both votes; V6's analogue
+`crf_st3` (week 4's files) is reported there. The pooled decision 13.2 is in
+`gpu/ner_week5_seed_analysis.json` (`week13`, `pooled`, `crf_mrm_topic6`).
+
 Week 12, phase 0 (names from a topic corpus; the gate in ROADMAP §4, no
 training): `mulms_articles.json` (`mulms_articles.py`) is the Europe PMC search
 for MuLMS's 50 documents by title, 16 found with a PMCID; `topic_corpora/<topic>.json`

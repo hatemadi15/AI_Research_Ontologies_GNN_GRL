@@ -49,7 +49,8 @@ COMPARISONS = (('3', 'CPU', '3', 'ner_week3_comparisons.json'),
                ('7', 'GPU', '3', 'gpu/ner_week7_screen.json'),
                ('7', 'GPU', '10', 'gpu/ner_week7_comparisons.json'),
                ('9', 'GPU', '10', 'gpu/ner_week9_comparisons.json'),
-               ('11', 'GPU', '10', 'gpu/ner_week11_comparisons.json'))
+               ('11', 'GPU', '10', 'gpu/ner_week11_comparisons.json'),
+               ('12', 'GPU', '10', 'gpu/ner_week12_comparisons.json'))
 DECIDED = ('decision', 'screen')
 PROTOCOL_NAMES = {'random_split_vary': 'random splits', 'leave_one_paper_out': 'unseen papers'}
 AVERAGES = (('micro', 'micro'), ('macro', 'macro'), ('weighted', 'weighted'),
@@ -149,12 +150,14 @@ HELD_OUT_CORPORA = {'mulms': 'MuLMS, held-out subfields',
                     'sofc_folds': 'SOFC-Exp, article folds'}
 
 
-def held_out_rows(analysis):
+def held_out_rows(analysis, week12=None):
     """The rows of Table 6 from the week-5 analyses file, in week order: every pre-registered
-    decision on held-out documents (MuLMS's decisions of weeks 10 and 11, the week-12
-    winner's, the consistency rule's of weeks 7 and 13, 13.3's on SOFC-Exp's folds, and the
-    pooled decision 13.2), with its units, difference and verdict; reported comparisons are
-    left out."""
+    decision on held-out documents that the seed analysis holds (MuLMS's decisions of weeks
+    10 and 11, the week-12 winner's, the consistency rule's of weeks 7 and 13, 13.3's on
+    SOFC-Exp's folds, and the pooled decision 13.2), and from the week-12 comparisons
+    (`week12`, ner_week12_comparisons.json) the winner's MaterioMiner analogue against the CRF
+    head on the held-out papers, which 13.2 pools; with its units, difference and verdict;
+    reported comparisons are left out (MaterioMiner's other decisions are in Table 2)."""
     rows = []
 
     def row(week, corpus, comparison, decision, units, diff, passes):
@@ -185,6 +188,11 @@ def held_out_rows(analysis):
                                       ('crf_mr', 'decision_2', 'week 12, decision 2')):
             row(12, HELD_OUT_CORPORA['mulms'], f'`{winner}` vs `{reference}`', label,
                 part['n_subfields'], part[f'minus_{reference}']['micro'], part[key])
+    for e in (week12 or {}).values():
+        if e.get('role') == 'decision' and e.get('protocol') == 'leave_one_paper_out':
+            row(12, HELD_OUT_CORPORA.get(e['granularity'], e['granularity']),
+                f"`{e['variant']}` vs `{e['reference']}`", "week 12, the winner's analogue",
+                e['n_pairs'], e['micro'], e['micro']['ci95'][0] > 0)
     for corpus, entries in (week13.get('consistency') or {}).items():
         for variant, e in entries.items():
             if 'decision' not in e:
@@ -214,10 +222,13 @@ def table6(rows):
     """Table 6 from held_out_rows."""
     header = ['week', 'corpus, protocol', 'comparison', 'decision', 'units',
               'Δ micro F1 [95% CI]', 'CI above 0']
-    return ('Table 6. Pre-registered decisions on held-out documents of three corpora (GPU '
-            'runs, 10 model seeds; a unit is a held-out subfield, paper or article fold, each '
-            'side the mean over its seeds): mean paired difference of micro F1 over the units '
-            'with its 95% CI, and whether the CI lies above 0.\n\n' + markdown(header, rows))
+    return ('Table 6. Pre-registered decisions on held-out documents of three corpora from '
+            'weeks 7 to 13: MuLMS\'s held-out subfields, the consistency rule, the week-12 '
+            "winner's MaterioMiner analogue, SOFC-Exp's article folds and the pooled decision "
+            '(GPU runs, 10 model seeds; a unit is a held-out subfield, paper or article fold, '
+            'each side the mean over its seeds; MaterioMiner\'s other unseen-paper decisions '
+            'are in Table 2): mean paired difference of micro F1 over the units with its 95% '
+            'CI, and whether the CI lies above 0.\n\n' + markdown(header, rows))
 
 
 def table3(published):
@@ -355,7 +366,8 @@ def main(argv=None):
                                                                     'mulms_coverage.json'))))
     else:
         print('table 5: no probe reports')
-    rows = held_out_rows(analysis)
+    rows = held_out_rows(analysis, load(os.path.join(args.results, 'gpu',
+                                                     'ner_week12_comparisons.json')))
     if rows:
         write('table6_held_out_decisions.md', table6(rows))
     else:

@@ -129,6 +129,12 @@ def test_table6_lists_the_held_out_decisions():
                           'week12': week12},
                 'week13': {'consistency': consistency, 'week12_winner': 'crf_mrm_topic',
                            'folds': folds, 'pooled': pooled}}
+    week12 = {'a': {**_comparison('crf_mrm6', 'decision', 4.27), 'granularity': 'fine'},
+              'b': {**_comparison('crf_mrm6', 'reported', 1.5)}}
+    rows = pt.held_out_rows(analysis, week12)
+    assert [r[0] for r in rows] == [7, 10, 10, 11, 11, 12, 12, 12, 13, 13, 13]
+    assert ("| 12 | MaterioMiner fine-grained, unseen papers | `crf_mrm6` vs `crf` | week 12, "
+            "the winner's analogue | 4 | +5.27 [+4.27, +6.27] | passes |") in pt.table6(rows)
     rows = pt.held_out_rows(analysis)
     assert [r[0] for r in rows] == [7, 10, 10, 11, 11, 12, 12, 13, 13, 13]
     table = pt.table6(rows)

@@ -33,13 +33,16 @@ week-12 screen is complete (20 October): the mention-level filter with 6
 copies (V4) leads mention replacement by +1.45 and the CRF head by +3.16 on
 3 seeds, and on the 7 seeds the screen did not see (24 October) it gains
 +3.19 [−1.13, +7.51] over the CRF head and +0.92 [−1.63, +3.48] over
-mention replacement, passing neither decision (Section 6.7); the pooled
-decision with MaterioMiner follows, and if it passes, the analogue also
-runs on SOFC-Exp's article folds (13.4,
+mention replacement, passing neither decision (Section 6.7). Its
+MaterioMiner analogue passes at both granularities (+4.27 [+1.39, +7.15]
+fine-grained, +1.77 [+0.67, +2.88] coarse-grained), and the pre-registered
+decision pooled over the two corpora passes: +3.58 [+0.95, +6.21] over 11
+held-out units against the CRF head, no corpus losing (C26). The third
+corpus runs: the analogue on SOFC-Exp's article folds (13.4,
 pre-registered on 20 October; the SOFC corpus holds 36% of the folds'
 unseen names, against 55–81% for MuLMS's topic corpora).
 The numbers come from `results/` through the claims table of `docs/PAPER.md`
-(C1–C25). References are keys of `docs/references.bib`.
+(C1–C26). References are keys of `docs/references.bib`.
 
 ---
 
@@ -847,6 +850,20 @@ names that three CRF teachers tag in unlabeled in-domain text.
   votes of Section 6.6). The pooled decision over MuLMS and MaterioMiner's
   held-out papers (13.2) needs V4's MaterioMiner analogue and is the
   remaining test of the names method.
+- *MaterioMiner analogue and the pooled decision (25 October):* the same
+  filter over the fatigue corpus with 6 copies, 10 seeds on MaterioMiner's
+  4 held-out papers, passes against the CRF head at both granularities,
+  +4.27 [+1.39, +7.15] fine-grained (every paper gaining) and +1.77
+  [+0.67, +2.88] coarse-grained. Pooled over MuLMS's 7 subfields and the 4
+  fine-grained papers, the pre-registered decision passes: +3.58 [+0.95,
+  +6.21] against the CRF head, with neither corpus's interval below 0
+  (MuLMS +3.18, MaterioMiner +4.27). On the 7 MuLMS seeds the screen did
+  not see the pooled estimate is the same (+3.58 [+1.04, +6.13], post
+  hoc). This is the methods result: harvested names, injected by mention
+  replacement, improve NER on held-out documents of two corpora over the
+  CRF head. Against plain mention replacement the names add +1.23
+  [−0.22, +2.68] pooled (post hoc) and pass no decision: most of the gain
+  is mention replacement's, and the names' share is not established.
 
 **6.8 Document-level propagation on held-out documents of three corpora
 (C25).** The rule of Section 5.5 (krishnan2006effective): within a document,

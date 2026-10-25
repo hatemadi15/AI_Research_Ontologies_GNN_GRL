@@ -383,8 +383,12 @@ WEEK11_COMPARISONS = (
 
 # week 12: the MaterioMiner analogue of the screen's winner (w12d; crf_st3 from week 4's
 # files), 10 seeds on the held-out papers: decided against the CRF head, reported against
-# mention replacement, the votes against both votes
+# mention replacement, the votes against both votes. The protocol decides only the winner's
+# analogue: the screen's winner is V4 (crf_mrm_topic6, 20 October), whose analogue is
+# crf_mrm6; the other variants' comparisons, where files exist (crf_st3: week 4's, decided
+# in week 5), are reported
 WEEK12_VARIANTS = ('crf_mrm', 'crf_mrm6', 'crf_gzm', 'crf_st3', 'crf_mr6')
+WEEK12_WINNER_ANALOGUE = 'crf_mrm6'
 WEEK12_SYSTEMS = {
     **WEEK11_SYSTEMS,
     **{v: seed_family(v) for v in WEEK12_VARIANTS if v not in WEEK11_SYSTEMS},
@@ -392,7 +396,7 @@ WEEK12_SYSTEMS = {
        if f'{v}_ens3' not in WEEK11_SYSTEMS},
 }
 WEEK12_COMPARISONS = (
-    *((v, 'crf', LOPO) for v in WEEK12_VARIANTS),
+    *((v, 'crf', LOPO if v == WEEK12_WINNER_ANALOGUE else None) for v in WEEK12_VARIANTS),
     *((v, 'crf_mr', None) for v in WEEK12_VARIANTS),
     *((f'{v}_ens3', 'crf_ens3', None) for v in WEEK12_VARIANTS),
     *((f'{v}_ens3', 'crf_mr_ens3', None) for v in WEEK12_VARIANTS),

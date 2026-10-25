@@ -18169,6 +18169,88 @@
         "status": "reported",
         "passes": true,
         "no_corpus_loses": true
+      },
+      "crf_mrm_topic6": {
+        "corpora": {
+          "mulms": {
+            "variant": "crf_mrm_topic6",
+            "n_units": 7,
+            "minus_crf": {
+              "mean_diff": 3.18,
+              "ci95": [
+                -1.3,
+                7.66
+              ],
+              "per_run": [
+                2.39,
+                1.75,
+                2.94,
+                -2.76,
+                6.2,
+                12.16,
+                -0.4
+              ]
+            },
+            "units": {
+              "electrolysis": 2.39,
+              "graphene": 1.75,
+              "pemfc": 2.94,
+              "poly": -2.76,
+              "semi": 6.2,
+              "sofc": 12.16,
+              "steel": -0.4
+            },
+            "loses": false
+          },
+          "fine": {
+            "variant": "crf_mrm6",
+            "n_units": 4,
+            "minus_crf": {
+              "mean_diff": 4.27,
+              "ci95": [
+                1.39,
+                7.15
+              ],
+              "per_run": [
+                1.99,
+                5.67,
+                3.64,
+                5.78
+              ]
+            },
+            "units": {
+              "10.1007_s11340-021-00758-x.conll": 1.99,
+              "10.1038_ncomms7164.conll": 5.67,
+              "10.1038_s41467-020-19071-7.conll": 3.64,
+              "10.3390_met10111458.conll": 5.78
+            },
+            "loses": false
+          }
+        },
+        "n_units": 11,
+        "minus_crf": {
+          "mean_diff": 3.58,
+          "ci95": [
+            0.95,
+            6.21
+          ],
+          "per_run": [
+            2.39,
+            1.75,
+            2.94,
+            -2.76,
+            6.2,
+            12.16,
+            -0.4,
+            1.99,
+            5.67,
+            3.64,
+            5.78
+          ]
+        },
+        "status": "decision",
+        "passes": true,
+        "no_corpus_loses": true
       }
     },
     "folds": {

@@ -421,10 +421,10 @@ def test_week11_silver_names_against_mention_replacement(tmp_path):
 
 
 def test_week12_analogue_systems_and_comparisons(tmp_path):
-    """Week 12 on MaterioMiner: the analogue variants are 10-seed families with votes; each is
-    decided against the CRF head on the held-out papers and reported against mention
-    replacement, the votes against both votes; comparisons without files are skipped. Its
-    own file."""
+    """Week 12 on MaterioMiner: the analogue variants are 10-seed families with votes; the
+    screen's winner's analogue (crf_mrm6) is decided against the CRF head on the held-out
+    papers, the others reported, and every variant reported against mention replacement, the
+    votes against both votes; comparisons without files are skipped. Its own file."""
     pytest.importorskip('scipy')
     lopo = 'leave_one_paper_out'
     systems = ns.system_list(12)
@@ -432,21 +432,24 @@ def test_week12_analogue_systems_and_comparisons(tmp_path):
         assert systems[v] == tuple(f'{v}_m{n}' for n in range(0, 1000, 100))
         assert systems[f'{v}_ens3'] == (f'{v}_ens3', f'{v}_ens3_m300', f'{v}_ens3_m600')
     comps = ns.comparison_list(12, gpu=True)
-    assert len(comps) == 20 and comps[2] == ('crf_gzm', 'crf', lopo)
+    assert len(comps) == 20 and comps[1] == ('crf_mrm6', 'crf', lopo)
+    assert comps[2] == ('crf_gzm', 'crf', None) and comps[3] == ('crf_st3', 'crf', None)
     assert ('crf_gzm', 'crf_mr', None) in comps and ('crf_gzm_ens3', 'crf_ens3', None) in comps
     with pytest.raises(ValueError):
         ns.comparison_list(12)
     for g in ('fine', 'coarse'):
-        for stem, plus in (('crf', 0), ('crf_mr', 1.5), ('crf_gzm', 2.5)):
+        for stem, plus in (('crf', 0), ('crf_mr', 1.5), ('crf_mrm6', 2.5), ('crf_gzm', 2.0)):
             for name in systems[stem]:
                 _write(tmp_path, g, lopo, name, [x + plus for x in (50, 51, 52, 53)])
     out = ns.main(['--results', str(tmp_path), '--week', '12', '--gpu'])
     key = 'ner_results_{}_{}_{}'
     assert {k: c['role'] for k, c in out.items()} == {
-        **{key.format(g, lopo, 'crf_gzm'): 'decision' for g in ('fine', 'coarse')},
-        **{key.format(g, lopo, 'crf_gzm_vs_crf_mr'): 'reported' for g in ('fine', 'coarse')}}
-    assert out[key.format('fine', lopo, 'crf_gzm')]['micro']['mean_diff'] == 2.5
-    assert out[key.format('coarse', lopo, 'crf_gzm_vs_crf_mr')]['micro']['mean_diff'] == 1.0
+        **{key.format(g, lopo, 'crf_mrm6'): 'decision' for g in ('fine', 'coarse')},
+        **{key.format(g, lopo, 'crf_gzm'): 'reported' for g in ('fine', 'coarse')},
+        **{key.format(g, lopo, f'{v}_vs_crf_mr'): 'reported'
+           for g in ('fine', 'coarse') for v in ('crf_mrm6', 'crf_gzm')}}
+    assert out[key.format('fine', lopo, 'crf_mrm6')]['micro']['mean_diff'] == 2.5
+    assert out[key.format('coarse', lopo, 'crf_mrm6_vs_crf_mr')]['micro']['mean_diff'] == 1.0
     assert (tmp_path / 'ner_week12_comparisons.json').exists()
 
 

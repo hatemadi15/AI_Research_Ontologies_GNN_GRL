@@ -1171,16 +1171,19 @@ def test_week12_analogue_table_and_bullet(tmp_path):
     ws = Workspace(tmp_path)
     lopo = 'leave_one_paper_out'
     for g in ('fine', 'coarse'):
-        ws.week4('crf_gzm', 'crf', g, lopo, gpu=True, role='decision',
+        ws.week4('crf_mrm6', 'crf', g, lopo, gpu=True, role='decision',
                  micro=(2.8, 1.1, 4.5), score=(52.0, 45.0, 59.0), name=rr.WEEK12_FILE)
-        ws.week4('crf_gzm', 'crf_mr', g, lopo, gpu=True, micro=(0.5, -1.0, 2.0),
+        ws.week4('crf_mrm6', 'crf_mr', g, lopo, gpu=True, micro=(0.5, -1.0, 2.0),
                  score=(52.0, 45.0, 59.0), name=rr.WEEK12_FILE)
+        ws.week4('crf_st3', 'crf', g, lopo, gpu=True, micro=(1.7, -1.2, 4.6),
+                 score=(48.0, 41.0, 55.0), name=rr.WEEK12_FILE)
     readme, _ = ws.generate()
     assert ("* NER week 12 (GPU runs; the MaterioMiner analogue of the screen's winner, 10 "
-            'seeds), CRF head + silver mentions as a match feature vs the CRF head (paired '
+            'seeds), mention replacement with silver mentions, 6 copies vs the CRF head (paired '
             'micro-F1 difference, leaving one paper out): fine-grained improves') in readme
     assert "#### NER week-12 comparisons, the MaterioMiner analogue of the screen's winner" in readme
-    assert '| CRF head + silver mentions as a match feature vs mention replacement |' in readme
+    assert '| mention replacement with silver mentions, 6 copies vs mention replacement |' in readme
+    assert 'self-training with 3 teachers vs the CRF head (paired' not in readme   # reported
 
 
 def test_a_week6_vote_that_passes_takes_the_unseen_slot(tmp_path):
