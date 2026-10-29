@@ -61,8 +61,8 @@ from ner_baseline import (DOCUMENT_FOLDS, POOL_SPLITS, SUBFIELDS, corpus_words,
                           document_groups, granularity_data, mulms_subfields, paper_fold,
                           pool_split, published_split, random_split, subfield_folds)
 from ner_ensemble import ensemble_run, tags_to_spans
-from ner_seedmeans import (GRANULARITIES, LOPO, SCREEN_OFFSETS, WEEK5_OFFSETS, WEEK5_TRIPLES,
-                           seed_family)
+from ner_seedmeans import (DECISION_OFFSETS, GRANULARITIES, LOPO, SCREEN_OFFSETS, WEEK5_OFFSETS,
+                           WEEK5_TRIPLES, seed_family)
 
 RESULTS_DIR = Path(__file__).resolve().parents[2] / 'results' / 'gpu'
 OUT_NAME = 'ner_mentions.json'
@@ -85,8 +85,9 @@ FAMILIES = ('crf', 'crf_mt', 'crf_ls', 'crf_st3', 'crf_ctx', 'crf_mt_st3', 'crf_
             'crf_mrs_topic', 'crf_mrm_topic', 'crf_mrm_topic6', 'crf_st3_topic', 'crf_mr6',
             'crf_gzm_topic', 'crf_gzs_topic',
             # the winner's MaterioMiner analogue (week 12) and, with crf_mr6 at 10 seeds on both
-            # corpora (week 14, 14.1), the copy control
-            'crf_mrm6')
+            # corpora (week 14, 14.1), the copy control; 14.2's mixed-corpus variant, which has
+            # the decision's 7 seeds (300-900) only
+            'crf_mrm6', 'crf_mrm_mixed6')
 VOTED = ('crf', 'crf_mt', 'crf_ctx', 'crf_mt_st3', 'crf_mr', 'crf_mt_mr', 'crf_mrs')
 # a published split's systems: plain MatSciBERT, the CRF head and the methods run on it
 PUBLISHED_SPLITS = ('fine', 'coarse', 'sofc', 'sofc_slot')
@@ -319,11 +320,12 @@ def paired(method, reference):
 
 def held_out_systems(directory, granularity, protocol):
     """{system: [{run_id: Counter}]} of the families and votes of one protocol, each family with
-    its 10 seeds or, failing that, the screen's 3; and {system: offsets}. The corpus is read
-    only when there are files (MuLMS's is built locally, mulms.py)."""
+    its 10 seeds or, failing that, the screen's 3 or the week-12 decision's 7 (seeds 300-900);
+    and {system: offsets}. The corpus is read only when there are files (MuLMS's is built
+    locally, mulms.py)."""
     systems, offsets = {}, {}
     for family in FAMILIES:
-        for seeds in (WEEK5_OFFSETS, SCREEN_OFFSETS):
+        for seeds in (WEEK5_OFFSETS, SCREEN_OFFSETS, DECISION_OFFSETS):
             files = family_files(directory, granularity, protocol, family, seeds)
             if files:
                 data = corpus(granularity)
