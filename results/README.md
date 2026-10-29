@@ -419,7 +419,10 @@ is their coverage of the unseen test names by phase 0's rule: 49–70% exact
 any run of 14.2. The week-14 batches: `w14a` (14.1, the 6-copy control
 `crf_mr6` on MuLMS's held-out subfields at seeds 300–900 and on MaterioMiner's
 held-out papers at 10 seeds, both granularities; `ner-gpu-jobs-c` version 7,
-29 October), `w14b` (14.2, `crf_mrm_mixed6_m<300..900>`) and `w14c` (14.3,
+29 October, 12:05–17:20 UTC, 5.2 session hours: the 27 files `mulms_leave_one_subfield_out_crf_mr6_m<300..900>` and
+`{fine,coarse}_leave_one_paper_out_crf_mr6_m<N>`, with the control's seed votes
+`crf_mr6_ens3`, `_ens3_m300` and `_ens3_m600` per granularity; 14.1 no, +0.80
+[−0.66, +2.26] pooled), `w14b` (14.2, `crf_mrm_mixed6_m<300..900>`) and `w14c` (14.3,
 `crf_mrm_topic10k6`, `crf_mrm_topic20k6`, `crf_mrm_topiclow6`,
 `crf_mrm_topictwo6` and `crf_mrm_topiccap6` at seeds 0–200), the last two after
 the reset of 31 October; their analyses in `gpu/ner_week5_seed_analysis.json`

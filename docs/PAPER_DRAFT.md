@@ -880,12 +880,21 @@ names that three CRF teachers tag in unlabeled in-domain text.
   Pooled over the 16 units of the three corpora the estimate is +2.45
   [+0.50, +4.40] (reported); the claim stays on two corpora, with this
   boundary condition.
-- *The ablations (week 14, pre-registered 29 October; running):* two
-  decisions and four reported ablations. 14.1 compares the method with
-  6 copies without names on the same units and seeds (MuLMS's subfields
-  on seeds 300–900, MaterioMiner's papers on 10 seeds), pooled as 13.2
-  was: whether the names, rather than the extra copies, carry the gain.
-  14.2 compares V4 with the subfield's own corpus against V4 with a mixed
+- *The names against matched copies (14.1, 29 October, pre-registered):
+  no.* Against mention replacement with 6 copies and no names, on the
+  same units and seeds as 13.2 (MuLMS's subfields on seeds 300–900,
+  MaterioMiner's papers on 10 seeds), the method gains +0.80 [−0.66,
+  +2.26] pooled over the 11 units (MuLMS +0.51 [−1.51, +2.53], three
+  subfields losing; MaterioMiner +1.29 [−2.51, +5.10], one paper losing);
+  its votes +0.35 and +0.94. The control alone gains +2.56 [+0.94, +4.18]
+  over the CRF head (reported), +0.41 and +0.20 over mention replacement
+  with 3 copies. So about +2.6 of the +3.58 is mention replacement with
+  more copies and about +0.8 the harvested names, whose share is not
+  established: the pre-registered pass is a gain over the CRF head, and
+  the paper says so.
+- *The topic's role and the ablations (14.2, 14.3; pre-registered 29
+  October, after the reset of 31 October):* 14.2 compares V4 with the
+  subfield's own corpus against V4 with a mixed
   corpus of the six other topics (40,000 sentences, the same source and
   pipeline), paired by subfield; measured before the run, the mixed
   corpora hold 49–70% of the unseen test names against the topic

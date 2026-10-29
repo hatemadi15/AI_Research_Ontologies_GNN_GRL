@@ -20,3 +20,4 @@ Table 6. Pre-registered decisions on held-out documents of three corpora from we
 | 13 | SOFC-Exp, article folds | `crf_mt_mr` vs `crf` | week 13, 13.3b | 5 | −0.11 [−0.69, +0.46] | no |
 | 13 | SOFC-Exp, article folds | `crf_mrm6` vs `crf` | week 13, 13.4 | 5 | −0.04 [−1.21, +1.14] | no |
 | 13 | pooled: MuLMS, held-out subfields (7) + MaterioMiner fine-grained, unseen papers (4) | `crf_mrm_topic6` vs `crf` | week 13, 13.2 | 11 | +3.58 [+0.95, +6.21] | passes |
+| 14 | pooled: MuLMS, held-out subfields (7) + MaterioMiner fine-grained, unseen papers (4) | `crf_mrm_topic6` / `crf_mrm6` vs `crf_mr6` | week 14, 14.1 | 11 | +0.80 [−0.66, +2.26] | no |
