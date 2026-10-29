@@ -155,6 +155,24 @@ def test_table6_lists_the_held_out_decisions():
             'papers (4) | `crf_mrm_topic` vs `crf` | week 13, 13.2, a corpus loses | 11 | '
             '+2.00 [+0.50, +3.50] | no |') in table
     assert 'crf_dcr' not in table and 'crf_mr6' not in table and table.count('`crf_mr` vs') == 2
+    # week 14: the pooled decision 14.1 and the mixed-corpus decision 14.2
+    analysis['week14'] = {
+        'copies': {'pooled': {'decision': '14.1', 'n_units': 11, 'passes': True,
+                              'no_corpus_loses': True,
+                              'minus_control': _spread(1.5, 0.6, 2.4, 'mean_diff'),
+                              'corpora': {'mulms': {'n_units': 7}, 'fine': {'n_units': 4}}}},
+        'topic': {'decision': {'n_units': 7, 'passes': False,
+                               'minus_crf_mrm_mixed6': d(0.4, -0.3, 1.1)}}}
+    rows = pt.held_out_rows(analysis)
+    assert rows[-2:] == [
+        [14, 'pooled: MuLMS, held-out subfields (7) + MaterioMiner fine-grained, unseen papers (4)',
+         '`crf_mrm_topic6` / `crf_mrm6` vs `crf_mr6`', 'week 14, 14.1', 11,
+         '+1.50 [+0.60, +2.40]', 'passes'],
+        [14, 'MuLMS, held-out subfields', '`crf_mrm_topic6` vs `crf_mrm_mixed6`', 'week 14, 14.2',
+         7, '+0.40 [\u22120.30, +1.10]', 'no']]
+    analysis['week14']['copies']['pooled']['no_corpus_loses'] = False
+    assert pt.held_out_rows(analysis)[-2][3:] == ['week 14, 14.1, a corpus loses', 11,
+                                                  '+1.50 [+0.60, +2.40]', 'no']
     assert pt.held_out_rows({}) == [] and pt.held_out_rows({'week13': {}}) == []
 
 

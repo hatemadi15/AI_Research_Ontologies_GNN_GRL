@@ -880,6 +880,19 @@ names that three CRF teachers tag in unlabeled in-domain text.
   Pooled over the 16 units of the three corpora the estimate is +2.45
   [+0.50, +4.40] (reported); the claim stays on two corpora, with this
   boundary condition.
+- *The ablations (week 14, pre-registered 29 October; running):* two
+  decisions and four reported ablations. 14.1 compares the method with
+  6 copies without names on the same units and seeds (MuLMS's subfields
+  on seeds 300–900, MaterioMiner's papers on 10 seeds), pooled as 13.2
+  was: whether the names, rather than the extra copies, carry the gain.
+  14.2 compares V4 with the subfield's own corpus against V4 with a mixed
+  corpus of the six other topics (40,000 sentences, the same source and
+  pipeline), paired by subfield; measured before the run, the mixed
+  corpora hold 49–70% of the unseen test names against the topic
+  corpora's 55–81%. The ablations, at the screen's 3 seeds: the corpus's
+  first 10,000 and 20,000 sentences, the threshold 0.7, 2 of 3 teachers,
+  and the silver names capped at half of the draws (today they are
+  85–97% of the pool's entries).
 
 **6.8 Document-level propagation on held-out documents of three corpora
 (C25).** The rule of Section 5.5 (krishnan2006effective): within a document,

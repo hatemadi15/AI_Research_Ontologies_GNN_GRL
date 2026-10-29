@@ -1790,3 +1790,81 @@ def test_week13_bullet(tmp_path):
             "4 held-out papers +2.00 [+0.50, +3.50]), passes (decision 13.2); with SOFC-Exp's "
             "5 article folds (crf_mrm6, +0.21 [-0.30, +0.72]): 16 units, +1.90 [+0.80, +3.00], "
             "passes (reported; the three-corpus estimate of 13.4).\n") in readme
+
+def test_week14_bullet(tmp_path):
+    """Week 14: 14.1's pooled decision with its corpora and the per-corpus comparisons with
+    the control's own differences, 14.2's decision with the mixed variant's references, and
+    the ablations; no bullet without the week14 section."""
+    ws = Workspace(tmp_path)
+    (ws.results / 'gpu').mkdir()
+
+    def diff(mean, lo, hi, n=7):
+        return {'mean_diff': mean, 'ci95': [lo, hi], 'per_run': [mean] * n}
+
+    def both(mean, lo, hi, n=7):
+        return {'micro': diff(mean, lo, hi, n), 'micro_strict': diff(mean, lo, hi, n)}
+
+    def score(mean, lo, hi):
+        return {'micro': {'mean': mean, 'ci95': [lo, hi]}}
+    analysis = {'mulms': {}, 'week13': {'consistency': {}, 'week12_winner': None, 'pooled': {}},
+                'week14': {'copies': {}, 'topic': {}, 'ablations': {}}}
+    (ws.results / 'gpu' / rr.WEEK5_ANALYSIS).write_text(json.dumps(analysis))
+    readme, _ = ws.generate()
+    assert '* NER week 14' not in readme
+    control = {'crf_mr6': score(56.1, 50.0, 62.0), 'minus_crf': both(2.5, 1.0, 4.0),
+               'minus_crf_mr': both(0.5, -0.5, 1.5), 'n_units': 7}
+    analysis['week14'] = {
+        'copies': {
+            'mulms': {'decision': {'crf_mrm_topic6': score(57.6, 51.0, 64.0),
+                                   'minus_crf_mr6': both(1.5, 0.2, 2.8), 'control': control,
+                                   'n_units': 7, 'seeds': list(range(300, 1000, 100))},
+                      'ten_seeds': {'crf_mrm_topic6': score(57.0, 51.0, 63.0),
+                                    'minus_crf_mr6': both(1.2, -0.1, 2.5), 'control': control,
+                                    'n_units': 7}},
+            'fine': {'crf_mrm6': score(49.0, 44.0, 54.0), 'minus_crf_mr6': both(1.5, 0.5, 2.5, 4),
+                     'control': {'crf_mr6': score(47.5, 43.0, 52.0),
+                                 'minus_crf': both(2.5, 1.5, 3.5, 4),
+                                 'minus_crf_mr': both(0.2, -0.2, 0.6, 4), 'n_units': 4},
+                     'n_units': 4},
+            'pooled': {'decision': '14.1', 'n_units': 11, 'minus_control': diff(1.5, 0.6, 2.4, 11),
+                       'passes': True, 'no_corpus_loses': True,
+                       'corpora': {'mulms': {'n_units': 7, 'minus_control': diff(1.5, 0.2, 2.8),
+                                             'loses': False},
+                                   'fine': {'n_units': 4, 'minus_control': diff(1.5, 0.5, 2.5, 4),
+                                            'loses': False}}}},
+        'topic': {'decision': {
+            'crf_mrm_topic6': score(57.6, 51.0, 64.0), 'minus_crf_mrm_mixed6': both(1.0, 0.3, 1.7),
+            'n_units': 7, 'decision': '14.2', 'passes': True,
+            'mixed': {'crf_mrm_mixed6': score(56.6, 50.0, 63.0), 'minus_crf': both(3.0, 1.0, 5.0),
+                      'minus_crf_mr': both(1.0, -0.5, 2.5), 'minus_crf_mr6': both(0.5, -0.2, 1.2),
+                      'unseen_in_silver': 0.18, 'n_units': 7}}},
+        'ablations': {'crf_mrm_topic10k6': {'minus_crf_mrm_topic6': both(-0.5, -1.5, 0.5),
+                                            'unseen_in_silver': 0.15, 'n_units': 7},
+                      'crf_mrm_topiccap6': {'minus_crf_mrm_topic6': both(0.2, -0.8, 1.2),
+                                            'n_units': 7}}}
+    (ws.results / 'gpu' / rr.WEEK5_ANALYSIS).write_text(json.dumps(analysis))
+    readme, _ = ws.generate()
+    bullet = next(line for line in readme.splitlines() if line.startswith('* NER week 14'))
+    assert ("14.1, the names against matched copies: pooled over 11 held-out units, the names "
+            "method against 6 copies without names (`crf_mr6`) +1.50 [+0.60, +2.40] (MuLMS's 7 "
+            "held-out subfields +1.50 [+0.20, +2.80]; MaterioMiner's 4 held-out papers +1.50 "
+            "[+0.50, +2.50]), passes (decision 14.1)") in bullet
+    assert ("MuLMS's 7 held-out subfields: the names method 57.60 [51.00, 64.00] against the "
+            "control's 56.10 [50.00, 62.00], +1.50 [+0.20, +2.80]; the control against the CRF "
+            "head +2.50 [+1.00, +4.00] and against mention replacement +0.50 [-0.50, +1.50] "
+            "(reported)") in bullet
+    assert ("MaterioMiner's 4 held-out papers, fine-grained: the names method 49.00 [44.00, "
+            "54.00] against the control's 47.50") in bullet
+    assert 'on MuLMS over all 10 seeds +1.20 [-0.10, +2.50] against the control (reported)' in bullet
+    assert ("14.2, the topic's role: V4 with the subfield's own corpus against V4 with the mixed "
+            "corpus of the six other topics, paired by subfield over seeds 300 to 900: 57.60 "
+            "[51.00, 64.00] against 56.60 [50.00, 63.00]; improves (+1.00, 95% CI [+0.30, +1.70]; "
+            "strict IOB2 +1.00 [+0.30, +1.70]) (decision 14.2); the mixed variant against the CRF "
+            "head +3.00 [+1.00, +5.00] and against mention replacement +1.00 [-0.50, +2.50], "
+            "against the copy control +0.50 [-0.20, +1.20] (reported); 18.0% of the unseen test "
+            "names are its silver names") in bullet
+    assert ("14.3, the ablations at the screen's seeds 0 to 200, against V4 on the same seeds "
+            "(reported; no decision): the corpus's first 10,000 sentences -0.50 [-1.50, +0.50] "
+            "(15.0% of the unseen names); the silver share capped at 0.5 +0.20 [-0.80, +1.20].")\
+        in bullet
+    assert bullet.endswith('.')

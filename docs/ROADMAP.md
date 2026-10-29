@@ -4768,8 +4768,10 @@ distance from mention replacement there is unknown); with a between-unit
 spread near 3 points the 11-unit interval's half-width is about 2, so a
 pass is about 0.4. Cost: 7 MuLMS jobs of 31–37 minutes (`w12a`'s) and 20
 MaterioMiner jobs of about 17 minutes (a 6-copy student about 4 minutes,
-from `crf_mr`'s 2.4), about 10 session hours over the two lanes, within
-the 11.7 hours left before the reset of 31 October.
+from `crf_mr`'s 2.4), about 10 lane hours over the two lanes, so about 5.5
+session hours (Kaggle charges a session's wall time, the longer lane's;
+corrected the same day, before any result, from a figure that summed the
+lanes), within the 11.7 hours left before the reset of 31 October.
 
 **14.2 The topic's role (decision).** The mixed corpus of a held-out
 subfield: 40,000 sentences drawn from the six other subfields' topic
@@ -4806,7 +4808,19 @@ other topics does as well, a simpler method the paper then states, with
 13.2 as its decision on the topic corpora and this as the reported
 comparison; a fail with neither above the other means 7 units cannot
 separate them, which the paper says. Cost: 14 jobs of 27–50 minutes
-(`w12b`'s), about 9 session hours.
+(`w12b`'s), 7 per lane, about 4.5 session hours (a lane's wall time, as
+`w12b`'s). *Measured on 29 October, before any
+run* (`build_mixed_corpus.py`, then `mulms_coverage.py` with the seven
+mixed corpora, `results/mulms_coverage_mixed.json`): the mixed corpora
+skipped 17–69 sentences each (in the own corpus, or taken twice) and hold
+49–70% of their subfield's unseen test names by the exact rule (57–74%
+loose), against the topic corpora's 55–81% (63–84%); the topic corpus
+holds more on every subfield, by 0.3 (graphene) and 1.7 (electrolysis) to
+5.6–6.5 (steel, pemfc, semi) and 10.0–11.3 points (poly, sofc); on MAT
+names, sofc's own corpus holds 90% against the mixed one's 74%, poly's 80%
+against 59%. So the mixed corpora hold most of what the topic corpora hold,
+which is what 14.2 tests: whether the names the topic adds, and the
+contexts they come in, are what the gain needs.
 
 **14.3 Ablations (reported, no decision).** V4 with one setting changed,
 on MuLMS's 7 held-out subfields with the screen's seeds 0 to 200 (3
@@ -4837,8 +4851,11 @@ Recorded per run as now (the counts, `marginal_threshold`, the filter)
 plus `teachers_agree` and `names_share` when set. The three options
 default to the current behaviour, byte for byte (tested on the toy corpora
 before the bundle). Cost: a screen job takes about 30 minutes (`w12e`),
-the 10,000- and 20,000-sentence ones less, about 16 session hours for the
-35 jobs over the two lanes.
+the 10,000- and 20,000-sentence ones less (the teachers tag a quarter or
+half of the corpus), so lane 0's 21 jobs take about 9 hours and lane 1's 14
+about 7: about 9 session hours; should lane 0 pass the runner's 10-hour
+deadline, its unfinished students run in a second push of `w14c` (finished
+runs are skipped).
 
 *Not run, and why.* V4 on the multi-task model (MaterioMiner only, the
 names typed at both levels; no second corpus to repeat it on); the copy
@@ -4860,7 +4877,24 @@ them again); every `crf_mr6` run records 6 copies, its seed and no
 
 *Order and budget.* `w14a` now, from bundle 3ac85a8 (about 10 of the 11.7
 session hours left this week); after the reset of 31 October, `w14b` then
-`w14c` from the new bundle (about 25 of 45 hours); the analyses in
+`w14c` from the new bundle (about 14 of 45 session hours; they can run at
+once on the two kernels); the analyses in
 `ner_seed_analysis.py` (`week14`: `copies`, `topic`, `ablations`), the
 report's week-14 bullet and Table 6's rows written before the results
 exist.
+
+*Session notes, 29 October.* `w14a` pushed at 12:05 UTC as `ner-gpu-jobs-c`
+version 7 (lane 0: the repeat `smokeay` and 14 jobs, lane 1: 13 jobs; the
+smoke repeat done in 1.3 minutes), from bundle 3ac85a8, before any other
+change. The week-14 code followed in the same afternoon, tested before the
+commit: the mixed corpora and their reports (`build_mixed_corpus.py`, the
+coverage above), the three options (`--silver-threshold`, `--teachers-agree`,
+`--names-share`; their defaults byte-identical to the committed code on the
+tiny model for the mention filter with 6 copies, the sentence filter, the
+self-training baseline, the copy control and single-teacher self-training),
+the batches `w14b` and `w14c`, the analyses (`week14`), the report's bullet
+and Table 6's rows. The week-12 section of the analysis now carries the
+decisions 1 and 2 only for the screen's winner: the copy control's runs at
+seeds 300–900 (14.1's) are reported there, not decided. The new bundle is
+built from the commit that holds all of this and uploaded once `w14a`'s
+session has ended, so that a running session never sees a dataset change.

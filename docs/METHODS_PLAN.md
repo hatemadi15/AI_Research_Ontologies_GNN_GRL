@@ -377,7 +377,7 @@ the annotation convention explains. It is not the paper's main method;
 13.2 and 13.3 (mention replacement pooled across corpora and on SOFC-Exp's
 folds) decide whether mention replacement joins it, after the reset.
 
-*Week 14 (29 October).* With 13.2 passed, the ablations of §4C are pre-registered as the week-14 protocol (ROADMAP §4): 14.1 names against matched copies and 14.2 the topic's role, each a decision, and four ablations reported; `w14a` (the copy control, about 10 session hours) runs on this week's remaining quota, `w14b` and `w14c` (about 25 hours) after the reset of 31 October. The paper's assembly moves to the week of 7 November.
+*Week 14 (29 October).* With 13.2 passed, the ablations of §4C are pre-registered as the week-14 protocol (ROADMAP §4): 14.1 names against matched copies and 14.2 the topic's role, each a decision, and four ablations reported; `w14a` (the copy control, about 5.5 session hours) runs on this week's remaining quota, `w14b` and `w14c` (about 4.5 and 9 hours) after the reset of 31 October. The paper's assembly moves to the week of 7 November.
 
 Stop rules (as written on 19 October): the methods route gets the two GPU weeks after the reset and
 route E at most; no fourth protocol on MuLMS. A pass on MuLMS alone (the

@@ -1,0 +1,82 @@
+{
+ "script": "src/graph/build_mixed_corpus.py",
+ "protocol": "docs/ROADMAP.md \u00a74, week 14: 14.2, the topic's role",
+ "topic": "mixed_graphene",
+ "held_out": "graphene",
+ "settings": {
+  "seed": 0,
+  "sentences": 40000,
+  "rule": "from each of the other topic corpora, in TOPICS order, the first sentences of a seeded shuffle that are neither in the held-out subfield's own corpus nor already taken, as many as its quota; written in corpus order, source after source"
+ },
+ "own_corpus": {
+  "path": "data/processed/corpus/topic_graphene_sentences.txt",
+  "sentences": 40000,
+  "sha256": "a319667fd44aae392d9bee2635213798fc4f6647e359c1dec263adb55cfdd418"
+ },
+ "sources": {
+  "electrolysis": {
+   "sha256": "8722375b63c3b822fee02cbc417525ea228f85784062f656157607ac2062285f",
+   "sentences": 40000,
+   "quota": 6667,
+   "visited": 6679,
+   "taken": 6667,
+   "skipped_own": 12,
+   "skipped_duplicate": 0
+  },
+  "pemfc": {
+   "sha256": "13ac1709715feee76cd50204df3674a58ec268a44d8042561a49080e66b79c55",
+   "sentences": 40000,
+   "quota": 6667,
+   "visited": 6671,
+   "taken": 6667,
+   "skipped_own": 1,
+   "skipped_duplicate": 3
+  },
+  "poly": {
+   "sha256": "f10decea53f50587415a0cf94692b94cee36c7bc00cee65ce50c2408704f663d",
+   "sentences": 40000,
+   "quota": 6667,
+   "visited": 6668,
+   "taken": 6667,
+   "skipped_own": 0,
+   "skipped_duplicate": 1
+  },
+  "semi": {
+   "sha256": "447c2524303a6fd89eb239b068bbb1b1a0a9e1a2b9c8fa91c831d91efe8def3f",
+   "sentences": 40000,
+   "quota": 6667,
+   "visited": 6713,
+   "taken": 6667,
+   "skipped_own": 46,
+   "skipped_duplicate": 0
+  },
+  "sofc": {
+   "sha256": "3d16de660dfa13a4daf629c406340eef70a524dbb3d43386171c0680d3c51819",
+   "sentences": 40000,
+   "quota": 6666,
+   "visited": 6669,
+   "taken": 6666,
+   "skipped_own": 1,
+   "skipped_duplicate": 2
+  },
+  "steel": {
+   "sha256": "29d4ece525d4d8c0acea397401541323de314e3e877b34f383d6cb69d5443339",
+   "sentences": 40000,
+   "quota": 6666,
+   "visited": 6669,
+   "taken": 6666,
+   "skipped_own": 1,
+   "skipped_duplicate": 2
+  }
+ },
+ "corpus": {
+  "path": "data/processed/corpus/topic_mixed_graphene_sentences.txt",
+  "sentences": 40000,
+  "words": 1155690,
+  "sha256": "a9c09d8e2f44ee8ed99fc4225e87572ef50bf385a53c1f32dcd87d2b217d543f"
+ },
+ "run": {
+  "finished": "2026-10-29T12:11:50Z",
+  "seconds": 0.7
+ }
+}

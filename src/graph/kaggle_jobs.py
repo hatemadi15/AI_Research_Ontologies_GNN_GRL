@@ -187,6 +187,16 @@ Week 14 (the ablations that make the paper; ROADMAP §4, week 14):
           subfields, seed offsets 300 to 900 (one job per offset over the subfields), and
           on MaterioMiner's held-out papers at both granularities, offsets 0 to 900 (one
           job per offset and granularity, w12d:mr6's), the 27 jobs balanced over the lanes
+  w14b    14.2, the topic's role: the CRF run of smoke4 again (smokeaz), then V4 with the mixed
+          corpus of the held-out subfield (build_mixed_corpus.py, in the bundle as
+          topic_mixed_<subfield>_sentences.txt; crf_mrm_mixed6_m<N>), seed offsets 300 to
+          900, w12b's lanes (each trains the teachers and 3 or 4 of the students)
+  w14c    14.3, V4's ablations at the screen's seed offsets 0 to 200 (ABLATIONS; reported):
+          the CRF run of smoke4 again (smokeba), then per ablation one job per subfield, the
+          jobs of an ablation in one lane: the corpus's first 10,000 and 20,000 sentences
+          (crf_mrm_topic10k6, crf_mrm_topic20k6) and the threshold 0.7 (crf_mrm_topiclow6)
+          in lane 0; 2 of 3 teachers (crf_mrm_topictwo6) and the silver share 0.5
+          (crf_mrm_topiccap6) in lane 1
 
 The TPU spike (docs/METHODS_PLAN.md §5; every batch named tpu... runs on the TPU v5e-8, one
 lane per chip, its jobs with --device xla, its results in results/tpu/, a family of their own):
@@ -210,6 +220,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -323,6 +334,17 @@ DECISION_LANES = (OFFSETS_W5[:3], OFFSETS_W5[3:])   # w12b: the students per lan
 # w12d:<variant>: the MaterioMiner analogue of the screen's winner (V1's is w11b, V6's the
 # week-4 crf_st3 files)
 WEEK12_ANALOGUES = ('mrm', 'mrm6', 'gzm', 'mr6')
+# week 14 (ROADMAP §4, week 14): 14.2's mixed corpus of a held-out subfield
+# (build_mixed_corpus.py; topic 'mixed_<subfield>', in the bundle as
+# topic_mixed_<subfield>_sentences.txt, its report under TOPIC_REPORTS as the topic corpora's)
+# and 14.3's ablations of V4 at the screen's seeds, {names tag: the change to V4's job}
+MIXED_TAG = 'mixed'
+ABLATIONS = {'topic10k': {'sample': 10000}, 'topic20k': {'sample': 20000},
+             'topiclow': {'extra': ('--silver-threshold', '0.7')},
+             'topictwo': {'extra': ('--teachers-agree', '2')},
+             'topiccap': {'extra': ('--names-share', '0.5')}}
+ABLATION_LANES = (('topic10k', 'topic20k', 'topiclow'), ('topictwo', 'topiccap'))
+TOPIC_CORPUS_RE = re.compile(re.escape(TOPIC_CORPUS_DIR) + r'/topic_([a-z0-9_]+)_sentences\.txt')
 
 
 # ---------------------------------------------------------------------------
@@ -385,7 +407,7 @@ def mrs_mulms_job(subfield, student_offsets):
 
 
 def topic_mulms_job(subfield, student_offsets, mentions=False, copies=3, names=True,
-                    feature=False):
+                    feature=False, corpus=None, tag=TOPIC_TAG, sample=0, extra=()):
     """Week 12 on MuLMS: one held-out subfield, 400 pool sentences; the 3 teachers tag the
     subfield's topic corpus (TOPIC_CORPUS, in the bundle; all of it) and the students of
     `student_offsets` train mention replacement with its silver names (crf_mrs_topic_m<N>;
@@ -394,21 +416,37 @@ def topic_mulms_job(subfield, student_offsets, mentions=False, copies=3, names=T
     sentences instead (week 4's method, 3 teachers: crf_st3_topic_m<N>). With `feature` the
     students train the plain CRF head with the names as a gazetteer match feature
     (--names-feature, no copies: crf_gzm_topic_m<N> with `mentions`, crf_gzs_topic_m<N>
-    without)."""
+    without). Week 14: `corpus` replaces the subfield's topic corpus (14.2's mixed corpus),
+    `tag` the names tag, `sample` the corpus sample (0: all of it) and `extra` adds options
+    (14.3's ablations: ABLATIONS)."""
     job = ['--granularity', 'mulms', '--leave-one-subfield-out', '--train-pool',
            str(MULMS_POOL), '--subfields', subfield, '--self-train',
-           TOPIC_CORPUS.format(topic=subfield), '--self-train-sample', '0',
-           '--student-offsets', *(str(o) for o in student_offsets), '--names-tag', TOPIC_TAG]
+           corpus or TOPIC_CORPUS.format(topic=subfield), '--self-train-sample', str(sample),
+           '--student-offsets', *(str(o) for o in student_offsets), '--names-tag', tag]
     if feature:
         return job + (['--silver-mentions'] if mentions else []) + [
             '--names-feature', '--crf', '--teachers', '3', '--students', '10',
-            '--save-predictions', '--threads', str(THREADS)]
+            '--save-predictions', '--threads', str(THREADS)] + list(extra)
     if not names:
         return job + ['--crf', '--teachers', '3', '--students', '10', '--save-predictions',
-                      '--threads', str(THREADS)]
+                      '--threads', str(THREADS)] + list(extra)
     flags = [f if f != '3' or MRS_FLAGS[i - 1] != '--augment-mentions' else str(copies)
              for i, f in enumerate(MRS_FLAGS)]
-    return job + (['--silver-mentions'] if mentions else []) + flags
+    return job + (['--silver-mentions'] if mentions else []) + flags + list(extra)
+
+
+def mixed_job(subfield, student_offsets):
+    """Week 14, 14.2: V4's job with the subfield's mixed corpus (build_mixed_corpus.py; in the
+    bundle as topic_mixed_<subfield>_sentences.txt): crf_mrm_mixed6_m<N>."""
+    return topic_mulms_job(subfield, student_offsets, mentions=True, copies=MR6_COPIES,
+                           corpus=TOPIC_CORPUS.format(topic=f'{MIXED_TAG}_{subfield}'),
+                           tag=MIXED_TAG)
+
+
+def ablation_job(tag, subfield, student_offsets):
+    """Week 14, 14.3: V4's job with one setting changed (ABLATIONS[tag]): crf_mrm_<tag>6_m<N>."""
+    return topic_mulms_job(subfield, student_offsets, mentions=True, copies=MR6_COPIES,
+                           tag=tag, **ABLATIONS[tag])
 
 
 def topic_variant_job(variant, subfield, student_offsets):
@@ -879,6 +917,22 @@ def batch_lanes(name):
         sofc = [(COST['sofc'] * len(OFFSETS_PUBLISHED), published_job('sofc', '--crf', *bias))]
         lanes = balance(inner + outer + sofc)
         return [[repeat + ['--tag', 'smokeu']] + lanes[0], lanes[1]]
+    if name == 'w14b':
+        # week 14, 14.2: V4 with the mixed corpus of the held-out subfield
+        # (crf_mrm_mixed6_m<N>), seed offsets 300 to 900, w12b's lanes (each trains the
+        # teachers and 3 or 4 of the students); first the repeat of the CRF run of smoke4
+        # (smokeaz)
+        lanes = [[mixed_job(s, offsets) for s in MULMS_SUBFIELD_NAMES]
+                 for offsets in DECISION_LANES]
+        return [[repeat + ['--tag', 'smokeaz']] + lanes[0], lanes[1]]
+    if name == 'w14c':
+        # week 14, 14.3: V4's ablations at the screen's seed offsets 0 to 200, one job per
+        # subfield, the jobs of an ablation in one lane (ABLATION_LANES: the smaller corpora
+        # and the threshold in lane 0, the agreement and the silver share in lane 1); first
+        # the repeat of the CRF run of smoke4 (smokeba)
+        lanes = [[ablation_job(tag, s, OFFSETS) for tag in tags for s in MULMS_SUBFIELD_NAMES]
+                 for tags in ABLATION_LANES]
+        return [[repeat + ['--tag', 'smokeba']] + lanes[0], lanes[1]]
     if name == 'w14a':
         # week 14, 14.1: the 6-copy control without names (crf_mr6_m<N>) on MuLMS's held-out
         # subfields, seed offsets 300 to 900 (one job per offset over the 7 subfields), and
@@ -901,7 +955,7 @@ BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'i
            'w7c', 'w7d', 'w7e', 'w8a', 'w8b', 'w9a', 'w9b', 'w10a', 'w11a', 'w11b', 'w12a', 'w12c',
            'w12e', 'w12f', 'w12g', 'w13a', 'w13b', 'w13c',
            *(f'w12b:{v}' for v in WEEK12_VARIANTS), *(f'w12d:{v}' for v in WEEK12_ANALOGUES),
-           'tpu-smoke1', 'tpu-smoke', 'w14a')
+           'tpu-smoke1', 'tpu-smoke', 'w14a', 'w14b', 'w14c')
 
 
 def batch_extras(name):
@@ -942,8 +996,8 @@ def batch_spec(name):
     if any(job[i:i + 2] == ['--granularity', 'mulms'] for lane in lanes for job in lane
            for i in range(len(job) - 1)):
         spec['mulms_files'] = mulms_files()
-    topics = sorted(t for t in TOPIC_NAMES
-                    if any(TOPIC_CORPUS.format(topic=t) in job for lane in lanes for job in lane))
+    topics = sorted({m.group(1) for lane in lanes for job in lane for arg in job
+                     if (m := TOPIC_CORPUS_RE.fullmatch(arg))})
     if topics:
         spec['topic_corpora'] = {t: corpus_sha256(TOPIC_REPORTS / f'{t}.json') for t in topics}
     if is_tpu_batch(name):

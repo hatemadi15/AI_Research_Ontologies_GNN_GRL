@@ -1153,7 +1153,8 @@ def ner_notes(res):
         note += week6_verdict_line(week12, variant, reference,
                                    "the MaterioMiner analogue of the screen's winner, 10 seeds",
                                    week='12', names=WEEK7_SYSTEM_NAMES)
-    return note + sofc_note(analysis) + mulms_note(analysis) + week13_note(analysis)
+    return (note + sofc_note(analysis) + mulms_note(analysis) + week13_note(analysis)
+            + week14_note(analysis))
 
 
 WEEK13_CORPORA = {'mulms': "MuLMS's 7 held-out subfields",
@@ -1236,6 +1237,83 @@ def week13_note(analysis):
     return line + ".\n"
 
 
+WEEK14_ABLATIONS = {'crf_mrm_topic10k6': "the corpus's first 10,000 sentences",
+                    'crf_mrm_topic20k6': "its first 20,000 sentences",
+                    'crf_mrm_topiclow6': 'the threshold 0.7',
+                    'crf_mrm_topictwo6': '2 of the 3 teachers',
+                    'crf_mrm_topiccap6': 'the silver share capped at 0.5'}
+WEEK14_CONTROL = 'crf_mr6'
+WEEK14_MIXED = 'crf_mrm_mixed6'
+WEEK14_WINNER = 'crf_mrm_topic6'
+
+
+def week14_note(analysis):
+    """The week-14 bullet (ROADMAP §4, week 14) from the week-5 analyses file ('' without its
+    week14 section): 14.1 the names method against the 6-copy control, pooled (the decision)
+    and per corpus with the control's own differences (reported); 14.2 V4 with the
+    subfield's own corpus against V4 with the mixed corpus (the decision) and the mixed
+    variant against the references (reported); 14.3 the ablations against V4 (reported)."""
+    w = analysis.get('week14') or {}
+    copies, topic, ablations = w.get('copies') or {}, w.get('topic') or {}, w.get('ablations') or {}
+    if not (copies or topic or ablations):
+        return ''
+    line = ("* NER week 14 (the names method's ablations; the 95% CIs are over the subfields or "
+            "papers, each the mean of its seeds)")
+    pooled = copies.get('pooled')
+    if pooled:
+        parts = '; '.join(f"{WEEK13_CORPORA[c].split(',')[0]} {delta_cell(v['minus_control'])}"
+                          f"{' (loses)' if v['loses'] else ''}"
+                          for c, v in pooled['corpora'].items())
+        line += (f". 14.1, the names against matched copies: pooled over {pooled['n_units']} "
+                 "held-out units, the names method against 6 copies without names "
+                 f"(`{WEEK14_CONTROL}`) {delta_cell(pooled['minus_control'])} ({parts}), "
+                 f"{'passes' if pooled['passes'] else 'no'}"
+                 f"{'' if pooled['no_corpus_loses'] else ', a corpus loses'} (decision 14.1)")
+    key = f'minus_{WEEK14_CONTROL}'
+    for corpus in ('mulms', 'fine', 'coarse'):
+        e = copies.get(corpus)
+        if corpus == 'mulms' and e:
+            e = e.get('decision')
+        if not e:
+            continue
+        system = next(k for k in e if k.startswith('crf_mrm'))
+        control = e['control']
+        line += (f". {WEEK13_CORPORA[corpus]}: the names method {interval(e[system]['micro'])} "
+                 f"against the control's {interval(control[WEEK14_CONTROL]['micro'])}, "
+                 f"{delta_cell(e[key]['micro'])}; the control against the CRF head "
+                 f"{delta_cell(control['minus_crf']['micro'])} and against mention replacement "
+                 f"{delta_cell(control['minus_crf_mr']['micro'])} (reported)")
+    ten = (copies.get('mulms') or {}).get('ten_seeds')
+    if ten:
+        line += (f"; on MuLMS over all 10 seeds {delta_cell(ten[key]['micro'])} against the "
+                 "control (reported)")
+    t = topic.get('decision')
+    if t:
+        word, numbers = paired_verdict(t[f'minus_{WEEK14_MIXED}'])
+        m = t['mixed']
+        line += (". 14.2, the topic's role: V4 with the subfield's own corpus against V4 with the "
+                 "mixed corpus of the six other topics, paired by subfield over seeds 300 to 900: "
+                 f"{interval(t[WEEK14_WINNER]['micro'])} against {interval(m[WEEK14_MIXED]['micro'])}; "
+                 f"{word} ({numbers}) (decision 14.2); the mixed variant against the CRF head "
+                 f"{delta_cell(m['minus_crf']['micro'])} and against mention replacement "
+                 f"{delta_cell(m['minus_crf_mr']['micro'])}")
+        if key in m:
+            line += f", against the copy control {delta_cell(m[key]['micro'])}"
+        line += ' (reported)'
+        if m.get('unseen_in_silver') is not None:
+            line += (f"; {100 * m['unseen_in_silver']:.1f}% of the unseen test names are its "
+                     "silver names")
+    if ablations:
+        line += (". 14.3, the ablations at the screen's seeds 0 to 200, against V4 on the same "
+                 "seeds (reported; no decision): ")
+        line += '; '.join(
+            f"{WEEK14_ABLATIONS.get(v, v)} {delta_cell(e[f'minus_{WEEK14_WINNER}']['micro'])}"
+            + (f" ({100 * e['unseen_in_silver']:.1f}% of the unseen names)"
+               if e.get('unseen_in_silver') is not None else '')
+            for v, e in ablations.items())
+    return line + '.\n'
+
+
 def mulms_note(analysis):
     """The week-10 bullet (MuLMS, ROADMAP §4) from the week-5 analyses file ('' until the
     held-out subfields have all their runs): its 2 decisions over the held-out subfields, each
@@ -1301,12 +1379,17 @@ def week12_sentences(week12):
                     f"({variant}), the 3-seed screen against mention replacement: "
                     f"{delta_cell(d)}")
         decision = parts.get('decision')
-        if decision:
+        if decision and 'decision_1' in decision:
             out += (f". Week-12 decision for {name} on seeds 300 to 900: "
                     f"{interval(decision[variant]['micro'])}")
             for k, reference in ((1, 'the CRF head'), (2, 'mention replacement')):
                 word, numbers = paired_verdict(decision['minus_crf' if k == 1 else 'minus_crf_mr'])
                 out += f"; decision {k}, against {reference}, paired by subfield: {word} ({numbers})"
+        elif decision:
+            out += (f". {name[0].upper()}{name[1:]} ({variant}) on seeds 300 to 900 (reported; "
+                    f"the decision was the winner's): {interval(decision[variant]['micro'])}, "
+                    f"against the CRF head {delta_cell(decision['minus_crf']['micro'])}, against "
+                    f"mention replacement {delta_cell(decision['minus_crf_mr']['micro'])}")
         entry = decision or screen
         if entry and entry.get('unseen_in_silver') is not None:
             out += (f". {100 * entry['unseen_in_silver']:.1f}% of the unseen test names are "

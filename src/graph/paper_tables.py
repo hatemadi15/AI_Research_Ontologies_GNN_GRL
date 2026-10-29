@@ -156,8 +156,10 @@ def held_out_rows(analysis, week12=None):
     10 and 11, the week-12 winner's, the consistency rule's of weeks 7 and 13, 13.3's on
     SOFC-Exp's folds, and the pooled decision 13.2), and from the week-12 comparisons
     (`week12`, ner_week12_comparisons.json) the winner's MaterioMiner analogue against the CRF
-    head on the held-out papers, which 13.2 pools; with its units, difference and verdict;
-    reported comparisons are left out (MaterioMiner's other decisions are in Table 2)."""
+    head on the held-out papers, which 13.2 pools; week 14's decisions 14.1 (the names
+    against matched copies, pooled) and 14.2 (the topic's own corpus against the mixed one);
+    with its units, difference and verdict; reported comparisons are left out
+    (MaterioMiner's other decisions are in Table 2)."""
     rows = []
 
     def row(week, corpus, comparison, decision, units, diff, passes):
@@ -214,6 +216,19 @@ def held_out_rows(analysis, week12=None):
         row(13, f'pooled: {corpora}', f'`{method}` vs `crf`',
             'week 13, 13.2' + ('' if e['no_corpus_loses'] else ', a corpus loses'),
             e['n_units'], e['minus_crf'], e['passes'] and e['no_corpus_loses'])
+    week14 = analysis.get('week14') or {}
+    pooled = (week14.get('copies') or {}).get('pooled')
+    if pooled:
+        corpora = ' + '.join(f"{HELD_OUT_CORPORA.get(c, c)} ({v['n_units']})"
+                             for c, v in pooled['corpora'].items())
+        row(14, f'pooled: {corpora}', '`crf_mrm_topic6` / `crf_mrm6` vs `crf_mr6`',
+            'week 14, 14.1' + ('' if pooled['no_corpus_loses'] else ', a corpus loses'),
+            pooled['n_units'], pooled['minus_control'],
+            pooled['passes'] and pooled['no_corpus_loses'])
+    mixed = (week14.get('topic') or {}).get('decision')
+    if mixed:
+        row(14, HELD_OUT_CORPORA['mulms'], '`crf_mrm_topic6` vs `crf_mrm_mixed6`', 'week 14, 14.2',
+            mixed['n_units'], mixed['minus_crf_mrm_mixed6']['micro'], mixed['passes'])
     rows.sort(key=lambda r: r[0])
     return rows
 

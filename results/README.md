@@ -404,3 +404,23 @@ with the most frequent pairs of gold and predicted type among those of the
 right span (`wrong_type_pairs`, per run); `conventions` what the gold annotations alone
 show: the names that are entities in two or more papers, those with
 different types, and the mean span length of each type per paper.
+
+Week 14 (the names method's ablations; protocol in ROADMAP §4, week 14):
+`topic_corpora/mixed_<subfield>.json` (`build_mixed_corpus.py`) is the report of
+the mixed corpus of a held-out subfield, 40,000 sentences drawn from the six
+other subfields' topic corpora (6,667 or 6,666 each, a seeded shuffle; the
+sentences of the subfield's own corpus and those already taken skipped, 17–69
+per corpus), with the sources' SHA-256, the counts and the corpus's SHA-256
+(the corpus, `data/processed/corpus/topic_mixed_<subfield>_sentences.txt`, is
+not versioned and the report rebuilds it from the topic corpora);
+`mulms_coverage_mixed.json` (`mulms_coverage.py` with the seven mixed corpora)
+is their coverage of the unseen test names by phase 0's rule: 49–70% exact
+(57–74% loose) against the topic corpora's 55–81% (63–84%), measured before
+any run of 14.2. The week-14 batches: `w14a` (14.1, the 6-copy control
+`crf_mr6` on MuLMS's held-out subfields at seeds 300–900 and on MaterioMiner's
+held-out papers at 10 seeds, both granularities; `ner-gpu-jobs-c` version 7,
+29 October), `w14b` (14.2, `crf_mrm_mixed6_m<300..900>`) and `w14c` (14.3,
+`crf_mrm_topic10k6`, `crf_mrm_topic20k6`, `crf_mrm_topiclow6`,
+`crf_mrm_topictwo6` and `crf_mrm_topiccap6` at seeds 0–200), the last two after
+the reset of 31 October; their analyses in `gpu/ner_week5_seed_analysis.json`
+(`week14`: `copies`, `topic`, `ablations`) and Table 6.

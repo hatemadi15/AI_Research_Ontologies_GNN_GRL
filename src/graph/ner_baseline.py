@@ -357,21 +357,23 @@ def entity_spans(tags):
     return out
 
 
-def mention_replacements(sentences, k, seed, p=MR_P, names=()):
+def mention_replacements(sentences, k, seed, p=MR_P, names=(), share=None):
     """Mention replacement (Dai and Adel, 2020) for --augment-mentions: per sentence with an
     entity, k copies in which each mention is replaced, with probability p, by a mention of
     the same type drawn from all the mentions of `sentences` (frequent ones more often).
     Copies that change nothing are dropped. sentences: (words, tags); returns (words, tags).
     names (--augment-names): further (type, words) mentions that join the pool after those
-    of `sentences`; their sentences are not copied.
+    of `sentences`; their sentences are not copied. With `share` (--names-share P), the
+    names form a pool of their own, and a replaced mention whose type has names is drawn
+    from them with probability P, else from the training mentions.
     """
     rng = random.Random(seed)
-    pool = {}
+    pool, extra = {}, {}
     for words, tags in sentences:
         for start, end, kind in entity_spans(tags):
             pool.setdefault(kind, []).append(tuple(words[start:end]))
     for kind, mention in names:
-        pool.setdefault(kind, []).append(tuple(mention))
+        (pool if share is None else extra).setdefault(kind, []).append(tuple(mention))
     out = []
     for words, tags in sentences:
         spans = entity_spans(tags)
@@ -382,7 +384,10 @@ def mention_replacements(sentences, k, seed, p=MR_P, names=()):
             for start, end, kind in spans:
                 mention = tuple(words[start:end])
                 if rng.random() < p:
-                    mention = rng.choice(pool[kind])
+                    if kind in extra and rng.random() < share:
+                        mention = rng.choice(extra[kind])
+                    else:
+                        mention = rng.choice(pool[kind])
                     changed |= mention != tuple(words[start:end])
                 new_words += list(words[last:start]) + list(mention)
                 new_tags += list(tags[last:start]) + [f'B-{kind}'] + [f'I-{kind}'] * (len(mention) - 1)
@@ -1065,9 +1070,10 @@ def teacher_tags(tagger, sentences, batch_size, device):
     return out
 
 
-def is_silver(tags, marginals):
-    """Silver sentence: an entity, and every word's tag with a marginal >= SILVER_THRESHOLD."""
-    return any(tag.startswith('B-') for tag in tags) and min(marginals) >= SILVER_THRESHOLD
+def is_silver(tags, marginals, threshold=SILVER_THRESHOLD):
+    """Silver sentence: an entity, and every word's tag with a marginal >= threshold
+    (SILVER_THRESHOLD, or --silver-threshold)."""
+    return any(tag.startswith('B-') for tag in tags) and min(marginals) >= threshold
 
 
 def train_one(seed, train, val, test, labels, args, device, test_index=None, descriptions=None,
@@ -1256,6 +1262,7 @@ def train_self_training(seed, train, val, test, labels, args, device, sample, te
     teacher_test_f1 (micro F1).
     """
     teacher_args = SimpleNamespace(**{**vars(args), 'save_predictions': False})
+    threshold = getattr(args, 'silver_threshold', SILVER_THRESHOLD)
     teacher, tagger = train_one(seed, train, val, test, labels, teacher_args, device,
                                 keep_tagger=True)
     sentences, n_skipped = fit_sample(tagger.tokenizer, sample,
@@ -1263,7 +1270,7 @@ def train_self_training(seed, train, val, test, labels, args, device, sample, te
     tagged = teacher_tags(tagger, sentences, args.batch_size, device)
     del tagger                     # the teacher is not needed any more
     silver = [(words, tags) for words, (tags, marginals) in zip(sentences, tagged)
-              if is_silver(tags, marginals)]
+              if is_silver(tags, marginals, threshold)]
     print(f"    teacher: val F1 {teacher['val_f1']:.2f}, test F1 {teacher['f1']:.2f}; "
           f"{len(silver)} silver of {len(sentences)} tagged sentences ({n_skipped} of "
           f"{len(sample)} sampled skipped); student:", flush=True)
@@ -1271,7 +1278,7 @@ def train_self_training(seed, train, val, test, labels, args, device, sample, te
                         silver=silver)
     student['self_training'] = {
         'n_sampled': len(sample), 'n_skipped': n_skipped, 'n_silver': len(silver),
-        'marginal_threshold': SILVER_THRESHOLD, 'teacher_val_f1': teacher['val_f1'],
+        'marginal_threshold': threshold, 'teacher_val_f1': teacher['val_f1'],
         'teacher_test_f1': teacher['f1']}
     return student
 
@@ -1289,15 +1296,15 @@ def student_offsets_of(args):
     return teacher_offsets(getattr(args, 'students', args.teachers))
 
 
-def unanimous_silver(tagged):
+def unanimous_silver(tagged, threshold=SILVER_THRESHOLD):
     """Silver with several teachers: [(tags, least marginal)] of one sentence, per teacher.
 
     Every teacher gives the same tags, and the sentence is silver for each of them alone
-    (an entity, every tag with a marginal of at least SILVER_THRESHOLD; is_silver).
+    (an entity, every tag with a marginal of at least `threshold`; is_silver).
     """
     first = tagged[0][0]
     return (all(tags == first for tags, _ in tagged)
-            and all(is_silver(tags, [least]) for tags, least in tagged))
+            and all(is_silver(tags, [least], threshold) for tags, least in tagged))
 
 
 def silver_mentions(silver):
@@ -1322,17 +1329,30 @@ def name_coverage(names, train, test):
             'n_test_unseen_in_silver': sum(m in silver for m in unseen)}
 
 
-def silver_mention_names(sentences, votes, threshold=None):
+def silver_mention_names(sentences, votes, threshold=None, agree=None):
     """(type, words) of the silver mentions (--silver-mentions), in order: a span that every
     teacher tags as the same entity (entity_spans of each teacher's tags agree on its start,
     end and type), each of its tags with a marginal of at least `threshold` (SILVER_THRESHOLD)
-    under each teacher. votes: per sentence, per teacher (tags, least marginal, marginals)."""
+    under each teacher. votes: per sentence, per teacher (tags, least marginal, marginals).
+    With `agree` (--teachers-agree N), a span that at least `agree` teachers tag as the same
+    entity, each of those with every tag of the span at `threshold` or more, whatever the
+    other teachers tag there (agree = the number of teachers gives the same names)."""
     threshold = SILVER_THRESHOLD if threshold is None else threshold
     names = []
     for words, teachers in zip(sentences, votes):
-        common = set.intersection(*(set(entity_spans(tags)) for tags, _, _ in teachers))
-        for start, end, kind in sorted(common):
-            if all(min(marginals[start:end]) >= threshold for _, _, marginals in teachers):
+        if agree is None:
+            common = set.intersection(*(set(entity_spans(tags)) for tags, _, _ in teachers))
+            for start, end, kind in sorted(common):
+                if all(min(marginals[start:end]) >= threshold for _, _, marginals in teachers):
+                    names.append((kind, tuple(words[start:end])))
+            continue
+        counts = {}
+        for tags, _, marginals in teachers:
+            for span in entity_spans(tags):
+                if min(marginals[span[0]:span[1]]) >= threshold:
+                    counts[span] = counts.get(span, 0) + 1
+        for start, end, kind in sorted(counts):
+            if counts[(start, end, kind)] >= agree:
                 names.append((kind, tuple(words[start:end])))
     return names
 
@@ -1439,6 +1459,9 @@ def train_with_teachers(seed, offsets, train, val, test, labels, args, device, s
     silver sentences as a single teacher).
     """
     teacher_args = SimpleNamespace(**{**vars(args), 'save_predictions': False})
+    threshold = getattr(args, 'silver_threshold', SILVER_THRESHOLD)   # week 14's ablations
+    agree = getattr(args, 'teachers_agree', None)
+    share = getattr(args, 'names_share', None)
     teachers, tagged, sentences, n_skipped = [], [], None, 0
     for offset in offsets:
         record, tagger = train_one(seed + offset, train, val, test, labels, teacher_args,
@@ -1458,20 +1481,20 @@ def train_with_teachers(seed, offsets, train, val, test, labels, args, device, s
                          'test_f1': record['f1'], 'test_f1_strict': record['f1_strict'],
                          'test_macro_f1': round(F1_AVERAGES['macro'](record), 2),
                          'best_epoch': record['best_epoch'],
-                         'n_silver_alone': sum(is_silver(t, [m]) for t, m, _ in out)})
+                         'n_silver_alone': sum(is_silver(t, [m], threshold) for t, m, _ in out)})
         print(f"    teacher seed {seed + offset}: val F1 {record['val_f1']:.2f}, test F1 "
               f"{record['f1']:.2f}; {teachers[-1]['n_silver_alone']} silver alone of "
               f"{len(sentences)} tagged", flush=True)
     per_sentence = list(zip(*tagged))
     silver = [(words, list(votes[0][0])) for words, votes in zip(sentences, per_sentence)
-              if unanimous_silver([(t, m) for t, m, _ in votes])]
+              if unanimous_silver([(t, m) for t, m, _ in votes], threshold)]
     n_agreed = sum(all(t == votes[0][0] for t, *_ in votes) for votes in per_sentence)
     print(f"    {len(silver)} silver of {len(sentences)} tagged sentences ({n_agreed} tagged "
           f"alike; {n_skipped} of {len(sample)} sampled skipped); students:", flush=True)
     names = None
     feature = getattr(args, 'names_feature', False)
     if getattr(args, 'augment_names', False) or feature:
-        names = (silver_mention_names(sentences, per_sentence)
+        names = (silver_mention_names(sentences, per_sentence, threshold, agree)
                  if getattr(args, 'silver_mentions', False) else silver_mentions(silver))
     coverage = name_coverage(names, train, test) if names is not None else None
     index = lexicon_index(names) if feature else None
@@ -1483,7 +1506,8 @@ def train_with_teachers(seed, offsets, train, val, test, labels, args, device, s
         else:
             pool = names if getattr(args, 'augment_names', False) else ()
             augmented = (mention_replacements([(w, t) for w, t, _ in train],
-                                              args.augment_mentions, seed + offset, names=pool)
+                                              args.augment_mentions, seed + offset, names=pool,
+                                              share=share)
                          if getattr(args, 'augment_mentions', 0) else None)
             student = train_one(seed + offset, train, val, test, labels, args, device,
                                 test_index=test_index, augmented=augmented, lexicon=index)
@@ -1491,7 +1515,9 @@ def train_with_teachers(seed, offsets, train, val, test, labels, args, device, s
                 student['n_augmented'] = len(augmented)
         student['self_training'] = {
             'n_sampled': len(sample), 'n_skipped': n_skipped, 'n_agreed': n_agreed,
-            'n_silver': len(silver), 'marginal_threshold': SILVER_THRESHOLD,
+            'n_silver': len(silver), 'marginal_threshold': threshold,
+            **({'teachers_agree': agree} if agree is not None else {}),
+            **({'names_share': share} if share is not None else {}),
             'teachers': teachers}
         if names is not None:
             student['self_training']['names'] = coverage
@@ -3272,6 +3298,21 @@ def parse_args(argv=None):
                         help='with --augment-names, or --self-train with --teachers: a label of '
                              'the corpus the teachers tag, appended to the variant '
                              '(crf_mrm_<label>, crf_st3_<label>); lowercase letters and digits')
+    parser.add_argument('--silver-threshold', type=float, default=argparse.SUPPRESS,
+                        metavar='T',
+                        help='with --self-train: the least CRF marginal of every tag of a silver '
+                             'sentence, or of a silver mention with --silver-mentions, under each '
+                             f'teacher (default {SILVER_THRESHOLD}; ROADMAP §4, week 14)')
+    parser.add_argument('--teachers-agree', type=int, default=argparse.SUPPRESS, metavar='N',
+                        help='with --silver-mentions: a span is a silver mention when at least N '
+                             'of the teachers tag it as the same entity, each of those with every '
+                             'tag of the span confident, whatever the others tag there (default: '
+                             'all the teachers; week 14)')
+    parser.add_argument('--names-share', type=float, default=argparse.SUPPRESS, metavar='P',
+                        help='with --augment-names: a replaced mention whose type has silver '
+                             'names is drawn from them with probability P and from the training '
+                             'mentions otherwise, instead of from one pool of both, where the '
+                             'names outnumber the training mentions (week 14)')
     parser.add_argument('--entity-bias', type=float, nargs='+', default=argparse.SUPPRESS,
                         metavar='D',
                         help='with --crf: decode the test and validation sentences again with D '
@@ -3471,6 +3512,21 @@ def parse_args(argv=None):
                                            or hasattr(args, 'teachers')):
         parser.error('--names-tag needs --augment-names, or --self-train with --teachers (the '
                      'corpus the teachers tag)')
+    if hasattr(args, 'silver_threshold'):
+        if getattr(args, 'self_train', None) is None:
+            parser.error('--silver-threshold needs --self-train (the silver filter)')
+        if not 0 < args.silver_threshold <= 1:
+            parser.error('--silver-threshold: a marginal above 0 and at most 1')
+    if hasattr(args, 'teachers_agree'):
+        if not hasattr(args, 'silver_mentions'):
+            parser.error('--teachers-agree needs --silver-mentions (the mention-level filter)')
+        if not 1 <= args.teachers_agree <= args.teachers:
+            parser.error('--teachers-agree: between 1 and the number of --teachers')
+    if hasattr(args, 'names_share'):
+        if not getattr(args, 'augment_names', False):
+            parser.error('--names-share needs --augment-names (the names in the pool)')
+        if not 0 <= args.names_share <= 1:
+            parser.error('--names-share: a probability')
     if hasattr(args, 'entity_bias'):
         if not args.crf:
             parser.error('--entity-bias needs --crf (it shifts the emissions of the Viterbi '
