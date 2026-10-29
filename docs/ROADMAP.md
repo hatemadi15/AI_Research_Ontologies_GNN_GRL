@@ -4931,3 +4931,19 @@ screen's reading of the copy control (−0.20 against mention replacement on
 3 seeds, semi −7.35) did not hold on the decision seeds (+0.41), which is
 why 3 seeds decide nothing. 14.2 (the topic's role) now carries the
 question whether the names' source matters at all.
+
+*Exploratory, after 14.1 (`ner_mentions.py` with the control's 10 seeds
+and the analogue added to its families; no decision; pooled over the
+seeds and units, by the unseen-name rule of C17).* On MuLMS's held-out
+subfields the names raise recall on unseen names and lower precision:
+recall 39.4 (CRF head), 43.2 (mention replacement), 43.7 (6 copies
+without names) and 47.3 (V4); precision 55.8, 54.3, 53.9 and 50.9; F1 on
+unseen names 46.2, 48.1, 48.3 and 49.0, so the names add +0.7 F1 on
+unseen names over the control (+3.6 recall, −3.0 precision) and +0.2 on
+seen ones (71.0 to 71.2). On MaterioMiner's held-out papers,
+fine-grained, the names add to both: on unseen names recall 39.7 to 41.1
+and precision 49.2 to 53.2 over the control (F1 43.9 to 46.4, +2.4; the
+CRF head 41.5, mention replacement 44.1), on seen names F1 68.8 to 70.1;
+coarse-grained F1 on unseen names 52.7 to 53.7 over the control. The
+mechanism is the same on both corpora, more unseen names found, and its
+size is what 14.1 measured: small.

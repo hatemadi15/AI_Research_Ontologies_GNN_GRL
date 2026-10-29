@@ -891,7 +891,11 @@ names that three CRF teachers tag in unlabeled in-domain text.
   with 3 copies. So about +2.6 of the +3.58 is mention replacement with
   more copies and about +0.8 the harvested names, whose share is not
   established: the pre-registered pass is a gain over the CRF head, and
-  the paper says so.
+  the paper says so. On unseen names the names do what they were meant
+  to (exploratory): on MuLMS recall 43.7 to 47.3 over the control at a
+  cost of 3.0 points of precision (+0.7 F1 on unseen names), on
+  MaterioMiner's papers recall 39.7 to 41.1 and precision 49.2 to 53.2
+  (+2.4 F1 on unseen names, fine-grained).
 - *The topic's role and the ablations (14.2, 14.3; pre-registered 29
   October, after the reset of 31 October):* 14.2 compares V4 with the
   subfield's own corpus against V4 with a mixed
