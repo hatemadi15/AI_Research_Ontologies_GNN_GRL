@@ -3474,6 +3474,54 @@
           "f1": 49.13,
           "share": 1.0
         }
+      },
+      "crf_mrm_mixed6": {
+        "seeds": [
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "n_runs": 49,
+        "seen": {
+          "n_gold": 25837,
+          "n_pred": 28164,
+          "n_correct": 19522,
+          "recall": 75.56,
+          "precision": 69.32,
+          "f1": 72.3,
+          "share": 0.116
+        },
+        "seen_other": {
+          "n_gold": 917,
+          "n_pred": 480,
+          "n_correct": 105,
+          "recall": 11.45,
+          "precision": 21.88,
+          "f1": 15.03,
+          "share": 0.004
+        },
+        "unseen": {
+          "n_gold": 196910,
+          "n_pred": 175441,
+          "n_correct": 91883,
+          "recall": 46.66,
+          "precision": 52.37,
+          "f1": 49.35,
+          "share": 0.88
+        },
+        "all": {
+          "n_gold": 223664,
+          "n_pred": 204085,
+          "n_correct": 111510,
+          "recall": 49.86,
+          "precision": 54.64,
+          "f1": 52.14,
+          "share": 1.0
+        }
       }
     },
     "fine_published_split": {
@@ -7544,6 +7592,48 @@
           "ci95": [
             -2.15,
             1.86
+          ],
+          "n_pairs": 7
+        }
+      },
+      "crf_mrm_mixed6": {
+        "reference": "crf",
+        "seeds": [
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "seen": {
+          "method": 69.91,
+          "reference": 66.83,
+          "mean_diff": 3.08,
+          "ci95": [
+            -1.11,
+            7.26
+          ],
+          "n_pairs": 7
+        },
+        "unseen": {
+          "method": 49.12,
+          "reference": 45.74,
+          "mean_diff": 3.38,
+          "ci95": [
+            -0.99,
+            7.75
+          ],
+          "n_pairs": 7
+        },
+        "all": {
+          "method": 51.91,
+          "reference": 48.54,
+          "mean_diff": 3.38,
+          "ci95": [
+            -0.89,
+            7.64
           ],
           "n_pairs": 7
         }

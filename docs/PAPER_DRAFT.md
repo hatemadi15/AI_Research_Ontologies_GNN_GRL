@@ -905,7 +905,9 @@ names that three CRF teachers tag in unlabeled in-domain text.
   the mixed one; the votes −0.39 [−2.64, +1.86]. The mixed variant gains
   +3.38 [−0.89, +7.64] over the CRF head and +0.70 [−1.19, +2.58] over
   the copy control (reported), with 18.3% of the unseen test names among
-  its silver names against 22.2%. So the names need not come from the
+  its silver names against 22.2%. On unseen names it does what the
+  topic corpus's names do (exploratory): recall 46.7 against 47.3, at
+  precision 52.4 against 50.9. So the names need not come from the
   held-out documents' topic: a large unlabeled materials corpus of other
   topics does as well. With 14.1, the method the paper can state is
   mention replacement with 6 copies and names harvested from any large

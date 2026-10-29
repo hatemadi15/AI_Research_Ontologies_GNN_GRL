@@ -4987,3 +4987,11 @@ far: 2 decisions, both fail; the names method has taken 8 pre-registered
 decisions in weeks 12–14, 3 passing (the MaterioMiner analogue at both
 granularities, and 13.2). `w14c`'s four ablations (reported) run at the
 reset.
+
+*Exploratory, after 14.2 (`ner_mentions.py`, the mixed variant on its 7
+seeds against the CRF head's; no decision).* The mixed corpus's names do
+to unseen names what the topic corpus's do: recall 46.7 (the topic
+corpus 47.3, the copy control 43.7, the CRF head 39.4) at precision 52.4
+(50.9, 53.9, 55.8), F1 on unseen names 49.4 (49.0, 48.3, 46.2); on seen
+names F1 72.3 (71.2, 71.0, 69.8). Names from other materials topics raise
+unseen-name recall by about as much and keep a point more precision.
