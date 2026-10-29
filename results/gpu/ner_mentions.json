@@ -1066,6 +1066,57 @@
           "f1": 52.46,
           "share": 1.0
         }
+      },
+      "crf_mr6": {
+        "seeds": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "n_runs": 40,
+        "seen": {
+          "n_gold": 2210,
+          "n_pred": 2731,
+          "n_correct": 1700,
+          "recall": 76.92,
+          "precision": 62.25,
+          "f1": 68.81,
+          "share": 0.166
+        },
+        "seen_other": {
+          "n_gold": 280,
+          "n_pred": 63,
+          "n_correct": 12,
+          "recall": 4.29,
+          "precision": 19.05,
+          "f1": 7.0,
+          "share": 0.021
+        },
+        "unseen": {
+          "n_gold": 10790,
+          "n_pred": 8706,
+          "n_correct": 4282,
+          "recall": 39.68,
+          "precision": 49.18,
+          "f1": 43.93,
+          "share": 0.812
+        },
+        "all": {
+          "n_gold": 13280,
+          "n_pred": 11500,
+          "n_correct": 5994,
+          "recall": 45.14,
+          "precision": 52.12,
+          "f1": 48.38,
+          "share": 1.0
+        }
       }
     },
     "coarse_random_split_vary": {
@@ -2129,6 +2180,57 @@
           "f1": 62.02,
           "share": 1.0
         }
+      },
+      "crf_mr6": {
+        "seeds": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "n_runs": 40,
+        "seen": {
+          "n_gold": 4390,
+          "n_pred": 4922,
+          "n_correct": 3770,
+          "recall": 85.88,
+          "precision": 76.59,
+          "f1": 80.97,
+          "share": 0.2
+        },
+        "seen_other": {
+          "n_gold": 260,
+          "n_pred": 175,
+          "n_correct": 70,
+          "recall": 26.92,
+          "precision": 40.0,
+          "f1": 32.18,
+          "share": 0.012
+        },
+        "unseen": {
+          "n_gold": 17290,
+          "n_pred": 17471,
+          "n_correct": 9158,
+          "recall": 52.97,
+          "precision": 52.42,
+          "f1": 52.69,
+          "share": 0.788
+        },
+        "all": {
+          "n_gold": 21940,
+          "n_pred": 22568,
+          "n_correct": 12998,
+          "recall": 59.24,
+          "precision": 57.59,
+          "f1": 58.41,
+          "share": 1.0
+        }
       }
     },
     "sofc_random_split_vary": {
@@ -2416,6 +2518,101 @@
           "recall": 85.39,
           "precision": 80.81,
           "f1": 83.03,
+          "share": 1.0
+        }
+      },
+      "crf_mt_mr": {
+        "seeds": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "n_runs": 50,
+        "seen": {
+          "n_gold": 24570,
+          "n_pred": 26603,
+          "n_correct": 22031,
+          "recall": 89.67,
+          "precision": 82.81,
+          "f1": 86.1,
+          "share": 0.535
+        },
+        "seen_other": {
+          "n_gold": 20,
+          "n_pred": 22,
+          "n_correct": 6,
+          "recall": 30.0,
+          "precision": 27.27,
+          "f1": 28.57,
+          "share": 0.0
+        },
+        "unseen": {
+          "n_gold": 21310,
+          "n_pred": 22691,
+          "n_correct": 17150,
+          "recall": 80.48,
+          "precision": 75.58,
+          "f1": 77.95,
+          "share": 0.464
+        },
+        "all": {
+          "n_gold": 45900,
+          "n_pred": 49316,
+          "n_correct": 39187,
+          "recall": 85.37,
+          "precision": 79.46,
+          "f1": 82.31,
+          "share": 1.0
+        }
+      },
+      "crf_mt_mr_ens3": {
+        "seeds": [
+          0,
+          300,
+          600
+        ],
+        "n_runs": 15,
+        "seen": {
+          "n_gold": 7371,
+          "n_pred": 8018,
+          "n_correct": 6674,
+          "recall": 90.54,
+          "precision": 83.24,
+          "f1": 86.74,
+          "share": 0.535
+        },
+        "seen_other": {
+          "n_gold": 6,
+          "n_pred": 6,
+          "n_correct": 3,
+          "recall": 50.0,
+          "precision": 50.0,
+          "f1": 50.0,
+          "share": 0.0
+        },
+        "unseen": {
+          "n_gold": 6393,
+          "n_pred": 6664,
+          "n_correct": 5160,
+          "recall": 80.71,
+          "precision": 77.43,
+          "f1": 79.04,
+          "share": 0.464
+        },
+        "all": {
+          "n_gold": 13770,
+          "n_pred": 14688,
+          "n_correct": 11837,
+          "recall": 85.96,
+          "precision": 80.59,
+          "f1": 83.19,
           "share": 1.0
         }
       }
@@ -2990,43 +3187,50 @@
         "seeds": [
           0,
           100,
-          200
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
         ],
-        "n_runs": 21,
+        "n_runs": 70,
         "seen": {
-          "n_gold": 11073,
-          "n_pred": 12168,
-          "n_correct": 8205,
-          "recall": 74.1,
-          "precision": 67.43,
-          "f1": 70.61,
+          "n_gold": 36910,
+          "n_pred": 38929,
+          "n_correct": 26929,
+          "recall": 72.96,
+          "precision": 69.17,
+          "f1": 71.02,
           "share": 0.116
         },
         "seen_other": {
-          "n_gold": 393,
-          "n_pred": 227,
-          "n_correct": 57,
-          "recall": 14.5,
-          "precision": 25.11,
-          "f1": 18.39,
+          "n_gold": 1310,
+          "n_pred": 747,
+          "n_correct": 164,
+          "recall": 12.52,
+          "precision": 21.95,
+          "f1": 15.95,
           "share": 0.004
         },
         "unseen": {
-          "n_gold": 84390,
-          "n_pred": 68635,
-          "n_correct": 36535,
-          "recall": 43.29,
-          "precision": 53.23,
-          "f1": 47.75,
+          "n_gold": 281300,
+          "n_pred": 228176,
+          "n_correct": 122978,
+          "recall": 43.72,
+          "precision": 53.9,
+          "f1": 48.28,
           "share": 0.88
         },
         "all": {
-          "n_gold": 95856,
-          "n_pred": 81030,
-          "n_correct": 44797,
-          "recall": 46.73,
-          "precision": 55.28,
-          "f1": 50.65,
+          "n_gold": 319520,
+          "n_pred": 267852,
+          "n_correct": 150071,
+          "recall": 46.97,
+          "precision": 56.03,
+          "f1": 51.1,
           "share": 1.0
         }
       },
@@ -5582,6 +5786,51 @@
           ],
           "n_pairs": 4
         }
+      },
+      "crf_mr6": {
+        "reference": "crf",
+        "seeds": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "seen": {
+          "method": 67.77,
+          "reference": 65.72,
+          "mean_diff": 2.05,
+          "ci95": [
+            -0.82,
+            4.93
+          ],
+          "n_pairs": 4
+        },
+        "unseen": {
+          "method": 45.02,
+          "reference": 41.36,
+          "mean_diff": 3.65,
+          "ci95": [
+            -0.15,
+            7.46
+          ],
+          "n_pairs": 4
+        },
+        "all": {
+          "method": 49.43,
+          "reference": 46.46,
+          "mean_diff": 2.98,
+          "ci95": [
+            0.09,
+            5.86
+          ],
+          "n_pairs": 4
+        }
       }
     },
     "coarse_random_split_vary": {
@@ -6347,6 +6596,51 @@
           ],
           "n_pairs": 4
         }
+      },
+      "crf_mr6": {
+        "reference": "crf",
+        "seeds": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "seen": {
+          "method": 80.04,
+          "reference": 79.41,
+          "mean_diff": 0.63,
+          "ci95": [
+            -0.98,
+            2.24
+          ],
+          "n_pairs": 4
+        },
+        "unseen": {
+          "method": 54.17,
+          "reference": 53.23,
+          "mean_diff": 0.94,
+          "ci95": [
+            -2.46,
+            4.33
+          ],
+          "n_pairs": 4
+        },
+        "all": {
+          "method": 59.67,
+          "reference": 58.6,
+          "mean_diff": 1.07,
+          "ci95": [
+            -1.82,
+            3.97
+          ],
+          "n_pairs": 4
+        }
       }
     },
     "sofc_random_split_vary": {},
@@ -6430,6 +6724,89 @@
           "ci95": [
             -0.91,
             0.55
+          ],
+          "n_pairs": 5
+        }
+      },
+      "crf_mt_mr": {
+        "reference": "crf",
+        "seeds": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "seen": {
+          "method": 86.47,
+          "reference": 86.54,
+          "mean_diff": -0.06,
+          "ci95": [
+            -0.38,
+            0.25
+          ],
+          "n_pairs": 5
+        },
+        "unseen": {
+          "method": 78.32,
+          "reference": 78.46,
+          "mean_diff": -0.14,
+          "ci95": [
+            -1.51,
+            1.24
+          ],
+          "n_pairs": 5
+        },
+        "all": {
+          "method": 82.67,
+          "reference": 82.79,
+          "mean_diff": -0.11,
+          "ci95": [
+            -0.69,
+            0.46
+          ],
+          "n_pairs": 5
+        }
+      },
+      "crf_mt_mr_ens3": {
+        "reference": "crf_ens3",
+        "seeds": [
+          0,
+          300,
+          600
+        ],
+        "seen": {
+          "method": 87.16,
+          "reference": 87.23,
+          "mean_diff": -0.07,
+          "ci95": [
+            -0.43,
+            0.29
+          ],
+          "n_pairs": 5
+        },
+        "unseen": {
+          "method": 79.42,
+          "reference": 79.41,
+          "mean_diff": 0.01,
+          "ci95": [
+            -1.16,
+            1.18
+          ],
+          "n_pairs": 5
+        },
+        "all": {
+          "method": 83.58,
+          "reference": 83.62,
+          "mean_diff": -0.04,
+          "ci95": [
+            -0.71,
+            0.64
           ],
           "n_pairs": 5
         }
@@ -6767,35 +7144,42 @@
         "seeds": [
           0,
           100,
-          200
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
         ],
         "seen": {
-          "method": 67.64,
-          "reference": 67.6,
-          "mean_diff": 0.04,
+          "method": 68.54,
+          "reference": 67.06,
+          "mean_diff": 1.47,
           "ci95": [
-            -4.34,
-            4.41
+            -1.58,
+            4.53
           ],
           "n_pairs": 7
         },
         "unseen": {
-          "method": 47.67,
-          "reference": 46.04,
-          "mean_diff": 1.64,
+          "method": 48.24,
+          "reference": 45.83,
+          "mean_diff": 2.41,
           "ci95": [
-            -1.54,
-            4.82
+            -0.22,
+            5.03
           ],
           "n_pairs": 7
         },
         "all": {
-          "method": 50.44,
-          "reference": 48.93,
-          "mean_diff": 1.5,
+          "method": 50.98,
+          "reference": 48.66,
+          "mean_diff": 2.33,
           "ci95": [
-            -1.65,
-            4.66
+            -0.27,
+            4.92
           ],
           "n_pairs": 7
         }

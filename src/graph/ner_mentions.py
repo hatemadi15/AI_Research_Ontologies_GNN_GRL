@@ -83,7 +83,10 @@ FAMILIES = ('crf', 'crf_mt', 'crf_ls', 'crf_st3', 'crf_ctx', 'crf_mt_st3', 'crf_
             'crf_mrs',
             # week 12's screen on MuLMS's held-out subfields (3 seeds): names from a topic corpus
             'crf_mrs_topic', 'crf_mrm_topic', 'crf_mrm_topic6', 'crf_st3_topic', 'crf_mr6',
-            'crf_gzm_topic', 'crf_gzs_topic')
+            'crf_gzm_topic', 'crf_gzs_topic',
+            # the winner's MaterioMiner analogue (week 12) and, with crf_mr6 at 10 seeds on both
+            # corpora (week 14, 14.1), the copy control
+            'crf_mrm6')
 VOTED = ('crf', 'crf_mt', 'crf_ctx', 'crf_mt_st3', 'crf_mr', 'crf_mt_mr', 'crf_mrs')
 # a published split's systems: plain MatSciBERT, the CRF head and the methods run on it
 PUBLISHED_SPLITS = ('fine', 'coarse', 'sofc', 'sofc_slot')
