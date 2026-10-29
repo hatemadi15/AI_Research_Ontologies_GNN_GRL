@@ -181,6 +181,13 @@ Week 13 (13.3: mention replacement on SOFC-Exp's article folds):
           all 5 folds, the 3 teachers per fold tagging the whole corpus and the students of
           the lane's seed offsets (0-400 in lane 0, 500-900 in lane 1) training the variant
 
+Week 14 (the ablations that make the paper; ROADMAP §4, week 14):
+  w14a    14.1, the names against matched copies: the CRF run of smoke4 again (smokeay),
+          then the 6-copy control without names (crf_mr6_m<N>) on MuLMS's 7 held-out
+          subfields, seed offsets 300 to 900 (one job per offset over the subfields), and
+          on MaterioMiner's held-out papers at both granularities, offsets 0 to 900 (one
+          job per offset and granularity, w12d:mr6's), the 27 jobs balanced over the lanes
+
 The TPU spike (docs/METHODS_PLAN.md §5; every batch named tpu... runs on the TPU v5e-8, one
 lane per chip, its jobs with --device xla, its results in results/tpu/, a family of their own):
   tpu-smoke1  one fine-grained CRF job (the 4 held-out papers, seed 0) on one chip (crf_tpu1):
@@ -872,6 +879,20 @@ def batch_lanes(name):
         sofc = [(COST['sofc'] * len(OFFSETS_PUBLISHED), published_job('sofc', '--crf', *bias))]
         lanes = balance(inner + outer + sofc)
         return [[repeat + ['--tag', 'smokeu']] + lanes[0], lanes[1]]
+    if name == 'w14a':
+        # week 14, 14.1: the 6-copy control without names (crf_mr6_m<N>) on MuLMS's held-out
+        # subfields, seed offsets 300 to 900 (one job per offset over the 7 subfields), and
+        # on MaterioMiner's held-out papers at both granularities, offsets 0 to 900 (one job
+        # per offset and granularity, w12d:mr6's); first the repeat of the CRF run of smoke4
+        # (smokeay); the jobs balanced over the lanes (each writes its own file)
+        mulms = [(COST['mulms'] * MULMS_SUBFIELDS * COST['mr6'], mr6_mulms_job(off))
+                 for off in OFFSETS_W5]
+        papers = [(RUNS['leave_one_paper_out'] * COST['mr6'],
+                   job(g, 'leave_one_paper_out', '--augment-mentions', str(MR6_COPIES),
+                       offset=off, tag=f'm{off}'))
+                  for g in GRANULARITIES for off in OFFSETS + OFFSETS_W5]
+        lanes = balance(mulms + papers, loads=[COST['crf'], 0.0])
+        return [[repeat + ['--tag', 'smokeay']] + lanes[0], lanes[1]]
     raise ValueError(f'unknown batch {name!r}')
 
 
@@ -880,7 +901,7 @@ BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'i
            'w7c', 'w7d', 'w7e', 'w8a', 'w8b', 'w9a', 'w9b', 'w10a', 'w11a', 'w11b', 'w12a', 'w12c',
            'w12e', 'w12f', 'w12g', 'w13a', 'w13b', 'w13c',
            *(f'w12b:{v}' for v in WEEK12_VARIANTS), *(f'w12d:{v}' for v in WEEK12_ANALOGUES),
-           'tpu-smoke1', 'tpu-smoke')
+           'tpu-smoke1', 'tpu-smoke', 'w14a')
 
 
 def batch_extras(name):

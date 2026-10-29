@@ -245,6 +245,8 @@ reported beside the screen.
 
 ### C. If names pass: the ablations that make the paper
 
+*Fixed on 29 October as the week-14 protocol (ROADMAP §4), after 13.2 passed: two decisions, 14.1 the names against the 6-copy control (pooled over MuLMS and MaterioMiner, 11 units) and 14.2 the topic's own corpus against a mixed corpus of the six other topics (7 subfields), and the ablations below at the screen's 3 seeds, reported: the corpus's size (10,000 and 20,000 sentences), the threshold (0.7), the agreement (2 of 3 teachers) and the silver share (capped at 0.5). Not run: the winner on the multi-task model (one corpus) and the match feature (screened in week 12, below mention replacement); the dictionary rule is Table 5.*
+
 On the TPU if the spike succeeds (its own references), else on the GPU in
 the week of 31 October, 10 seeds each on MuLMS:
 - another topic's corpus (the topic's role; phase 0's coverage table says
@@ -374,6 +376,8 @@ claim of two corpora, scoped and under a point, with a boundary condition
 the annotation convention explains. It is not the paper's main method;
 13.2 and 13.3 (mention replacement pooled across corpora and on SOFC-Exp's
 folds) decide whether mention replacement joins it, after the reset.
+
+*Week 14 (29 October).* With 13.2 passed, the ablations of §4C are pre-registered as the week-14 protocol (ROADMAP §4): 14.1 names against matched copies and 14.2 the topic's role, each a decision, and four ablations reported; `w14a` (the copy control, about 10 session hours) runs on this week's remaining quota, `w14b` and `w14c` (about 25 hours) after the reset of 31 October. The paper's assembly moves to the week of 7 November.
 
 Stop rules (as written on 19 October): the methods route gets the two GPU weeks after the reset and
 route E at most; no fourth protocol on MuLMS. A pass on MuLMS alone (the

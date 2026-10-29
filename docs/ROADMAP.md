@@ -1027,6 +1027,7 @@ chance at class level. For a Task C-style result:
 | 11 | Protocol committed before any run: mention replacement whose replacement pool also holds the names in the sentences that 3 CRF teachers tag alike and confidently in unlabeled in-domain text (`--augment-names`, variant `crf_mrs`), on MuLMS's 7 held-out subfields (`w11a`) and MaterioMiner's 4 held-out papers (`w11b`), 10 seeds; protocol below | It improves on the CRF head on MuLMS's held-out subfields (decision 1) and on mention replacement (decisions 2–4: MuLMS, MaterioMiner fine- and coarse-grained); a methods claim needs decision 1 and one of decisions 2–4. MuLMS (`w11a`): decisions 1 (+2.04 [−0.85, +4.92]) and 2 (−0.06 [−1.09, +0.96]) not met, so no methods claim; MaterioMiner (`w11b`, 19–20 October): decisions 3 (fine-grained, +0.23 [−0.69, +1.14]) and 4 (coarse-grained, +0.61 [−0.96, +2.18]) not met either; the method is closed on both corpora |
 | 12 | Protocol committed before any run: mention replacement whose replacement pool holds the names that 3 CRF teachers find in a corpus of the held-out subfield's own topic (40,000 open-access sentences per subfield, `build_topic_corpus.py`; phase 0's gate: they hold 55–81% of the unseen test names), on MuLMS's 7 held-out subfields; a 3-seed screen of seven variants (`w12a`: silver sentences `crf_mrs_topic`, silver mentions `crf_mrm_topic`, the same with 6 copies `crf_mrm_topic6`, 6 copies without names `crf_mr6`, self-training on the topic corpus `crf_st3_topic`; `w12c`: the silver mentions or sentences as a gazetteer match feature, `crf_gzm_topic` and `crf_gzs_topic`; amendments 1–3), then the 7-seed decision for the screen's winner on seeds the screen did not see (`w12b:<variant>`); protocol below, plan in `docs/METHODS_PLAN.md` | Screen: the variant with the largest mean gain over mention replacement goes on if it is above 0. Decision 1: it improves on the CRF head (paired by subfield); decision 2: on mention replacement. A methods claim needs decision 1 on MuLMS and the winner's MaterioMiner analogue passing against the CRF head. Screen done (20 October; 3 seeds, 7 subfields; outcome below): V4 `crf_mrm_topic6`, the mention-level filter with 6 copies, 52.09, +1.45 [−1.35, +4.25] over mention replacement and +3.16 [−1.96, +8.28] over the CRF head, is the winner (V2 +0.97, V1 +0.80, V6 +0.16; V3, V7 and V8 below mention replacement). Decision done (24 October, seeds 300–900): +3.19 [−1.13, +7.51] against the CRF head and +0.92 [−1.63, +3.48] against mention replacement, neither passes (the screen's +3.16 held; the 7-subfield test lacks the power for V4's spread). The MaterioMiner analogue (25 October, `crf_mrm6`, 10 seeds) passes against the CRF head at both granularities: +4.27 [+1.39, +7.15] fine-grained and +1.77 [+0.67, +2.88] coarse-grained; with MuLMS it carries 13.2's pooled decision (week 13) |
 | 13 | Protocol committed before any run (20 October, on the user's directive to push for a methods paper; the plan's stop rule of a third protocol on MuLMS lifted, the count reported): 13.1 the document consistency rule of week 7 on MuLMS's saved 10-seed predictions (no training; amended the same day with SOFC-Exp's article folds, reported, and mention replacement on MaterioMiner, decisions); 13.2 a pooled decision over MuLMS's 7 subfields and MaterioMiner's 4 papers for the week-12 winner; 13.3 mention replacement with and without multi-task training on SOFC-Exp's 5 article folds, 10 seeds (`w13a`); 13.4 (amendment, conditional on a pass of week 12's decision 1 or of 13.2) the screen's winner on SOFC-Exp's folds (`w13b`); protocol below | Revised methods criterion: a pre-registered pass on held-out documents of two corpora, or the pooled decision over two or more corpora with no corpus losing; claims scoped to what passed. 13.1 done: on the CRF head the rule passes on MuLMS (13.1a, +0.82 [+0.18, +1.46], every subfield gaining), its second corpus after coarse-grained MaterioMiner (week 7, +0.12), and loses on SOFC-Exp's folds (13.1c, −0.44 [−0.72, −0.16]); it adds nothing to mention replacement (13.1b +0.57 [−0.12, +1.25]; 13.1d +0.19 [−0.34, +0.73] fine-grained, +0.11 [−0.08, +0.31] coarse-grained): a scoped claim of two corpora, under a point, with a boundary condition. 13.3a done (24 October): mention replacement on SOFC-Exp's folds −0.48 [−1.36, +0.39], no (pooled over three corpora, reported: +1.46 [+0.28, +2.64]); 13.2 done (25 October): V4 pooled over MuLMS's 7 subfields and MaterioMiner's 4 papers +3.58 [+0.95, +6.21] against the CRF head, no corpus losing: passes, the methods claim of two corpora (not over plain mention replacement: +1.23 [−0.22, +2.68], post hoc); 13.3b done (25 October): mention replacement on the multi-task model on SOFC-Exp's folds −0.11 [−0.69, +0.46], no; 13.4 done (25 October): V4's analogue on SOFC-Exp's folds with the SOFC corpus −0.04 [−1.21, +1.14], no (+0.45 [+0.04, +0.86] over plain mention replacement, reported; three corpora pooled +2.45 [+0.50, +4.40], reported). Week 13: 8 decisions, 2 pass (13.1a, 13.2); the methods claim of two corpora (C26) stands, SOFC-Exp its boundary |
+| 14 | Protocol committed before any run (29 October): the ablations that make the paper, `docs/METHODS_PLAN.md` §4C. 14.1 the names against matched copies: the 6-copy control without names `crf_mr6` on MuLMS's 7 held-out subfields (seeds 300–900) and MaterioMiner's 4 held-out papers (10 seeds, both granularities; `w14a`, this week's remaining quota), a pooled decision over the 11 units as 13.2; 14.2 the topic's role: V4 with a mixed corpus of the six other topics (40,000 sentences; `build_mixed_corpus.py`, `crf_mrm_mixed6`, seeds 300–900; `w14b`, after the reset), paired by subfield against V4 with the subfield's own corpus; 14.3 reported ablations at the screen's seeds (corpus size 10,000 and 20,000, threshold 0.7, 2-of-3 teachers, silver share 0.5; `w14c`); protocol below | 14.1: V4 improves on the matched copies pooled over MuLMS and MaterioMiner with no corpus losing (then C26 gains "over mention replacement with the same copies"); 14.2: the subfield's own corpus beats the mixed one (then the claim keeps the topic; else a corpus of other topics does as well, reported) |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -4713,3 +4714,153 @@ amendment 2 replaces it by a bundle built after the probe: rebuilt from
 of `ner-gpu-bundle-3` (413 GPU results files, the 7 topic corpora and the 52
 MuLMS files with their SHA-256 in `BUNDLE.json`); every week-12 batch runs
 from it.
+
+### Week 14 protocol: the ablations that make the paper (fixed before any run, 29 October)
+
+*Why.* The pooled decision 13.2 made the names method the paper's claim
+(C26): against the CRF head, +3.58 [+0.95, +6.21] over MuLMS's 7 held-out
+subfields and MaterioMiner's 4 held-out papers. The two questions a
+reviewer asks first (`docs/METHODS_PLAN.md` §3, questions 2 and 3) are
+open. Is it the names or the extra copies? V4 trains on 6 copies of each
+sentence where mention replacement trains on 3; against plain mention
+replacement it gains +1.23 [−0.22, +2.68] pooled (post hoc), and the
+6-copy control without names, V3 `crf_mr6`, has only the screen's 3 seeds
+on MuLMS (−0.20 [−3.20, +2.80] against mention replacement; V4 is +1.65
+above it on those seeds, with a spread of 4.0 points between subfields:
+semi +7.7 and sofc +6.2 for V4, pemfc +2.0 for the control). Does the topic
+matter? Phase 0 found 45–65 points of the corpora's coverage generic, and
+no run has used a corpus of another topic. Week 14 answers each with one
+pre-registered decision and runs the ablations of `docs/METHODS_PLAN.md`
+§4C as reported numbers. Nothing already decided is re-decided: neither
+decision asks again whether the method beats the CRF head.
+
+**14.1 Names against matched copies (decision).** Runs: the 6-copy control
+`crf_mr6` (`--augment-mentions 6`, no teachers, no names) on MuLMS's 7
+held-out subfields with seeds 300 to 900 (the decision's seeds; its seeds
+0 to 200 exist from the screen), one job per seed offset over the 7
+subfields, the files `mulms_leave_one_subfield_out_crf_mr6_m<N>`; and on
+MaterioMiner's 4 held-out papers, fine- and coarse-grained, seeds 0 to
+900, one job per seed offset and granularity (`w12d:mr6`'s jobs), the
+files `<granularity>_leave_one_paper_out_crf_mr6_m<N>`. Batch `w14a`: the
+smoke repeat `smokeay` first, then the 27 jobs balanced over the two lanes
+(each writes its own file); bundle 3ac85a8, whose code runs these jobs
+unchanged. Decision 14.1: V4 against `crf_mr6`, pooled over 11 held-out
+units as 13.2 was: MuLMS's 7 subfields (`crf_mrm_topic6` against `crf_mr6`,
+each the mean over seeds 300 to 900 of the paired difference) and
+MaterioMiner's 4 fine-grained papers (`crf_mrm6` against `crf_mr6`, each
+the mean over the 10 seeds); the week-6 rule (the 95% Student-t CI of the
+mean paired difference above 0, 10 degrees of freedom) with no corpus
+losing (13.2's condition: no corpus whose own interval lies below 0). V4's
+screen seeds 0 to 200 on MuLMS stay out of the decision: they took part in
+choosing V4 over V3; the control's new runs never did. Reported, no
+decision: each corpus alone (7 and 4 units) and coarse-grained MaterioMiner
+(4 units); the MuLMS comparison over all 10 seeds; `crf_mr6` against the
+CRF head and against mention replacement on both corpora and granularities
+(what 3 more copies do without names); the votes over its seed triples.
+What a pass means: the names carry the gain over mention replacement at an
+equal number of copies, and C26 reads "improves on mention replacement
+with the same copies" as well as "on the CRF head". A fail leaves C26 as
+it is (the gain over the CRF head, pooled), with the names' share
+unestablished and said so. Expected, from the seeds in hand: V4 −
+`crf_mr6` is +1.65 on MuLMS (3 seeds) and `crf_mrm6` − `crf_mr` +1.50
+[−1.76, +4.75] fine-grained on MaterioMiner (10 seeds; the control's own
+distance from mention replacement there is unknown); with a between-unit
+spread near 3 points the 11-unit interval's half-width is about 2, so a
+pass is about 0.4. Cost: 7 MuLMS jobs of 31–37 minutes (`w12a`'s) and 20
+MaterioMiner jobs of about 17 minutes (a 6-copy student about 4 minutes,
+from `crf_mr`'s 2.4), about 10 session hours over the two lanes, within
+the 11.7 hours left before the reset of 31 October.
+
+**14.2 The topic's role (decision).** The mixed corpus of a held-out
+subfield: 40,000 sentences drawn from the six other subfields' topic
+corpora, 6,667 or 6,666 from each, by `build_mixed_corpus.py` (seed 0; a
+sentence also in the held-out subfield's own corpus is skipped, the corpora
+share at most 243 sentences pairwise; every sentence comes from a topic
+corpus, so phase 0's exclusions of MuLMS's articles and of every sentence
+sharing an 8-word n-gram or a 50-character run with a MuLMS sentence
+hold), written to `data/processed/corpus/topic_mixed_<subfield>_sentences.txt`
+with a report `results/topic_corpora/mixed_<subfield>.json` (the sources,
+the counts, the SHA-256; the text is not committed) and its coverage of
+the subfield's unseen test names by phase 0's rule (`mulms_coverage.py`,
+`results/mulms_coverage_mixed.json`), all before the run. It has the topic
+corpus's size, source and pipeline without its topic: what "any large
+unlabeled materials corpus" would give. Runs: V4's recipe with the mixed
+corpus (`--self-train` the mixed file, `--names-tag mixed`:
+`crf_mrm_mixed6_m<N>`), seeds 300 to 900, `w12b`'s lanes (one job per
+subfield and lane, 3 students in lane 0 and 4 in lane 1, each lane training
+the 3 teachers, which must equal week 10's `crf_m0`, `_m100` and `_m200`
+on their subfield: a check); batch `w14b` after the reset, the smoke repeat
+`smokeaz` first, from a bundle built from the commit that adds the mixed
+corpora. Decision 14.2: V4 with the subfield's own corpus (the stored
+`crf_mrm_topic6` runs of seeds 300 to 900) against V4 with the mixed
+corpus, paired by subfield (7 units, 6 degrees of freedom, each the mean
+over the 7 seeds), the week-6 rule. Reported: the mixed variant against
+the CRF head, mention replacement and `crf_mr6` on the same seeds; the
+share of the unseen test names among its silver names (V4's with the topic
+corpora: 22.2% over the 7 subfields, 7–36% per subfield) and the mixed
+corpora's coverage against the topic corpora's (55–81%); the votes. What a
+pass means: the gain comes from the topic's text, and the claim keeps
+"unlabeled text of the held-out documents' topic". A fail with the mixed
+variant above the CRF head (reported) means a large materials corpus of
+other topics does as well, a simpler method the paper then states, with
+13.2 as its decision on the topic corpora and this as the reported
+comparison; a fail with neither above the other means 7 units cannot
+separate them, which the paper says. Cost: 14 jobs of 27–50 minutes
+(`w12b`'s), about 9 session hours.
+
+**14.3 Ablations (reported, no decision).** V4 with one setting changed,
+on MuLMS's 7 held-out subfields with the screen's seeds 0 to 200 (3
+students per subfield, one job per subfield, the teachers trained again
+and checked), each against V4's screen runs on the same seeds, against the
+CRF head and against mention replacement (the mean paired difference over
+the subfields with its 95% CI; no verdict words). Batch `w14c` after
+`w14b`, the smoke repeat `smokeba` first, from the same bundle; the jobs of
+a variant share a lane.
+- The corpus's size: the first 10,000 and 20,000 sentences of the fixed
+  shuffle that `--self-train-sample` draws (the whole corpus is 40,000):
+  `--names-tag topic10k` and `topic20k`, the files `crf_mrm_topic10k6_m<N>`
+  and `crf_mrm_topic20k6_m<N>`.
+- The filter's threshold: every marginal of the span at least 0.7 instead
+  of 0.9 (`--silver-threshold 0.7`, a new option whose default is the old
+  constant; `--names-tag topiclow`: `crf_mrm_topiclow6`). The probe priced
+  0.7 as a dictionary (Table 5); this prices it in the pool.
+- The teachers' agreement: a span admitted when 2 of the 3 teachers tag it
+  alike, each of those two with every marginal at least 0.9
+  (`--teachers-agree 2`, new; `topictwo`: `crf_mrm_topictwo6`).
+- The silver share of the draws: today a replacement is drawn uniformly
+  from the pool, where the silver names are 8,328–50,869 entries against
+  about 1,400 training mentions (MuLMS annotates about 4 entities per
+  sentence), so 85–97% of the draws are silver; the ablation draws from
+  the silver names with probability 0.5 and from the training mentions
+  otherwise (`--names-share 0.5`, new; `topiccap`: `crf_mrm_topiccap6`).
+Recorded per run as now (the counts, `marginal_threshold`, the filter)
+plus `teachers_agree` and `names_share` when set. The three options
+default to the current behaviour, byte for byte (tested on the toy corpora
+before the bundle). Cost: a screen job takes about 30 minutes (`w12e`),
+the 10,000- and 20,000-sentence ones less, about 16 session hours for the
+35 jobs over the two lanes.
+
+*Not run, and why.* V4 on the multi-task model (MaterioMiner only, the
+names typed at both levels; no second corpus to repeat it on); the copy
+control on SOFC-Exp's article folds (about 13 lane hours on a corpus where
+the method does not pass); the names as a match feature (screened in week
+12 as V7 and V8, below mention replacement); the names as a dictionary
+(Table 5).
+
+*Attempts.* 14.1 and 14.2 are the names method's seventh and eighth
+pre-registered decisions (weeks 12 and 13: six, three passing); neither
+re-asks whether it beats the CRF head, and the paper reports the count.
+
+*Checks before any number is used.* The smoke repeats equal the stored
+smoke4 run; each lane's teachers equal week 10's on their subfield (`w14b`,
+`w14c`); the bundle's corpora match the reports' SHA-256 (the runner checks
+them again); every `crf_mr6` run records 6 copies, its seed and no
+`self_training`; every mixed run records the mixed corpus's SHA-256 and
+`silver_filter: mentions`; every ablation run records its setting.
+
+*Order and budget.* `w14a` now, from bundle 3ac85a8 (about 10 of the 11.7
+session hours left this week); after the reset of 31 October, `w14b` then
+`w14c` from the new bundle (about 25 of 45 hours); the analyses in
+`ner_seed_analysis.py` (`week14`: `copies`, `topic`, `ablations`), the
+report's week-14 bullet and Table 6's rows written before the results
+exist.

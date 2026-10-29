@@ -1245,3 +1245,37 @@ def test_week13_folds_analogue_batch(monkeypatch):
         assert a.teachers == 3 and a.students == 10 and a.silver_mentions
         assert a.augment_mentions == 6 and a.augment_names and a.crf and a.save_predictions
     assert 'w13b' in kj.BATCHES and 'sofc_corpus_sha256' in kj.batch_spec('w13b')
+
+
+def test_week14_copy_control_batch(monkeypatch):
+    """w14a (week 14, 14.1): a repeat, then the 6-copy control without names on MuLMS's
+    held-out subfields (seed offsets 300 to 900, one job per offset over the subfields) and
+    on MaterioMiner's held-out papers at both granularities (offsets 0 to 900, one job per
+    offset and granularity), the 27 jobs balanced over the lanes; no corpus in the spec."""
+    monkeypatch.setattr(nb.os.path, 'isfile', lambda path: True)    # the corpus is not here
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda report=None: 'x' * 64)
+    monkeypatch.setattr(kj, 'mulms_files', lambda: {'a_01.conll': 'a' * 64})
+    lane0, lane1 = _parsed(kj.batch_lanes('w14a'))
+    assert lane0[0].tag == 'smokeay' and lane0[0].granularity == 'fine'
+    jobs = lane0[1:] + lane1
+    assert len(jobs) == 27 and min(len(lane0) - 1, len(lane1)) >= 10
+    mulms = [a for a in jobs if a.granularity == 'mulms']
+    assert sorted(a.tag for a in mulms) == [f'm{off}' for off in range(300, 1000, 100)]
+    for a in mulms:
+        assert (a.train_pool, a.augment_mentions, a.crf, a.save_predictions) == (
+            400, 6, True, True)
+        assert nb.protocol_name(a) == 'leave_one_subfield_out' and not hasattr(a, 'teachers')
+        assert nb.variant_name(a) == f'crf_mr6_{a.tag}'
+        assert _get(a, 'seed_offset', 0) == int(a.tag[1:])
+    for g in ('fine', 'coarse'):
+        papers = [a for a in jobs if a.granularity == g]
+        assert sorted(a.tag for a in papers) == sorted(f'm{off}' for off in range(0, 1000, 100))
+        for a in papers:
+            assert (nb.protocol_name(a), a.augment_mentions, a.crf) == (
+                'leave_one_paper_out', 6, True)
+            assert not hasattr(a, 'self_train') and nb.variant_name(a) == f'crf_mr6_{a.tag}'
+            assert _get(a, 'seed_offset', 0) == int(a.tag[1:])
+    spec = kj.batch_spec('w14a')
+    assert spec['mulms_files'] == {'a_01.conll': 'a' * 64}
+    assert 'topic_corpora' not in spec and 'sofc_corpus_sha256' not in spec
+    assert 'w14a' in kj.BATCHES and kj.batch_name('w14a') == 'w14a'
