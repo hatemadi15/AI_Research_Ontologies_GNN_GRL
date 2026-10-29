@@ -896,16 +896,27 @@ names that three CRF teachers tag in unlabeled in-domain text.
   cost of 3.0 points of precision (+0.7 F1 on unseen names), on
   MaterioMiner's papers recall 39.7 to 41.1 and precision 49.2 to 53.2
   (+2.4 F1 on unseen names, fine-grained).
-- *The topic's role and the ablations (14.2, 14.3; pre-registered 29
-  October, after the reset of 31 October):* 14.2 compares V4 with the
-  subfield's own corpus against V4 with a mixed
-  corpus of the six other topics (40,000 sentences, the same source and
-  pipeline), paired by subfield; measured before the run, the mixed
-  corpora hold 49–70% of the unseen test names against the topic
-  corpora's 55–81%. The ablations, at the screen's 3 seeds: the corpus's
-  first 10,000 and 20,000 sentences, the threshold 0.7, 2 of 3 teachers,
-  and the silver names capped at half of the draws (today they are
-  85–97% of the pool's entries).
+- *The topic's role (14.2, 29 October, pre-registered): no.* V4 with
+  the subfield's own corpus against V4 with a mixed corpus of the six
+  other topics (40,000 sentences, the same source and pipeline; it holds
+  49–70% of the unseen test names against the topic corpus's 55–81%,
+  measured before the run): −0.18 [−2.01, +1.65] paired by subfield over
+  seeds 300–900, three subfields better with the own corpus and four with
+  the mixed one; the votes −0.39 [−2.64, +1.86]. The mixed variant gains
+  +3.38 [−0.89, +7.64] over the CRF head and +0.70 [−1.19, +2.58] over
+  the copy control (reported), with 18.3% of the unseen test names among
+  its silver names against 22.2%. So the names need not come from the
+  held-out documents' topic: a large unlabeled materials corpus of other
+  topics does as well. With 14.1, the method the paper can state is
+  mention replacement with 6 copies and names harvested from any large
+  materials corpus; its pre-registered pass is a gain over the CRF head
+  on held-out documents of two corpora, the names' own share being small
+  and not established.
+- *The ablations (14.3, pre-registered 29 October, after the reset of 31
+  October; reported):* at the screen's 3 seeds, the corpus's first
+  10,000 and 20,000 sentences, the threshold 0.7, 2 of 3 teachers, and
+  the silver names capped at half of the draws (today they are 85–97% of
+  the pool's entries).
 
 **6.8 Document-level propagation on held-out documents of three corpora
 (C25).** The rule of Section 5.5 (krishnan2006effective): within a document,
