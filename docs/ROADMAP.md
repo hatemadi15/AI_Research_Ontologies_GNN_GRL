@@ -4897,7 +4897,11 @@ and Table 6's rows. The week-12 section of the analysis now carries the
 decisions 1 and 2 only for the screen's winner: the copy control's runs at
 seeds 300–900 (14.1's) are reported there, not decided. The new bundle is
 built from the commit that holds all of this and uploaded once `w14a`'s
-session has ended, so that a running session never sees a dataset change.
+session has ended, so that a running session never sees a dataset change:
+done at 18:05 UTC from 8919928 (14.1's outcome included), the new version
+of `ner-gpu-bundle-3` holding the 7 topic and 7 mixed corpora with their
+SHA-256 and 528 GPU results files; `w14b` and `w14c` run from it at the
+reset.
 
 *Outcome of 14.1 (29 October, 17:30 UTC; `ner_seed_analysis.py`, `week14`,
 `copies`).* The control ran as planned (`ner-gpu-jobs-c` version 7,
