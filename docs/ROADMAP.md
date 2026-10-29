@@ -4947,3 +4947,11 @@ CRF head 41.5, mention replacement 44.1), on seen names F1 68.8 to 70.1;
 coarse-grained F1 on unseen names 52.7 to 53.7 over the control. The
 mechanism is the same on both corpora, more unseen names found, and its
 size is what 14.1 measured: small.
+
+*18:00 UTC: `w14b` pushed early.* With 6.5 of the week's 45 hours unused
+after `w14a` and both kernels idle, 14.2's batch (about 4.5 session
+hours) runs before the reset instead of after it: `ner-gpu-jobs-d`
+version 14, from the new bundle (8919928; lane 0 the repeat `smokeaz` and
+7 jobs, lane 1 7 jobs). A change of schedule only: the order `w14b` then
+`w14c` stays, `w14c` goes to kernel c at the reset of 31 October, and
+nothing in 14.2's design or analysis changes.
