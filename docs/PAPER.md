@@ -151,6 +151,17 @@ into `docs/figures/` (no training; re-run it when results change):
   seeds) has the largest mean at both granularities; fine-grained the
   combination lies 0.6 points below it, with a far narrower interval
   (C5–C8, C19–C21).
+- Figure 7 (`fig7_names.png`; paper A's mechanism figure, Section 4.4): per
+  held-out setting (MuLMS's subfields, MaterioMiner's papers at both
+  granularities), each system's recall and precision on the unseen test
+  names, pooled over seeds and units, on the recall–precision plane with
+  iso-F1 curves, each system joined to the one it adds to: the CRF head,
+  mention replacement with 3 copies, 6 copies without names, 6 copies with
+  the harvested names (the topic corpus's and a mixed corpus's on MuLMS, the
+  fatigue corpus's on MaterioMiner). On MuLMS the names move the point
+  along an iso-F1 curve and a little past it (recall 43.7 to 47.3, precision
+  53.9 to 50.9, F1 48.3 to 49.0); on MaterioMiner fine-grained they raise
+  both (41.1 at 53.2 against 39.7 at 49.2; F1 43.9 to 46.4) (C26).
 Tables 1–6 are generated into `docs/tables/` by `src/graph/paper_tables.py`
 from the committed results (no training; re-run it when results change):
 - Table 1 (`table1_published_split.md`): the published splits, MaterioMiner's

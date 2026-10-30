@@ -901,7 +901,7 @@ names that three CRF teachers tag in unlabeled in-domain text.
   other topics (40,000 sentences, the same source and pipeline; it holds
   49–70% of the unseen test names against the topic corpus's 55–81%,
   measured before the run): −0.18 [−2.01, +1.65] paired by subfield over
-  seeds 300–900, three subfields better with the own corpus and four with
+  seeds 300–900, two subfields better with the own corpus and five with
   the mixed one; the votes −0.39 [−2.64, +1.86]. The mixed variant gains
   +3.38 [−0.89, +7.64] over the CRF head and +0.70 [−1.19, +2.58] over
   the copy control (reported), with 18.3% of the unseen test names among

@@ -215,3 +215,32 @@ def test_gain_data_and_figure6(tmp_path):
     matplotlib.use('Agg')
     pf.figure6(gains, tmp_path / 'fig6.png')
     assert (tmp_path / 'fig6.png').stat().st_size > 0
+
+
+def test_names_data_and_figure7(tmp_path):
+    """Figure 7 (C26): per held-out setting, each system's recall, precision and F1 on the
+    unseen test names (and its F1 on the seen ones), in NAMES_SYSTEMS order; a setting
+    without the CRF head and a system without results are left out."""
+    def kinds(recall, precision, f1, seen_f1=70.0):
+        return {'unseen': {'recall': recall, 'precision': precision, 'f1': f1, 'share': 0.8},
+                'seen': {'recall': 70.0, 'precision': 70.0, 'f1': seen_f1}}
+    mentions = {'systems': {
+        'mulms_leave_one_subfield_out': {'crf': kinds(39.4, 55.8, 46.2),
+                                         'crf_mrm_topic6': kinds(47.3, 50.9, 49.0, 71.2),
+                                         'crf_mr6': kinds(43.7, 53.9, 48.3),
+                                         'crf_mt': kinds(40.0, 56.0, 46.7)},
+        'fine_leave_one_paper_out': {'crf_mr6': kinds(39.7, 49.2, 43.9),
+                                     'crf_mrm6': kinds(41.1, 53.2, 46.4)},
+        'coarse_leave_one_paper_out': {'crf': {'seen': {'f1': 70.0}}}}}
+    rows = pf.names_data(mentions)
+    assert list(rows) == ['MuLMS, held-out subfields']       # no CRF head on the papers
+    assert rows['MuLMS, held-out subfields'] == [
+        ('crf', 'CRF head', 39.4, 55.8, 46.2, 70.0),
+        ('crf_mr6', '6 copies, no names', 43.7, 53.9, 48.3, 70.0),
+        ('crf_mrm_topic6', "6 copies + the topic corpus's names", 47.3, 50.9, 49.0, 71.2)]
+    assert pf.names_data({}) == {}
+    pytest.importorskip('matplotlib')
+    import matplotlib
+    matplotlib.use('Agg')
+    pf.figure7(rows, tmp_path / 'fig7.png')
+    assert (tmp_path / 'fig7.png').stat().st_size > 10000
