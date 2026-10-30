@@ -182,6 +182,47 @@ def test_runs_from_another_corpus_are_not_resumed(tmp_path):
         'self_train_sha256': None}
 
 
+def test_runs_with_a_corpus_each_are_kept_and_resumed_by_run_id(tmp_path):
+    """Week 12 (--subfields, a topic corpus per held-out subfield): a file's runs record their
+    own corpus; when the file's corpus differs, a run of another subfield is kept, a run of
+    this invocation's subfield is resumed only from the same corpus and otherwise refused."""
+    path = tmp_path / 'ner_results_mulms_leave_one_subfield_out_crf_gzm_topic_m0.json'
+    runs = [{'run_id': 'electrolysis', 'self_train_sha256': 'a' * 64},
+            {'run_id': 'graphene', 'self_train_sha256': 'b' * 64}]
+    path.write_text(json.dumps({'labels': ['A'], 'model': 'm', 'variant': 'crf_gzm_topic_m0',
+                                'config': {'seed_offset': 0, 'self_train_sha256': 'b' * 64},
+                                'runs': runs}))
+    same = {'labels': ['A'], 'model': 'm', 'variant': 'crf_gzm_topic_m0'}
+    # a third subfield's job: both runs are kept, none resumed
+    assert nb.resumable_runs(str(path), **same, self_train_sha256='c' * 64,
+                             run_ids={'pemfc'}) == runs
+    nb.check_overwrite(str(path), **same, self_train_sha256='c' * 64, run_ids={'pemfc'})
+    # the same subfield again from the same corpus: resumed (and the other kept)
+    assert nb.resumable_runs(str(path), **same, self_train_sha256='a' * 64,
+                             run_ids={'electrolysis'}) == runs
+    # the same subfield from another corpus: its run would be replaced, so refused
+    assert nb.resumable_runs(str(path), **same, self_train_sha256='d' * 64,
+                             run_ids={'electrolysis'}) == runs[1:]
+    with pytest.raises(nb.OverwriteError, match='self_train_sha256'):
+        nb.check_overwrite(str(path), **same, self_train_sha256='d' * 64,
+                           run_ids={'electrolysis'})
+    # without named run ids (every other protocol) the old rule holds: another corpus
+    # resumes nothing; runs without their own corpus are never kept across corpora
+    assert nb.resumable_runs(str(path), **same, self_train_sha256='c' * 64) == []
+    path.write_text(json.dumps({'labels': ['A'], 'model': 'm', 'variant': 'crf_gzm_topic_m0',
+                                'config': {'seed_offset': 0, 'self_train_sha256': 'b' * 64},
+                                'runs': [{'run_id': 'graphene'}]}))
+    assert nb.resumable_runs(str(path), **same, self_train_sha256='c' * 64,
+                             run_ids={'pemfc'}) == []
+    assert nb.trained_run_ids(nb.SimpleNamespace(subfields=['pemfc'])) == {'pemfc'}
+    assert nb.trained_run_ids(nb.SimpleNamespace()) is None
+    assert nb.per_run_corpus(nb.SimpleNamespace(subfields=['pemfc']),
+                             {'self_train_sha256': 'c' * 64}) == 'c' * 64
+    assert nb.per_run_corpus(nb.SimpleNamespace(subfields=['pemfc']),
+                             {'self_train_sha256': None}) is None
+    assert nb.per_run_corpus(nb.SimpleNamespace(), {'self_train_sha256': 'c' * 64}) is None
+
+
 def test_run_resumes_only_runs_of_the_same_corpus(tmp_path, monkeypatch):
     """run() wiring, with the training replaced: config, resume and the overwrite guard."""
     monkeypatch.setattr(nb, 'PROCESSED_DIR', str(tmp_path))
@@ -500,7 +541,7 @@ RESULT_KEYS = ('f1', 'precision', 'recall', 'f1_strict', 'per_class', 'seed', 'b
 
 def test_self_training_run(tiny_run, tmp_path, monkeypatch):
     corpus = _corpus(tmp_path)
-    monkeypatch.setattr(nb, 'is_silver', lambda tags, marginals: True)   # all tagged sentences
+    monkeypatch.setattr(nb, 'is_silver', lambda tags, marginals, *a: True)   # all tagged sentences
     flags = ('--vary-split', '--seeds', '0', '--tag', 'm100', '--seed-offset', '100')
     calls = tiny_run('--crf', '--self-train', str(corpus), *flags, '--save-predictions')
     res = _load(tmp_path, 'ner_results_fine_random_split_vary_crf_st_m100.json')
@@ -544,7 +585,7 @@ def test_self_training_run(tiny_run, tmp_path, monkeypatch):
 
 
 def test_without_silver_the_student_is_the_teacher(tiny_run, tmp_path, monkeypatch):
-    monkeypatch.setattr(nb, 'is_silver', lambda tags, marginals: False)
+    monkeypatch.setattr(nb, 'is_silver', lambda tags, marginals, *a: False)
     calls = tiny_run('--crf', '--self-train', str(_corpus(tmp_path)), '--leave-one-paper-out',
                      '--seeds', '0', '--max-train', '10')
     res = _load(tmp_path, 'ner_results_fine_leave_one_paper_out_crf_st_smoke10.json')
@@ -559,7 +600,7 @@ def test_without_silver_the_student_is_the_teacher(tiny_run, tmp_path, monkeypat
 
 def test_self_training_with_three_teachers(tiny_run, tmp_path, monkeypatch):
     corpus = _corpus(tmp_path)
-    monkeypatch.setattr(nb, 'unanimous_silver', lambda votes: True)   # every tagged sentence
+    monkeypatch.setattr(nb, 'unanimous_silver', lambda votes, *a: True)   # every tagged sentence
     flags = ('--vary-split', '--seeds', '0')
     st3 = ('--crf', '--self-train', str(corpus), '--teachers', '3', '--self-train-sample', '0',
            *flags, '--save-predictions')
@@ -604,7 +645,7 @@ def test_more_students_than_teachers(tiny_run, tmp_path, monkeypatch):
     run, a student for every seed offset 0 to 300, and the files of the students that a
     run already has left as they are."""
     corpus = _corpus(tmp_path)
-    monkeypatch.setattr(nb, 'unanimous_silver', lambda votes: True)   # every tagged sentence
+    monkeypatch.setattr(nb, 'unanimous_silver', lambda votes, *a: True)   # every tagged sentence
     flags = ('--vary-split', '--seeds', '0')
     st3 = ('--crf', '--self-train', str(corpus), '--teachers', '3', '--self-train-sample', '0',
            *flags, '--save-predictions')
@@ -721,7 +762,7 @@ def test_students_train_on_copies_with_the_silver_names(tiny_run, tmp_path, monk
     the gold data and its copies (with its own seed), whose pool holds the silver mentions;
     no silver sentence is trained on. The teachers are the plain CRF runs of their seeds."""
     corpus = _corpus(tmp_path)
-    monkeypatch.setattr(nb, 'unanimous_silver', lambda votes: True)   # every tagged sentence
+    monkeypatch.setattr(nb, 'unanimous_silver', lambda votes, *a: True)   # every tagged sentence
     seen = []                                    # (silver sentences, their mentions)
     silver_mentions = nb.silver_mentions
 
@@ -773,7 +814,7 @@ def test_without_silver_names_a_student_is_the_mention_replacement_run(tiny_run,
     """With no silver sentence the pool is the training mentions', so each student equals
     the crf_mr run of its seed: the two variants differ only in the pool."""
     corpus = _corpus(tmp_path)
-    monkeypatch.setattr(nb, 'unanimous_silver', lambda votes: False)  # no silver sentence
+    monkeypatch.setattr(nb, 'unanimous_silver', lambda votes, *a: False)  # no silver sentence
     flags = ('--vary-split', '--seeds', '0')
     calls = list(tiny_run('--crf', '--self-train', str(corpus), '--teachers', '2',
                           '--self-train-sample', '0', '--augment-mentions', '2',
@@ -808,6 +849,118 @@ def test_silver_mention_names_need_every_teacher_confident_on_the_span():
                                                          ('COND', ('300', 'K'))]
     # at a lower threshold the foam counts
     assert nb.silver_mention_names(sentences, votes, threshold=0.8)[-1] == ('MAT', ('Ni', 'foam'))
+
+
+def test_silver_mention_names_with_fewer_teachers_agreeing():
+    """--teachers-agree N: a span that N teachers tag alike and confidently counts whatever
+    the others tag there; N equal to the number of teachers gives the default's names."""
+    sentences = [['Ti', 'alloy', 'at', '300', 'K'], ['steel', 'bar'], ['Ni', 'foam']]
+    sure = (0.95, 0.99, 0.5, 0.97, 0.96)
+    votes = [[(('B-MAT', 'I-MAT', 'O', 'B-COND', 'I-COND'), 0.5, sure)] * 3,
+             [(('B-MAT', 'I-MAT'), 0.95, (0.95, 0.95)), (('B-MAT', 'I-MAT'), 0.95, (0.95, 0.95)),
+              (('B-MAT', 'O'), 0.95, (0.95, 0.95))],
+             [(('B-MAT', 'I-MAT'), 0.9, (0.99, 0.9)), (('B-MAT', 'I-MAT'), 0.8, (0.99, 0.8)),
+              (('B-MAT', 'I-MAT'), 0.9, (0.99, 0.9))]]
+    default = nb.silver_mention_names(sentences, votes)
+    assert nb.silver_mention_names(sentences, votes, agree=3) == default
+    assert nb.silver_mention_names(sentences, votes, agree=2) == [
+        ('MAT', ('Ti', 'alloy')), ('COND', ('300', 'K')), ('MAT', ('steel', 'bar')),
+        ('MAT', ('Ni', 'foam'))]
+    # one teacher suffices: the third teacher's shorter span counts too, in span order
+    assert nb.silver_mention_names(sentences, votes, agree=1) == [
+        ('MAT', ('Ti', 'alloy')), ('COND', ('300', 'K')), ('MAT', ('steel',)),
+        ('MAT', ('steel', 'bar')), ('MAT', ('Ni', 'foam'))]
+    # the threshold applies per teacher under both rules
+    assert nb.silver_mention_names(sentences, votes, threshold=0.8, agree=3) == \
+        nb.silver_mention_names(sentences, votes, threshold=0.8)
+
+
+def test_names_share_draws_from_the_names_with_the_given_probability():
+    """--names-share P: a replaced mention whose type has silver names comes from them with
+    probability P, else from the training mentions; without the share the names join one
+    pool (unchanged)."""
+    sentences = [(['Ti', 'alloy', 'bar'], ['B-MAT', 'I-MAT', 'O']),
+                 (['steel', 'bar'], ['B-MAT', 'O']), (['hot', 'bar'], ['B-COND', 'O'])]
+    names = [('MAT', ('Ni', 'foam')), ('MAT', ('Cu',))]
+    assert nb.mention_replacements(sentences, 4, 0, names=names) == \
+        nb.mention_replacements(sentences, 4, 0, names=names, share=None)
+    assert nb.mention_replacements(sentences, 4, 0, share=0.5) == \
+        nb.mention_replacements(sentences, 4, 0)                     # no names: no change
+
+    def mat_mentions(copies):
+        return {tuple(w[s:e]) for w, t in copies for s, e, k in nb.entity_spans(t) if k == 'MAT'}
+    silver, gold = {('Ni', 'foam'), ('Cu',)}, {('Ti', 'alloy'), ('steel',)}
+    assert mat_mentions(nb.mention_replacements(sentences, 20, 0, p=1.0, names=names,
+                                                share=1.0)) == silver
+    assert mat_mentions(nb.mention_replacements(sentences, 20, 0, p=1.0, names=names,
+                                                share=0.0)) == gold
+    half = mat_mentions(nb.mention_replacements(sentences, 20, 0, p=1.0, names=names, share=0.5))
+    assert half & silver and half & gold
+    # a type without names keeps the training mentions ('hot' alone: nothing changes)
+    assert all(k != 'COND' or tuple(w[s:e]) == ('hot',)
+               for w, t in nb.mention_replacements(sentences, 20, 0, p=1.0, names=names,
+                                                   share=1.0)
+               for s, e, k in nb.entity_spans(t))
+
+
+def test_week14_options_parser_checks(tmp_path, capsys):
+    """--silver-threshold, --teachers-agree and --names-share (week 14's ablations): their
+    conditions and ranges; the variant name does not change (the names tag labels the run)."""
+    corpus = _corpus(tmp_path)
+    base = ['--leave-one-paper-out', '--crf', '--self-train', str(corpus), '--teachers', '3',
+            '--augment-mentions', '6', '--augment-names', '--silver-mentions']
+    args = nb.parse_args([*base, '--silver-threshold', '0.7', '--teachers-agree', '2',
+                          '--names-share', '0.5', '--names-tag', 'topiclow'])
+    assert (args.silver_threshold, args.teachers_agree, args.names_share) == (0.7, 2, 0.5)
+    assert nb.variant_name(SimpleNamespace(**{**vars(args), 'tag': 'm0'})) == \
+        'crf_mrm_topiclow6_m0'
+    plain = nb.parse_args(base)
+    assert not any(hasattr(plain, o) for o in ('silver_threshold', 'teachers_agree',
+                                                'names_share'))
+    for argv, message in (
+            (['--leave-one-paper-out', '--crf', '--silver-threshold', '0.7'],
+             '--silver-threshold needs --self-train'),
+            ([*base, '--silver-threshold', '0'], 'above 0'),
+            ([*base, '--silver-threshold', '1.5'], 'above 0'),
+            ([*base[:-1], '--teachers-agree', '2'], '--teachers-agree needs --silver-mentions'),
+            ([*base, '--teachers-agree', '4'], 'between 1 and'),
+            ([*base, '--teachers-agree', '0'], 'between 1 and'),
+            (['--leave-one-paper-out', '--crf', '--self-train', str(corpus), '--teachers', '3',
+              '--names-share', '0.5'], '--names-share needs --augment-names'),
+            ([*base, '--names-share', '1.5'], 'a probability')):
+        with pytest.raises(SystemExit):
+            nb.parse_args(argv)
+        assert message in capsys.readouterr().err
+
+
+def test_students_record_the_week14_settings(tiny_run, tmp_path, monkeypatch):
+    """The three settings reach the filter (threshold and agreement), the pool (share) and
+    the record of every student."""
+    corpus = _corpus(tmp_path)
+    seen = {}
+    original_mr, original_names = nb.mention_replacements, nb.silver_mention_names
+
+    def recording_mr(*args, **kwargs):
+        seen['share'] = kwargs.get('share')
+        return original_mr(*args, **kwargs)
+
+    def recording_names(*args, **kwargs):
+        seen['filter'] = args[2:]
+        return original_names(*args, **kwargs)
+    monkeypatch.setattr(nb, 'mention_replacements', recording_mr)
+    monkeypatch.setattr(nb, 'silver_mention_names', recording_names)
+    tiny_run('--crf', '--self-train', str(corpus), '--teachers', '2', '--self-train-sample',
+             '0', '--augment-mentions', '2', '--augment-names', '--silver-mentions',
+             '--silver-threshold', '0.5', '--teachers-agree', '1', '--names-share', '0.5',
+             '--names-tag', 'toylow', '--vary-split', '--seeds', '0', '--save-predictions')
+    assert seen == {'share': 0.5, 'filter': (0.5, 1)}
+    res = _load(tmp_path, 'ner_results_fine_random_split_vary_crf_mrm_toylow2_m0.json')
+    assert res['config']['silver_threshold'] == 0.5
+    for run in res['runs']:
+        info = run['self_training']
+        assert (info['marginal_threshold'], info['teachers_agree'], info['names_share']) == (
+            0.5, 1, 0.5)
+        assert info['silver_filter'] == 'mentions'
 
 
 def test_self_training_with_teachers_on_mulms_and_its_corpus_tag(tmp_path):
@@ -900,3 +1053,85 @@ def test_students_with_silver_mentions(tiny_run, tmp_path, monkeypatch):
     assert len(seen['silver_mentions']) <= len(names)
     res = _load(tmp_path / 'sentences', 'ner_results_fine_random_split_vary_crf_mrs2_m0.json')
     assert res['runs'][0]['self_training']['silver_filter'] == 'sentences'
+
+
+def test_lexicon_index_matches_and_features():
+    """--names-feature's pure parts: the index keeps a name's most frequent type and drops
+    names over LEXICON_MAX_WORDS; the matcher takes the longest name at each word, left to
+    right; the features are two columns per type of the run, first word and later words."""
+    names = [('MAT', ('YSZ',)), ('MAT', ('La', 'Sr', 'Co')), ('DEV', ('Co',)),
+             ('DEV', ('La', 'Sr', 'Co')), ('MAT', ('La', 'Sr', 'Co')), ('PROP', ('w',) * 9)]
+    index = nb.lexicon_index(names)
+    assert index == {('YSZ',): 'MAT', ('La', 'Sr', 'Co'): 'MAT', ('Co',): 'DEV'}
+    words = ['the', 'La', 'Sr', 'Co', 'cell', 'Co', 'YSZ']
+    assert nb.lexicon_matches(words, index) == [(1, 4, 'MAT'), (5, 6, 'DEV'), (6, 7, 'MAT')]
+    assert nb.match_features(words, index, ['MAT', 'DEV']) == [
+        [0, 0, 0, 0], [1, 0, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0],
+        [1, 0, 0, 0]]
+    # a type the run does not label is matched (it blocks the words) but has no column
+    assert nb.match_features(words, index, ['DEV']) == [[0, 0]] * 5 + [[1, 0], [0, 0]]
+    assert nb.lexicon_matches(words, {}) == []
+    assert nb.match_features(words, {}, ['MAT']) == [[0.0, 0.0]] * 7
+
+
+def test_names_feature_parser_and_variant(tmp_path, capsys):
+    corpus = str(_corpus(tmp_path))
+    base = ['--leave-one-paper-out', '--crf', '--self-train', corpus, '--teachers', '3']
+    for argv, error in ((['--leave-one-paper-out', '--crf', '--names-feature'],
+                         '--names-feature needs --crf and --self-train with --teachers'),
+                        ([*base, '--names-feature', '--multi-task'],
+                         '--names-feature is not available with --multi-task'),
+                        (['--leave-one-paper-out', '--crf', '--silver-mentions'],
+                         '--silver-mentions needs --augment-names or --names-feature')):
+        with pytest.raises(SystemExit):
+            nb.parse_args(argv)
+        assert error in capsys.readouterr().err
+
+    def tagged(argv, tag='m0'):
+        return nb.variant_name(SimpleNamespace(**{**vars(nb.parse_args(argv)), 'tag': tag}))
+    assert tagged([*base, '--names-feature']) == 'crf_gzs_m0'
+    assert tagged([*base, '--names-feature', '--silver-mentions']) == 'crf_gzm_m0'
+    assert tagged([*base, '--names-feature', '--silver-mentions', '--names-tag', 'topic']) == \
+        'crf_gzm_topic_m0'
+    assert tagged([*base, '--names-feature', '--silver-mentions', '--augment-mentions', '3',
+                   '--names-tag', 'topic']) == 'crf_mr_gzm_topic_m0'
+    assert tagged([*base, '--names-feature', '--silver-mentions', '--augment-mentions', '3',
+                   '--augment-names', '--names-tag', 'topic']) == 'crf_mrm_gzm_topic_m0'
+    assert tagged([*base, '--names-feature', '--augment-mentions', '6', '--augment-names',
+                   '--names-tag', 'topic']) == 'crf_mrs_gzs_topic6_m0'
+    args = nb.parse_args(['--granularity', 'mulms', '--leave-one-subfield-out', '--train-pool',
+                          '400', '--crf', '--self-train', corpus, '--teachers', '3',
+                          '--names-feature', '--silver-mentions', '--names-tag', 'topic'])
+    assert nb.variant_name(args) == 'crf_gzm_topic' and args.names_feature
+
+
+def test_students_with_the_names_as_a_feature(tiny_run, tmp_path, monkeypatch):
+    """--names-feature: the silver mentions are the students' lexicon; each student trains
+    the plain CRF head with a match term learned from zero and no copies; the record counts
+    the names and the matches, and the variant is crf_gzm_<tag>."""
+    corpus = _corpus(tmp_path)
+    monkeypatch.setattr(nb, 'SILVER_THRESHOLD', 0.0)     # every agreed tag counts
+    seen = {}
+    real_index = nb.lexicon_index
+
+    def spy(names):
+        seen['index'] = real_index(names)
+        return seen['index']
+    monkeypatch.setattr(nb, 'lexicon_index', spy)
+    calls = list(tiny_run('--crf', '--self-train', str(corpus), '--teachers', '2',
+                          '--self-train-sample', '0', '--names-feature', '--silver-mentions',
+                          '--vary-split', '--seeds', '0', '--names-tag', 'toy',
+                          '--save-predictions'))
+    assert seen['index'] and len(calls) == 4
+    for offset, student in zip((0, 100), calls[2:]):
+        res = _load(tmp_path, f'ner_results_fine_random_split_vary_crf_gzm_toy_m{offset}.json')
+        assert res['variant'] == f'crf_gzm_toy_m{offset}' and res['config']['names_feature']
+        run = res['runs'][0]
+        assert run['self_training']['silver_filter'] == 'mentions'
+        assert run['self_training']['names']['n_distinct'] >= len(seen['index'])
+        info = run['names_feature']
+        assert info['n_names'] == len(seen['index']) and info['lr'] == nb.GAZ_LR
+        assert info['n_train_matches'] >= 0 and info['n_test_matches'] >= 0
+        assert (info['weight_abs_max'] > 0) == (info['n_train_matches'] > 0)
+        assert student['augmented'] is None and student['silver'] is None
+        assert 'n_augmented' not in run and len(run['test_pred']) == run['n_test']

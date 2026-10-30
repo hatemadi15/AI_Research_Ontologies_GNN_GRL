@@ -357,21 +357,23 @@ def entity_spans(tags):
     return out
 
 
-def mention_replacements(sentences, k, seed, p=MR_P, names=()):
+def mention_replacements(sentences, k, seed, p=MR_P, names=(), share=None):
     """Mention replacement (Dai and Adel, 2020) for --augment-mentions: per sentence with an
     entity, k copies in which each mention is replaced, with probability p, by a mention of
     the same type drawn from all the mentions of `sentences` (frequent ones more often).
     Copies that change nothing are dropped. sentences: (words, tags); returns (words, tags).
     names (--augment-names): further (type, words) mentions that join the pool after those
-    of `sentences`; their sentences are not copied.
+    of `sentences`; their sentences are not copied. With `share` (--names-share P), the
+    names form a pool of their own, and a replaced mention whose type has names is drawn
+    from them with probability P, else from the training mentions.
     """
     rng = random.Random(seed)
-    pool = {}
+    pool, extra = {}, {}
     for words, tags in sentences:
         for start, end, kind in entity_spans(tags):
             pool.setdefault(kind, []).append(tuple(words[start:end]))
     for kind, mention in names:
-        pool.setdefault(kind, []).append(tuple(mention))
+        (pool if share is None else extra).setdefault(kind, []).append(tuple(mention))
     out = []
     for words, tags in sentences:
         spans = entity_spans(tags)
@@ -382,7 +384,10 @@ def mention_replacements(sentences, k, seed, p=MR_P, names=()):
             for start, end, kind in spans:
                 mention = tuple(words[start:end])
                 if rng.random() < p:
-                    mention = rng.choice(pool[kind])
+                    if kind in extra and rng.random() < share:
+                        mention = rng.choice(extra[kind])
+                    else:
+                        mention = rng.choice(pool[kind])
                     changed |= mention != tuple(words[start:end])
                 new_words += list(words[last:start]) + list(mention)
                 new_tags += list(tags[last:start]) + [f'B-{kind}'] + [f'I-{kind}'] * (len(mention) - 1)
@@ -573,11 +578,13 @@ def batches(features, batch_size, pad_id, shuffle_seed=None, widths=None, full=F
                order[start:start + batch_size])
 
 
-def predict(model, features, batch_size, pad_id, id2label, device, crf=None):
+def predict(model, features, batch_size, pad_id, id2label, device, crf=None, gaz=None,
+            feats=None):
     """Word-level predicted tags per sentence (first-subword positions).
 
     Without a CRF the tag of a word is the argmax at its first subword; with
-    one it is the Viterbi path over the word-level emissions.
+    one it is the Viterbi path over the word-level emissions. gaz and feats
+    (--names-feature): the match term gaz(feature_batch(feats, ...)) is added to the emissions.
     """
     import torch
     model.eval()
@@ -593,6 +600,9 @@ def predict(model, features, batch_size, pad_id, id2label, device, crf=None):
                     preds[i] = [id2label[int(p)] for p in best[row][keep]]
             else:
                 emissions, _, word_mask = word_view(logits, labels, widths)
+                if gaz is not None:
+                    emissions = emissions + gaz(
+                        feature_batch(feats, idx, emissions.size(1), emissions.device))
                 if widths:
                     emissions, word_mask = emissions.cpu(), word_mask.cpu()
                 for i, path in zip(idx, crf.decode(emissions, word_mask)):
@@ -691,6 +701,8 @@ def prediction_fields(test_index, test, test_pred):
 # encoder, so they get their own learning rate (100x the default encoder rate),
 # fixed in advance rather than tuned.
 CRF_LR = 5e-3
+GAZ_LR = 1e-2                 # --names-feature: the match term starts at zero and must reach the
+                              # emissions' scale within a run (no weight decay, as the CRF)
 CRF_FORBIDDEN = -1e4   # added to transitions that break IOB2
 
 
@@ -1058,13 +1070,14 @@ def teacher_tags(tagger, sentences, batch_size, device):
     return out
 
 
-def is_silver(tags, marginals):
-    """Silver sentence: an entity, and every word's tag with a marginal >= SILVER_THRESHOLD."""
-    return any(tag.startswith('B-') for tag in tags) and min(marginals) >= SILVER_THRESHOLD
+def is_silver(tags, marginals, threshold=SILVER_THRESHOLD):
+    """Silver sentence: an entity, and every word's tag with a marginal >= threshold
+    (SILVER_THRESHOLD, or --silver-threshold)."""
+    return any(tag.startswith('B-') for tag in tags) and min(marginals) >= threshold
 
 
 def train_one(seed, train, val, test, labels, args, device, test_index=None, descriptions=None,
-              silver=None, keep_tagger=False, contexts=None, augmented=None):
+              silver=None, keep_tagger=False, contexts=None, augmented=None, lexicon=None):
     """Fine-tune and test once; `seed` is the model seed (--seed-offset included).
 
     test_index (positions of `test` in the corpus) is stored with the
@@ -1077,7 +1090,10 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
     tokenizer, label2id and id2label (teacher_tags). contexts (--context): the
     part_contexts of train, val and test ({'train': ..., 'val': ..., 'test': ...}),
     encoded around each sentence with up to args.context subwords per side. augmented
-    (--augment-mentions): (words, tags) sentences trained on as gold ones.
+    (--augment-mentions): (words, tags) sentences trained on as gold ones. lexicon
+    (--names-feature): {words: type} (lexicon_index); the emissions of every word then add a
+    linear term, learned from zero at GAZ_LR, on its match features (match_features), in
+    training, validation and test alike; the record adds `names_feature`.
     """
     import torch
     from transformers import (AutoModelForTokenClassification, AutoTokenizer,
@@ -1104,6 +1120,17 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
         model.classifier = make_label_head(embeddings, model.config).to(device)
     pad_id = tokenizer.pad_token_id
     crf = make_crf(label_list).to(device) if getattr(args, 'crf', False) else None
+    gaz = rows = None
+    if lexicon is not None:
+        assert crf is not None and not silver and not entity_biases(args), \
+            'the match term is a CRF emission term; no silver sentences or biases with it'
+        types = list(labels)
+        rows = {'train': feature_rows(tokenizer, train, lexicon, types)
+                + (feature_rows(tokenizer, augmented, lexicon, types) if augmented else []),
+                'val': feature_rows(tokenizer, val, lexicon, types),
+                'test': feature_rows(tokenizer, test, lexicon, types)}
+        gaz = torch.nn.Linear(2 * len(types), len(label_list), bias=False).to(device)
+        torch.nn.init.zeros_(gaz.weight)
 
     def encode_part(name, part):
         sentences = [(t, g) for t, g, _ in part]
@@ -1130,11 +1157,17 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
     if crf is None:
         optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=0.01)
     else:
-        optimizer = torch.optim.AdamW(
-            [{'params': model.parameters()},
-             {'params': crf.parameters(), 'lr': CRF_LR, 'weight_decay': 0.0}],
-            lr=args.lr, weight_decay=0.01)
+        groups = [{'params': model.parameters()},
+                  {'params': crf.parameters(), 'lr': CRF_LR, 'weight_decay': 0.0}]
+        if gaz is not None:
+            groups.append({'params': gaz.parameters(), 'lr': GAZ_LR, 'weight_decay': 0.0})
+        optimizer = torch.optim.AdamW(groups, lr=args.lr, weight_decay=0.01)
     params = list(model.parameters()) + (list(crf.parameters()) if crf is not None else [])
+    params += list(gaz.parameters()) if gaz is not None else []
+
+    def decode(part_features, part):
+        return predict(model, part_features, args.batch_size, pad_id, id2label, device, crf,
+                       gaz=gaz, feats=None if rows is None else rows[part])
     steps = args.epochs * ((len(f_train) + args.batch_size - 1) // args.batch_size)
     scheduler = get_linear_schedule_with_warmup(optimizer, int(0.1 * steps), steps)
 
@@ -1157,6 +1190,11 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
             elif silver:
                 loss = crf.nll(*word_view(logits, lab, widths),
                                weights=torch.tensor([weight[i] for i in idx], device=device))
+            elif gaz is not None:
+                emissions, tags, word_mask = word_view(logits, lab, widths)
+                emissions = emissions + gaz(
+                    feature_batch(rows['train'], idx, emissions.size(1), emissions.device))
+                loss = crf.nll(emissions, tags, word_mask)
             else:
                 loss = crf.nll(*word_view(logits, lab, widths))
             loss.backward()
@@ -1167,29 +1205,38 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
             if xla:
                 xla_sync()
             total += loss.item()
-        val_pred = predict(model, f_val, args.batch_size, pad_id, id2label, device, crf)
+        val_pred = decode(f_val, 'val')
         val_f1 = score([g for _, g, _ in val], val_pred)['f1']
         history.append({'epoch': epoch, 'train_loss': round(total, 4), 'val_f1': val_f1})
         print(f"    seed {seed} epoch {epoch}: loss {total:.3f} val F1 {val_f1:.2f}", flush=True)
         if val_f1 > best[0]:
-            best = (val_f1, (snapshot(model), snapshot(crf) if crf is not None else None), epoch)
+            best = (val_f1, (snapshot(model), snapshot(crf) if crf is not None else None,
+                             snapshot(gaz) if gaz is not None else None), epoch)
         elif epoch - best[2] >= args.patience:
             break
 
     model.load_state_dict(best[1][0])
     if crf is not None:
         crf.load_state_dict(best[1][1])
+    if gaz is not None:
+        gaz.load_state_dict(best[1][2])
     biases = entity_biases(args)
     if biases:
         decodes = biased_decodes(model, f_test, args.batch_size, pad_id, id2label, device, crf,
                                  biases)
         test_pred = decodes[0.0]
     else:
-        test_pred = predict(model, f_test, args.batch_size, pad_id, id2label, device, crf)
+        test_pred = decode(f_test, 'test')
     result = score([g for _, g, _ in test], test_pred)
     result.update({'seed': seed, 'best_epoch': best[2], 'val_f1': best[0],
                    'n_train': len(train), 'n_val': len(val), 'n_test': len(test),
                    'history': history})
+    if gaz is not None:
+        result['names_feature'] = {
+            'n_names': len(lexicon), 'lr': GAZ_LR,
+            'n_train_matches': int(sum(r[:, 0::2].sum() for r in rows['train'])),
+            'n_test_matches': int(sum(r[:, 0::2].sum() for r in rows['test'])),
+            'weight_abs_max': round(float(gaz.weight.detach().abs().max()), 4)}
     if getattr(args, 'save_predictions', False):
         result.update(prediction_fields(test_index, test, test_pred))
     if biases:
@@ -1199,7 +1246,8 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
             getattr(args, 'save_predictions', False)))
     if keep_tagger:
         return result, SimpleNamespace(model=model, crf=crf, tokenizer=tokenizer,
-                                       label2id=label2id, id2label=id2label)
+                                       label2id=label2id, id2label=id2label, gaz=gaz,
+                                       lexicon=lexicon)
     return result
 
 
@@ -1214,6 +1262,7 @@ def train_self_training(seed, train, val, test, labels, args, device, sample, te
     teacher_test_f1 (micro F1).
     """
     teacher_args = SimpleNamespace(**{**vars(args), 'save_predictions': False})
+    threshold = getattr(args, 'silver_threshold', SILVER_THRESHOLD)
     teacher, tagger = train_one(seed, train, val, test, labels, teacher_args, device,
                                 keep_tagger=True)
     sentences, n_skipped = fit_sample(tagger.tokenizer, sample,
@@ -1221,7 +1270,7 @@ def train_self_training(seed, train, val, test, labels, args, device, sample, te
     tagged = teacher_tags(tagger, sentences, args.batch_size, device)
     del tagger                     # the teacher is not needed any more
     silver = [(words, tags) for words, (tags, marginals) in zip(sentences, tagged)
-              if is_silver(tags, marginals)]
+              if is_silver(tags, marginals, threshold)]
     print(f"    teacher: val F1 {teacher['val_f1']:.2f}, test F1 {teacher['f1']:.2f}; "
           f"{len(silver)} silver of {len(sentences)} tagged sentences ({n_skipped} of "
           f"{len(sample)} sampled skipped); student:", flush=True)
@@ -1229,7 +1278,7 @@ def train_self_training(seed, train, val, test, labels, args, device, sample, te
                         silver=silver)
     student['self_training'] = {
         'n_sampled': len(sample), 'n_skipped': n_skipped, 'n_silver': len(silver),
-        'marginal_threshold': SILVER_THRESHOLD, 'teacher_val_f1': teacher['val_f1'],
+        'marginal_threshold': threshold, 'teacher_val_f1': teacher['val_f1'],
         'teacher_test_f1': teacher['f1']}
     return student
 
@@ -1247,15 +1296,15 @@ def student_offsets_of(args):
     return teacher_offsets(getattr(args, 'students', args.teachers))
 
 
-def unanimous_silver(tagged):
+def unanimous_silver(tagged, threshold=SILVER_THRESHOLD):
     """Silver with several teachers: [(tags, least marginal)] of one sentence, per teacher.
 
     Every teacher gives the same tags, and the sentence is silver for each of them alone
-    (an entity, every tag with a marginal of at least SILVER_THRESHOLD; is_silver).
+    (an entity, every tag with a marginal of at least `threshold`; is_silver).
     """
     first = tagged[0][0]
     return (all(tags == first for tags, _ in tagged)
-            and all(is_silver(tags, [least]) for tags, least in tagged))
+            and all(is_silver(tags, [least], threshold) for tags, least in tagged))
 
 
 def silver_mentions(silver):
@@ -1280,19 +1329,101 @@ def name_coverage(names, train, test):
             'n_test_unseen_in_silver': sum(m in silver for m in unseen)}
 
 
-def silver_mention_names(sentences, votes, threshold=None):
+def silver_mention_names(sentences, votes, threshold=None, agree=None):
     """(type, words) of the silver mentions (--silver-mentions), in order: a span that every
     teacher tags as the same entity (entity_spans of each teacher's tags agree on its start,
     end and type), each of its tags with a marginal of at least `threshold` (SILVER_THRESHOLD)
-    under each teacher. votes: per sentence, per teacher (tags, least marginal, marginals)."""
+    under each teacher. votes: per sentence, per teacher (tags, least marginal, marginals).
+    With `agree` (--teachers-agree N), a span that at least `agree` teachers tag as the same
+    entity, each of those with every tag of the span at `threshold` or more, whatever the
+    other teachers tag there (agree = the number of teachers gives the same names)."""
     threshold = SILVER_THRESHOLD if threshold is None else threshold
     names = []
     for words, teachers in zip(sentences, votes):
-        common = set.intersection(*(set(entity_spans(tags)) for tags, _, _ in teachers))
-        for start, end, kind in sorted(common):
-            if all(min(marginals[start:end]) >= threshold for _, _, marginals in teachers):
+        if agree is None:
+            common = set.intersection(*(set(entity_spans(tags)) for tags, _, _ in teachers))
+            for start, end, kind in sorted(common):
+                if all(min(marginals[start:end]) >= threshold for _, _, marginals in teachers):
+                    names.append((kind, tuple(words[start:end])))
+            continue
+        counts = {}
+        for tags, _, marginals in teachers:
+            for span in entity_spans(tags):
+                if min(marginals[span[0]:span[1]]) >= threshold:
+                    counts[span] = counts.get(span, 0) + 1
+        for start, end, kind in sorted(counts):
+            if counts[(start, end, kind)] >= agree:
                 names.append((kind, tuple(words[start:end])))
     return names
+
+
+LEXICON_MAX_WORDS = 8       # words of a name that lexicon_matches looks up (the probe's rule too)
+
+
+def lexicon_index(names):
+    """{words: type} of the (type, words) names of at most LEXICON_MAX_WORDS words; a name
+    with several types gets its most frequent one, the first met among equals."""
+    counts = {}
+    for kind, words in names:
+        if len(words) <= LEXICON_MAX_WORDS:
+            counts.setdefault(tuple(words), Counter())[kind] += 1
+    return {words: kinds.most_common(1)[0][0] for words, kinds in counts.items()}
+
+
+def lexicon_matches(words, index):
+    """(start, end, type) of the maximal verbatim matches of index names in `words`: at each
+    word the longest name that starts there, left to right, no overlaps, whatever the tags."""
+    longest = min(LEXICON_MAX_WORDS, max((len(w) for w in index), default=0))
+    out, i = [], 0
+    while i < len(words):
+        for n in range(min(longest, len(words) - i), 0, -1):
+            kind = index.get(tuple(words[i:i + n]))
+            if kind is not None:
+                out.append((i, i + n, kind))
+                i += n
+                break
+        else:
+            i += 1
+    return out
+
+
+def match_features(words, index, types):
+    """The gazetteer match features of a sentence (--names-feature): per word, two columns
+    per type of `types` in order, 1.0 in the first on the first word of a lexicon match of
+    that type (lexicon_matches) and 1.0 in the second on its other words, 0.0 elsewhere."""
+    column = {kind: 2 * k for k, kind in enumerate(types)}
+    out = [[0.0] * (2 * len(types)) for _ in words]
+    for start, end, kind in lexicon_matches(words, index):
+        if kind in column:
+            out[start][column[kind]] = 1.0
+            for t in range(start + 1, end):
+                out[t][column[kind] + 1] = 1.0
+    return out
+
+
+def feature_rows(tokenizer, sentences, index, types):
+    """match_features of each (words, ...) sentence as a float tensor over the words that
+    have a subword, in order (the words word_view sees; one without carries no tag and no
+    row)."""
+    import torch
+    rows = []
+    for words, *_ in sentences:
+        present = sorted({i for i in tokenizer(list(words), is_split_into_words=True,
+                                               truncation=False).word_ids() if i is not None})
+        feats = match_features(words, index, types)
+        rows.append(torch.tensor([feats[i] for i in present], dtype=torch.float32)
+                    .reshape(len(present), 2 * len(types)))
+    return rows
+
+
+def feature_batch(rows, idx, width, device):
+    """The feature rows of the sentences at `idx` as one (B, width, F) tensor padded with
+    zeros (word_view's order), on `device`."""
+    import torch
+    out = torch.zeros(len(idx), width, rows[idx[0]].size(1))
+    for b, i in enumerate(idx):
+        out[b, :rows[i].size(0)] = rows[i]
+    return out.to(device)
 
 
 UNUSED_CORPUS = 'unused'      # --self-train unused: a fold's sentences in none of its parts
@@ -1318,14 +1449,19 @@ def train_with_teachers(seed, offsets, train, val, test, labels, args, device, s
     the student instead trains on the gold data and its mention replacement copies
     (--augment-mentions K, with that seed), whose pool also holds the mentions of the silver
     sentences (silver_mentions); the silver sentences themselves are not trained on, and
-    the record adds n_augmented and, in `self_training`, `names` (name_coverage). Each
-    record adds
+    the record adds n_augmented and, in `self_training`, `names` (name_coverage). With
+    --names-feature the names are the student's lexicon instead (train_one's `lexicon`,
+    lexicon_index), with --augment-mentions on top of its copies, with --augment-names on
+    top of the pool too. Each record adds
     `self_training`: n_sampled, n_skipped, n_agreed (sentences that all teachers tag
     alike), n_silver, marginal_threshold, and per teacher (in offset order) its seed,
     val_f1, test_f1, test_f1_strict, test_macro_f1, best_epoch and n_silver_alone (its
     silver sentences as a single teacher).
     """
     teacher_args = SimpleNamespace(**{**vars(args), 'save_predictions': False})
+    threshold = getattr(args, 'silver_threshold', SILVER_THRESHOLD)   # week 14's ablations
+    agree = getattr(args, 'teachers_agree', None)
+    share = getattr(args, 'names_share', None)
     teachers, tagged, sentences, n_skipped = [], [], None, 0
     for offset in offsets:
         record, tagger = train_one(seed + offset, train, val, test, labels, teacher_args,
@@ -1345,35 +1481,43 @@ def train_with_teachers(seed, offsets, train, val, test, labels, args, device, s
                          'test_f1': record['f1'], 'test_f1_strict': record['f1_strict'],
                          'test_macro_f1': round(F1_AVERAGES['macro'](record), 2),
                          'best_epoch': record['best_epoch'],
-                         'n_silver_alone': sum(is_silver(t, [m]) for t, m, _ in out)})
+                         'n_silver_alone': sum(is_silver(t, [m], threshold) for t, m, _ in out)})
         print(f"    teacher seed {seed + offset}: val F1 {record['val_f1']:.2f}, test F1 "
               f"{record['f1']:.2f}; {teachers[-1]['n_silver_alone']} silver alone of "
               f"{len(sentences)} tagged", flush=True)
     per_sentence = list(zip(*tagged))
     silver = [(words, list(votes[0][0])) for words, votes in zip(sentences, per_sentence)
-              if unanimous_silver([(t, m) for t, m, _ in votes])]
+              if unanimous_silver([(t, m) for t, m, _ in votes], threshold)]
     n_agreed = sum(all(t == votes[0][0] for t, *_ in votes) for votes in per_sentence)
     print(f"    {len(silver)} silver of {len(sentences)} tagged sentences ({n_agreed} tagged "
           f"alike; {n_skipped} of {len(sample)} sampled skipped); students:", flush=True)
     names = None
-    if getattr(args, 'augment_names', False):
-        names = (silver_mention_names(sentences, per_sentence)
+    feature = getattr(args, 'names_feature', False)
+    if getattr(args, 'augment_names', False) or feature:
+        names = (silver_mention_names(sentences, per_sentence, threshold, agree)
                  if getattr(args, 'silver_mentions', False) else silver_mentions(silver))
     coverage = name_coverage(names, train, test) if names is not None else None
+    index = lexicon_index(names) if feature else None
     students = {}
     for offset in offsets if student_offsets is None else student_offsets:
         if names is None:
             student = train_one(seed + offset, train, val, test, labels, args, device,
                                 test_index=test_index, silver=silver)
         else:
-            augmented = mention_replacements([(w, t) for w, t, _ in train],
-                                             args.augment_mentions, seed + offset, names=names)
+            pool = names if getattr(args, 'augment_names', False) else ()
+            augmented = (mention_replacements([(w, t) for w, t, _ in train],
+                                              args.augment_mentions, seed + offset, names=pool,
+                                              share=share)
+                         if getattr(args, 'augment_mentions', 0) else None)
             student = train_one(seed + offset, train, val, test, labels, args, device,
-                                test_index=test_index, augmented=augmented)
-            student['n_augmented'] = len(augmented)
+                                test_index=test_index, augmented=augmented, lexicon=index)
+            if augmented is not None:
+                student['n_augmented'] = len(augmented)
         student['self_training'] = {
             'n_sampled': len(sample), 'n_skipped': n_skipped, 'n_agreed': n_agreed,
-            'n_silver': len(silver), 'marginal_threshold': SILVER_THRESHOLD,
+            'n_silver': len(silver), 'marginal_threshold': threshold,
+            **({'teachers_agree': agree} if agree is not None else {}),
+            **({'names_share': share} if share is not None else {}),
             'teachers': teachers}
         if names is not None:
             student['self_training']['names'] = coverage
@@ -1894,10 +2038,12 @@ PLAIN_VARIANTS = ('baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_st', 'crf_mt
 def variant_name(args):
     """Variant of a run: 'baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_mt_ls', 'crf_st' or
     'crf_st<N>', 'crf_mt_st<N>', 'crf_ctx', 'crf_mt_ctx', 'crf_mr', 'crf_mt_mr', 'crf_mrs'
-    (--augment-names) or 'crf_mrm' (with --silver-mentions), these two and the self-training
-    names plus _<names tag> (crf_mrm_topic, crf_st3_topic), the mention replacement names
-    plus the copies when not 3 (crf_mr6, crf_mrm_topic6), with _bias for --entity-bias
-    (crf_bias, crf_ctx_bias), then the tag.
+    (--augment-names) or 'crf_mrm' (with --silver-mentions), 'crf_gzs' or 'crf_gzm'
+    (--names-feature; 'crf_mr_gzm' with --augment-mentions too, 'crf_mrm_gzm' with
+    --augment-names as well), these and the self-training names plus _<names tag>
+    (crf_mrm_topic, crf_gzm_topic, crf_st3_topic), the mention replacement names plus the
+    copies when not 3 (crf_mr6, crf_mrm_topic6), with _bias for --entity-bias (crf_bias,
+    crf_ctx_bias), then the tag.
 
     'cw' is --class-weights, 'crf_mt' is --crf --multi-task, 'crf_ls' is --crf
     --label-semantics, 'crf_mt_ls' both, 'crf_st' is --crf --self-train and 'crf_st<N>' that
@@ -1920,8 +2066,16 @@ def variant_name(args):
             name = 'crf_mt_ctx' if multi_task else 'crf_ctx'
         if getattr(args, 'augment_mentions', 0):
             name = 'crf_mt_mr' if multi_task else 'crf_mr'
-        if getattr(args, 'augment_names', False):
-            name = 'crf_mrm' if getattr(args, 'silver_mentions', False) else 'crf_mrs'
+        feature = getattr(args, 'names_feature', False)
+        if getattr(args, 'augment_names', False) or feature:
+            letter = 'm' if getattr(args, 'silver_mentions', False) else 's'
+            if not feature:
+                name = f'crf_mr{letter}'
+            elif getattr(args, 'augment_names', False):
+                name = f'crf_mr{letter}_gz{letter}'
+            else:
+                name = (f'crf_mr_gz{letter}' if getattr(args, 'augment_mentions', 0)
+                        else f'crf_gz{letter}')
             if getattr(args, 'names_tag', None):
                 name = f'{name}_{args.names_tag}'
         if getattr(args, 'augment_mentions', 0) not in (0, MR_COPIES):
@@ -1982,21 +2136,32 @@ def stored_settings(results):
 
 
 def resumable_runs(path, labels, model, variant, seed_offset=0, save_predictions=False,
-                   self_train_sha256=None):
-    """Runs of an earlier invocation that this one may reuse.
+                   self_train_sha256=None, run_ids=None):
+    """Runs of an earlier invocation that this one may reuse (or must keep).
 
     Only runs with the same labels, model, training variant, seed offset and
     self-training corpus count (see stored_settings). With `save_predictions`,
-    runs that did not store their predictions are not reused.
+    runs that did not store their predictions are not reused. run_ids (the run
+    ids this invocation trains; --subfields): a file whose corpus differs may
+    still hold runs made from their own corpora (`self_train_sha256` per run,
+    week 12's topic corpora, one per held-out subfield); such a run is kept when
+    its id is not trained now, and resumed when it is and its corpus is this one.
     """
     if not os.path.exists(path):
         return []
     with open(path) as f:
         previous = json.load(f)
-    same = stored_settings(previous) == {'labels': labels, 'model': model, 'variant': variant,
-                                         'seed_offset': seed_offset,
-                                         'self_train_sha256': self_train_sha256}
-    runs = previous.get('runs', []) if same else []
+    stored = stored_settings(previous)
+    now = {'labels': labels, 'model': model, 'variant': variant, 'seed_offset': seed_offset,
+           'self_train_sha256': self_train_sha256}
+    if {k: v for k, v in stored.items() if k != 'self_train_sha256'} != {
+            k: v for k, v in now.items() if k != 'self_train_sha256'}:
+        return []
+    runs = previous.get('runs', [])
+    if stored['self_train_sha256'] != self_train_sha256:
+        runs = [r for r in runs if r.get('self_train_sha256') is not None
+                and ((run_ids is not None and r.get('run_id') not in run_ids)
+                     or r.get('self_train_sha256') == self_train_sha256)]
     return [r for r in runs if 'test_pred' in r] if save_predictions else runs
 
 
@@ -2015,7 +2180,7 @@ def setting_change(name, stored, now):
 
 
 def check_overwrite(path, labels, model, variant, seed_offset=0, save_predictions=False,
-                    self_train_sha256=None):
+                    self_train_sha256=None, run_ids=None):
     """Raise OverwriteError if `path` holds runs that resumable_runs would not reuse.
 
     A run writes its results file anew, so those runs would be lost: runs made
@@ -2028,7 +2193,7 @@ def check_overwrite(path, labels, model, variant, seed_offset=0, save_prediction
         previous = json.load(f)
     held = previous.get('runs', [])
     kept = resumable_runs(path, labels, model, variant, seed_offset, save_predictions,
-                          self_train_sha256)
+                          self_train_sha256, run_ids)
     if len(kept) >= len(held):
         return
     stored = stored_settings(previous)
@@ -2054,7 +2219,23 @@ def check_results_files(args, files, self_train_sha256=None):
         return
     for path, labels in files:
         check_overwrite(path, labels, args.model, variant_name(args), args.seed_offset,
-                        args.save_predictions, self_train_sha256)
+                        args.save_predictions, self_train_sha256, trained_run_ids(args))
+
+
+def trained_run_ids(args):
+    """The run ids an invocation trains when it names them (--subfields: the held-out
+    subfields), else None (every run id of the protocol)."""
+    subfields = getattr(args, 'subfields', None)
+    return set(subfields) if subfields else None
+
+
+def per_run_corpus(args, corpus):
+    """The corpus SHA-256 a run records as its own (`self_train_sha256`): with --subfields and
+    a self-training corpus file, so that the runs of a file may come from a corpus each
+    (resumable_runs); None otherwise (nothing is recorded)."""
+    if trained_run_ids(args) is None:
+        return None
+    return corpus.get('self_train_sha256')
 
 
 def summarize(results):
@@ -2577,7 +2758,8 @@ def run(args):
                    'paper_test_f1': PAPER_F1[granularity], 'config': stored_config(args),
                    'runs': resumable_runs(out_path, labels, args.model, variant,
                                           args.seed_offset, args.save_predictions,
-                                          corpus.get('self_train_sha256'))}
+                                          corpus.get('self_train_sha256'),
+                                          trained_run_ids(args))}
         if semantics:
             results['config']['label_descriptions_sha256'] = ner_label_text.descriptions_sha256(
                 labels, descriptions[granularity])
@@ -2634,6 +2816,8 @@ def run(args):
             res['runtime_sec'] = round(time.time() - start, 1)
             if environment:
                 res['environment'] = environment
+            if per_run_corpus(args, corpus):
+                res['self_train_sha256'] = per_run_corpus(args, corpus)
             results['runs'].append(res)
             summarize(results)
             with open(out_path, 'w') as f:
@@ -2803,7 +2987,8 @@ def run_teachers(args, out_dir):
                             'config': {**stored_config(view), **corpus},
                             'runs': resumable_runs(paths[off], labels, args.model, variant, off,
                                                    args.save_predictions,
-                                                   corpus['self_train_sha256'])}
+                                                   corpus['self_train_sha256'],
+                                                   trained_run_ids(args))}
         done_by = {off: {r.get('run_id') for r in results[off]['runs']}
                    for off in student_offsets}
         done = set.intersection(*done_by.values())
@@ -2849,6 +3034,8 @@ def run_teachers(args, out_dir):
                 res['runtime_sec'] = runtime      # teachers and these students together
                 if environment:
                     res['environment'] = environment
+                if per_run_corpus(args, corpus):
+                    res['self_train_sha256'] = per_run_corpus(args, corpus)
                 results[off]['runs'].append(res)
                 done_by[off].add(run_id)
             changed.update(records)
@@ -3098,10 +3285,34 @@ def parse_args(argv=None):
                              'every teacher tags as the same entity with every tag confident, '
                              'whatever the rest of the sentence, instead of the mentions of '
                              'the silver sentences (files tagged _crf_mrm; ROADMAP §4, week 12)')
+    parser.add_argument('--names-feature', action='store_true', default=argparse.SUPPRESS,
+                        help='with --crf and --self-train CORPUS --teachers N: the names the '
+                             'teachers tag in the corpus (the mentions of the silver '
+                             'sentences, or the silver mentions with --silver-mentions) are a '
+                             'gazetteer for each student, which adds to the emissions of every '
+                             'verbatim match a term learned per type and match position (first '
+                             'word, later word; files tagged _crf_gzs or _crf_gzm); with '
+                             '--augment-mentions the copies as well (_crf_mr_gzm), with '
+                             '--augment-names the names in their pool too (_crf_mrm_gzm)')
     parser.add_argument('--names-tag', type=tag_name, default=argparse.SUPPRESS, metavar='LABEL',
                         help='with --augment-names, or --self-train with --teachers: a label of '
                              'the corpus the teachers tag, appended to the variant '
                              '(crf_mrm_<label>, crf_st3_<label>); lowercase letters and digits')
+    parser.add_argument('--silver-threshold', type=float, default=argparse.SUPPRESS,
+                        metavar='T',
+                        help='with --self-train: the least CRF marginal of every tag of a silver '
+                             'sentence, or of a silver mention with --silver-mentions, under each '
+                             f'teacher (default {SILVER_THRESHOLD}; ROADMAP §4, week 14)')
+    parser.add_argument('--teachers-agree', type=int, default=argparse.SUPPRESS, metavar='N',
+                        help='with --silver-mentions: a span is a silver mention when at least N '
+                             'of the teachers tag it as the same entity, each of those with every '
+                             'tag of the span confident, whatever the others tag there (default: '
+                             'all the teachers; week 14)')
+    parser.add_argument('--names-share', type=float, default=argparse.SUPPRESS, metavar='P',
+                        help='with --augment-names: a replaced mention whose type has silver '
+                             'names is drawn from them with probability P and from the training '
+                             'mentions otherwise, instead of from one pool of both, where the '
+                             'names outnumber the training mentions (week 14)')
     parser.add_argument('--entity-bias', type=float, nargs='+', default=argparse.SUPPRESS,
                         metavar='D',
                         help='with --crf: decode the test and validation sentences again with D '
@@ -3274,8 +3485,9 @@ def parse_args(argv=None):
         if args.augment_mentions < 1:
             parser.error('--augment-mentions: at least 1 copy')
         for option in ('label_semantics', 'self_train', 'context'):
-            if option == 'self_train' and getattr(args, 'augment_names', False):
-                continue          # the silver names join the pool (week 11)
+            if option == 'self_train' and (getattr(args, 'augment_names', False)
+                                           or getattr(args, 'names_feature', False)):
+                continue          # the silver names join the pool (week 11) or are a feature
             if getattr(args, option, None) not in (None, False):
                 parser.error(f"--augment-mentions is not available with "
                              f"--{option.replace('_', '-')}")
@@ -3285,12 +3497,36 @@ def parse_args(argv=None):
                          '--teachers (the teachers tag the names)')
         if getattr(args, 'multi_task', False):
             parser.error('--augment-names is not available with --multi-task')
-    if hasattr(args, 'silver_mentions') and not getattr(args, 'augment_names', False):
-        parser.error('--silver-mentions needs --augment-names')
+    if getattr(args, 'names_feature', False):
+        if not (args.crf and hasattr(args, 'teachers')):
+            parser.error('--names-feature needs --crf and --self-train with --teachers (the '
+                         'teachers tag the names)')
+        for option in ('multi_task', 'label_semantics', 'context', 'entity_bias'):
+            if getattr(args, option, None) not in (None, False):
+                parser.error(f"--names-feature is not available with "
+                             f"--{option.replace('_', '-')}")
+    if hasattr(args, 'silver_mentions') and not (getattr(args, 'augment_names', False)
+                                                 or getattr(args, 'names_feature', False)):
+        parser.error('--silver-mentions needs --augment-names or --names-feature')
     if hasattr(args, 'names_tag') and not (getattr(args, 'augment_names', False)
                                            or hasattr(args, 'teachers')):
         parser.error('--names-tag needs --augment-names, or --self-train with --teachers (the '
                      'corpus the teachers tag)')
+    if hasattr(args, 'silver_threshold'):
+        if getattr(args, 'self_train', None) is None:
+            parser.error('--silver-threshold needs --self-train (the silver filter)')
+        if not 0 < args.silver_threshold <= 1:
+            parser.error('--silver-threshold: a marginal above 0 and at most 1')
+    if hasattr(args, 'teachers_agree'):
+        if not hasattr(args, 'silver_mentions'):
+            parser.error('--teachers-agree needs --silver-mentions (the mention-level filter)')
+        if not 1 <= args.teachers_agree <= args.teachers:
+            parser.error('--teachers-agree: between 1 and the number of --teachers')
+    if hasattr(args, 'names_share'):
+        if not getattr(args, 'augment_names', False):
+            parser.error('--names-share needs --augment-names (the names in the pool)')
+        if not 0 <= args.names_share <= 1:
+            parser.error('--names-share: a probability')
     if hasattr(args, 'entity_bias'):
         if not args.crf:
             parser.error('--entity-bias needs --crf (it shifts the emissions of the Viterbi '

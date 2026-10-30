@@ -1103,3 +1103,249 @@ def test_run_jobs_places_the_mulms_files_only_when_asked(tmp_path):
         rj.place_mulms({'mulms_files': {'a_01.conll': '0' * 64}}, inputs, repo)
     with pytest.raises(FileNotFoundError):
         rj.place_mulms({'mulms_files': {'b_01.conll': digest}}, inputs, repo)
+
+
+def test_week12_gazetteer_feature_batches(monkeypatch, tmp_path):
+    """w12c (amendment 2): the match-feature variant's screen, one job per
+    subfield over the two lanes, no copies; w12b:gzm: its decision over seed offsets 300 to
+    900."""
+    monkeypatch.setattr(nb.os.path, 'isfile', lambda path: True)
+    monkeypatch.setattr(kj, 'MULMS_REPORT', tmp_path / 'no_mulms.json')
+    monkeypatch.setattr(kj, 'mulms_files', lambda: {'a_01.conll': 'a' * 64})
+    reports = tmp_path / 'topic_corpora'
+    reports.mkdir()
+    for topic in kj.MULMS_SUBFIELD_NAMES:
+        (reports / f'{topic}.json').write_text(json.dumps({'corpus': {'sha256': topic * 8}}))
+    monkeypatch.setattr(kj, 'TOPIC_REPORTS', reports)
+    real_sha256 = kj.corpus_sha256
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda report=None: (
+        real_sha256(report) if report is not None and Path(report).parent == reports else 'x' * 64))
+
+    def kind(a):
+        return nb.variant_name(nb.SimpleNamespace(**{**vars(a), 'tag': ''}))
+    lane0, lane1 = _parsed(kj.batch_lanes('w12c'))
+    assert lane0[0].tag == 'smokeaq' and lane0[0].granularity == 'fine'
+    jobs = lane0[1:] + lane1
+    assert (len(lane0), len(lane1)) == (8, 7)
+    for name in ('crf_gzm_topic', 'crf_gzs_topic'):
+        assert sorted(a.subfields for a in jobs if kind(a) == name) == sorted(
+            [s] for s in kj.MULMS_SUBFIELD_NAMES)
+    assert [kind(a) for a in lane0[1:]] == ['crf_gzm_topic'] * 7
+    assert [kind(a) for a in lane1] == ['crf_gzs_topic'] * 7
+    for a in jobs:
+        assert a.names_feature and getattr(a, 'silver_mentions', False) == (
+            kind(a) == 'crf_gzm_topic')
+        assert not hasattr(a, 'augment_mentions') and not hasattr(a, 'augment_names')
+        assert (a.teachers, a.students, a.student_offsets) == (3, 10, [0, 100, 200])
+        assert a.self_train == f'data/processed/corpus/topic_{a.subfields[0]}_sentences.txt'
+        assert a.crf and a.save_predictions and a.names_tag == 'topic'
+    lane0, lane1 = _parsed(kj.batch_lanes('w12b:gzm'))
+    assert lane0[0].tag == 'smokeap' and (len(lane0), len(lane1)) == (8, 7)
+    for lane, offsets in ((lane0[1:], [300, 400, 500]), (lane1, [600, 700, 800, 900])):
+        assert [a.subfields for a in lane] == [[s] for s in kj.MULMS_SUBFIELD_NAMES]
+        for a in lane:
+            assert kind(a) == 'crf_gzm_topic' and a.student_offsets == offsets
+    assert 'w12c' in kj.BATCHES and {'w12b:gzm', 'w12b:gzs'} <= set(kj.BATCHES)
+    # w12e: w12a's names variants without the 6-copy jobs, a variant's jobs in one lane
+    lane0, lane1 = _parsed(kj.batch_lanes('w12e'))
+    assert lane0[0].tag == 'smokeas' and (len(lane0), len(lane1)) == (15, 14)
+    assert [kind(a) for a in lane0[1:]] == ['crf_mrs_topic'] * 7 + ['crf_mrm_topic6'] * 7
+    assert [kind(a) for a in lane1] == ['crf_mrm_topic'] * 7 + ['crf_st3_topic'] * 7
+    assert 'w12e' in kj.BATCHES
+    for name, smoke, kinds in (('w12f', 'smokeat', ('crf_mrs_topic', 'crf_mrm_topic')),
+                               ('w12g', 'smokeau', ('crf_mrm_topic6', 'crf_st3_topic'))):
+        lane0, lane1 = _parsed(kj.batch_lanes(name))
+        assert lane0[0].tag == smoke and (len(lane0), len(lane1)) == (8, 7)
+        assert [kind(a) for a in lane0[1:]] == [kinds[0]] * 7
+        assert [kind(a) for a in lane1] == [kinds[1]] * 7
+        assert name in kj.BATCHES
+    lane0, lane1 = _parsed(kj.batch_lanes('w12b:gzs'))
+    assert all(kind(a) == 'crf_gzs_topic' and not hasattr(a, 'silver_mentions')
+               for a in lane0[1:] + lane1)
+
+
+def test_week12_analogue_batches(monkeypatch, tmp_path):
+    """w12d:<variant>: the MaterioMiner analogue of the screen's winner, one lane per
+    granularity, a job per held-out paper for the teacher variants (the mention-level silver
+    names in the pool with 3 or 6 copies, or as a match feature) and a job per seed offset
+    for crf_mr6; V1's analogue is w11b and V6's exists, so neither is a batch."""
+    monkeypatch.setattr(nb.os.path, 'isfile', lambda path: True)    # the corpus is not here
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda report=None: 'x' * 64)
+
+    def kind(a, tag='m300'):
+        return nb.variant_name(nb.SimpleNamespace(**{**vars(a), 'tag': tag}))
+    for variant, name, copies in (('mrm', 'crf_mrm', 3), ('mrm6', 'crf_mrm6', 6),
+                                  ('gzm', 'crf_gzm', 0)):
+        lane0, lane1 = _parsed(kj.batch_lanes(f'w12d:{variant}'))
+        assert lane0[0].tag == 'smokear' and lane0[0].granularity == 'fine'
+        for lane, g in ((lane0[1:], 'fine'), (lane1, 'coarse')):
+            assert [a.papers for a in lane] == [[p] for p in kj.PAPERS]
+            for a in lane:
+                assert (a.granularity, nb.protocol_name(a), a.self_train) == (
+                    g, 'leave_one_paper_out', kj.CORPUS)
+                assert (a.teachers, a.students, a.self_train_sample) == (3, 10, 0)
+                assert a.silver_mentions and a.crf and a.save_predictions
+                assert getattr(a, 'augment_mentions', 0) == copies
+                assert getattr(a, 'augment_names', False) == (variant != 'gzm')
+                assert getattr(a, 'names_feature', False) == (variant == 'gzm')
+                assert kind(a) == f'{name}_m300' and not hasattr(a, 'names_tag')
+    lane0, lane1 = _parsed(kj.batch_lanes('w12d:mr6'))
+    assert lane0[0].tag == 'smokear' and (len(lane0), len(lane1)) == (11, 10)
+    for lane, g in ((lane0[1:], 'fine'), (lane1, 'coarse')):
+        assert [a.tag for a in lane] == [f'm{off}' for off in range(0, 1000, 100)]
+        for a in lane:
+            assert (a.granularity, nb.protocol_name(a), a.augment_mentions) == (
+                g, 'leave_one_paper_out', 6)
+            assert not hasattr(a, 'self_train') and kind(a, a.tag) == f'crf_mr6_{a.tag}'
+    for name in ('w12d:mrs', 'w12d:st3', 'w12d:x'):
+        with pytest.raises(ValueError):
+            kj.batch_lanes(name)
+    assert {f'w12d:{v}' for v in ('mrm', 'mrm6', 'gzm', 'mr6')} <= set(kj.BATCHES)
+
+
+def test_week13_sofc_folds_batch(monkeypatch):
+    """w13a and w13c (week 13, 13.3): a repeat, then on SOFC-Exp's 5 article folds mention
+    replacement (w13a, crf_mr_m<N>) or mention replacement on the multi-task model trained on
+    both levels (w13c, sofc_both, crf_mt_mr_m<N>), seed offsets 0 to 900 split over the
+    lanes (0-400, 500-900)."""
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda report=None: 'x' * 64)
+    for name, smoke, granularity, variant in (('w13a', 'smokeav', 'sofc', 'crf_mr'),
+                                              ('w13c', 'smokeax', 'sofc_both', 'crf_mt_mr')):
+        lane0, lane1 = _parsed(kj.batch_lanes(name))
+        assert lane0[0].tag == smoke and (len(lane0), len(lane1)) == (6, 5)
+        assert [a.seed_offset for a in lane0[1:]] == [0, 100, 200, 300, 400]
+        assert [a.seed_offset for a in lane1] == [500, 600, 700, 800, 900]
+        for a in lane0[1:] + lane1:
+            assert (a.granularity, nb.protocol_name(a), nb.variant_name(a)) == (
+                granularity, 'document_folds', f'{variant}_m{a.seed_offset}')
+            assert a.crf and a.augment_mentions == 3 and a.save_predictions
+            assert a.document_folds == 5 and a.seeds == [0, 1, 2, 3, 4]
+            assert _get(a, 'multi_task', False) == (granularity == 'sofc_both')
+        assert name in kj.BATCHES
+    # week 8's jobs are unchanged
+    assert kj.sofc_split_job('document_folds', 300) == [
+        '--granularity', 'sofc', '--document-folds', '5', '--crf', '--tag', 'm300',
+        '--seed-offset', '300', '--save-predictions', '--threads', str(kj.THREADS)]
+    assert 'w13a' in kj.BATCHES and 'sofc_corpus_sha256' not in kj.batch_spec('w13a')
+
+
+def test_week13_folds_analogue_batch(monkeypatch):
+    """w13b (13.4): a repeat, then the week-12 winner's analogue on SOFC-Exp's 5 article
+    folds, one job per lane with the lane's student seed offsets (0-400, 500-900): 3 teachers
+    tagging the whole SOFC corpus, mention replacement with the mention-level silver names
+    and 6 copies (crf_mrm6); the batch carries the SOFC corpus's SHA-256."""
+    monkeypatch.setattr(nb.os.path, 'isfile', lambda path: True)    # the corpus is not here
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda report=None: 'x' * 64)
+    lane0, lane1 = _parsed(kj.batch_lanes('w13b'))
+    assert lane0[0].tag == 'smokeaw' and (len(lane0), len(lane1)) == (2, 1)
+    for a, offsets in ((lane0[1], [0, 100, 200, 300, 400]), (lane1[0], [500, 600, 700, 800, 900])):
+        assert (a.granularity, nb.protocol_name(a), nb.variant_name(a)) == (
+            'sofc', 'document_folds', 'crf_mrm6')
+        assert a.document_folds == 5 and a.student_offsets == offsets
+        assert a.self_train == kj.SOFC_CORPUS and a.self_train_sample == 0
+        assert a.teachers == 3 and a.students == 10 and a.silver_mentions
+        assert a.augment_mentions == 6 and a.augment_names and a.crf and a.save_predictions
+    assert 'w13b' in kj.BATCHES and 'sofc_corpus_sha256' in kj.batch_spec('w13b')
+
+
+def test_week14_copy_control_batch(monkeypatch):
+    """w14a (week 14, 14.1): a repeat, then the 6-copy control without names on MuLMS's
+    held-out subfields (seed offsets 300 to 900, one job per offset over the subfields) and
+    on MaterioMiner's held-out papers at both granularities (offsets 0 to 900, one job per
+    offset and granularity), the 27 jobs balanced over the lanes; no corpus in the spec."""
+    monkeypatch.setattr(nb.os.path, 'isfile', lambda path: True)    # the corpus is not here
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda report=None: 'x' * 64)
+    monkeypatch.setattr(kj, 'mulms_files', lambda: {'a_01.conll': 'a' * 64})
+    lane0, lane1 = _parsed(kj.batch_lanes('w14a'))
+    assert lane0[0].tag == 'smokeay' and lane0[0].granularity == 'fine'
+    jobs = lane0[1:] + lane1
+    assert len(jobs) == 27 and min(len(lane0) - 1, len(lane1)) >= 10
+    mulms = [a for a in jobs if a.granularity == 'mulms']
+    assert sorted(a.tag for a in mulms) == [f'm{off}' for off in range(300, 1000, 100)]
+    for a in mulms:
+        assert (a.train_pool, a.augment_mentions, a.crf, a.save_predictions) == (
+            400, 6, True, True)
+        assert nb.protocol_name(a) == 'leave_one_subfield_out' and not hasattr(a, 'teachers')
+        assert nb.variant_name(a) == f'crf_mr6_{a.tag}'
+        assert _get(a, 'seed_offset', 0) == int(a.tag[1:])
+    for g in ('fine', 'coarse'):
+        papers = [a for a in jobs if a.granularity == g]
+        assert sorted(a.tag for a in papers) == sorted(f'm{off}' for off in range(0, 1000, 100))
+        for a in papers:
+            assert (nb.protocol_name(a), a.augment_mentions, a.crf) == (
+                'leave_one_paper_out', 6, True)
+            assert not hasattr(a, 'self_train') and nb.variant_name(a) == f'crf_mr6_{a.tag}'
+            assert _get(a, 'seed_offset', 0) == int(a.tag[1:])
+    spec = kj.batch_spec('w14a')
+    assert spec['mulms_files'] == {'a_01.conll': 'a' * 64}
+    assert 'topic_corpora' not in spec and 'sofc_corpus_sha256' not in spec
+    assert 'w14a' in kj.BATCHES and kj.batch_name('w14a') == 'w14a'
+
+def test_week14_mixed_corpus_and_ablation_batches(monkeypatch, tmp_path):
+    """w14b (14.2): a repeat, then V4 with the mixed corpus of each held-out subfield, seed
+    offsets 300 to 900 over w12b's lanes; w14c (14.3): V4's five ablations at seed offsets 0
+    to 200, one job per subfield, each ablation's jobs in one lane; the spec lists the
+    corpora a batch reads, the mixed ones by their own reports."""
+    monkeypatch.setattr(nb.os.path, 'isfile', lambda path: True)    # the corpora are not here
+    monkeypatch.setattr(kj, 'MULMS_REPORT', tmp_path / 'no_mulms.json')
+    monkeypatch.setattr(kj, 'mulms_files', lambda: {'a_01.conll': 'a' * 64})
+    reports = tmp_path / 'topic_corpora'
+    reports.mkdir()
+    sha = {}
+    for topic in kj.MULMS_SUBFIELD_NAMES:
+        for name in (topic, f'mixed_{topic}'):
+            sha[name] = (name + '0' * 64)[:64]
+            (reports / f'{name}.json').write_text(json.dumps({'corpus': {'sha256': sha[name]}}))
+    monkeypatch.setattr(kj, 'TOPIC_REPORTS', reports)
+    real_sha256 = kj.corpus_sha256
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda report=None: (
+        real_sha256(report) if report is not None and Path(report).parent == reports else 'x' * 64))
+
+    def kind(a):
+        return nb.variant_name(nb.SimpleNamespace(**{**vars(a), 'tag': ''}))
+    lane0, lane1 = _parsed(kj.batch_lanes('w14b'))
+    assert lane0[0].tag == 'smokeaz' and lane0[0].granularity == 'fine'
+    for lane, offsets in ((lane0[1:], [300, 400, 500]), (lane1, [600, 700, 800, 900])):
+        assert [a.subfields for a in lane] == [[s] for s in kj.MULMS_SUBFIELD_NAMES]
+        for a in lane:
+            assert kind(a) == 'crf_mrm_mixed6' and a.student_offsets == offsets
+            assert a.self_train == (f'data/processed/corpus/topic_mixed_{a.subfields[0]}'
+                                    '_sentences.txt')
+            assert (a.self_train_sample, a.teachers, a.students, a.augment_mentions) == (
+                0, 3, 10, 6)
+            assert a.silver_mentions and a.augment_names and a.names_tag == 'mixed'
+            assert (a.granularity, a.train_pool, nb.protocol_name(a)) == (
+                'mulms', 400, 'leave_one_subfield_out')
+            assert not any(hasattr(a, o) for o in ('silver_threshold', 'teachers_agree',
+                                                    'names_share'))
+    spec = kj.batch_spec('w14b')
+    assert spec['topic_corpora'] == {f'mixed_{t}': sha[f'mixed_{t}'] for t in kj.MULMS_SUBFIELD_NAMES}
+    assert spec['mulms_files'] == {'a_01.conll': 'a' * 64}
+    lane0, lane1 = _parsed(kj.batch_lanes('w14c'))
+    assert lane0[0].tag == 'smokeba'
+    expected = {'crf_mrm_topic10k6': {'self_train_sample': 10000},
+                'crf_mrm_topic20k6': {'self_train_sample': 20000},
+                'crf_mrm_topiclow6': {'silver_threshold': 0.7},
+                'crf_mrm_topictwo6': {'teachers_agree': 2},
+                'crf_mrm_topiccap6': {'names_share': 0.5}}
+    assert [kind(a) for a in lane0[1:]] == [
+        v for v in ('crf_mrm_topic10k6', 'crf_mrm_topic20k6', 'crf_mrm_topiclow6')
+        for _ in kj.MULMS_SUBFIELD_NAMES]
+    assert [kind(a) for a in lane1] == [v for v in ('crf_mrm_topictwo6', 'crf_mrm_topiccap6')
+                                        for _ in kj.MULMS_SUBFIELD_NAMES]
+    for a in lane0[1:] + lane1:
+        assert a.student_offsets == [0, 100, 200] and a.augment_mentions == 6
+        assert a.silver_mentions and a.augment_names and a.teachers == 3
+        assert a.self_train == f'data/processed/corpus/topic_{a.subfields[0]}_sentences.txt'
+        assert a.names_tag == kind(a)[len('crf_mrm_'):-1]
+        settings = {o: getattr(a, o, None) for o in ('self_train_sample', 'silver_threshold',
+                                                     'teachers_agree', 'names_share')}
+        assert settings == {'self_train_sample': 0, 'silver_threshold': None,
+                            'teachers_agree': None, 'names_share': None, **expected[kind(a)]}
+    for name in ('crf_mrm_topic10k6', 'crf_mrm_topiccap6'):
+        assert [a.subfields for a in lane0[1:] + lane1 if kind(a) == name] == [
+            [s] for s in kj.MULMS_SUBFIELD_NAMES]
+    spec = kj.batch_spec('w14c')
+    assert spec['topic_corpora'] == {t: sha[t] for t in kj.MULMS_SUBFIELD_NAMES}
+    assert {'w14b', 'w14c'} <= set(kj.BATCHES)
+    assert kj.batch_spec('w12a')['topic_corpora'] == {t: sha[t] for t in kj.MULMS_SUBFIELD_NAMES}

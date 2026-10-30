@@ -30,8 +30,9 @@ Usage:
 import argparse
 import json
 import os
+import pickle
 import time
-from collections import Counter, defaultdict
+from collections import Counter
 
 import dapt_mlm
 import ner_baseline as nb
@@ -46,7 +47,7 @@ THRESHOLDS = (0.9, 0.7, 0.5)
 TEACHER_OFFSETS = (0, 100, 200)
 SEED_OFFSETS = tuple(range(0, 1000, 100))
 POOL, SPLIT_SEED = 400, 0
-MAX_NAME = 8                  # words of a name the dictionary rule matches
+MAX_NAME = nb.LEXICON_MAX_WORDS   # words of a name the dictionary rule matches
 
 
 def read_corpus(path, limit=0):
@@ -82,14 +83,7 @@ def lexicons_from_votes(sentences, votes, thresholds=THRESHOLDS):
     return out
 
 
-def lexicon_index(names):
-    """{words: type} of the names (at most MAX_NAME words), the most frequent type of a name
-    that has several."""
-    counts = defaultdict(Counter)
-    for kind, words in names:
-        if len(words) <= MAX_NAME:
-            counts[tuple(words)][kind] += 1
-    return {words: kinds.most_common(1)[0][0] for words, kinds in counts.items()}
+lexicon_index = nb.lexicon_index        # {words: type}, the most frequent type per name
 
 
 def apply_lexicon(words, tags, index, mode='fill'):
@@ -197,7 +191,20 @@ def run(args):
     print(f'{args.subfield}: {len(train)} training, {len(val)} validation, {len(test)} test '
           f'sentences; corpus {corpus_path}: {len(corpus):,} sentences', flush=True)
     teachers, tagged, sentences, skipped = [], [], None, 0
+    os.makedirs(args.lexicon_dir, exist_ok=True)
     for offset in args.offsets:
+        # a teacher's votes are kept locally (never committed) so that a killed probe resumes
+        # from its last finished teacher
+        cache = os.path.join(args.lexicon_dir, f'{args.subfield}_votes_m{offset}.pkl')
+        if os.path.isfile(cache):
+            with open(cache, 'rb') as f:
+                saved = pickle.load(f)
+            if saved['corpus_sha256'] == dapt_mlm.file_sha256(corpus_path):
+                sentences, skipped = saved['sentences'], saved['skipped']
+                tagged.append(saved['votes'])
+                teachers.append(saved['teacher'])
+                print(f"  teacher seed {offset}: votes restored from {cache}", flush=True)
+                continue
         t0 = time.perf_counter()
         record, tagger = nb.train_one(offset, train, val, test, labels, nb_args, device,
                                       keep_tagger=True)
@@ -217,6 +224,10 @@ def run(args):
         print(f"  teacher seed {offset}: val F1 {record['val_f1']:.2f}, test F1 "
               f"{record['f1']:.2f}; trained in {teachers[-1]['train_minutes']} min, tagged "
               f"{len(sentences):,} sentences in {teachers[-1]['tag_minutes']} min", flush=True)
+        with open(cache, 'wb') as f:
+            pickle.dump({'corpus_sha256': dapt_mlm.file_sha256(corpus_path),
+                         'sentences': sentences, 'skipped': skipped, 'votes': out,
+                         'teacher': teachers[-1]}, f)
     votes = list(zip(*tagged))
     lexicons = lexicons_from_votes(sentences, votes)
     unseen = [m for m in gold_names(test) if m not in set(gold_names(train))]

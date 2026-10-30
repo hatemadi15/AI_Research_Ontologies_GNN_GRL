@@ -77,6 +77,105 @@ def test_table3_and_table4():
     assert 'random splits' not in t4.split('\n\n', 1)[1]     # settings without results left out
 
 
+def _probe(subfield, fill_s, fill_m, precision=60.0, recall=40.0):
+    seed = {'before': {'precision': precision, 'recall': recall, 'f1': 48.0}}
+    return {'subfield': subfield,
+            'lexicons': {'sentences_0.9': {'unseen_share_in_lexicon': 0.133},
+                         'mentions_0.9': {'unseen_share_in_lexicon': 0.25}},
+            'probe': {'sentences_0.9': {'fill': {'delta_f1': fill_s, 'per_seed': {'m0': seed}}},
+                      'mentions_0.9': {'fill': {'delta_f1': fill_m, 'per_seed': {'m0': seed}}},
+                      'ceiling_unseen_gold': {'fill': {'delta_f1': -1.82},
+                                              'override': {'delta_f1': 4.13}}}}
+
+
+def test_table5_lists_the_probe_per_subfield_with_a_mean():
+    coverage = {'subfields': {'steel': {'corpora': {'topic_steel': {'exact': 0.55}}}}}
+    t5 = pt.table5([_probe('steel', 0.01, -10.03), _probe('sofc', 5.79, 5.91)], coverage)
+    lines = t5.splitlines()
+    assert '| steel | 55.0 | 13.3 | 25.0 | 60.0 | 40.0 | +0.01 | −10.03 | −1.82 | +4.13 |' in lines
+    assert '| sofc |  | 13.3 | 25.0 | 60.0 | 40.0 | +5.79 | +5.91 | −1.82 | +4.13 |' in lines
+    assert lines[-1] == '| mean | 55.0 | 13.3 | 25.0 | 60.0 | 40.0 | +2.90 | −2.06 | −1.82 | +4.13 |'
+    assert lines[2].startswith('| subfield | corpus holds (%) |')
+
+
+def test_table6_lists_the_held_out_decisions():
+    """Table 6: every pre-registered decision on held-out documents, in week order, the
+    reported comparisons and the screen's losers left out; the pooled decision needs every
+    corpus not to lose."""
+    def d(mean, lo, hi):
+        return {'micro': _spread(mean, lo, hi, 'mean_diff')}
+    held = {'n_subfields': 7, 'passes': False, 'crf_mr_minus_crf': d(2.1, -0.31, 4.51),
+            'votes': {'passes': True, 'crf_mr_minus_crf': d(2.71, 0.22, 5.2)}}
+    names = {'n_subfields': 7, 'minus_crf': d(2.04, -0.85, 4.92), 'decision_1': False,
+             'minus_crf_mr': d(-0.06, -1.09, 0.96), 'decision_2': False}
+    part = {'n_subfields': 7, 'minus_crf': d(3.0, 1.0, 5.0), 'decision_1': True,
+            'minus_crf_mr': d(1.0, -0.5, 2.5), 'decision_2': False}
+    week12 = {'crf_mrm_topic': {'decision': part}, 'crf_mr6': {'decision': part}}
+    consistency = {
+        'mulms': {'crf_dc': {'decision': '13.1a', 'passes': True, 'n_units': 7,
+                             'minus_input': d(0.82, 0.18, 1.46)},
+                  'crf_dcr': {'n_units': 7, 'minus_input': d(1.01, 0.28, 1.74)}},
+        'coarse': {'crf_dc': {'decision': 'week 7', 'passes': True, 'n_units': 4,
+                              'minus_input': d(0.12, 0.01, 0.24)}}}
+    folds = {'crf_mr': {'decision': '13.3a', 'passes': False, 'n_units': 5,
+                        'minus_crf': d(0.3, -0.2, 0.8)}}
+    pooled = {'crf_mrm_topic': {'status': 'decision', 'passes': True, 'no_corpus_loses': False,
+                                'n_units': 11, 'minus_crf': _spread(2.0, 0.5, 3.5, 'mean_diff'),
+                                'corpora': {'mulms': {'n_units': 7}, 'fine': {'n_units': 4}}},
+              'crf_mr': {'status': 'reported', 'passes': True, 'no_corpus_loses': True,
+                         'n_units': 11, 'minus_crf': _spread(2.3, 0.9, 3.7, 'mean_diff'),
+                         'corpora': {'mulms': {'n_units': 7}, 'fine': {'n_units': 4}}}}
+    analysis = {'mulms': {'leave_one_subfield_out': held, 'silver_names': names,
+                          'week12': week12},
+                'week13': {'consistency': consistency, 'week12_winner': 'crf_mrm_topic',
+                           'folds': folds, 'pooled': pooled}}
+    week12 = {'a': {**_comparison('crf_mrm6', 'decision', 4.27), 'granularity': 'fine'},
+              'b': {**_comparison('crf_mrm6', 'reported', 1.5)}}
+    rows = pt.held_out_rows(analysis, week12)
+    assert [r[0] for r in rows] == [7, 10, 10, 11, 11, 12, 12, 12, 13, 13, 13]
+    assert ("| 12 | MaterioMiner fine-grained, unseen papers | `crf_mrm6` vs `crf` | week 12, "
+            "the winner's analogue | 4 | +5.27 [+4.27, +6.27] | passes |") in pt.table6(rows)
+    rows = pt.held_out_rows(analysis)
+    assert [r[0] for r in rows] == [7, 10, 10, 11, 11, 12, 12, 13, 13, 13]
+    table = pt.table6(rows)
+    assert table.startswith('Table 6. Pre-registered decisions on held-out documents')
+    assert ('| 7 | MaterioMiner coarse-grained, unseen papers | `crf_dc` vs `crf` | week 7 '
+            '(recomputed) | 4 | +0.12 [+0.01, +0.24] | passes |') in table
+    assert ('| 10 | MuLMS, held-out subfields | `crf_mr` votes vs `crf` votes | week 10, '
+            'decision 2 | 7 | +2.71 [+0.22, +5.20] | passes |') in table
+    assert ('| 11 | MuLMS, held-out subfields | `crf_mrs` vs `crf_mr` | week 11, decision 2 '
+            '| 7 | \u22120.06 [\u22121.09, +0.96] | no |') in table
+    assert ('| 12 | MuLMS, held-out subfields | `crf_mrm_topic` vs `crf_mr` | week 12, '
+            'decision 2 | 7 | +1.00 [\u22120.50, +2.50] | no |') in table
+    assert ('| 13 | MuLMS, held-out subfields | `crf_dc` vs `crf` | week 13, 13.1a | 7 | '
+            '+0.82 [+0.18, +1.46] | passes |') in table
+    assert ('| 13 | SOFC-Exp, article folds | `crf_mr` vs `crf` | week 13, 13.3a | 5 | '
+            '+0.30 [\u22120.20, +0.80] | no |') in table
+    assert ('| 13 | pooled: MuLMS, held-out subfields (7) + MaterioMiner fine-grained, unseen '
+            'papers (4) | `crf_mrm_topic` vs `crf` | week 13, 13.2, a corpus loses | 11 | '
+            '+2.00 [+0.50, +3.50] | no |') in table
+    assert 'crf_dcr' not in table and 'crf_mr6' not in table and table.count('`crf_mr` vs') == 2
+    # week 14: the pooled decision 14.1 and the mixed-corpus decision 14.2
+    analysis['week14'] = {
+        'copies': {'pooled': {'decision': '14.1', 'n_units': 11, 'passes': True,
+                              'no_corpus_loses': True,
+                              'minus_control': _spread(1.5, 0.6, 2.4, 'mean_diff'),
+                              'corpora': {'mulms': {'n_units': 7}, 'fine': {'n_units': 4}}}},
+        'topic': {'decision': {'n_units': 7, 'passes': False,
+                               'minus_crf_mrm_mixed6': d(0.4, -0.3, 1.1)}}}
+    rows = pt.held_out_rows(analysis)
+    assert rows[-2:] == [
+        [14, 'pooled: MuLMS, held-out subfields (7) + MaterioMiner fine-grained, unseen papers (4)',
+         '`crf_mrm_topic6` / `crf_mrm6` vs `crf_mr6`', 'week 14, 14.1', 11,
+         '+1.50 [+0.60, +2.40]', 'passes'],
+        [14, 'MuLMS, held-out subfields', '`crf_mrm_topic6` vs `crf_mrm_mixed6`', 'week 14, 14.2',
+         7, '+0.40 [\u22120.30, +1.10]', 'no']]
+    analysis['week14']['copies']['pooled']['no_corpus_loses'] = False
+    assert pt.held_out_rows(analysis)[-2][3:] == ['week 14, 14.1, a corpus loses', 11,
+                                                  '+1.50 [+0.60, +2.40]', 'no']
+    assert pt.held_out_rows({}) == [] and pt.held_out_rows({'week13': {}}) == []
+
+
 def test_main_writes_what_it_has(tmp_path, capsys):
     results = tmp_path / 'results'
     (results / 'gpu').mkdir(parents=True)
@@ -87,5 +186,8 @@ def test_main_writes_what_it_has(tmp_path, capsys):
     written = pt.main(['--results', str(results), '--out', str(tmp_path / 'tables')])
     assert written == ['table1_published_split.md', 'table3_strict.md', 'table2_decisions.md',
                        'tableA1_all_comparisons.md']
-    assert 'table 4: no mention or matching analysis' in capsys.readouterr().out
+    out = capsys.readouterr().out
+    assert 'table 4: no mention or matching analysis' in out
+    assert 'table 5: no probe reports' in out
+    assert 'table 6: no held-out decisions' in out
     assert (tmp_path / 'tables' / 'table2_decisions.md').read_text().count('| 5 | GPU |') == 1

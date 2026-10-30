@@ -189,17 +189,72 @@ sentences; the official validation and test articles), with predictions.
 by draw, each the mean of its 10 seeds) and the CRF head on 10 articles
 against all 26 (`ten_minus_all_articles`, paired by seed).
 
+Week 13, 13.1 (the consistency rule on held-out documents; protocol, amendment
+and outcome in ROADMAP §4; no training): `ner_consistency.py`, with and without
+`--retype`, on the saved 10-seed predictions of the CRF head and mention
+replacement on MuLMS's held-out subfields
+(`gpu/ner_results_mulms_leave_one_subfield_out_{crf,crf_mr}_{dc,dcr}_m<N>.json`,
+run ids the subfields; CC BY-SA 4.0), of the CRF head on SOFC-Exp's 5 article
+folds (`gpu/ner_results_sofc_document_folds_crf_{dc,dcr}_m<N>.json`, run ids
+`fold0` to `fold4`) and of mention replacement and its multi-task combination
+on MaterioMiner's held-out papers
+(`gpu/ner_results_{fine,coarse}_leave_one_paper_out_{crf_mr,crf_mt_mr}_{dc,dcr}_m<N>.json`),
+N = 0 to 900; each run keeps the entities added and retyped, the input's F1
+and, unlike week 7's files, the new predictions (`--save-predictions`).
+`gpu/ner_week5_seed_analysis.json` (`week13`, `consistency`) holds every
+output against its input, paired over the subfields, papers or folds, with
+its verdict where the comparison is a decision (13.1a, 13.1b, 13.1d, and
+week 7's on the CRF head on MaterioMiner, recomputed), and (`week13`,
+`pooled`) the pooled estimates across corpora of 13.2 and 13.3
+(`week12_winner` names the screen's winner once the screen is complete).
+Batches `w13a` and `w13c` (13.3) write
+`gpu/ner_results_sofc_document_folds_crf_mr_m<N>.json` (`w13a`,
+`ner-gpu-jobs-c` version 5, 24 October, bundle 3ac85a8; in hand, run ids
+`fold0` to `fold4`, with predictions) and
+`gpu/ner_results_sofc{,_slot}_document_folds_crf_mt_mr_m<N>.json` (`w13c`,
+`ner-gpu-jobs-c` version 6, 24–25 October; in hand, a file per level); (`week13`,
+`folds`) then holds the decisions 13.3a and 13.3b, each method paired over the
+folds against week 8's CRF head on them, and the multi-task combination's slot
+level and its difference against mention replacement (reported). Batch `w13b`
+(13.4, conditional on a pass of week 12's decision 1 or of 13.2) will write
+`gpu/ner_results_sofc_document_folds_crf_mrm6_m<N>.json`, the week-12
+winner's analogue on the folds (the SOFC corpus's silver mentions, 6 copies):
+(`week13`, `folds`, `crf_mrm6`) its decision 13.4 and (`week13`, `pooled`,
+`crf_mrm_topic6`, `with_sofc_folds`) the three-corpus estimate (reported).
+
 Week 11 (mention replacement with silver names; protocol and the outcome of part
-`w11a` in ROADMAP §4; batches `w11a` and `w11b` from 427e34c): `w11a` (Kaggle
-session of 18 October, `ner-gpu-jobs-d` version 5) wrote
+`w11a` in ROADMAP §4; batch `w11a` from 427e34c, `w11b` from 77c37be): `w11a`
+(Kaggle session of 18 October, `ner-gpu-jobs-d` version 5) wrote
 `gpu/ner_results_mulms_leave_one_subfield_out_crf_mrs_m<N>.json` (MuLMS, run ids the
-subfields; CC BY-SA 4.0); `w11b`, after 24 October, will write
-`gpu/ner_results_{fine,coarse}_leave_one_paper_out_crf_mrs_m<N>.json`
-(MaterioMiner), model seeds 0 to 900, with predictions. Each run's `self_training`
+subfields; CC BY-SA 4.0); `w11b` (session of 19–20 October, `ner-gpu-jobs-d`
+version 6) wrote `gpu/ner_results_{fine,coarse}_leave_one_paper_out_crf_mrs_m<N>.json`
+(MaterioMiner), model seeds 0 to 900, with predictions, their votes
+`..._crf_mrs_ens3[_m300|_m600].json` (`ner_ensemble.py`) and
+`gpu/ner_week11_comparisons.json` (`ner_seedmeans.py --week 11`: decisions 3 and 4
+and the reported comparisons). Each run's `self_training`
 holds its 3 teachers' scores and the silver counts (`names`: mentions, distinct names,
 and the unseen test entities that are silver names); no name is stored.
 `gpu/ner_week5_seed_analysis.json` (`mulms`, `silver_names`) holds the MuLMS
 decisions, and `gpu/ner_week11_comparisons.json` will hold the MaterioMiner ones.
+
+Week 12, the MaterioMiner analogue of the screen's winner (`w12d:mrm6`,
+`ner-gpu-jobs-d` version 12, 24–25 October, bundle 3ac85a8; outcome in
+ROADMAP §4): `gpu/ner_results_{fine,coarse}_leave_one_paper_out_crf_mrm6_m<N>.json`,
+N = 0 to 900 (run ids the held-out papers; each run records its teachers,
+the mention filter and the silver names' counts), the votes of the three
+seed triples `..._crf_mrm6_ens3{,_m300,_m600}.json` (`ner_ensemble.py`), and
+`gpu/ner_week12_comparisons.json` (`ner_seedmeans.py --week 12 --gpu`): the
+analogue decided against the CRF head per granularity, reported against
+mention replacement and with its votes against both votes; V6's analogue
+`crf_st3` (week 4's files) is reported there. The pooled decision 13.2 is in
+`gpu/ner_week5_seed_analysis.json` (`week13`, `pooled`, `crf_mrm_topic6`).
+Week 13, 13.4 (`w13b`, `ner-gpu-jobs-d` version 13, 25 October, bundle
+3ac85a8): `gpu/ner_results_sofc_document_folds_crf_mrm6_m<N>.json`, N = 0 to
+900, the analogue on SOFC-Exp's 5 article folds with the SOFC corpus (run ids
+`fold0` to `fold4`; each run records its teachers, the mention filter and the
+silver names' counts); (`week13`, `folds`, `crf_mrm6`) holds decision 13.4 and
+(`week13`, `pooled`, `crf_mrm_topic6`, `with_sofc_folds`) the three-corpus
+estimate.
 
 Week 12, phase 0 (names from a topic corpus; the gate in ROADMAP §4, no
 training): `mulms_articles.json` (`mulms_articles.py`) is the Europe PMC search
@@ -215,16 +270,28 @@ is the gate: per held-out subfield and corpus, the share of the unseen test
 entities (and of their distinct names) whose words occur in a corpus sentence,
 exact and ignoring word boundaries and case, per type, with the sentences
 that share a shingle with the held-out documents left out (`leaked`, 0
-everywhere). The week-12 batches `w12a` (the screen, five variants after
-amendment 1) and `w12b:<variant>` (the decision) run from 77c37be (bundle on
-`ner-gpu-bundle-3`) after 24 October and will write
+everywhere). The week-12 batches `w12a`, `w12e` and `w12c` (the screen, seven variants
+after amendments 1–3; all run on 20 October) and `w12b:mrm6` (the decision for
+the screen's winner V4: `crf_mrm_topic6_m<300..900>`, `ner-gpu-jobs-d` version
+10, 24 October; in hand), from a bundle rebuilt after the CPU
+probe (`ner-gpu-bundle-3`), write
 `gpu/ner_results_mulms_leave_one_subfield_out_<variant>_m<N>.json` for the
-variants `crf_mrs_topic`, `crf_mrm_topic`, `crf_mrm_topic6`, `crf_st3_topic`
-and `crf_mr6` (run ids the subfields; CC BY-SA 4.0);
-`gpu/ner_week5_seed_analysis.json` (`mulms`, `week12`) will hold the screen
-and the decisions. `silver_lexicons/<subfield>.json` (`silver_lexicon.py`,
-the CPU probe of `docs/METHODS_PLAN.md` §4B, no decision) records per
-subfield the lexicons' sizes and their coverage of the unseen test names
+variants `crf_mrs_topic`, `crf_mrm_topic`, `crf_mrm_topic6`, `crf_st3_topic`,
+`crf_gzm_topic` and `crf_gzs_topic` (amendments 2 and 3, batch `w12c`) and
+`crf_mr6` (run ids the subfields; CC BY-SA 4.0);
+`gpu/ner_week5_seed_analysis.json` (`mulms`, `week12`) holds the screen
+and the decisions. In hand (20 October): `crf_gzm_topic_m<N>` and
+`crf_gzs_topic_m<N>` (the feature screen, `ner-gpu-jobs-c` version 4, bundle
+3ac85a8) and `crf_mr6_m<N>` (the first `w12a` session, `ner-gpu-jobs-d`
+version 7, bundle 47e2310), and `crf_mrs_topic_m<N>`, `crf_mrm_topic_m<N>`,
+`crf_mrm_topic6_m<N>` and `crf_st3_topic_m<N>` (`w12e`, `ner-gpu-jobs-d`
+version 8, bundle 3ac85a8; the screen is complete), N in 0, 100, 200; each
+run of a topic variant
+records its corpus (`self_train_sha256`), its teachers and, for the feature
+variants, `names_feature` (the lexicon's size, the matches and the largest
+learned weight). `silver_lexicons/<subfield>.json` (`silver_lexicon.py`,
+the CPU probe of `docs/METHODS_PLAN.md` §4B, no decision; all 7 subfields,
+19–20 October) records per subfield the lexicons' sizes and their coverage of the unseen test names
 under both silver filters at three thresholds, and the dictionary rule's
 effect on week 10's saved predictions with the gold-name ceilings; the names
 themselves stay local.
@@ -337,3 +404,27 @@ with the most frequent pairs of gold and predicted type among those of the
 right span (`wrong_type_pairs`, per run); `conventions` what the gold annotations alone
 show: the names that are entities in two or more papers, those with
 different types, and the mean span length of each type per paper.
+
+Week 14 (the names method's ablations; protocol in ROADMAP §4, week 14):
+`topic_corpora/mixed_<subfield>.json` (`build_mixed_corpus.py`) is the report of
+the mixed corpus of a held-out subfield, 40,000 sentences drawn from the six
+other subfields' topic corpora (6,667 or 6,666 each, a seeded shuffle; the
+sentences of the subfield's own corpus and those already taken skipped, 17–69
+per corpus), with the sources' SHA-256, the counts and the corpus's SHA-256
+(the corpus, `data/processed/corpus/topic_mixed_<subfield>_sentences.txt`, is
+not versioned and the report rebuilds it from the topic corpora);
+`mulms_coverage_mixed.json` (`mulms_coverage.py` with the seven mixed corpora)
+is their coverage of the unseen test names by phase 0's rule: 49–70% exact
+(57–74% loose) against the topic corpora's 55–81% (63–84%), measured before
+any run of 14.2. The week-14 batches: `w14a` (14.1, the 6-copy control
+`crf_mr6` on MuLMS's held-out subfields at seeds 300–900 and on MaterioMiner's
+held-out papers at 10 seeds, both granularities; `ner-gpu-jobs-c` version 7,
+29 October, 12:05–17:20 UTC, 5.2 session hours: the 27 files `mulms_leave_one_subfield_out_crf_mr6_m<300..900>` and
+`{fine,coarse}_leave_one_paper_out_crf_mr6_m<N>`, with the control's seed votes
+`crf_mr6_ens3`, `_ens3_m300` and `_ens3_m600` per granularity; 14.1 no, +0.80
+[−0.66, +2.26] pooled), `w14b` (14.2, `crf_mrm_mixed6_m<300..900>`; `ner-gpu-jobs-d` version 14, 29 October
+18:00–22:20 UTC, 4.3 session hours, pushed early on the week's remaining quota; 14.2 no, −0.18 [−2.01, +1.65]) and `w14c` (14.3,
+`crf_mrm_topic10k6`, `crf_mrm_topic20k6`, `crf_mrm_topiclow6`,
+`crf_mrm_topictwo6` and `crf_mrm_topiccap6` at seeds 0–200), the last two after
+the reset of 31 October; their analyses in `gpu/ner_week5_seed_analysis.json`
+(`week14`: `copies`, `topic`, `ablations`) and Table 6.

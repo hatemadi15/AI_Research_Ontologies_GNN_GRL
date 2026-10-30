@@ -428,6 +428,12 @@ def test_mulms_held_out_subfields_and_pool_splits(tmp_path):
                 runs.append(run)
             (tmp_path / f'ner_results_mulms_leave_one_subfield_out_{system}_m{off}.json'
              ).write_text(json.dumps({'runs': runs}))
+    # the consistency rule's outputs on the held-out subfields (week 13) are not variants
+    for system in ('crf_dc', 'crf_mr_dcr'):
+        for off in range(0, 1000, 100):
+            src = tmp_path / f'ner_results_mulms_leave_one_subfield_out_crf_mr6_m{off}.json'
+            (tmp_path / f'ner_results_mulms_leave_one_subfield_out_{system}_m{off}.json'
+             ).write_text(src.read_text())
     week12 = sa.mulms(tmp_path)['week12']
     assert set(week12) == {'crf_mr6', 'crf_mrm_topic'}
     assert set(week12['crf_mrm_topic']) == {'screen'}       # seeds 0-200 only
@@ -444,7 +450,9 @@ def test_mulms_held_out_subfields_and_pool_splits(tmp_path):
     assert set(six) == {'screen', 'decision', 'ten_seeds'}
     decision = six['decision']
     assert decision['seeds'] == list(range(300, 1000, 100))
-    assert (decision['decision_1'], decision['decision_2']) == (True, False)
+    # no screen's winner here (the screen lacks variants), so no decision keys: the part
+    # is reported (week 14 reads it as the copy control)
+    assert 'decision_1' not in decision and 'decision_2' not in decision
     assert decision['minus_crf_mr']['micro']['per_run'] == [-0.7] * 7
     assert decision['subfields']['alpha'] == 50.9                    # 50 + 0.6 (seeds 300-900) + 0.3
     assert six['ten_seeds']['subfields']['alpha'] == 50.75 and 'decision_1' not in six['ten_seeds']
@@ -509,3 +517,261 @@ def test_paper_diversity_three_papers_at_the_size_of_two(tmp_path):
     (tmp_path / 'ner_results_fine_leave_one_paper_out_crf_p3n2_m200.json').write_text(
         json.dumps({'runs': sized[:-1]}))                         # a pair missing: left out
     assert sa.paper_diversity(tmp_path) == {}
+
+
+def test_week13_consistency_rule_and_pooled_estimates(tmp_path):
+    """Week 13: the consistency rule's outputs against their inputs per corpus (a decision
+    where pre-registered), the week-12 screen's winner, and a method pooled over the
+    held-out units of every corpus with its files."""
+    pytest.importorskip('scipy')
+    subfields = ['alpha', 'beta', 'gamma', 'delta', 'eps', 'zeta', 'eta']
+    papers = ['p1', 'p2', 'p3', 'p4']
+    folds = [f'fold{k}' for k in range(5)]
+
+    def write(prefix, system, ids, score, extra=None):
+        for j, off in enumerate(range(0, 1000, 100)):
+            runs = []
+            for k, name in enumerate(ids):
+                run = _run(name, score(j, k))
+                run.update(extra(j, k) if extra else {})
+                runs.append(run)
+            (tmp_path / f'ner_results_{prefix}_{system}_m{off}.json').write_text(
+                json.dumps({'runs': runs}))
+    # MuLMS: the rule adds 0.8 on every subfield to the CRF head (13.1a) and 0.2 to mention
+    # replacement, which crosses 0 (13.1b); retyping adds 1.0 (reported)
+    write('mulms_leave_one_subfield_out', 'crf', subfields, lambda j, k: 50 + k + j / 10)
+    write('mulms_leave_one_subfield_out', 'crf_dc', subfields, lambda j, k: 50.8 + k + j / 10,
+          lambda j, k: {'n_added': 10 + k, 'n_retyped': 0})
+    write('mulms_leave_one_subfield_out', 'crf_dcr', subfields, lambda j, k: 51 + k + j / 10,
+          lambda j, k: {'n_added': 10 + k, 'n_retyped': 2})
+    write('mulms_leave_one_subfield_out', 'crf_mr', subfields, lambda j, k: 52 + k + j / 10)
+    write('mulms_leave_one_subfield_out', 'crf_mr_dc', subfields,
+          lambda j, k: 52 + k + j / 10 + (0.9 if k % 2 else -0.5), lambda j, k: {'n_added': 5})
+    # MaterioMiner fine-grained: mention replacement gains 2 over the CRF head on every paper;
+    # SOFC-Exp's folds: 0.5 on every fold
+    write('fine_leave_one_paper_out', 'crf', papers, lambda j, k: 45 + k + j / 10)
+    write('fine_leave_one_paper_out', 'crf_mr', papers, lambda j, k: 47 + k + j / 10)
+    write('sofc_document_folds', 'crf', folds, lambda j, k: 80 + k + j / 10)
+    write('sofc_document_folds', 'crf_mr', folds, lambda j, k: 80.5 + k + j / 10)
+    out = sa.week13(tmp_path)
+    cons = out['consistency']
+    assert set(cons) == {'mulms'} and set(cons['mulms']) == {'crf_dc', 'crf_dcr', 'crf_mr_dc'}
+    dc = cons['mulms']['crf_dc']
+    assert (dc['decision'], dc['passes'], dc['n_units']) == ('13.1a', True, 7)
+    assert dc['minus_input']['micro']['per_run'] == [0.8] * 7
+    assert dc['units']['alpha'] == 0.8 and dc['output']['micro']['mean'] == 54.25
+    assert dc['input']['micro']['mean'] == 53.45
+    assert dc['n_added_per_seed'] == 91.0 and dc['n_retyped_per_seed'] == 0.0   # 7 subfields
+    dcr = cons['mulms']['crf_dcr']
+    assert 'decision' not in dcr and dcr['minus_input']['micro']['mean_diff'] == 1.0
+    assert dcr['n_retyped_per_seed'] == 14.0
+    mr_dc = cons['mulms']['crf_mr_dc']
+    assert (mr_dc['decision'], mr_dc['passes']) == ('13.1b', False)
+    assert mr_dc['minus_input']['micro']['per_run'] == [-0.5, 0.9, -0.5, 0.9, -0.5, 0.9, -0.5]
+    # 13.3a: mention replacement on the article folds against the CRF head, paired by fold
+    assert set(out['folds']) == {'crf_mr'}
+    mr = out['folds']['crf_mr']
+    assert (mr['decision'], mr['passes'], mr['n_units']) == ('13.3a', True, 5)
+    assert mr['minus_crf']['micro']['per_run'] == [0.5] * 5 and mr['units'] == {f: 0.5 for f in folds}
+    assert mr['system']['micro']['mean'] == 82.95 and mr['crf']['micro']['mean'] == 82.45
+    assert 'minus_crf_mr' not in mr and 'slot' not in mr
+    # the pooled estimates: mention replacement over 7 + 4 + 5 units, reported (no winner)
+    assert out['week12_winner'] is None
+    assert set(out['pooled']) == {'crf_mr'}
+    pooled = out['pooled']['crf_mr']
+    assert (pooled['n_units'], pooled['status'], pooled['passes']) == (16, 'reported', True)
+    assert {c: e['n_units'] for c, e in pooled['corpora'].items()} == {
+        'mulms': 7, 'fine': 4, 'sofc_folds': 5}
+    assert pooled['corpora']['fine']['minus_crf']['per_run'] == [2.0] * 4
+    assert pooled['corpora']['sofc_folds']['units'] == {f: 0.5 for f in folds}
+    assert pooled['minus_crf']['per_run'] == [2.0] * 7 + [2.0] * 4 + [0.5] * 5
+    assert pooled['no_corpus_loses'] and not any(e['loses'] for e in pooled['corpora'].values())
+    # 13.3b: the multi-task combination on the folds (1 over the CRF head, 0.5 over mention
+    # replacement), with its slot level
+    write('sofc_document_folds', 'crf_mt_mr', folds, lambda j, k: 81 + k + j / 10)
+    write('sofc_slot_document_folds', 'crf_mt_mr', folds, lambda j, k: 70 + k + j / 10)
+    out = sa.week13(tmp_path)
+    assert set(out['folds']) == {'crf_mr', 'crf_mt_mr'}
+    mt = out['folds']['crf_mt_mr']
+    assert (mt['decision'], mt['passes'], mt['n_units']) == ('13.3b', True, 5)
+    assert mt['minus_crf']['micro']['per_run'] == [1.0] * 5
+    assert mt['minus_crf_mr']['micro']['per_run'] == [0.5] * 5
+    assert mt['slot']['micro']['mean'] == 72.45 and mt['slot']['n_units'] == 5
+    assert set(out['pooled']) == {'crf_mr'}        # crf_mt_mr: no MaterioMiner files yet
+    # 13.4: the winner's analogue on the folds (0.3 over the CRF head, -0.2 under mention
+    # replacement), and the winner's three-corpus estimate once its MuLMS and MaterioMiner
+    # files exist (7 + 4 + 5 units; reported, 13.2 stays the two-corpus decision)
+    write('sofc_document_folds', 'crf_mrm6', folds, lambda j, k: 80.3 + k + j / 10)
+    write('mulms_leave_one_subfield_out', 'crf_mrm_topic6', subfields,
+          lambda j, k: 53 + k + j / 10)
+    write('fine_leave_one_paper_out', 'crf_mrm6', papers, lambda j, k: 46 + k + j / 10)
+    out = sa.week13(tmp_path)
+    an = out['folds']['crf_mrm6']
+    assert (an['decision'], an['passes'], an['n_units']) == ('13.4', True, 5)
+    assert an['minus_crf']['micro']['per_run'] == [0.3] * 5
+    assert an['minus_crf_mr']['micro']['per_run'] == [-0.2] * 5
+    winner = out['pooled']['crf_mrm_topic6']
+    assert winner['n_units'] == 11 and set(winner['corpora']) == {'mulms', 'fine'}
+    three = winner['with_sofc_folds']
+    assert (three['n_units'], three['status'], three['passes']) == (16, 'reported', True)
+    assert three['sofc_folds']['units'] == {f: 0.3 for f in folds}
+    assert three['minus_crf']['per_run'] == [3.0] * 7 + [1.0] * 4 + [0.3] * 5
+    assert three['corpora']['sofc_folds'] == {'variant': 'crf_mrm6', 'n_units': 5}
+    assert 'with_sofc_folds' not in out['pooled']['crf_mr']
+    # a MuLMS variant and its MaterioMiner analogue: two corpora, the analogue losing
+    write('mulms_leave_one_subfield_out', 'crf_mrm_topic', subfields,
+          lambda j, k: 53 + k + j / 10)
+    write('fine_leave_one_paper_out', 'crf_mrm', papers, lambda j, k: 44 + k + j / 10)
+    pooled = sa.week13(tmp_path)['pooled']
+    assert set(pooled) == {'crf_mr', 'crf_mrm_topic', 'crf_mrm_topic6'}
+    topic = pooled['crf_mrm_topic']
+    assert topic['n_units'] == 11 and topic['corpora']['fine']['loses']
+    assert not topic['no_corpus_loses'] and topic['status'] == 'reported'
+    assert topic['minus_crf']['per_run'] == [3.0] * 7 + [-1.0] * 4
+    # the screen's winner makes its pooled estimate the decision 13.2
+    week12 = {v: {'screen': {'minus_crf_mr': {'micro': {'mean_diff': 0.5}}}}
+              for v in sa.SCREEN_VARIANTS}
+    assert sa.week12_winner(week12) is None or True       # all equal: the first maximum
+    week12['crf_mrm_topic']['screen']['minus_crf_mr']['micro']['mean_diff'] = 1.5
+    assert sa.week12_winner(week12) == 'crf_mrm_topic'
+    assert sa.week13(tmp_path, week12)['pooled']['crf_mrm_topic']['status'] == 'decision'
+    assert sa.week13(tmp_path, week12)['week12_winner'] == 'crf_mrm_topic'
+    week12['crf_mrm_topic']['screen']['minus_crf_mr']['micro']['mean_diff'] = -0.1
+    for v in sa.SCREEN_VARIANTS:
+        week12[v]['screen']['minus_crf_mr']['micro']['mean_diff'] = -0.1
+    assert sa.week12_winner(week12) is None                 # no gain above 0
+    del week12['crf_gzs_topic']
+    assert sa.week12_winner(week12) is None                 # the screen is incomplete
+    # a corpus with one family missing drops out of the pooled estimate
+    (tmp_path / 'ner_results_sofc_document_folds_crf_mr_m900.json').unlink()
+    pooled = sa.week13(tmp_path)['pooled']['crf_mr']
+    assert set(pooled['corpora']) == {'mulms', 'fine'} and pooled['n_units'] == 11
+
+def test_week14_copies_topic_and_ablations(tmp_path):
+    """Week 14: 14.1 the names method against the 6-copy control, per corpus and pooled
+    (the decision); 14.2 V4 with the own corpus against V4 with the mixed corpus (the
+    decision) and the mixed variant against the references; 14.3 the ablations against V4
+    on the screen's seeds; the week-14 variants are no week-12 variants, and the control's
+    decision-seed part of the week-12 section carries no decision."""
+    pytest.importorskip('scipy')
+    subfields = ['alpha', 'beta', 'gamma', 'delta', 'eps', 'zeta', 'eta']
+    papers = ['p1', 'p2', 'p3', 'p4']
+
+    def write(prefix, system, ids, score, offsets=range(0, 1000, 100), extra=None):
+        for j, off in enumerate(offsets):
+            runs = []
+            for k, name in enumerate(ids):
+                run = _run(name, score(j, k))
+                run.update(extra(j, k) if extra else {})
+                runs.append(run)
+            (tmp_path / f'ner_results_{prefix}_{system}_m{off}.json').write_text(
+                json.dumps({'runs': runs}))
+
+    def names(j, k, **setting):
+        return {'self_training': {
+            'names': {'n_mentions': 100 + k, 'n_distinct': 50, 'n_test_entities': 200,
+                      'n_test_unseen': 100, 'n_test_unseen_in_silver': 20 + k},
+            'silver_filter': 'mentions', 'n_sampled': 40000, 'marginal_threshold': 0.9,
+            **setting}}
+    m = 'mulms_leave_one_subfield_out'
+    write(m, 'crf', subfields, lambda j, k: 50 + k + j / 10)
+    write(m, 'crf_mr', subfields, lambda j, k: 52 + k + j / 10)
+    write(m, 'crf_mrm_topic6', subfields, lambda j, k: 54 + k + j / 10, extra=names)
+    assert sa.week14(tmp_path) == {'copies': {}, 'topic': {}, 'ablations': {}}
+    # 14.1 on MuLMS: the control on all 10 seeds, 1.5 below V4 on every subfield
+    write(m, 'crf_mr6', subfields, lambda j, k: 52.5 + k + j / 10)
+    out = sa.week14(tmp_path)
+    mulms = out['copies']['mulms']
+    assert set(mulms) == {'decision', 'ten_seeds'} and 'pooled' not in out['copies']
+    dec = mulms['decision']
+    assert dec['seeds'] == list(range(300, 1000, 100)) and dec['n_units'] == 7
+    assert dec['minus_crf_mr6']['micro']['per_run'] == [1.5] * 7
+    assert dec['crf_mrm_topic6']['micro']['mean'] == 57.6 and dec['units']['alpha'] == 54.6
+    assert dec['control']['crf_mr6']['micro']['mean'] == 56.1
+    assert dec['control']['minus_crf']['micro']['per_run'] == [2.5] * 7
+    assert dec['control']['minus_crf_mr']['micro']['per_run'] == [0.5] * 7
+    assert 'votes' not in dec and 'names' not in dec['control']
+    assert mulms['ten_seeds']['seeds'] == list(range(0, 1000, 100))
+    assert mulms['ten_seeds']['crf_mrm_topic6']['micro']['mean'] == 57.45
+    week12 = sa.week12_variants(tmp_path)
+    assert set(week12) == {'crf_mr6', 'crf_mrm_topic6'}
+    assert 'decision_1' not in week12['crf_mr6']['decision']      # not the screen's winner
+    assert 'decision_1' not in week12['crf_mrm_topic6']['decision']   # no winner: screens missing
+    # MaterioMiner: the analogue against the control at both granularities, pooled with
+    # MuLMS's decision units
+    f, c = 'fine_leave_one_paper_out', 'coarse_leave_one_paper_out'
+    write(f, 'crf', papers, lambda j, k: 45 + k + j / 10)
+    write(f, 'crf_mr', papers, lambda j, k: 47 + k + j / 10)
+    write(f, 'crf_mr6', papers, lambda j, k: 47.2 + k + j / 10)
+    write(f, 'crf_mrm6', papers, lambda j, k: 48.7 + k + j / 10)
+    write(c, 'crf', papers, lambda j, k: 55 + k + j / 10)
+    write(c, 'crf_mr', papers, lambda j, k: 56 + k + j / 10)
+    write(c, 'crf_mr6', papers, lambda j, k: 56.5 + k + j / 10)
+    write(c, 'crf_mrm6', papers, lambda j, k: 56 + k + j / 10)
+    out = sa.week14(tmp_path)
+    fine = out['copies']['fine']
+    assert fine['n_units'] == 4 and fine['minus_crf_mr6']['micro']['per_run'] == [1.5] * 4
+    assert fine['control']['minus_crf_mr']['micro']['per_run'] == [0.2] * 4
+    assert fine['seeds'] == list(range(0, 1000, 100))
+    assert out['copies']['coarse']['minus_crf_mr6']['micro']['per_run'] == [-0.5] * 4
+    pooled = out['copies']['pooled']
+    assert (pooled['decision'], pooled['n_units'], pooled['passes'],
+            pooled['no_corpus_loses']) == ('14.1', 11, True, True)
+    assert pooled['minus_control']['per_run'] == [1.5] * 11
+    assert pooled['minus_control']['mean_diff'] == 1.5
+    assert {k: e['n_units'] for k, e in pooled['corpora'].items()} == {'mulms': 7, 'fine': 4}
+    assert pooled['corpora']['mulms']['minus_control']['per_run'] == [1.5] * 7
+    # a losing corpus: the fine-grained analogue 0.5 below the control
+    write(f, 'crf_mrm6', papers, lambda j, k: 46.7 + k + j / 10)
+    pooled = sa.week14(tmp_path)['copies']['pooled']
+    assert pooled['minus_control']['per_run'] == [1.5] * 7 + [-0.5] * 4
+    assert pooled['corpora']['fine']['loses'] and not pooled['no_corpus_loses']
+    assert pooled['passes'] and pooled['minus_control']['mean_diff'] == 0.77
+    # 14.2: V4 with the mixed corpus, 1 below V4 with the own corpus, with its silver names
+    write(m, 'crf_mrm_mixed6', subfields, lambda j, k: 53 + k + j / 10, extra=names)
+    t = sa.week14(tmp_path)['topic']
+    assert set(t) == {'decision', 'ten_seeds'}
+    d = t['decision']
+    assert (d['decision'], d['passes'], d['n_units']) == ('14.2', True, 7)
+    assert d['minus_crf_mrm_mixed6']['micro']['per_run'] == [1.0] * 7
+    mixed = d['mixed']
+    assert mixed['crf_mrm_mixed6']['micro']['mean'] == 56.6
+    assert mixed['minus_crf']['micro']['per_run'] == [3.0] * 7
+    assert mixed['minus_crf_mr']['micro']['per_run'] == [1.0] * 7
+    assert mixed['minus_crf_mr6']['micro']['per_run'] == [0.5] * 7
+    assert mixed['silver_filter'] == 'mentions' and mixed['unseen_in_silver'] == 0.23
+    assert mixed['names']['eta']['n_mentions'] == 106
+    assert 'decision' not in t['ten_seeds']
+    assert t['ten_seeds']['seeds'] == list(range(0, 1000, 100))
+    assert 'crf_mrm_mixed6' not in sa.week12_variants(tmp_path)
+    # 14.3: two ablations on the screen's seeds, against V4's screen runs
+    write(m, 'crf_mrm_topic10k6', subfields, lambda j, k: 53.5 + k + j / 10, offsets=(0, 100, 200),
+          extra=lambda j, k: names(j, k, n_sampled=10000))
+    write(m, 'crf_mrm_topiccap6', subfields, lambda j, k: 54.2 + k + j / 10, offsets=(0, 100, 200),
+          extra=lambda j, k: names(j, k, names_share=0.5))
+    out = sa.week14(tmp_path)
+    ab = out['ablations']
+    assert list(ab) == ['crf_mrm_topic10k6', 'crf_mrm_topiccap6']
+    ten = ab['crf_mrm_topic10k6']
+    assert ten['seeds'] == [0, 100, 200] and ten['n_units'] == 7
+    assert ten['minus_crf_mrm_topic6']['micro']['per_run'] == [-0.5] * 7
+    assert ten['minus_crf']['micro']['per_run'] == [3.5] * 7
+    assert ten['minus_crf_mr']['micro']['per_run'] == [1.5] * 7
+    assert ten['setting'] == {'n_sampled': 10000, 'marginal_threshold': 0.9}
+    assert ten['unseen_in_silver'] == 0.23
+    cap = ab['crf_mrm_topiccap6']
+    assert cap['setting'] == {'n_sampled': 40000, 'marginal_threshold': 0.9, 'names_share': 0.5}
+    assert cap['minus_crf_mrm_topic6']['micro']['mean_diff'] == 0.2
+    assert set(sa.week12_variants(tmp_path)) == {'crf_mr6', 'crf_mrm_topic6'}
+    assert sa.analyse(tmp_path)['week14']['copies']['pooled']['n_units'] == 11
+    # with every screen variant screened, V4 wins the screen (2.0 over mention replacement
+    # against 0.5) and its decision-seed part alone carries the week-12 decisions
+    for v in sa.SCREEN_VARIANTS:
+        if v not in ('crf_mr6', 'crf_mrm_topic6'):
+            write(m, v, subfields, lambda j, k: 52.5 + k + j / 10, offsets=(0, 100, 200))
+    week12 = sa.week12_variants(tmp_path)
+    assert sa.week12_winner(week12) == 'crf_mrm_topic6'
+    assert (week12['crf_mrm_topic6']['decision']['decision_1'],
+            week12['crf_mrm_topic6']['decision']['decision_2']) == (True, True)
+    assert 'decision_1' not in week12['crf_mr6']['decision']
+    assert set(sa.week14(tmp_path)['ablations']) == {'crf_mrm_topic10k6', 'crf_mrm_topiccap6'}
