@@ -441,7 +441,7 @@ limitations; related work cut from §8); week 16 (8–14 November) paper B's
 draft from `PAPER_DRAFT.md` §2–5, 7 and 8 with the method sections cut to
 summaries (a first complete draft was written on 30 October, `docs/PAPER_B.md`); the titles and abstracts of both fixed by 14 November; then
 the submission checklists (the reproducibility appendix and the code
-release for both; the authors' confirmation email, the user's; the
+release for both, drafted 30 October in `docs/REPRODUCIBILITY.md`; the authors' confirmation email, the user's; the
 venues, the user's: a materials-informatics venue for A, a
 scholarly-document-processing or NLP-evaluation venue for B; the
 shortlist with deadlines is `docs/VENUES.md`). No GPU

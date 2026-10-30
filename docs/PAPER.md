@@ -217,8 +217,34 @@ condition, the consistency rule (C25) and the unseen-name mechanism
 (C17, C22). Paper B, the evaluation paper (`docs/PAPER_B.md`, drafted 30 October
 from `docs/PAPER_DRAFT.md`, ahead of week 16): C1–C24 with the method
 results cut to summaries that cite A, and the count of 86 pre-registered
-decisions. The
-division and the schedule are in `docs/METHODS_PLAN.md` §7.
+decisions. The division and the schedule are in `docs/METHODS_PLAN.md`
+§7. The reproducibility appendix both papers attach and the code-release
+checklist are `docs/REPRODUCIBILITY.md` (30 October).
+
+## Titles and abstracts (candidates, 30 October; fixed by 14 November)
+
+Each draft carries its abstract (paper A about 330 words, paper B about
+400); the venue sets the length (Nature Portfolio journals about 150
+words unreferenced, RSC and IOP about 250, ACL no hard limit; check the
+author guidelines when the venue is chosen). Title candidates, the first
+of each the drafts' working title:
+
+Paper A (methods):
+1. Mention replacement with more copies and harvested names improves
+   materials NER on unseen documents.
+2. Teaching a materials tagger the names it has never read: lexicons from
+   unlabeled text through mention replacement, under a pre-registered
+   protocol.
+3. More copies and borrowed names: a pre-registered augmentation for
+   materials NER on held-out documents.
+
+Paper B (evaluation):
+1. Materials NER on documents it has never read: a pre-registered
+   evaluation on three corpora.
+2. What a random split hides: materials NER on held-out papers, with
+   seeds, votes and the names a model lacks.
+3. Eighty-six decisions: how the usual additions to materials NER fare on
+   unseen documents under a ten-seed, pre-registered protocol.
 
 ## Still missing before submission
 
