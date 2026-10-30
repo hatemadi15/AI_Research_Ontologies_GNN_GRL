@@ -69,6 +69,7 @@ Stand-alone baselines:
 | `results/` | versioned JSON snapshots behind every number in this README (see [results/README.md](results/README.md)); `results/gpu/` holds the GPU runs and their analyses |
 | `docs/ROADMAP.md` | where the project stands, the prioritised next steps, and every week's protocol (§4), fixed before its runs |
 | `docs/PAPER.md`, `docs/PAPER_DRAFT.md` | the paper plan (claims C1–C26 with their evidence) and a draft of its sections |
+| `docs/PAPER_A.md`, `docs/METHODS_PLAN.md`, `docs/VENUES.md` | the methods paper's draft, the plan behind it, and the venue shortlist with deadlines for both papers |
 | `docs/figures/`, `docs/tables/` | the paper's figures and tables, generated from `results/` by `paper_figures.py` and `paper_tables.py` |
 | `tests/` | unit tests, run by CI |
 
