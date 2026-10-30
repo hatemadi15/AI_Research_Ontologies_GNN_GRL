@@ -1234,6 +1234,7 @@ def test_week13_folds_analogue_batch(monkeypatch):
     folds, one job per lane with the lane's student seed offsets (0-400, 500-900): 3 teachers
     tagging the whole SOFC corpus, mention replacement with the mention-level silver names
     and 6 copies (crf_mrm6); the batch carries the SOFC corpus's SHA-256."""
+    monkeypatch.setattr(nb.os.path, 'isfile', lambda path: True)    # the corpus is not here
     monkeypatch.setattr(kj, 'corpus_sha256', lambda report=None: 'x' * 64)
     lane0, lane1 = _parsed(kj.batch_lanes('w13b'))
     assert lane0[0].tag == 'smokeaw' and (len(lane0), len(lane1)) == (2, 1)
