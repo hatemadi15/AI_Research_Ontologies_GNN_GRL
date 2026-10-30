@@ -442,7 +442,8 @@ summaries; the titles and abstracts of both fixed by 14 November; then
 the submission checklists (the reproducibility appendix and the code
 release for both; the authors' confirmation email, the user's; the
 venues, the user's: a materials-informatics venue for A, a
-scholarly-document-processing or NLP-evaluation venue for B). No GPU
+scholarly-document-processing or NLP-evaluation venue for B; the
+shortlist with deadlines is `docs/VENUES.md`). No GPU
 decision is planned after `w14c`; a reviewer's cheap reported item (the
 winner on the multi-task model, one corpus) stays an option.
 

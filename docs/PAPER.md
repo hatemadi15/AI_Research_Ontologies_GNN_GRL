@@ -262,4 +262,5 @@ division and the schedule are in `docs/METHODS_PLAN.md` §7.
      the choice of the bias for unseen documents, on inner folds.
 4. The venues (the user's choice): a materials-informatics journal or
    workshop for paper A; a scholarly-document-processing or NLP-evaluation
-   workshop for paper B.
+   workshop for paper B. The shortlist with deadlines, fit and charges is
+   `docs/VENUES.md` (30 October).
