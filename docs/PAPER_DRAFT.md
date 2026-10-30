@@ -1,5 +1,9 @@
 # Draft: materials NER on unseen papers
 
+*Since 30 October this file is the shared source of the two papers: paper A
+(methods) is `docs/PAPER_A.md`, paper B (evaluation) `docs/PAPER_B.md`.
+New results are still recorded here first.*
+
 **Status.** A working draft of the sections that hold whichever paper this
 becomes (`docs/PAPER.md`): a methods paper if a method passes its
 pre-registered decisions and repeats on SOFC-Exp, otherwise an evaluation
