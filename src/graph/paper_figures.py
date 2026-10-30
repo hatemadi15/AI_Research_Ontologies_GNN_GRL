@@ -35,6 +35,13 @@ No training: reads the 10-seed GPU results (results/gpu) and writes PNG files.
       the 10-seed comparison where there is one (weeks 5-7), else the 3-seed screen (hollow
       markers); and a third training paper, the CRF head trained on three papers minus on
       two (paper_count, seeds 0-200).
+  fig7_names.png (C26, paper A's Section 4.4; ner_mentions.json): per held-out setting
+      (MuLMS's subfields, MaterioMiner's papers at both granularities), each system's recall
+      and precision on the unseen test names, pooled over seeds and units, on the
+      recall-precision plane with iso-F1 curves: the CRF head, mention replacement with 3
+      copies, 6 copies without names, and 6 copies with the harvested names (the topic
+      corpus's and the mixed corpus's on MuLMS, the fatigue corpus's on MaterioMiner), each
+      joined to the system it adds to.
 A figure whose results are missing is skipped (and named on stdout).
 
 Usage:
@@ -100,6 +107,17 @@ MENTION_METHODS = {'crf_mt': 'multi-task', 'crf_mt_ens3': 'multi-task vote',
                    'crf_mt_mr_ens3': 'multi-task + mention-replacement vote',
                    'crf_mt_st3_ens3': 'multi-task self-training vote',
                    'crf_mrs': 'mention replacement + silver names'}
+# Figure 7: what the harvested names do to the unseen test names (paper A, Section 4.4)
+NAMES_SETTINGS = {'mulms_leave_one_subfield_out': 'MuLMS, held-out subfields',
+                  'fine_leave_one_paper_out': 'MaterioMiner fine-grained, held-out papers',
+                  'coarse_leave_one_paper_out': 'MaterioMiner coarse-grained, held-out papers'}
+NAMES_SYSTEMS = {'crf': 'CRF head', 'crf_mr': 'mention replacement, 3 copies',
+                 'crf_mr6': '6 copies, no names',
+                 'crf_mrm_topic6': "6 copies + the topic corpus's names",
+                 'crf_mrm6': "6 copies + the fatigue corpus's names",
+                 'crf_mrm_mixed6': "6 copies + a mixed corpus's names"}
+NAMES_PARENT = {'crf_mr': 'crf', 'crf_mr6': 'crf_mr', 'crf_mrm_topic6': 'crf_mr6',
+                'crf_mrm6': 'crf_mr6', 'crf_mrm_mixed6': 'crf_mr6'}
 
 
 def load(directory, names):
@@ -459,6 +477,71 @@ def figure5(settings, methods, path):
     plt.close(fig)
 
 
+def names_data(mentions):
+    """{setting label: [(system, label, recall, precision, F1 on the unseen test names, F1 on
+    the seen ones)]} for Figure 7, from ner_mentions.json, in NAMES_SYSTEMS order; a setting
+    without the CRF head and a system without results are left out."""
+    out = {}
+    for key, setting in NAMES_SETTINGS.items():
+        found = mentions.get('systems', {}).get(key, {})
+        rows = []
+        for system, label in NAMES_SYSTEMS.items():
+            unseen = found.get(system, {}).get('unseen')
+            if unseen:
+                rows.append((system, label, unseen['recall'], unseen['precision'],
+                             unseen['f1'], found[system].get('seen', {}).get('f1')))
+        if rows and rows[0][0] == 'crf':
+            out[setting] = rows
+    return out
+
+
+def figure7(rows_by_setting, path):
+    import matplotlib.pyplot as plt
+    n = len(rows_by_setting)
+    fig, axes = plt.subplots(1, n, figsize=(5.4 * n, 5.0), squeeze=False)
+    styles = {'crf': ('o', 'black'), 'crf_mr': ('s', 'tab:blue'), 'crf_mr6': ('D', 'tab:cyan'),
+              'crf_mrm_topic6': ('*', 'tab:red'), 'crf_mrm6': ('*', 'tab:red'),
+              'crf_mrm_mixed6': ('P', 'tab:orange')}
+    for ax, (setting, rows) in zip(axes[0], rows_by_setting.items()):
+        at = {system: (recall, precision) for system, _, recall, precision, *_ in rows}
+        xs, ys = [r[2] for r in rows], [r[3] for r in rows]
+        x0, x1 = min(xs) - 3, max(xs) + 3
+        y0, y1 = min(ys) - 3, max(ys) + 3
+        for f in range(10, 100, 2):                          # iso-F1 curves: P = fR / (2R - f)
+            curve = [(r, f * r / (2 * r - f)) for r in
+                     [x0 + (x1 - x0) * k / 200 for k in range(201)] if 2 * r > f]
+            curve = [(r, p) for r, p in curve if y0 <= p <= y1]
+            if len(curve) > 1:
+                ax.plot(*zip(*curve), color='lightgrey', lw=0.7, zorder=1)
+                if curve[-1][0] >= x1 - (x1 - x0) / 100:      # the curve leaves on the right
+                    ax.annotate(f'F1 {f}', curve[-1], xytext=(2, 0), textcoords='offset points',
+                                fontsize=6, color='grey', va='center')
+                elif curve[0][0] <= x0 + (x1 - x0) / 100:    # it enters on the left
+                    ax.annotate(f'F1 {f}', curve[0], xytext=(2, 0), textcoords='offset points',
+                                fontsize=6, color='grey', va='center')
+                else:                                        # it enters at the top
+                    ax.annotate(f'F1 {f}', curve[0], xytext=(0, 2), textcoords='offset points',
+                                fontsize=6, color='grey', ha='center', va='bottom')
+        for system, label, recall, precision, f1, seen in rows:
+            parent = NAMES_PARENT.get(system)
+            if parent in at:
+                ax.annotate('', (recall, precision), at[parent],
+                            arrowprops={'arrowstyle': '->', 'color': 'grey', 'lw': 1},
+                            zorder=2)
+            marker, color = styles.get(system, ('o', 'tab:grey'))
+            ax.plot(recall, precision, marker, color=color, ms=9 if marker == '*' else 6,
+                    zorder=3)
+            text = f'{label}\nF1 {f1:.1f}' + (f' (seen {seen:.1f})' if seen is not None else '')
+            ax.annotate(text, (recall, precision), textcoords='offset points', fontsize=6.5,
+                        xytext=(6, -12) if system == 'crf_mr6' else (6, 2), zorder=4)
+        ax.set(xlim=(x0, x1 + 4), ylim=(y0, y1), xlabel='recall on the unseen test names (%)',
+               ylabel='precision on the unseen test names (%)', title=setting)
+        ax.grid(alpha=0.3)
+    fig.tight_layout()
+    fig.savefig(path, dpi=160, bbox_inches='tight')
+    plt.close(fig)
+
+
 def gain_data(directory, analysis):
     """{granularity: [(label, mean, CI low, CI high, kind)]} for Figure 6, kind 'ten' (10
     seeds), 'screen' (3 seeds) or 'papers' (a third training paper); methods without a
@@ -574,6 +657,12 @@ def main(argv=None):
         written.append('fig6_gains.png')
     else:
         print('fig6: no comparisons on the held-out papers')
+    names = names_data(mentions)
+    if names:
+        figure7(names, os.path.join(args.out, 'fig7_names.png'))
+        written.append('fig7_names.png')
+    else:
+        print('fig7: no unseen-name scores of the names method')
     print(f"wrote {', '.join(written) or 'nothing'} to {args.out}")
     return written
 

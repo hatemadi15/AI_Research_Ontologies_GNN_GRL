@@ -423,7 +423,8 @@ in the other.
   recall-for-precision trade) as motivation and explanation; the
   evaluation protocol in one section, as the reason the numbers can be
   trusted; the attempt count. Draft: `docs/PAPER_A.md`.
-- *Paper B, the evaluation paper* (as drafted in `docs/PAPER_DRAFT.md`):
+- *Paper B, the evaluation paper* (draft: `docs/PAPER_B.md`, begun 30
+  October from `docs/PAPER_DRAFT.md`):
   the gap between random splits and unseen documents and its anatomy
   (C2, C17, C22), seed variance and votes (C3–C6), the reproduction and
   the split question (C1), data against method (C19), the pre-registered
@@ -438,9 +439,9 @@ Schedule: `w14c`'s reported ablations at the reset (31 October); week 15
 experiments with Table 6 and the ablations, the mechanism figure,
 limitations; related work cut from §8); week 16 (8–14 November) paper B's
 draft from `PAPER_DRAFT.md` §2–5, 7 and 8 with the method sections cut to
-summaries; the titles and abstracts of both fixed by 14 November; then
+summaries (a first complete draft was written on 30 October, `docs/PAPER_B.md`); the titles and abstracts of both fixed by 14 November; then
 the submission checklists (the reproducibility appendix and the code
-release for both; the authors' confirmation email, the user's; the
+release for both, drafted 30 October in `docs/REPRODUCIBILITY.md`; the authors' confirmation email, the user's; the
 venues, the user's: a materials-informatics venue for A, a
 scholarly-document-processing or NLP-evaluation venue for B; the
 shortlist with deadlines is `docs/VENUES.md`). No GPU

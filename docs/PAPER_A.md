@@ -1,10 +1,12 @@
 # Paper A (methods): mention replacement with more copies and harvested names improves materials NER on unseen documents
 
-*A first draft, 30 October (week 15 begins; `docs/METHODS_PLAN.md` §7).
-Every number is taken from the committed results files named in
-`docs/PAPER.md`'s claims table (C2, C17, C19, C20, C22–C26) and the
-week-12 to week-14 outcomes in `docs/ROADMAP.md` §4; a number in square
-brackets is a 95% Student-t confidence interval of a mean paired
+*A first draft, 30 October (week 15 begins; `docs/METHODS_PLAN.md` §7);
+second pass the same day: every number of Sections 1 to 6 checked
+against the results files (three wordings corrected), the mechanism
+figure added. Every number is taken from the committed results files
+named in `docs/PAPER.md`'s claims table (C2, C17, C19, C20, C22–C26) and
+the week-12 to week-14 outcomes in `docs/ROADMAP.md` §4; a number in
+square brackets is a 95% Student-t confidence interval of a mean paired
 difference over the held-out units named. The ablations of 14.3 (the
 corpus's size, the filter's threshold and agreement, the silver share)
 run on 31 October and fill Section 4.3. Paper B, the evaluation paper, is
@@ -204,8 +206,8 @@ On MuLMS the method scores 51.84 over 10 seeds against the CRF head's
 48.66 and mention replacement's 50.76; on the decision's seeds 6 of the
 seven subfields gain against the CRF head (sofc by 11.9, poly
 loses 2.4) and the 7-unit
-interval, with 6 degrees of freedom and a spread of 5 points between
-subfields, does not clear 0. On MaterioMiner every paper gains at both
+interval, with 6 degrees of freedom and a standard deviation of 4.7
+points across subfields, does not clear 0. On MaterioMiner every paper gains at both
 granularities. Pooled over the 11 units, the pre-registered decision
 13.2 passes with neither corpus's interval below 0 (MuLMS +3.18 [−1.30,
 +7.66], MaterioMiner +4.27). On the 7 MuLMS seeds the screen did not see,
@@ -236,7 +238,7 @@ corpora, with the same source, pipeline and exclusions; it holds 49–70% of
 the subfield's unseen test names against the topic corpus's 55–81%, and
 its lexicon 18.3% of them against 22.2%. The method with the mixed corpus
 scores 51.91 against 51.73 with the topic's own, −0.18 [−2.01, +1.65]
-paired by subfield (three subfields better with the own corpus, four with
+paired by subfield (two subfields better with the own corpus, five with
 the mixed one); the mixed variant gains +3.38 [−0.89, +7.64] over the CRF
 head and +0.70 [−1.19, +2.58] over the copy control. The decision fails:
 no difference is detected, and a large unlabeled corpus of other
@@ -259,7 +261,10 @@ share of the unseen names it holds.*
 ### 4.4 What the names do
 
 By kind of name, pooled over the 70 runs of MuLMS's held-out subfields
-(Table 2): the CRF head finds 39.4% of the unseen names at 55.8%
+(Table 2 and Figure 1, `docs/figures/fig7_names.png`, which puts each
+system's recall and precision on the unseen names on one plane with
+iso-F1 curves, for MuLMS and for MaterioMiner's papers at both
+granularities): the CRF head finds 39.4% of the unseen names at 55.8%
 precision; mention replacement 43.2% at 54.3; six copies without names
 43.7% at 53.9; the method 47.3% at 50.9. The names raise recall on unseen
 names by 3.6 points over the control and lower precision by 3.0, a net
@@ -267,8 +272,9 @@ names by 3.6 points over the control and lower precision by 3.0, a net
 71.2). With the mixed corpus the figures are the same (46.7% at 52.4).
 On MaterioMiner's papers, fine-grained, the names add to both recall and
 precision on unseen names (39.7 to 41.1 and 49.2 to 53.2 over the
-control; F1 43.9 to 46.4). The mechanism is the one intended, more unseen
-names found, and its size is what 14.1 measured.
+control; F1 43.9 to 46.4), and coarse-grained a little of each (53.0 to
+54.2 and 52.4 to 53.2; F1 52.7 to 53.7). The mechanism is the one
+intended, more unseen names found, and its size is what 14.1 measured.
 
 | MuLMS, unseen names (88% of the test entities) | recall | precision | F1 |
 |---|---|---|---|
@@ -285,8 +291,9 @@ corpus scores 82.75 against the CRF head's 82.79, −0.04 [−1.21, +1.14]
 (decision 13.4, no). It gains +0.45 [+0.04, +0.86] over mention
 replacement on every fold, but mention replacement itself is below the CRF
 head there (−0.48 [−1.36, +0.39], decision 13.3a), as on the official
-split. Only 46% of a fold's test names are unseen (81–88% on the other two
-corpora) and the corpus holds 36% of them; the method needs test names
+split. Only 46% of a fold's test names are unseen (81% fine-grained and 79%
+coarse-grained on MaterioMiner's held-out papers, 88% on MuLMS's
+subfields) and the corpus holds 36% of them; the method needs test names
 that training has not seen. Pooled over the 16 units of the three corpora
 the estimate is +2.45 [+0.50, +4.40] (reported); the claim is the
 two-corpus one, with SOFC-Exp as its boundary condition.

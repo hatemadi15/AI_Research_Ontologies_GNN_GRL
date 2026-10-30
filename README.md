@@ -69,7 +69,7 @@ Stand-alone baselines:
 | `results/` | versioned JSON snapshots behind every number in this README (see [results/README.md](results/README.md)); `results/gpu/` holds the GPU runs and their analyses |
 | `docs/ROADMAP.md` | where the project stands, the prioritised next steps, and every week's protocol (§4), fixed before its runs |
 | `docs/PAPER.md`, `docs/PAPER_DRAFT.md` | the paper plan (claims C1–C26 with their evidence) and a draft of its sections |
-| `docs/PAPER_A.md`, `docs/METHODS_PLAN.md`, `docs/VENUES.md` | the methods paper's draft, the plan behind it, and the venue shortlist with deadlines for both papers |
+| `docs/PAPER_A.md`, `docs/PAPER_B.md`, `docs/METHODS_PLAN.md`, `docs/VENUES.md`, `docs/REPRODUCIBILITY.md` | the two papers' drafts (A, the methods paper; B, the evaluation paper), the plan behind them, the venue shortlist with deadlines, and the reproducibility appendix with the code-release checklist |
 | `docs/figures/`, `docs/tables/` | the paper's figures and tables, generated from `results/` by `paper_figures.py` and `paper_tables.py` |
 | `tests/` | unit tests, run by CI |
 
@@ -735,10 +735,11 @@ Ten seeds per split also re-tested the gains of weeks 3 and 4, which used 3:
 New NER experiments should use the CRF head (`--crf`) and 10 seeds per split
 before a claim. GPU runs are compared only with GPU runs.
 
-The work aims at a methods paper, with an evaluation paper if every option
-fails ([docs/PAPER.md](docs/PAPER.md); a draft of the sections that hold
-either way is in [docs/PAPER_DRAFT.md](docs/PAPER_DRAFT.md)). Where it
-stands (ROADMAP §4, weeks 6 to 9):
+The work produces two papers (decided 30 October, [docs/PAPER.md](docs/PAPER.md)):
+a methods paper ([docs/PAPER_A.md](docs/PAPER_A.md)) and an evaluation
+paper ([docs/PAPER_B.md](docs/PAPER_B.md)); the shared draft of the
+sections that hold for both is [docs/PAPER_DRAFT.md](docs/PAPER_DRAFT.md).
+Where it stands (ROADMAP §4, weeks 6 to 9):
 1. Methods for unseen papers, screened with 3 seeds and decided with 10.
    DeBERTa-v3-large stopped at the screen. Document context passed the
    screen but neither 10-seed decision, nor its repeat on SOFC-Exp (+0.58
