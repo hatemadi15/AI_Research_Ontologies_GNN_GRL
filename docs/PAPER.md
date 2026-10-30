@@ -197,6 +197,15 @@ from the committed results (no training; re-run it when results change):
   recomputed without training; the tables are generated and checked by the
   test suite (`report_results.py --check`).
 
+## Two papers (decided 30 October)
+
+Paper A, the methods paper (`docs/PAPER_A.md`, week 15): C26 as stated
+after week 14, with the ablations of 14.1–14.3, the SOFC-Exp boundary
+condition, the consistency rule (C25) and the unseen-name mechanism
+(C17, C22). Paper B, the evaluation paper (`docs/PAPER_DRAFT.md`, week
+16): C1–C24 with the method results cut to summaries that cite A. The
+division and the schedule are in `docs/METHODS_PLAN.md` §7.
+
 ## Still missing before submission
 
 1. A second materials NER dataset (week 6), so the findings do not rest on
@@ -251,5 +260,6 @@ from the committed results (no training; re-run it when results change):
      2006); training CRFs for F-score (Suzuki et al., 2006); calibration
      under shift (Ovadia et al., 2019). The paper's contribution there is
      the choice of the bias for unseen documents, on inner folds.
-4. The venue. Candidates are a materials-informatics journal or workshop, or
-   a scholarly-document-processing workshop.
+4. The venues (the user's choice): a materials-informatics journal or
+   workshop for paper A; a scholarly-document-processing or NLP-evaluation
+   workshop for paper B.

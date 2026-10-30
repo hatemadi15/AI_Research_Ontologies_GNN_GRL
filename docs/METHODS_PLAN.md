@@ -357,6 +357,8 @@ rebuilt.
 | 25–27 Oct | `w12b:<winner>`; the MaterioMiner analogue if decision 1 passes | the methods criterion |
 | 31 Oct–7 Nov | ablations (§4C) on the GPU; or route E; the evaluation paper's remaining items either way | the paper's claims |
 | 7–14 Nov | the paper assembled as what the results say; title and abstract fixed by 14 Nov | — |
+| 1–7 Nov (decided 30 Oct: two papers, §7) | paper A's draft, the methods paper, after `w14c`'s reported ablations | — |
+| 8–14 Nov | paper B's draft, the evaluation paper; both titles and abstracts fixed by 14 Nov | — |
 
 **Revised on 20 October (the user's directive: push as hard as possible for
 a methods paper).** The stop rule below is lifted: week 13 (ROADMAP §4) adds
@@ -403,6 +405,46 @@ tests of every popular addition with 10 seeds and three corpora, the seed
 and split lessons, the reproduction, and the methods attempts as negative
 results with the attempt count. Its abstract and introduction get the
 conditional sentence removed on 14 November.
+
+**Decided on 30 October: both papers.** The user chose to write both; the
+division below keeps every decision a result in one paper and a citation
+in the other.
+
+- *Paper A, the methods paper* (working title: "Mention replacement with
+  more copies and harvested names improves materials NER on unseen
+  documents"; it no longer names the topic). Its claims: C26 as stated
+  after week 14 (the pre-registered, pooled gain over the CRF head on
+  held-out documents of two corpora, +3.58 [+0.95, +6.21]; the names'
+  share beyond matched copies +0.8 [−0.7, +2.3], not established; no
+  difference detected between the topic's corpus and a mixed corpus of
+  other topics, −0.18 [−2.01, +1.65]); the ablations of 14.3 (reported);
+  the SOFC-Exp boundary condition (13.4); the consistency rule as a
+  second, smaller result (C25); the unseen-name mechanism (C17, C22, the
+  recall-for-precision trade) as motivation and explanation; the
+  evaluation protocol in one section, as the reason the numbers can be
+  trusted; the attempt count. Draft: `docs/PAPER_A.md`.
+- *Paper B, the evaluation paper* (as drafted in `docs/PAPER_DRAFT.md`):
+  the gap between random splits and unseen documents and its anatomy
+  (C2, C17, C22), seed variance and votes (C3–C6), the reproduction and
+  the split question (C1), data against method (C19), the pre-registered
+  tests of the popular additions with their attempt counts (C7–C16,
+  C20–C24), and the lessons for evaluating on unseen documents. It cites
+  A for the method and keeps each of A's results to one summary row.
+- *Shared material* (the corpora, the protocol, the CRF head, the seed
+  design) is described in both, briefly in A with a pointer to B.
+
+Schedule: `w14c`'s reported ablations at the reset (31 October); week 15
+(1–7 November) paper A's draft (abstract, introduction, method,
+experiments with Table 6 and the ablations, the mechanism figure,
+limitations; related work cut from §8); week 16 (8–14 November) paper B's
+draft from `PAPER_DRAFT.md` §2–5, 7 and 8 with the method sections cut to
+summaries; the titles and abstracts of both fixed by 14 November; then
+the submission checklists (the reproducibility appendix and the code
+release for both; the authors' confirmation email, the user's; the
+venues, the user's: a materials-informatics venue for A, a
+scholarly-document-processing or NLP-evaluation venue for B). No GPU
+decision is planned after `w14c`; a reviewer's cheap reported item (the
+winner on the multi-task model, one corpus) stays an option.
 
 ## 8. Risks
 
