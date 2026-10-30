@@ -201,8 +201,9 @@ taken (paper B's Table 6 holds the full list).
 | MuLMS, 7 subfields (seeds 300–900) | own-topic corpus vs mixed corpus | 14.2 | −0.18 [−2.01, +1.65] | no |
 
 On MuLMS the method scores 51.84 over 10 seeds against the CRF head's
-48.66 and mention replacement's 50.76; six of the seven subfields gain
-against the CRF head (sofc by 11.6, poly loses 2.1) and the 7-unit
+48.66 and mention replacement's 50.76; on the decision's seeds 6 of the
+seven subfields gain against the CRF head (sofc by 11.9, poly
+loses 2.4) and the 7-unit
 interval, with 6 degrees of freedom and a spread of 5 points between
 subfields, does not clear 0. On MaterioMiner every paper gains at both
 granularities. Pooled over the 11 units, the pre-registered decision
