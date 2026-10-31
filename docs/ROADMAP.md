@@ -4997,3 +4997,18 @@ corpus 47.3, the copy control 43.7, the CRF head 39.4) at precision 52.4
 (50.9, 53.9, 55.8), F1 on unseen names 49.4 (49.0, 48.3, 46.2); on seen
 names F1 72.3 (71.2, 71.0, 69.8). Names from other materials topics raise
 unseen-name recall by about as much and keep a point more precision.
+
+*Session notes, 31 October.* The quota reset at 00:00 UTC (45 hours, 0
+used). `w14c` pushed at 00:14 UTC as `ner-gpu-jobs-c` version 8 from the
+bundle of 8919928 (the one `w14b` ran from; its code carries the ablation
+options and the batch unchanged): lane 0 the smoke repeat `smokeba` and the
+three corpus-and-filter ablations over the 7 subfields (the first 10,000
+and 20,000 sentences, the threshold 0.7; 22 jobs), lane 1 the 2-of-3
+agreement and the half-share cap (14 jobs), each job the 3 teachers of
+seeds 0 to 200 and the 3 students of the screen's seeds. By `w14b`'s job
+times the lanes should end within the 12-hour session, about 10 to 11
+hours; the checks (`check_w14c.py`: the smoke repeat, the 3 files per
+ablation with their 7 subfields, teachers equal to week 10's, the topic
+corpus's SHA-256, the recorded setting, one environment), the collection,
+`ner_seed_analysis.py`'s `week14.ablations`, the report, Table 6 and paper
+A's Section 4.3 follow the pull.
