@@ -438,6 +438,46 @@ def lexicon_rows(data):
     return scores, comparisons
 
 
+WEEK17_NAMES, WEEK17_CONTROL = 'crf_mt_mrm6', 'crf_mt_mr6'
+WEEK17_LABELS = {WEEK17_NAMES: 'multi-task + MR6 + names', WEEK17_CONTROL: 'multi-task + MR6 (the control)',
+                 'crf_mt_mr': 'multi-task + MR3 (week 9)', 'crf_mt': 'multi-task model', 'crf': 'CRF head'}
+
+
+def week17_rows(analysis):
+    """[(granularity, decision, names entry)] from the week17 section of the seed analysis
+    (ner_seed_analysis.week17), in granularity order; empty without it."""
+    w = analysis.get('week17') or {}
+    return [(g, e['decision'], e) for g, e in w.items()]
+
+
+def table11(rows):
+    """Table 11 from week17_rows: per granularity the names' and the control's micro F1 over the
+    4 held-out papers (10 seeds), the names against the control (the decision), and both against
+    multi-task + MR3, the multi-task model and the CRF head (reported)."""
+    header = ['granularity', 'system', 'micro F1 [95% CI], 4 papers', 'Δ vs the control [95% CI]',
+              'Δ vs multi-task + MR3', 'Δ vs the multi-task model', 'Δ vs the CRF head']
+    cells = []
+    for g, decision, e in rows:
+        names, control = e['names'], e['control']
+        cells.append([f'{g}-grained', WEEK17_LABELS[WEEK17_NAMES], interval(e[WEEK17_NAMES]['micro']),
+                      interval(e[f'minus_{WEEK17_CONTROL}']['micro'], 'mean_diff', signed=True)
+                      + f" (decision {decision}, {'passes' if e['passes'] else 'no'})",
+                      interval(names['minus_crf_mt_mr']['micro'], 'mean_diff', signed=True),
+                      interval(names['minus_crf_mt']['micro'], 'mean_diff', signed=True),
+                      interval(names['minus_crf']['micro'], 'mean_diff', signed=True)])
+        cells.append([f'{g}-grained', WEEK17_LABELS[WEEK17_CONTROL],
+                      interval(control[WEEK17_CONTROL]['micro']), '',
+                      interval(control['minus_crf_mt_mr']['micro'], 'mean_diff', signed=True),
+                      interval(control['minus_crf_mt']['micro'], 'mean_diff', signed=True),
+                      interval(control['minus_crf']['micro'], 'mean_diff', signed=True)])
+    return ('Table 11. The harvested names on the strongest MaterioMiner base (week 17, post review; '
+            'the multi-task model with 6-copy mention replacement, with and without the fatigue '
+            "corpus's names; 4 held-out papers, 10 seeds, both granularities from one model): micro "
+            'F1 with its 95% CI over the papers, the names against the matched control (decisions '
+            '17.1 and 17.2, the week-6 rule), and both against multi-task + MR3, the multi-task model '
+            'and the CRF head (reported).\n\n' + markdown(header, cells))
+
+
 def table10(data):
     """Table 10 from ner_lexicon_recall.json: per setting and system, recall on the unseen test
     names in and out of the rebuilt lexicon and the unseen predictions' lexicon share and
@@ -640,6 +680,11 @@ def main(argv=None):
         write('table10_lexicon.md', table10(lexicon))
     else:
         print('table 10: no lexicon-membership file')
+    rows = week17_rows(analysis)
+    if rows:
+        write('table11_week17.md', table11(rows))
+    else:
+        print('table 11: no week-17 runs')
     print(f"wrote {', '.join(written) or 'nothing'} to {args.out}")
     return written
 

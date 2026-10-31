@@ -279,3 +279,27 @@ def test_table10_lexicon_membership():
     text = pt.table10(data)
     assert '| MuLMS, 7 held-out subfields (seeds 300–900) | CRF head | 25.0 | 50.0 | 40.0 | 30.0 | 60.0 |  |' in text
     assert '+3.00 [+0.50, +5.50] | 6/7 |' in text and 'semi, sofc' in text and "['poly']" in text
+
+
+def test_table11_week17():
+    """Table 11: per granularity the names' and the control's rows with the decision's verdict
+    and the reported differences; empty rows without the week17 section."""
+    def spread(mean, lo, hi):
+        return {'micro': {'mean': mean, 'ci95': [lo, hi]}}
+
+    def diff(mean, lo, hi):
+        return {'micro': {'mean_diff': mean, 'ci95': [lo, hi]}}
+    e = {'decision': '17.1', 'passes': False, 'crf_mt_mrm6': spread(53.0, 48.0, 58.0),
+         'minus_crf_mt_mr6': diff(0.5, -1.0, 2.0),
+         'names': {'minus_crf_mt_mr': diff(1.0, -0.5, 2.5), 'minus_crf_mt': diff(4.0, 1.0, 7.0),
+                   'minus_crf': diff(7.7, 4.0, 11.4)},
+         'control': {'crf_mt_mr6': spread(52.5, 47.5, 57.5),
+                     'minus_crf_mt_mr': diff(0.5, -0.8, 1.8), 'minus_crf_mt': diff(3.5, 0.5, 6.5),
+                     'minus_crf': diff(7.2, 3.5, 10.9)}}
+    assert pt.week17_rows({}) == []
+    rows = pt.week17_rows({'week17': {'fine': e}})
+    text = pt.table11(rows)
+    assert text.startswith('Table 11.') and 'decision 17.1, no' in text
+    lines = [l for l in text.split('\n') if l.startswith('| fine')]
+    assert len(lines) == 2 and 'multi-task + MR6 + names' in lines[0] and 'the control' in lines[1]
+    assert '+0.50 [−1.00, +2.00]' in lines[0] and '+7.20 [+3.50, +10.90]' in lines[1]
