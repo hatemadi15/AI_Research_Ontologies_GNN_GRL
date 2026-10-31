@@ -1067,11 +1067,42 @@ def ablations(directory):
     return out
 
 
+def week14_types(directory):
+    """Week 14 (the types part of week14): per entity type, the names method and the 6-copy
+    control against the CRF head (type_differences, most frequent type first): on MuLMS's
+    held-out subfields over the decision's seeds (DECISION_OFFSETS; WEEK14_WINNER and
+    COPIES_CONTROL against crf) and on MaterioMiner's held-out papers per granularity over
+    the 10 seeds (WEEK14_ANALOGUE and COPIES_CONTROL against crf); a part is present when
+    every file of the CRF head and of the system is there."""
+    def typed(files):
+        return files and all('per_class' in r for f in files for r in f['runs'])
+    out = {}
+    prefix = f'ner_results_mulms_{MULMS_PROTOCOLS[0]}_'
+    crf = load_files(directory, [f'{prefix}crf_m{off}.json' for off in DECISION_OFFSETS])
+    if typed(crf):
+        for system in (WEEK14_WINNER, COPIES_CONTROL):
+            files = load_files(directory, [f'{prefix}{system}_m{off}.json'
+                                           for off in DECISION_OFFSETS])
+            if typed(files):
+                out.setdefault('mulms', {})[system] = type_differences(files, crf)
+    for g in GRANULARITIES:
+        crf = load_files(directory, file_names(g, LOPO, 'crf', WEEK5_SYSTEMS))
+        if not typed(crf):
+            continue
+        for system in (WEEK14_ANALOGUE, COPIES_CONTROL):
+            files = load_files(directory, file_names(g, LOPO, system,
+                                                     {system: seed_family(system)}))
+            if typed(files):
+                out.setdefault(g, {})[system] = type_differences(files, crf)
+    return out
+
+
 def week14(directory):
-    """The week14 section (see the module docstring): copies (14.1), topic (14.2) and
-    ablations (14.3)."""
+    """The week14 section (see the module docstring): copies (14.1), topic (14.2),
+    ablations (14.3) and types (per entity type, the method and the control against the
+    CRF head)."""
     return {'copies': copies(directory), 'topic': topic(directory),
-            'ablations': ablations(directory)}
+            'ablations': ablations(directory), 'types': week14_types(directory)}
 
 
 def analyse(directory):

@@ -47,6 +47,11 @@ No training: reads the 10-seed GPU results (results/gpu) and writes PNG files.
       mentions all three tag alike and confidently form the lexicon; mention replacement
       with six copies draws from the training mentions and the lexicon; the student trains
       on the gold sentences and their copies and is tested on the held-out document.
+  fig9_units.png (paper A's main results figure; ner_week5_seed_analysis.json): per held-out
+      unit, the paired micro-F1 difference of MR6 with harvested names against the CRF head
+      and against MR6 without names: MuLMS's 7 subfields (seeds 300-900), MaterioMiner's 4
+      papers at both granularities (10 seeds) and SOFC-Exp's 5 article folds (against the
+      CRF head only), with the pooled 11-unit means and intervals of decision 13.2's units.
 A figure whose results are missing is skipped (and named on stdout).
 
 Usage:
@@ -547,6 +552,90 @@ def figure7(rows_by_setting, path):
     plt.close(fig)
 
 
+def unit_data(analysis):
+    """[(group, unit, difference against the CRF head, difference against MR6 or None)] for
+    Figure 9: MuLMS's subfields on the decision's seeds (mulms.week12.<winner>.decision and
+    week14.copies.mulms.decision), MaterioMiner's papers per granularity over 10 seeds
+    (week14.copies.<granularity>: the analogue minus the control, and the control minus the
+    CRF head, summed for the CRF head), SOFC-Exp's folds (week13.folds.crf_mrm6; no control).
+    Empty without the MuLMS decision part."""
+    winner = analysis.get('week13', {}).get('week12_winner', 'crf_mrm_topic6')
+    w = analysis.get('mulms', {}).get('week12', {}).get(winner, {}).get('decision')
+    copies = analysis.get('week14', {}).get('copies', {})
+    c = copies.get('mulms', {}).get('decision')
+    if not w or not c:
+        return []
+    rows = []
+    units = list(w['subfields'])
+    crf = w['minus_crf']['micro']['per_run']
+    ctrl = c['minus_crf_mr6']['micro']['per_run']
+    rows += [('MuLMS subfield (seeds 300–900)', u, a, b) for u, a, b in zip(units, crf, ctrl)]
+    for g in ('fine', 'coarse'):
+        part = copies.get(g)
+        if not part:
+            continue
+        names = list(part['units'])
+        vs_ctrl = part['minus_crf_mr6']['micro']['per_run']
+        ctrl_vs_crf = part['control']['minus_crf']['micro']['per_run']
+        rows += [(f'MaterioMiner {g}-grained paper (10 seeds)', SHORT_PAPER.get(u.replace('.conll', ''), u),
+                  round(a + b, 2), a) for u, a, b in zip(names, vs_ctrl, ctrl_vs_crf)]
+    folds = analysis.get('week13', {}).get('folds', {}).get('crf_mrm6')
+    if folds:
+        rows += [('SOFC-Exp article fold (10 seeds)', u, d, None)
+                 for u, d in zip(folds['units'], folds['minus_crf']['micro']['per_run'])]
+    return rows
+
+
+def figure9(rows, path):
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(figsize=(8.5, 7.2))
+    groups = []
+    for g, *_ in rows:
+        if g not in groups:
+            groups.append(g)
+    y = 0
+    ticks, labels, bands = [], [], []
+    for g in groups:
+        members = [r for r in rows if r[0] == g]
+        start = y
+        for _, unit, vs_crf, vs_ctrl in members:
+            ax.plot(vs_crf, y, 'o', color='tab:red', ms=6, zorder=3,
+                    label='against the CRF head' if y == 0 else None)
+            if vs_ctrl is not None:
+                ax.plot(vs_ctrl, y, 's', color='tab:blue', ms=5, zorder=3,
+                        label='against MR6 (6 copies, no names)' if y == 0 else None)
+            ticks.append(y)
+            labels.append(unit)
+            y += 1
+        bands.append((g, start, y - 1))
+        y += 1
+    for g, start, end in bands:
+        ax.axhspan(start - 0.5, end + 0.5, color='#f2f2f2' if bands.index((g, start, end)) % 2 else 'white',
+                   zorder=0)
+        ax.text(ax.get_xlim()[0] if False else -0.98, end + 0.5, g, fontsize=8, va='top', ha='left',
+                transform=ax.get_yaxis_transform(), color='#333333')
+    pooled = [r for r in rows if r[0].startswith('MuLMS') or 'fine-grained' in r[0]]
+    for values, color, name in ((lambda rs: [r[2] for r in rs], 'tab:red', 'CRF head'),
+                                (lambda rs: [r[3] for r in rs], 'tab:blue', 'MR6')):
+        v = values(pooled)
+        if len(v) == 11:
+            m, lo, hi = mean_ci(v)
+            ax.axvspan(lo, hi, color=color, alpha=0.08, zorder=1)
+            ax.axvline(m, color=color, lw=1, ls='--', zorder=2)
+            ax.text(m, y - 0.2, f'pooled 11 units vs {name}: {m:+.2f} [{lo:+.2f}, {hi:+.2f}]',
+                    fontsize=7.5, color=color, ha='center', va='bottom')
+    ax.axvline(0, color='black', lw=0.8, zorder=2)
+    ax.set_yticks(ticks, labels, fontsize=8)
+    ax.set_ylim(-0.7, y + 0.8)
+    ax.invert_yaxis()
+    ax.set_xlabel('micro F1 of MR6 + harvested names minus the reference, on the held-out unit')
+    ax.grid(alpha=0.3, axis='x')
+    ax.legend(fontsize=8, loc='lower right')
+    fig.tight_layout()
+    fig.savefig(path, dpi=160, bbox_inches='tight')
+    plt.close(fig)
+
+
 def figure8(path):
     """Paper A's method overview: boxes and arrows, no data."""
     import matplotlib.pyplot as plt
@@ -563,7 +652,7 @@ def figure8(path):
                    '#fff2cc'),
         'filter': (8.3, 3.0, 2.1, 1.3, 'Mention filter\nsame span and type by all 3,\nevery marginal \u2265 0.9',
                    '#fff2cc'),
-        'lexicon': (10.8, 3.0, 1.6, 1.3, 'Lexicon\n4k to 17k names\nper subfield', '#fff2cc'),
+        'lexicon': (10.8, 3.0, 1.6, 1.3, 'Lexicon\n4k to 13k names\nper subfield', '#fff2cc'),
         'pool': (2.9, 0.6, 2.6, 1.3, 'Replacement pool\ntraining mentions (~1,400)\n+ the lexicon (85 to 97%)',
                  '#e2f0d9'),
         'mr': (5.9, 0.6, 3.0, 1.3, 'Mention replacement\n6 copies per sentence; each mention\nswapped (p = 0.5) for a same-type name',
@@ -729,6 +818,12 @@ def main(argv=None):
         print('fig7: no unseen-name scores of the names method')
     figure8(os.path.join(args.out, 'fig8_method.png'))
     written.append('fig8_method.png')
+    units = unit_data(analysis)
+    if units:
+        figure9(units, os.path.join(args.out, 'fig9_units.png'))
+        written.append('fig9_units.png')
+    else:
+        print('fig9: no per-unit comparisons of the names method')
     print(f"wrote {', '.join(written) or 'nothing'} to {args.out}")
     return written
 

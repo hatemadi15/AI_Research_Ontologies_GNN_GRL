@@ -412,14 +412,15 @@ conditional sentence removed on 14 November.
 division below keeps every decision a result in one paper and a citation
 in the other.
 
-- *Paper A, the methods paper* (working title: "Mention replacement with
-  more copies and harvested names improves materials NER on unseen
-  documents"; it no longer names the topic). Its claims: C26 as stated
-  after week 14 (the pre-registered, pooled gain over the CRF head on
-  held-out documents of two corpora, +3.58 [+0.95, +6.21]; the names'
-  share beyond matched copies +0.8 [−0.7, +2.3], not established; no
-  difference detected between the topic's corpus and a mixed corpus of
-  other topics, −0.18 [−2.01, +1.65]); the ablations of 14.3 (reported);
+- *Paper A, the methods paper* (title since its first review round, 31
+  October: "Harvested names add little to mention replacement on held-out materials documents: a pre-registered test"; the 30 October working title credited the recipe's
+  gain to the names and was withdrawn). Its thesis: the pre-registered,
+  pooled gain over the CRF head on held-out documents of two corpora,
+  +3.58 [+0.95, +6.21] (C26), decomposes on the decision seeds into
+  mention replacement's +2.46 [+1.00, +3.91], the extra copies' +0.33
+  [−0.25, +0.92] and the names' +0.80 [−0.66, +2.26] (Table 9), of which
+  only the first is established; no difference detected between the
+  topic's corpus and a mixed corpus of other topics, −0.18 [−2.01, +1.65]; the ablations of 14.3 (reported);
   the SOFC-Exp boundary condition (13.4); the consistency rule as a
   second, smaller result (C25); the unseen-name mechanism (C17, C22, the
   recall-for-precision trade) as motivation and explanation; the

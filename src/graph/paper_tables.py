@@ -31,6 +31,17 @@ docs/tables/:
       marginal threshold 0.7, 2 of 3 teachers, the harvested names in half of the draws),
       each against the method, mention replacement and the CRF head, with the distinct
       names the teachers admit and the share of the unseen test names among them.
+  table8_types.md (paper A): per entity type on held-out documents, the CRF head, mention
+      replacement with 6 copies (MR6) and MR6 with harvested names: F1 per type averaged over
+      the (seed, unit) pairs whose test set has the type, and the differences; MuLMS's 13
+      types over the decision's seeds, MaterioMiner's coarse-grained types over 10 seeds
+      (week14.types of the seed analysis); tableA2_types_fine.md the fine-grained classes.
+  table9_robustness.md (paper A): the pooled comparisons over the 11 held-out units of
+      decision 13.2 among the CRF head, MR3, MR6 and MR6 + names, on both MuLMS seed bases
+      (ner_robustness.json): mean difference with its 95% CI, positive units, the exact
+      sign-flip permutation p-value, and the leave-one-unit-out minimum for the names
+      against the CRF head; then the same comparisons on MaterioMiner's papers per
+      granularity.
   tableA1_all_comparisons.md: every comparison of the comparisons files, the reported and
       descriptive ones too.
 A table whose results are missing is skipped (and named on stdout).
@@ -310,6 +321,97 @@ def table7(rows):
             'names among them.\n\n' + markdown(header, cells))
 
 
+# Table 8: per entity type (week14.types); Table 9: the pooled comparisons (ner_robustness.json)
+TYPE_PARTS = {'mulms': "MuLMS, 7 held-out subfields (seeds 300–900)",
+              'coarse': "MaterioMiner coarse-grained, 4 held-out papers (10 seeds)",
+              'fine': "MaterioMiner fine-grained, 4 held-out papers (10 seeds)"}
+ROBUST_LABELS = {'names_vs_crf': 'MR6 + names − CRF head', 'names_vs_mr3': 'MR6 + names − MR3',
+                 'names_vs_mr6': 'MR6 + names − MR6', 'mr6_vs_crf': 'MR6 − CRF head',
+                 'mr6_vs_mr3': 'MR6 − MR3', 'mr3_vs_crf': 'MR3 − CRF head'}
+BASES = {'ten': 'MuLMS seeds 0–900 (as decided)', 'decision': 'MuLMS seeds 300–900 (not seen by the screen)'}
+
+
+def type_rows(analysis, part):
+    """Rows of Table 8 for one part of week14.types: per type, most frequent first: type,
+    mean test support per unit, units with the type, the CRF head's F1, MR6's, the names
+    method's, the names method minus the CRF head and minus MR6 (None without MR6)."""
+    types = analysis.get('week14', {}).get('types', {}).get(part, {})
+    method = types.get('crf_mrm_topic6') or types.get('crf_mrm6')
+    control = types.get('crf_mr6', {})
+    rows = []
+    for name, e in (method or {}).items():
+        c = control.get(name)
+        rows.append([name, e['support_per_split'], e['n_splits'], e['crf'],
+                     None if c is None else c['method'], e['method'], e['diff'],
+                     None if c is None else round(e['method'] - c['method'], 2)])
+    return rows
+
+
+def table8(parts, title='Table 8', note=''):
+    """Table 8 from {part: type_rows}; one block per part."""
+    header = ['type', 'test support per unit', 'units', 'CRF head', 'MR6', 'MR6 + names',
+              'names − CRF head', 'names − MR6']
+    blocks = []
+    for part, rows in parts.items():
+        cells = [[name, support, units, number(crf), '' if mr6 is None else number(mr6),
+                  number(method), number(d_crf, signed=True),
+                  '' if d_mr6 is None else number(d_mr6, signed=True)]
+                 for name, support, units, crf, mr6, method, d_crf, d_mr6 in rows]
+        blocks.append(f'**{TYPE_PARTS.get(part, part)}**\n\n' + markdown(header, cells))
+    return (f'{title}. Per entity type on held-out documents: micro F1 of the CRF head, mention '
+            'replacement with 6 copies (MR6) and MR6 with harvested names, averaged over the '
+            '(seed, held-out unit) pairs whose test set has the type, with the names method\'s '
+            'differences; types ordered by test support. Exploratory: per-type differences are '
+            f'not decided on.{note}\n\n' + '\n\n'.join(blocks))
+
+
+def robustness_rows(robust):
+    """Rows of Table 9's first block from ner_robustness.json's pooled section: per basis
+    and comparison in ROBUST_LABELS order: basis label, comparison label, interval entry,
+    positives of units, sign-flip p, and for the names against the CRF head the
+    leave-one-out minimum lower bound."""
+    rows = []
+    for basis, label in BASES.items():
+        entries = robust.get('pooled', {}).get(basis)
+        if not entries:
+            continue
+        for key, name in ROBUST_LABELS.items():
+            e = entries.get(key)
+            if e:
+                loo = e.get('leave_one_out', {})
+                rows.append([label, name, e, f"{e['n_positive']}/{e['n_units']}", e['sign_flip_p'],
+                             loo.get('min_lower')])
+    return rows
+
+
+def table9(robust):
+    """Table 9 from ner_robustness.json: the pooled comparisons on both bases, then the
+    MaterioMiner grids."""
+    rows = robustness_rows(robust)
+    cells = [[basis, name, interval(e, 'mean_diff', signed=True), pos, f'{p_value:.4f}',
+              '' if loo is None else number(loo, signed=True)]
+             for basis, name, e, pos, p_value, loo in rows]
+    header = ['MuLMS seed basis', 'comparison', 'Δ micro F1 [95% CI], 11 units', 'units above 0',
+              'sign-flip p', 'leave-one-unit-out: lowest lower bound']
+    blocks = [markdown(header, cells)]
+    grids = robust.get('grids', {})
+    if grids:
+        gh = ['comparison', *(f'{g}-grained, 4 papers [95% CI]' for g in grids)]
+        gcells = [[name, *(interval(grids[g][key], 'mean_diff', signed=True) if key in grids[g] else ''
+                           for g in grids)] for key, name in ROBUST_LABELS.items()]
+        blocks.append('**MaterioMiner\'s held-out papers (10 seeds)**\n\n' + markdown(gh, gcells))
+    return ('Table 9. Post hoc robustness of the pooled comparisons (ner_robustness.py): over the '
+            '11 held-out units of decision 13.2 (MuLMS\'s 7 subfields and MaterioMiner\'s 4 '
+            'fine-grained papers), every comparison among the CRF head, mention replacement with '
+            '3 copies (MR3), with 6 copies (MR6) and MR6 with harvested names, with the MuLMS '
+            'units as 10-seed means (as decided) and as means over the 7 seeds the screen did '
+            'not see; the mean paired difference with its 95% Student-t CI, the number of units '
+            'above 0, the exact two-sided sign-flip permutation p-value of the mean, and for the '
+            'names against the CRF head the lowest lower bound over the 11 leave-one-unit-out '
+            'intervals. Only decision 13.2 (first row of the first basis) was pre-registered.'
+            '\n\n' + '\n\n'.join(blocks))
+
+
 def table3(published):
     """Table 3: default against strict IOB2 scoring on the published splits."""
     rows = []
@@ -456,6 +558,20 @@ def main(argv=None):
         write('table7_ablations.md', table7(rows))
     else:
         print('table 7: no ablations')
+    parts = {part: type_rows(analysis, part) for part in ('mulms', 'coarse')}
+    parts = {k: v for k, v in parts.items() if v}
+    if parts:
+        write('table8_types.md', table8(parts))
+        fine = type_rows(analysis, 'fine')
+        if fine:
+            write('tableA2_types_fine.md', table8({'fine': fine}, 'Table A2'))
+    else:
+        print('table 8: no per-type analysis of the names method')
+    robust = load(os.path.join(args.results, 'gpu', 'ner_robustness.json'))
+    if robust and robust.get('pooled'):
+        write('table9_robustness.md', table9(robust))
+    else:
+        print('table 9: no robustness file')
     print(f"wrote {', '.join(written) or 'nothing'} to {args.out}")
     return written
 

@@ -431,3 +431,16 @@ repeat identical, `check_w14c.py` all checks pass), the last after the reset of
 31 October; their analyses in `gpu/ner_week5_seed_analysis.json` (`week14`:
 `copies`, `topic`, `ablations`), Table 6 and Table 7
 (`docs/tables/table7_ablations.md`, the ablations against the method).
+`gpu/ner_robustness.json` (`ner_robustness.py`, 31 October, post hoc, for
+paper A's first review round; Table 9, `docs/tables/table9_robustness.md`)
+holds every comparison among the CRF head, mention replacement with 3 and
+6 copies and the names method over the 11 units of 13.2, with MuLMS's
+units as 10-seed means (as decided) and as means over seeds 300–900: the
+paired intervals, the units above 0, exact sign-flip permutation p-values,
+leave-one-unit-out intervals, the stratified mean, minimum detectable
+effects at 80% power, the MaterioMiner grids at both granularities, the
+per-subfield coverage–gain correlation and the runtime and epochs per run.
+`gpu/ner_week5_seed_analysis.json` adds `week14.types`, the per-type F1 of
+the names method and the 6-copy control against the CRF head on MuLMS's
+decision seeds and MaterioMiner's papers (Tables 8 and A2,
+`docs/tables/table8_types.md`, `tableA2_types_fine.md`).

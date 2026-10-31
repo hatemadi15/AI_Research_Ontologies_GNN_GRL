@@ -677,7 +677,12 @@ def test_week14_copies_topic_and_ablations(tmp_path):
     write(m, 'crf', subfields, lambda j, k: 50 + k + j / 10)
     write(m, 'crf_mr', subfields, lambda j, k: 52 + k + j / 10)
     write(m, 'crf_mrm_topic6', subfields, lambda j, k: 54 + k + j / 10, extra=names)
-    assert sa.week14(tmp_path) == {'copies': {}, 'topic': {}, 'ablations': {}}
+    first = sa.week14(tmp_path)
+    assert {k: first[k] for k in ('copies', 'topic', 'ablations')} == {'copies': {}, 'topic': {},
+                                                                        'ablations': {}}
+    # the per-type part needs only the winner and the CRF head: MAT and PRO on 7 subfields
+    assert list(first['types']['mulms']) == ['crf_mrm_topic6']
+    assert first['types']['mulms']['crf_mrm_topic6']['MAT']['n_splits'] == 7
     # 14.1 on MuLMS: the control on all 10 seeds, 1.5 below V4 on every subfield
     write(m, 'crf_mr6', subfields, lambda j, k: 52.5 + k + j / 10)
     out = sa.week14(tmp_path)

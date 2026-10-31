@@ -736,7 +736,8 @@ New NER experiments should use the CRF head (`--crf`) and 10 seeds per split
 before a claim. GPU runs are compared only with GPU runs.
 
 The work produces two papers (decided 30 October, [docs/PAPER.md](docs/PAPER.md)):
-a methods paper ([docs/PAPER_A.md](docs/PAPER_A.md)) and an evaluation
+a methods paper ([docs/PAPER_A.md](docs/PAPER_A.md); since its first
+review round on 31 October titled "Harvested names add little to mention replacement on held-out materials documents: a pre-registered test") and an evaluation
 paper ([docs/PAPER_B.md](docs/PAPER_B.md)); the shared draft of the
 sections that hold for both is [docs/PAPER_DRAFT.md](docs/PAPER_DRAFT.md).
 Where it stands (ROADMAP §4, weeks 6 to 9):

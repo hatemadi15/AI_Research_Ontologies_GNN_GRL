@@ -245,3 +245,33 @@ def test_names_data_and_figure7(tmp_path):
     matplotlib.use('Agg')
     pf.figure7(rows, tmp_path / 'fig7.png')
     assert (tmp_path / 'fig7.png').stat().st_size > 10000
+
+
+def test_unit_data_and_figure9(tmp_path):
+    """Figure 9: per held-out unit the names method's difference against the CRF head and
+    against MR6: MuLMS's subfields on the decision's seeds, MaterioMiner's papers (the CRF
+    head's difference summed from the two stored ones), SOFC-Exp's folds without a control;
+    nothing without the MuLMS decision part."""
+    def d(values):
+        return {'micro': {'mean_diff': sum(values) / len(values), 'ci95': [0, 0], 'per_run': values}}
+    analysis = {'week13': {'week12_winner': 'crf_mrm_topic6',
+                           'folds': {'crf_mrm6': {'units': {'fold0': 82.0, 'fold1': 83.0},
+                                                  'minus_crf': d([-0.2, 0.5])}}},
+                'mulms': {'week12': {'crf_mrm_topic6': {'decision': {
+                    'subfields': {'sofc': 55.0, 'steel': 56.0}, 'minus_crf': d([11.9, 0.3])}}}},
+                'week14': {'copies': {
+                    'mulms': {'decision': {'minus_crf_mr6': d([3.3, -0.8])}},
+                    'fine': {'units': {'10.1038_ncomms7164.conll': 49.4, '10.3390_met10111458.conll': 48.1},
+                             'minus_crf_mr6': d([1.35, 2.63]), 'control': {'minus_crf': d([4.32, 3.15])}}}}}
+    rows = pf.unit_data(analysis)
+    assert [r[1] for r in rows] == ['sofc', 'steel', 'ncomms7164', 'met10111458', 'fold0', 'fold1']
+    assert rows[0] == ('MuLMS subfield (seeds 300–900)', 'sofc', 11.9, 3.3)
+    assert rows[2][2] == pytest.approx(5.67) and rows[2][3] == 1.35
+    assert rows[4][3] is None
+    assert pf.unit_data({}) == []
+    pytest.importorskip('matplotlib')
+    import matplotlib
+    matplotlib.use('Agg')
+    pytest.importorskip('scipy')
+    pf.figure9(rows, tmp_path / 'fig9.png')
+    assert (tmp_path / 'fig9.png').stat().st_size > 10000

@@ -95,7 +95,7 @@ gain survives? Splits, scoring and seeds on MaterioMiner".
 | C23 | Names from unlabeled text add nothing to mention replacement on MuLMS. Three CRF teachers tag the training subfields' sentences outside the 400-sentence pool. The mentions of the sentences they tag alike and confidently (181–419 per fold, 126–358 distinct names) join the replacement pool. Over 10 seeds the method scores 50.69 on the held-out subfields: +2.04 [−0.85, +4.92] against the CRF head (decision 1) and −0.06 [−1.09, +0.96] against mention replacement (decision 2); its votes +2.48 [−0.44, +5.40] and −0.23 [−1.15, +0.68]. The teachers' names hold 4.4% of the unseen test names (1.0–7.8% per subfield), so the copies hardly show the model the names it misses. On MaterioMiner (decisions 3 and 4; 10 seeds, 4 held-out papers) it scores 49.45 fine-grained and 60.49 coarse-grained: +0.23 [−0.69, +1.14] and +0.61 [−0.96, +2.18] against mention replacement, so no gain there either, although 49–65% of a held-out paper's unseen test names occur in the fatigue corpus: the teachers' names hold 1.9–9.3% of them (fine) and 5.3–7.7% (coarse). Against the CRF head it gains +3.00 [+1.98, +4.02] fine-grained and +1.89 [−0.31, +4.10] coarse-grained, as mention replacement does (reported). | `gpu/ner_week5_seed_analysis.json` (`mulms`, `silver_names`); `gpu/ner_week11_comparisons.json` (decisions 3 and 4); `gpu/ner_mentions.json` (corpus coverage) | Done on both corpora (week 11, pre-registered): MuLMS decisions 1 and 2 and MaterioMiner decisions 3 and 4 all fail, so no methods claim. Week 12 (pre-registered, ROADMAP §4) takes the names from a corpus of the held-out subfield's own topic, 40,000 sentences per subfield, which holds 55–81% of its unseen test names (`results/mulms_coverage.json`, phase 0) |
 | C24 | A lexicon harvested from the held-out topic's unlabeled text helps as a dictionary only where the held-out head's recall trails its precision by 15 points or more (sofc +5.9, pemfc +4.0, semi +2.3) and hurts elsewhere (steel −10.0, graphene −5.1, poly −3.3); the agreement filter at 0.9 admits 9–34% of the unseen names and picks the context-free ones (pemfc: silver +4.0 against gold −10.5). As a learned match feature of the CRF head it adds nothing on the 3-seed screen (−0.03 and −0.15 against the head, −1.73 and −1.85 against mention replacement); 6 copies without names add nothing to 3 (−0.20). | `silver_lexicons/<subfield>.json` (Table 5, `docs/tables/table5_probe.md`); `gpu/ner_week5_seed_analysis.json` (`mulms`, `week12`) | Week 12 (pre-registered; the probe is no decision): the feature variants and the copy control are screened; all seven variants screened on 20 October; V4, the mention-level filter with 6 copies, wins the screen with +1.45 [−1.35, +4.25] over mention replacement and +3.16 [−1.96, +8.28] over the CRF head (V2 +0.97, V1 +0.80, V6 +0.16; the feature variants and the copy control below mention replacement); its 7-seed decision (24 October, seeds 300–900) passes neither: +3.19 [−1.13, +7.51] against the CRF head, six of seven subfields gaining, and +0.92 [−1.63, +3.48] against mention replacement; the screen's estimate held, the 7-subfield test lacks the power for V4's spread between subfields. Its MaterioMiner analogue passes at both granularities (+4.27 [+1.39, +7.15] fine-grained, +1.77 [+0.67, +2.88] coarse-grained) and the pooled decision 13.2 passes (C26), so its analogue on SOFC-Exp's article folds with the SOFC corpus (13.4, pre-registered 20 October; the corpus holds 36% of the folds' unseen test names), a decision on a third corpus |
 | C25 | Document-level propagation of a model's own predictions (C12's rule) improves NER on held-out documents of two corpora and hurts on the third, which its annotation convention explains. Pre-registered, on the CRF head's saved predictions: MuLMS, each of 7 subfields held out, +0.82 [+0.18, +1.46] over 10 seeds (49.47 against 48.66; every subfield gains, +0.07 to +2.07; 1,213 entities added per seed); MaterioMiner, coarse-grained, +0.12 [+0.01, +0.24] (week 7; fine-grained +0.30 [−0.35, +0.95]); SOFC-Exp, −0.42 [−0.61, −0.22] on its official split and −0.44 [−0.72, −0.16] on 5 folds of held-out articles (every fold loses), where the annotators leave 14% of a tagged term's occurrences untagged. It does not add to mention replacement: +0.57 [−0.12, +1.25] on MuLMS, +0.19 [−0.34, +0.73] fine-grained and +0.11 [−0.08, +0.31] coarse-grained on MaterioMiner. Retyping (reported, never a decision) is larger wherever the rule helps: +1.01 [+0.28, +1.74] on MuLMS, +0.64 [+0.29, +1.00] coarse-grained on MaterioMiner and +0.63 [+0.13, +1.14] on mention replacement there. 2 of the rule's 10 pre-registered decisions pass (about 0.25 expected by chance), on two corpora. | `gpu/ner_week5_seed_analysis.json` (`week13`, `consistency`; Table 6, `docs/tables/table6_held_out_decisions.md`); `gpu/ner_week7_comparisons.json` | Week 13 (pre-registered 20 October): 13.1a passes, 13.1b and 13.1d fail, 13.1c reported. By the revised methods criterion (ROADMAP §4, week 13) a scoped claim of two corpora, under a point, with its boundary condition; 13.3a fails on SOFC-Exp's folds (C22); 13.2, the pooled decision for the week-12 winner, passes (C26) |
-| C26 | Mention replacement with names harvested from unlabeled text of the held-out documents' own topic improves NER on held-out documents of two corpora. Three CRF teachers tag the topic's corpus (40,000 open-access sentences per MuLMS subfield; the fatigue corpus for MaterioMiner); a mention joins the replacement pool when the three tag its span alike with every marginal at least 0.9; each training sentence gets 6 copies. Pre-registered: pooled over MuLMS's 7 held-out subfields and MaterioMiner's 4 held-out papers (fine-grained), +3.58 [+0.95, +6.21] against the CRF head, no corpus losing (MuLMS +3.18 [−1.30, +7.66], MaterioMiner +4.27 [+1.39, +7.15]); on MaterioMiner alone +4.27 fine-grained and +1.77 [+0.67, +2.88] coarse-grained, every paper gaining; on MuLMS alone +3.19 [−1.13, +7.51] on the seeds the screen did not see, six of seven subfields gaining but no pass. The gain is recall on unseen names (MuLMS: 39.4% to 47.3%, precision 55.8 to 50.9), of which 6 copies without names give 43.7% (precision 53.9): the names add 3.6 points of recall at a cost of 3.0 of precision, +0.7 F1 on unseen names (on MaterioMiner's papers, fine-grained, +1.4 recall and +4.0 precision over the control, +2.4 F1 on unseen names; exploratory). It is not shown to exceed plain mention replacement (MuLMS +0.92 [−1.63, +3.48]; pooled +1.23 [−0.22, +2.68], post hoc), nor 6 copies without names: +0.80 [−0.66, +2.26] pooled over the same 11 units and seeds (14.1, pre-registered, no; MuLMS +0.51 [−1.51, +2.53], MaterioMiner +1.29 [−2.51, +5.10]); the control alone gains +2.56 [+0.94, +4.18] over the CRF head (reported), so most of the gain is mention replacement's with more copies and the names' share is small and not established. Nor does the names' source matter: V4 with a mixed corpus of the six other topics scores −0.18 [−2.01, +1.65] against the own-topic version (14.2, pre-registered, no), the mixed variant gaining +3.38 [−0.89, +7.64] over the CRF head and +0.70 [−1.19, +2.58] over the copy control (reported). The method the paper can state: mention replacement with 6 copies and names harvested from a large unlabeled materials corpus of any topic. Its five ablations (14.3, 31 October; reported, 3 seeds, Table 7): the corpus's first 10,000 or 20,000 sentences, the threshold 0.7, 2 of 3 teachers and the names capped at half of the draws each lie within 0.2 points of the method (−0.16 to +0.11, every interval covering 0) while the lexicon ranges from 19,171 to 78,604 distinct names and from 16.4% to 31.5% of the unseen test names: the settings that govern how many names enter do not matter, as 14.1 implies, and a quarter of the corpus with the strictest filter does as well. | `gpu/ner_week5_seed_analysis.json` (`week13`, `pooled`; `mulms`, `week12`); `gpu/ner_week12_comparisons.json`; `gpu/ner_mentions.json`; Table 6, `docs/tables/table6_held_out_decisions.md` | Weeks 12 and 13 (pre-registered; the screen 20 October, the decisions 24–25 October). The third corpus (13.4, 25 October): on SOFC-Exp's article folds with its own corpus −0.04 [−1.21, +1.14] against the CRF head, no, though +0.45 [+0.04, +0.86] over plain mention replacement (reported), where half the test names are seen in training; pooled over the three corpora +2.45 [+0.50, +4.40] (reported). The claim is the two-corpus one, SOFC-Exp its boundary condition. Week 14 (pre-registered 29 October, ROADMAP §4): 14.1 done the same day, no (the names against the 6-copy control on the same units and seeds, +0.80 [−0.66, +2.26] pooled over 11 units); 14.2 done the same day, no (the subfield's own corpus against a mixed corpus of the other six topics, −0.18 [−2.01, +1.65] over 7 subfields); the five reported ablations done 31 October (`w14c`, 9.7 session hours): all within 0.2 points of the method |
+| C26 | Mention replacement with names harvested from unlabeled text of the held-out documents' own topic improves NER on held-out documents of two corpora. Three CRF teachers tag the topic's corpus (40,000 open-access sentences per MuLMS subfield; the fatigue corpus for MaterioMiner); a mention joins the replacement pool when the three tag its span alike with every marginal at least 0.9; each training sentence gets 6 copies. Pre-registered: pooled over MuLMS's 7 held-out subfields and MaterioMiner's 4 held-out papers (fine-grained), +3.58 [+0.95, +6.21] against the CRF head, no corpus losing (MuLMS +3.18 [−1.30, +7.66], MaterioMiner +4.27 [+1.39, +7.15]); on MaterioMiner alone +4.27 fine-grained and +1.77 [+0.67, +2.88] coarse-grained, every paper gaining; on MuLMS alone +3.19 [−1.13, +7.51] on the seeds the screen did not see, six of seven subfields gaining but no pass. The gain is recall on unseen names (MuLMS: 39.4% to 47.3%, precision 55.8 to 50.9), of which 6 copies without names give 43.7% (precision 53.9): the names add 3.6 points of recall at a cost of 3.0 of precision, +0.7 F1 on unseen names (on MaterioMiner's papers, fine-grained, +1.4 recall and +4.0 precision over the control, +2.4 F1 on unseen names; exploratory). It is not shown to exceed plain mention replacement (MuLMS +0.92 [−1.63, +3.48]; pooled +1.23 [−0.22, +2.68], post hoc), nor 6 copies without names: +0.80 [−0.66, +2.26] pooled over the same 11 units and seeds (14.1, pre-registered, no; MuLMS +0.51 [−1.51, +2.53], MaterioMiner +1.29 [−2.51, +5.10]); the control alone gains +2.56 [+0.94, +4.18] over the CRF head (reported), so most of the gain is mention replacement's with more copies and the names' share is small and not established. Nor does the names' source matter: V4 with a mixed corpus of the six other topics scores −0.18 [−2.01, +1.65] against the own-topic version (14.2, pre-registered, no), the mixed variant gaining +3.38 [−0.89, +7.64] over the CRF head and +0.70 [−1.19, +2.58] over the copy control (reported). The method the paper can state: mention replacement with 6 copies and names harvested from a large unlabeled materials corpus of any topic. Its five ablations (14.3, 31 October; reported, 3 seeds, Table 7): the corpus's first 10,000 or 20,000 sentences, the threshold 0.7, 2 of 3 teachers and the names capped at half of the draws each lie within 0.2 points of the method (−0.16 to +0.11, every interval covering 0) while the lexicon ranges from 19,171 to 78,604 distinct names and from 16.4% to 31.5% of the unseen test names: the settings that govern how many names enter do not matter, as 14.1 implies, and a quarter of the corpus with the strictest filter does as well. Read after paper A's first review round (31 October; post hoc, `gpu/ner_robustness.json`, Table 9): on the same 11 units and decision seeds plain mention replacement gains +2.46 [+1.00, +3.91] over the CRF head, the extra copies +0.33 [−0.25, +0.92] and the names +0.80 [−0.66, +2.26], so the pre-registered pass is a property mention replacement already has (its own 11-unit gain, from runs that predate the names route, +2.35 [+0.94, +3.75] on the 10-seed basis); the recipe's whole increment over the published method is +1.13 [−0.51, +2.76]. Paper A states the claim this way. | `gpu/ner_week5_seed_analysis.json` (`week13`, `pooled`; `mulms`, `week12`); `gpu/ner_week12_comparisons.json`; `gpu/ner_mentions.json`; Table 6, `docs/tables/table6_held_out_decisions.md` | Weeks 12 and 13 (pre-registered; the screen 20 October, the decisions 24–25 October). The third corpus (13.4, 25 October): on SOFC-Exp's article folds with its own corpus −0.04 [−1.21, +1.14] against the CRF head, no, though +0.45 [+0.04, +0.86] over plain mention replacement (reported), where half the test names are seen in training; pooled over the three corpora +2.45 [+0.50, +4.40] (reported). The claim is the two-corpus one, SOFC-Exp its boundary condition. Week 14 (pre-registered 29 October, ROADMAP §4): 14.1 done the same day, no (the names against the 6-copy control on the same units and seeds, +0.80 [−0.66, +2.26] pooled over 11 units); 14.2 done the same day, no (the subfield's own corpus against a mixed corpus of the other six topics, −0.18 [−2.01, +1.65] over 7 subfields); the five reported ablations done 31 October (`w14c`, 9.7 session hours): all within 0.2 points of the method |
 
 A draft of the sections that hold for either paper type is in
 `docs/PAPER_DRAFT.md`; the two papers' own drafts are `docs/PAPER_A.md`
@@ -103,7 +103,7 @@ and `docs/PAPER_B.md`.
 
 ## Figures and tables
 
-Figures 1–8 are drawn from the GPU results (Figure 8 from no data) by `src/graph/paper_figures.py`
+Figures 1–9 are drawn from the GPU results (Figure 8 from no data) by `src/graph/paper_figures.py`
 into `docs/figures/` (no training; re-run it when results change):
 - Figure 1 (`fig1_random_vs_unseen.png`): per system with 10 seeds on both
   protocols, micro F1 on the 5 random splits and on the 4 unseen papers,
@@ -163,7 +163,7 @@ into `docs/figures/` (no training; re-run it when results change):
   along an iso-F1 curve and a little past it (recall 43.7 to 47.3, precision
   53.9 to 50.9, F1 48.3 to 49.0); on MaterioMiner fine-grained they raise
   both (41.1 at 53.2 against 39.7 at 49.2; F1 43.9 to 46.4) (C26).
-Tables 1–6 are generated into `docs/tables/` by `src/graph/paper_tables.py`
+Tables 1–9 and A1–A2 are generated into `docs/tables/` by `src/graph/paper_tables.py`
 from the committed results (no training; re-run it when results change):
 - Table 1 (`table1_published_split.md`): the published splits, MaterioMiner's
   two levels and SOFC-Exp's official split at its two levels (entity and
@@ -203,10 +203,34 @@ from the committed results (no training; re-run it when results change):
   the CRF head, with the distinct names each setting admits and the share
   of the unseen test names among them: F1 within 0.2 points of the
   method throughout, the lexicon from 19,171 to 78,604 names (C26).
+- Table 8 (`table8_types.md`) and Table A2 (`tableA2_types_fine.md`): per
+  entity type on held-out documents, the F1 of the CRF head, the 6-copy
+  control and the names method, averaged over the (seed, unit) pairs whose
+  test set has the type (MuLMS's subfields on the decision seeds and
+  MaterioMiner's papers, coarse-grained in Table 8 and fine-grained in
+  A2); exploratory: on MuLMS the names method gains over the CRF head on
+  every type with support and the control holds more than half of that
+  gain on 9 of the 12 (C26).
+- Table 9 (`table9_robustness.md`; `ner_robustness.py`,
+  `gpu/ner_robustness.json`, post hoc): over the 11 units of 13.2, every
+  comparison among the CRF head, mention replacement with 3 and 6 copies
+  and the names method, on MuLMS's 10-seed means (as decided) and on the
+  7 seeds the screen did not see, with the units above 0, the exact
+  sign-flip permutation p-value and the lowest leave-one-unit-out lower
+  bound; and the MaterioMiner grids at both granularities. The
+  decomposition paper A rests on: +2.46 [+1.00, +3.91] (3 copies against
+  the CRF head), +0.33 [−0.25, +0.92] (6 against 3), +0.80 [−0.66, +2.26]
+  (the names against 6 copies) (C26).
 - Figure 8 (`fig8_method.png`; paper A's Figure 1): the method as boxes
   and arrows, no data: the three teachers, the corpus, the mention filter,
   the lexicon, the replacement pool, mention replacement with six copies,
   the student.
+- Figure 9 (`fig9_units.png`; paper A's Figure 2): per held-out unit, the
+  names method's difference from the CRF head and from the 6-copy control
+  (MuLMS's 7 subfields on the decision seeds, MaterioMiner's 4 papers at
+  both granularities, SOFC-Exp's 5 folds), with the pooled 11-unit
+  intervals of 13.2 and 14.1 as bands: 10 of 11 units above 0 against the
+  CRF head, 7 of 11 against the control (C26).
 
 ## Reproducibility appendix
 
@@ -223,10 +247,15 @@ from the committed results (no training; re-run it when results change):
 
 ## Two papers (decided 30 October)
 
-Paper A, the methods paper (`docs/PAPER_A.md`, week 15): C26 as stated
-after week 14, with the ablations of 14.1–14.3, the SOFC-Exp boundary
-condition, the consistency rule (C25) and the unseen-name mechanism
-(C17, C22). Paper B, the evaluation paper (`docs/PAPER_B.md`, drafted 30 October
+Paper A, the methods paper (`docs/PAPER_A.md`, week 15; rewritten 31
+October after its first adversarial review round under the title
+"Harvested names add little to mention replacement on held-out materials documents: a pre-registered test"): the pre-registered test of names harvested from unlabeled
+text through mention replacement, whose finding is that the pooled gain
+over the CRF head (C26) is mention replacement's and the names' share is
+not established (Table 9), with the ablations of 14.1–14.3, the SOFC-Exp
+boundary condition, the unseen-name mechanism (C17, C22), the per-unit and
+per-type results (Figure 9, Tables 8 and A2), the protocol record with
+its amendments, and the consistency rule (C25) in an appendix. Paper B, the evaluation paper (`docs/PAPER_B.md`, drafted 30 October
 from `docs/PAPER_DRAFT.md`, ahead of week 16): C1–C24 with the method
 results cut to summaries that cite A, and the count of 86 pre-registered
 decisions. The division and the schedule are in `docs/METHODS_PLAN.md`
@@ -235,20 +264,20 @@ checklist are `docs/REPRODUCIBILITY.md` (30 October).
 
 ## Titles and abstracts (candidates, 30 October; fixed by 14 November)
 
-Each draft carries its abstract (paper A about 330 words, paper B about
-400); the venue sets the length (Nature Portfolio journals about 150
+Each draft carries its abstract (paper A 250 words since 31 October, with
+the 150-word variant below; paper B about 400); the venue sets the length (Nature Portfolio journals about 150
 words unreferenced, RSC and IOP about 250, ACL no hard limit; check the
 author guidelines when the venue is chosen). Title candidates, the first
 of each the drafts' working title:
 
-Paper A (methods):
-1. Mention replacement with more copies and harvested names improves
+Paper A (methods; the first is the draft's title since the review round
+of 31 October, which withdrew the 30 October candidates because the
+names' share of the gain is not established):
+1. Harvested names add little to mention replacement on held-out materials documents: a pre-registered test.
+2. Mention replacement, not the harvested names: a pre-registered test of
+   lexicons from unlabeled text for materials NER on held-out documents.
+3. Where the gain comes from: matched controls for a names method in
    materials NER on unseen documents.
-2. Teaching a materials tagger the names it has never read: lexicons from
-   unlabeled text through mention replacement, under a pre-registered
-   protocol.
-3. More copies and borrowed names: a pre-registered augmentation for
-   materials NER on held-out documents.
 
 Paper B (evaluation):
 1. Materials NER on documents it has never read: a pre-registered
@@ -257,6 +286,24 @@ Paper B (evaluation):
    seeds, votes and the names a model lacks.
 3. Eighty-six decisions: how the usual additions to materials NER fare on
    unseen documents under a ten-seed, pre-registered protocol.
+
+Paper A, the 150-word abstract (for a venue with that limit):
+
+> Materials entity taggers trained on a few annotated papers miss most of
+> a new paper's entity names: 81% of a held-out MaterioMiner paper's
+> entities are names absent from training, and the baseline finds 35% of
+> them. We test whether unlabeled papers can supply those names. Three
+> baseline taggers label 40,000 open-access sentences, the names they agree
+> on join the pool of mention replacement, and six augmented copies of
+> each training sentence train the student. Under pre-registered protocols
+> with 7–10 seeds per held-out unit, the recipe gains 3.6 F1 [1.0, 6.1]
+> over the baseline across 11 held-out units of two corpora. But mention
+> replacement without harvested names already gains 2.5 [1.0, 3.9]; the
+> names' share, 0.8 [−0.7, 2.3], is not established, does not depend on
+> their source or on the filter, and buys recall on unseen names with
+> precision. We report every decision and amendment. Mention replacement
+> is worth using on new documents; harvesting names is not yet shown to
+> add to it.
 
 ## Still missing before submission
 
@@ -275,7 +322,9 @@ Paper B (evaluation):
    13's pooled decision over MuLMS and MaterioMiner passed (C26): the
    paper is the methods paper (`docs/METHODS_PLAN.md` §7), with SOFC-Exp
    as the boundary condition and week 14's ablations (the names' share,
-   the topic's role) as its last runs.
+   the topic's role) as its last runs. Paper A's first review round (31
+   October) reframed its headline: the pooled gain is mention
+   replacement's, and the names' share is not established.
 2. The authors' confirmation of the split and the scoring (item 6; the email
    is drafted). The reproduction (C1) already matches both numbers.
 3. Related work. A draft is in `docs/PAPER_DRAFT.md`, Section 8 (17

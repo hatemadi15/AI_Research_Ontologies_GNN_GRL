@@ -231,3 +231,30 @@ def test_table7_lists_the_ablations_against_the_method():
     assert ("| the method: 40,000 sentences, threshold 0.9, 3 of 3 teachers, a uniform pool | 2 "
             "| 300 | 22.0 | 52.09 |  | +1.45 [−1.35, +4.25] | +3.16 [−1.96, +8.28] |") in table
     assert pt.ablation_rows({}) == []
+
+
+def test_table8_per_type_and_table9_robustness(tmp_path):
+    """Table 8: per type, the CRF head, MR6 and the names method with the differences, per
+    part; Table 9: the pooled comparisons per basis with positives, the sign-flip p and the
+    leave-one-out minimum, then the MaterioMiner grids."""
+    types = {'mulms': {'crf_mrm_topic6': {'MAT': {'crf': 50.0, 'method': 53.0, 'diff': 3.0,
+                                                  'n_splits': 7, 'support_per_split': 1800.0}},
+                       'crf_mr6': {'MAT': {'crf': 50.0, 'method': 52.0, 'diff': 2.0,
+                                           'n_splits': 7, 'support_per_split': 1800.0}}}}
+    rows = pt.type_rows({'week14': {'types': types}}, 'mulms')
+    assert rows == [['MAT', 1800.0, 7, 50.0, 52.0, 53.0, 3.0, 1.0]]
+    table = pt.table8({'mulms': rows})
+    assert '| MAT | 1800.0 | 7 | 50.00 | 52.00 | 53.00 | +3.00 | +1.00 |' in table
+    assert pt.type_rows({}, 'mulms') == []
+    entry = {'mean_diff': 3.58, 'ci95': [0.95, 6.21], 'per_run': [1] * 11, 'n_positive': 9,
+             'n_units': 11, 'sign_flip_p': 0.0107,
+             'leave_one_out': {'min_lower': 0.44, 'all_above_zero': True, 'rows': []}}
+    robust = {'pooled': {'ten': {'names_vs_crf': entry, 'units': ['a'] * 11}},
+              'grids': {'fine': {'names_vs_crf': {'mean_diff': 4.27, 'ci95': [1.39, 7.15]}}}}
+    rows = pt.robustness_rows(robust)
+    assert rows[0][:2] == ['MuLMS seeds 0–900 (as decided)', 'MR6 + names − CRF head']
+    table = pt.table9(robust)
+    assert ('| MuLMS seeds 0–900 (as decided) | MR6 + names − CRF head | +3.58 [+0.95, +6.21] | 9/11 '
+            '| 0.0107 | +0.44 |') in table
+    assert '| MR6 + names − CRF head | +4.27 [+1.39, +7.15] |' in table
+    assert pt.robustness_rows({}) == []
