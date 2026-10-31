@@ -5041,3 +5041,13 @@ buys nothing. Week 14's tally: 2 decisions, both no; 5 ablations reported,
 all flat; the names method stays at 8 pre-registered decisions in weeks 12
 to 14, 3 passing. Table 7 (`docs/tables/table7_ablations.md`,
 `paper_tables.py`) holds the numbers; paper A's Section 4.3 states them.
+*Exploratory, after 14.3 (`ner_mentions.py` with the five variants; the
+screen's 3 seeds pooled over the subfields; no decision).* The settings
+move the unseen-name trade without moving F1: against V4's screen runs
+(48.1% recall at 50.0 precision on the unseen names, F1 49.1), the
+smaller lexicons recall less at higher precision (10,000 sentences 46.9%
+at 52.3, F1 49.5; 20,000 sentences 46.2% at 53.0, F1 49.3; the names in
+half of the draws 46.2% at 53.7, F1 49.7) and the larger ones more at
+lower precision (threshold 0.7 48.8% at 49.5, F1 49.1; 2 of 3 teachers
+48.3% at 50.6, F1 49.5). More names buy recall and cost precision in the
+same measure.

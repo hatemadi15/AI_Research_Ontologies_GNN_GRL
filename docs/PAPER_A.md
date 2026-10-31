@@ -289,6 +289,17 @@ no better than half. What the ablations cannot say is whether a much
 smaller or a much larger lexicon would change the result: they bracket
 the method's settings by a factor of four in names, no more.
 
+On the unseen names the settings do move the trade that Section 4.4
+describes (exploratory; the screen's 3 seeds pooled over the subfields,
+the method's own screen runs at 48.1% recall and 50.0 precision): the
+smaller lexicons find fewer of them at higher precision (10,000 sentences
+46.9% at 52.3; 20,000 sentences 46.2% at 53.0; the names in half of the
+draws 46.2% at 53.7) and the larger ones more at lower precision (the
+threshold 0.7 48.8% at 49.5; 2 of 3 teachers 48.3% at 50.6), while F1 on
+the unseen names stays between 49.1 and 49.7. More names buy recall and
+cost precision in the same measure, which is why the settings do not show
+in F1.
+
 ### 4.4 What the names do
 
 By kind of name, pooled over the 70 runs of MuLMS's held-out subfields

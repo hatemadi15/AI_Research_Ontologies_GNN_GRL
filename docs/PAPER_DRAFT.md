@@ -931,7 +931,11 @@ names that three CRF teachers tag in unlabeled in-domain text.
   coverage doubles, and F1 does not move: as 14.1 found, the names'
   contribution is small, so the settings that govern how many names
   enter cannot matter; a quarter of the corpus with the strictest filter
-  does as well as the rest.
+  does as well as the rest. On the unseen names (exploratory, 3 seeds)
+  the settings move the trade without moving F1: the smaller lexicons
+  recall 46.2–46.9% at 52.3–53.7 precision, the larger 48.3–48.8% at
+  49.5–50.6, against V4's 48.1% at 50.0; F1 on unseen names 49.1–49.7
+  throughout.
 
 **6.8 Document-level propagation on held-out documents of three corpora
 (C25).** The rule of Section 5.5 (krishnan2006effective): within a document,
