@@ -447,3 +447,19 @@ per run.
 the names method and the 6-copy control against the CRF head on MuLMS's
 decision seeds and MaterioMiner's papers (Tables 8 and A2,
 `docs/tables/table8_types.md`, `tableA2_types_fine.md`).
+
+Week 15 (the week-15 analysis note, ROADMAP §4; post hoc, no decision):
+batch `w15a` rebuilds the lexicons of the names method with no students
+(`ner_baseline.py --students 0 --save-names`): V4's on MuLMS's 7 held-out
+subfields (the CRF head's teachers of seeds 0, 100 and 200, the topic corpus,
+the mention filter at 0.9) and its analogue's on MaterioMiner's 4 papers at
+both granularities (the fatigue corpus). The names files
+(`ner_names_<granularity>_<protocol>_<variant>[_<subfield>].json`: the names
+with their counts, the teachers' scores, the coverage counts) are pulled to
+`results/gpu_names/`, which git ignores (the harvested names are never
+committed). `gpu/ner_lexicon_recall.json` (`ner_lexicon_recall.py`) holds the
+aggregate analysis: per unit and system, recall on the unseen test names the
+lexicon holds and on those it does not, the unseen predictions' lexicon share
+and precision, the paired gains over MR6 and the CRF head on each part and
+their difference with 95% CIs, and the checks that the rebuilt teachers' F1
+and coverage counts equal the stored ones.

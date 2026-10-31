@@ -1349,3 +1349,35 @@ def test_week14_mixed_corpus_and_ablation_batches(monkeypatch, tmp_path):
     assert spec['topic_corpora'] == {t: sha[t] for t in kj.MULMS_SUBFIELD_NAMES}
     assert {'w14b', 'w14c'} <= set(kj.BATCHES)
     assert kj.batch_spec('w12a')['topic_corpora'] == {t: sha[t] for t in kj.MULMS_SUBFIELD_NAMES}
+
+
+def test_week15_names_batch(monkeypatch, tmp_path):
+    """w15a (week 15): the lexicons rebuilt by their teachers with no students; lane 0 the smoke
+    repeat then MuLMS's 7 subfields, lane 1 MaterioMiner's 4 papers at both granularities; every
+    job carries --students 0 and --save-names with the names file of its variant; collect_names
+    copies the ner_names files of a pulled output to a directory of their own."""
+    lane0, lane1 = _parsed(kj.batch_lanes('w15a'))
+    assert lane0[0].tag == 'smokebb' and len(lane0) == 8 and len(lane1) == 8
+    for a in lane0[1:]:
+        assert a.students == 0 and a.teachers == 3 and a.silver_mentions and a.augment_names
+        assert a.augment_mentions == 6 and a.self_train_sample == 0 and a.names_tag == 'topic'
+        assert a.self_train == f'data/processed/corpus/topic_{a.subfields[0]}_sentences.txt'
+        assert a.save_names == f'ner_names_mulms_leave_one_subfield_out_crf_mrm_topic6_{a.subfields[0]}.json'
+        assert not hasattr(a, 'student_offsets') and not a.save_predictions
+    assert [a.subfields[0] for a in lane0[1:]] == list(kj.MULMS_SUBFIELD_NAMES)
+    assert [(a.granularity, a.papers[0]) for a in lane1] == [(g, p) for g in kj.GRANULARITIES
+                                                             for p in kj.PAPERS]
+    for a in lane1:
+        assert a.students == 0 and a.self_train == kj.CORPUS and a.augment_mentions == 6
+        assert a.save_names == f'ner_names_{a.granularity}_leave_one_paper_out_crf_mrm6.json'
+    assert nb.variant_name(lane0[1]) == 'crf_mrm_topic6' and nb.variant_name(lane1[0]) == 'crf_mrm6'
+    assert 'w15a' in kj.BATCHES
+    pulled = tmp_path / 'pulled' / 'processed' / 'ner'
+    pulled.mkdir(parents=True)
+    (pulled / 'ner_names_mulms_leave_one_subfield_out_crf_mrm_topic6_semi.json').write_text('{}')
+    (pulled / 'ner_results_mulms_leave_one_subfield_out_crf_m0.json').write_text('{}')
+    dest = tmp_path / 'names'
+    assert kj.collect_names(tmp_path / 'pulled', dest) == [
+        'ner_names_mulms_leave_one_subfield_out_crf_mrm_topic6_semi.json']
+    assert sorted(p.name for p in dest.iterdir()) == [
+        'ner_names_mulms_leave_one_subfield_out_crf_mrm_topic6_semi.json']

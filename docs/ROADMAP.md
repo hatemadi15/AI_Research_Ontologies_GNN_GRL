@@ -5129,3 +5129,53 @@ Figure 3's labels fixed; fu2020rethinking and ghaddar2021context added to
 the bibliography after verification. Planned next: the recall split by
 lexicon membership (the seven lexicons rebuilt, one teacher pass per
 corpus, under a protocol note) and round 3.
+
+### Week 15 analysis note: recall by lexicon membership (post hoc; fixed before its run, 31 October, evening)
+
+*Question.* Paper A's Section 5.4 cannot say whether the harvested names
+help the tagger with the names the lexicon holds (name knowledge) or shift
+it toward tagging more spans (a generic bias): the lexicons were not stored
+with the runs. The reviews of 31 October asked for the direct analysis.
+
+*Rebuild.* Batch `w15a` (`kaggle_jobs.py`, kernel c): the seven MuLMS
+lexicons of V4 (`crf_mrm_topic6`: the CRF head's teachers of seeds 0, 100
+and 200 on the fold's 340 training sentences, the subfield's topic corpus,
+all 40,000 sentences, the mention filter at 0.9, all three teachers
+agreeing) and the eight of its MaterioMiner analogue (`crf_mrm6`, the
+fatigue corpus, one per paper and granularity), each by a run with no
+students (`--students 0 --save-names`, new): the names with their counts,
+the teachers' scores and the coverage counts go to
+`ner_names_<granularity>_<protocol>_<variant>[_<subfield>].json`, pulled to
+`results/gpu_names/` (git-ignored: the harvested names are never
+committed). Lane 0: the smoke repeat (`smokebb`, the CRF run of smoke4,
+must be identical) then the 7 subfields; lane 1: the 8 papers. About 15
+teacher-and-tagging jobs, 2 to 5 session hours of the 35.3 left this week.
+
+*Checks before any number is used.* Per unit, the rebuilt teachers' test F1
+must equal the stored teachers' (`self_training.teachers` of the names runs
+at every seed), and the rebuilt lexicon's coverage counts (`n_mentions`,
+`n_distinct`, `n_test_unseen`, `n_test_unseen_in_silver`) must equal the
+stored `self_training.names` of those runs; a unit that differs is reported
+and left out.
+
+*Analysis* (`ner_lexicon_recall.py`, from the saved test predictions; MuLMS
+at the decision seeds 300–900, MaterioMiner at seeds 0–900): for the CRF
+head, MR3, MR6 and MR6 + names (and the mixed-corpus variant on MuLMS),
+recall on the unseen test names that the unit's lexicon holds and on those
+it does not, pooled over seeds and units and per unit; the names' gain over
+MR6 on each part and the difference of the two gains, paired over the 7
+subfields (and the 4 papers per granularity) with 95% Student-t intervals;
+the same against the CRF head and for MR6 against the CRF head; and, among
+predicted entities whose name is unseen, the share that are lexicon names
+and their precision, per system. Output: `results/gpu/ner_lexicon_recall.json`
+(aggregate counts only), a table in paper A.
+
+*Reading, fixed in advance.* Name knowledge: the names' recall gain over
+MR6 is larger on the unseen names the lexicon holds than on those it does
+not, the paired interval of the difference above 0. A generic shift: the
+two gains are alike, the interval covering 0 with both gains positive.
+Mixed: the interval above 0 but the gain on the names not held also above
+0. No decision is taken; the result is reported with its intervals in
+paper A's Section 5.4 and Discussion, labelled post hoc. Nothing else about
+the paper's claims changes with the outcome: the names' share of the F1
+gain stays +0.80 [−0.66, +2.26] either way.
