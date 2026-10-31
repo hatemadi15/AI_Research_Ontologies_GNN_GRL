@@ -62,3 +62,26 @@ def test_unit_differences_and_pooled(tmp_path):
     assert nr.unit_differences({}, {}) == {} and nr.pooled({}, {}) == {}
     assert nr.coverage_gain({}) == {} and nr.compute(str(tmp_path)) == {}
     (tmp_path / 'x.json').write_text(json.dumps({}))
+
+
+def test_mde_stratified_partial_and_detectable():
+    """The detectable difference from a stored interval, the stratified mean over the two corpora,
+    the partial correlation, and the per-comparison table from the pooled, grid and analysis parts."""
+    pytest.importorskip('scipy')
+    assert nr.mde(1.46, 10) == 2.04                                   # D7's half-width: 2.0 points
+    assert nr.mde(4.32, 6) > nr.mde(1.83, 6)                          # a wider interval detects less
+    st = nr.stratified(['s1', 's2', 'p1.conll', 'p2.conll'], [2.0, 4.0, 5.0, 7.0])
+    assert st == {'corpus_means': {'mulms': 3.0, 'materiominer': 6.0}, 'mean': 4.5}
+    assert nr.stratified(['s1', 's2'], [1.0, 2.0]) == {}              # one corpus: no stratified mean
+    assert round(nr.partial(0.6, 0.5, 0.5), 4) == 0.4667
+    robust = {'decision': {'names_vs_mr6': {'ci95': [-0.66, 2.26], 'n_units': 11}, 'units': []}}
+    grids = {'fine': {'names_vs_crf': {'ci95': [1.39, 7.15]}}}
+    analysis = {'week13': {'week12_winner': 'w'},
+                'mulms': {'week12': {'w': {'decision': {'minus_crf': {'micro': {'ci95': [-1.13, 7.51]}}}}}},
+                'week14': {'copies': {'mulms': {'decision': {}}}, 'topic': {'decision': {}},
+                           'ablations': {'x': {'minus_w': {'micro': {'ci95': [-1.0, 1.0]}}}}}}
+    d = nr.detectable(analysis, robust, grids)
+    assert d['pooled decision: names_vs_mr6'] == {'half_width': 1.46, 'df': 10, 'mde_80': 2.04}
+    assert d['MaterioMiner fine: names_vs_crf']['df'] == 3
+    assert d['D1 MuLMS: names_vs_crf']['half_width'] == 4.32
+    assert 'ablation x: vs_method (3 seeds)' in d and 'D2 MuLMS: names_vs_mr3' not in d

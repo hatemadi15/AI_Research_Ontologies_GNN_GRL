@@ -245,7 +245,14 @@
     "10.1038_ncomms7164.conll",
     "10.1038_s41467-020-19071-7.conll",
     "10.3390_met10111458.conll"
-   ]
+   ],
+   "stratified_names_vs_crf": {
+    "corpus_means": {
+     "mulms": 3.18,
+     "materiominer": 4.27
+    },
+    "mean": 3.73
+   }
   },
   "decision": {
    "names_vs_crf": {
@@ -492,7 +499,14 @@
     "10.1038_ncomms7164.conll",
     "10.1038_s41467-020-19071-7.conll",
     "10.3390_met10111458.conll"
-   ]
+   ],
+   "stratified_names_vs_crf": {
+    "corpus_means": {
+     "mulms": 3.19,
+     "materiominer": 4.27
+    },
+    "mean": 3.73
+   }
   }
  },
  "grids": {
@@ -718,11 +732,187 @@
   "pearson": {
    "coverage_vs_names_gain": -0.71,
    "crf_f1_vs_names_gain": -0.76,
-   "crf_f1_vs_method_gain": -0.61
+   "crf_f1_vs_method_gain": -0.61,
+   "coverage_vs_crf_f1": 0.89
+  },
+  "partial": {
+   "coverage_vs_names_gain_given_crf_f1": -0.1,
+   "crf_f1_vs_names_gain_given_coverage": -0.4
+  },
+  "without_semi_sofc": {
+   "coverage_vs_names_gain": -0.19,
+   "crf_f1_vs_names_gain": -0.01
   },
   "spearman": {
    "coverage_vs_names_gain": -0.61,
    "crf_f1_vs_names_gain": -0.57
+  }
+ },
+ "detectable": {
+  "pooled ten: names_vs_crf": {
+   "half_width": 2.63,
+   "df": 10,
+   "mde_80": 3.67
+  },
+  "pooled ten: names_vs_mr3": {
+   "half_width": 1.45,
+   "df": 10,
+   "mde_80": 2.02
+  },
+  "pooled ten: names_vs_mr6": {
+   "half_width": 1.57,
+   "df": 10,
+   "mde_80": 2.2
+  },
+  "pooled ten: mr6_vs_crf": {
+   "half_width": 1.62,
+   "df": 10,
+   "mde_80": 2.26
+  },
+  "pooled ten: mr6_vs_mr3": {
+   "half_width": 0.52,
+   "df": 10,
+   "mde_80": 0.73
+  },
+  "pooled ten: mr3_vs_crf": {
+   "half_width": 1.41,
+   "df": 10,
+   "mde_80": 1.96
+  },
+  "pooled decision: names_vs_crf": {
+   "half_width": 2.54,
+   "df": 10,
+   "mde_80": 3.55
+  },
+  "pooled decision: names_vs_mr3": {
+   "half_width": 1.63,
+   "df": 10,
+   "mde_80": 2.28
+  },
+  "pooled decision: names_vs_mr6": {
+   "half_width": 1.46,
+   "df": 10,
+   "mde_80": 2.04
+  },
+  "pooled decision: mr6_vs_crf": {
+   "half_width": 1.59,
+   "df": 10,
+   "mde_80": 2.22
+  },
+  "pooled decision: mr6_vs_mr3": {
+   "half_width": 0.58,
+   "df": 10,
+   "mde_80": 0.82
+  },
+  "pooled decision: mr3_vs_crf": {
+   "half_width": 1.46,
+   "df": 10,
+   "mde_80": 2.03
+  },
+  "MaterioMiner fine: names_vs_mr6": {
+   "half_width": 3.8,
+   "df": 3,
+   "mde_80": 4.97
+  },
+  "MaterioMiner fine: mr6_vs_crf": {
+   "half_width": 2.89,
+   "df": 3,
+   "mde_80": 3.77
+  },
+  "MaterioMiner fine: mr6_vs_mr3": {
+   "half_width": 1.67,
+   "df": 3,
+   "mde_80": 2.19
+  },
+  "MaterioMiner fine: names_vs_crf": {
+   "half_width": 2.88,
+   "df": 3,
+   "mde_80": 3.77
+  },
+  "MaterioMiner fine: names_vs_mr3": {
+   "half_width": 3.25,
+   "df": 3,
+   "mde_80": 4.26
+  },
+  "MaterioMiner fine: mr3_vs_crf": {
+   "half_width": 1.26,
+   "df": 3,
+   "mde_80": 1.65
+  },
+  "MaterioMiner coarse: names_vs_mr6": {
+   "half_width": 2.3,
+   "df": 3,
+   "mde_80": 3.01
+  },
+  "MaterioMiner coarse: mr6_vs_crf": {
+   "half_width": 2.9,
+   "df": 3,
+   "mde_80": 3.79
+  },
+  "MaterioMiner coarse: mr6_vs_mr3": {
+   "half_width": 2.5,
+   "df": 3,
+   "mde_80": 3.27
+  },
+  "MaterioMiner coarse: names_vs_crf": {
+   "half_width": 1.1,
+   "df": 3,
+   "mde_80": 1.44
+  },
+  "MaterioMiner coarse: names_vs_mr3": {
+   "half_width": 0.43,
+   "df": 3,
+   "mde_80": 0.56
+  },
+  "MaterioMiner coarse: mr3_vs_crf": {
+   "half_width": 1.22,
+   "df": 3,
+   "mde_80": 1.6
+  },
+  "D1 MuLMS: names_vs_crf": {
+   "half_width": 4.32,
+   "df": 6,
+   "mde_80": 5.92
+  },
+  "D2 MuLMS: names_vs_mr3": {
+   "half_width": 2.55,
+   "df": 6,
+   "mde_80": 3.5
+  },
+  "D8 MuLMS: own_vs_mixed": {
+   "half_width": 1.83,
+   "df": 6,
+   "mde_80": 2.51
+  },
+  "MuLMS: names_vs_mr6": {
+   "half_width": 2.02,
+   "df": 6,
+   "mde_80": 2.77
+  },
+  "ablation crf_mrm_topic10k6: vs_method (3 seeds)": {
+   "half_width": 1.63,
+   "df": 6,
+   "mde_80": 2.23
+  },
+  "ablation crf_mrm_topic20k6: vs_method (3 seeds)": {
+   "half_width": 2.29,
+   "df": 6,
+   "mde_80": 3.14
+  },
+  "ablation crf_mrm_topiclow6: vs_method (3 seeds)": {
+   "half_width": 1.47,
+   "df": 6,
+   "mde_80": 2.01
+  },
+  "ablation crf_mrm_topictwo6: vs_method (3 seeds)": {
+   "half_width": 1.7,
+   "df": 6,
+   "mde_80": 2.32
+  },
+  "ablation crf_mrm_topiccap6: vs_method (3 seeds)": {
+   "half_width": 1.71,
+   "df": 6,
+   "mde_80": 2.35
   }
  },
  "compute": {

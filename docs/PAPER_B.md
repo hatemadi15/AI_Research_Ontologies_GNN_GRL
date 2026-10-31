@@ -672,7 +672,7 @@ the mechanism, the ablations and the discussion are A's.
 
 Eight decisions in weeks 12 to 14, three passing, the three sharing one
 corpus's four papers. Paper A's reading, after its first review round
-(31 October; post hoc, its Table 2): the pre-registered pooled gain over
+(31 October; post hoc, its Table 3): the pre-registered pooled gain over
 the CRF head is mention replacement's, which gains +2.46 [+1.00, +3.91]
 on the same 11 units and seeds without any harvested name; the extra
 copies add +0.33 [−0.25, +0.92] and the names +0.80 [−0.66, +2.26],

@@ -249,7 +249,7 @@ from the committed results (no training; re-run it when results change):
 
 Paper A, the methods paper (`docs/PAPER_A.md`, week 15; rewritten 31
 October after its first adversarial review round under the title
-"Harvested names add little to mention replacement on held-out materials documents: a pre-registered test"): the pre-registered test of names harvested from unlabeled
+"Harvested names are not shown to add to mention replacement on held-out materials documents: a pre-registered test"): the pre-registered test of names harvested from unlabeled
 text through mention replacement, whose finding is that the pooled gain
 over the CRF head (C26) is mention replacement's and the names' share is
 not established (Table 9), with the ablations of 14.1–14.3, the SOFC-Exp
@@ -273,7 +273,7 @@ of each the drafts' working title:
 Paper A (methods; the first is the draft's title since the review round
 of 31 October, which withdrew the 30 October candidates because the
 names' share of the gain is not established):
-1. Harvested names add little to mention replacement on held-out materials documents: a pre-registered test.
+1. Harvested names are not shown to add to mention replacement on held-out materials documents: a pre-registered test.
 2. Mention replacement, not the harvested names: a pre-registered test of
    lexicons from unlabeled text for materials NER on held-out documents.
 3. Where the gain comes from: matched controls for a names method in
@@ -299,9 +299,10 @@ Paper A, the 150-word abstract (for a venue with that limit):
 > with 7–10 seeds per held-out unit, the recipe gains 3.6 F1 [1.0, 6.1]
 > over the baseline across 11 held-out units of two corpora. But mention
 > replacement without harvested names already gains 2.5 [1.0, 3.9]; the
-> names' share, 0.8 [−0.7, 2.3], is not established, does not depend on
-> their source or on the filter, and buys recall on unseen names with
-> precision. We report every decision and amendment. Mention replacement
+> names' share, 0.8 [−0.7, 2.3], is not established, shows no detectable
+> dependence on their source or on the filter, and on one corpus buys
+> recall on unseen names with precision. We report every decision and
+> amendment. Mention replacement
 > is worth using on new documents; harvesting names is not yet shown to
 > add to it.
 

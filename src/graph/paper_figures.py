@@ -541,9 +541,19 @@ def figure7(rows_by_setting, path):
             marker, color = styles.get(system, ('o', 'tab:grey'))
             ax.plot(recall, precision, marker, color=color, ms=9 if marker == '*' else 6,
                     zorder=3)
-            text = f'{label}\nF1 {f1:.1f}' + (f' (seen {seen:.1f})' if seen is not None else '')
+            text = f'{label}\nF1 {f1:.2f}' + (f' (seen {seen:.1f})' if seen is not None else '')
+            crowded = any(abs(r2 - recall) < 2.5 and abs(p2 - precision) < 2.5 and s2 != system
+                          for s2, (r2, p2) in at.items())
+            if system == 'crf_mr6':
+                offset, align = (6, -14), 'left'
+            elif system == 'crf_mr' and crowded:
+                offset, align = (6, 8), 'left'
+            elif system == 'crf' and crowded:
+                offset, align = (-6, 2), 'right'
+            else:
+                offset, align = (6, 2), 'left'
             ax.annotate(text, (recall, precision), textcoords='offset points', fontsize=6.5,
-                        xytext=(6, -12) if system == 'crf_mr6' else (6, 2), zorder=4)
+                        xytext=offset, ha=align, zorder=4)
         ax.set(xlim=(x0, x1 + 4), ylim=(y0, y1), xlabel='recall on the unseen test names (%)',
                ylabel='precision on the unseen test names (%)', title=setting)
         ax.grid(alpha=0.3)
@@ -630,7 +640,7 @@ def figure9(rows, path):
     ax.invert_yaxis()
     ax.set_xlabel('micro F1 of MR6 + harvested names minus the reference, on the held-out unit')
     ax.grid(alpha=0.3, axis='x')
-    ax.legend(fontsize=8, loc='lower right')
+    ax.legend(fontsize=8, loc='upper center', bbox_to_anchor=(0.5, -0.07), ncol=2, frameon=False)
     fig.tight_layout()
     fig.savefig(path, dpi=160, bbox_inches='tight')
     plt.close(fig)
@@ -648,12 +658,12 @@ def figure8(path):
                  '#dbe9f6'),
         'teachers': (3.0, 3.0, 1.9, 1.3, '3 CRF teachers\n(seeds 0, 100, 200;\nthe reference\'s own runs)',
                      '#dbe9f6'),
-        'corpus': (5.3, 3.0, 2.6, 1.3, 'Unlabeled corpus\n40,000 open-access sentences\n(any materials topic)',
+        'corpus': (5.3, 3.0, 2.6, 1.3, 'Unlabeled corpus\n40,000 open-access sentences\n(the held-out topic, or a mix of others)',
                    '#fff2cc'),
         'filter': (8.3, 3.0, 2.1, 1.3, 'Mention filter\nsame span and type by all 3,\nevery marginal \u2265 0.9',
                    '#fff2cc'),
         'lexicon': (10.8, 3.0, 1.6, 1.3, 'Lexicon\n4k to 13k names\nper subfield', '#fff2cc'),
-        'pool': (2.9, 0.6, 2.6, 1.3, 'Replacement pool\ntraining mentions (~1,400)\n+ the lexicon (85 to 97%)',
+        'pool': (2.9, 0.6, 2.6, 1.3, 'Replacement pool\ntraining mentions (601 to 1,309)\n+ the lexicon (86 to 99% of entries)',
                  '#e2f0d9'),
         'mr': (5.9, 0.6, 3.0, 1.3, 'Mention replacement\n6 copies per sentence; each mention\nswapped (p = 0.5) for a same-type name',
                '#e2f0d9'),

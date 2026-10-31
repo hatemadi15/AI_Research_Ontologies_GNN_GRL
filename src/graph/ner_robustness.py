@@ -128,6 +128,60 @@ def pooled(analysis, comparisons):
                 e['leave_one_out'] = leave_one_out(units, values)
             out[basis][key] = e
         out[basis]['units'] = units
+        out[basis]['stratified_names_vs_crf'] = stratified(units, entries['names_vs_crf'][1])
+    return out
+
+
+def stratified(units, values):
+    """The mean of the per-corpus means of names_vs_crf: MuLMS's subfields and MaterioMiner's papers
+    weighted equally as corpora rather than as units."""
+    groups = {}
+    for unit, value in zip(units, values):
+        groups.setdefault('mulms' if not unit.endswith('.conll') else 'materiominer', []).append(value)
+    means = [statistics.mean(v) for v in groups.values()]
+    return {'corpus_means': {k: round(statistics.mean(v), 2) for k, v in groups.items()},
+            'mean': round(statistics.mean(means), 2)} if len(means) == 2 else {}
+
+
+def mde(half_width, df, power=0.80):
+    """The smallest true mean difference a paired comparison with this CI half-width and these
+    degrees of freedom detects with the given power at the two-sided 5% level: the standard error
+    implied by the half-width times the sum of the 97.5% and the power quantiles of Student's t."""
+    from scipy import stats
+    t975 = stats.t.ppf(0.975, df)
+    return round(half_width / t975 * (t975 + stats.t.ppf(power, df)), 2)
+
+
+def detectable(analysis, robust_pooled, robust_grids):
+    """Per comparison the CI half-width, degrees of freedom and MDE at 80% power, from the stored
+    intervals: the pooled comparisons of both bases (10 degrees of freedom), the MaterioMiner
+    grids (3), the MuLMS decisions D1, D2 and D8 and the names against MR6 there (6), and the
+    3-seed ablations against the method (6)."""
+    out = {}
+
+    def add(name, entry, df):
+        m = entry.get('micro', entry) if isinstance(entry, dict) else None
+        if m and 'ci95' in m:
+            half = (m['ci95'][1] - m['ci95'][0]) / 2
+            out[name] = {'half_width': round(half, 2), 'df': df, 'mde_80': mde(half, df)}
+
+    for basis, entries in robust_pooled.items():
+        for key, e in entries.items():
+            if isinstance(e, dict) and 'ci95' in e:
+                add(f'pooled {basis}: {key}', e, e['n_units'] - 1)
+    for g, cells in robust_grids.items():
+        for key, e in cells.items():
+            add(f'MaterioMiner {g}: {key}', e, 3)
+    winner = analysis.get('week13', {}).get('week12_winner', WEEK14_WINNER)
+    dec = analysis.get('mulms', {}).get('week12', {}).get(winner, {}).get('decision', {})
+    cop = analysis.get('week14', {}).get('copies', {}).get('mulms', {}).get('decision', {})
+    top = analysis.get('week14', {}).get('topic', {}).get('decision', {})
+    add('D1 MuLMS: names_vs_crf', dec.get('minus_crf'), 6)
+    add('D2 MuLMS: names_vs_mr3', dec.get('minus_crf_mr'), 6)
+    add('D8 MuLMS: own_vs_mixed', top.get('minus_crf_mrm_mixed6'), 6)
+    add('MuLMS: names_vs_mr6', cop.get('minus_crf_mr6'), 6)
+    for name, entry in (analysis.get('week14', {}).get('ablations', {}) or {}).items():
+        add(f'ablation {name}: vs_method (3 seeds)', entry.get(f'minus_{winner}') if isinstance(entry, dict) else None, 6)
     return out
 
 
@@ -162,6 +216,11 @@ def stored_interval(entry):
             'per_run': per, 'n_positive': sum(v > 0 for v in per)}
 
 
+def partial(r_xy, r_xz, r_yz):
+    """The partial correlation of x and y given z from the three pairwise correlations."""
+    return (r_xy - r_xz * r_yz) / ((1 - r_xz ** 2) * (1 - r_yz ** 2)) ** 0.5
+
+
 def coverage_gain(analysis):
     """Per MuLMS subfield the lexicon's coverage of the unseen test names, the names' gain over
     MR6 and over the CRF head on the decision seeds and the CRF head's 10-seed F1, with the
@@ -178,11 +237,21 @@ def coverage_gain(analysis):
     method_gain = _micro(dec['minus_crf'])
     crf = [held[s]['crf'] for s in subs]
     from scipy import stats
+    r_cov_f1 = stats.pearsonr(cov, crf)[0]
+    r_cov_gain = stats.pearsonr(cov, names_gain)[0]
+    r_f1_gain = stats.pearsonr(crf, names_gain)[0]
+    keep = [i for i, s in enumerate(subs) if s not in ('semi', 'sofc')]
+    sub = lambda xs: [xs[i] for i in keep]  # noqa: E731
     return {'subfields': subs, 'coverage': [round(x, 3) for x in cov],
             'names_minus_mr6': names_gain, 'names_minus_crf': method_gain, 'crf_f1': crf,
-            'pearson': {'coverage_vs_names_gain': round(stats.pearsonr(cov, names_gain)[0], 2),
-                        'crf_f1_vs_names_gain': round(stats.pearsonr(crf, names_gain)[0], 2),
-                        'crf_f1_vs_method_gain': round(stats.pearsonr(crf, method_gain)[0], 2)},
+            'pearson': {'coverage_vs_names_gain': round(r_cov_gain, 2),
+                        'crf_f1_vs_names_gain': round(r_f1_gain, 2),
+                        'crf_f1_vs_method_gain': round(stats.pearsonr(crf, method_gain)[0], 2),
+                        'coverage_vs_crf_f1': round(r_cov_f1, 2)},
+            'partial': {'coverage_vs_names_gain_given_crf_f1': round(partial(r_cov_gain, r_cov_f1, r_f1_gain), 2),
+                        'crf_f1_vs_names_gain_given_coverage': round(partial(r_f1_gain, r_cov_f1, r_cov_gain), 2)},
+            'without_semi_sofc': {'coverage_vs_names_gain': round(stats.pearsonr(sub(cov), sub(names_gain))[0], 2),
+                                  'crf_f1_vs_names_gain': round(stats.pearsonr(sub(crf), sub(names_gain))[0], 2)},
             'spearman': {'coverage_vs_names_gain': round(stats.spearmanr(cov, names_gain)[0], 2),
                          'crf_f1_vs_names_gain': round(stats.spearmanr(crf, names_gain)[0], 2)}}
 
@@ -224,8 +293,9 @@ def main(argv=None):
     args = parser.parse_args(argv)
     analysis = load(os.path.join(args.results, ANALYSIS))
     week7, week12 = load(os.path.join(args.results, WEEK7)), load(os.path.join(args.results, WEEK12))
-    out = {'pooled': pooled(analysis, week12), 'grids': grids(analysis, week7, week12),
-           'coverage_gain': coverage_gain(analysis), 'compute': compute(args.results)}
+    robust, grid = pooled(analysis, week12), grids(analysis, week7, week12)
+    out = {'pooled': robust, 'grids': grid, 'coverage_gain': coverage_gain(analysis),
+           'detectable': detectable(analysis, robust, grid), 'compute': compute(args.results)}
     path = args.out or os.path.join(args.results, 'ner_robustness.json')
     with open(path, 'w') as f:
         json.dump(out, f, indent=1)

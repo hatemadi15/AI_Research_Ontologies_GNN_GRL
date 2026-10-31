@@ -438,8 +438,11 @@ holds every comparison among the CRF head, mention replacement with 3 and
 units as 10-seed means (as decided) and as means over seeds 300–900: the
 paired intervals, the units above 0, exact sign-flip permutation p-values,
 leave-one-unit-out intervals, the stratified mean, minimum detectable
-effects at 80% power, the MaterioMiner grids at both granularities, the
-per-subfield coverage–gain correlation and the runtime and epochs per run.
+effects at 80% power (`detectable`, per comparison), the MaterioMiner
+grids at both granularities (the decisions' stored intervals), the
+per-subfield coverage–gain correlation with its partial correlations and
+the leave-two-out check, the stratified mean, and the runtime and epochs
+per run.
 `gpu/ner_week5_seed_analysis.json` adds `week14.types`, the per-type F1 of
 the names method and the 6-copy control against the CRF head on MuLMS's
 decision seeds and MaterioMiner's papers (Tables 8 and A2,

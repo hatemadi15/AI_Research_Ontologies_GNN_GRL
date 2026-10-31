@@ -413,7 +413,7 @@ division below keeps every decision a result in one paper and a citation
 in the other.
 
 - *Paper A, the methods paper* (title since its first review round, 31
-  October: "Harvested names add little to mention replacement on held-out materials documents: a pre-registered test"; the 30 October working title credited the recipe's
+  October: "Harvested names are not shown to add to mention replacement on held-out materials documents: a pre-registered test"; the 30 October working title credited the recipe's
   gain to the names and was withdrawn). Its thesis: the pre-registered,
   pooled gain over the CRF head on held-out documents of two corpora,
   +3.58 [+0.95, +6.21] (C26), decomposes on the decision seeds into
