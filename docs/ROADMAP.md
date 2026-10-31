@@ -1030,6 +1030,7 @@ chance at class level. For a Task C-style result:
 | 14 | Protocol committed before any run (29 October): the ablations that make the paper, `docs/METHODS_PLAN.md` §4C. 14.1 the names against matched copies: the 6-copy control without names `crf_mr6` on MuLMS's 7 held-out subfields (seeds 300–900) and MaterioMiner's 4 held-out papers (10 seeds, both granularities; `w14a`, this week's remaining quota), a pooled decision over the 11 units as 13.2; 14.2 the topic's role: V4 with a mixed corpus of the six other topics (40,000 sentences; `build_mixed_corpus.py`, `crf_mrm_mixed6`, seeds 300–900; `w14b`, after the reset), paired by subfield against V4 with the subfield's own corpus; 14.3 reported ablations at the screen's seeds (corpus size 10,000 and 20,000, threshold 0.7, 2-of-3 teachers, silver share 0.5; `w14c`); protocol below | 14.1 done (29 October): +0.80 [−0.66, +2.26] pooled over the 11 units, no (MuLMS +0.51, MaterioMiner fine-grained +1.29; no corpus losing); the 6-copy control alone gains +2.56 [+0.94, +4.18] over the CRF head (reported), so most of V4's gain is mention replacement with more copies and the names' share is not established. 14.2 done (29 October): −0.18 [−2.01, +1.65], no; V4 with a mixed corpus of the six other topics does as well (+3.38 [−0.89, +7.64] over the CRF head, +0.70 [−1.19, +2.58] over the copy control, reported), so the names' source does not matter either. The criteria as fixed: 14.1, V4 improves on the matched copies pooled over MuLMS and MaterioMiner with no corpus losing (then C26 gains "over mention replacement with the same copies"); 14.2: the subfield's own corpus beats the mixed one (then the claim keeps the topic; else a corpus of other topics does as well, reported). 14.3 done (31 October; reported, 3 seeds, Table 7): the five ablations lie within 0.2 points of the method (−0.16 to +0.11 against it, every interval covering 0) while the lexicon ranges from 19,171 to 78,604 distinct names and from 16.4% to 31.5% of the unseen test names; a quarter of the corpus with the strictest filter does as well as the rest |
 | 15 | Write-up (decided 30 October: two papers, `docs/METHODS_PLAN.md` §7), after `w14c`'s reported ablations at the reset of 31 October: paper A, the methods paper (`docs/PAPER_A.md`): abstract, introduction, method, experiments (Table 6, the ablations), the unseen-name mechanism figure, limitations, related work. Done 30 October: a first complete draft (every section but 4.3, the ablations) and a second pass the same day, every number of Sections 1 to 6 checked against the results files (three wordings corrected) and the mechanism figure drawn (`docs/figures/fig7_names.png`, Figure 7 of `docs/PAPER.md`). Review round 1 (31 October; three independent adversarial reviews of the 30 October draft): the headline could not be the names' (14.1), the draft was not self-contained, and it omitted the criterion revision of 20 October, the two seed bases of 13.2, the lifted stop rule and the timing of the week-14 protocol; rewritten the same day under the title "Harvested names are not shown to add to mention replacement on held-out materials documents: a pre-registered test", with the decomposition on one seed basis, a post hoc robustness analysis (`ner_robustness.py`, Table 9), per-unit and per-type results (Figure 9, Tables 8 and A2), the protocol record and a full related-work section. Round 2 (31 October, evening; three reviews of the rewrite): the account of the criterion revision corrected to the record (the directive, the half-screen, the control known to meet the new criterion), a confounded correlation claim withdrawn, the mechanism scoped per corpus, the title softened to "are not shown to add", detectable differences per comparison (Appendix E), the MuLMS pool described as about two articles, statements and captions added, 16 number mismatches fixed; the lexicon-membership analysis planned. Round 3 (31 October, night; three reviews of the round-2 text): the week-13 amendment record corrected to two commits (13:53, D6 added conditional on D1; 18:42, widened and un-gated), "before its runs" made "before its results" where one protocol followed its first push, the cost restated per student (6 to 14 times the CRF head, not 22: a names run stores its job's time), the confound paragraph rewritten on the degrees of freedom with a false "every pooled measure" sentence removed, Table 3 given both seed bases and the MaterioMiner grid, Table 6 printed, terms glossed for a materials reader, the code and data availability statements written with the repository's address, five verified references added, the figures re-rendered at print size. Round 4 (31 October, late night; three reviews of the round-3 text): the week-13 amendment record as three states (the analogue un-gated at 09:14, gated on D1 at 13:53 and restored at 18:42, the gating recorded as a mistake), the abstract's double-rounded intervals quoted at two decimals, the compute ratios recomputed from the mean augmentation count and epoch counts (2.0/2.9/3.1 updates, `ner_robustness.py`), D3 and D4 marked pre-registered in Table 3, SOFC-Exp's regime stated (36 training articles), the practitioner advice rewritten around MR3 with the names priced against it and the absolute levels, the unseen definition completed, Table 1 slimmed, six verified references added, Figures 1 and 3 redrawn. Round 5 (31 October, late night; three reviews of the round-4 text): MR3 no longer called "the published method" (its 3 copies and p = 0.5 are this project's fixed setting; Dai and Adel tune both), Table 3's provenance completed (the week-7 MR3 decisions, the week-14 reported MR6 comparisons), MR6's MuLMS level corrected (51.2, not MR3's 50.8), the Bonferroni reading added (none of the three passes survives 0.05/8), the third week-13 amendment (09:25, the consistency rule) recorded, the abstract's causal clause softened with the gap decomposition (the name mix is about half of MaterioMiner's recall gap, a third of MuLMS's), the companion study's calibrated-bias control cited with the names' marginal precision (30% of the added unseen-name predictions right), captions for every table, Appendix E at two decimals, reproducibility details (the tie rule, the optimiser settings, the sentence splitter); Round 6 (31 October, late night; three reviews of the round-5 text): MR6's own MuLMS gain over the CRF head stated (+2.68 [+0.13, +5.23], reported in week 14), the recall–precision trade given paired per-subfield intervals (names − MR6 on the decision seeds: recall +2.56 [+0.76, +4.36], precision −2.22 [−5.03, +0.60]; `ner_mentions.py` `chain`), Table 3's provenance completed (the week-12 reported comparisons), D3 and D4 given their week-12 row in Appendix A, the protocol text's written times disclosed against the commit times, D8's contrast framed (the mixed corpus holds most of the same names), the net marginal rate worded as such, the order dependence of the recall-gap decomposition stated, an untuned-settings limitation, Riloff and Jones (1999) added; a focused final round follows after the lexicon analysis (notes below) | A complete draft of paper A by 7 November |
 | 16 | Paper B, the evaluation paper, from `docs/PAPER_DRAFT.md` §2–5, 7 and 8 with the method sections cut to summaries citing A; both titles and abstracts fixed; the reproducibility appendices and the code release. Begun 30 October on the user's go-ahead: a first complete draft (`docs/PAPER_B.md`: the gap and its anatomy, seeds and votes, every addition tested with the count of 86 pre-registered decisions and 18 passes, data against method, seven lessons); its length waits on the venue. Also 30 October: the reproducibility appendix and code-release checklist for both papers (`docs/REPRODUCIBILITY.md`) and three title candidates per paper (`docs/PAPER.md`) | Both drafts complete by 14 November; the venues and the authors' confirmation email are the user's |
+| 17 | The harvested names on the strongest MaterioMiner base (ordered 31 October after six review rounds of paper A; protocol fixed 19:10 UTC, before any run, below): the multi-task model with 6-copy mention replacement, with (`crf_mt_mrm6`) and without (`crf_mt_mr6`) the fatigue corpus's names, 10 seeds on the 4 held-out papers; decisions 17.1 (fine) and 17.2 (coarse) against the matched control; batches `w17a` (kernel d) and `w17b` (kernel c) | Decisions 17.1 and 17.2 recorded and paper A updated by 2 November |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -5415,3 +5416,96 @@ lane 1 the 8 MaterioMiner names jobs. Quota before the push: 35.3 of 45
 hours. The outputs are pulled with `kaggle_jobs.py pull` and `collect`,
 which puts the names files in `results/gpu_names/` (ignored) and nothing
 in `results/gpu/` (no students ran); then `ner_lexicon_recall.py`.
+
+
+### Week 17 protocol: the harvested names on the strongest base (fixed before any run, 31 October, 19:10 UTC)
+
+*Why, and when.* The round-6 reviews of paper A (31 October) listed as a
+limitation that the names were never run on the strongest MaterioMiner
+base, the multi-task model with mention replacement (`crf_mt_mr`, week 9:
++3.01 [+0.42, +5.60] fine-grained and +2.30 [+0.49, +4.10] coarse-grained
+over the multi-task model, +6.73 [+6.03, +7.43] fine-grained over the CRF
+head). The author ordered the experiment the same evening, after six
+review rounds and with the paper's negative headline written; it is
+pre-registered here before any run and will be labelled in the paper as a
+post-review protocol (week 17; week 16 is paper B's write-up). Its prior,
+stated now: low. The names add +0.80 [−0.66, +2.26] to six-copy mention
+replacement on 11 units and +1.29 [−2.51, +5.10] / +0.70 [−1.60, +3.00] on
+these four papers; a stronger base of the same kind is not expected to
+change that. A pass would be a pass on one corpus's four papers.
+
+*Systems (MaterioMiner, the 4 held-out papers, both granularities from one
+model).*
+- `crf_mt_mr6`: the multi-task model (one MatSciBERT encoder, a CRF head per
+  granularity) with mention replacement at 6 copies and no harvested names:
+  the matched control. 10 model seeds (offsets 0 to 900), one job per
+  offset over the 4 papers, as week 9's `crf_mt_mr` jobs.
+- `crf_mt_mrm6`: the same with the harvested names in the replacement pool.
+  Teachers: three multi-task models of seeds 0, 100 and 200 trained on the
+  held-out paper's training sentences (the `crf_mt` reference's own runs;
+  their test F1 per head must equal the stored `crf_mt_m0/m100/m200` runs of
+  that paper, the week-15 check). Each teacher tags the whole fatigue
+  corpus (40,000 sentences, `data/processed/corpus/fatigue_sentences.txt`,
+  SHA-256 checked) with both heads. A mention is admitted when all three
+  teachers tag the same coarse-grained span and type, and the same
+  fine-grained type at exactly that span (a fine-grained entity with that
+  span, or none), with every marginal of the span at 0.9 or more under each
+  teacher on the coarse head and, where a fine type is tagged, on the fine
+  head. Names are keyed by (coarse type, fine type or none), the pool key
+  of multi-task mention replacement, one entry per occurrence (uniform over
+  entries, as in V4); the training mentions join the pool as before. Ten
+  students (offsets 0 to 900) per paper, each `train_multitask` on the gold
+  sentences plus 6 copies (p = 0.5), the reference's recipe and seed; no
+  silver sentence is trained on. One job per held-out paper (teachers,
+  tagging and the 10 students; the file per student offset holds the
+  paper's run).
+- Everything else as the week-14 protocol: the week-6 rule (the 95%
+  Student-t interval of the mean paired difference over the 4 papers of the
+  10-seed means, above 0), micro F1, saved predictions, deterministic CUDA,
+  a frozen commit per batch.
+
+*Decisions.*
+- 17.1 fine-grained: `crf_mt_mrm6` minus `crf_mt_mr6` over the 4 papers.
+- 17.2 coarse-grained: the same at the coarse level.
+- Reported, no decision: `crf_mt_mrm6` and `crf_mt_mr6` against `crf_mt_mr`
+  (what 3 more copies do on this base, and the names' whole increment over
+  the week-9 system), against `crf_mt` and against the CRF head; the votes
+  over the seed triples; the recall–precision trade on the unseen test
+  names (`ner_mentions.py`, `chain`); the lexicons' coverage of the unseen
+  test names and sizes; the cost per student and per job. Expected
+  detectable differences at 80% power, from the week-9 and week-13
+  intervals on these papers: about 3.4 to 3.8 points fine-grained and 1.4
+  to 2.4 coarse-grained.
+- What a pass means: on the strongest base the names add on MaterioMiner's
+  four papers at that granularity (a pre-registered pass, post review; one
+  corpus); paper A's Limitations bullet "the reference is not the strongest
+  base" is replaced by the result and Section 5.2 gains the comparison. A
+  fail extends the negative result to the strongest base. Either way the
+  decision is reported with its number, and the eight decisions of the
+  names route become ten.
+
+*Runs.* Two Kaggle sessions, both from the bundle of the code commit that
+follows this protocol (the code adds the names to multi-task mention
+replacement and the mention filter to the multi-task teachers; the plain
+multi-task and mention-replacement paths stay byte-identical, checked by a
+repeat). Batch `w17a` (kernel d, now): lane 0, the CRF repeat of smoke4
+(`smokebc`), a repeat of week 9's `crf_mt_mr` run of seed 0 on paper
+s11340 (`smokebd`; fine 54.05) and the names jobs of papers s11340 and
+ncomms7164; lane 1, the 10 control jobs. Batch `w17b` (kernel c, once
+`w15a` is pulled): lane 0, the names jobs of papers s41467 and
+met10111458. The two sessions write the same student files for different
+papers; `collect` merges runs by run_id when the shared runs are identical
+(a small extension, tested). About 17 GPU hours of the 33 left this week
+(two sessions of about 6 hours); the harvest, three teachers tagging
+40,000 sentences with two heads each, is about 80 minutes of a names job's
+2.8 hours.
+
+*Analysis, fixed now.* `ner_seed_analysis.py` gains `week17`: per
+granularity, `crf_mt_mrm6` against `crf_mt_mr6` (the decision), and both
+against `crf_mt_mr`, `crf_mt` and `crf`, with the votes; `report_results.py`
+a week-17 bullet; `paper_tables.py` a table of the four systems per
+granularity; `ner_mentions.py` the two new families and chain pairs. Paper
+A: a Section 5.7 (or a paragraph in 5.2), Table 2 extended by two rows
+labelled "post review", Appendix A a row, the Limitations bullet replaced,
+the abstract's and conclusion's counts updated (ten decisions). Nothing
+already decided is re-decided; D3 to D7 keep their verdicts.

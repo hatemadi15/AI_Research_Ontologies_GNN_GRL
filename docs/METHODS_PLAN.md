@@ -466,3 +466,16 @@ winner on the multi-task model, one corpus) stays an option.
   no more than 2 sessions).
 - Licences: the corpora's text and the names are never committed; reports
   with counts and SHA-256 are, and the corpora rebuild from the caches.
+
+### Week 17 (31 October, after six review rounds of paper A)
+
+The names on the strongest base: the round-6 reviews listed as untested the
+multi-task model with mention replacement, the strongest MaterioMiner
+system. Pre-registered in ROADMAP §4 ("Week 17 protocol") before any run:
+`crf_mt_mrm6` against the matched control `crf_mt_mr6` on the 4 held-out
+papers, 10 seeds, two decisions (fine, coarse), the rest reported. The
+prior is low (the names add nothing detectable to six-copy replacement on
+the single-task base, on these papers included); a pass is a pass on one
+corpus's four papers and is reported as such; a fail extends paper A's
+negative result to the strongest base. Paper A is updated either way
+(Section 5.2 or a 5.7, Table 2, Appendix A, the Limitations).
