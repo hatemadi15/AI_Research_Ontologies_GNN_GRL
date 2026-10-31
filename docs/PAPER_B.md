@@ -687,7 +687,7 @@ and hurts elsewhere (steel −10.0, graphene −5.1), −1.0 on average (C24).
 The method's five ablations at the screen's seeds (the corpus's first
 10,000 or 20,000 sentences, the threshold 0.7, 2 of 3 teachers, the names
 in half of the draws) lie within 0.2 points of it while the lexicon's
-coverage of the unseen names ranges from 16% to 32% (paper A, Table 2).
+coverage of the unseen names ranges from 16% to 32% (paper A, Table 4).
 
 The document-level rule of Section 7.3, taken to held-out documents of
 the three corpora (C25): on the CRF head it passes on MuLMS's held-out

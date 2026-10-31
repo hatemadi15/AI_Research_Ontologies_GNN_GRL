@@ -536,29 +536,36 @@ def figure7(rows_by_setting, path):
             parent = NAMES_PARENT.get(system)
             if parent in at:
                 ax.annotate('', (recall, precision), at[parent],
-                            arrowprops={'arrowstyle': '->', 'color': 'grey', 'lw': 1},
-                            zorder=2)
+                            arrowprops={'arrowstyle': '->', 'color': 'grey', 'lw': 1,
+                                        'shrinkA': 6, 'shrinkB': 6}, zorder=2)
             marker, color = styles.get(system, ('o', 'tab:grey'))
             ax.plot(recall, precision, marker, color=color, ms=9 if marker == '*' else 6,
                     zorder=3)
             text = f'{label}\nF1 {f1:.2f}' + (f' (seen {seen:.1f})' if seen is not None else '')
-            crowded = any(abs(r2 - recall) < 2.5 and abs(p2 - precision) < 2.5 and s2 != system
-                          for s2, (r2, p2) in at.items())
-            if system == 'crf_mr6':
-                offset, align = (6, -14), 'left'
-            elif system == 'crf_mr' and crowded:
-                offset, align = (6, 8), 'left'
-            elif system == 'crf' and crowded:
-                offset, align = (-6, 2), 'right'
+            def near(other):
+                return other in at and abs(at[other][0] - recall) < 2.5 and abs(at[other][1] - precision) < 2.5
+            names_near = near('crf_mrm_topic6') or near('crf_mrm6')
+            if system == 'crf_mr6':              # below-right when the CRF head crowds it, else below-left
+                offset, align = ((7, -18), 'left') if near('crf') else ((-7, -14), 'right')
+            elif system == 'crf_mr':             # away from a names point to its upper right
+                offset, align = ((-7, 12), 'right') if names_near else ((7, 10), 'left')
+            elif system == 'crf':
+                offset, align = (-7, -14), 'right'
+            elif system in ('crf_mrm_topic6', 'crf_mrm6'):
+                offset, align = (7, 6), 'left'
+            elif system == 'crf_mrm_mixed6':
+                offset, align = (7, 14), 'left'
             else:
-                offset, align = (6, 2), 'left'
-            ax.annotate(text, (recall, precision), textcoords='offset points', fontsize=6.5,
+                offset, align = (7, -16), 'left'
+            ax.annotate(text, (recall, precision), textcoords='offset points', fontsize=8,
                         xytext=offset, ha=align, zorder=4)
-        ax.set(xlim=(x0, x1 + 4), ylim=(y0, y1), xlabel='recall on the unseen test names (%)',
-               ylabel='precision on the unseen test names (%)', title=setting)
+        ax.set(xlim=(x0 - 2, x1 + 4), ylim=(y0 - 1, y1 + 1), title=setting)
+        ax.set_xlabel('recall on the unseen test names (%)', fontsize=9)
+        ax.set_ylabel('precision on the unseen test names (%)', fontsize=9)
+        ax.tick_params(labelsize=9)
         ax.grid(alpha=0.3)
     fig.tight_layout()
-    fig.savefig(path, dpi=160, bbox_inches='tight')
+    fig.savefig(path, dpi=300, bbox_inches='tight')
     plt.close(fig)
 
 
@@ -622,27 +629,30 @@ def figure9(rows, path):
     for g, start, end in bands:
         ax.axhspan(start - 0.5, end + 0.5, color='#f2f2f2' if bands.index((g, start, end)) % 2 else 'white',
                    zorder=0)
-        ax.text(ax.get_xlim()[0] if False else -0.98, end + 0.5, g, fontsize=8, va='top', ha='left',
+        ax.text(0.01, end + 1.0, g, fontsize=8.5, va='center', ha='left', style='italic',
                 transform=ax.get_yaxis_transform(), color='#333333')
     pooled = [r for r in rows if r[0].startswith('MuLMS') or 'fine-grained' in r[0]]
-    for values, color, name in ((lambda rs: [r[2] for r in rs], 'tab:red', 'CRF head'),
-                                (lambda rs: [r[3] for r in rs], 'tab:blue', 'MR6')):
+    for k, (values, color, name) in enumerate(((lambda rs: [r[2] for r in rs], 'tab:red', 'CRF head'),
+                                               (lambda rs: [r[3] for r in rs], 'tab:blue', 'MR6'))):
         v = values(pooled)
         if len(v) == 11:
             m, lo, hi = mean_ci(v)
             ax.axvspan(lo, hi, color=color, alpha=0.08, zorder=1)
             ax.axvline(m, color=color, lw=1, ls='--', zorder=2)
-            ax.text(m, y - 0.2, f'pooled 11 units vs {name}: {m:+.2f} [{lo:+.2f}, {hi:+.2f}]',
-                    fontsize=7.5, color=color, ha='center', va='bottom')
+            ax.text(0.99, 0.99 - 0.045 * k,
+                    f'pooled, 11 units, vs {name}: {m:+.2f} [{lo:+.2f}, {hi:+.2f}]',
+                    fontsize=8.5, color=color, ha='right', va='top', transform=ax.transAxes)
     ax.axvline(0, color='black', lw=0.8, zorder=2)
-    ax.set_yticks(ticks, labels, fontsize=8)
+    ax.set_yticks(ticks, labels, fontsize=9)
     ax.set_ylim(-0.7, y + 0.8)
     ax.invert_yaxis()
-    ax.set_xlabel('micro F1 of MR6 + harvested names minus the reference, on the held-out unit')
+    ax.set_xlabel('micro F1 of MR6 + harvested names minus the reference, on the held-out unit',
+                  fontsize=9)
+    ax.tick_params(axis='x', labelsize=9)
     ax.grid(alpha=0.3, axis='x')
-    ax.legend(fontsize=8, loc='upper center', bbox_to_anchor=(0.5, -0.07), ncol=2, frameon=False)
+    ax.legend(fontsize=9, loc='upper center', bbox_to_anchor=(0.5, -0.07), ncol=2, frameon=False)
     fig.tight_layout()
-    fig.savefig(path, dpi=160, bbox_inches='tight')
+    fig.savefig(path, dpi=300, bbox_inches='tight')
     plt.close(fig)
 
 
@@ -672,7 +682,7 @@ def figure8(path):
     for x, y, w, h, text, face in boxes.values():
         ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle='round,pad=0.02,rounding_size=0.12',
                                     facecolor=face, edgecolor='#555555', lw=1))
-        ax.text(x + w / 2, y + h / 2, text, ha='center', va='center', fontsize=7.8)
+        ax.text(x + w / 2, y + h / 2, text, ha='center', va='center', fontsize=9)
 
     def arrow(a, b, text=None):
         xa, ya, wa, ha = boxes[a][:4]
@@ -681,7 +691,7 @@ def figure8(path):
         ax.annotate('', end, start, arrowprops={'arrowstyle': '->', 'color': '#333333', 'lw': 1.2})
         if text:
             ax.text((start[0] + end[0]) / 2, start[1] + 0.1, text, ha='center', va='bottom',
-                    fontsize=7.5, color='#333333')
+                    fontsize=8.5, color='#333333')
     arrow('gold', 'teachers', 'train')
     arrow('teachers', 'corpus', 'tag')
     arrow('corpus', 'filter')
@@ -695,13 +705,13 @@ def figure8(path):
                 (boxes['lexicon'][0] + 0.3, boxes['lexicon'][1]), arrowprops=elbow)
     ax.annotate('', (boxes['pool'][0] + 0.4, boxes['pool'][1] + boxes['pool'][3]),
                 (boxes['gold'][0] + 0.6, boxes['gold'][1]), arrowprops=elbow)
-    ax.text(1.0, 2.3, 'training mentions', fontsize=7.5, color='#333333')
-    ax.text(8.2, 2.3, 'harvested names', fontsize=7.5, color='#333333', ha='center')
+    ax.text(1.0, 2.3, 'training mentions', fontsize=8.5, color='#333333')
+    ax.text(8.2, 2.3, 'harvested names', fontsize=8.5, color='#333333', ha='center')
     ax.text(0.2, 0.1, 'No silver sentence is trained on: the gold contexts stay, only the names change. '
             'Without the lexicon the student is mention replacement with 6 copies (the control); '
-            'with 3 copies and no lexicon, Dai and Adel (2020).', fontsize=7.5, color='#333333',
+            'with 3 copies and no lexicon, Dai and Adel (2020).', fontsize=8.5, color='#333333',
             va='bottom')
-    fig.savefig(path, dpi=160, bbox_inches='tight')
+    fig.savefig(path, dpi=300, bbox_inches='tight')
     plt.close(fig)
 
 

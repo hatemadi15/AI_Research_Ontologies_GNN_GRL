@@ -946,7 +946,16 @@
    "runtime_sec_mean": 2109,
    "runtime_sec_max": 2972,
    "best_epoch_mean": 4.6,
-   "n_augmented": 1180
+   "n_augmented": 1180,
+   "n_jobs": 14,
+   "students_per_job": [
+    3,
+    4
+   ],
+   "job_sec_mean": 2099,
+   "per_student_sec_mean": 609,
+   "harvest_sec_mean": 1063,
+   "harvest_student_sec": 296
   }
  }
 }

@@ -258,3 +258,24 @@ def test_table8_per_type_and_table9_robustness(tmp_path):
             '| 0.0107 | +0.44 |') in table
     assert '| MR6 + names − CRF head | +4.27 [+1.39, +7.15] |' in table
     assert pt.robustness_rows({}) == []
+
+
+def test_table10_lexicon_membership():
+    """Table 10 lists per setting and system the recall in and out of the lexicon and the paired
+    gains, and names the units used and the excluded ones."""
+    unit = {'recall_in': 50.0, 'recall_out': 40.0, 'precision_in': 60.0, 'precision_out': None,
+            'gold_share_in': 25.0, 'pred_share_in': 30.0, 'gold': {'in': 1, 'out': 3},
+            'correct': {'in': 1, 'out': 1}, 'pred': {'in': 1, 'out': 0}, 'pred_correct': {'in': 1, 'out': 0}}
+    comp = {'per_unit': {}, 'gain_in': {'mean_diff': 5.0, 'ci95': [1.0, 9.0], 'n_units': 7, 'n_positive': 6},
+            'gain_out': {'mean_diff': 2.0, 'ci95': [-1.0, 5.0], 'n_units': 7, 'n_positive': 4},
+            'in_minus_out': {'mean_diff': 3.0, 'ci95': [0.5, 5.5], 'n_units': 7, 'n_positive': 6}}
+    data = {'mulms': {'systems': {'crf': 'CRF head', 'crf_mrm_topic6': 'MR6 + names'},
+                      'units': ['semi', 'sofc'], 'excluded': ['poly'],
+                      'pooled': {'crf': unit, 'crf_mrm_topic6': unit},
+                      'comparisons': {'names_vs_mr6': comp}}}
+    scores, comparisons = pt.lexicon_rows(data)
+    assert [s[1] for s in scores] == ['CRF head', 'MR6 + names']
+    assert comparisons[0][1] == 'MR6 + names − MR6'
+    text = pt.table10(data)
+    assert '| MuLMS, 7 held-out subfields (seeds 300–900) | CRF head | 25.0 | 50.0 | 40.0 | 30.0 | 60.0 |  |' in text
+    assert '+3.00 [+0.50, +5.50] | 6/7 |' in text and 'semi, sofc' in text and "['poly']" in text

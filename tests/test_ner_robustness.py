@@ -85,3 +85,12 @@ def test_mde_stratified_partial_and_detectable():
     assert d['MaterioMiner fine: names_vs_crf']['df'] == 3
     assert d['D1 MuLMS: names_vs_crf']['half_width'] == 4.32
     assert 'ablation x: vs_method (3 seeds)' in d and 'D2 MuLMS: names_vs_mr3' not in d
+
+
+def test_job_costs_share_a_job_over_its_students():
+    """Three students of one job share its runtime; the per-student cost divides it, and the
+    harvest is the job less the students' own training."""
+    runs = [{'run_id': 'a', 'runtime_sec': 900.0}] * 3 + [{'run_id': 'b', 'runtime_sec': 1200.0}] * 4
+    out = nr.job_costs(runs, student_sec=100)
+    assert out == {'n_jobs': 2, 'students_per_job': [3, 4], 'job_sec_mean': 1050,
+                   'per_student_sec_mean': 300, 'harvest_sec_mean': 700, 'harvest_student_sec': 100}

@@ -275,6 +275,27 @@ def compute(directory):
                            'runtime_sec_max': round(max(r['runtime_sec'] for r in runs)),
                            'best_epoch_mean': round(statistics.mean(r['best_epoch'] for r in runs), 1),
                            'n_augmented': runs[0].get('n_augmented')}
+            if runs[0].get('self_training'):
+                out[system].update(job_costs(runs, out.get('crf_mr6', {}).get('runtime_sec_mean')))
+    return out
+
+
+def job_costs(runs, student_sec=None):
+    """A teacher system's runs store their job's time (teachers, tagging and the job's students
+    together), one value shared by the students of a job: the jobs (distinct run_id and
+    runtime), the students per job, the job mean, the mean per student (job / students) and,
+    given a plain student's time (MR6's run mean), the harvest alone (job - students * that)."""
+    jobs = {}
+    for r in runs:
+        jobs.setdefault((r['run_id'], r['runtime_sec']), 0)
+        jobs[(r['run_id'], r['runtime_sec'])] += 1
+    times = [(t, n) for (_, t), n in jobs.items()]
+    out = {'n_jobs': len(times), 'students_per_job': sorted({n for _, n in times}),
+           'job_sec_mean': round(statistics.mean(t for t, _ in times)),
+           'per_student_sec_mean': round(statistics.mean(t / n for t, n in times))}
+    if student_sec:
+        out['harvest_sec_mean'] = round(statistics.mean(t - n * student_sec for t, n in times))
+        out['harvest_student_sec'] = student_sec
     return out
 
 

@@ -36,6 +36,8 @@ docs/tables/:
       the (seed, unit) pairs whose test set has the type, and the differences; MuLMS's 13
       types over the decision's seeds, MaterioMiner's coarse-grained types over 10 seeds
       (week14.types of the seed analysis); tableA2_types_fine.md the fine-grained classes.
+  table10_lexicon.md (paper A): recall on the unseen test names in and out of the rebuilt
+      lexicon per system, and the paired gains per part (week 15, ner_lexicon_recall.json)
   table9_robustness.md (paper A): the pooled comparisons over the 11 held-out units of
       decision 13.2 among the CRF head, MR3, MR6 and MR6 + names, on both MuLMS seed bases
       (ner_robustness.json): mean difference with its 95% CI, positive units, the exact
@@ -412,6 +414,67 @@ def table9(robust):
             '\n\n' + '\n\n'.join(blocks))
 
 
+LEXICON_SETTINGS = {'mulms': "MuLMS, 7 held-out subfields (seeds 300–900)",
+                    'fine': "MaterioMiner fine-grained, 4 held-out papers (10 seeds)",
+                    'coarse': "MaterioMiner coarse-grained, 4 held-out papers (10 seeds)"}
+LEXICON_COMPARISONS = {'names_vs_mr6': 'MR6 + names − MR6', 'names_vs_crf': 'MR6 + names − CRF head',
+                       'mr6_vs_crf': 'MR6 − CRF head', 'mr3_vs_crf': 'MR3 − CRF head',
+                       'mixed_vs_mr6': 'MR6 + names (mixed corpus) − MR6'}
+
+
+def lexicon_rows(data):
+    """[(setting, system label, pooled scores)] and [(setting, comparison label, comparison)]
+    from ner_lexicon_recall.json, settings in LEXICON_SETTINGS order."""
+    scores, comparisons = [], []
+    for key, label in LEXICON_SETTINGS.items():
+        part = data.get(key)
+        if not part:
+            continue
+        for system, name in part['systems'].items():
+            scores.append((label, name, part['pooled'][system]))
+        for ckey, cname in LEXICON_COMPARISONS.items():
+            if ckey in part['comparisons']:
+                comparisons.append((label, cname, part['comparisons'][ckey]))
+    return scores, comparisons
+
+
+def table10(data):
+    """Table 10 from ner_lexicon_recall.json: per setting and system, recall on the unseen test
+    names in and out of the rebuilt lexicon and the unseen predictions' lexicon share and
+    precision, pooled over seeds and units; then the paired gains per part and their
+    difference."""
+    scores, comparisons = lexicon_rows(data)
+
+    def pct(x):
+        return '' if x is None else f'{x:.1f}'
+    header = ['setting', 'system', 'unseen test names in the lexicon (%)', 'recall, in',
+              'recall, out', 'unseen predictions in the lexicon (%)', 'precision, in',
+              'precision, out']
+    cells = [[setting, system, pct(e['gold_share_in']), pct(e['recall_in']), pct(e['recall_out']),
+              pct(e['pred_share_in']), pct(e['precision_in']), pct(e['precision_out'])]
+             for setting, system, e in scores]
+    cheader = ['setting', 'comparison', 'recall gain on the names in the lexicon [95% CI]',
+               'recall gain on the names not in it [95% CI]', 'in − out [95% CI]', 'units with in > out']
+    ccells = [[setting, name, interval(c['gain_in'], 'mean_diff', signed=True),
+               interval(c['gain_out'], 'mean_diff', signed=True),
+               interval(c['in_minus_out'], 'mean_diff', signed=True),
+               f"{c['in_minus_out']['n_positive']}/{c['in_minus_out']['n_units']}"]
+              for setting, name, c in comparisons]
+    units = {k: ', '.join(v['units']) for k, v in data.items() if v}
+    excluded = {k: v['excluded'] for k, v in data.items() if v and v['excluded']}
+    return ('Table 10. Recall on the unseen test names by lexicon membership (week 15, post hoc; '
+            'ner_lexicon_recall.py from the saved predictions and the lexicons rebuilt by the '
+            "names method's own teachers, batch w15a): per system, pooled over seeds and held-out "
+            'units, recall on the unseen test names that the unit\'s lexicon holds (in) and on '
+            'those it does not (out), and among the predicted entities whose name is unseen the '
+            'share that are lexicon names and the precision of each part; then, paired over the '
+            "units, a method's recall gain over its reference on each part and the difference of "
+            'the two gains with its 95% Student-t CI. Units used: '
+            + '; '.join(f'{LEXICON_SETTINGS[k]}: {u}' for k, u in units.items())
+            + (f". Excluded (rebuilt teachers or coverage differ): {excluded}" if excluded else '')
+            + '.\n\n' + markdown(header, cells) + '\n\n**Paired gains**\n\n' + markdown(cheader, ccells))
+
+
 def table3(published):
     """Table 3: default against strict IOB2 scoring on the published splits."""
     rows = []
@@ -572,6 +635,11 @@ def main(argv=None):
         write('table9_robustness.md', table9(robust))
     else:
         print('table 9: no robustness file')
+    lexicon = load(os.path.join(args.results, 'gpu', 'ner_lexicon_recall.json'))
+    if lexicon:
+        write('table10_lexicon.md', table10(lexicon))
+    else:
+        print('table 10: no lexicon-membership file')
     print(f"wrote {', '.join(written) or 'nothing'} to {args.out}")
     return written
 
