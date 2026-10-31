@@ -397,7 +397,7 @@ def mention_replacements(sentences, k, seed, p=MR_P, names=(), share=None):
     return out
 
 
-def mention_replacements_multitask(examples, k, seed, p=MR_P):
+def mention_replacements_multitask(examples, k, seed, p=MR_P, names=()):
     """mention_replacements for the multi-task model (--multi-task --augment-mentions): per
     training example (multitask_examples) with both heads' tags and an entity, k copies in
     which each coarse-grained mention is replaced, with probability p, by a mention of the
@@ -405,7 +405,10 @@ def mention_replacements_multitask(examples, k, seed, p=MR_P):
     with its span, or none) drawn from all such mentions of `examples`, in both tag
     sequences at once. Examples labelled for one head only, or with a fine-grained entity
     whose span is no coarse-grained entity's, are neither replaced nor drawn from. Copies
-    that change nothing are dropped. Returns [(words, {head: tags})].
+    that change nothing are dropped. Returns [(words, {head: tags})]. names (--augment-names
+    with --multi-task, week 17): further ((coarse type, fine type or None), words) mentions
+    that join the pool under their key after those of `examples`; without them the copies
+    are exactly those of before.
     """
     rng = random.Random(seed)
     usable = []
@@ -421,6 +424,8 @@ def mention_replacements_multitask(examples, k, seed, p=MR_P):
     for words, _, spans in usable:
         for start, end, key in spans:
             pool.setdefault(key, []).append(tuple(words[start:end]))
+    for key, mention in names:
+        pool.setdefault(tuple(key), []).append(tuple(mention))
     out = []
     for words, tags, spans in usable:
         if not spans:
@@ -1384,6 +1389,37 @@ def silver_mention_names(sentences, votes, threshold=None, agree=None):
     return names
 
 
+def silver_mention_names_multitask(sentences, votes, threshold=None):
+    """((coarse type, fine type or None), words) of the mentions that multi-task teachers
+    agree on (week 17, the pool key of mention_replacements_multitask), in order: a span
+    that every teacher tags as the same coarse-grained entity, each teacher's fine head
+    tagging the same fine-grained type at exactly that span or no entity touching it, with
+    every marginal of the span at `threshold` (SILVER_THRESHOLD) or more under each teacher
+    on the coarse head and, where a fine type is tagged, on the fine head. votes: per
+    sentence, per teacher, {head: (tags, marginals)}."""
+    threshold = SILVER_THRESHOLD if threshold is None else threshold
+    names = []
+    for words, teachers in zip(sentences, votes):
+        keyed = []
+        for t in teachers:
+            fine = entity_spans(t['fine'][0])
+            exact = {(start, end): kind for start, end, kind in fine}
+            spans = set()
+            for start, end, kind in entity_spans(t['coarse'][0]):
+                fine_kind = exact.get((start, end))
+                if fine_kind is None and any(a < end and start < b for a, b, _ in fine):
+                    continue                     # a fine entity overlaps the span: no key
+                spans.add((start, end, kind, fine_kind))
+            keyed.append(spans)
+        common = set.intersection(*keyed) if keyed else set()
+        for start, end, kind, fine_kind in sorted(common, key=lambda x: (x[0], x[1], x[2], x[3] or '')):
+            if all(min(t['coarse'][1][start:end]) >= threshold
+                   and (fine_kind is None or min(t['fine'][1][start:end]) >= threshold)
+                   for t in teachers):
+                names.append(((kind, fine_kind), tuple(words[start:end])))
+    return names
+
+
 LEXICON_MAX_WORDS = 8       # words of a name that lexicon_matches looks up (the probe's rule too)
 
 
@@ -1989,8 +2025,11 @@ def train_mt_with_teachers(seed, offsets, parts, labels, args, device, sample, t
     tables) and the teachers' scores per head.
     """
     teacher_args = SimpleNamespace(**{**vars(args), 'save_predictions': False})
+    mentions = getattr(args, 'augment_names', False)        # week 17: names, not silver
+    threshold = getattr(args, 'silver_threshold', SILVER_THRESHOLD)
     val_words = {h: [t for t, _, _ in parts[h][1]] for h in MT_HEADS}
     teachers, tagged, val_tagged, sentences, n_skipped = [], [], [], None, 0
+    marginals = []                 # per teacher, {head: the per-word marginals} (names only)
     for offset in offsets:
         records, tagger = train_multitask(seed + offset, parts, labels, teacher_args, device,
                                           keep_tagger=True)
@@ -2000,6 +2039,8 @@ def train_mt_with_teachers(seed, offsets, parts, labels, args, device, sample, t
         for store, words in ((tagged, {h: sentences for h in MT_HEADS}), (val_tagged, val_words)):
             out = mt_teacher_tags(tagger, words, args.batch_size, device)
             store.append({h: [(tuple(t), min(m)) for t, m in out[h]] for h in MT_HEADS})
+            if mentions and store is tagged:
+                marginals.append({h: [tuple(m) for _, m in out[h]] for h in MT_HEADS})
         del tagger
         if str(device).startswith('cuda'):
             import torch
@@ -2011,6 +2052,31 @@ def train_mt_with_teachers(seed, offsets, parts, labels, args, device, sample, t
             'best_epoch': records[h]['best_epoch']} for h in MT_HEADS}})
         print(f"    teacher seed {seed + offset}: test F1 fine {records['fine']['f1']:.2f}, "
               f"coarse {records['coarse']['f1']:.2f}", flush=True)
+    if mentions:
+        votes = [[{h: (tagged[t][h][i][0], marginals[t][h][i]) for h in MT_HEADS}
+                  for t in range(len(offsets))] for i in range(len(sentences))]
+        names = silver_mention_names_multitask(sentences, votes, threshold)
+        by_head = {'coarse': [(key[0], words) for key, words in names],
+                   'fine': [(key[1], words) for key, words in names if key[1] is not None]}
+        coverage = {h: name_coverage(by_head[h], parts[h][0], parts[h][2]) for h in MT_HEADS}
+        examples = multitask_examples(parts['fine'][0], parts['coarse'][0])
+        info = {'n_sampled': len(sample), 'n_skipped': n_skipped,
+                'marginal_threshold': threshold, 'silver_filter': 'mentions',
+                'n_names': len(names), 'names': coverage, 'teachers': teachers}
+        print(f"    {len(names)} harvested mentions ({coverage['coarse']['n_distinct']} distinct "
+              f"coarse names, {coverage['fine']['n_distinct']} fine) of {len(sentences)} tagged "
+              f"sentences; students:", flush=True)
+        students = {}
+        for offset in offsets if student_offsets is None else student_offsets:
+            augmented = mention_replacements_multitask(examples, args.augment_mentions,
+                                                       seed + offset, names=names)
+            records = train_multitask(seed + offset, parts, labels, args, device,
+                                      test_index=test_index, augmented=augmented)
+            for h in MT_HEADS:
+                records[h]['self_training'] = info
+                records[h]['n_augmented'] = len(augmented)
+            students[offset] = records
+        return students
     filters, silver_tags = {}, {}
     for h in MT_HEADS:
         votes = list(zip(*(t[h] for t in val_tagged)))
@@ -2104,7 +2170,7 @@ def variant_name(args):
         if getattr(args, 'augment_names', False) or feature:
             letter = 'm' if getattr(args, 'silver_mentions', False) else 's'
             if not feature:
-                name = f'crf_mr{letter}'
+                name = f"crf_{'mt_' if multi_task else ''}mr{letter}"      # crf_mt_mrm (week 17)
             elif getattr(args, 'augment_names', False):
                 name = f'crf_mr{letter}_gz{letter}'
             else:
@@ -3528,6 +3594,13 @@ def parse_args(argv=None):
     if hasattr(args, 'teachers') and (args.tag or args.seed_offset):
         parser.error('--teachers writes its own seed tags (m0, m100, ...): no --tag or '
                      '--seed-offset')
+    if getattr(args, 'multi_task', False):
+        for option in ('save_names', 'names_feature', 'teachers_agree', 'names_share'):
+            if getattr(args, option, None) not in (None, False):
+                parser.error(f"--{option.replace('_', '-')} is not available with --multi-task")
+        if getattr(args, 'augment_names', False) and not getattr(args, 'silver_mentions', False):
+            parser.error('--augment-names with --multi-task needs --silver-mentions (week 17: '
+                         'the mention filter on both heads)')
     if hasattr(args, 'context'):
         if not args.crf:
             parser.error('--context needs --crf')
@@ -3552,8 +3625,6 @@ def parse_args(argv=None):
         if not (hasattr(args, 'augment_mentions') and hasattr(args, 'teachers')):
             parser.error('--augment-names needs --augment-mentions and --self-train with '
                          '--teachers (the teachers tag the names)')
-        if getattr(args, 'multi_task', False):
-            parser.error('--augment-names is not available with --multi-task')
     if getattr(args, 'names_feature', False):
         if not (args.crf and hasattr(args, 'teachers')):
             parser.error('--names-feature needs --crf and --self-train with --teachers (the '

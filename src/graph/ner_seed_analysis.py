@@ -206,6 +206,9 @@ SCREEN_VARIANTS = ('crf_mrs_topic', 'crf_mrm_topic', 'crf_mr6', 'crf_mrm_topic6'
 WEEK14_WINNER = 'crf_mrm_topic6'
 WEEK14_ANALOGUE = 'crf_mrm6'
 COPIES_CONTROL = 'crf_mr6'
+WEEK17_NAMES = 'crf_mt_mrm6'        # week 17: the names on the multi-task model with 6 copies
+WEEK17_CONTROL = 'crf_mt_mr6'       # its matched control
+WEEK17_REFERENCES = ('crf_mt_mr', 'crf_mt', 'crf')   # reported: 3 copies, the multi-task model, the CRF head
 MIXED_VARIANT = 'crf_mrm_mixed6'
 ABLATION_VARIANTS = ('crf_mrm_topic10k6', 'crf_mrm_topic20k6', 'crf_mrm_topiclow6',
                      'crf_mrm_topictwo6', 'crf_mrm_topiccap6')
@@ -1012,6 +1015,30 @@ def copies(directory):
     return out
 
 
+def week17(directory):
+    """Week 17 (ROADMAP §4, the week-17 protocol): the names on the strongest base. Per
+    granularity on the 4 held-out papers over the 10 seeds: WEEK17_NAMES `against` the
+    matched control WEEK17_CONTROL (decisions 17.1 fine and 17.2 coarse, the week-6 rule:
+    `passes`), and both `against` WEEK17_REFERENCES (reported, under `names` and `control`);
+    `decision` names the decision. A granularity is present when every file is there."""
+    out = {}
+    for g, decision in zip(GRANULARITIES, ('17.1', '17.2')):
+        prefix = f'ner_results_{g}_{LOPO}_'
+        systems = (*WEEK17_REFERENCES, WEEK17_CONTROL, WEEK17_NAMES)
+        files = {s: load_files(directory, [f'{prefix}{s}_m{off}.json' for off in WEEK5_OFFSETS])
+                 for s in systems}
+        if not all(files.values()):
+            continue
+        entry = against(files, WEEK17_NAMES, (WEEK17_CONTROL,))
+        entry.update({'decision': decision, 'seeds': list(WEEK5_OFFSETS),
+                      'passes': entry[f'minus_{WEEK17_CONTROL}']['micro']['ci95'][0] > 0,
+                      'names': against(files, WEEK17_NAMES, WEEK17_REFERENCES),
+                      'control': against({s: files[s] for s in (*WEEK17_REFERENCES, WEEK17_CONTROL)},
+                                         WEEK17_CONTROL, WEEK17_REFERENCES)})
+        out[g] = entry
+    return out
+
+
 def topic(directory):
     """Week 14, 14.2 (the topic part of week14): V4 with the subfield's own topic corpus
     (WEEK14_WINNER) against V4 with the mixed corpus of the six other topics (MIXED_VARIANT),
@@ -1130,6 +1157,7 @@ def analyse(directory):
     out['mulms'] = mulms(directory)
     out['week13'] = week13(directory, out['mulms'].get('week12'))
     out['week14'] = week14(directory)
+    out['week17'] = week17(directory)
     out['paper_count'] = paper_count(directory)
     out['paper_diversity'] = paper_diversity(directory)
     out['errors'] = {}

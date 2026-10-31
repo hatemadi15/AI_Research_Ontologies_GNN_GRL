@@ -90,8 +90,11 @@ FAMILIES = ('crf', 'crf_mt', 'crf_ls', 'crf_st3', 'crf_ctx', 'crf_mt_st3', 'crf_
             'crf_mrm6', 'crf_mrm_mixed6',
             # week 14's ablations of the names method (14.3; the screen's 3 seeds)
             'crf_mrm_topic10k6', 'crf_mrm_topic20k6', 'crf_mrm_topiclow6', 'crf_mrm_topictwo6',
-            'crf_mrm_topiccap6')
-VOTED = ('crf', 'crf_mt', 'crf_ctx', 'crf_mt_st3', 'crf_mr', 'crf_mt_mr', 'crf_mrs')
+            'crf_mrm_topiccap6',
+            # week 17: the names on the strongest base, the multi-task model with 6 copies
+            'crf_mt_mr6', 'crf_mt_mrm6')
+VOTED = ('crf', 'crf_mt', 'crf_ctx', 'crf_mt_st3', 'crf_mr', 'crf_mt_mr', 'crf_mrs', 'crf_mt_mr6',
+         'crf_mt_mrm6')
 # a published split's systems: plain MatSciBERT, the CRF head and the methods run on it
 PUBLISHED_SPLITS = ('fine', 'coarse', 'sofc', 'sofc_slot')
 PUBLISHED_METHODS = ('crf_ctx', 'crf_mt', 'crf_mr', 'crf_mt_mr', 'crf_cdetest')
@@ -327,7 +330,8 @@ def paired(method, reference):
 
 
 CHAIN = (('crf_mr', 'crf'), ('crf_mr6', 'crf_mr'), ('crf_mrm_topic6', 'crf_mr6'),
-         ('crf_mrm6', 'crf_mr6'), ('crf_mrm_mixed6', 'crf_mr6'))
+         ('crf_mrm6', 'crf_mr6'), ('crf_mrm_mixed6', 'crf_mr6'),
+         ('crf_mt_mr', 'crf_mt'), ('crf_mt_mr6', 'crf_mt_mr'), ('crf_mt_mrm6', 'crf_mt_mr6'))
 
 
 def chain_comparisons(systems, offsets):

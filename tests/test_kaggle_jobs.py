@@ -478,8 +478,11 @@ def test_check_collect():
     old = _gpu_file('seed0', 'seed1')
     assert kj.check_collect(_gpu_file('seed0', 'seed1', 'seed2'), old) == []
     assert kj.check_collect(_gpu_file('seed0'), old) == [
-        'run seed1 of the file in results/gpu is missing or changed']
-    assert kj.check_collect(_gpu_file('seed0', 'seed1', f1=71.0), old)[0].startswith('run seed0')
+        'run seed1 of the file in results/gpu is missing']
+    assert kj.check_collect(_gpu_file('seed0'), old, merge=True) == []       # week 17: united
+    changed = kj.check_collect(_gpu_file('seed0', 'seed1', f1=71.0), old)
+    assert changed[0].startswith('run seed0') and changed[0].endswith('changed')
+    assert kj.check_collect(_gpu_file('seed0', 'seed1', f1=71.0), old, merge=True) == changed
 
 
 def test_collect_copies_gpu_results_and_skips_smoke_tests(tmp_path):
@@ -1381,3 +1384,51 @@ def test_week15_names_batch(monkeypatch, tmp_path):
         'ner_names_mulms_leave_one_subfield_out_crf_mrm_topic6_semi.json']
     assert sorted(p.name for p in dest.iterdir()) == [
         'ner_names_mulms_leave_one_subfield_out_crf_mrm_topic6_semi.json']
+
+
+def test_week17_batches_and_merge(tmp_path, monkeypatch):
+    """w17a: lane 0 the CRF repeat, the crf_mt_mr repeat on the first paper and the names jobs of
+    the first two papers (3 multi-task teachers, 10 students, 6 copies, the mention filter), lane
+    1 the 10 control jobs (crf_mt_mr6, one per seed offset); w17b the other two papers' names
+    jobs on one lane. collect --merge unites one file written by two sessions for different
+    papers and refuses a changed run."""
+    lane0, lane1 = _parsed(kj.batch_lanes('w17a'))
+    assert lane0[0].tag == 'smokebc' and lane0[1].tag == 'smokebd'
+    assert lane0[1].multi_task and lane0[1].augment_mentions == 3 and lane0[1].papers == [kj.PAPERS[0]]
+    for a, paper in zip(lane0[2:], kj.PAPERS[:2]):
+        assert a.multi_task and a.teachers == 3 and a.students == 10 and a.silver_mentions
+        assert a.augment_names and a.augment_mentions == 6 and a.self_train_sample == 0
+        assert a.papers == [paper] and a.save_predictions and a.self_train == kj.CORPUS
+    assert len(lane1) == 10
+    for a, off in zip(lane1, kj.OFFSETS_PUBLISHED):
+        assert a.multi_task and a.augment_mentions == 6 and a.tag == f'm{off}'
+        assert a.seed_offset == off and not hasattr(a, 'teachers')
+    lane0b, lane1b = kj.batch_lanes('w17b')
+    assert [j[j.index('--papers') + 1] for j in lane0b] == list(kj.PAPERS[2:]) and lane1b == []
+    # merge (the toy runs lack the fields the summary needs: summarize is stubbed)
+    monkeypatch.setattr(nb, 'summarize',
+                        lambda results: results.update({'summary': 'stub'}) or results)
+
+    def run(run_id, f1, env='T4'):
+        return {'run_id': run_id, 'f1': f1, 'seed': 0, 'environment': {'device': 'cuda',
+                'gpu': env, 'torch': '2', 'transformers': '4'}}
+    common = {'granularity': 'fine', 'protocol': 'leave_one_paper_out', 'variant': 'crf_mt_mrm6_m0',
+              'model': 'm', 'labels': ['A'], 'config': {'x': 1}}
+    dest = tmp_path / 'gpu'
+    dest.mkdir()
+    old = {**common, 'runs': [run('p1', 50.0), run('p2', 51.0)]}
+    (dest / 'ner_results_fine_leave_one_paper_out_crf_mt_mrm6_m0.json').write_text(json.dumps(old))
+    pulled = tmp_path / 'pulled'
+    pulled.mkdir()
+    new = {**common, 'runs': [run('p3', 52.0), run('p4', 53.0)]}
+    (pulled / 'ner_results_fine_leave_one_paper_out_crf_mt_mrm6_m0.json').write_text(json.dumps(new))
+    copied, problems = kj.collect(str(pulled), dest)
+    assert not copied and 'missing' in ' '.join(problems['ner_results_fine_leave_one_paper_out_crf_mt_mrm6_m0.json'])
+    copied, problems = kj.collect(str(pulled), dest, merge=True)
+    assert copied == ['ner_results_fine_leave_one_paper_out_crf_mt_mrm6_m0.json'] and not problems
+    got = json.loads((dest / 'ner_results_fine_leave_one_paper_out_crf_mt_mrm6_m0.json').read_text())
+    assert [r['run_id'] for r in got['runs']] == ['p1', 'p2', 'p3', 'p4'] and 'summary' in got
+    changed = {**common, 'runs': [run('p1', 49.0), run('p3', 52.0)]}
+    (pulled / 'ner_results_fine_leave_one_paper_out_crf_mt_mrm6_m0.json').write_text(json.dumps(changed))
+    copied, problems = kj.collect(str(pulled), dest, merge=True)
+    assert not copied and 'changed' in ' '.join(problems['ner_results_fine_leave_one_paper_out_crf_mt_mrm6_m0.json'])

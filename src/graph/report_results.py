@@ -1154,7 +1154,7 @@ def ner_notes(res):
                                    "the MaterioMiner analogue of the screen's winner, 10 seeds",
                                    week='12', names=WEEK7_SYSTEM_NAMES)
     return (note + sofc_note(analysis) + mulms_note(analysis) + week13_note(analysis)
-            + week14_note(analysis))
+            + week14_note(analysis) + week17_note(analysis))
 
 
 WEEK13_CORPORA = {'mulms': "MuLMS's 7 held-out subfields",
@@ -1245,6 +1245,33 @@ WEEK14_ABLATIONS = {'crf_mrm_topic10k6': "the corpus's first 10,000 sentences",
 WEEK14_CONTROL = 'crf_mr6'
 WEEK14_MIXED = 'crf_mrm_mixed6'
 WEEK14_WINNER = 'crf_mrm_topic6'
+
+
+WEEK17_NAMES, WEEK17_CONTROL = 'crf_mt_mrm6', 'crf_mt_mr6'
+
+
+def week17_note(analysis):
+    """The week-17 bullet (ROADMAP §4, the week-17 protocol) from the week-5 analyses file
+    ('' without its week17 section): per granularity the names on the multi-task model with
+    6 copies against the matched control (decisions 17.1 and 17.2), and both against 3 copies,
+    the multi-task model and the CRF head (reported)."""
+    w = analysis.get('week17') or {}
+    if not w:
+        return ''
+    line = ("* NER week 17 (the harvested names on the strongest MaterioMiner base, the multi-task "
+            "model with 6-copy mention replacement; 4 held-out papers, 10 seeds; post review)")
+    key = f'minus_{WEEK17_CONTROL}'
+    for g, e in w.items():
+        line += (f". {g.capitalize()}-grained: the names {interval(e[WEEK17_NAMES]['micro'])} against "
+                 f"the control's {interval(e['control'][WEEK17_CONTROL]['micro'])}, "
+                 f"{delta_cell(e[key]['micro'])}, {'passes' if e['passes'] else 'no'} (decision "
+                 f"{e['decision']}); the names against 3 copies "
+                 f"{delta_cell(e['names']['minus_crf_mt_mr']['micro'])}, the multi-task model "
+                 f"{delta_cell(e['names']['minus_crf_mt']['micro'])} and the CRF head "
+                 f"{delta_cell(e['names']['minus_crf']['micro'])}; the control against 3 copies "
+                 f"{delta_cell(e['control']['minus_crf_mt_mr']['micro'])} and the multi-task model "
+                 f"{delta_cell(e['control']['minus_crf_mt']['micro'])} (reported)")
+    return line + '\n'
 
 
 def week14_note(analysis):

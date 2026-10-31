@@ -471,6 +471,36 @@ def names_paper_job(granularity, paper):
             '--threads', str(THREADS)]
 
 
+def mt_mr6_job(offset):
+    """Week 17: the multi-task model with MR6_COPIES copies of mention replacement and no
+    names (crf_mt_mr6_m<N>), the matched control, one job per seed offset over the 4 held-out
+    papers (both granularities from one model), as week 9's crf_mt_mr jobs."""
+    return ['--leave-one-paper-out', '--crf', '--multi-task', '--augment-mentions',
+            str(MR6_COPIES), '--tag', f'm{offset}',
+            *(('--seed-offset', str(offset)) if offset else ()), '--save-predictions',
+            '--threads', str(THREADS)]
+
+
+def mt_names_paper_job(paper, students=len(OFFSETS_PUBLISHED)):
+    """Week 17: crf_mt_mrm6 on one held-out paper: three multi-task teachers (seeds 0, 100,
+    200), the fatigue corpus tagged with both heads, the mention filter on both heads, and
+    `students` students (seed offsets 0, 100, ...), one results file per student offset and
+    granularity holding the paper's run."""
+    return ['--leave-one-paper-out', '--papers', paper, '--crf', '--multi-task', '--self-train',
+            CORPUS, '--self-train-sample', '0', '--silver-mentions', '--teachers', '3',
+            '--students', str(students), '--augment-mentions', str(MR6_COPIES),
+            '--augment-names', '--save-predictions', '--threads', str(THREADS)]
+
+
+def mt_mr_repeat(paper, tag):
+    """A repeat of week 9's crf_mt_mr run of seed 0 on one held-out paper (the stored
+    crf_mt_mr_m0 run), under a smoke tag: the multi-task mention-replacement path must give
+    the same scores after the week-17 code."""
+    return ['--leave-one-paper-out', '--papers', paper, '--crf', '--multi-task',
+            '--augment-mentions', '3', '--tag', tag, '--save-predictions', '--threads',
+            str(THREADS)]
+
+
 def mixed_job(subfield, student_offsets):
     """Week 14, 14.2: V4's job with the subfield's mixed corpus (build_mixed_corpus.py; in the
     bundle as topic_mixed_<subfield>_sentences.txt): crf_mrm_mixed6_m<N>."""
@@ -976,6 +1006,20 @@ def batch_lanes(name):
         # granularities (one names file per granularity, so one lane)
         return [[repeat + ['--tag', 'smokebb']] + [names_mulms_job(s) for s in MULMS_SUBFIELD_NAMES],
                 [names_paper_job(g, p) for g in GRANULARITIES for p in PAPERS]]
+    if name == 'w17a':
+        # week 17 (ROADMAP §4, the week-17 protocol): the names on the strongest base. Lane 0:
+        # the CRF repeat of smoke4 (smokebc), the repeat of crf_mt_mr's seed-0 run on paper
+        # s11340 (smokebd), then the names jobs of the first two papers (crf_mt_mrm6, 10
+        # students each); lane 1: the 10 control jobs (crf_mt_mr6, one per seed offset). The
+        # other two papers' names jobs are w17b (kernel c): they write the same student files,
+        # which collect --merge unites by run_id.
+        return [[repeat + ['--tag', 'smokebc'], mt_mr_repeat(PAPERS[0], 'smokebd'),
+                 mt_names_paper_job(PAPERS[0]), mt_names_paper_job(PAPERS[1])],
+                [mt_mr6_job(off) for off in OFFSETS_PUBLISHED]]
+    if name == 'w17b':
+        # week 17, the second session: the names jobs of the other two papers on one lane (they
+        # share their files); the other lane is empty
+        return [[mt_names_paper_job(PAPERS[2]), mt_names_paper_job(PAPERS[3])], []]
     if name == 'w14a':
         # week 14, 14.1: the 6-copy control without names (crf_mr6_m<N>) on MuLMS's held-out
         # subfields, seed offsets 300 to 900 (one job per offset over the 7 subfields), and
@@ -998,7 +1042,7 @@ BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'i
            'w7c', 'w7d', 'w7e', 'w8a', 'w8b', 'w9a', 'w9b', 'w10a', 'w11a', 'w11b', 'w12a', 'w12c',
            'w12e', 'w12f', 'w12g', 'w13a', 'w13b', 'w13c',
            *(f'w12b:{v}' for v in WEEK12_VARIANTS), *(f'w12d:{v}' for v in WEEK12_ANALOGUES),
-           'tpu-smoke1', 'tpu-smoke', 'w14a', 'w14b', 'w14c', 'w15a')
+           'tpu-smoke1', 'tpu-smoke', 'w14a', 'w14b', 'w14c', 'w15a', 'w17a', 'w17b')
 
 
 def batch_extras(name):
@@ -1218,7 +1262,7 @@ def environment_key(run):
     return None if env is None else tuple(env.get(k) for k in ENV_KEYS)
 
 
-def check_collect(new, old=None, environments=()):
+def check_collect(new, old=None, environments=(), merge=False):
     """Problems with copying a pulled results file (`new`) over `old` in results/gpu/.
 
     Every run needs an environment, all the same and the same as `environments` (those
@@ -1236,10 +1280,27 @@ def check_collect(new, old=None, environments=()):
     if old is not None:
         mine = {r.get('run_id'): r for r in runs}
         for r in old.get('runs', []):
-            if mine.get(r.get('run_id')) != r:
-                problems.append(f"run {r.get('run_id')} of the file in results/gpu is missing "
-                                f"or changed")
+            if r.get('run_id') in mine and mine[r.get('run_id')] != r:
+                problems.append(f"run {r.get('run_id')} of the file in results/gpu changed")
+            elif r.get('run_id') not in mine and not merge:
+                problems.append(f"run {r.get('run_id')} of the file in results/gpu is missing")
     return problems
+
+
+def merged(old, new):
+    """`new` with the runs of `old` that it lacks (two sessions that wrote the same file for
+    different units, week 17), old's first, and the summary recomputed; the files must agree
+    outside their runs and summary."""
+    sys.path.insert(0, str(ROOT / 'src' / 'graph'))
+    from ner_baseline import summarize
+    strip = lambda f: {k: v for k, v in f.items() if k not in ('runs', 'summary')}  # noqa: E731
+    if strip(old) != strip(new):
+        raise ValueError('the files differ outside their runs and summary')
+    ids = {r.get('run_id') for r in new.get('runs', [])}
+    out = {**new, 'runs': [r for r in old.get('runs', []) if r.get('run_id') not in ids]
+           + list(new.get('runs', []))}
+    summarize(out)
+    return out
 
 
 def collect_names(pulled, dest=NAMES_RESULTS):
@@ -1255,8 +1316,10 @@ def collect_names(pulled, dest=NAMES_RESULTS):
     return copied
 
 
-def collect(pulled, dest=GPU_RESULTS):
-    """Copy the non-smoke results files of a pulled output to `dest`; returns the names."""
+def collect(pulled, dest=GPU_RESULTS, merge=False):
+    """Copy the non-smoke results files of a pulled output to `dest`; returns the names. With
+    `merge`, a file whose counterpart in `dest` holds runs it lacks is united with it
+    (merged) instead of refused: the week-17 sessions write one file for different papers."""
     sys.path.insert(0, str(ROOT / 'src' / 'graph'))
     from ner_baseline import parse_result_name
     dest = Path(dest)
@@ -1271,11 +1334,15 @@ def collect(pulled, dest=GPU_RESULTS):
         new = json.loads(path.read_text())
         target = dest / path.name
         old = json.loads(target.read_text()) if target.exists() else None
-        found = check_collect(new, old, environments)
+        found = check_collect(new, old, environments, merge)
         if found:
             problems[path.name] = found
             continue
-        shutil.copy2(path, target)
+        if merge and old is not None and {r.get('run_id') for r in old.get('runs', [])} - \
+                {r.get('run_id') for r in new.get('runs', [])}:
+            target.write_text(json.dumps(merged(old, new), indent=2))
+        else:
+            shutil.copy2(path, target)
         copied.append(path.name)
     return copied, problems
 
@@ -1383,7 +1450,7 @@ def cmd_pull(args):
 
 def cmd_collect(args):
     dest = Path(args.results_dir)
-    copied, problems = collect(args.pulled, dest)
+    copied, problems = collect(args.pulled, dest, merge=args.merge)
     for name in copied:
         print(f'  copied {name}')
     for name, found in problems.items():
@@ -1422,6 +1489,9 @@ def main(argv=None):
     p.add_argument('pulled', help='a directory made by pull')
     p.add_argument('--results-dir', default=str(GPU_RESULTS), metavar='DIR',
                    help='where the files go (TPU batches: results/tpu)')
+    p.add_argument('--merge', action='store_true',
+                   help='unite a file with the runs its counterpart holds and it lacks (two '
+                        'sessions writing one file for different units, week 17)')
     p.set_defaults(func=cmd_collect)
     sub.add_parser('quota', help='weekly GPU quota').set_defaults(func=cmd_quota)
     args = parser.parse_args(argv)

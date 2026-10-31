@@ -6,6 +6,7 @@ torch, transformers, seqeval and scipy (skipped without them).
 import json
 
 import pytest
+from types import SimpleNamespace
 
 import ner_baseline as nb
 
@@ -153,3 +154,80 @@ def test_augmented_run(tmp_path, monkeypatch):
     (run,) = res['runs']
     assert res['variant'] == 'crf_mr2_m100' and res['config']['augment_mentions'] == 2
     assert run['n_augmented'] == len(augmented) and run['n_train'] == n_train
+
+
+def test_multitask_mention_replacement_takes_harvested_names():
+    """Week 17: harvested names join the pool under their (coarse, fine) key; a name whose key
+    no training mention has is never drawn; without names the copies are those of before."""
+    names = [(('MAT', 'Alloy'), ('Inconel', '718')), (('MAT', None), ('nickel',)),
+             (('DEV', None), ('cell',))]                        # DEV: no training mention
+    with_names = nb.mention_replacements_multitask(MT_EXAMPLES, 20, seed=0, p=1.0, names=names)
+    drawn = {tuple(words[a:b]) for words, tags in with_names
+             for a, b, _ in nb.entity_spans(tags['coarse'])}
+    assert ('Inconel', '718') in drawn and ('nickel',) in drawn and ('cell',) not in drawn
+    for words, tags in with_names:
+        fine = {(a, b): kind for a, b, kind in nb.entity_spans(tags['fine'])}
+        for a, b, kind in nb.entity_spans(tags['coarse']):
+            if tuple(words[a:b]) == ('Inconel', '718'):
+                assert kind == 'MAT' and fine[(a, b)] == 'Alloy'
+            if tuple(words[a:b]) == ('nickel',):
+                assert kind == 'MAT' and (a, b) not in fine
+    assert nb.mention_replacements_multitask(MT_EXAMPLES, 5, seed=0, names=()) == \
+        nb.mention_replacements_multitask(MT_EXAMPLES, 5, seed=0)
+
+
+def test_multitask_mention_filter_needs_both_heads_to_agree():
+    """Week 17's filter: a coarse span every teacher tags alike, with the same fine type at
+    exactly that span or none, every marginal of the span at the threshold on the coarse head
+    and, with a fine type, on the fine head; a fine entity overlapping the span blocks it."""
+    words = ['Inconel', '718', 'at', '600', 'C']
+    def teacher(coarse, fine, c_marg, f_marg):
+        return {'coarse': (coarse, c_marg), 'fine': (fine, f_marg)}
+    high = [0.99] * 5
+    t1 = teacher(['B-MAT', 'I-MAT', 'O', 'B-COND', 'I-COND'], ['B-Alloy', 'I-Alloy', 'O', 'O', 'O'],
+                 high, high)
+    t2 = teacher(['B-MAT', 'I-MAT', 'O', 'B-COND', 'I-COND'], ['B-Alloy', 'I-Alloy', 'O', 'O', 'O'],
+                 high, high)
+    out = nb.silver_mention_names_multitask([words], [[t1, t2]], 0.9)
+    assert out == [(('MAT', 'Alloy'), ('Inconel', '718')), (('COND', None), ('600', 'C'))]
+    # a low coarse marginal on one word of a span drops that span only
+    low = [0.99, 0.99, 0.99, 0.5, 0.99]
+    t3 = teacher(t1['coarse'][0], t1['fine'][0], low, high)
+    assert nb.silver_mention_names_multitask([words], [[t1, t3]], 0.9) == \
+        [(('MAT', 'Alloy'), ('Inconel', '718'))]
+    # the teachers disagree on the fine type at the span: dropped; a low fine marginal too
+    t4 = teacher(t1['coarse'][0], ['B-Value', 'I-Value', 'O', 'O', 'O'], high, high)
+    assert nb.silver_mention_names_multitask([words], [[t1, t4]], 0.9) == \
+        [(('COND', None), ('600', 'C'))]
+    t5 = teacher(t1['coarse'][0], t1['fine'][0], high, [0.8, 0.99, 0.99, 0.99, 0.99])
+    assert nb.silver_mention_names_multitask([words], [[t1, t5]], 0.9) == \
+        [(('COND', None), ('600', 'C'))]
+    # a fine entity overlapping but not equal to the coarse span blocks the key
+    t6 = teacher(t1['coarse'][0], ['O', 'B-Value', 'O', 'O', 'O'], high, high)
+    assert nb.silver_mention_names_multitask([words], [[t6, t6]], 0.9) == \
+        [(('COND', None), ('600', 'C'))]
+    assert nb.silver_mention_names_multitask([], [], 0.9) == []
+
+
+def test_multitask_names_parser_and_variant(capsys):
+    """--augment-names with --multi-task needs --silver-mentions; the week-17 variants are
+    crf_mt_mr6 (the control) and crf_mt_mrm6 (the names); --save-names and the feature,
+    agreement and share options are single-task only."""
+    control = nb.parse_args(['--leave-one-paper-out', '--crf', '--multi-task',
+                             '--augment-mentions', '6', '--tag', 'm100', '--seed-offset', '100'])
+    assert nb.variant_name(control) == 'crf_mt_mr6_m100'
+    args = nb.parse_args(['--leave-one-paper-out', '--papers', '10.1038_ncomms7164', '--crf',
+                          '--multi-task', '--self-train', 'data/processed/corpus/fatigue_sentences.txt',
+                          '--self-train-sample', '0', '--silver-mentions', '--teachers', '3',
+                          '--students', '10', '--augment-mentions', '6', '--augment-names'])
+    assert nb.variant_name(SimpleNamespace(**{**vars(args), 'tag': 'm300'})) == 'crf_mt_mrm6_m300'
+    base = ['--leave-one-paper-out', '--crf', '--multi-task', '--self-train',
+            'data/processed/corpus/fatigue_sentences.txt', '--teachers', '3',
+            '--augment-mentions', '6', '--augment-names']
+    for extra, error in ((['--silver-mentions', '--save-names', 'x.json'], '--save-names'),
+                         (['--silver-mentions', '--names-share', '0.5'], '--names-share'),
+                         (['--silver-mentions', '--teachers-agree', '2'], '--teachers-agree'),
+                         ([], 'needs --silver-mentions')):
+        with pytest.raises(SystemExit):
+            nb.parse_args(base + extra)
+        assert error in capsys.readouterr().err
