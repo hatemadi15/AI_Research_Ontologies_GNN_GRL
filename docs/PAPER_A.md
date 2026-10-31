@@ -28,10 +28,10 @@ Neither the names' source (a mixed corpus holding most of the same
 names) nor the filter's settings changes the result detectably, and
 where half the test names are seen nothing helps. The names
 trade precision for recall on unseen names on one corpus and raise both
-on the other; on MuLMS the gain is name knowledge: recall rises 7.3 points
-on the unseen names the lexicon holds and 1.1 on the others, a difference
-of +6.2 [+2.4, +9.9] over the subfields (post hoc), but the lexicon holds
-only 22% of them.
+on the other; on MuLMS the recall gain is name knowledge, +7.3 points on
+the unseen names the lexicon holds (22% of them, pooled) against +1.1 on
+the others, +6.2 [+2.4, +9.9] apart (post hoc), while the wrong
+predictions the names add fall mostly on the other names.
 We report all eight decisions, the criterion's revision and a post hoc
 robustness analysis. Mention replacement is worth using where most of a
 new document's names are unseen and training is a few hundred sentences;
@@ -113,12 +113,14 @@ amendments and the one deviation in the analysis. The results are:
   own (pre-registered), and five settings of corpus size, filter and share
   move F1 by at most 0.2 points (Section 5.3).
 - On MuLMS the names raise recall on unseen names and lower precision; on
-  MaterioMiner they raise both. On MuLMS the gain is name knowledge: over
+  MaterioMiner they raise both. On MuLMS the recall gain is name knowledge: over
   the matched control, recall rises +7.3 points on the unseen test names
   the lexicon holds and +1.1 on the others, a difference of +6.2 [+2.4,
   +9.9] paired over the subfields (post hoc, from lexicons rebuilt after
-  the runs), but the lexicon holds 22% of a subfield's unseen names; on
-  MaterioMiner four papers do not resolve the split (Section 5.4). On SOFC-Exp, where
+  the runs), but the lexicon holds 22% of the unseen names (7% to 36% by
+  subfield) and two thirds of the wrong predictions the names add are
+  names it does not hold; on MaterioMiner the fixed reading gives a
+  generic shift, within four papers' wide intervals (Section 5.4). On SOFC-Exp, where
   half the test names are seen, nothing helps (Section 5.5).
 
 Section 6 lists what else was tried on the way and the count: eight
@@ -630,32 +632,71 @@ fixed before its run).** The lexicons were not stored with the runs. Week
 15 rebuilt each from its unit's own teachers and corpus (the rebuilt
 teachers' test F1 and the lexicon's coverage counts equal the stored
 runs' in every unit) and split the unseen test names by whether the
-lexicon holds them (Table 8). The reading was fixed in advance: name
-knowledge if the names' recall gain over MR6 is larger on the held names
-than on the others, the paired interval of the difference above 0. On
-MuLMS the lexicon holds 22% of a subfield's unseen test names. On those,
-MR6 + names recalls 82.4% against MR6's 75.0% (+7.29 [+3.27, +11.30],
-paired over the seven subfields); on the names it does not hold, 36.8%
-against 35.0% (+1.12 [−0.78, +3.02]); the difference is +6.17 [+2.44,
-+9.90], positive in every subfield: name knowledge. The copies alone show
-no such split (MR6 over the CRF head gains +3.39 on the held names and
-+5.22 on the others, a difference of −1.84 [−5.27, +1.60]; MR3 −0.66
-[−2.78, +1.45]), and the mixed corpus's names give the same picture as
-the topic's (+4.86 [+1.50, +8.21]). Precision on the predictions of held
-names falls from 74.7% to 69.0%: the names add wrong mentions of lexicon
-names too. On MaterioMiner four papers do not resolve the split:
-fine-grained +4.33 [−5.33, +13.98] (three papers of four), coarse-grained
-−1.54 [−3.60, +0.51]. So on MuLMS the names do what they were built to do,
-on the fifth of the unseen names the lexicon holds, and the F1 increment
-stays within Section 5.2's noise because the other four fifths are
-untouched and the precision is paid on the held ones.
+lexicon holds them (Table 8). The reading was fixed in advance with three
+outcomes: name knowledge if the names' recall gain over MR6 is larger on
+the held names than on the others, the paired interval of the difference
+above 0; a generic shift if the two gains are alike, the interval
+covering 0 with both gains positive; mixed if the interval is above 0 but
+the gain on the other names is also above 0. On MuLMS the lexicon holds
+22% of the unseen test names pooled over the subfields (7% to 36% by
+subfield). On those, MR6 + names recalls 82.4% against MR6's 75.0% (+7.29
+[+3.27, +11.30], paired over the seven subfields); on the names it does
+not hold, 36.8% against 35.0% (+1.12 [−0.78, +3.02]); the difference is
++6.17 [+2.44, +9.90], positive in every subfield: name knowledge, and not
+the mixed case, since the gain on the other names does not clear 0 (it
+would count as mixed under a reading of the rule on point estimates,
+which we did not adopt). The copies alone show no such split (MR6 over
+the CRF head gains +3.39 on the held names and +5.22 on the others, a
+difference of −1.84 [−5.27, +1.60]; MR3 −0.66 [−2.78, +1.45]), and the
+mixed corpus's names give the same picture as the topic's (+4.86 [+1.50,
++8.21]). The precision side reads differently. By the pooled counts the
+names add 8,336 predictions of held names, 39% of them right, and 12,206
+of other names, 22% right, so two thirds of the wrong predictions they
+add are names the lexicon does not hold, at about the rate of the
+companion study's tagging bias (below); precision falls on both parts,
+74.7% to 69.0% on the held names and 46.4% to 44.0% on the others. The
+recall gain is name knowledge; the extra wrong predictions look like a
+generic shift. On MaterioMiner the rule's letter gives a generic shift at
+both granularities, both gains positive with the interval covering 0:
+fine-grained +4.62 and +0.29, difference +4.33 [−5.33, +13.98];
+coarse-grained +0.36 and +1.91, −1.54 [−3.60, +0.51]. We report that
+verdict with one caveat, a post hoc judgement: the fine-grained interval,
+−5 to +14, also covers every name-knowledge value MuLMS shows, so four
+papers cannot tell the readings apart there. So on MuLMS the names do what
+they were built to do, on the fifth of the unseen names the lexicon
+holds, and the F1 increment stays within Section 5.2's noise because the
+gain is confined to that fifth while the wrong predictions land on both
+parts.
 
 **Table 8.** Recall on the unseen test names by lexicon membership (post
 hoc; lexicons rebuilt by the names method's own teachers; MuLMS on the
-decision seeds, MaterioMiner on 10 seeds): each system's recall gain on
-the unseen names the unit's lexicon holds and on those it does not, the
-difference of the two gains, paired over the units with 95% CIs, and the
-units where the gain on the held names is the larger.
+decision seeds, MaterioMiner on 10 seeds). Levels: per system, the share
+of the unseen test names the lexicon holds (pooled over seeds and units),
+recall on those and on the others, the share of the unseen-name
+predictions that are lexicon names, and precision on each part. Paired
+gains: per comparison, the recall gain on the held names and on the
+others, the difference of the two gains, paired over the units with 95%
+CIs, and the units where the gain on the held names is the larger.
+
+**Levels**
+
+| setting | system | unseen test names in the lexicon (%) | recall, in | recall, out | unseen predictions in the lexicon (%) | precision, in | precision, out |
+|---|---|---|---|---|---|---|---|
+| MuLMS, 7 subfields | CRF head | 22.2 | 71.8 | 29.7 | 30.7 | 74.3 | 47.6 |
+| MuLMS, 7 subfields | MR3 | 22.2 | 75.6 | 34.1 | 28.4 | 74.1 | 46.3 |
+| MuLMS, 7 subfields | MR6 | 22.2 | 75.0 | 35.0 | 27.5 | 74.7 | 46.4 |
+| MuLMS, 7 subfields | MR6 + names | 22.2 | 82.4 | 36.8 | 29.0 | 69.0 | 44.0 |
+| MuLMS, 7 subfields | MR6 + names (mixed corpus) | 22.2 | 81.6 | 36.7 | 28.8 | 70.7 | 45.0 |
+| MaterioMiner fine, 4 papers | CRF head | 9.8 | 74.0 | 30.8 | 13.0 | 81.3 | 46.4 |
+| MaterioMiner fine, 4 papers | MR3 | 9.8 | 83.1 | 34.0 | 13.0 | 82.7 | 46.3 |
+| MaterioMiner fine, 4 papers | MR6 | 9.8 | 82.5 | 35.0 | 12.3 | 81.4 | 44.6 |
+| MaterioMiner fine, 4 papers | MR6 + names | 9.8 | 86.6 | 36.1 | 13.6 | 81.2 | 48.8 |
+| MaterioMiner coarse, 4 papers | CRF head | 18.2 | 79.6 | 45.4 | 17.7 | 82.2 | 45.5 |
+| MaterioMiner coarse, 4 papers | MR3 | 18.2 | 79.1 | 47.2 | 17.3 | 82.8 | 46.6 |
+| MaterioMiner coarse, 4 papers | MR6 | 18.2 | 80.5 | 46.9 | 17.8 | 81.5 | 46.1 |
+| MaterioMiner coarse, 4 papers | MR6 + names | 18.2 | 80.7 | 48.3 | 17.5 | 82.4 | 47.0 |
+
+**Paired gains**
 
 | setting | comparison | recall gain on the names in the lexicon [95% CI] | recall gain on the names not in it [95% CI] | in − out [95% CI] | units with in > out |
 |---|---|---|---|---|---|
@@ -834,7 +875,8 @@ gains in proportion: on MuLMS's held-out subfields the CRF head scores
 48.5, MR3 50.8, MR6 51.2 and MR6 + names 51.7, and the best of them still
 finds only half of a subfield's entities (recall 50%). If recall on the names an
 unlabeled corpus holds is what you need, the names buy it there, on the
-fifth of a subfield's unseen names the lexicon covers (Section 5.4), though
+fifth of the unseen names the lexicon covers, pooled over subfields
+(Section 5.4), though
 a decoding bias, untested against the names, might buy part of it; if F1 is, stop at mention
 replacement. Expect nothing from either on a corpus like SOFC-Exp, where half
 the test names are seen, the baseline is at 83 F1 and the corpus covers
@@ -1011,10 +1053,13 @@ method and its control.
   than the names route does (Section 4); the names were never run on that
   base, so whether they add to the best system is untested.
 - **The names' effect is only partly isolated.** The lexicon-membership
-  split (Section 5.4) was run after the decisions, on rebuilt lexicons,
-  and resolves on MuLMS only; no recall-matched control was run; the
-  lexicon's precision was not estimated (the precision of the predictions
-  of lexicon names, 69 to 75%, is the nearest figure); the per-subfield
+  split (Section 5.4) was run after the decisions, on rebuilt lexicons;
+  it reads name knowledge on MuLMS and, by the rule's letter, a generic
+  shift on MaterioMiner within four papers' wide intervals; no
+  recall-matched control was run; the lexicon's precision was not
+  estimated (the precision of the predictions of lexicon names, 69 to 75%
+  on MuLMS and 81 to 83% on MaterioMiner, is the nearest figure); the
+  per-subfield
   correlations of Section 5.4 are exploratory with 7 points and
   confounded; the recall–precision trade is reported as pooled rates and, post hoc,
   as paired per-subfield intervals (Section 5.4).
@@ -1218,12 +1263,13 @@ head); Table 6 to `table8_types.md` and `tableA2_types_fine.md`; Table 7
 to the week-12 screen in `docs/ROADMAP.md`; Figure 1 to
 `docs/figures/fig8_method.png`, Figure 2 to `fig9_units.png`, Figure 3 to
 `fig7_names.png`; Appendix E to `results/gpu/ner_robustness.json`. The
-claims it rests on are C2, C17 and C20–C26 of `docs/PAPER.md`; citation
+claims it rests on are C2, C17 and C20–C26 and C28 of `docs/PAPER.md`; citation
 keys refer to `docs/references.bib`. For a journal's structure, Section 1
 is the Introduction, Sections 5 and 6 the Results, Sections 7 to 9 the
 Discussion, and Sections 2 to 4 with the appendices the Methods. Table 8 is `table10_lexicon.md`, from `results/gpu/ner_lexicon_recall.json`
 (`ner_lexicon_recall.py`; the rebuilt lexicons themselves are not committed).
 
 Every interval in the paper is the analysis scripts' value, computed from
-per-unit means rounded to two decimals; recomputed from the unrounded
-runs, no bound moves by more than 0.01 and no verdict changes.
+per-unit values (F1 means over seeds, or rates pooled over seeds)
+rounded to two decimals; recomputed from the unrounded runs, no bound
+moves by more than about 0.01 and no verdict changes.

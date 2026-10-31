@@ -5436,8 +5436,17 @@ is **name knowledge**. The copies show no split (MR6 − CRF head −1.84
 [−5.27, +1.60]; MR3 − CRF head −0.66 [−2.78, +1.45]); the mixed corpus's
 names behave like the topic's (+4.86 [+1.50, +8.21]); precision on the
 predictions of held names falls 74.7 → 69.0 with the names. MaterioMiner
-(4 papers): fine +4.33 [−5.33, +13.98] (3 of 4 papers), coarse −1.54
-[−3.60, +0.51], unresolved. As fixed, no decision changes: the names'
+(4 papers): both gains positive with the interval covering 0 (fine +4.62
+and +0.29, difference +4.33 [−5.33, +13.98], 3 of 4 papers; coarse +0.36
+and +1.91, −1.54 [−3.60, +0.51]): by the rule's letter a generic shift,
+within intervals too wide to tell the readings apart (a post hoc caveat
+the paper states). The precision side: the names add 8,336 predictions of
+held names (39% right) and 12,206 of others (22% right), two thirds of the
+added wrong ones being names the lexicon does not hold; precision falls
+74.7 → 69.0 and 46.4 → 44.0. A focused review of the addition (31 October,
+20:10) caught the first draft's "the other four fifths are untouched",
+the missing rule verdict for MaterioMiner and the unstated mixed case;
+fixed. As fixed, no decision changes: the names'
 share of F1 stays +0.80 [−0.66, +2.26]; paper A's Sections 1, 5.4, 7, 9,
 the abstract, the Limitations and Appendix A carry the result.
 
