@@ -295,9 +295,10 @@ def summary(members):
 
 def paired(method, reference):
     """For each compared kind: the method's and the reference's F1 per pair and their mean
-    paired difference with its 95% CI. method, reference: [{run_id: Counter}] with members
-    matched by position; a pair is a run_id, its F1 the mean over the members (a held-out
-    paper over the seeds or votes; on a published split, one model seed)."""
+    paired difference with its 95% CI, and the same for recall and precision under 'recall'
+    and 'precision'. method, reference: [{run_id: Counter}] with members matched by position;
+    a pair is a run_id, its score the mean over the members (a held-out paper over the seeds
+    or votes; on a published split, one model seed)."""
     out = {}
     for kind in COMPARED:
         kinds = KINDS if kind == 'all' else (kind,)
@@ -307,17 +308,50 @@ def paired(method, reference):
                 if run_id not in ours:
                     continue
                 pair = values.setdefault(run_id, ([], []))
-                pair[0].append(kind_scores(ours[run_id], kinds)['f1'])
-                pair[1].append(kind_scores(counts, kinds)['f1'])
+                pair[0].append(kind_scores(ours[run_id], kinds))
+                pair[1].append(kind_scores(counts, kinds))
         pairs = sorted(values)
-        ours = [sum(values[p][0]) / len(values[p][0]) for p in pairs]
-        ref = [sum(values[p][1]) / len(values[p][1]) for p in pairs]
-        diffs = [a - b for a, b in zip(ours, ref)]
-        lo, hi = metrics.mean_ci(diffs)['ci']
-        out[kind] = {'method': round(sum(ours) / len(ours), 2),
-                     'reference': round(sum(ref) / len(ref), 2),
-                     'mean_diff': round(sum(diffs) / len(diffs), 2),
-                     'ci95': [round(lo, 2), round(hi, 2)], 'n_pairs': len(pairs)}
+        entry = {}
+        for metric in ('f1', 'recall', 'precision'):
+            ours = [sum(x[metric] for x in values[p][0]) / len(values[p][0]) for p in pairs]
+            ref = [sum(x[metric] for x in values[p][1]) / len(values[p][1]) for p in pairs]
+            diffs = [a - b for a, b in zip(ours, ref)]
+            lo, hi = metrics.mean_ci(diffs)['ci']
+            entry[metric] = {'method': round(sum(ours) / len(ours), 2),
+                             'reference': round(sum(ref) / len(ref), 2),
+                             'mean_diff': round(sum(diffs) / len(diffs), 2),
+                             'ci95': [round(lo, 2), round(hi, 2)]}
+        out[kind] = {**entry['f1'], 'n_pairs': len(pairs), 'recall': entry['recall'],
+                     'precision': entry['precision']}
+    return out
+
+
+CHAIN = (('crf_mr', 'crf'), ('crf_mr6', 'crf_mr'), ('crf_mrm_topic6', 'crf_mr6'),
+         ('crf_mrm6', 'crf_mr6'), ('crf_mrm_mixed6', 'crf_mr6'))
+
+
+def chain_comparisons(systems, offsets):
+    """{system: paired against the system it builds on (CHAIN) on the seeds both have, with
+    the reference's name and the seeds, and under 'decision' the same on the decision seeds
+    (300-900) when they are a proper subset of those}: the paired per-unit intervals of the
+    recall-precision trade on the unseen names (post hoc; paper A, Section 5.4)."""
+    out = {}
+    for system, parent in CHAIN:
+        if system not in systems or parent not in systems:
+            continue
+        common = [o for o in offsets[system] if o in offsets[parent]]
+        if not common:
+            continue
+
+        def members(name, seeds):
+            return [systems[name][list(offsets[name]).index(o)] for o in seeds]
+        entry = {'reference': parent, 'seeds': list(common),
+                 **paired(members(system, common), members(parent, common))}
+        decision = [o for o in common if o in DECISION_OFFSETS]
+        if decision and len(decision) < len(common):
+            entry['decision'] = {'seeds': decision,
+                                 **paired(members(system, decision), members(parent, decision))}
+        out[system] = entry
     return out
 
 
@@ -439,7 +473,7 @@ def analyse(directory, corpus_path=CORPUS):
                              'sentences',
                      'seen_other': 'they are an entity there, only of other types',
                      'unseen': 'they are no entity there'},
-           'systems': {}, 'papers': {}, 'types': {}, 'gap': {}, 'methods': {}}
+           'systems': {}, 'papers': {}, 'types': {}, 'gap': {}, 'methods': {}, 'chain': {}}
     for g, protocols in HELD_OUT.items():
         reference = {}
         for protocol in protocols:
@@ -450,6 +484,9 @@ def analyse(directory, corpus_path=CORPUS):
             out['systems'][key] = {s: {'seeds': list(offsets[s]), **summary(m)}
                                    for s, m in systems.items()}
             out['methods'][key] = held_out_comparisons(directory, g, protocol, systems, offsets)
+            chain = chain_comparisons(systems, offsets)
+            if chain:
+                out['chain'][key] = chain
             if REFERENCE not in systems:
                 continue
             reference[protocol] = scores(pooled(systems[REFERENCE]))
@@ -506,6 +543,13 @@ def main(argv=None):
         for system, m in methods.items():
             print(f"  {key} {system} minus the reference, F1: "
                   + ', '.join(f"{k} {m[k]['mean_diff']:+.2f} {m[k]['ci95']}" for k in COMPARED))
+    for key, chain in result['chain'].items():
+        for system, c in chain.items():
+            u = c['unseen']
+            print(f"  {key} {system} minus {c['reference']}, unseen names ({len(c['seeds'])} seeds): "
+                  f"recall {u['recall']['mean_diff']:+.2f} {u['recall']['ci95']}, precision "
+                  f"{u['precision']['mean_diff']:+.2f} {u['precision']['ci95']}, F1 {u['mean_diff']:+.2f} "
+                  f"{u['ci95']}")
     for g, papers in result['corpus_coverage'].items():
         if g != 'corpus':
             print(f'  {g}-grained, unseen test names in the self-training corpus: ' + ', '.join(

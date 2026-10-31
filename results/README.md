@@ -314,7 +314,7 @@ and `gpu/ner_matching.json` hold MuLMS's unseen names and looser matching
 (settings `mulms_leave_one_subfield_out` and `mulms_random_split_pool`). *Licence:*
 MuLMS is CC BY-SA 4.0 (Schrader et al., 2023), so every results file with
 `mulms` in its name, which holds MuLMS's tags (`test_gold`), is CC BY-SA 4.0
-as well, unlike the rest of the repository (Apache 2.0).
+as well, unlike the rest of the repository (Apache 2.0). Since 31 October it also holds `chain`: each system's paired per-unit differences of recall, precision and F1 on the unseen names against the system it builds on (MR3 against the CRF head, MR6 against MR3, the names and the mixed variant against MR6), on the seeds both have and, under `decision`, on the decision seeds (post hoc; paper A, Section 5.4), and every `methods` entry carries `recall` and `precision` beside its F1.
 
 Week 7, part 2e (SOFC-Exp's test articles cut into words as its training
 articles are; Kaggle session `w7e` of 17 October, `ner-gpu-jobs-d` version 3,

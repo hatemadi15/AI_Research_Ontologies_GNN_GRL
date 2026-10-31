@@ -517,6 +517,7 @@ def figure7(rows_by_setting, path):
     styles = {'crf': ('o', 'black'), 'crf_mr': ('s', 'tab:blue'), 'crf_mr6': ('D', 'tab:cyan'),
               'crf_mrm_topic6': ('*', 'tab:red'), 'crf_mrm6': ('*', 'tab:red'),
               'crf_mrm_mixed6': ('P', 'tab:orange')}
+    iso_labels, point_labels = [], []
     for k, (ax, (setting, rows)) in enumerate(zip(axes[0], rows_by_setting.items())):
         narrow = n == 3 and k > 0          # the lower panels: half the width, labels to the left
         at = {system: (recall, precision) for system, _, recall, precision, *_ in rows}
@@ -530,14 +531,17 @@ def figure7(rows_by_setting, path):
             if len(curve) > 1:
                 ax.plot(*zip(*curve), color='lightgrey', lw=0.7, zorder=1)
                 if curve[-1][0] >= x1 - (x1 - x0) / 100:      # the curve leaves on the right
-                    ax.annotate(f'F1 {f}', curve[-1], xytext=(2, 0), textcoords='offset points',
-                                fontsize=6.5, color='grey', va='center')
+                    iso_labels.append(ax.annotate(f'F1 {f}', curve[-1], xytext=(2, 0),
+                                                  textcoords='offset points', fontsize=6.5,
+                                                  color='grey', va='center'))
                 elif curve[0][0] <= x0 + (x1 - x0) / 100:    # it enters on the left
-                    ax.annotate(f'F1 {f}', curve[0], xytext=(2, 0), textcoords='offset points',
-                                fontsize=6.5, color='grey', va='center')
+                    iso_labels.append(ax.annotate(f'F1 {f}', curve[0], xytext=(2, 0),
+                                                  textcoords='offset points', fontsize=6.5,
+                                                  color='grey', va='center'))
                 else:                                        # it enters at the top
-                    ax.annotate(f'F1 {f}', curve[0], xytext=(0, 2), textcoords='offset points',
-                                fontsize=6.5, color='grey', ha='center', va='bottom')
+                    iso_labels.append(ax.annotate(f'F1 {f}', curve[0], xytext=(0, 2),
+                                                  textcoords='offset points', fontsize=6.5,
+                                                  color='grey', ha='center', va='bottom'))
         for system, label, recall, precision, f1, seen in rows:
             parent = NAMES_PARENT.get(system)
             if parent in at:
@@ -564,9 +568,12 @@ def figure7(rows_by_setting, path):
                 offset, align = (7, 14), 'left'
             else:
                 offset, align = (7, -16), 'left'
-            ax.annotate(text, (recall, precision), textcoords='offset points', fontsize=7,
-                        xytext=offset, ha=align, zorder=4,
-                        bbox={'boxstyle': 'round,pad=0.12', 'fc': 'white', 'ec': 'none', 'alpha': 0.85})
+            leader = ({'arrowstyle': '-', 'color': '0.6', 'lw': 0.5, 'shrinkA': 0, 'shrinkB': 3}
+                      if narrow else None)
+            point_labels.append(ax.annotate(
+                text, (recall, precision), textcoords='offset points', fontsize=7, xytext=offset,
+                ha=align, zorder=4, arrowprops=leader,
+                bbox={'boxstyle': 'round,pad=0.12', 'fc': 'white', 'ec': 'none', 'alpha': 0.85}))
         ax.set(xlim=(x0 - (5 if narrow else 2), x1 + 4), ylim=(y0 - 1, y1 + 1))
         ax.set_title(setting, fontsize=9)
         ax.set_xlabel('recall on the unseen test names (%)', fontsize=8)
@@ -584,6 +591,12 @@ def figure7(rows_by_setting, path):
         fig.tight_layout(rect=(0, 0.03, 1, 1))
     else:
         fig.tight_layout()
+    fig.canvas.draw()                # hide an iso-F1 label that a point's label would cover
+    renderer = fig.canvas.get_renderer()
+    boxes = [t.get_window_extent(renderer) for t in point_labels]
+    for t in iso_labels:
+        if any(t.get_window_extent(renderer).overlaps(b) for b in boxes):
+            t.set_visible(False)
     fig.savefig(path, dpi=300, bbox_inches='tight')
     plt.close(fig)
 
@@ -692,7 +705,7 @@ def figure8(path):
         'teachers': (3.1, top, 2.6, h, '3 CRF teachers\n(seeds 0, 100, 200;\nthe reference\'s\nown runs)', '#dbe9f6'),
         'corpus': (6.0, top, 2.6, h, 'Unlabeled corpus\n40,000 sentences\n(the held-out topic,\nor a mix of others)',
                    '#fff2cc'),
-        'filter': (8.9, top, 2.6, h, 'Mention filter\nall 3 teachers agree\non span and type,\nevery marginal \u2265 0.9',
+        'filter': (8.9, top, 2.6, h, 'Mention filter\nall 3 teachers agree\non span and type;\nmarginals \u2265 0.9',
                    '#fff2cc'),
         'lexicon': (11.8, top, 2.6, h, 'Lexicon\n4k to 13k names\nper subfield', '#fff2cc'),
         'pool': (1.5, bottom, 3.6, h, 'Replacement pool\ntraining mentions\n(601 to 1,309)\n+ the lexicon\n(at least 92% of entries)',
