@@ -462,4 +462,5 @@ aggregate analysis: per unit and system, recall on the unseen test names the
 lexicon holds and on those it does not, the unseen predictions' lexicon share
 and precision, the paired gains over MR6 and the CRF head on each part and
 their difference with 95% CIs, and the checks that the rebuilt teachers' F1
-and coverage counts equal the stored ones.
+and coverage counts equal the stored ones. Run record: `w15a` pushed to
+`ner-gpu-jobs-c` (version 9, bundle `2c60f33`) on 31 October at 16:30 UTC.
