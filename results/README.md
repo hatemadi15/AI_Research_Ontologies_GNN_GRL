@@ -425,6 +425,9 @@ held-out papers at 10 seeds, both granularities; `ner-gpu-jobs-c` version 7,
 [−0.66, +2.26] pooled), `w14b` (14.2, `crf_mrm_mixed6_m<300..900>`; `ner-gpu-jobs-d` version 14, 29 October
 18:00–22:20 UTC, 4.3 session hours, pushed early on the week's remaining quota; 14.2 no, −0.18 [−2.01, +1.65]) and `w14c` (14.3,
 `crf_mrm_topic10k6`, `crf_mrm_topic20k6`, `crf_mrm_topiclow6`,
-`crf_mrm_topictwo6` and `crf_mrm_topiccap6` at seeds 0–200), the last two after
-the reset of 31 October; their analyses in `gpu/ner_week5_seed_analysis.json`
-(`week14`: `copies`, `topic`, `ablations`) and Table 6.
+`crf_mrm_topictwo6` and `crf_mrm_topiccap6` at seeds 0–200; `ner-gpu-jobs-c`
+version 8, 31 October 00:14 to about 09:55 UTC, 9.7 session hours, the smoke
+repeat identical, `check_w14c.py` all checks pass), the last after the reset of
+31 October; their analyses in `gpu/ner_week5_seed_analysis.json` (`week14`:
+`copies`, `topic`, `ablations`), Table 6 and Table 7
+(`docs/tables/table7_ablations.md`, the ablations against the method).

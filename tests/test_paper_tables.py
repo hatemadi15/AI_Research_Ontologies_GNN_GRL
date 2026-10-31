@@ -191,3 +191,43 @@ def test_main_writes_what_it_has(tmp_path, capsys):
     assert 'table 5: no probe reports' in out
     assert 'table 6: no held-out decisions' in out
     assert (tmp_path / 'tables' / 'table2_decisions.md').read_text().count('| 5 | GPU |') == 1
+
+
+def test_table7_lists_the_ablations_against_the_method():
+    """Table 7: the names method on the screen's seeds first, then each ablation of
+    week14.ablations in ABLATION_LABELS order, with its distinct silver names, the share of
+    the unseen test names among them and its differences against the method, mention
+    replacement and the CRF head; ablations without files are left out."""
+    def d(mean, lo, hi):
+        return {'micro': _spread(mean, lo, hi, 'mean_diff')}
+
+    def names(distinct, unseen, in_silver):
+        return {'n_mentions': 3 * distinct, 'n_distinct': distinct, 'n_test_entities': unseen + 10,
+                'n_test_unseen': unseen, 'n_test_unseen_in_silver': in_silver}
+    screen = {'n_subfields': 2, 'crf_mrm_topic6': {'micro': _spread(52.09, 45.72, 58.46)},
+              'minus_crf': d(3.16, -1.96, 8.28), 'minus_crf_mr': d(1.45, -1.35, 4.25),
+              'names': {'a': names(100, 50, 10), 'b': names(200, 50, 12)},
+              'unseen_in_silver': 0.22}
+    low = {'n_units': 2, 'crf_mrm_topiclow6': {'micro': _spread(51.5, 44.0, 59.0)},
+           'minus_crf_mrm_topic6': d(-0.59, -2.0, 0.82), 'minus_crf_mr': d(0.86, -1.0, 2.72),
+           'minus_crf': d(2.57, -2.5, 7.64), 'seeds': [0, 100, 200],
+           'names': {'a': names(300, 50, 20), 'b': names(400, 50, 12)}, 'unseen_in_silver': 0.32,
+           'setting': {'n_sampled': 40000, 'marginal_threshold': 0.7}}
+    ten = {**low, 'crf_mrm_topic10k6': low['crf_mrm_topiclow6'], 'unseen_in_silver': 0.164,
+           'names': {'a': names(10, 50, 8), 'b': names(20, 50, 8)}}
+    del ten['crf_mrm_topiclow6']
+    analysis = {'week13': {'week12_winner': 'crf_mrm_topic6'},
+                'mulms': {'week12': {'crf_mrm_topic6': {'screen': screen}}},
+                'week14': {'ablations': {'crf_mrm_topiclow6': low, 'crf_mrm_topic10k6': ten}}}
+    rows = pt.ablation_rows(analysis)
+    assert [r[0] for r in rows] == [pt.METHOD_LABEL, pt.ABLATION_LABELS['crf_mrm_topic10k6'],
+                                    pt.ABLATION_LABELS['crf_mrm_topiclow6']]
+    assert rows[0][1:5] == [2, 300, 0.22, 52.09] and rows[0][5] is None
+    assert rows[2][1:5] == [2, 700, 0.32, 51.5]
+    table = pt.table7(rows)
+    assert table.startswith('Table 7. The ablations of the names method')
+    assert ('| marginal threshold 0.7 (0.9) | 2 | 700 | 32.0 | 51.50 | −0.59 [−2.00, +0.82] | '
+            '+0.86 [−1.00, +2.72] | +2.57 [−2.50, +7.64] |') in table
+    assert ("| the method: 40,000 sentences, threshold 0.9, 3 of 3 teachers, a uniform pool | 2 "
+            "| 300 | 22.0 | 52.09 |  | +1.45 [−1.35, +4.25] | +3.16 [−1.96, +8.28] |") in table
+    assert pt.ablation_rows({}) == []

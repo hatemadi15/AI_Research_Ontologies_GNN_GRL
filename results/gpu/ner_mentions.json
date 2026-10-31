@@ -3522,6 +3522,226 @@
           "f1": 52.14,
           "share": 1.0
         }
+      },
+      "crf_mrm_topic10k6": {
+        "seeds": [
+          0,
+          100,
+          200
+        ],
+        "n_runs": 21,
+        "seen": {
+          "n_gold": 11073,
+          "n_pred": 12549,
+          "n_correct": 8414,
+          "recall": 75.99,
+          "precision": 67.05,
+          "f1": 71.24,
+          "share": 0.116
+        },
+        "seen_other": {
+          "n_gold": 393,
+          "n_pred": 219,
+          "n_correct": 51,
+          "recall": 12.98,
+          "precision": 23.29,
+          "f1": 16.67,
+          "share": 0.004
+        },
+        "unseen": {
+          "n_gold": 84390,
+          "n_pred": 75674,
+          "n_correct": 39573,
+          "recall": 46.89,
+          "precision": 52.29,
+          "f1": 49.45,
+          "share": 0.88
+        },
+        "all": {
+          "n_gold": 95856,
+          "n_pred": 88442,
+          "n_correct": 48038,
+          "recall": 50.11,
+          "precision": 54.32,
+          "f1": 52.13,
+          "share": 1.0
+        }
+      },
+      "crf_mrm_topic20k6": {
+        "seeds": [
+          0,
+          100,
+          200
+        ],
+        "n_runs": 21,
+        "seen": {
+          "n_gold": 11073,
+          "n_pred": 12682,
+          "n_correct": 8562,
+          "recall": 77.32,
+          "precision": 67.51,
+          "f1": 72.09,
+          "share": 0.116
+        },
+        "seen_other": {
+          "n_gold": 393,
+          "n_pred": 184,
+          "n_correct": 55,
+          "recall": 13.99,
+          "precision": 29.89,
+          "f1": 19.06,
+          "share": 0.004
+        },
+        "unseen": {
+          "n_gold": 84390,
+          "n_pred": 73543,
+          "n_correct": 38957,
+          "recall": 46.16,
+          "precision": 52.97,
+          "f1": 49.33,
+          "share": 0.88
+        },
+        "all": {
+          "n_gold": 95856,
+          "n_pred": 86409,
+          "n_correct": 47574,
+          "recall": 49.63,
+          "precision": 55.06,
+          "f1": 52.2,
+          "share": 1.0
+        }
+      },
+      "crf_mrm_topiclow6": {
+        "seeds": [
+          0,
+          100,
+          200
+        ],
+        "n_runs": 21,
+        "seen": {
+          "n_gold": 11073,
+          "n_pred": 12302,
+          "n_correct": 8310,
+          "recall": 75.05,
+          "precision": 67.55,
+          "f1": 71.1,
+          "share": 0.116
+        },
+        "seen_other": {
+          "n_gold": 393,
+          "n_pred": 259,
+          "n_correct": 65,
+          "recall": 16.54,
+          "precision": 25.1,
+          "f1": 19.94,
+          "share": 0.004
+        },
+        "unseen": {
+          "n_gold": 84390,
+          "n_pred": 83075,
+          "n_correct": 41138,
+          "recall": 48.75,
+          "precision": 49.52,
+          "f1": 49.13,
+          "share": 0.88
+        },
+        "all": {
+          "n_gold": 95856,
+          "n_pred": 95636,
+          "n_correct": 49513,
+          "recall": 51.65,
+          "precision": 51.77,
+          "f1": 51.71,
+          "share": 1.0
+        }
+      },
+      "crf_mrm_topictwo6": {
+        "seeds": [
+          0,
+          100,
+          200
+        ],
+        "n_runs": 21,
+        "seen": {
+          "n_gold": 11073,
+          "n_pred": 11627,
+          "n_correct": 8241,
+          "recall": 74.42,
+          "precision": 70.88,
+          "f1": 72.61,
+          "share": 0.116
+        },
+        "seen_other": {
+          "n_gold": 393,
+          "n_pred": 221,
+          "n_correct": 49,
+          "recall": 12.47,
+          "precision": 22.17,
+          "f1": 15.96,
+          "share": 0.004
+        },
+        "unseen": {
+          "n_gold": 84390,
+          "n_pred": 80554,
+          "n_correct": 40779,
+          "recall": 48.32,
+          "precision": 50.62,
+          "f1": 49.45,
+          "share": 0.88
+        },
+        "all": {
+          "n_gold": 95856,
+          "n_pred": 92402,
+          "n_correct": 49069,
+          "recall": 51.19,
+          "precision": 53.1,
+          "f1": 52.13,
+          "share": 1.0
+        }
+      },
+      "crf_mrm_topiccap6": {
+        "seeds": [
+          0,
+          100,
+          200
+        ],
+        "n_runs": 21,
+        "seen": {
+          "n_gold": 11073,
+          "n_pred": 12029,
+          "n_correct": 8144,
+          "recall": 73.55,
+          "precision": 67.7,
+          "f1": 70.5,
+          "share": 0.116
+        },
+        "seen_other": {
+          "n_gold": 393,
+          "n_pred": 184,
+          "n_correct": 44,
+          "recall": 11.2,
+          "precision": 23.91,
+          "f1": 15.25,
+          "share": 0.004
+        },
+        "unseen": {
+          "n_gold": 84390,
+          "n_pred": 72565,
+          "n_correct": 38981,
+          "recall": 46.19,
+          "precision": 53.72,
+          "f1": 49.67,
+          "share": 0.88
+        },
+        "all": {
+          "n_gold": 95856,
+          "n_pred": 84778,
+          "n_correct": 47169,
+          "recall": 49.21,
+          "precision": 55.64,
+          "f1": 52.23,
+          "share": 1.0
+        }
       }
     },
     "fine_published_split": {
@@ -7634,6 +7854,196 @@
           "ci95": [
             -0.89,
             7.64
+          ],
+          "n_pairs": 7
+        }
+      },
+      "crf_mrm_topic10k6": {
+        "reference": "crf",
+        "seeds": [
+          0,
+          100,
+          200
+        ],
+        "seen": {
+          "method": 68.69,
+          "reference": 67.6,
+          "mean_diff": 1.09,
+          "ci95": [
+            -3.0,
+            5.18
+          ],
+          "n_pairs": 7
+        },
+        "unseen": {
+          "method": 49.28,
+          "reference": 46.04,
+          "mean_diff": 3.24,
+          "ci95": [
+            -1.02,
+            7.5
+          ],
+          "n_pairs": 7
+        },
+        "all": {
+          "method": 51.94,
+          "reference": 48.93,
+          "mean_diff": 3.01,
+          "ci95": [
+            -1.21,
+            7.23
+          ],
+          "n_pairs": 7
+        }
+      },
+      "crf_mrm_topic20k6": {
+        "reference": "crf",
+        "seeds": [
+          0,
+          100,
+          200
+        ],
+        "seen": {
+          "method": 69.19,
+          "reference": 67.6,
+          "mean_diff": 1.59,
+          "ci95": [
+            -3.05,
+            6.23
+          ],
+          "n_pairs": 7
+        },
+        "unseen": {
+          "method": 49.18,
+          "reference": 46.04,
+          "mean_diff": 3.14,
+          "ci95": [
+            -0.28,
+            6.57
+          ],
+          "n_pairs": 7
+        },
+        "all": {
+          "method": 51.93,
+          "reference": 48.93,
+          "mean_diff": 3.0,
+          "ci95": [
+            -0.49,
+            6.49
+          ],
+          "n_pairs": 7
+        }
+      },
+      "crf_mrm_topiclow6": {
+        "reference": "crf",
+        "seeds": [
+          0,
+          100,
+          200
+        ],
+        "seen": {
+          "method": 69.43,
+          "reference": 67.6,
+          "mean_diff": 1.82,
+          "ci95": [
+            -3.34,
+            6.99
+          ],
+          "n_pairs": 7
+        },
+        "unseen": {
+          "method": 49.32,
+          "reference": 46.04,
+          "mean_diff": 3.29,
+          "ci95": [
+            -1.55,
+            8.13
+          ],
+          "n_pairs": 7
+        },
+        "all": {
+          "method": 51.93,
+          "reference": 48.93,
+          "mean_diff": 3.0,
+          "ci95": [
+            -1.85,
+            7.85
+          ],
+          "n_pairs": 7
+        }
+      },
+      "crf_mrm_topictwo6": {
+        "reference": "crf",
+        "seeds": [
+          0,
+          100,
+          200
+        ],
+        "seen": {
+          "method": 69.99,
+          "reference": 67.6,
+          "mean_diff": 2.39,
+          "ci95": [
+            -2.47,
+            7.25
+          ],
+          "n_pairs": 7
+        },
+        "unseen": {
+          "method": 49.56,
+          "reference": 46.04,
+          "mean_diff": 3.53,
+          "ci95": [
+            -0.56,
+            7.61
+          ],
+          "n_pairs": 7
+        },
+        "all": {
+          "method": 52.2,
+          "reference": 48.93,
+          "mean_diff": 3.27,
+          "ci95": [
+            -0.85,
+            7.38
+          ],
+          "n_pairs": 7
+        }
+      },
+      "crf_mrm_topiccap6": {
+        "reference": "crf",
+        "seeds": [
+          0,
+          100,
+          200
+        ],
+        "seen": {
+          "method": 68.52,
+          "reference": 67.6,
+          "mean_diff": 0.92,
+          "ci95": [
+            -3.83,
+            5.67
+          ],
+          "n_pairs": 7
+        },
+        "unseen": {
+          "method": 49.68,
+          "reference": 46.04,
+          "mean_diff": 3.65,
+          "ci95": [
+            -0.33,
+            7.63
+          ],
+          "n_pairs": 7
+        },
+        "all": {
+          "method": 52.18,
+          "reference": 48.93,
+          "mean_diff": 3.24,
+          "ci95": [
+            -0.73,
+            7.22
           ],
           "n_pairs": 7
         }

@@ -87,7 +87,10 @@ FAMILIES = ('crf', 'crf_mt', 'crf_ls', 'crf_st3', 'crf_ctx', 'crf_mt_st3', 'crf_
             # the winner's MaterioMiner analogue (week 12) and, with crf_mr6 at 10 seeds on both
             # corpora (week 14, 14.1), the copy control; 14.2's mixed-corpus variant, which has
             # the decision's 7 seeds (300-900) only
-            'crf_mrm6', 'crf_mrm_mixed6')
+            'crf_mrm6', 'crf_mrm_mixed6',
+            # week 14's ablations of the names method (14.3; the screen's 3 seeds)
+            'crf_mrm_topic10k6', 'crf_mrm_topic20k6', 'crf_mrm_topiclow6', 'crf_mrm_topictwo6',
+            'crf_mrm_topiccap6')
 VOTED = ('crf', 'crf_mt', 'crf_ctx', 'crf_mt_st3', 'crf_mr', 'crf_mt_mr', 'crf_mrs')
 # a published split's systems: plain MatSciBERT, the CRF head and the methods run on it
 PUBLISHED_SPLITS = ('fine', 'coarse', 'sofc', 'sofc_slot')

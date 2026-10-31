@@ -9,7 +9,7 @@ the week-12 to week-14 outcomes in `docs/ROADMAP.md` §4; a number in
 square brackets is a 95% Student-t confidence interval of a mean paired
 difference over the held-out units named. The ablations of 14.3 (the
 corpus's size, the filter's threshold and agreement, the silver share)
-run on 31 October and fill Section 4.3. Paper B, the evaluation paper, is
+ran on 31 October and are in Section 4.3 (Table 2). Paper B, the evaluation paper, is
 `docs/PAPER_DRAFT.md`; this paper cites it for the protocol and the gap.*
 
 ## Abstract
@@ -34,7 +34,10 @@ mention replacement with the same six copies and no names the gain is
 +0.80 [−0.66, +2.26], so most of the gain is the extra augmentation and
 the names' share is not established; and a mixed corpus of six other
 materials topics does as well as the held-out topic's own (−0.18 [−2.01,
-+1.65]), so the names' source does not matter. What the names do is raise
++1.65]), so the names' source does not matter. Five ablations of the corpus size,
+the filter and the names' share of the draws move the result by at most
+0.2 points: a quarter of the corpus and the strictest filter suffice.
+What the names do is raise
 recall on unseen names (39.4 to 47.3 on MuLMS) at a cost in precision. A
 second, smaller result holds on the same two corpora: propagating a
 model's own confident labels within a document adds +0.82 [+0.18, +1.46]
@@ -90,6 +93,9 @@ pre-registered after the main decision passed. The results are:
 - The names' source does not matter: a mixed corpus of the six other
   materials subfields does as well as the held-out subfield's own
   (−0.18 [−2.01, +1.65]; Section 4.2).
+- The recipe is insensitive to its settings: five ablations of the corpus
+  size, the filter and the names' share of the draws move the result by
+  at most 0.2 points (Section 4.3).
 - The names raise recall on unseen names and lower precision; on
   SOFC-Exp, where half the test names are seen, the method does not help
   (Sections 4.4 and 4.5).
@@ -251,17 +257,53 @@ share beyond the copies is small.
 
 ### 4.3 Ablations (reported, 3 seeds)
 
-*To be filled on 31 October from `w14c`: the corpus's first 10,000 and
-20,000 sentences against all 40,000; the filter's threshold 0.7 against
-0.9; 2 of 3 teachers against 3 of 3; the lexicon capped at half of the
-draws against the uniform pool, where it is 85–97% of the entries. Each
-against the method on the same seeds, with the lexicon's counts and the
-share of the unseen names it holds.*
+Each ablation changes one setting of the method and runs on MuLMS's 7
+held-out subfields at the screen's seeds (0 to 200), against the method's
+own runs on those seeds. With 3 seeds and 7 subfields these are readings,
+not decisions, and they detect only a difference of about 2 points or
+more. Table 2 gives them, with the lexicon each setting admits (distinct
+names, summed over the subfields) and the share of the held-out subfields'
+unseen test names in it.
+
+| Setting (the method's value) | Distinct names | Unseen test names in the lexicon | Micro F1 | Δ vs the method [95% CI] | Δ vs mention replacement | Δ vs CRF head |
+|---|---|---|---|---|---|---|
+| the method: 40,000 sentences, threshold 0.9, 3 of 3 teachers, a uniform pool | 54,095 | 22.2% | 52.09 | | +1.45 [−1.35, +4.25] | +3.16 [−1.96, +8.28] |
+| corpus: its first 10,000 sentences | 19,171 | 16.4% | 51.94 | −0.15 [−1.78, +1.48] | +1.30 [−1.14, +3.74] | +3.01 [−1.21, +7.23] |
+| corpus: its first 20,000 sentences | 32,461 | 20.1% | 51.93 | −0.16 [−2.45, +2.14] | +1.30 [−0.56, +3.15] | +3.00 [−0.49, +6.49] |
+| filter: marginal threshold 0.7 | 77,879 | 31.5% | 51.93 | −0.16 [−1.62, +1.31] | +1.29 [−0.95, +3.53] | +3.00 [−1.85, +7.85] |
+| filter: 2 of 3 teachers agree | 78,604 | 28.8% | 52.20 | +0.11 [−1.58, +1.81] | +1.56 [+0.07, +3.05] | +3.27 [−0.85, +7.38] |
+| pool: harvested names in half of the draws (85–97% uniform) | 54,095 | 22.2% | 52.18 | +0.09 [−1.63, +1.80] | +1.54 [−0.74, +3.82] | +3.24 [−0.73, +7.22] |
+
+Nothing moves. The lexicon ranges from 19 thousand to 79 thousand distinct
+names and from 16% to 32% of the unseen test names, and micro F1 stays
+within 0.16 of the method's 52.09; every interval covers 0, the votes' too
+(+0.20, −0.32, +0.34, +0.45 and +0.08), and per subfield the differences
+run from −3.2 to +2.9, the spread of 3-seed means. This is what 14.1
+predicts: if the names add under a point, the settings that govern how
+many names enter cannot show an effect, and none does. For a practitioner
+the readings say that a quarter of the corpus (10,000 sentences, a quarter
+of the teachers' tagging) with three teachers agreeing at 0.9 does as well
+as the full corpus and as the loosened filters, and that letting the
+harvested names take 85 to 97% of the draws, as the uniform pool does, is
+no better than half. What the ablations cannot say is whether a much
+smaller or a much larger lexicon would change the result: they bracket
+the method's settings by a factor of four in names, no more.
+
+On the unseen names the settings do move the trade that Section 4.4
+describes (exploratory; the screen's 3 seeds pooled over the subfields,
+the method's own screen runs at 48.1% recall and 50.0 precision): the
+smaller lexicons find fewer of them at higher precision (10,000 sentences
+46.9% at 52.3; 20,000 sentences 46.2% at 53.0; the names in half of the
+draws 46.2% at 53.7) and the larger ones more at lower precision (the
+threshold 0.7 48.8% at 49.5; 2 of 3 teachers 48.3% at 50.6), while F1 on
+the unseen names stays between 49.1 and 49.7. More names buy recall and
+cost precision in the same measure, which is why the settings do not show
+in F1.
 
 ### 4.4 What the names do
 
 By kind of name, pooled over the 70 runs of MuLMS's held-out subfields
-(Table 2 and Figure 1, `docs/figures/fig7_names.png`, which puts each
+(Table 3 and Figure 1, `docs/figures/fig7_names.png`, which puts each
 system's recall and precision on the unseen names on one plane with
 iso-F1 curves, for MuLMS and for MaterioMiner's papers at both
 granularities): the CRF head finds 39.4% of the unseen names at 55.8%
@@ -345,8 +387,8 @@ runs, each failing or passing as recorded:
 In all, the names method took eight pre-registered decisions in weeks 12
 to 14, of which three pass (the MaterioMiner analogue at both
 granularities and the pooled decision); with weeks 10 and 11, fourteen
-decisions on this route, four passing. The ablations of Section 4.2 were
-registered after the pooled decision passed and before their runs.
+decisions on this route, four passing. The ablations of Sections 4.2 and 4.3
+were registered after the pooled decision passed and before their runs.
 
 ## 6 Limitations
 
@@ -359,6 +401,9 @@ registered after the pooled decision passed and before their runs.
   gain is over the CRF head; against the matched control it is +0.80
   [−0.66, +2.26]. A reader who wants "names help" should read "names add
   little to more augmentation, measurably on recall of unseen names".
+- **The ablations are 3-seed readings** on 7 subfields: they detect a
+  difference of about 2 points or more, and what they show is the absence
+  of any effect of that size, not the equality of the settings.
 - **MuLMS as converted** keeps the outermost entities and repairs damaged
   tokens; its scores cannot be compared with the published nested ones.
 - **One corpus per dataset.** The corpora are open-access papers found by
@@ -404,7 +449,8 @@ on silver labels. Under a pre-registered protocol the combination improves
 on the CRF head on held-out documents of two corpora, by +3.58 pooled;
 its ablations say that most of the gain is mention replacement with more
 copies, that the names add recall on unseen names at a cost in precision,
-and that the names may come from any large materials corpus. On a corpus
+that the names may come from any large materials corpus, and that a
+quarter of the corpus with the strictest filter does as well. On a corpus
 whose test names are mostly seen, nothing helps. We think the honest
 summary is useful to practitioners with a few annotated papers: use
 mention replacement with more copies; add harvested names if recall on
