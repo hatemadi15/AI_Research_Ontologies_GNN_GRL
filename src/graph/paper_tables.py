@@ -25,6 +25,12 @@ docs/tables/:
       subfields (weeks 10 to 12), the consistency rule of weeks 7 and 13, SOFC-Exp's article
       folds (13.3) and the pooled decision 13.2; its units, the mean paired difference of
       micro F1 with its 95% CI, and whether the CI lies above 0.
+  table7_ablations.md (C26, paper A's Section 4.3): the ablations of the names method
+      (week 14, 14.3; reported): on MuLMS's held-out subfields at the screen's seeds, the
+      method with one setting changed (the corpus's first 10,000 or 20,000 sentences, the
+      marginal threshold 0.7, 2 of 3 teachers, the harvested names in half of the draws),
+      each against the method, mention replacement and the CRF head, with the distinct
+      names the teachers admit and the share of the unseen test names among them.
   tableA1_all_comparisons.md: every comparison of the comparisons files, the reported and
       descriptive ones too.
 A table whose results are missing is skipped (and named on stdout).
@@ -246,6 +252,64 @@ def table6(rows):
             'CI, and whether the CI lies above 0.\n\n' + markdown(header, rows))
 
 
+# Table 7: the ablations of the names method (week 14, 14.3), in this order
+ABLATION_LABELS = {'crf_mrm_topic10k6': "the corpus's first 10,000 sentences (40,000)",
+                   'crf_mrm_topic20k6': "the corpus's first 20,000 sentences (40,000)",
+                   'crf_mrm_topiclow6': 'marginal threshold 0.7 (0.9)',
+                   'crf_mrm_topictwo6': '2 of 3 teachers agree (3 of 3)',
+                   'crf_mrm_topiccap6': 'harvested names in half of the draws (a uniform pool)'}
+METHOD_LABEL = 'the method: 40,000 sentences, threshold 0.9, 3 of 3 teachers, a uniform pool'
+
+
+def ablation_rows(analysis):
+    """The rows of Table 7 from the week-5 analyses file: the names method on the screen's
+    seeds first (the week-12 screen entry of week13.week12_winner), then each ablation of
+    week14.ablations in ABLATION_LABELS order: label, held-out units, distinct silver names
+    (summed over the units), the share of the unseen test names among the silver names,
+    micro F1, and the paired difference (micro, with its CI) against the method, mention
+    replacement and the CRF head, None where a reference is missing."""
+    rows = []
+    winner = analysis.get('week13', {}).get('week12_winner', 'crf_mrm_topic6')
+    screen = analysis.get('mulms', {}).get('week12', {}).get(winner, {}).get('screen')
+    if screen and winner in screen:
+        names = screen.get('names', {})
+        rows.append([METHOD_LABEL, screen.get('n_subfields', len(names)),
+                     sum(n['n_distinct'] for n in names.values()), screen.get('unseen_in_silver'),
+                     screen[winner]['micro']['mean'], None,
+                     screen.get('minus_crf_mr', {}).get('micro'),
+                     screen.get('minus_crf', {}).get('micro')])
+    for variant, label in ABLATION_LABELS.items():
+        entry = analysis.get('week14', {}).get('ablations', {}).get(variant)
+        if not entry or variant not in entry:
+            continue
+        names = entry.get('names', {})
+        rows.append([label, entry['n_units'], sum(n['n_distinct'] for n in names.values()),
+                     entry.get('unseen_in_silver'), entry[variant]['micro']['mean'],
+                     entry.get(f'minus_{winner}', {}).get('micro'),
+                     entry.get('minus_crf_mr', {}).get('micro'),
+                     entry.get('minus_crf', {}).get('micro')])
+    return rows
+
+
+def table7(rows):
+    """Table 7 from ablation_rows."""
+    header = ["setting (the method's value)", 'units', 'distinct silver names',
+              'unseen test names among them (%)', 'micro F1', 'Δ vs the method [95% CI]',
+              'Δ vs mention replacement [95% CI]', 'Δ vs CRF head [95% CI]']
+    cells = []
+    for label, units, distinct, share, micro, vs_method, vs_mr, vs_crf in rows:
+        cells.append([label, units, f'{distinct:,}', '' if share is None else f'{100 * share:.1f}',
+                      number(micro), *(interval(d, 'mean_diff', signed=True) if d else ''
+                                       for d in (vs_method, vs_mr, vs_crf))])
+    return ("Table 7. The ablations of the names method (week 14, 14.3; reported, no decision): "
+            "on MuLMS's 7 held-out subfields at the screen's seed offsets 0 to 200, the method "
+            'with one setting changed, each against the method, mention replacement with 3 '
+            'copies and the CRF head on the same seeds (mean paired micro-F1 difference over '
+            'the subfields with its 95% CI); the distinct names the three teachers admit, '
+            "summed over the subfields, and the share of the held-out subfields' unseen test "
+            'names among them.\n\n' + markdown(header, cells))
+
+
 def table3(published):
     """Table 3: default against strict IOB2 scoring on the published splits."""
     rows = []
@@ -387,6 +451,11 @@ def main(argv=None):
         write('table6_held_out_decisions.md', table6(rows))
     else:
         print('table 6: no held-out decisions')
+    rows = ablation_rows(analysis)
+    if rows:
+        write('table7_ablations.md', table7(rows))
+    else:
+        print('table 7: no ablations')
     print(f"wrote {', '.join(written) or 'nothing'} to {args.out}")
     return written
 

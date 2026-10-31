@@ -918,11 +918,20 @@ names that three CRF teachers tag in unlabeled in-domain text.
   materials corpus; its pre-registered pass is a gain over the CRF head
   on held-out documents of two corpora, the names' own share being small
   and not established.
-- *The ablations (14.3, pre-registered 29 October, after the reset of 31
-  October; reported):* at the screen's 3 seeds, the corpus's first
-  10,000 and 20,000 sentences, the threshold 0.7, 2 of 3 teachers, and
-  the silver names capped at half of the draws (today they are 85–97% of
-  the pool's entries).
+- *The ablations (14.3, pre-registered 29 October, run 31 October;
+  reported, no decision; Table 7):* at the screen's 3 seeds over the 7
+  subfields, against V4 on the same seeds: the corpus's first 10,000
+  sentences −0.15 [−1.78, +1.48] (19,171 distinct silver names summed
+  over the subfields, 16.4% of the unseen test names, against V4's 54,095
+  and 22.2%), its first 20,000 −0.16 [−2.45, +2.14] (32,461; 20.1%), the
+  threshold 0.7 −0.16 [−1.62, +1.31] (77,879; 31.5%), 2 of 3 teachers
+  +0.11 [−1.58, +1.81] (78,604; 28.8%), the silver names capped at half
+  of the draws +0.09 [−1.63, +1.80] (V4's lexicon; uncapped they are
+  85–97% of the pool). The lexicon's size varies fourfold and its
+  coverage doubles, and F1 does not move: as 14.1 found, the names'
+  contribution is small, so the settings that govern how many names
+  enter cannot matter; a quarter of the corpus with the strictest filter
+  does as well as the rest.
 
 **6.8 Document-level propagation on held-out documents of three corpora
 (C25).** The rule of Section 5.5 (krishnan2006effective): within a document,
