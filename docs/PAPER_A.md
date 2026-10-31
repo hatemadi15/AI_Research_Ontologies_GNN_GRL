@@ -28,8 +28,10 @@ Neither the names' source (a mixed corpus holding most of the same
 names) nor the filter's settings changes the result detectably, and
 where half the test names are seen nothing helps. The names
 trade precision for recall on unseen names on one corpus and raise both
-on the other; whether they help with the names the lexicon holds, the
-recorded data cannot tell.
+on the other; on MuLMS the gain is name knowledge: recall rises 7.3 points
+on the unseen names the lexicon holds and 1.1 on the others, a difference
+of +6.2 [+2.4, +9.9] over the subfields (post hoc), but the lexicon holds
+only 22% of them.
 We report all eight decisions, the criterion's revision and a post hoc
 robustness analysis. Mention replacement is worth using where most of a
 new document's names are unseen and training is a few hundred sentences;
@@ -111,10 +113,12 @@ amendments and the one deviation in the analysis. The results are:
   own (pre-registered), and five settings of corpus size, filter and share
   move F1 by at most 0.2 points (Section 5.3).
 - On MuLMS the names raise recall on unseen names and lower precision; on
-  MaterioMiner they raise both. Whether they help with the names the
-  lexicon holds cannot be told from the recorded data: per subfield their
-  gain correlates negatively with the lexicon's coverage, but coverage and
-  the baseline's strength are confounded (Section 5.4). On SOFC-Exp, where
+  MaterioMiner they raise both. On MuLMS the gain is name knowledge: over
+  the matched control, recall rises +7.3 points on the unseen test names
+  the lexicon holds and +1.1 on the others, a difference of +6.2 [+2.4,
+  +9.9] paired over the subfields (post hoc, from lexicons rebuilt after
+  the runs), but the lexicon holds 22% of a subfield's unseen names; on
+  MaterioMiner four papers do not resolve the split (Section 5.4). On SOFC-Exp, where
   half the test names are seen, nothing helps (Section 5.5).
 
 Section 6 lists what else was tried on the way and the count: eight
@@ -600,8 +604,7 @@ point's label gives its F1 on the unseen names and, in parentheses, on
 the seen ones; the MaterioMiner panels carry the scores only, and the
 legend names the markers.
 
-Whether this is name knowledge or a generic shift toward tagging more
-spans, the recorded data do not say. Per subfield, the lexicon's coverage
+Per subfield, the lexicon's coverage
 of the unseen test names runs from 7% (semiconductors) to 36%
 (electrolysis), and the names' gain over MR6 on the decision seeds from
 −2.3 (polymers) to +3.3 (solid oxide cells); the two correlate negatively
@@ -614,23 +617,70 @@ association with the gain (partial r = −0.10) while F1 given coverage
 keeps some (−0.40), but with 7 points, 4 degrees of freedom for a partial
 correlation, neither is distinguishable from 0, and the raw correlations
 fall to −0.19 and −0.01 without the two subfields that drive them
-(semiconductors and solid oxide cells). The sign of the raw correlation
-with coverage, if anything, runs against name knowledge. A mixed corpus
+(semiconductors and solid oxide cells). The raw correlation
+with coverage runs against a simple dose–response in F1, though the
+membership split below finds the recall gain on the held names in every
+subfield; F1 also pays the precision the names cost. A mixed corpus
 that covers fewer unseen names scores slightly higher on unseen-name F1
 (49.35 against 49.01) with lower recall (46.7 against 46.9 on the same
-seeds) and higher precision. The
-decisive analysis, recall on the unseen test names that are in the
-lexicon against those that are not, was not run: the lexicons were not
-stored with the runs, and rebuilding them takes a teacher pass per corpus
-(the teachers are deterministic); nor was a recall-matched control (a
-bias toward tagging) run against the names; the nearest evidence is the
+seeds) and higher precision.
+
+**Which names the gain falls on (post hoc; the analysis and its reading
+fixed before its run).** The lexicons were not stored with the runs. Week
+15 rebuilt each from its unit's own teachers and corpus (the rebuilt
+teachers' test F1 and the lexicon's coverage counts equal the stored
+runs' in every unit) and split the unseen test names by whether the
+lexicon holds them (Table 8). The reading was fixed in advance: name
+knowledge if the names' recall gain over MR6 is larger on the held names
+than on the others, the paired interval of the difference above 0. On
+MuLMS the lexicon holds 22% of a subfield's unseen test names. On those,
+MR6 + names recalls 82.4% against MR6's 75.0% (+7.29 [+3.27, +11.30],
+paired over the seven subfields); on the names it does not hold, 36.8%
+against 35.0% (+1.12 [−0.78, +3.02]); the difference is +6.17 [+2.44,
++9.90], positive in every subfield: name knowledge. The copies alone show
+no such split (MR6 over the CRF head gains +3.39 on the held names and
++5.22 on the others, a difference of −1.84 [−5.27, +1.60]; MR3 −0.66
+[−2.78, +1.45]), and the mixed corpus's names give the same picture as
+the topic's (+4.86 [+1.50, +8.21]). Precision on the predictions of held
+names falls from 74.7% to 69.0%: the names add wrong mentions of lexicon
+names too. On MaterioMiner four papers do not resolve the split:
+fine-grained +4.33 [−5.33, +13.98] (three papers of four), coarse-grained
+−1.54 [−3.60, +0.51]. So on MuLMS the names do what they were built to do,
+on the fifth of the unseen names the lexicon holds, and the F1 increment
+stays within Section 5.2's noise because the other four fifths are
+untouched and the precision is paid on the held ones.
+
+**Table 8.** Recall on the unseen test names by lexicon membership (post
+hoc; lexicons rebuilt by the names method's own teachers; MuLMS on the
+decision seeds, MaterioMiner on 10 seeds): each system's recall gain on
+the unseen names the unit's lexicon holds and on those it does not, the
+difference of the two gains, paired over the units with 95% CIs, and the
+units where the gain on the held names is the larger.
+
+| setting | comparison | recall gain on the names in the lexicon [95% CI] | recall gain on the names not in it [95% CI] | in − out [95% CI] | units with in > out |
+|---|---|---|---|---|---|
+| MuLMS, 7 subfields | MR6 + names − MR6 | +7.29 [+3.27, +11.30] | +1.12 [−0.78, +3.02] | +6.17 [+2.44, +9.90] | 7/7 |
+| MuLMS, 7 subfields | MR6 + names − CRF head | +10.67 [+5.14, +16.20] | +6.34 [+2.60, +10.07] | +4.33 [+1.18, +7.48] | 6/7 |
+| MuLMS, 7 subfields | MR6 − CRF head | +3.39 [+0.92, +5.85] | +5.22 [+1.92, +8.52] | −1.84 [−5.27, +1.60] | 3/7 |
+| MuLMS, 7 subfields | MR3 − CRF head | +3.56 [+1.11, +6.01] | +4.22 [+0.87, +7.57] | −0.66 [−2.78, +1.45] | 3/7 |
+| MuLMS, 7 subfields | MR6 + names (mixed corpus) − MR6 | +6.16 [+1.32, +11.01] | +1.31 [−1.07, +3.68] | +4.86 [+1.50, +8.21] | 7/7 |
+| MaterioMiner fine, 4 papers | MR6 + names − MR6 | +4.62 [−5.27, +14.50] | +0.29 [−4.23, +4.81] | +4.33 [−5.33, +13.98] | 3/4 |
+| MaterioMiner fine, 4 papers | MR6 + names − CRF head | +12.77 [−12.61, +38.15] | +6.00 [+2.84, +9.16] | +6.77 [−18.59, +32.13] | 2/4 |
+| MaterioMiner fine, 4 papers | MR6 − CRF head | +8.15 [−7.65, +23.95] | +5.71 [+1.05, +10.37] | +2.44 [−15.96, +20.85] | 2/4 |
+| MaterioMiner fine, 4 papers | MR3 − CRF head | +8.77 [−5.95, +23.49] | +4.17 [−0.17, +8.50] | +4.60 [−13.82, +23.03] | 3/4 |
+| MaterioMiner coarse, 4 papers | MR6 + names − MR6 | +0.36 [−1.11, +1.84] | +1.91 [−1.46, +5.28] | −1.54 [−3.60, +0.51] | 0/4 |
+| MaterioMiner coarse, 4 papers | MR6 + names − CRF head | +1.41 [−0.38, +3.19] | +3.62 [+1.18, +6.07] | −2.22 [−5.06, +0.62] | 0/4 |
+| MaterioMiner coarse, 4 papers | MR6 − CRF head | +1.04 [−1.72, +3.80] | +1.72 [−0.37, +3.80] | −0.67 [−1.53, +0.19] | 0/4 |
+| MaterioMiner coarse, 4 papers | MR3 − CRF head | −0.12 [−1.58, +1.34] | +2.32 [+0.88, +3.75] | −2.44 [−2.63, −2.24] | 0/4 |
+
+A recall-matched control (a bias toward tagging) was not run against the
+names; the nearest evidence is the
 companion study's recall-calibrated bias on the CRF head's emissions,
 not matched to the names and not run on MuLMS, which gave −0.59 [−1.75,
 +0.57] fine-grained and +0.17 [−0.14, +0.48] coarse-grained on
 MaterioMiner and −0.21 [−0.58, +0.17] on SOFC-Exp, the entities it added
 being right 19–22% of the time, against the names' net rate of 30%
-above. Both
-analyses are the first things to do (Section 7).
+above. It is the first thing to do (Section 7).
 
 ### 5.5 Where nothing helps: SOFC-Exp
 
@@ -782,17 +832,17 @@ seed basis (paired by subfield on the decision seeds, +2.56 [+0.76, +4.36]
 recall and −2.22 [−5.03, +0.60] precision). The absolute levels keep these
 gains in proportion: on MuLMS's held-out subfields the CRF head scores
 48.5, MR3 50.8, MR6 51.2 and MR6 + names 51.7, and the best of them still
-finds only half of a subfield's entities (recall 50%). If recall on new names
-is what you need, the names buy it there, though a decoding bias, untested
-against the names, might buy the same (Section 5.4); if F1 is, stop at mention
+finds only half of a subfield's entities (recall 50%). If recall on the names an
+unlabeled corpus holds is what you need, the names buy it there, on the
+fifth of a subfield's unseen names the lexicon covers (Section 5.4), though
+a decoding bias, untested against the names, might buy part of it; if F1 is, stop at mention
 replacement. Expect nothing from either on a corpus like SOFC-Exp, where half
 the test names are seen, the baseline is at 83 F1 and the corpus covers
 few of the unseen names; which of the three matters is not separated
 (Section 5.5).
 
-**What would settle the names question.** Three analyses not run here:
-recall split by whether an unseen test name is in the lexicon, which
-needs the lexicons rebuilt (one teacher pass per corpus); a recall-matched control, a
+**What would settle the names question.** Two analyses not run here: a
+recall-matched control, a
 bias toward tagging more spans calibrated on validation data, against
 which the names' extra recall would have to show as precision (the
 companion study's calibrated bias on the CRF head alone did not help,
@@ -913,7 +963,8 @@ protocol; but mention replacement without the names gains most of it
 on the same units, the names' share, +0.8 points with an interval from
 −0.7 to +2.3, is not established, no dependence on their source or on the
 filter was detected within about 2 to 3 points, and on MuLMS what they
-buy is recall on unseen names at the price of precision. We report the eight decisions, the criterion
+buy is recall on the unseen names the lexicon holds, a fifth of them, at
+the price of precision. We report the eight decisions, the criterion
 revision, the amendments and the one deviation, and the analyses that
 would settle the question. The practical advice is mention replacement; the
 methodological advice is to test a names method against a matched copies
@@ -959,10 +1010,11 @@ method and its control.
   multi-task training with mention replacement beats the CRF head by more
   than the names route does (Section 4); the names were never run on that
   base, so whether they add to the best system is untested.
-- **The names' effect is not isolated.** The lexicons were not stored
-  with the runs, so recall was not split by lexicon membership (rebuilding
-  them is a teacher pass per corpus); no recall-matched control was run;
-  the lexicon's precision was not estimated; the per-subfield
+- **The names' effect is only partly isolated.** The lexicon-membership
+  split (Section 5.4) was run after the decisions, on rebuilt lexicons,
+  and resolves on MuLMS only; no recall-matched control was run; the
+  lexicon's precision was not estimated (the precision of the predictions
+  of lexicon names, 69 to 75%, is the nearest figure); the per-subfield
   correlations of Section 5.4 are exploratory with 7 points and
   confounded; the recall–precision trade is reported as pooled rates and, post hoc,
   as paired per-subfield intervals (Section 5.4).
@@ -1050,6 +1102,7 @@ recorded, and the amendments.
 | D6 (week 13) | 20 October 13:53 (`5f7f827`), conditional on D1; widened to D1 or D5 at 18:42 (`de62446`) | 25 October | 25 October | — |
 | D7, D8 (week 14) | 29 October 12:07 (`2886267`), two minutes after the first batch was pushed and five hours before its results | 29 October | 29 October | — |
 | ablations (week 14) | 29 October, as above | 31 October | 31 October | — |
+| the lexicon-membership analysis (week 15; post hoc, no decision) | 31 October 16:13 (`2c60f33`): the rebuild, its checks and the reading fixed before the run | 31 October (`w15a`) | 31 October | — |
 
 ## Appendix B: hyperparameters and compute
 
@@ -1168,7 +1221,8 @@ to the week-12 screen in `docs/ROADMAP.md`; Figure 1 to
 claims it rests on are C2, C17 and C20–C26 of `docs/PAPER.md`; citation
 keys refer to `docs/references.bib`. For a journal's structure, Section 1
 is the Introduction, Sections 5 and 6 the Results, Sections 7 to 9 the
-Discussion, and Sections 2 to 4 with the appendices the Methods.
+Discussion, and Sections 2 to 4 with the appendices the Methods. Table 8 is `table10_lexicon.md`, from `results/gpu/ner_lexicon_recall.json`
+(`ner_lexicon_recall.py`; the rebuilt lexicons themselves are not committed).
 
 Every interval in the paper is the analysis scripts' value, computed from
 per-unit means rounded to two decimals; recomputed from the unrounded

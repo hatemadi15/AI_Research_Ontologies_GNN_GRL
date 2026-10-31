@@ -5418,6 +5418,38 @@ which puts the names files in `results/gpu_names/` (ignored) and nothing
 in `results/gpu/` (no students ran); then `ner_lexicon_recall.py`.
 
 
+*Outcome (31 October, 19:41–19:55 UTC).* `w15a` finished (16 jobs, all
+done, 16–18 minutes each; the smoke repeat `smokebb` identical to the
+stored seed-0 run, F1 77.95 and the same predictions); pulled at 19:41,
+nine names files collected to `results/gpu_names/` (seven MuLMS, two
+MaterioMiner, one per granularity holding the four papers). Checks: in
+every unit the rebuilt teachers' test F1 equal the stored runs' (7 or 10
+runs checked per unit) and the coverage counts equal the stored
+`self_training.names`; no unit excluded. Analysis
+(`results/gpu/ner_lexicon_recall.json`, Table 10 of `paper_tables.py`,
+paper A's Table 8): on MuLMS the lexicon holds 22.2% of a subfield's
+unseen test names; recall on those, MR6 + names 82.4% against MR6's 75.0%
+(+7.29 [+3.27, +11.30] paired over the 7 subfields), on the others 36.8%
+against 35.0% (+1.12 [−0.78, +3.02]); the difference of the gains +6.17
+[+2.44, +9.90], in > out in 7 of 7 subfields: the reading fixed in advance
+is **name knowledge**. The copies show no split (MR6 − CRF head −1.84
+[−5.27, +1.60]; MR3 − CRF head −0.66 [−2.78, +1.45]); the mixed corpus's
+names behave like the topic's (+4.86 [+1.50, +8.21]); precision on the
+predictions of held names falls 74.7 → 69.0 with the names. MaterioMiner
+(4 papers): fine +4.33 [−5.33, +13.98] (3 of 4 papers), coarse −1.54
+[−3.60, +0.51], unresolved. As fixed, no decision changes: the names'
+share of F1 stays +0.80 [−0.66, +2.26]; paper A's Sections 1, 5.4, 7, 9,
+the abstract, the Limitations and Appendix A carry the result.
+
+*Week 17, session notes (31 October, 19:54 UTC).* The protocol
+(`f39447c`, 19:15) and the code (`013f9ac`, 19:40; the full suite green,
+a CPU smoke of the multi-task names path end to end) committed; the
+bundle of `013f9ac` uploaded (19:41–19:54); `w17a` pushed to
+`ner-gpu-jobs-d` (version 15) at 19:54:50 and `w17b` to `ner-gpu-jobs-c`
+(version 10) at 19:54:53 UTC, after `w15a` was pulled. Quota before the
+pushes: 33.4 of 45 hours; the two sessions are expected to take about 6
+and 5.6 hours. The first check-in is at 22:56 UTC.
+
 ### Week 17 protocol: the harvested names on the strongest base (fixed before any run, 31 October, 19:10 UTC)
 
 *Why, and when.* The round-6 reviews of paper A (31 October) listed as a

@@ -467,4 +467,26 @@ lexicon holds and on those it does not, the unseen predictions' lexicon share
 and precision, the paired gains over MR6 and the CRF head on each part and
 their difference with 95% CIs, and the checks that the rebuilt teachers' F1
 and coverage counts equal the stored ones. Run record: `w15a` pushed to
-`ner-gpu-jobs-c` (version 9, bundle `2c60f33`) on 31 October at 16:30 UTC.
+`ner-gpu-jobs-c` (version 9, bundle `2c60f33`) on 31 October at 16:30 UTC;
+pulled at 19:41 (16 jobs done; the smoke repeat identical); every unit's
+rebuilt teachers and coverage counts equal the stored runs'. Outcome (Table
+10, paper A's Table 8): on MuLMS the names' recall gain over MR6 is +7.29
+[+3.27, +11.30] on the unseen names the lexicon holds and +1.12 [−0.78,
++3.02] on the others (difference +6.17 [+2.44, +9.90], 7 of 7 subfields):
+name knowledge, as the reading fixed in advance defines it; MaterioMiner's
+four papers do not resolve the split (fine +4.33 [−5.33, +13.98], coarse
+−1.54 [−3.60, +0.51]).
+
+Week 17 (the week-17 protocol, ROADMAP §4; fixed 31 October 19:15 UTC
+before any run): the harvested names on the strongest MaterioMiner base,
+the multi-task model with 6-copy mention replacement: `crf_mt_mr6_m<N>`
+(the matched control) and `crf_mt_mrm6_m<N>` (three multi-task teachers,
+the fatigue corpus tagged with both heads, the mention filter on both
+heads, 10 students), 10 seeds on the 4 held-out papers, a fine and a
+coarse file per seed offset. Decisions 17.1 (fine) and 17.2 (coarse)
+against the control; the comparisons with `crf_mt_mr`, `crf_mt` and the
+CRF head reported (`ner_week5_seed_analysis.json`, `week17`). Run record:
+`w17a` pushed to `ner-gpu-jobs-d` (version 15, bundle `013f9ac`) at
+19:54:50 UTC and `w17b` to `ner-gpu-jobs-c` (version 10, the same bundle)
+at 19:54:53 UTC on 31 October; the two sessions write the student files
+for different papers, united by `kaggle_jobs.py collect --merge`.
