@@ -147,6 +147,9 @@ and precision are reported by kind of name, pooled over seeds and units.
 
 ## 3 The method
 
+Figure 1 (`docs/figures/fig8_method.png`) gives the pipeline; the
+paragraphs below give its parts.
+
 **Teachers.** The three CRF taggers of seeds 0, 100 and 200, trained on
 the fold's training sentences: the same runs as the reference's first
 three seeds, so the teachers are the baseline, not a stronger model.
@@ -303,7 +306,7 @@ in F1.
 ### 4.4 What the names do
 
 By kind of name, pooled over the 70 runs of MuLMS's held-out subfields
-(Table 3 and Figure 1, `docs/figures/fig7_names.png`, which puts each
+(Table 3 and Figure 2, `docs/figures/fig7_names.png`, which puts each
 system's recall and precision on the unseen names on one plane with
 iso-F1 curves, for MuLMS and for MaterioMiner's papers at both
 granularities): the CRF head finds 39.4% of the unseen names at 55.8%
@@ -423,7 +426,7 @@ gazetteer and retrained with it as a feature. Song et al. (2020) found
 Wikidata match features worth +0.5 F1 on OntoNotes and that replacing
 annotated entities with gazetteer entries gave no significant gain where
 test names were not the bottleneck. Dai and Adel (2020) replace mentions
-with the training set's own; Amalvy et al. (2022, 2023) adapt a tagger to
+with the training set's own; Amalvy et al. (2022) adapt a tagger to
 fantasy novels with predefined lists of target names and gain recall at a
 precision cost, as we do on MuLMS; COSINER picks the replacement that fits
 the context; Torres et al. (2024) find mention replacement helps small

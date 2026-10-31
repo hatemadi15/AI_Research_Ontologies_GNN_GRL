@@ -116,7 +116,8 @@ def test_figures_are_written(tmp_path):
             'MEC': {'f1': 80.0, 'support_per_split': 53.0}}}}}))
     out = tmp_path / 'figures'
     written = pf.main(['--results', str(results), '--out', str(out)])
-    assert written == ['fig1_random_vs_unseen.png', 'fig2_seeds.png', 'fig3_types.png']
+    assert written == ['fig1_random_vs_unseen.png', 'fig2_seeds.png', 'fig3_types.png',
+                       'fig8_method.png']        # figure 8 needs no results
     assert all((out / name).stat().st_size > 10000 for name in written)
 
 

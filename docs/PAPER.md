@@ -103,7 +103,7 @@ and `docs/PAPER_B.md`.
 
 ## Figures and tables
 
-Figures 1–6 are drawn from the GPU results by `src/graph/paper_figures.py`
+Figures 1–8 are drawn from the GPU results (Figure 8 from no data) by `src/graph/paper_figures.py`
 into `docs/figures/` (no training; re-run it when results change):
 - Figure 1 (`fig1_random_vs_unseen.png`): per system with 10 seeds on both
   protocols, micro F1 on the 5 random splits and on the 4 unseen papers,
@@ -203,6 +203,10 @@ from the committed results (no training; re-run it when results change):
   the CRF head, with the distinct names each setting admits and the share
   of the unseen test names among them: F1 within 0.2 points of the
   method throughout, the lexicon from 19,171 to 78,604 names (C26).
+- Figure 8 (`fig8_method.png`; paper A's Figure 1): the method as boxes
+  and arrows, no data: the three teachers, the corpus, the mention filter,
+  the lexicon, the replacement pool, mention replacement with six copies,
+  the student.
 
 ## Reproducibility appendix
 

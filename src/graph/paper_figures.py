@@ -42,6 +42,11 @@ No training: reads the 10-seed GPU results (results/gpu) and writes PNG files.
       copies, 6 copies without names, and 6 copies with the harvested names (the topic
       corpus's and the mixed corpus's on MuLMS, the fatigue corpus's on MaterioMiner), each
       joined to the system it adds to.
+  fig8_method.png (paper A's method overview, no data): the pipeline as boxes and arrows:
+      three CRF teachers trained on the labeled sentences tag an unlabeled corpus; the
+      mentions all three tag alike and confidently form the lexicon; mention replacement
+      with six copies draws from the training mentions and the lexicon; the student trains
+      on the gold sentences and their copies and is tested on the held-out document.
 A figure whose results are missing is skipped (and named on stdout).
 
 Usage:
@@ -542,6 +547,65 @@ def figure7(rows_by_setting, path):
     plt.close(fig)
 
 
+def figure8(path):
+    """Paper A's method overview: boxes and arrows, no data."""
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import FancyBboxPatch
+    fig, ax = plt.subplots(figsize=(13, 4.8))
+    ax.set(xlim=(0, 12.6), ylim=(0, 4.7))
+    ax.axis('off')
+    boxes = {  # name: (x, y, w, h, text, face)
+        'gold': (0.2, 3.0, 2.4, 1.3, 'Labeled training sentences\n(3 papers, or 340 MuLMS\nsentences of other subfields)',
+                 '#dbe9f6'),
+        'teachers': (3.0, 3.0, 1.9, 1.3, '3 CRF teachers\n(seeds 0, 100, 200;\nthe reference\'s own runs)',
+                     '#dbe9f6'),
+        'corpus': (5.3, 3.0, 2.6, 1.3, 'Unlabeled corpus\n40,000 open-access sentences\n(any materials topic)',
+                   '#fff2cc'),
+        'filter': (8.3, 3.0, 2.1, 1.3, 'Mention filter\nsame span and type by all 3,\nevery marginal \u2265 0.9',
+                   '#fff2cc'),
+        'lexicon': (10.8, 3.0, 1.6, 1.3, 'Lexicon\n4k to 17k names\nper subfield', '#fff2cc'),
+        'pool': (2.9, 0.6, 2.6, 1.3, 'Replacement pool\ntraining mentions (~1,400)\n+ the lexicon (85 to 97%)',
+                 '#e2f0d9'),
+        'mr': (5.9, 0.6, 3.0, 1.3, 'Mention replacement\n6 copies per sentence; each mention\nswapped (p = 0.5) for a same-type name',
+               '#e2f0d9'),
+        'student': (9.3, 0.6, 3.1, 1.3, 'Student: MatSciBERT + CRF\nsame recipe and seed as the reference,\ntested on the held-out document',
+                    '#e2f0d9')}
+    for x, y, w, h, text, face in boxes.values():
+        ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle='round,pad=0.02,rounding_size=0.12',
+                                    facecolor=face, edgecolor='#555555', lw=1))
+        ax.text(x + w / 2, y + h / 2, text, ha='center', va='center', fontsize=7.8)
+
+    def arrow(a, b, text=None):
+        xa, ya, wa, ha = boxes[a][:4]
+        xb, yb, wb, hb = boxes[b][:4]
+        start, end = (xa + wa, ya + ha / 2), (xb, yb + hb / 2)
+        ax.annotate('', end, start, arrowprops={'arrowstyle': '->', 'color': '#333333', 'lw': 1.2})
+        if text:
+            ax.text((start[0] + end[0]) / 2, start[1] + 0.1, text, ha='center', va='bottom',
+                    fontsize=7.5, color='#333333')
+    arrow('gold', 'teachers', 'train')
+    arrow('teachers', 'corpus', 'tag')
+    arrow('corpus', 'filter')
+    arrow('filter', 'lexicon')
+    arrow('pool', 'mr')
+    arrow('mr', 'student')
+    elbow = {'arrowstyle': '->', 'color': '#333333', 'lw': 1.2,
+             'connectionstyle': 'angle,angleA=90,angleB=0,rad=10'}
+    # the lexicon's names and the training mentions feed the pool
+    ax.annotate('', (boxes['pool'][0] + boxes['pool'][2] - 0.3, boxes['pool'][1] + boxes['pool'][3]),
+                (boxes['lexicon'][0] + 0.3, boxes['lexicon'][1]), arrowprops=elbow)
+    ax.annotate('', (boxes['pool'][0] + 0.4, boxes['pool'][1] + boxes['pool'][3]),
+                (boxes['gold'][0] + 0.6, boxes['gold'][1]), arrowprops=elbow)
+    ax.text(1.0, 2.3, 'training mentions', fontsize=7.5, color='#333333')
+    ax.text(8.2, 2.3, 'harvested names', fontsize=7.5, color='#333333', ha='center')
+    ax.text(0.2, 0.1, 'No silver sentence is trained on: the gold contexts stay, only the names change. '
+            'Without the lexicon the student is mention replacement with 6 copies (the control); '
+            'with 3 copies and no lexicon, Dai and Adel (2020).', fontsize=7.5, color='#333333',
+            va='bottom')
+    fig.savefig(path, dpi=160, bbox_inches='tight')
+    plt.close(fig)
+
+
 def gain_data(directory, analysis):
     """{granularity: [(label, mean, CI low, CI high, kind)]} for Figure 6, kind 'ten' (10
     seeds), 'screen' (3 seeds) or 'papers' (a third training paper); methods without a
@@ -663,6 +727,8 @@ def main(argv=None):
         written.append('fig7_names.png')
     else:
         print('fig7: no unseen-name scores of the names method')
+    figure8(os.path.join(args.out, 'fig8_method.png'))
+    written.append('fig8_method.png')
     print(f"wrote {', '.join(written) or 'nothing'} to {args.out}")
     return written
 

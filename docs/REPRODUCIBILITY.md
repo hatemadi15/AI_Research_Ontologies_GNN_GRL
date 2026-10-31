@@ -41,7 +41,7 @@ its root.*
   `ner_week7_consistency.json` and the rest, as indexed in
   `results/README.md`) are committed beside the files they read.
 - **Tables and figures.** `docs/tables/table1–7` and
-  `docs/figures/fig1–7` are generated from `results/` by `paper_tables.py`
+  `docs/figures/fig1–8` are generated from `results/` by `paper_tables.py`
   and `paper_figures.py`; no number in either paper is typed by hand
   (`report_results.py --check` fails the test suite when the README or the
   ROADMAP disagrees with the results).
