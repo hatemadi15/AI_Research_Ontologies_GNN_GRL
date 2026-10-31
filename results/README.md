@@ -441,8 +441,12 @@ leave-one-unit-out intervals, the stratified mean, minimum detectable
 effects at 80% power (`detectable`, per comparison), the MaterioMiner
 grids at both granularities (the decisions' stored intervals), the
 per-subfield coverage–gain correlation with its partial correlations and
-the leave-two-out check, the stratified mean, and the runtime and epochs
-per run.
+the leave-two-out check, the stratified mean, and per system on MuLMS's
+decision seeds the runtime, the best epoch (a 0-based index in the run
+files, and the count of epochs up to it), the mean count of augmented
+sentences and, against the CRF head, the ratio of sentences per epoch
+and of updates up to the best epoch (`compute`; the names system's job
+costs under `job_costs`).
 `gpu/ner_week5_seed_analysis.json` adds `week14.types`, the per-type F1 of
 the names method and the 6-copy control against the CRF head on MuLMS's
 decision seeds and MaterioMiner's papers (Tables 8 and A2,

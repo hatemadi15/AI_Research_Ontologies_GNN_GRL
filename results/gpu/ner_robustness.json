@@ -922,7 +922,8 @@
    "runtime_sec_mean": 96,
    "runtime_sec_max": 163,
    "best_epoch_mean": 7.1,
-   "n_augmented": null
+   "epochs_to_best_mean": 8.1,
+   "n_augmented_mean": null
   },
   "crf_mr": {
    "label": "MR3",
@@ -930,7 +931,10 @@
    "runtime_sec_mean": 198,
    "runtime_sec_max": 362,
    "best_epoch_mean": 4.7,
-   "n_augmented": 597
+   "epochs_to_best_mean": 5.7,
+   "n_augmented_mean": 601,
+   "sentences_per_epoch_ratio": 2.77,
+   "updates_to_best_ratio": 1.96
   },
   "crf_mr6": {
    "label": "MR6",
@@ -938,7 +942,10 @@
    "runtime_sec_mean": 296,
    "runtime_sec_max": 580,
    "best_epoch_mean": 4.1,
-   "n_augmented": 1218
+   "epochs_to_best_mean": 5.1,
+   "n_augmented_mean": 1203,
+   "sentences_per_epoch_ratio": 4.54,
+   "updates_to_best_ratio": 2.88
   },
   "crf_mrm_topic6": {
    "label": "MR6 + names",
@@ -946,7 +953,8 @@
    "runtime_sec_mean": 2109,
    "runtime_sec_max": 2972,
    "best_epoch_mean": 4.6,
-   "n_augmented": 1180,
+   "epochs_to_best_mean": 5.6,
+   "n_augmented_mean": 1209,
    "n_jobs": 14,
    "students_per_job": [
     3,
@@ -955,7 +963,9 @@
    "job_sec_mean": 2099,
    "per_student_sec_mean": 609,
    "harvest_sec_mean": 1063,
-   "harvest_student_sec": 296
+   "harvest_student_sec": 296,
+   "sentences_per_epoch_ratio": 4.56,
+   "updates_to_best_ratio": 3.14
   }
  }
 }

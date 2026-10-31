@@ -257,8 +257,11 @@ def coverage_gain(analysis):
 
 
 def compute(directory):
-    """Per system on MuLMS's decision seeds: runs, mean and max runtime_sec, mean best_epoch,
-    augmented sentences; systems whose files are missing are left out."""
+    """Per system on MuLMS's decision seeds: runs, mean and max runtime_sec, the mean best
+    epoch (best_epoch is a 0-based index in the run files; epochs_to_best_mean counts the
+    epochs trained up to and including it), the mean count of augmented sentences, and
+    against the CRF head the ratio of sentences per epoch and of updates up to the best
+    epoch; systems whose files are missing are left out."""
     out = {}
     for system in SYSTEMS:
         runs = []
@@ -270,13 +273,27 @@ def compute(directory):
             with open(path) as f:
                 runs += json.load(f)['runs']
         if runs:
+            augmented = [r.get('n_augmented') for r in runs]
             out[system] = {'label': SYSTEMS[system], 'n_runs': len(runs),
                            'runtime_sec_mean': round(statistics.mean(r['runtime_sec'] for r in runs)),
                            'runtime_sec_max': round(max(r['runtime_sec'] for r in runs)),
                            'best_epoch_mean': round(statistics.mean(r['best_epoch'] for r in runs), 1),
-                           'n_augmented': runs[0].get('n_augmented')}
+                           'epochs_to_best_mean': round(statistics.mean(r['best_epoch'] + 1 for r in runs), 1),
+                           'n_augmented_mean': (round(statistics.mean(augmented))
+                                                if all(a is not None for a in augmented) else None)}
             if runs[0].get('self_training'):
                 out[system].update(job_costs(runs, out.get('crf_mr6', {}).get('runtime_sec_mean')))
+            if out[system]['n_augmented_mean'] is not None and 'crf' in out:
+                n_train = statistics.mean(r['n_train'] for r in runs)
+                sentences = (n_train + statistics.mean(augmented)) / n_train
+                epochs = statistics.mean(r['best_epoch'] + 1 for r in runs)
+                out[system]['sentences_per_epoch_ratio'] = round(sentences, 2)
+                out[system]['updates_to_best_ratio'] = round(
+                    sentences * epochs / out['crf']['epochs_to_best_mean_exact'], 2)
+            if system == 'crf':
+                out[system]['epochs_to_best_mean_exact'] = statistics.mean(r['best_epoch'] + 1 for r in runs)
+    if 'crf' in out:
+        del out['crf']['epochs_to_best_mean_exact']
     return out
 
 

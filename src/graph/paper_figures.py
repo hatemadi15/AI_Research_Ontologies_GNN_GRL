@@ -508,14 +508,20 @@ def names_data(mentions):
 def figure7(rows_by_setting, path):
     import matplotlib.pyplot as plt
     n = len(rows_by_setting)
-    fig, axes = plt.subplots(1, n, figsize=(5.4 * n, 5.0), squeeze=False)
+    if n == 3:                       # 7.2 inches wide: MuLMS on top, the two MaterioMiner panels below
+        fig = plt.figure(figsize=(7.2, 9.0))
+        grid = fig.add_gridspec(2, 2, height_ratios=[1.15, 1])
+        axes = [[fig.add_subplot(grid[0, :]), fig.add_subplot(grid[1, 0]), fig.add_subplot(grid[1, 1])]]
+    else:
+        fig, axes = plt.subplots(1, n, figsize=(min(7.2, 3.6 * n), 4.6), squeeze=False)
     styles = {'crf': ('o', 'black'), 'crf_mr': ('s', 'tab:blue'), 'crf_mr6': ('D', 'tab:cyan'),
               'crf_mrm_topic6': ('*', 'tab:red'), 'crf_mrm6': ('*', 'tab:red'),
               'crf_mrm_mixed6': ('P', 'tab:orange')}
-    for ax, (setting, rows) in zip(axes[0], rows_by_setting.items()):
+    for k, (ax, (setting, rows)) in enumerate(zip(axes[0], rows_by_setting.items())):
+        narrow = n == 3 and k > 0          # the lower panels: half the width, labels to the left
         at = {system: (recall, precision) for system, _, recall, precision, *_ in rows}
         xs, ys = [r[2] for r in rows], [r[3] for r in rows]
-        x0, x1 = min(xs) - 3, max(xs) + 3
+        x0, x1 = min(xs) - 3.5, max(xs) + 3.5
         y0, y1 = min(ys) - 3, max(ys) + 3
         for f in range(10, 100, 2):                          # iso-F1 curves: P = fR / (2R - f)
             curve = [(r, f * r / (2 * r - f)) for r in
@@ -525,13 +531,13 @@ def figure7(rows_by_setting, path):
                 ax.plot(*zip(*curve), color='lightgrey', lw=0.7, zorder=1)
                 if curve[-1][0] >= x1 - (x1 - x0) / 100:      # the curve leaves on the right
                     ax.annotate(f'F1 {f}', curve[-1], xytext=(2, 0), textcoords='offset points',
-                                fontsize=6, color='grey', va='center')
+                                fontsize=6.5, color='grey', va='center')
                 elif curve[0][0] <= x0 + (x1 - x0) / 100:    # it enters on the left
                     ax.annotate(f'F1 {f}', curve[0], xytext=(2, 0), textcoords='offset points',
-                                fontsize=6, color='grey', va='center')
+                                fontsize=6.5, color='grey', va='center')
                 else:                                        # it enters at the top
                     ax.annotate(f'F1 {f}', curve[0], xytext=(0, 2), textcoords='offset points',
-                                fontsize=6, color='grey', ha='center', va='bottom')
+                                fontsize=6.5, color='grey', ha='center', va='bottom')
         for system, label, recall, precision, f1, seen in rows:
             parent = NAMES_PARENT.get(system)
             if parent in at:
@@ -541,7 +547,8 @@ def figure7(rows_by_setting, path):
             marker, color = styles.get(system, ('o', 'tab:grey'))
             ax.plot(recall, precision, marker, color=color, ms=9 if marker == '*' else 6,
                     zorder=3)
-            text = f'{label}\nF1 {f1:.2f}' + (f' (seen {seen:.1f})' if seen is not None else '')
+            seen_text = f' (seen {seen:.1f})' if seen is not None else ''
+            text = f'F1 {f1:.2f}{seen_text}' if narrow else f'{label}\nF1 {f1:.2f}{seen_text}'
             def near(other):
                 return other in at and abs(at[other][0] - recall) < 2.5 and abs(at[other][1] - precision) < 2.5
             names_near = near('crf_mrm_topic6') or near('crf_mrm6')
@@ -557,12 +564,13 @@ def figure7(rows_by_setting, path):
                 offset, align = (7, 14), 'left'
             else:
                 offset, align = (7, -16), 'left'
-            ax.annotate(text, (recall, precision), textcoords='offset points', fontsize=8,
+            ax.annotate(text, (recall, precision), textcoords='offset points', fontsize=7,
                         xytext=offset, ha=align, zorder=4)
-        ax.set(xlim=(x0 - 2, x1 + 4), ylim=(y0 - 1, y1 + 1), title=setting)
-        ax.set_xlabel('recall on the unseen test names (%)', fontsize=9)
-        ax.set_ylabel('precision on the unseen test names (%)', fontsize=9)
-        ax.tick_params(labelsize=9)
+        ax.set(xlim=(x0 - (3 if narrow else 2), x1 + 4), ylim=(y0 - 1, y1 + 1))
+        ax.set_title(setting, fontsize=9)
+        ax.set_xlabel('recall on the unseen test names (%)', fontsize=8)
+        ax.set_ylabel('precision on the unseen test names (%)', fontsize=8)
+        ax.tick_params(labelsize=8)
         ax.grid(alpha=0.3)
     fig.tight_layout()
     fig.savefig(path, dpi=300, bbox_inches='tight')
@@ -605,31 +613,33 @@ def unit_data(analysis):
 
 def figure9(rows, path):
     import matplotlib.pyplot as plt
-    fig, ax = plt.subplots(figsize=(8.5, 7.2))
+    fig, ax = plt.subplots(figsize=(7.2, 7.2))
     groups = []
     for g, *_ in rows:
         if g not in groups:
             groups.append(g)
     y = 0
-    ticks, labels, bands = [], [], []
+    ticks, labels, bands, labelled = [], [], [], False
     for g in groups:
         members = [r for r in rows if r[0] == g]
-        start = y
+        start = y                    # the group's header row, then its units
+        y += 1
         for _, unit, vs_crf, vs_ctrl in members:
             ax.plot(vs_crf, y, 'o', color='tab:red', ms=6, zorder=3,
-                    label='against the CRF head' if y == 0 else None)
+                    label=None if labelled else 'against the CRF head')
             if vs_ctrl is not None:
                 ax.plot(vs_ctrl, y, 's', color='tab:blue', ms=5, zorder=3,
-                        label='against MR6 (6 copies, no names)' if y == 0 else None)
+                        label=None if labelled else 'against MR6 (6 copies, no names)')
+            labelled = True
             ticks.append(y)
             labels.append(unit)
             y += 1
         bands.append((g, start, y - 1))
-        y += 1
+        y += 0.5
     for g, start, end in bands:
         ax.axhspan(start - 0.5, end + 0.5, color='#f2f2f2' if bands.index((g, start, end)) % 2 else 'white',
                    zorder=0)
-        ax.text(0.01, end + 1.0, g, fontsize=8.5, va='center', ha='left', style='italic',
+        ax.text(0.01, start, g, fontsize=8.5, va='center', ha='left', style='italic',
                 transform=ax.get_yaxis_transform(), color='#333333')
     pooled = [r for r in rows if r[0].startswith('MuLMS') or 'fine-grained' in r[0]]
     for k, (values, color, name) in enumerate(((lambda rs: [r[2] for r in rs], 'tab:red', 'CRF head'),
@@ -639,7 +649,7 @@ def figure9(rows, path):
             m, lo, hi = mean_ci(v)
             ax.axvspan(lo, hi, color=color, alpha=0.08, zorder=1)
             ax.axvline(m, color=color, lw=1, ls='--', zorder=2)
-            ax.text(0.99, 0.99 - 0.045 * k,
+            ax.text(0.99, 0.995 - 0.04 * k,
                     f'pooled, 11 units, vs {name}: {m:+.2f} [{lo:+.2f}, {hi:+.2f}]',
                     fontsize=8.5, color=color, ha='right', va='top', transform=ax.transAxes)
     ax.axvline(0, color='black', lw=0.8, zorder=2)
@@ -657,63 +667,66 @@ def figure9(rows, path):
 
 
 def figure8(path):
-    """Paper A's method overview: boxes and arrows, no data."""
+    """Paper A's method overview: boxes and arrows, no data; 7.2 inches wide (a journal's
+    double column) with 7.5-point type."""
     import matplotlib.pyplot as plt
     from matplotlib.patches import FancyBboxPatch
-    fig, ax = plt.subplots(figsize=(13, 4.8))
-    ax.set(xlim=(0, 12.6), ylim=(0, 4.7))
+    fig, ax = plt.subplots(figsize=(7.2, 5.6))
+    ax.set(xlim=(0, 14.4), ylim=(0, 11.2))
     ax.axis('off')
+    top, bottom, h = 7.4, 1.4, 3.2
     boxes = {  # name: (x, y, w, h, text, face)
-        'gold': (0.2, 3.0, 2.4, 1.3, 'Labeled training sentences\n(3 papers, or 340 MuLMS\nsentences of other subfields)',
+        'gold': (0.2, top, 2.6, h, 'Labeled training\nsentences\n(3 papers, or 340\nMuLMS sentences\nof other subfields)',
                  '#dbe9f6'),
-        'teachers': (3.0, 3.0, 1.9, 1.3, '3 CRF teachers\n(seeds 0, 100, 200;\nthe reference\'s own runs)',
-                     '#dbe9f6'),
-        'corpus': (5.3, 3.0, 2.6, 1.3, 'Unlabeled corpus\n40,000 open-access sentences\n(the held-out topic, or a mix of others)',
+        'teachers': (3.1, top, 2.6, h, '3 CRF teachers\n(seeds 0, 100, 200;\nthe reference\'s\nown runs)', '#dbe9f6'),
+        'corpus': (6.0, top, 2.6, h, 'Unlabeled corpus\n40,000 sentences\n(the held-out topic,\nor a mix of others)',
                    '#fff2cc'),
-        'filter': (8.3, 3.0, 2.1, 1.3, 'Mention filter\nsame span and type by all 3,\nevery marginal \u2265 0.9',
+        'filter': (8.9, top, 2.6, h, 'Mention filter\nsame span and type\nby all 3 teachers,\nevery marginal \u2265 0.9',
                    '#fff2cc'),
-        'lexicon': (10.8, 3.0, 1.6, 1.3, 'Lexicon\n4k to 13k names\nper subfield', '#fff2cc'),
-        'pool': (2.9, 0.6, 2.6, 1.3, 'Replacement pool\ntraining mentions (601 to 1,309)\n+ the lexicon (86 to 99% of entries)',
+        'lexicon': (11.8, top, 2.6, h, 'Lexicon\n4k to 13k names\nper subfield', '#fff2cc'),
+        'pool': (1.5, bottom, 3.6, h, 'Replacement pool\ntraining mentions\n(601 to 1,309)\n+ the lexicon\n(at least 85% of entries)',
                  '#e2f0d9'),
-        'mr': (5.9, 0.6, 3.0, 1.3, 'Mention replacement\n6 copies per sentence; each mention\nswapped (p = 0.5) for a same-type name',
+        'mr': (5.7, bottom, 3.6, h, 'Mention replacement\n6 copies per sentence;\neach mention swapped\n(p = 0.5) for a\nsame-type name',
                '#e2f0d9'),
-        'student': (9.3, 0.6, 3.1, 1.3, 'Student: MatSciBERT + CRF\nsame recipe and seed as the reference,\ntested on the held-out document',
+        'student': (9.9, bottom, 3.6, h, 'Student\nMatSciBERT + CRF,\nthe reference\'s recipe\nand seed; tested on\nthe held-out document',
                     '#e2f0d9')}
-    for x, y, w, h, text, face in boxes.values():
-        ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle='round,pad=0.02,rounding_size=0.12',
-                                    facecolor=face, edgecolor='#555555', lw=1))
-        ax.text(x + w / 2, y + h / 2, text, ha='center', va='center', fontsize=9)
+    for x, y, w, hh, text, face in boxes.values():
+        ax.add_patch(FancyBboxPatch((x, y), w, hh, boxstyle='round,pad=0.02,rounding_size=0.15',
+                                    facecolor=face, edgecolor='#555555', lw=0.8))
+        ax.text(x + w / 2, y + hh / 2, text, ha='center', va='center', fontsize=7.2, linespacing=1.25)
 
     def arrow(a, b, text=None):
         xa, ya, wa, ha = boxes[a][:4]
         xb, yb, wb, hb = boxes[b][:4]
         start, end = (xa + wa, ya + ha / 2), (xb, yb + hb / 2)
-        ax.annotate('', end, start, arrowprops={'arrowstyle': '->', 'color': '#333333', 'lw': 1.2})
+        ax.annotate('', end, start, arrowprops={'arrowstyle': '->', 'color': '#333333', 'lw': 1,
+                                                 'shrinkA': 1, 'shrinkB': 1})
         if text:
-            ax.text((start[0] + end[0]) / 2, start[1] + 0.1, text, ha='center', va='bottom',
-                    fontsize=8.5, color='#333333')
+            ax.text((start[0] + end[0]) / 2, ya + ha + 0.2, text, ha='center', va='bottom',
+                    fontsize=7, color='#333333')
     arrow('gold', 'teachers', 'train')
     arrow('teachers', 'corpus', 'tag')
     arrow('corpus', 'filter')
     arrow('filter', 'lexicon')
     arrow('pool', 'mr')
     arrow('mr', 'student')
-    elbow = {'arrowstyle': '->', 'color': '#333333', 'lw': 1.2,
-             'connectionstyle': 'angle,angleA=90,angleB=0,rad=10'}
-    # the lexicon's names and the training mentions feed the pool
-    ax.annotate('', (boxes['pool'][0] + boxes['pool'][2] - 0.3, boxes['pool'][1] + boxes['pool'][3]),
-                (boxes['lexicon'][0] + 0.3, boxes['lexicon'][1]), arrowprops=elbow)
-    ax.annotate('', (boxes['pool'][0] + 0.4, boxes['pool'][1] + boxes['pool'][3]),
-                (boxes['gold'][0] + 0.6, boxes['gold'][1]), arrowprops=elbow)
-    ax.text(1.0, 2.3, 'training mentions', fontsize=8.5, color='#333333')
-    ax.text(8.2, 2.3, 'harvested names', fontsize=8.5, color='#333333', ha='center')
-    ax.text(0.2, 0.1, 'No silver sentence is trained on: the gold contexts stay, only the names change. '
-            'Without the lexicon the student is mention replacement with 6 copies (the control); '
-            'with 3 copies and no lexicon, Dai and Adel (2020).', fontsize=8.5, color='#333333',
-            va='bottom')
+    # the lexicon's names and the training mentions feed the pool: down, across above the
+    # lower row, then down into the pool
+    pool_top, rail = boxes['pool'][1] + boxes['pool'][3], bottom + h + 0.7
+    head = {'arrowstyle': '->', 'color': '#333333', 'lw': 1, 'shrinkA': 0, 'shrinkB': 1}
+    for x_from, y_from, x_to in ((boxes['lexicon'][0] + 0.6, boxes['lexicon'][1],
+                                  boxes['pool'][0] + boxes['pool'][2] - 0.6),
+                                 (boxes['gold'][0] + 0.5, boxes['gold'][1], boxes['pool'][0] + 0.6)):
+        ax.plot([x_from, x_from, x_to], [y_from, rail, rail], color='#333333', lw=1,
+                solid_joinstyle='miter')
+        ax.annotate('', (x_to, pool_top), (x_to, rail), arrowprops=head)
+    ax.text(0.9, 6.1, 'training mentions', fontsize=7, color='#333333')
+    ax.text(8.6, rail + 0.15, 'harvested names', fontsize=7, color='#333333', ha='center')
+    ax.text(0.2, 0.15, 'No silver sentence is trained on: the gold contexts stay, only the names change. Without the '
+            'lexicon the student is\nmention replacement with 6 copies (the control); with 3 copies and no lexicon, '
+            'Dai and Adel (2020).', fontsize=7, color='#333333', va='bottom', linespacing=1.3)
     fig.savefig(path, dpi=300, bbox_inches='tight')
     plt.close(fig)
-
 
 def gain_data(directory, analysis):
     """{granularity: [(label, mean, CI low, CI high, kind)]} for Figure 6, kind 'ten' (10

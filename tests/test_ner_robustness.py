@@ -94,3 +94,21 @@ def test_job_costs_share_a_job_over_its_students():
     out = nr.job_costs(runs, student_sec=100)
     assert out == {'n_jobs': 2, 'students_per_job': [3, 4], 'job_sec_mean': 1050,
                    'per_student_sec_mean': 300, 'harvest_sec_mean': 700, 'harvest_student_sec': 100}
+
+
+def test_compute_means_and_ratios(tmp_path):
+    def write(system, best, augmented):
+        for off in nr.DECISION:
+            run = {'runtime_sec': 100.0, 'best_epoch': best, 'n_train': 100}
+            if augmented:
+                run['n_augmented'] = augmented
+            path = tmp_path / f'ner_results_{nr.MULMS}_{system}_m{off}.json'
+            path.write_text(json.dumps({'runs': [run]}))
+    write('crf', 7, None)
+    write('crf_mr', 3, 200)
+    out = nr.compute(str(tmp_path))
+    assert out['crf']['epochs_to_best_mean'] == 8 and out['crf']['n_augmented_mean'] is None
+    assert 'epochs_to_best_mean_exact' not in out['crf']
+    assert out['crf_mr']['n_augmented_mean'] == 200
+    assert out['crf_mr']['sentences_per_epoch_ratio'] == 3.0      # (100 + 200) / 100
+    assert out['crf_mr']['updates_to_best_ratio'] == 1.5           # 3 x 4 epochs / 8
