@@ -5221,3 +5221,13 @@ Mixed: the interval above 0 but the gain on the names not held also above
 paper A's Section 5.4 and Discussion, labelled post hoc. Nothing else about
 the paper's claims changes with the outcome: the names' share of the F1
 gain stays +0.80 [−0.66, +2.26] either way.
+
+*Session notes, 31 October, 16:30 UTC.* The note and the code committed
+(`2c60f33`, 16:13) before any run; the bundle built from that commit and
+uploaded as `ner-gpu-bundle-3`'s new version (16:14–16:28, two 429 retries
+on the version call); `w15a` pushed to `ner-gpu-jobs-c` (version 9) at
+16:30 UTC: lane 0 the smoke repeat `smokebb` and the 7 MuLMS names jobs,
+lane 1 the 8 MaterioMiner names jobs. Quota before the push: 35.3 of 45
+hours. The outputs are pulled with `kaggle_jobs.py pull` and `collect`,
+which puts the names files in `results/gpu_names/` (ignored) and nothing
+in `results/gpu/` (no students ran); then `ner_lexicon_recall.py`.
