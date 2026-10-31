@@ -565,14 +565,25 @@ def figure7(rows_by_setting, path):
             else:
                 offset, align = (7, -16), 'left'
             ax.annotate(text, (recall, precision), textcoords='offset points', fontsize=7,
-                        xytext=offset, ha=align, zorder=4)
-        ax.set(xlim=(x0 - (3 if narrow else 2), x1 + 4), ylim=(y0 - 1, y1 + 1))
+                        xytext=offset, ha=align, zorder=4,
+                        bbox={'boxstyle': 'round,pad=0.12', 'fc': 'white', 'ec': 'none', 'alpha': 0.85})
+        ax.set(xlim=(x0 - (5 if narrow else 2), x1 + 4), ylim=(y0 - 1, y1 + 1))
         ax.set_title(setting, fontsize=9)
         ax.set_xlabel('recall on the unseen test names (%)', fontsize=8)
         ax.set_ylabel('precision on the unseen test names (%)', fontsize=8)
         ax.tick_params(labelsize=8)
         ax.grid(alpha=0.3)
-    fig.tight_layout()
+    if n == 3:                       # the lower panels carry scores only: name the markers once
+        from matplotlib.lines import Line2D
+        shown = {system for rows in rows_by_setting.values() for system, *_ in rows}
+        handles = [Line2D([], [], linestyle='', marker=styles[system][0], color=styles[system][1],
+                          ms=8 if styles[system][0] == '*' else 6, label=label)
+                   for system, label in NAMES_SYSTEMS.items() if system in shown]
+        fig.legend(handles=handles, loc='lower center', ncol=3, fontsize=7, frameon=False,
+                   bbox_to_anchor=(0.5, -0.01))
+        fig.tight_layout(rect=(0, 0.03, 1, 1))
+    else:
+        fig.tight_layout()
     fig.savefig(path, dpi=300, bbox_inches='tight')
     plt.close(fig)
 
@@ -681,10 +692,10 @@ def figure8(path):
         'teachers': (3.1, top, 2.6, h, '3 CRF teachers\n(seeds 0, 100, 200;\nthe reference\'s\nown runs)', '#dbe9f6'),
         'corpus': (6.0, top, 2.6, h, 'Unlabeled corpus\n40,000 sentences\n(the held-out topic,\nor a mix of others)',
                    '#fff2cc'),
-        'filter': (8.9, top, 2.6, h, 'Mention filter\nsame span and type\nby all 3 teachers,\nevery marginal \u2265 0.9',
+        'filter': (8.9, top, 2.6, h, 'Mention filter\nall 3 teachers agree\non span and type,\nevery marginal \u2265 0.9',
                    '#fff2cc'),
         'lexicon': (11.8, top, 2.6, h, 'Lexicon\n4k to 13k names\nper subfield', '#fff2cc'),
-        'pool': (1.5, bottom, 3.6, h, 'Replacement pool\ntraining mentions\n(601 to 1,309)\n+ the lexicon\n(at least 85% of entries)',
+        'pool': (1.5, bottom, 3.6, h, 'Replacement pool\ntraining mentions\n(601 to 1,309)\n+ the lexicon\n(at least 92% of entries)',
                  '#e2f0d9'),
         'mr': (5.7, bottom, 3.6, h, 'Mention replacement\n6 copies per sentence;\neach mention swapped\n(p = 0.5) for a\nsame-type name',
                '#e2f0d9'),
@@ -724,7 +735,8 @@ def figure8(path):
     ax.text(8.6, rail + 0.15, 'harvested names', fontsize=7, color='#333333', ha='center')
     ax.text(0.2, 0.15, 'No silver sentence is trained on: the gold contexts stay, only the names change. Without the '
             'lexicon the student is\nmention replacement with 6 copies (the control); with 3 copies and no lexicon, '
-            'Dai and Adel (2020).', fontsize=7, color='#333333', va='bottom', linespacing=1.3)
+            'MR3 (mention replacement, Dai and Adel 2020, at a fixed setting).', fontsize=7, color='#333333',
+            va='bottom', linespacing=1.3)
     fig.savefig(path, dpi=300, bbox_inches='tight')
     plt.close(fig)
 
