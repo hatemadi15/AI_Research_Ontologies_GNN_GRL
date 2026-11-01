@@ -5828,3 +5828,17 @@ follow-up rows; Section 5.4 the result; the abstract by the readings
 above; Sections 1, 3 and 6 and the Supplementary Information their counts
 and a note; `report_results.py` a week-18 bullet. Nothing already decided
 is re-decided.
+
+*Week 18, session notes (1 November, 11:20 UTC).* The protocol
+(`e02c3be`, 10:51) and the code (`7906996`, 10:58; the full suite green)
+committed; the analysis `ner_recall_matched.py` committed at 11:04
+(`789f42e`) before any result, tested and dry-run end to end on the stored
+files with a fake bias field; Table 12 and the README bullet committed
+before any result as well. The bundle of `7906996` uploaded to
+`ner-gpu-bundle-3` (10:58–11:12); `w18a` pushed to `ner-gpu-jobs-d`
+(version 16) at 11:12:34 UTC, lane 0 the CRF repeat `smokebe` and three of
+the seven seed offsets, lane 1 the other four. Quota before the push:
+25.1 of 45 hours. Expected about 2.5 hours. Meanwhile paper A's round-10
+reviews (a number audit, a referee recommending minor revision, a
+consistency check) were applied in part (`e1cde40`); the rest waits for the
+week-18 result.
