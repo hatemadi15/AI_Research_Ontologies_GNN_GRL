@@ -9,8 +9,8 @@ unlabeled papers to augment materials named entity recognition on unseen
 documents".
 
 Materials text mining depends on named-entity recognizers trained on a
-handful of annotated papers but run on new papers, whose materials,
-processes and values those papers never mention. The manuscript tests a
+handful of annotated papers but run on new papers, many of whose
+materials, processes and values those papers never mention. The manuscript tests a
 cheap remedy. It harvests the names that three baseline taggers
 confidently agree on in 40,000 sentences of open-access papers, and feeds
 them to mention replacement, a standard data augmentation. On held-out

@@ -144,7 +144,7 @@
     6.21
    ],
    "decision": "D5",
-   "comparison": "pooled 11 units (MuLMS seeds 0-900): MR6 + names vs CRF head",
+   "comparison": "pooled 11 units (MuLMS seeds 0\u2013900): MR6 + names vs CRF head",
    "per_unit": [
     2.39,
     1.75,
@@ -182,7 +182,7 @@
     6.13
    ],
    "decision": "D5'",
-   "comparison": "pooled 11 units (MuLMS seeds 300-900, post hoc reading): MR6 + names vs CRF head",
+   "comparison": "pooled 11 units (MuLMS seeds 300\u2013900, post hoc reading): MR6 + names vs CRF head",
    "per_unit": [
     2.52,
     0.47,

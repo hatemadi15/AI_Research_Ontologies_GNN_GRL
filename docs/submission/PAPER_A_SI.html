@@ -462,12 +462,11 @@ corpus's lexicon, the one rebuilt). Levels: per system, the share
 of the unseen test names the lexicon holds (pooled over seeds and units),
 recall on those and on the others, the share of the unseen-name
 predictions that are lexicon names, and precision and F1 on each part
-(F1 from the pooled recall and precision). Paired gains: per comparison,
+(F1 from the pooled counts, 2 correct / (gold + predicted)). Paired gains: per comparison,
 the recall gain on the held names and on the others, the difference of
 the two gains, paired over the units with 95% CIs, the units where the
 gain on the held names is the larger, and the F1 gain on the held names,
-each unit's F1 from its recall and precision on them pooled over the
-seeds.</p>
+each unit's F1 from its counts on them pooled over the seeds.</p>
 <p><strong>Levels</strong></p>
 <table>
 <thead>
@@ -579,7 +578,7 @@ seeds.</p>
 <td>81.4</td>
 <td>44.6</td>
 <td>82.0</td>
-<td>39.3</td>
+<td>39.2</td>
 </tr>
 <tr>
 <td>MaterioMiner fine, 4 papers</td>
@@ -666,7 +665,7 @@ seeds.</p>
 <td>+1.12 [−0.78, +3.02]</td>
 <td>+6.17 [+2.44, +9.90]</td>
 <td>7/7</td>
-<td>+1.13 [−1.84, +4.11]</td>
+<td>+1.13 [−1.85, +4.11]</td>
 </tr>
 <tr>
 <td>MuLMS, 7 subfields</td>
@@ -684,7 +683,7 @@ seeds.</p>
 <td>+5.22 [+1.92, +8.52]</td>
 <td>−1.84 [−5.27, +1.60]</td>
 <td>3/7</td>
-<td>+2.15 [+0.15, +4.16]</td>
+<td>+2.16 [+0.15, +4.16]</td>
 </tr>
 <tr>
 <td>MuLMS, 7 subfields</td>
@@ -720,7 +719,7 @@ seeds.</p>
 <td>+6.00 [+2.84, +9.16]</td>
 <td>+6.77 [−18.59, +32.13]</td>
 <td>2/4</td>
-<td>+6.57 [−18.80, +31.94]</td>
+<td>+6.57 [−18.79, +31.94]</td>
 </tr>
 <tr>
 <td>MaterioMiner fine, 4 papers</td>
@@ -738,7 +737,7 @@ seeds.</p>
 <td>+4.17 [−0.17, +8.50]</td>
 <td>+4.60 [−13.82, +23.03]</td>
 <td>3/4</td>
-<td>+5.73 [−9.03, +20.49]</td>
+<td>+5.73 [−9.03, +20.50]</td>
 </tr>
 <tr>
 <td>MaterioMiner coarse, 4 papers</td>
@@ -1059,7 +1058,11 @@ pemfc +4.0, semiconductors +2.3) and hurts elsewhere (steel −10.0,
 graphene −5.1), −1.0 on average over the seven subfields; its lexicons,
 from teachers trained on CPUs, differ from the runs' (25% of the unseen
 names on average against 23%), so it speaks to the dictionary rule
-only. Supplementary Note 13 gives it per subfield with the sentence
+only. Averaged over the 10 seeds it raised recall over all test
+entities in every subfield, by 1.4 (poly) to 11.2 points (sofc), and
+lowered precision by 2.8 (pemfc) to 24.2 (steel)
+(<code>results/silver_lexicons/</code>); recall on the held names was not scored.
+Supplementary Note 13 gives it per subfield with the sentence
 filter's lexicon (+1.13 on average) and the gold unseen names as a
 ceiling (+2.68 filling the head's O tags, +11.18 overriding them).</li>
 <li><em>A second rule, label propagation within a document</em> (below): a
@@ -1107,7 +1110,8 @@ either.</p>
 <p><strong>Training size on SOFC-Exp.</strong> A decision of the companion study (17
 October 07:28; Table S1, week 9) trained on 10 of the official split's 26
 training articles (5 draws of 10 articles, 156–248 sentences and 820–1,276
-entities each, as many entities as MaterioMiner's training sets hold; 10
+entities each, about as many entities as MaterioMiner's training sets
+hold; 10
 seeds each) and scored on its test articles: MR3 gained +0.50 [−0.47,
 +1.46] over the CRF head and did not pass. MR6 + names was not run at
 that size.</p>
@@ -7368,11 +7372,12 @@ by the registered rule, the interval above 0 (for D5 and D7 with neither
 corpus's interval below 0), which is the one-sided test at 2.5%. The
 last column (post hoc) gives the interval and two-sided P value with the
 units correlated where their training sets share documents, at the
-correlation the corrected resampled t test assumes for k-fold designs,
-1/K: 1/4 between MaterioMiner's papers, 1/5 between SOFC-Exp's folds,
+correlation n_test/n that the corrected resampled t test assumes, 1/K
+in a design of K folds: 1/4 between MaterioMiner's papers, 1/5 between SOFC-Exp's folds,
 1/4 between the 5 of 21 pairs of MuLMS subfields whose training pools
 share an article, none otherwise or across corpora; the variance of the
-mean of n units is then S²/(1 − ρ̄)·(n + Σρ)/n², with n − 1 degrees of
+mean of n units is then S²/(1 − ρ̄)·(n + Σρ)/n², Σρ over the n(n − 1)
+ordered pairs i ≠ j and ρ̄ = Σρ/(n(n − 1)), with n − 1 degrees of
 freedom (<code>decision_tests.py</code>, <code>post_hoc_dependence</code>).</p>
 <table>
 <thead>
@@ -7445,7 +7450,7 @@ freedom (<code>decision_tests.py</code>, <code>post_hoc_dependence</code>).</p>
 </tr>
 <tr>
 <td>D5</td>
-<td>pooled 11 units (MuLMS seeds 0-900): MR6 + names vs CRF head</td>
+<td>pooled 11 units (MuLMS seeds 0–900): MR6 + names vs CRF head</td>
 <td>11</td>
 <td>+3.58 [+0.95, +6.21]</td>
 <td>3.92</td>
@@ -7458,7 +7463,7 @@ freedom (<code>decision_tests.py</code>, <code>post_hoc_dependence</code>).</p>
 </tr>
 <tr>
 <td>D5′</td>
-<td>pooled 11 units (MuLMS seeds 300-900, post hoc reading): MR6 + names vs CRF head</td>
+<td>pooled 11 units (MuLMS seeds 300–900, post hoc reading): MR6 + names vs CRF head</td>
 <td>11</td>
 <td>+3.58 [+1.04, +6.13]</td>
 <td>3.79</td>

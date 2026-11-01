@@ -284,12 +284,11 @@ corpus's lexicon, the one rebuilt). Levels: per system, the share
 of the unseen test names the lexicon holds (pooled over seeds and units),
 recall on those and on the others, the share of the unseen-name
 predictions that are lexicon names, and precision and F1 on each part
-(F1 from the pooled recall and precision). Paired gains: per comparison,
+(F1 from the pooled counts, 2 correct / (gold + predicted)). Paired gains: per comparison,
 the recall gain on the held names and on the others, the difference of
 the two gains, paired over the units with 95% CIs, the units where the
 gain on the held names is the larger, and the F1 gain on the held names,
-each unit's F1 from its recall and precision on them pooled over the
-seeds.
+each unit's F1 from its counts on them pooled over the seeds.
 
 **Levels**
 
@@ -302,7 +301,7 @@ seeds.
 | MuLMS, 7 subfields | MR6 + names (mixed corpus) | 22.2 | 81.6 | 36.7 | 28.8 | 70.7 | 45.0 | 75.7 | 40.4 |
 | MaterioMiner fine, 4 papers | CRF head | 9.8 | 74.0 | 30.8 | 13.0 | 81.3 | 46.4 | 77.5 | 37.0 |
 | MaterioMiner fine, 4 papers | MR3 | 9.8 | 83.1 | 34.0 | 13.0 | 82.7 | 46.3 | 82.9 | 39.2 |
-| MaterioMiner fine, 4 papers | MR6 | 9.8 | 82.5 | 35.0 | 12.3 | 81.4 | 44.6 | 82.0 | 39.3 |
+| MaterioMiner fine, 4 papers | MR6 | 9.8 | 82.5 | 35.0 | 12.3 | 81.4 | 44.6 | 82.0 | 39.2 |
 | MaterioMiner fine, 4 papers | MR6 + names | 9.8 | 86.6 | 36.1 | 13.6 | 81.2 | 48.8 | 83.8 | 41.5 |
 | MaterioMiner coarse, 4 papers | CRF head | 18.2 | 79.6 | 45.4 | 17.7 | 82.2 | 45.5 | 80.9 | 45.4 |
 | MaterioMiner coarse, 4 papers | MR3 | 18.2 | 79.1 | 47.2 | 17.3 | 82.8 | 46.6 | 80.9 | 46.9 |
@@ -313,15 +312,15 @@ seeds.
 
 | setting | comparison | recall gain on the names in the lexicon [95% CI] | recall gain on the names not in it [95% CI] | in − out [95% CI] | units with in > out | F1 gain on the names in the lexicon [95% CI] |
 |---|---|---|---|---|---|---|
-| MuLMS, 7 subfields | MR6 + names − MR6 | +7.29 [+3.27, +11.30] | +1.12 [−0.78, +3.02] | +6.17 [+2.44, +9.90] | 7/7 | +1.13 [−1.84, +4.11] |
+| MuLMS, 7 subfields | MR6 + names − MR6 | +7.29 [+3.27, +11.30] | +1.12 [−0.78, +3.02] | +6.17 [+2.44, +9.90] | 7/7 | +1.13 [−1.85, +4.11] |
 | MuLMS, 7 subfields | MR6 + names − CRF head | +10.67 [+5.14, +16.20] | +6.34 [+2.60, +10.07] | +4.33 [+1.18, +7.48] | 6/7 | +3.29 [−1.27, +7.85] |
-| MuLMS, 7 subfields | MR6 − CRF head | +3.39 [+0.92, +5.85] | +5.22 [+1.92, +8.52] | −1.84 [−5.27, +1.60] | 3/7 | +2.15 [+0.15, +4.16] |
+| MuLMS, 7 subfields | MR6 − CRF head | +3.39 [+0.92, +5.85] | +5.22 [+1.92, +8.52] | −1.84 [−5.27, +1.60] | 3/7 | +2.16 [+0.15, +4.16] |
 | MuLMS, 7 subfields | MR3 − CRF head | +3.56 [+1.11, +6.01] | +4.22 [+0.87, +7.57] | −0.66 [−2.78, +1.45] | 3/7 | +2.02 [−0.02, +4.06] |
 | MuLMS, 7 subfields | MR6 + names (mixed corpus) − MR6 | +6.16 [+1.32, +11.01] | +1.31 [−1.07, +3.68] | +4.86 [+1.50, +8.21] | 7/7 | +1.18 [−1.63, +4.00] |
 | MaterioMiner fine, 4 papers | MR6 + names − MR6 | +4.62 [−5.27, +14.50] | +0.29 [−4.23, +4.81] | +4.33 [−5.33, +13.98] | 3/4 | +1.96 [−6.54, +10.46] |
-| MaterioMiner fine, 4 papers | MR6 + names − CRF head | +12.77 [−12.61, +38.15] | +6.00 [+2.84, +9.16] | +6.77 [−18.59, +32.13] | 2/4 | +6.57 [−18.80, +31.94] |
+| MaterioMiner fine, 4 papers | MR6 + names − CRF head | +12.77 [−12.61, +38.15] | +6.00 [+2.84, +9.16] | +6.77 [−18.59, +32.13] | 2/4 | +6.57 [−18.79, +31.94] |
 | MaterioMiner fine, 4 papers | MR6 − CRF head | +8.15 [−7.65, +23.95] | +5.71 [+1.05, +10.37] | +2.44 [−15.96, +20.85] | 2/4 | +4.61 [−12.46, +21.68] |
-| MaterioMiner fine, 4 papers | MR3 − CRF head | +8.77 [−5.95, +23.49] | +4.17 [−0.17, +8.50] | +4.60 [−13.82, +23.03] | 3/4 | +5.73 [−9.03, +20.49] |
+| MaterioMiner fine, 4 papers | MR3 − CRF head | +8.77 [−5.95, +23.49] | +4.17 [−0.17, +8.50] | +4.60 [−13.82, +23.03] | 3/4 | +5.73 [−9.03, +20.50] |
 | MaterioMiner coarse, 4 papers | MR6 + names − MR6 | +0.36 [−1.11, +1.84] | +1.91 [−1.46, +5.28] | −1.54 [−3.60, +0.51] | 0/4 | +1.17 [−2.23, +4.58] |
 | MaterioMiner coarse, 4 papers | MR6 + names − CRF head | +1.41 [−0.38, +3.19] | +3.62 [+1.18, +6.07] | −2.22 [−5.06, +0.62] | 0/4 | +1.47 [−1.36, +4.30] |
 | MaterioMiner coarse, 4 papers | MR6 − CRF head | +1.04 [−1.72, +3.80] | +1.72 [−0.37, +3.80] | −0.67 [−1.53, +0.19] | 0/4 | +0.30 [−2.84, +3.43] |
@@ -434,7 +433,11 @@ head (no decision).
   graphene −5.1), −1.0 on average over the seven subfields; its lexicons,
   from teachers trained on CPUs, differ from the runs' (25% of the unseen
   names on average against 23%), so it speaks to the dictionary rule
-  only. Supplementary Note 13 gives it per subfield with the sentence
+  only. Averaged over the 10 seeds it raised recall over all test
+  entities in every subfield, by 1.4 (poly) to 11.2 points (sofc), and
+  lowered precision by 2.8 (pemfc) to 24.2 (steel)
+  (`results/silver_lexicons/`); recall on the held names was not scored.
+  Supplementary Note 13 gives it per subfield with the sentence
   filter's lexicon (+1.13 on average) and the gold unseen names as a
   ceiling (+2.68 filling the head's O tags, +11.18 overriding them).
 - *A second rule, label propagation within a document* (below): a
@@ -484,7 +487,8 @@ either.
 **Training size on SOFC-Exp.** A decision of the companion study (17
 October 07:28; Table S1, week 9) trained on 10 of the official split's 26
 training articles (5 draws of 10 articles, 156–248 sentences and 820–1,276
-entities each, as many entities as MaterioMiner's training sets hold; 10
+entities each, about as many entities as MaterioMiner's training sets
+hold; 10
 seeds each) and scored on its test articles: MR3 gained +0.50 [−0.47,
 +1.46] over the CRF head and did not pass. MR6 + names was not run at
 that size.
@@ -1732,11 +1736,12 @@ by the registered rule, the interval above 0 (for D5 and D7 with neither
 corpus's interval below 0), which is the one-sided test at 2.5%. The
 last column (post hoc) gives the interval and two-sided P value with the
 units correlated where their training sets share documents, at the
-correlation the corrected resampled t test assumes for k-fold designs,
-1/K: 1/4 between MaterioMiner's papers, 1/5 between SOFC-Exp's folds,
+correlation n_test/n that the corrected resampled t test assumes, 1/K
+in a design of K folds: 1/4 between MaterioMiner's papers, 1/5 between SOFC-Exp's folds,
 1/4 between the 5 of 21 pairs of MuLMS subfields whose training pools
 share an article, none otherwise or across corpora; the variance of the
-mean of n units is then S²/(1 − ρ̄)·(n + Σρ)/n², with n − 1 degrees of
+mean of n units is then S²/(1 − ρ̄)·(n + Σρ)/n², Σρ over the n(n − 1)
+ordered pairs i ≠ j and ρ̄ = Σρ/(n(n − 1)), with n − 1 degrees of
 freedom (`decision_tests.py`, `post_hoc_dependence`).
 
 | Decision | Comparison | Units | Δ [95% CI] | SD | t (df) | P, one-sided | P, two-sided | Sign-flip P | Verdict | Units correlated: 95% CI, P (post hoc) |
@@ -1745,8 +1750,8 @@ freedom (`decision_tests.py`, `post_hoc_dependence`).
 | D2 | MuLMS: MR6 + names vs MR3 | 7 | +0.92 [−1.63, +3.48] | 2.76 | 0.88 (6) | 0.2062 | 0.4125 | 0.4062 | no | [−2.15, +3.99], 0.491 |
 | D3 | MaterioMiner fine: MR6 + names vs CRF head | 4 | +4.27 [+1.39, +7.15] | 1.81 | 4.72 (3) | 0.0090 | 0.0180 | 0.1250 | passes | [−0.13, +8.67], 0.054 |
 | D4 | MaterioMiner coarse: MR6 + names vs CRF head | 4 | +1.77 [+0.67, +2.88] | 0.69 | 5.12 (3) | 0.0072 | 0.0144 | 0.1250 | passes | [+0.09, +3.45], 0.044 |
-| D5 | pooled 11 units (MuLMS seeds 0-900): MR6 + names vs CRF head | 11 | +3.58 [+0.95, +6.21] | 3.92 | 3.03 (10) | 0.0063 | 0.0127 | 0.0107 | passes | [+0.27, +6.88], 0.037 |
-| D5′ | pooled 11 units (MuLMS seeds 300-900, post hoc reading): MR6 + names vs CRF head | 11 | +3.58 [+1.04, +6.13] | 3.79 | 3.14 (10) | 0.0053 | 0.0106 | 0.0068 | above 0 (post hoc) | [+0.38, +6.78], 0.032 |
+| D5 | pooled 11 units (MuLMS seeds 0–900): MR6 + names vs CRF head | 11 | +3.58 [+0.95, +6.21] | 3.92 | 3.03 (10) | 0.0063 | 0.0127 | 0.0107 | passes | [+0.27, +6.88], 0.037 |
+| D5′ | pooled 11 units (MuLMS seeds 300–900, post hoc reading): MR6 + names vs CRF head | 11 | +3.58 [+1.04, +6.13] | 3.79 | 3.14 (10) | 0.0053 | 0.0106 | 0.0068 | above 0 (post hoc) | [+0.38, +6.78], 0.032 |
 | D6 | SOFC-Exp folds: MR6 + names vs CRF head | 5 | −0.04 [−1.21, +1.14] | 0.94 | −0.08 (4) | 0.5284 | 0.9432 | 1.0000 | no | [−1.79, +1.73], 0.962 |
 | D7 | pooled 11 units: MR6 + names vs MR6 | 11 | +0.80 [−0.66, +2.26] | 2.17 | 1.22 (10) | 0.1258 | 0.2517 | 0.2383 | no | [−1.04, +2.63], 0.356 |
 | D8 | MuLMS: own-topic vs mixed corpus | 7 | −0.18 [−2.01, +1.65] | 1.98 | −0.24 (6) | 0.5926 | 0.8148 | 0.7969 | no | [−2.38, +2.01], 0.845 |

@@ -816,9 +816,20 @@ def f1_of(recall, precision):
     return 2 * recall * precision / (recall + precision)
 
 
+def part_f1(e, part):
+    """F1 in percent on one lexicon part ('in' or 'out') of a ner_lexicon_recall.json score
+    entry: from its counts, 2 correct / (gold + predicted), where it has them (exact), else
+    from its rounded recall and precision."""
+    counts = [(e.get(k) or {}).get(part) for k in ('correct', 'gold', 'pred')]
+    if all(c is not None for c in counts):
+        correct, gold, pred = counts
+        return 200 * correct / (gold + pred) if gold + pred else None
+    return f1_of(e.get(f'recall_{part}'), e.get(f'precision_{part}'))
+
+
 def held_f1_gain(part, setting, key):
     """Post hoc (round 15): the paired gain in F1 on the unseen test names the lexicon holds,
-    each unit's F1 from its recall and precision on them pooled over the seeds, the method
+    each unit's F1 on them pooled over the seeds (part_f1, from the counts), the method
     minus its reference, with the 95% Student-t interval over the units; None without the
     per-unit scores."""
     import statistics
@@ -831,8 +842,8 @@ def held_f1_gain(part, setting, key):
     diffs = []
     for unit in part['units']:
         a, b = per_unit[method].get(unit), per_unit[reference].get(unit)
-        fa = a and f1_of(a['recall_in'], a['precision_in'])
-        fb = b and f1_of(b['recall_in'], b['precision_in'])
+        fa = a and part_f1(a, 'in')
+        fb = b and part_f1(b, 'in')
         if fa is None or fb is None:
             return None
         diffs.append(fa - fb)
@@ -859,8 +870,7 @@ def table10(data):
               'precision, out', 'F1, in', 'F1, out']
     cells = [[setting, system, pct(e['gold_share_in']), pct(e['recall_in']), pct(e['recall_out']),
               pct(e['pred_share_in']), pct(e['precision_in']), pct(e['precision_out']),
-              pct(f1_of(e['recall_in'], e['precision_in'])),
-              pct(f1_of(e['recall_out'], e['precision_out']))]
+              pct(part_f1(e, 'in')), pct(part_f1(e, 'out'))]
              for setting, system, e in scores]
     cheader = ['setting', 'comparison', 'recall gain on the names in the lexicon [95% CI]',
                'recall gain on the names not in it [95% CI]', 'in − out [95% CI]',
@@ -888,10 +898,10 @@ def table10(data):
             'units, recall on the unseen test names that the unit\'s lexicon holds (in) and on '
             'those it does not (out), and among the predicted entities whose name is unseen the '
             'share that are lexicon names and the precision of each part, with the F1 of each '
-            'part from its pooled recall and precision (round 15); then, paired over the '
+            'part from its pooled counts (round 15); then, paired over the '
             "units, a method's recall gain over its reference on each part and the difference of "
             'the two gains with its 95% Student-t CI, and the F1 gain on the held names, each '
-            "unit's F1 from its own pooled recall and precision on them (round 15). Units used: "
+            "unit's F1 from its own pooled counts on them (round 15). Units used: "
             + '; '.join(f'{LEXICON_SETTINGS[k]}: {u}' for k, u in units.items())
             + (f". Excluded (rebuilt teachers or coverage differ): {excluded}" if excluded else '')
             + '.\n\n' + markdown(header, cells) + '\n\n**Paired gains**\n\n' + markdown(cheader, ccells))

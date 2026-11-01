@@ -4,20 +4,20 @@ Hatem Madi (affiliation to be added; hatem.madi15@gmail.com)
 
 ## Abstract
 
-Materials named-entity recognizers, trained on few annotated papers,
-often miss names no training sentence annotates. In pre-registered
-tests we added names three baseline taggers confidently agree on in
-40,000 unlabeled sentences to mention replacement, which swaps names in
-copied training sentences. Over 11 held-out subfields and papers of two
-corpora this gains 3.58 F1 points [95% CI 0.95, 6.21] over the baseline,
-mention replacement alone 2.35 [0.94, 3.75] (post hoc). This pooled
-criterion was adopted mid-study, when mention replacement already met
-it; the original, gains on both corpora, was not met; a third corpus
-shows no gain. Over six-copy mention replacement the names add 0.80 F1
-[−0.66, 2.26], not established. On MuLMS they raise recall on unseen
-names their lexicon holds, at lower precision (post hoc), passing a
-registered test against a recall-matched decoding bias only with three
-subfields it could not match.
+Materials named-entity recognizers trained on few annotated papers miss
+many names no training sentence annotates. In pre-registered tests we
+added names three baseline taggers confidently agree on in 40,000
+unlabeled sentences to mention replacement, which swaps names in copied
+sentences. Over 11 held-out subfields and papers of two corpora this
+gains 3.58 F1 points [95% CI 0.95, 6.21] over the baseline, mention
+replacement alone 2.35 [0.94, 3.75] (post hoc). This pooled criterion
+was adopted mid-study, when mention replacement already met it; the
+original, gains on both corpora, failed; a third corpus shows no gain.
+Over six-copy mention replacement the names add 0.80 [−0.66, 2.26] on
+seeds unused in selection, not established. On MuLMS they raise recall
+on unseen names their lexicon holds, at lower precision (post hoc),
+passing a registered test against a recall-matched decoding bias only
+with three subfields it could not match.
 
 ## Introduction
 
@@ -154,7 +154,7 @@ detectably (Results, *The names' source and the lexicon's settings*). On
 MuLMS the names raise recall on unseen names, most on the fifth of them
 the lexicon holds (+7.29 [+3.27, +11.30] over MR6, post hoc), at lower
 precision on those names (69.0% against 74.7%, pooled), so that F1 on
-them is not shown to change (+1.13 [−1.84, +4.11], post hoc). MR6 does
+them is not shown to change (+1.13 [−1.85, +4.11], post hoc). MR6 does
 not reach the names' recall on them at any of twelve decoding biases
 tried, constants from −2 to 5 added to every entity tag's score (post
 hoc). The registered test against MR6 decoded at the bias that matches
@@ -363,7 +363,7 @@ parts, on point estimates, and none of its outcomes on intervals. The copies alo
 detectable split (MR6 over the CRF head). Pooled precision falls on both
 parts (74.7% to 69.0% on the held names, 46.4% to 44.0% on the others),
 so that F1 on the held names is not shown to change (75.1 against 74.8
-pooled; paired, +1.13 [−1.84, +4.11]; post hoc, Table 5), and two thirds
+pooled; paired, +1.13 [−1.85, +4.11]; post hoc, Table 5), and two thirds
 of the wrong predictions the names add, and 45% of the correct ones, are
 names the lexicon does not hold. Because the teachers are the baseline, the
 lexicon holds the unseen names the baseline already finds most easily:
@@ -448,8 +448,8 @@ headroom. The SOFC corpus holds fewer of the unseen test names (36%,
 MaterioMiner's, and against MR3 the names' interval lies above 0 there
 (pre-specified, one of many comparisons without a decision): it is
 mention replacement that is not shown to gain. Whether training size
-explains that is open: trained on as many entities as MaterioMiner's
-training sets hold, MR3 gained +0.50 [−0.47,
+explains that is open: trained on about as many entities as
+MaterioMiner's training sets hold, MR3 gained +0.50 [−0.47,
 +1.46], also not shown to differ from 0 (a decision of 17 October, 07:28;
 Supplementary Note 7). Pooled over the 16 units of the three corpora the
 estimate of MR6 + names is +2.45 [+0.50, +4.40] and that of MR3 +1.46
@@ -527,7 +527,7 @@ macro and +0.89 [−0.40, +2.18] in weighted F1, post hoc), is not
 established, nor on MaterioMiner's strongest system. What the names do
 add, on MuLMS, is recall on the unseen names their lexicon holds, with
 lower precision on them (69.0% against 74.7%), so that F1 on those names
-is not shown to change (+1.13 [−1.84, +4.11]; post hoc). Post hoc, the
+is not shown to change (+1.13 [−1.85, +4.11]; post hoc). Post hoc, the
 names model recalls more of them than MR6 does at any of the twelve
 biases tried (+6.52 [+2.15, +10.89]). The registered recall-matched decision
 (D11) passes, but only with three subfields where no bias reached the
@@ -568,8 +568,10 @@ against MR6's 75.0% on MuLMS), at three to seven times the cost of an
 MR3 run and with 61% of their extra predictions of those names wrong;
 the baseline itself already finds 72% of those names (Table S3), and
 whether a dictionary rule over the same lexicon would give that recall
-more cheaply was not measured (the probe of Supplementary Note 7 scored
-it in F1 only).
+more cheaply was not measured: the probe of Supplementary Note 7, with
+lexicons of CPU-trained teachers, raised recall over all test entities
+in every subfield (by 1.4 to 11.2 points, at 2.8 to 24.2 points of
+precision) but did not score the held names.
 Even the best system finds only half of a held-out MuLMS
 subfield's entities. If F1 is the goal, stop at
 mention replacement, and expect no gain to be shown on a corpus like
@@ -1150,11 +1152,12 @@ articles, and 5 of the 21 pairs of MuLMS subfields share an article of
 their training pools, and positively correlated differences make the
 intervals too narrow. As a sensitivity analysis (post hoc), every two
 units whose training sets share documents were given the correlation
-that the corrected resampled t test assumes for k-fold designs<sup>60</sup>, 1/K: 1/4 for MaterioMiner's papers and,
+n_test/n that the corrected resampled t test assumes<sup>60</sup>, 1/K in a design of K folds: 1/4 for MaterioMiner's papers and,
 conservatively, for the MuLMS pairs, 1/5 for SOFC-Exp's folds, and none
 across corpora. D3 then reads +4.27 [−0.13, +8.67] (P = 0.054), D4
 +1.77 [+0.09, +3.45], D5 +3.58 [+0.27, +6.88] and D11 +11.24 [+1.71,
-+20.77], and no other decision's interval clears 0 (Table S16); the
++20.77] (D5′, the decision-seed reading, [+0.38, +6.78]), and no other
+decision's interval clears 0 (Table S16); the
 decisions stand as registered. Figure 2 and Supplementary Note 12 show
 the per-unit values; the Discussion gives what the pooled intervals
 assume about the corpora.
@@ -1219,7 +1222,8 @@ companion summarises D1–D8 and the decomposition in the Results (*Whose gain i
 The labeled corpora are public: MaterioMiner, release v1.0.1 (Fordatis,
 https://doi.org/10.24406/fordatis/329.2; CC BY 4.0), whose files the
 repository includes; SOFC-Exp (github.com/boschresearch/sofc-exp_textmining_resources;
-CC BY 4.0), converted by the repository's code; and MuLMS (Hugging Face,
+CC BY 4.0; at commit bbf75fd), whose converted files the repository
+includes; and MuLMS (Hugging Face,
 huggingface.co/datasets/timo-pierre-schrader/MuLMS at revision bc1c97d;
 CC BY-SA 4.0). The repository, github.com/hatemadi15/AI_Research_Ontologies_GNN_GRL,
 holds every results file with its seeds, environment and saved test
@@ -1275,7 +1279,7 @@ The author declares no financial or non-financial competing interests.
 16. Gorman, K. & Bedrick, S. We Need to Talk about Standard Splits. In *Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics* 2786–2791 (Association for Computational Linguistics, 2019). https://doi.org/10.18653/v1/P19-1267
 17. Søgaard, A., Ebert, S., Bastings, J. & Filippova, K. We Need To Talk About Random Splits. In *Proceedings of the 16th Conference of the European Chapter of the Association for Computational Linguistics: Main Volume* 1823–1832 (Association for Computational Linguistics, 2021). https://doi.org/10.18653/v1/2021.eacl-main.156
 18. Augenstein, I., Derczynski, L. & Bontcheva, K. Generalisation in named entity recognition: A quantitative analysis. *Computer Speech & Language* **44**, 61–83 (2017). https://doi.org/10.1016/j.csl.2017.01.012
-19. Fu, J., Liu, P., Zhang, Q. & Huang, X. Rethinking Generalization of Neural Models: A Named Entity Recognition Case Study. *Proceedings of the AAAI Conference on Artificial Intelligence* **34**, 7732–7739 (2020). https://doi.org/10.1609/aaai.v34i05.6276
+19. Fu, J., Liu, P. & Zhang, Q. Rethinking Generalization of Neural Models: A Named Entity Recognition Case Study. *Proceedings of the AAAI Conference on Artificial Intelligence* **34**, 7732–7739 (2020). https://doi.org/10.1609/aaai.v34i05.6276
 20. Kim, H. & Kang, J. How Do Your Biomedical Named Entity Recognition Models Generalize to Novel Entities? *IEEE Access* **10**, 31513–31523 (2022). https://doi.org/10.1109/ACCESS.2022.3157854
 21. Lin, H. et al. A Rigorous Study on Named Entity Recognition: Can Fine-tuning Pretrained Model Lead to the Promised Land? In *Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)* 7291–7300 (Association for Computational Linguistics, 2020). https://doi.org/10.18653/v1/2020.emnlp-main.592
 22. Ghaddar, A., Langlais, P., Rashid, A. & Rezagholizadeh, M. Context-aware Adversarial Training for Name Regularity Bias in Named Entity Recognition. *Transactions of the Association for Computational Linguistics* **9**, 586–604 (2021). https://doi.org/10.1162/tacl_a_00386
@@ -1467,8 +1471,8 @@ MaterioMiner on 10 seeds.
 
 | setting | comparison | recall gain, names in the lexicon [95% CI] | recall gain, names not in it [95% CI] | in − out [95% CI] | units with in > out | F1 gain, names in the lexicon [95% CI] |
 |---|---|---|---|---|---|---|
-| MuLMS, 7 subfields | MR6 + names − MR6 | +7.29 [+3.27, +11.30] | +1.12 [−0.78, +3.02] | +6.17 [+2.44, +9.90] | 7/7 | +1.13 [−1.84, +4.11] |
-| MuLMS, 7 subfields | MR6 − CRF head | +3.39 [+0.92, +5.85] | +5.22 [+1.92, +8.52] | −1.84 [−5.27, +1.60] | 3/7 | +2.15 [+0.15, +4.16] |
+| MuLMS, 7 subfields | MR6 + names − MR6 | +7.29 [+3.27, +11.30] | +1.12 [−0.78, +3.02] | +6.17 [+2.44, +9.90] | 7/7 | +1.13 [−1.85, +4.11] |
+| MuLMS, 7 subfields | MR6 − CRF head | +3.39 [+0.92, +5.85] | +5.22 [+1.92, +8.52] | −1.84 [−5.27, +1.60] | 3/7 | +2.16 [+0.15, +4.16] |
 | MuLMS, 7 subfields | MR6 + names (mixed corpus) − MR6 | +6.16 [+1.32, +11.01] | +1.31 [−1.07, +3.68] | +4.86 [+1.50, +8.21] | 7/7 | +1.18 [−1.63, +4.00] |
 | MaterioMiner fine, 4 papers | MR6 + names − MR6 | +4.62 [−5.27, +14.50] | +0.29 [−4.23, +4.81] | +4.33 [−5.33, +13.98] | 3/4 | +1.96 [−6.54, +10.46] |
 | MaterioMiner coarse, 4 papers | MR6 + names − MR6 | +0.36 [−1.11, +1.84] | +1.91 [−1.46, +5.28] | −1.54 [−3.60, +0.51] | 0/4 | +1.17 [−2.23, +4.58] |

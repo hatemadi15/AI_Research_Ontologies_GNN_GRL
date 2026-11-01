@@ -5959,6 +5959,37 @@ author asked:
     checked without a rebuild. This would release part of the lexicons,
     which the repository does not hold.
 
+*Paper A, review round 16, part 1 (1 November, night): the number
+audit of `7395d9e`.* No blocking item; every decision, interval, P value,
+count and time it recomputed matches the record, including an
+independent reimplementation of the dependence analysis (the MuLMS pools
+rebuilt from `subfield_folds`). Applied:
+
+- **Abstract** (144 words). D7's 0.80 now names its seed basis, "on seeds
+  unused in selection", since the abstract's other two numbers are on all
+  ten seeds. Two words were cut to keep it under 150.
+- **The dictionary rule.** The Discussion said the probe scored the rule
+  "in F1 only". The probe files (`results/silver_lexicons/`) hold recall
+  and precision per seed: the rule raised recall over all test entities
+  in every subfield (+1.4 to +11.2) and cut precision by 2.8 to 24.2. What
+  was not scored is recall on the held names. The Discussion and SI Note
+  7 now say so.
+- **Reference.** `fu2020rethinking` has three authors on the AAAI
+  version's DOI metadata and article page; the arXiv version adds a fourth.
+- **F1 on the held names** is now computed from the counts, 2 correct /
+  (gold + predicted) (`paper_tables.part_f1`), not from two-decimal
+  rates. Five cells moved by 0.01. MuLMS names − MR6 now reads +1.13
+  [−1.85, +4.11]; round 15's note above gives −1.84.
+- **Smaller fixes.**
+  - The variance formula's Σρ is over ordered pairs, and the correlation
+    is stated as n_test/n (1/K in a K-fold design).
+  - D5′ is shown in the dependence check.
+  - "About as many entities" replaces "as many entities".
+  - SOFC-Exp's source commit (bbf75fd) is named, its converted files
+    included.
+  - Table S16's seed ranges take en dashes.
+  - The cover letter says many held-out names are unseen, not all.
+
 ### Week 17 protocol: the harvested names on the strongest base (fixed before any run, 31 October, 19:10 UTC)
 
 *Why, and when.* The round-6 reviews of paper A (31 October) listed as a

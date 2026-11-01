@@ -6,8 +6,8 @@ Table 16. The t statistic and P values of paper A's decisions (D5' the post hoc 
 | D2 | MuLMS: MR6 + names vs MR3 | 7 | +0.92 [−1.63, +3.48] | 2.76 | 0.88 (6) | 0.2062 | 0.4125 | 0.4062 | no | [−2.15, +3.99], 0.491 |
 | D3 | MaterioMiner fine: MR6 + names vs CRF head | 4 | +4.27 [+1.39, +7.15] | 1.81 | 4.72 (3) | 0.0090 | 0.0180 | 0.1250 | passes | [−0.13, +8.67], 0.054 |
 | D4 | MaterioMiner coarse: MR6 + names vs CRF head | 4 | +1.77 [+0.67, +2.88] | 0.69 | 5.12 (3) | 0.0072 | 0.0144 | 0.1250 | passes | [+0.09, +3.45], 0.044 |
-| D5 | pooled 11 units (MuLMS seeds 0-900): MR6 + names vs CRF head | 11 | +3.58 [+0.95, +6.21] | 3.92 | 3.03 (10) | 0.0063 | 0.0127 | 0.0107 | passes | [+0.27, +6.88], 0.037 |
-| D5' | pooled 11 units (MuLMS seeds 300-900, post hoc reading): MR6 + names vs CRF head | 11 | +3.58 [+1.04, +6.13] | 3.79 | 3.14 (10) | 0.0053 | 0.0106 | 0.0068 | above 0 (post hoc) | [+0.38, +6.78], 0.032 |
+| D5 | pooled 11 units (MuLMS seeds 0–900): MR6 + names vs CRF head | 11 | +3.58 [+0.95, +6.21] | 3.92 | 3.03 (10) | 0.0063 | 0.0127 | 0.0107 | passes | [+0.27, +6.88], 0.037 |
+| D5' | pooled 11 units (MuLMS seeds 300–900, post hoc reading): MR6 + names vs CRF head | 11 | +3.58 [+1.04, +6.13] | 3.79 | 3.14 (10) | 0.0053 | 0.0106 | 0.0068 | above 0 (post hoc) | [+0.38, +6.78], 0.032 |
 | D6 | SOFC-Exp folds: MR6 + names vs CRF head | 5 | −0.04 [−1.21, +1.14] | 0.94 | −0.08 (4) | 0.5284 | 0.9432 | 1.0000 | no | [−1.79, +1.73], 0.962 |
 | D7 | pooled 11 units: MR6 + names vs MR6 | 11 | +0.80 [−0.66, +2.26] | 2.17 | 1.22 (10) | 0.1258 | 0.2517 | 0.2383 | no | [−1.04, +2.63], 0.356 |
 | D8 | MuLMS: own-topic vs mixed corpus | 7 | −0.18 [−2.01, +1.65] | 1.98 | −0.24 (6) | 0.5926 | 0.8148 | 0.7969 | no | [−2.38, +2.01], 0.845 |
