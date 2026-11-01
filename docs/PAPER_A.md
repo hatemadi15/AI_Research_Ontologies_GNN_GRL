@@ -490,8 +490,10 @@ every measure, with the votes and the per-unit values.
 **Figure 2.** Per held-out unit, the micro-F1 difference of MR6 + names
 from the CRF head (circles) and from MR6 (squares): MuLMS's 7 subfields
 on the decision seeds, MaterioMiner's 4 papers at both granularities and
-SOFC-Exp's 5 folds, where MR6 was not run. The bands, drawn across the
-11 units' rows, are the pooled intervals of D5′ and D7.
+SOFC-Exp's 5 folds, where MR6 was not run (about 13 lane hours on a
+corpus where mention replacement does not pass; Supplementary Note 11).
+The bands, drawn across the 11 units' rows, are the pooled intervals of
+D5′ and D7.
 
 ### 5.2 Whose gain is it
 

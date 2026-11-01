@@ -414,3 +414,28 @@ def test_table12_post_hoc_parts():
     assert '| MAT | held | +12.02 [+11.02, +13.02], 7/7 | +9.87 [+8.87, +10.87], 7/7 |  | 184–1022 |' in text
     assert '18.1 0.0156, 18.2 0.1406' in text and '| a | 2,392 (29,748) |' in text
     assert pt.table12_post_hoc({}) == ''
+
+
+def test_table14_chain_and_table15_lexicon_units():
+    """Table 14: each system against the one it builds on, on the unseen and seen names and all
+    entities, with MuLMS's decision seeds too; Table 15: the lexicon split per unit."""
+    def q(m, r=1.0, p=-1.0):
+        return {'mean_diff': m, 'ci95': [m - 1, m + 1],
+                'recall': {'mean_diff': r, 'ci95': [r - 1, r + 1]},
+                'precision': {'mean_diff': p, 'ci95': [p - 1, p + 1]}}
+    mentions = {'chain': {'mulms_leave_one_subfield_out': {
+        'crf_mrm_topic6': {'reference': 'crf_mr6', 'unseen': q(0.93, 3.24, -2.23), 'seen': q(0.77),
+                           'all': q(0.85), 'decision': {'unseen': q(0.56, 2.56, -2.22)}}},
+        'fine_leave_one_paper_out': {'crf_mr': {'reference': 'crf', 'unseen': q(3.19),
+                                                'decision': {'unseen': q(9.9)}}}}}
+    text = pt.table14(mentions)
+    assert '| MuLMS, 7 subfields | MR6 + names − MR6 | all ten | unseen names | +0.93 [−0.07, +1.93] | +3.24 [+2.24, +4.24] | −2.23 [−3.23, −1.23] |' in text
+    assert '| MuLMS, 7 subfields | MR6 + names − MR6 | decision seeds (300–900) | unseen names | +0.56' in text
+    assert 'MR3 − CRF head | all ten | unseen names' in text and '+9.90' not in text   # no decision seeds off MuLMS
+    data = {'mulms': {'comparisons': {'names_vs_mr6': {'per_unit': {
+        'sofc': {'gain_in': 14.09, 'gain_out': 1.51, 'in_minus_out': 12.58}}}}},
+            'fine': {'comparisons': {'names_vs_mr6': {'per_unit': {
+                '10.1038_ncomms7164.conll': {'gain_in': 1.0, 'gain_out': -0.5, 'in_minus_out': 1.5}}}}}}
+    text = pt.table15(data)
+    assert '| MR6 + names − MR6 | sofc | +14.09 | +1.51 | +12.58 |' in text
+    assert '| 10.1038_ncomms7164 | +1.00 | −0.50 | +1.50 |' in text

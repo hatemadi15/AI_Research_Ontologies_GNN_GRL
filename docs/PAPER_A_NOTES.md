@@ -5,7 +5,7 @@ a reader of the repository needs beside it.
 
 **Tables and figures to generated files.** The paper is the main text
 (`docs/PAPER_A.md`) and the Supplementary Information
-(`docs/PAPER_A_SI.md`, Notes 1 to 12, Tables S1 to S12). Table 1 is written
+(`docs/PAPER_A_SI.md`, Notes 1 to 13, Tables S1 to S15). Table 1 is written
 by hand from the conversions in `src/graph/`; Table 2 to
 `docs/tables/table6_held_out_decisions.md` and `table2_decisions.md` (D9
 and D10 to `table11_week17.md`, D11 and D12 to `table12_week18.md`, whose
@@ -28,7 +28,9 @@ S5 to the week-12 screen in `docs/ROADMAP.md`; Table S6 to
 (`detectable`); Tables S8, S9 and S10 to the second and fourth, sixth
 and seventh parts of `table12_week18.md`; Tables S11 and S12 to the two
 parts of `table13_names_route.md` (`names_route_record.py`, every
-comparison of the names route in every measure); Supplementary Note 11
+comparison of the names route in every measure); Tables S13, S14 and
+S15 to `table14_chain.md`, `table15_lexicon_units.md` and
+`table5_probe.md`; Supplementary Note 11
 to the ROADMAP's session notes and `git log` (drafted with a source per
 sentence, re-checked). The
 push times of Supplementary Note 1 are `protocol_pushes.py`'s reading of

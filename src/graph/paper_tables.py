@@ -422,6 +422,64 @@ LEXICON_COMPARISONS = {'names_vs_mr6': 'MR6 + names − MR6', 'names_vs_crf': 'M
                        'mixed_vs_mr6': 'MR6 + names (mixed corpus) − MR6'}
 
 
+CHAIN_SETTINGS = {'mulms_leave_one_subfield_out': "MuLMS, 7 subfields",
+                  'fine_leave_one_paper_out': 'MaterioMiner fine, 4 papers',
+                  'coarse_leave_one_paper_out': 'MaterioMiner coarse, 4 papers',
+                  'sofc_document_folds': "SOFC-Exp, 5 folds"}
+CHAIN_SYSTEMS = {'crf': 'CRF head', 'crf_mr': 'MR3', 'crf_mr6': 'MR6', 'crf_mrm_topic6': 'MR6 + names',
+                 'crf_mrm6': 'MR6 + names', 'crf_mrm_mixed6': 'MR6 + names (mixed corpus)',
+                 'crf_mt': 'multi-task', 'crf_mt_mr': 'multi-task + MR3',
+                 'crf_mt_mr6': 'multi-task + MR6', 'crf_mt_mrm6': 'multi-task + MR6 + names'}
+
+
+def table14(mentions):
+    """Table 14 from ner_mentions.json's `chain` block: per setting, each system against the one it
+    builds on, the paired differences in F1, recall and precision on the unseen and on the seen
+    test names and over all entities, on all ten seeds and on MuLMS's decision seeds."""
+    header = ['setting', 'comparison', 'seeds', 'part', 'Δ F1 [95% CI]', 'Δ recall [95% CI]',
+              'Δ precision [95% CI]']
+    cells = []
+    for key, label in CHAIN_SETTINGS.items():
+        for system, e in (mentions.get('chain', {}).get(key) or {}).items():
+            name = f"{CHAIN_SYSTEMS.get(system, system)} − {CHAIN_SYSTEMS.get(e['reference'], e['reference'])}"
+            for basis, block in (('all ten', e), ('decision seeds (300–900)', e.get('decision'))):
+                if not block or (basis != 'all ten' and not key.startswith('mulms')):
+                    continue
+                for part in ('unseen', 'seen', 'all'):
+                    q = block.get(part)
+                    if not q:
+                        continue
+                    cells.append([label, name, basis, {'all': 'all entities'}.get(part, part + ' names'),
+                                  interval(q, 'mean_diff', signed=True),
+                                  interval(q['recall'], 'mean_diff', signed=True) if 'recall' in q else '',
+                                  interval(q['precision'], 'mean_diff', signed=True) if 'precision' in q else ''])
+    return ('Table 14. The unseen-name trade in full (ner_mentions.json, `chain`): per setting, each '
+            'system against the one it builds on, the mean paired difference over the units in F1, '
+            'recall and precision on the unseen and the seen test names and over all entities, with '
+            "95% CIs, on all ten seeds and, on MuLMS, on the decision seeds (300–900).\n\n"
+            + markdown(header, cells))
+
+
+def table15(data):
+    """Table 15 from ner_lexicon_recall.json: per setting and comparison, each unit's recall gain on
+    the unseen test names the lexicon holds and on the others, and their difference."""
+    header = ['setting', 'comparison', 'unit', 'gain, names in the lexicon', 'gain, names not in it',
+              'in − out']
+    cells = []
+    for setting, label in LEXICON_SETTINGS.items():
+        for key, name in LEXICON_COMPARISONS.items():
+            c = ((data.get(setting) or {}).get('comparisons') or {}).get(key)
+            if not c:
+                continue
+            for unit, v in c['per_unit'].items():
+                cells.append([label, name, unit.replace('.conll', ''), number(v['gain_in'], True),
+                              number(v['gain_out'], True), number(v['in_minus_out'], True)])
+    return ('Table 15. The lexicon split per unit (ner_lexicon_recall.json, post hoc): per setting '
+            "and comparison, each held-out unit's recall gain on the unseen test names its lexicon "
+            'holds and on the others, and their difference (the paired means are Table 10).\n\n'
+            + markdown(header, cells))
+
+
 def lexicon_rows(data):
     """[(setting, system label, pooled scores)] and [(setting, comparison label, comparison)]
     from ner_lexicon_recall.json, settings in LEXICON_SETTINGS order."""
@@ -863,8 +921,11 @@ def main(argv=None):
     lexicon = load(os.path.join(args.results, 'gpu', 'ner_lexicon_recall.json'))
     if lexicon:
         write('table10_lexicon.md', table10(lexicon))
+        write('table15_lexicon_units.md', table15(lexicon))
     else:
         print('table 10: no lexicon-membership file')
+    if mentions and mentions.get('chain'):
+        write('table14_chain.md', table14(mentions))
     rows = week17_rows(analysis)
     if rows:
         write('table11_week17.md', table11(rows))
