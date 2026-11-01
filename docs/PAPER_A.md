@@ -11,37 +11,32 @@ sections to a journal's structure.*
 
 ## Abstract
 
-Materials entity taggers are trained on a few annotated papers and scored
-on sentences from those papers, which hides how they read a new one: our
-baseline scores 77 F1 on random splits of MaterioMiner and 46 on a
-held-out paper, in part because 81% of its entities are names the
-training sentences never annotate. We ask whether unlabeled papers can supply those names. Three
-seeds of the baseline label 40,000 sentences of open papers; the names
-they agree on confidently join the pool of mention replacement,
-which swaps the names in six copies of each training sentence. Under
-pre-registered protocols with 7–10 seeds per unit, the recipe gains 3.58
-F1 points [0.95, 6.21] over the baseline across 11 held-out units of two
-corpora. But mention replacement without any harvested name gains 2.46
-[1.00, 3.91] on the same units (post hoc, on the seeds the screen did not
-see); the extra copies add 0.33 [−0.25, 0.92] and the names 0.80 [−0.66,
-2.26], neither established (the names comparison detects 2 points).
-Neither the names' source (a mixed corpus holding most of the same
-names) nor the filter's settings changes the result detectably, and
-where half the test names are seen nothing helps. The names
-trade precision for recall on unseen names on one corpus and raise both
-on the other; on MuLMS the recall gain is name knowledge, +7.3 points on
-the unseen names the lexicon holds (22% of them, pooled) against +1.1 on
-the others, +6.2 [+2.4, +9.9] apart (post hoc), while the wrong
-predictions the names add fall mostly on the other names.
-Post review, on the strongest base (multi-task training with six-copy
-mention replacement) the names add 0.96 [−0.01, 1.92] fine-grained and
-0.85 [−0.72, 2.42] coarse-grained, two further decisions that do not
-pass. We report all ten decisions, the criterion's revision and a post hoc
-robustness analysis. Mention replacement is worth using where most of a
+Materials entity taggers are trained and scored on sentences of a few
+annotated papers, which hides how they read a new one: our baseline
+scores 77 F1 on random splits of MaterioMiner and 46 on a held-out
+paper, in part because 81% of its entities are names no training
+sentence annotates. We ask whether unlabeled papers can supply those
+names. Three seeds of the baseline tag 40,000 sentences of open papers,
+and the names they agree on confidently join the pool of mention
+replacement, which swaps the names in six copies of each training
+sentence. Under pre-registered protocols, this recipe gains 3.58 F1
+points [0.95, 6.21] over the baseline across 11 held-out units of two
+corpora. But mention replacement without harvested names gains 2.46
+[1.00, 3.91] on the same units (post hoc, on the seeds the screen did
+not see); three extra copies add 0.33 [−0.25, 0.92] and the names 0.80
+[−0.66, 2.26], neither established (the names comparison detects 2
+points). Neither the names' source (a mixed corpus shares most of them)
+nor the filter's settings changes this detectably, and where half the
+test names are seen nothing helps. On MuLMS the names' recall gain falls
+mostly on the fifth of the unseen names their lexicon holds (post hoc).
+On the strongest base, multi-task training with mention replacement, the
+names add 0.96 [−0.01, 1.92] fine-grained and 0.85 [−0.72, 2.42]
+coarse-grained over a matched control (post review), two further
+decisions, neither passing. We report all ten decisions and the
+criterion's revision. Mention replacement is worth using where most of a
 new document's names are unseen and training is a few hundred sentences;
-harvesting names, at six to fourteen times the training cost, is not
-shown to add to it.
-
+harvesting names, at six to fourteen times the baseline's training cost,
+is not shown to add to it.
 
 ## 1 Introduction
 
