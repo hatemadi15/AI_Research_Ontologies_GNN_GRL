@@ -497,6 +497,25 @@ def robust_rows(robust, keys):
     return rows
 
 
+def with_measures(rows, robust):
+    """The rows, the 11-unit pooled comparisons given the macro and weighted F1 of
+    ner_robustness.json's pooled_measures (post hoc, recomputed from the run files) where a row
+    has none; `rows` are changed in place and returned."""
+    measures = (robust or {}).get('pooled_measures') or {}
+    keys = {name: key for key, (name, _) in ROBUST.items()}
+    for basis, seeds in (('ten', TEN), ('decision', DECISION_SEEDS)):
+        entries = measures.get(basis) or {}
+        units = entries.get('units') or []
+        n_mulms = sum(not u.endswith('.conll') for u in units)
+        corpus = pooled_label([('mulms', n_mulms), ('fine', len(units) - n_mulms)], seeds)
+        for r in rows:
+            e = entries.get(keys.get(r['comparison'])) if r['corpus'] == corpus else None
+            for avg in ('macro', 'weighted'):
+                if e and avg in e and avg not in r['diff']:
+                    r['diff'][avg] = e[avg]
+    return rows
+
+
 def week13(analysis, robust):
     """Week 13: the label-propagation rule (13.1a to 13.1d and the reported applications),
     SOFC-Exp's article folds (13.3a, 13.3b, D6 and their reported comparisons), and the pooled
@@ -709,7 +728,7 @@ def build(results):
             + week12(analysis, gpu('ner_week12_comparisons.json'))
             + week13(analysis, robust) + week14(analysis, robust) + week17(analysis)
             + week18(gpu('ner_recall_matched.json')))
-    return dedupe(rows)
+    return with_measures(dedupe(rows), robust)
 
 
 def strict_equals_default(rows):
@@ -759,8 +778,10 @@ def table13(rows):
         "its seeds 0–200 the first), each unit the mean over its triples. The status is the "
         "micro (or named) comparison's; the other columns are reported beside it and decide "
         "nothing, except the votes of decision 10.2 and, in the rows of V6's analogue, those "
-        "of the companion study's week-5 decision." + strict + " An empty cell: the results "
-        "do not hold that quantity. Left out: the per-type analyses (Tables 8 and A2), the "
+        "of the companion study's week-5 decision; the macro and weighted cells of the pooled "
+        "11-unit rows are post hoc, recomputed from the run files (ner_robustness.py, "
+        "pooled_measures, whose micro values equal the rows' to within 0.01)." + strict
+        + " An empty cell: the results do not hold that quantity. Left out: the per-type analyses (Tables 8 and A2), the "
         "lexicon split of week 15 (Table 10), F1 on the seen and unseen test names after week 11 "
         "(ner_mentions.json; exploratory), and the companion study's comparisons, among them "
         "MR3 and multi-task + MR3 against the CRF head on MaterioMiner's papers, whose units "

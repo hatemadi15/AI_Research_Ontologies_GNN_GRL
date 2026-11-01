@@ -5697,6 +5697,61 @@ the quota overrun of 20 October, failed sessions, unreported checks) is
 being added as a table of every comparison and a record of checks and
 deviations.
 
+*Paper A, review round 12 (1 November, evening).* Three fresh reviews of
+the completeness revision (Supplementary Notes 11 to 13, Tables S11 to
+S15). The referee recommended minor revision, text only, and found no
+number wrong; the number audit (4 blocking, 5 should-fix) and the
+consistency check (15 should-fix) found wording, labels and three
+wrong times. Checked and applied:
+- *The 20 October timings (Section 3, Limitations).* The amendment of
+  18:42, which lifted the gate on the analogue again ("13.2 needs the
+  analogue whatever decision 1 says"), was written with the screen's
+  choice of V4 in hand, beside a power reading that put D5 at about
+  [+0.1, +5.9]; the plan's odds of a methods paper had fallen to about
+  0.2 at 08:13. Both are now in the main text. The first `w12a`
+  session's pulled files (`data/processed/kaggle/ner-gpu-jobs-d/20261020T050256`,
+  not committed) were compared today with the `w12e` reruns and the
+  committed files: all twelve electrolysis runs of V1, V2, V4 and V6 are
+  identical in every field but the run time and environment, predictions
+  included (V4's gain there +2.06 against MR6's +2.97); whether their
+  scores were read on 20 October is not recorded.
+- *Session times from the manifests.* The first `w12a` session ended at
+  04:53 (pulled 05:03), `w12e` at 12:25 (441 minutes; found complete at
+  13:23), `w12d:mrm6` at 00:48 (pulled 00:56) and `w13b` at 11:21; the
+  SI had given the times the notes were written. No before/after order
+  changes. Every completed GPU session after 15 October 16:00 but `w5a`
+  and `w17b` began with a repeat; the sessions without a manifest are the
+  failed or hung ones.
+- *Macro F1, pooled (post hoc, new).* `ner_robustness.py` now recomputes
+  the 11-unit pooled comparisons from the run files in micro, macro and
+  weighted F1 (`pooled_measures`; micro equal to `pooled` within 0.01),
+  and Table 13 carries them. The names against MR6 in macro F1 are +0.83
+  [−0.01, +1.67] on the decision seeds and +1.12 [+0.21, +2.03] on all
+  ten (which include the screen's selection seeds); against MR3 +1.33
+  [+0.29, +2.36] and +1.73 [+0.84, +2.61]. The referee's proposed "no
+  measure shows the names' increment" is therefore not used; Sections 1,
+  5.1 and 9 report the pooled macro readings.
+- *Mechanism wording.* The split within types is read at D = 0 (held
+  materials names +7.98 [+2.15, +13.82] against +0.89; values held
+  +1.74; other types held +9.80 from small cells); of the held names
+  recalled beyond MR6, 68% are materials names (Table 12's sixth part,
+  new column). "Names its training copies contain" is dropped (never
+  measured); the Conclusion's D11 sentence names MuLMS and the three
+  unmatched subfields; D11's outcome is described as chosen after the
+  lexicon split.
+- *Labels and records.* Table 14's mixed-corpus rows labelled by their
+  own seeds (300–900); Table 6's D = 0 row's F1 as D7's MuLMS part; D8's
+  fixed reading checked against its condition (point estimate only) and
+  the amendment of 12:32; the SI's Note 10 type shares (the other unseen
+  names are 24 to 59% materials and values, a majority in pemfc and
+  sofc), Note 12's exceptions (D11 decides on recall) and numbers not in
+  the tables, Note 7's count order, the companion's self-training in
+  Table S1 and the Ethics overlap, the MuLMS identifier coverage (16 of
+  50), the 45% of added correct predictions outside the lexicon, 64% for
+  electrolysis's materials entries.
+The main text is about 10,800 words to the Limitations; the referee's
+list of what to move to the SI is an author item (`docs/PAPER_A_NOTES.md`).
+
 ### Week 17 protocol: the harvested names on the strongest base (fixed before any run, 31 October, 19:10 UTC)
 
 *Why, and when.* The round-6 reviews of paper A (31 October) listed as a

@@ -442,8 +442,10 @@ def table14(mentions):
     for key, label in CHAIN_SETTINGS.items():
         for system, e in (mentions.get('chain', {}).get(key) or {}).items():
             name = f"{CHAIN_SYSTEMS.get(system, system)} − {CHAIN_SYSTEMS.get(e['reference'], e['reference'])}"
-            for basis, block in (('all ten', e), ('decision seeds (300–900)', e.get('decision'))):
-                if not block or (basis != 'all ten' and not key.startswith('mulms')):
+            top = 'all ten' if tuple(e.get('seeds') or range(0, 1000, 100)) == tuple(range(0, 1000, 100)) \
+                else 'decision seeds (300–900)'
+            for basis, block in ((top, e), ('decision seeds (300–900)', e.get('decision'))):
+                if not block or (block is not e and not key.startswith('mulms')):
                     continue
                 for part in ('unseen', 'seen', 'all'):
                     q = block.get(part)
@@ -666,6 +668,27 @@ def table12_curves(matched):
     return out + table12_post_hoc(matched)
 
 
+def extra_names(types, key):
+    """The names MR6 + names recalls beyond MR6 at D = 0 in a type cell of post_hoc_types, per
+    seed summed over the subfields (each subfield's recall gain times its names in the cell),
+    with the cell's share of its part's total ('' without the gains)."""
+    gains, gold = types.get('minus_mr6_at_0') or {}, types.get('gold_per_run') or {}
+
+    def extra(k):
+        e = gains.get(k)
+        if not e or 'per_unit' not in e:
+            return None
+        return sum(e['per_unit'][u] / 100 * gold[u][k] for u in e['per_unit'] if u in gold)
+    mine = extra(key)
+    if mine is None:
+        return ''
+    part = key.rsplit('_', 1)[1]
+    parts = [extra(k) for k in gains if k.rsplit('_', 1)[1] == part]
+    total = sum(x for x in parts if x is not None)
+    count = f'{mine:+.0f}'.replace('-', '\u2212')
+    return f'{count} ({100 * mine / total:.0f}%)'.replace('-', '\u2212') if total else count
+
+
 def table12_post_hoc(matched):
     """Table 12's post hoc parts added after paper A's round-11 review: the decomposition of 18.1,
     the held / not-held split within type groups, the sign-flip p-values and the rebuilt
@@ -697,14 +720,19 @@ def table12_post_hoc(matched):
                              + f", {e['n_positive']}/{e['n_units']}")
             gold = [v[key] for v in types['gold_per_run'].values()]
             cells.append(f'{min(gold):.0f}–{max(gold):.0f}')
+            cells.append(extra_names(types, key))
             rows.append(cells)
         out += ('\nTable 12, sixth part (post hoc). Recall on the unseen test names by type group and '
                 'lexicon membership: the names minus the control at D*, at the nearest grid value for '
                 'the flagged subfields, and minus MR6 at D = 0, paired over the subfields with the '
-                'subfields above 0; and the unseen test names per subfield in each cell.\n\n'
+                'subfields above 0; the unseen test names per subfield in each cell; and the names '
+                'MR6 + names recalls beyond MR6 at D = 0 in each cell, per seed summed over the '
+                "subfields (each subfield's gain times its names), with the cell's share of its "
+                "part's (held or not held) total.\n\n"
                 + markdown(['type', 'unseen names', 'names − control at D*',
                             'the flagged at the nearest recall', 'names − MR6 at D = 0',
-                            'test names per subfield'], rows))
+                            'test names per subfield', 'names recalled beyond MR6 at D = 0, per seed'],
+                           rows))
     flips = matched.get('post_hoc_sign_flip')
     if flips:
         out += ('\nExact two-sided sign-flip p over the 7 subfields (post hoc): 18.1 '

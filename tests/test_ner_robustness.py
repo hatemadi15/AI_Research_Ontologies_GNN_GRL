@@ -136,3 +136,42 @@ def test_compute_means_and_ratios(tmp_path):
     assert out['crf_mr']['n_augmented_mean'] == 200
     assert out['crf_mr']['sentences_per_epoch_ratio'] == 3.0      # (100 + 200) / 100
     assert out['crf_mr']['updates_to_best_ratio'] == 1.5           # 3 x 4 epochs / 8
+
+
+def test_pooled_measures_recompute_every_average_from_the_run_files(tmp_path):
+    """Each unit is the difference of the two systems' seed means under micro, macro and
+    weighted F1 (macro and weighted from the per-class report's fractions), in the order of the
+    pooled section's units; MuLMS's seeds follow the basis, MaterioMiner's are always ten; a
+    comparison with a missing file is left out."""
+    pytest.importorskip('scipy')
+    units = ['s1', 's2', 'p1.conll', 'p2.conll']
+    shift = {'s1': 0.0, 's2': 1.0, 'p1.conll': 2.0, 'p2.conll': 4.0}
+    base = {'crf': 50.0, 'crf_mr': 52.0, 'crf_mr6': 53.0, 'crf_mrm_topic6': 55.0, 'crf_mrm6': 55.0}
+
+    def write(prefix, family, subset):
+        for off in nr.TEN:
+            runs = []
+            for u in subset:
+                # the names gain more on later units; the screen's seeds add 3 to MuLMS's names
+                b = base[family] + (shift[u] if family.startswith('crf_mrm') else 0.0)
+                b += 3.0 if family == 'crf_mrm_topic6' and off < 300 else 0.0
+                runs.append({'run_id': u, 'f1': b, 'per_class': {
+                    'macro avg': {'f1-score': (b + 2) / 100}, 'weighted avg': {'f1-score': (b + 3) / 100}}})
+            (tmp_path / f'ner_results_{prefix}_{family}_m{off}.json').write_text(json.dumps({'runs': runs}))
+    for family in ('crf', 'crf_mr', 'crf_mr6', 'crf_mrm_topic6'):
+        write(nr.MULMS, family, units[:2])
+    for family in ('crf', 'crf_mr', 'crf_mr6', 'crf_mrm6'):
+        write(nr.FINE, family, units[2:])
+    nr.run_scores.cache_clear()
+    out = nr.pooled_measures(str(tmp_path), {'ten': {'units': units}, 'decision': {'units': units}})
+    names_mr6 = out['decision']['names_vs_mr6']
+    assert names_mr6['micro']['per_run'] == [2.0, 3.0, 4.0, 6.0]           # 55 + shift - 53
+    assert names_mr6['macro']['per_run'] == names_mr6['weighted']['per_run'] == [2.0, 3.0, 4.0, 6.0]
+    # on all ten seeds MuLMS's names carry the screen's 3 seeds at +3: +0.9 on each subfield
+    assert out['ten']['names_vs_mr6']['micro']['per_run'] == [2.9, 3.9, 4.0, 6.0]
+    assert out['ten']['mr3_vs_crf']['macro']['mean_diff'] == 2.0 and out['ten']['units'] == units
+    (tmp_path / f'ner_results_{nr.FINE}_crf_mr6_m0.json').unlink()
+    nr.run_scores.cache_clear()
+    out = nr.pooled_measures(str(tmp_path), {'ten': {'units': units}})
+    assert 'names_vs_mr6' not in out['ten'] and 'mr3_vs_crf' in out['ten']   # MR6's file is missing
+    assert nr.pooled_measures(str(tmp_path), {}) == {}

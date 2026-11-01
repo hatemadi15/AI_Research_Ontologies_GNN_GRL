@@ -18,6 +18,9 @@ comparisons files and writes results/gpu/ner_robustness.json:
       with Pearson and Spearman correlations.
   compute: per system on MuLMS's decision seeds, runs, mean and maximum runtime, mean best
       epoch and the number of augmented sentences.
+  pooled_measures: the comparisons of `pooled` in macro and weighted F1 (and micro, which
+      reproduces `pooled` to within the per-unit rounding), recomputed from the run files: each
+      unit the difference of the two systems' seed means, rounded to two decimals.
 Everything here is post hoc and labelled so in the paper; no decision rests on it.
 
 Usage:
@@ -25,6 +28,7 @@ Usage:
 """
 
 import argparse
+import functools
 import itertools
 import json
 import os
@@ -39,11 +43,17 @@ WEEK7 = 'ner_week7_comparisons.json'
 WEEK12 = 'ner_week12_comparisons.json'
 WEEK18 = 'ner_recall_matched.json'
 MULMS = 'mulms_leave_one_subfield_out'
+FINE = 'fine_leave_one_paper_out'
 DECISION = tuple(range(300, 1000, 100))
+TEN = tuple(range(0, 1000, 100))
 SYSTEMS = {'crf': 'CRF head', 'crf_mr': 'MR3', COPIES_CONTROL: 'MR6', WEEK14_WINNER: 'MR6 + names'}
 COMPARISONS = (('names_vs_crf', 'MR6 + names', 'CRF head'), ('names_vs_mr3', 'MR6 + names', 'MR3'),
                ('names_vs_mr6', 'MR6 + names', 'MR6'), ('mr6_vs_crf', 'MR6', 'CRF head'),
                ('mr6_vs_mr3', 'MR6', 'MR3'), ('mr3_vs_crf', 'MR3', 'CRF head'))
+# pooled_measures: each system's results family on MuLMS and on MaterioMiner's fine-grained papers
+FAMILIES = {'MR6 + names': (WEEK14_WINNER, WEEK14_ANALOGUE), 'MR6': (COPIES_CONTROL, COPIES_CONTROL),
+            'MR3': ('crf_mr', 'crf_mr'), 'CRF head': ('crf', 'crf')}
+AVERAGES = ('micro', 'macro', 'weighted')
 
 
 def interval(values):
@@ -338,6 +348,70 @@ def job_costs(runs, student_sec=None):
     return out
 
 
+def run_f1(run, average):
+    """A run's test F1 under `average`: micro is its `f1`; macro and weighted come from its
+    per-class report (fractions, as seqeval writes them)."""
+    if average == 'micro':
+        return run['f1']
+    return 100 * run['per_class'][f'{average} avg']['f1-score']
+
+
+@functools.lru_cache(maxsize=None)
+def run_scores(path):
+    """((unit, {average: F1}), ...) of a results file's runs, or None when it is missing."""
+    if not os.path.exists(path):
+        return None
+    with open(path) as f:
+        runs = json.load(f)['runs']
+    return tuple((r['run_id'], {avg: run_f1(r, avg) for avg in AVERAGES}) for r in runs)
+
+
+def seed_means(directory, prefix, family, seeds, average):
+    """{unit: mean over `seeds` of the runs' F1 under `average`}, or None when a file is
+    missing or a unit lacks a seed's run."""
+    values = {}
+    for off in seeds:
+        scores = run_scores(os.path.join(directory, f'ner_results_{prefix}_{family}_m{off}.json'))
+        if scores is None:
+            return None
+        for unit, f1 in scores:
+            values.setdefault(unit, []).append(f1[average])
+    if any(len(v) != len(seeds) for v in values.values()):
+        return None
+    return {unit: statistics.mean(v) for unit, v in values.items()}
+
+
+def pooled_measures(directory, robust_pooled):
+    """Post hoc: per basis of `pooled` (its units, in its order) and comparison, the 95%
+    interval of the mean paired difference under each F1 average, recomputed from the run
+    files (MuLMS's seeds per basis, MaterioMiner's 10), each unit's difference rounded to two
+    decimals; a comparison whose files are missing is left out."""
+    out = {}
+    for basis, seeds in (('ten', TEN), ('decision', DECISION)):
+        units = (robust_pooled.get(basis) or {}).get('units')
+        if not units:
+            continue
+        entries = {}
+        for key, system, reference in COMPARISONS:
+            entry = {}
+            for average in AVERAGES:
+                diffs = {}
+                for k, (prefix, s) in enumerate(((MULMS, seeds), (FINE, TEN))):
+                    a = seed_means(directory, prefix, FAMILIES[system][k], s, average)
+                    b = seed_means(directory, prefix, FAMILIES[reference][k], s, average)
+                    if a is None or b is None:
+                        break
+                    diffs.update({u: a[u] - b[u] for u in a if u in b})
+                if any(u not in diffs for u in units):
+                    break
+                entry[average] = interval([round(diffs[u], 2) for u in units])
+            if len(entry) == len(AVERAGES):
+                entries[key] = entry
+        if entries:
+            out[basis] = {**entries, 'units': list(units)}
+    return out
+
+
 def load(path):
     if not os.path.exists(path):
         return {}
@@ -356,7 +430,8 @@ def main(argv=None):
     robust, grid = pooled(analysis, week12), grids(analysis, week7, week12)
     matched = load(os.path.join(args.results, WEEK18))
     out = {'pooled': robust, 'grids': grid, 'coverage_gain': coverage_gain(analysis),
-           'detectable': detectable(analysis, robust, grid, matched), 'compute': compute(args.results)}
+           'detectable': detectable(analysis, robust, grid, matched), 'compute': compute(args.results),
+           'pooled_measures': pooled_measures(args.results, robust)}
     path = args.out or os.path.join(args.results, 'ner_robustness.json')
     with open(path, 'w') as f:
         json.dump(out, f, indent=1)
@@ -366,6 +441,13 @@ def main(argv=None):
             if e:
                 print(f"  {basis:8s} {label} minus {ref}: {e['mean_diff']:+.2f} [{e['ci95'][0]:+.2f}, {e['ci95'][1]:+.2f}], "
                       f"{e['n_positive']}/{e['n_units']} positive, sign-flip p = {e['sign_flip_p']}")
+    for basis, entries in out['pooled_measures'].items():
+        for key, label, ref in COMPARISONS:
+            e = entries.get(key)
+            if e:
+                print(f"  {basis:8s} {label} minus {ref}: " + ', '.join(
+                    f"{avg} {e[avg]['mean_diff']:+.2f} [{e[avg]['ci95'][0]:+.2f}, {e[avg]['ci95'][1]:+.2f}]"
+                    for avg in AVERAGES))
     cg = out['coverage_gain']
     if cg:
         print(f"  coverage vs names gain r = {cg['pearson']['coverage_vs_names_gain']}, "

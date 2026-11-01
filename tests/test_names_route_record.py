@@ -570,3 +570,25 @@ def test_smoke_the_stored_results():
     for numbers in ('+2.12 [+1.14, +3.09]', '+2.71 [+0.22, +5.20]', '+3.00 [+1.98, +4.02]',
                     '+3.78 [+2.47, +5.10]', f'+0.19 [{M}2.28, +2.66]', '74.01 [67.89, 80.13]'):
         assert numbers in table, numbers
+
+
+def test_pooled_rows_get_the_post_hoc_macro_and_weighted_f1():
+    """The 11-unit pooled rows take ner_robustness.json's pooled_measures by basis and
+    comparison; a row's own macro cell is kept, and other corpora's rows are left alone."""
+    units = list(SUBFIELDS) + list(PAPERS)
+
+    def e(mean):
+        return {'mean_diff': mean, 'ci95': [mean - 1, mean + 1], 'per_run': [mean] * 11, 'n_positive': 11}
+    robust = {'pooled_measures': {'decision': {'units': units, 'names_vs_mr6': {
+        'micro': e(0.8), 'macro': e(0.83), 'weighted': e(0.89)}}}}
+    decision = 'pooled, 11 units: MuLMS 7 (300–900) + MaterioMiner fine 4'
+    rows = [nr.row(nr.W14, decision, 'MR6 + names − MR6', 'D7: no', e(0.8)),
+            nr.row(nr.W14, 'pooled, 11 units: MuLMS 7 (0–900) + MaterioMiner fine 4',
+                   'MR6 + names − MR6', 'post hoc', e(1.02)),
+            nr.row(nr.W14, decision, 'MR6 − MR3', 'post hoc', {'micro': e(0.33), 'macro': e(9.9)})]
+    out = nr.with_measures(rows, robust)
+    assert nr.cell(out[0]['diff']['macro']) == '+0.83 [−0.17, +1.83]'
+    assert out[0]['diff']['weighted']['mean_diff'] == 0.89
+    assert 'macro' not in out[1]['diff']                      # the 10-seed basis has no entry here
+    assert out[2]['diff']['macro']['mean_diff'] == 9.9        # a row's own value is kept
+    assert nr.with_measures(rows, None) == rows

@@ -446,7 +446,13 @@ decision seeds the runtime, the best epoch (a 0-based index in the run
 files, and the count of epochs up to it), the mean count of augmented
 sentences and, against the CRF head, the ratio of sentences per epoch
 and of updates up to the best epoch (`compute`; the names system's job
-costs under `job_costs`).
+costs under `job_costs`). `pooled_measures` (added 1 November, post hoc,
+for paper A's review round 12) recomputes the same pooled comparisons on
+both seed bases from the run files in micro, macro and weighted F1; its
+micro values equal `pooled`'s to within 0.01, and its macro and weighted
+values fill the pooled rows of Table 13 (Supplementary Table S11). In
+macro F1 the names against MR6 are +0.83 [−0.01, +1.67] on the decision
+seeds and +1.12 [+0.21, +2.03] on all ten.
 `gpu/ner_week5_seed_analysis.json` adds `week14.types`, the per-type F1 of
 the names method and the 6-copy control against the CRF head on MuLMS's
 decision seeds and MaterioMiner's papers (Tables 8 and A2,

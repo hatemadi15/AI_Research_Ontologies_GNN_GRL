@@ -20,9 +20,9 @@ Table 14. The unseen-name trade in full (ner_mentions.json, `chain`): per settin
 | MuLMS, 7 subfields | MR6 + names − MR6 | decision seeds (300–900) | unseen names | +0.56 [−1.44, +2.56] | +2.56 [+0.76, +4.36] | −2.22 [−5.03, +0.60] |
 | MuLMS, 7 subfields | MR6 + names − MR6 | decision seeds (300–900) | seen names | +0.47 [−1.39, +2.33] | +1.89 [−0.70, +4.48] | −0.96 [−3.61, +1.68] |
 | MuLMS, 7 subfields | MR6 + names − MR6 | decision seeds (300–900) | all entities | +0.51 [−1.51, +2.53] | +2.48 [+0.67, +4.29] | −2.15 [−4.95, +0.66] |
-| MuLMS, 7 subfields | MR6 + names (mixed corpus) − MR6 | all ten | unseen names | +0.64 [−1.33, +2.62] | +2.47 [−0.09, +5.02] | −1.85 [−3.56, −0.15] |
-| MuLMS, 7 subfields | MR6 + names (mixed corpus) − MR6 | all ten | seen names | +0.99 [−0.70, +2.67] | +2.43 [−0.71, +5.58] | −0.02 [−2.48, +2.45] |
-| MuLMS, 7 subfields | MR6 + names (mixed corpus) − MR6 | all ten | all entities | +0.70 [−1.19, +2.58] | +2.51 [+0.04, +4.98] | −1.68 [−3.35, −0.02] |
+| MuLMS, 7 subfields | MR6 + names (mixed corpus) − MR6 | decision seeds (300–900) | unseen names | +0.64 [−1.33, +2.62] | +2.47 [−0.09, +5.02] | −1.85 [−3.56, −0.15] |
+| MuLMS, 7 subfields | MR6 + names (mixed corpus) − MR6 | decision seeds (300–900) | seen names | +0.99 [−0.70, +2.67] | +2.43 [−0.71, +5.58] | −0.02 [−2.48, +2.45] |
+| MuLMS, 7 subfields | MR6 + names (mixed corpus) − MR6 | decision seeds (300–900) | all entities | +0.70 [−1.19, +2.58] | +2.51 [+0.04, +4.98] | −1.68 [−3.35, −0.02] |
 | MaterioMiner fine, 4 papers | MR3 − CRF head | all ten | unseen names | +3.19 [+1.66, +4.72] | +4.51 [+2.27, +6.74] | +0.35 [−2.01, +2.71] |
 | MaterioMiner fine, 4 papers | MR3 − CRF head | all ten | seen names | +1.49 [−1.31, +4.30] | +3.38 [−0.02, +6.77] | −0.49 [−6.98, +6.00] |
 | MaterioMiner fine, 4 papers | MR3 − CRF head | all ten | all entities | +2.77 [+1.51, +4.03] | +4.11 [+2.97, +5.25] | +0.32 [−3.23, +3.87] |

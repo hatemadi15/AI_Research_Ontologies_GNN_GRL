@@ -403,15 +403,19 @@ def test_table12_post_hoc_parts():
                                     'mr6_at_0_minus_control_at_d_star': e(3.96),
                                     'matched_only': {'names_minus_mr6_at_0': e(5.92, 4, 4),
                                                      'mr6_at_0_minus_control_at_d_star': e(0.14, 4, 1)}},
-         'post_hoc_types': {'minus_control_at_d_star': {'MAT_in': e(12.02)},
-                            'minus_control_nearest': {'MAT_in': e(9.87)},
-                            'minus_mr6_at_0': {'MAT_in': None},
-                            'gold_per_run': {'a': {'MAT_in': 184.0}, 'b': {'MAT_in': 1022.0}}},
+         'post_hoc_types': {'minus_control_at_d_star': {'MAT_in': e(12.02), 'other_in': e(2.87)},
+                            'minus_control_nearest': {'MAT_in': e(9.87), 'other_in': e(0.94)},
+                            'minus_mr6_at_0': {'MAT_in': None,
+                                               'other_in': {**e(9.8), 'per_unit': {'a': 10.0, 'b': 5.0}}},
+                            'gold_per_run': {'a': {'MAT_in': 184.0, 'other_in': 6.0},
+                                             'b': {'MAT_in': 1022.0, 'other_in': 577.0}}},
          'post_hoc_sign_flip': {'18.1': 0.0156, '18.2': 0.1406},
          'post_hoc_lexicon_types': {'a': {'MAT': {'distinct': 2392, 'entries': 29748}}}}
     text = pt.table12_post_hoc(m)
     assert '| the 4 matched subfields | +5.92 [+4.92, +6.92] | +0.14 [−0.86, +1.14] |' in text
-    assert '| MAT | held | +12.02 [+11.02, +13.02], 7/7 | +9.87 [+8.87, +10.87], 7/7 |  | 184–1022 |' in text
+    assert '| MAT | held | +12.02 [+11.02, +13.02], 7/7 | +9.87 [+8.87, +10.87], 7/7 |  | 184–1022 |  |' in text
+    # 10% of 6 names and 5% of 577 names: about 29 more, all of the held part's recalled names
+    assert '| other | held | +2.87 [+1.87, +3.87], 7/7 | +0.94 [−0.06, +1.94], 7/7 | +9.80 [+8.80, +10.80], 7/7 | 6–577 | +29 (100%) |' in text
     assert '18.1 0.0156, 18.2 0.1406' in text and '| a | 2,392 (29,748) |' in text
     assert pt.table12_post_hoc({}) == ''
 
@@ -425,13 +429,18 @@ def test_table14_chain_and_table15_lexicon_units():
                 'precision': {'mean_diff': p, 'ci95': [p - 1, p + 1]}}
     mentions = {'chain': {'mulms_leave_one_subfield_out': {
         'crf_mrm_topic6': {'reference': 'crf_mr6', 'unseen': q(0.93, 3.24, -2.23), 'seen': q(0.77),
-                           'all': q(0.85), 'decision': {'unseen': q(0.56, 2.56, -2.22)}}},
+                           'all': q(0.85), 'decision': {'unseen': q(0.56, 2.56, -2.22)}},
+        'crf_mrm_mixed6': {'reference': 'crf_mr6', 'seeds': list(range(300, 1000, 100)),
+                           'all': q(0.70)}},
         'fine_leave_one_paper_out': {'crf_mr': {'reference': 'crf', 'unseen': q(3.19),
                                                 'decision': {'unseen': q(9.9)}}}}}
     text = pt.table14(mentions)
     assert '| MuLMS, 7 subfields | MR6 + names − MR6 | all ten | unseen names | +0.93 [−0.07, +1.93] | +3.24 [+2.24, +4.24] | −2.23 [−3.23, −1.23] |' in text
     assert '| MuLMS, 7 subfields | MR6 + names − MR6 | decision seeds (300–900) | unseen names | +0.56' in text
     assert 'MR3 − CRF head | all ten | unseen names' in text and '+9.90' not in text   # no decision seeds off MuLMS
+    # a system run on the decision seeds alone is labelled by its own seeds
+    assert '| MR6 + names (mixed corpus) − MR6 | decision seeds (300–900) | all entities | +0.70' in text
+    assert 'mixed corpus) − MR6 | all ten' not in text
     data = {'mulms': {'comparisons': {'names_vs_mr6': {'per_unit': {
         'sofc': {'gain_in': 14.09, 'gain_out': 1.51, 'in_minus_out': 12.58}}}}},
             'fine': {'comparisons': {'names_vs_mr6': {'per_unit': {
