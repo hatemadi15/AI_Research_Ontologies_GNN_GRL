@@ -44,6 +44,8 @@ ANALYSIS = 'ner_week5_seed_analysis.json'
 WEEK12 = 'ner_week12_comparisons.json'
 WEEK18 = 'ner_recall_matched.json'
 ROBUST = 'ner_robustness.json'
+LEXICON = 'ner_lexicon_recall.json'
+MENTIONS = 'ner_mentions.json'
 # the recomputed interval may differ from the stored one by the per-unit rounding (two decimals)
 TOLERANCE = 0.02
 # the verdict printed for an interval above 0 where "passes" would mislead: D5' is a post hoc
@@ -156,17 +158,20 @@ def layout(n):
     return layouts[n]
 
 
-def pair_rho(a, b):
+def pair_rho(a, b, rho=None):
     """The assumed correlation of two units' differences: 1/K within a leave-one-out design,
-    SHARED_POOL_RHO for two MuLMS subfields whose pools share an article, else 0."""
+    SHARED_POOL_RHO for two MuLMS subfields whose pools share an article, else 0. rho:
+    {'materiominer', 'sofc_exp', 'mulms': correlation} overriding those values."""
+    rho = rho or {}
     if a[0] != b[0]:
         return 0.0
     if a[0] in LEAVE_ONE_OUT:
-        return 1 / LEAVE_ONE_OUT[a[0]]
-    return SHARED_POOL_RHO if set(MULMS_POOLS[a[1]]) & set(MULMS_POOLS[b[1]]) else 0.0
+        return rho.get(a[0], 1 / LEAVE_ONE_OUT[a[0]])
+    shared = set(MULMS_POOLS[a[1]]) & set(MULMS_POOLS[b[1]])
+    return rho.get('mulms', SHARED_POOL_RHO) if shared else 0.0
 
 
-def dependent_t(values, units):
+def dependent_t(values, units, rho=None):
     """The t test of the mean of `values` when unit pairs are correlated (pair_rho): the
     variance of the mean S^2 / (1 - rho_bar) * (n + sum_ij rho_ij) / n^2 (sum over ordered pairs
     i != j, rho_bar its mean), n - 1 degrees of freedom; with the ratio of its standard error to
@@ -174,7 +179,7 @@ def dependent_t(values, units):
     from scipy import stats
     n = len(values)
     mean, s2 = statistics.fmean(values), statistics.variance(values)
-    rho = [pair_rho(units[i], units[j]) for i in range(n) for j in range(n) if i != j]
+    rho = [pair_rho(units[i], units[j], rho) for i in range(n) for j in range(n) if i != j]
     off = sum(rho)
     se = math.sqrt(s2 / (1 - off / (n * (n - 1))) * (n + off) / n ** 2)
     t = mean / se
@@ -195,6 +200,39 @@ def dependence(rows):
     return out
 
 
+# the correlation each passing decision's dependence check turns on: the papers' for those
+# with MaterioMiner units (the MuLMS pairs held at SHARED_POOL_RHO), the shared pools' for D11
+TIPPING = {'D3': 'materiominer', 'D4': 'materiominer', 'D5': 'materiominer',
+           "D5'": 'materiominer', 'D11': 'mulms'}
+
+
+def tipping(rows, top=0.95, steps=60):
+    """Post hoc: per passing decision, the correlation (of TIPPING's group; the others as in
+    pair_rho) at which its dependence-adjusted interval reaches 0, by bisection on [0, top]; 0
+    if it covers 0 without correlation, None if it stays above 0 up to `top`."""
+    out = {}
+    for r in rows:
+        group = TIPPING.get(r['decision'])
+        if not group or not r['passes']:
+            continue
+        units = layout(r['n_units'])
+
+        def lower(x):
+            return dependent_t(r['per_unit'], units, {group: x})['ci95'][0]
+        if lower(0.0) <= 0:
+            out[r['decision']] = {'group': group, 'rho': 0.0}
+            continue
+        if lower(top) > 0:
+            out[r['decision']] = {'group': group, 'rho': None}
+            continue
+        lo, hi = 0.0, top
+        for _ in range(steps):
+            mid = (lo + hi) / 2
+            lo, hi = (mid, hi) if lower(mid) > 0 else (lo, mid)
+        out[r['decision']] = {'group': group, 'rho': round(hi, 2)}
+    return out
+
+
 def shared_pool_pairs():
     """The pairs of MuLMS subfields whose training pools share an article, with the articles."""
     return [[a, b, sorted(set(MULMS_POOLS[a]) & set(MULMS_POOLS[b]))]
@@ -207,6 +245,81 @@ def reported(robust):
     (ner_robustness.json), which the paper quotes with its P value."""
     return {basis: t_test([float(v) for v in robust['pooled'][basis]['mr3_vs_crf']['per_run']])
             for basis in ('decision', 'ten')}
+
+
+def p_of(entry, n=None):
+    """The two-sided P value of the one-sample t test behind a stored paired difference: from
+    its per-unit values ('per_run', or 'per_unit' as a list or a {unit: value} map) if it has
+    them, else from its mean and 95% Student-t interval over n units, which determine it."""
+    from scipy import stats
+    values = entry.get('per_run', entry.get('per_unit'))
+    if isinstance(values, dict):
+        values = list(values.values())
+    if values:
+        return t_test([float(v) for v in values])['p_two_sided']
+    mean, (lo, hi) = entry.get('mean_diff', entry.get('mean')), entry['ci95']
+    se = (hi - lo) / 2 / float(stats.t.ppf(0.975, n - 1))
+    return round(float(2 * stats.t.sf(abs(mean / se), n - 1)), 4)
+
+
+def inferences(analysis, robust, matched, lexicon, mentions):
+    """Post hoc (round 16): the two-sided t test P values of the reported, non-decision
+    comparisons from which the paper draws an inference, each with its stored interval; the
+    unseen-name recall and precision on MuLMS (ner_mentions.json `chain`) store no per-unit
+    values, so theirs come from the interval and n = 7."""
+    chain = mentions['chain']['mulms_leave_one_subfield_out']['crf_mrm_topic6']['decision']['unseen']
+    split = lexicon['mulms']['comparisons']['names_vs_mr6']
+
+    def part(key):
+        return {'mean_diff': split[key]['mean_diff'], 'ci95': split[key]['ci95'],
+                'per_unit': {u: v[key] for u, v in split['per_unit'].items()}}
+    entries = {
+        'mr3_vs_crf_11_decision': robust['pooled']['decision']['mr3_vs_crf'],
+        'mr6_vs_mr3_11_decision': robust['pooled']['decision']['mr6_vs_mr3'],
+        'mr3_vs_crf_16': analysis['week13']['pooled']['crf_mr']['minus_crf'],
+        'mr6_vs_crf_mulms_decision': analysis['week14']['copies']['mulms']['decision']['control']['minus_crf']['micro'],
+        'sofc_names_vs_mr3': analysis['week13']['folds']['crf_mrm6']['minus_crf_mr']['micro'],
+        'unseen_recall_names_vs_mr6': chain['recall'],
+        'unseen_precision_names_vs_mr6': chain['precision'],
+        'held_recall_names_vs_mr6': part('gain_in'),
+        'held_in_minus_out': part('in_minus_out'),
+        'held_names_vs_best_bias': matched['post_hoc_curves']['names_minus_best']['recall_in'],
+        'other_unseen_at_matched_bias': matched['prespecified']['recall_out'],
+    }
+    out = {}
+    for key, e in entries.items():
+        n = len(e.get('per_run') or e.get('per_unit') or []) or 7
+        out[key] = {'mean_diff': e.get('mean_diff', e.get('mean')), 'ci95': list(e['ci95']),
+                    'n_units': n, 'p_two_sided': p_of(e, n)}
+    return out
+
+
+def mr3_materiominer(results_dir, offsets=range(300, 1000, 100)):
+    """Post hoc (round 16): the companion study's MR3 decisions on MaterioMiner's held-out
+    papers (crf_mr against crf, leave one paper out) on the seeds the stage-1 screen did not
+    use, 300 to 900, and on all ten as decided: per granularity the t test over the papers,
+    each paper's value the difference of the two systems' seed means."""
+    out = {}
+    for g in ('fine', 'coarse'):
+        means = {}
+        for system in ('crf', 'crf_mr'):
+            runs = {}
+            for off in offsets:
+                path = os.path.join(results_dir,
+                                    f'ner_results_{g}_leave_one_paper_out_{system}_m{off}.json')
+                for r in load(path)['runs']:
+                    runs.setdefault(r['run_id'], []).append(r['f1'])
+            means[system] = {k: statistics.fmean(v) for k, v in runs.items()}
+        papers = sorted(means['crf'])
+        out[g] = t_test([means['crf_mr'][p] - means['crf'][p] for p in papers])
+    return out
+
+
+def d5_coarse(rows):
+    """Post hoc: D5's pooled comparison with MaterioMiner's coarse-grained papers (D4's
+    per-unit values) in place of the fine-grained ones, MuLMS on all ten seeds as in D5."""
+    by = {r['decision']: r for r in rows}
+    return t_test(by['D5']['per_unit'][:len(MULMS_UNITS)] + by['D4']['per_unit'])
 
 
 def welch_average(a, b):
@@ -241,6 +354,7 @@ def main(argv=None):
     parser.add_argument('--out', default=None)
     args = parser.parse_args(argv)
     inputs = [load(os.path.join(args.results, name)) for name in (ANALYSIS, WEEK12, WEEK18, ROBUST)]
+    lexicon, mentions = (load(os.path.join(args.results, name)) for name in (LEXICON, MENTIONS))
     rows = decision_tests(*inputs)
     out = {'note': ('Reporting only, computed on 1 November 2026 for the journal: the decisions '
                     'were taken by the registered interval rule, which is a one-sided t test at '
@@ -262,11 +376,18 @@ def main(argv=None):
                                            'mulms_shared_pool': SHARED_POOL_RHO},
                                    'mulms_pools': {k: list(v) for k, v in MULMS_POOLS.items()},
                                    'shared_pool_pairs': shared_pool_pairs(),
-                                   'decisions': dependence(rows)},
+                                   'decisions': dependence(rows),
+                                   'tipping': tipping(rows)},
            'post_hoc_reported': {'note': ('t tests of comparisons the paper quotes with a P value: '
                                           'MR3 minus the CRF head over the 11 pooled units, on '
                                           "MuLMS's decision seeds (decision) and all ten (ten)"),
-                                 'mr3_vs_crf': reported(inputs[3])}}
+                                 'mr3_vs_crf': reported(inputs[3]),
+                                 'inferences': inferences(inputs[0], inputs[3], inputs[2],
+                                                          lexicon, mentions),
+                                 'mr3_materiominer_decision_seeds': mr3_materiominer(args.results),
+                                 'mr3_materiominer_all_seeds': mr3_materiominer(
+                                     args.results, range(0, 1000, 100)),
+                                 'd5_coarse': d5_coarse(rows)}}
     path = args.out or os.path.join(args.results, 'ner_decision_tests.json')
     with open(path, 'w') as f:
         json.dump(out, f, indent=1)
@@ -284,6 +405,16 @@ def main(argv=None):
         print(f"{key:4s} units correlated: {e['mean_diff']:+.2f} [{e['ci95'][0]:+.2f}, "
               f"{e['ci95'][1]:+.2f}], P two-sided {e['p_two_sided']:.4f}, SE x{e['se_ratio']:.3f}, "
               f"{e['correlated_pairs']} correlated pairs{'' if e['above_0'] else ', covers 0'}")
+    for key, e in out['post_hoc_dependence']['tipping'].items():
+        print(f"{key:4s} interval reaches 0 at a {e['group']} correlation of {e['rho']}")
+    rep = out['post_hoc_reported']
+    for key, e in rep['inferences'].items():
+        print(f"{key}: {e['mean_diff']:+.2f} {e['ci95']}, n {e['n_units']}, P {e['p_two_sided']:.4f}")
+    for basis in ('mr3_materiominer_decision_seeds', 'mr3_materiominer_all_seeds'):
+        for g, e in rep[basis].items():
+            print(f"{basis} {g}: {e['mean_diff']:+.2f} {e['ci95']}, P {e['p_two_sided']:.4f}")
+    e = rep['d5_coarse']
+    print(f"D5 with coarse papers: {e['mean_diff']:+.2f} {e['ci95']}, P {e['p_two_sided']:.4f}")
     for basis, e in out['post_hoc_reported']['mr3_vs_crf'].items():
         print(f"MR3 - CRF head, 11 units, {basis}: {e['mean_diff']:+.2f} [{e['ci95'][0]:+.2f}, "
               f"{e['ci95'][1]:+.2f}], P two-sided {e['p_two_sided']:.4f}")

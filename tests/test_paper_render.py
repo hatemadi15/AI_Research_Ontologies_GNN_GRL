@@ -40,7 +40,7 @@ def test_parse_and_style():
     assert set(bib) == {'gupta2022matscibert', 'devlin2019bert', 'nakayama2018seqeval', 'many2020authors'}
     assert pr.format_entry(bib['gupta2022matscibert']) == (
         'Gupta, T., Zaki, M., Krishnan, N. M. A. & Mausam. MatSciBERT: A materials domain language '
-        'model. *npj Computational Materials* **8**, 102 (2022). https://doi.org/10.1038/s41524-022-00784-w')
+        'model. *npj Comput. Mater.* **8**, 102 (2022). https://doi.org/10.1038/s41524-022-00784-w')
     assert pr.format_entry(bib['devlin2019bert']).startswith(
         'Devlin, J., Chang, M.-W., Lee, K. & Toutanova, K. BERT: Pre-training')
     assert '4171–4186 (Association for Computational Linguistics, 2019).' in pr.format_entry(bib['devlin2019bert'])
@@ -63,7 +63,7 @@ def test_numbering_and_sections():
     assert si.startswith('Note<sup>1</sup>.') and si.endswith('## Supplementary references\n\n1. Devlin, J., '
                                                        'Chang, M.-W., Lee, K. & Toutanova, K. BERT: '
                                                        'Pre-training of Deep Bidirectional Transformers. '
-                                                       'In *Proceedings of NAACL* 4171–4186 '
+                                                       'In *Proc. NAACL* 4171–4186 '
                                                        '(Association for Computational Linguistics, 2019).\n')
 
 
@@ -128,3 +128,10 @@ def test_preprints_questions_and_no_empty_section():
     assert pr.format_entry(bib['loshchilov2019decoupled']).endswith(
         '(2019). https://arxiv.org/abs/1711.05101')
     assert pr.render('No citations here.\n', bib, 'Supplementary references') == 'No citations here.\n'
+
+
+def test_journal_abbreviations():
+    """Journals take their Nature-style abbreviations; proceedings titles start "Proc."."""
+    assert pr.venue_name('Nature Communications') == 'Nat. Commun.'
+    assert pr.venue_name('Proceedings of the 58th Annual Meeting') == 'Proc. 58th Annual Meeting'
+    assert pr.venue_name('Findings of the ACL') == 'Findings of the ACL'

@@ -499,7 +499,7 @@ def table16(tests):
     interval and P with the units correlated where their training sets share documents;
     reporting only, the decisions rest on the intervals."""
     dependence = (tests.get('post_hoc_dependence') or {}).get('decisions', {})
-    header = ['decision', 'comparison', 'units', 'Δ [95% CI]', 'SD', 't (df)', 'P one-sided',
+    header = ['decision or reading', 'comparison', 'units', 'Δ [95% CI]', 'SD', 't (df)', 'P one-sided',
               'P two-sided', 'sign-flip P', 'verdict', 'units correlated: 95% CI, P (post hoc)']
 
     def correlated(key):

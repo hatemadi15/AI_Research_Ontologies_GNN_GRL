@@ -100,3 +100,41 @@ def test_mulms_pools_match_the_folds():
             if doc[:-len('.conll')] not in docs:
                 docs.append(doc[:-len('.conll')])
         assert set(docs) == set(dt.MULMS_POOLS[name]), name
+
+
+def test_p_of_from_values_and_from_the_interval():
+    """p_of gives the t test's two-sided P from per-unit values when an entry has them, and
+    the same P from the mean and 95% interval when it has not."""
+    pytest.importorskip('scipy')
+    values = [1.0, 2.0, 3.0, 4.0]
+    full = dt.t_test(values)
+    assert dt.p_of({'per_run': values}) == full['p_two_sided']
+    assert dt.p_of({'per_unit': {'a': 1.0, 'b': 2.0, 'c': 3.0, 'd': 4.0}}) == full['p_two_sided']
+    from_ci = dt.p_of({'mean_diff': full['mean_diff'], 'ci95': full['ci95']}, n=4)
+    assert abs(from_ci - full['p_two_sided']) < 0.002
+
+
+def test_committed_tipping_inferences_and_readings():
+    """On the committed results: the correlation at which each pass's adjusted interval
+    reaches 0, the P values of the reported inferences, MR3's MaterioMiner decisions on the
+    decision seeds (its stored all-seed decisions reproduced) and D5 with coarse papers."""
+    pytest.importorskip('scipy')
+    names = (dt.ANALYSIS, dt.WEEK12, dt.WEEK18, dt.ROBUST, dt.LEXICON, dt.MENTIONS)
+    if not all(os.path.exists(os.path.join(RESULTS, n)) for n in names):
+        pytest.skip('results files not present')
+    analysis, week12, matched, robust, lexicon, mentions = (dt.load(os.path.join(RESULTS, n))
+                                                            for n in names)
+    rows = dt.decision_tests(analysis, week12, matched, robust)
+    tip = dt.tipping(rows)
+    assert {k: v['rho'] for k, v in tip.items()} == {'D3': 0.23, 'D4': 0.28, 'D5': 0.44,
+                                                     "D5'": 0.54, 'D11': 0.53}
+    inf = dt.inferences(analysis, robust, matched, lexicon, mentions)
+    assert inf['held_recall_names_vs_mr6']['p_two_sided'] == 0.0044
+    assert inf['mr3_vs_crf_16']['n_units'] == 16 and inf['mr3_vs_crf_16']['p_two_sided'] == 0.0184
+    if not os.path.exists(os.path.join(RESULTS, 'ner_results_fine_leave_one_paper_out_crf_mr_m300.json')):
+        pytest.skip('run files not present')
+    every = dt.mr3_materiominer(RESULTS, range(0, 1000, 100))
+    assert every['fine']['ci95'] == [1.51, 4.03] and every['coarse']['ci95'] == [0.06, 2.51]
+    seven = dt.mr3_materiominer(RESULTS)
+    assert seven['fine']['ci95'] == [0.1, 5.03] and seven['coarse']['ci95'] == [-0.63, 4.08]
+    assert dt.d5_coarse(rows)['ci95'] == [0.09, 5.25]

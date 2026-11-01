@@ -23,19 +23,22 @@ figure { break-before: page; break-inside: avoid; margin: 0; }
 figure img { display: block; max-width: 100%; max-height: 175mm; margin: 0 auto 6mm; }
 figure figcaption p { font-size: 9.5pt; }
 h2.tables { break-before: page; }
+h2.legends { break-before: page; }
+figure.first { break-before: avoid; }
+section.tbl > p:first-child { break-inside: avoid; break-after: avoid; }
 sup { font-size: 70%; line-height: 0; vertical-align: super; }
 </style></head><body>
 <h1>Harvesting names from unlabeled papers to augment materials named entity recognition on unseen documents</h1>
 <p>Hatem Madi (affiliation to be added; hatem.madi15@gmail.com)</p>
 <h2>Abstract</h2>
 <p>Materials named-entity recognizers trained on few annotated papers miss
-many names no training sentence annotates. In pre-registered tests we
+names no training sentence annotates. In pre-registered tests we
 added names three baseline taggers confidently agree on in 40,000
 unlabeled sentences to mention replacement, which swaps names in copied
 sentences. Over 11 held-out subfields and papers of two corpora this
-gains 3.58 F1 points [95% CI 0.95, 6.21] over the baseline, mention
-replacement alone 2.35 [0.94, 3.75] (post hoc). This pooled criterion
-was adopted mid-study, when mention replacement already met it; the
+gains 3.58 F1 points [95% CI 0.95, 6.21] over the baseline, three-copy
+mention replacement alone 2.35 [0.94, 3.75] (post hoc). This pooled criterion
+was adopted mid-study, when mention replacement met it; the
 original, gains on both corpora, failed; a third corpus shows no gain.
 Over six-copy mention replacement the names add 0.80 [−0.66, 2.26] on
 seeds unused in selection, not established. On MuLMS they raise recall
@@ -70,12 +73,13 @@ study, H.M., in preparation; Methods, <em>Relation to a companion study</em>).</
 <p>Text mining has become a source of materials data<sup>6,7</sup>. Besides MatSciBERT,
 ChemDataExtractor<sup>8</sup> combines dictionaries,
 rules and a CRF tagger; Weston et al.<sup>9</sup> applied a
-materials NER model at scale; Trewartha et al.<sup>10</sup>
+materials named-entity recognition (NER) model at scale; Trewartha et al.<sup>10</sup>
 and MatSci-NLP<sup>11</sup> benchmark materials language models;
 and large language models now extract structured materials information
 by fine-tuning<sup>12</sup> or prompting<sup>13</sup>. Potu et al.<sup>14</sup> report 66.74 F1 on
 MaterioMiner against 78.56 in distribution, a gap of about 12 points
-where our three-paper models lose 28–31 (companion study). Random
+where our three-paper models lose 28–31 points fine-grained and 17–20
+coarse-grained (companion study). Random
 sentence splits leak names between training and test<sup>15</sup>,
 and their use is disputed<sup>16,17</sup>; taggers
 score far lower on unseen mentions<sup>18–20</sup>, lean on name regularity and the
@@ -84,12 +88,12 @@ not close that gap with contextual embeddings<sup>23</sup>,
 and are exposed when a test set's entities are switched<sup>24</sup>. Seed variance and significance on small
 test sets are treated by Reimers and Gurevych<sup>25</sup>, Dror
 et al.<sup>26</sup> and Bouthillier et al.<sup>27</sup>, and Card et al.<sup>28</sup> show how
-underpowered typical NLP comparisons are, which is why Supplementary Note
+underpowered typical natural language processing comparisons are, which is why Supplementary Note
 9 reports what each comparison here could detect.</p>
 <p>Mention replacement, which swaps annotated
 mentions for others of the same type, is one of the simple augmentations
 Dai and Adel<sup>29</sup> compared on a materials synthesis corpus<sup>30</sup> and a clinical one; it helped most with small
-training sets, and its gains shrink and reverse as training grows<sup>31</sup>; most augmentations make the tagger memorise
+training sets, and its gains shrink and reverse as training grows<sup>31</sup>; most augmentations make the tagger memorize
 entities<sup>32</sup>, which is why unseen entities are scored
 separately here. The replacements otherwise come from the training set<sup>33</sup>, a masked language model<sup>34</sup>, a
 generative model<sup>35</sup>, related sentences<sup>36</sup> or
@@ -107,7 +111,7 @@ confident entities as a gazetteer feature; GEMNET<sup>47</sup> gates
 gazetteer features against the context; Song et al.<sup>48</sup>
 find no clear gain from replacing annotated entities with gazetteer
 entries, on a corpus whose test names are mostly seen. AutoNER<sup>49</sup>, BOND<sup>50</sup> and weak supervision with
-labelling functions<sup>51</sup> train taggers from dictionaries,
+labeling functions<sup>51</sup> train taggers from dictionaries,
 heuristics and unlabeled text; students learn from several teachers on
 unlabeled target-language text<sup>52</sup>, and teachers' agreement
 selects labels in distantly supervised NER<sup>53</sup>. Our
@@ -126,8 +130,8 @@ Three CRF heads trained on the labeled sentences (the <em>teachers</em>) tag the
 corpus; the names all three tag alike, each tag with a probability (its
 <em>marginal</em>) of 0.9 or more, form a <em>lexicon</em>; and the lexicon enters
 training through mention replacement<sup>29</sup>, which copies each
-training sentence six times with its entity mentions swapped for other
-mentions of the same type, drawn from the training mentions and the
+training sentence six times, each entity mention swapped with probability
+0.5 for another mention of the same type, drawn from the training mentions and the
 lexicon together (<em>MR6 + names</em>; Figure 1 and Methods, <em>Systems</em>). The model trained on the
 augmented data, the <em>student</em>, never trains on a teacher-labeled
 sentence: it sees only annotated sentences, some of whose names are
@@ -140,7 +144,8 @@ stated in advance: a system improves on its reference when the 95%
 interval of the mean paired difference in micro F1 over the units lies
 above 0. A number in square brackets is that 95% Student-t confidence
 interval, over the units named; a comparison specified after the results
-of the runs it analyses were known is labelled post hoc. Protocols are
+of the runs it analyses were known is labeled post hoc, and one fixed in
+a protocol without its own verdict rule pre-specified. Protocols are
 cited by date, with the time where one day has two, and Supplementary
 Note 1 lists each with its commit. The <em>names route</em> is the sequence of
 protocols that led to and tested harvested names; five of them (18
@@ -166,7 +171,7 @@ test entities) read the same way on the seeds not used in selection (the
 <p>Neither the names' source nor the lexicon's settings changes F1
 detectably (Results, <em>The names' source and the lexicon's settings</em>). On
 MuLMS the names raise recall on unseen names, most on the fifth of them
-the lexicon holds (+7.29 [+3.27, +11.30] over MR6, post hoc), at lower
+the lexicon holds (+7.29 [+3.27, +11.30] over MR6, P = 0.004, post hoc), at lower
 precision on those names (69.0% against 74.7%, pooled), so that F1 on
 them is not shown to change (+1.13 [−1.85, +4.11], post hoc). MR6 does
 not reach the names' recall on them at any of twelve decoding biases
@@ -220,7 +225,8 @@ leaving out any one unit (post hoc: the lowest lower bounds are +0.44
 and +0.54, without semiconductors), and the other post hoc checks agree:
 weighting the two corpora equally gives 3.73 on either seed basis, with
 Welch intervals [+1.39, +6.07] and [+1.46, +6.00] (D7's is +0.90
-[−0.88, +2.69]); 9 of the 11 units are positive on the executed 10-seed
+[−0.88, +2.69]); with MaterioMiner's coarse-grained papers in place of
+its fine-grained ones the pooled estimate is +2.67 [+0.09, +5.25]; 9 of the 11 units are positive on the executed 10-seed
 basis and 10 on the 7-seed basis; and the exact sign-flip test gives
 P = 0.011 and 0.007. Figure 2 shows every unit.</p>
 <p>The decision rule carries no correction for the number of decisions.
@@ -274,8 +280,9 @@ units, on both seed bases, and on MaterioMiner per granularity, with the
 status of each.</p>
 <p>The +3.58 decomposes, on the decision seeds, into +2.46 from mention
 replacement with three copies, +0.33 from three more copies and +0.80
-from the harvested names; only the first term has an interval above 0,
-and that post hoc (mention replacement's own pre-registered single-model
+from the harvested names; only the first term has an interval above 0
+(two-sided t-test P = 0.004, against 0.23 and 0.25 for the others), and
+that post hoc (mention replacement's own pre-registered single-model
 decisions passed on MaterioMiner and failed on MuLMS alone, where its
 votes passed; Table 3 and Supplementary Note 7). The 10-seed basis gives
 the same picture
@@ -336,7 +343,8 @@ unseen names by 3.6 points and lower precision by 3.0, a net +0.7 F1 on
 them, the point moving almost along a curve of equal F1. Paired by
 subfield on the decision seeds, the recall gain is +2.56 [+0.76, +4.36],
 the precision loss −2.22 [−5.03, +0.60] and the net
-+0.56 [−1.44, +2.56]: only the recall gain's interval lies above 0. On MaterioMiner's papers the pooled rates of both
++0.56 [−1.44, +2.56]: only the recall gain's interval lies above 0 (P =
+0.013, against 0.10 for the precision loss; post hoc). On MaterioMiner's papers the pooled rates of both
 recall and precision on unseen names rise over MR6, within paired
 intervals that cover 0 (Supplementary Note 5).</p>
 <p><strong>Which names the gain falls on (post hoc; the analysis and its reading
@@ -350,7 +358,7 @@ unseen test names,
 pooled over the subfields (7% to 36% by subfield). On those, MR6 + names
 recalls 82.4% against MR6's 75.0%; on the others, 36.8% against 35.0%;
 the gain on the held names is the larger in every subfield, and the
-difference of the two gains has an interval above 0 (Table 5). The
+difference of the two gains has an interval above 0 (Table 5; P = 0.007). The
 reading rule fixed in advance (Supplementary Note 5) calls this <em>name
 knowledge</em> if the other names' gain is read on its interval, which
 covers 0, and <em>mixed</em> if on its point estimate (+1.12); MaterioMiner's
@@ -369,7 +377,8 @@ gain paid for in precision might be no more than a shift toward tagging
 more spans, which a constant bias at decoding would also give. The
 follow-up of 1 November tested this on MuLMS at the decision seeds
 (Supplementary Note 10). MR6 was run again and decoded with a bias D
-added to the score of every tag but O, over a grid from −2 to 5 (at D =
+added to the score of every tag but O (the tag of a word outside any
+entity), over a grid from −2 to 5 (at D =
 0 all 49 runs equal the stored ones in every score, in the training
 history and in the predictions); per subfield the bias D* was found at
 which MR6's recall over all test entities, pooled over the seeds, equals
@@ -378,7 +387,8 @@ linearly between the two grid values around it. At that bias the names
 find more of the unseen test names their lexicon holds, +11.24 [+3.31,
 +19.18], in every subfield (D11, passes as registered; exact sign-flip
 P = 0.016, post hoc), and fewer of the other unseen names, −1.73 [−3.02, −0.44]
-(pre-specified; −0.88 [−2.63, +0.87] on the four matched subfields, a
+(P = 0.017;
+pre-specified; −0.88 [−2.63, +0.87] on the four matched subfields, a
 reading fixed in the analysis code of 11:04, before any result); in micro F1 they are not shown to beat the control,
 +3.26 [−0.79, +7.31] (D12), and in precision +5.78 [−1.22, +12.79]
 (pre-specified)
@@ -389,7 +399,7 @@ are tagged but fewer match exactly (Table S8). The protocol matched
 these at the grid's end, D = 5, where MR6's recall is 1.7 to 2.9 points
 below the names', and its seed-mean F1 5.3 to 7.0 points and its recall
 on the held names 6.9 to 11.5 points below its own at D = 0, which
-favours the names in both decisions. The protocol also reported the
+favors the names in both decisions. The protocol also reported the
 decisions without these flagged subfields (pre-specified):
 D11 +6.05 [−3.33, +15.44], all four subfields positive with 3 degrees of
 freedom (an interval that could detect only about 12 points), and D12
@@ -403,12 +413,12 @@ that do not depend on the protocol's matching of those three agree in
 direction: with them matched at the grid value nearest the names'
 recall, D11 is +8.63 [+3.35, +13.90] and D12 +1.37 [−0.66, +3.41]; and
 against MR6 at whichever bias gives it its highest recall on the held
-names, the names lead by +6.52 [+2.15, +10.89], in every subfield
+names, the names lead by +6.52 [+2.15, +10.89] (P = 0.011), in every subfield
 (Figure 4), while MR6 at the bias best for the other unseen names
 overtakes them there, −4.16 [−5.82, −2.50] (Supplementary Note 10). No single decoding bias gives MR6 the names'
 recall on the names the lexicon holds. A lexicon is mostly materials names and values
 (83 to 99% of its distinct names; Supplementary Note 10), so a shift
-toward those types could also favour the held names. Within types, at
+toward those types could also favor the held names. Within types, at
 D = 0, where no matching is involved, the names gain on the materials
 names the lexicon holds and not detectably on the others (+7.98 [+2.15,
 +13.82] against +0.89 [−3.48, +5.27]; post hoc; Table S9), and not
@@ -438,7 +448,8 @@ headroom. The SOFC corpus holds fewer of the unseen test names (36%,
 20 October, 13:53, whose measuring script was not committed) than MuLMS's topic corpora
 (55–81%), but its lexicon holds 20–33% per fold, no less than MuLMS's or
 MaterioMiner's, and against MR3 the names' interval lies above 0 there
-(pre-specified, one of many comparisons without a decision): it is
+(+0.45 [+0.04, +0.86], P = 0.038; pre-specified, one of many comparisons
+without a decision): it is
 mention replacement that is not shown to gain. Whether training size
 explains that is open: trained on about as many entities as
 MaterioMiner's training sets hold, MR3 gained +0.50 [−0.47,
@@ -446,9 +457,10 @@ MaterioMiner's training sets hold, MR3 gained +0.50 [−0.47,
 Supplementary Note 7). Pooled over the 16 units of the three corpora the
 estimate of MR6 + names is +2.45 [+0.50, +4.40] and that of MR3 +1.46
 [+0.28, +2.64], and over the 9 units of MaterioMiner and SOFC-Exp that
-of multi-task training with MR3 +2.93 [+0.14, +5.72] (pre-specified,
-MR3's and multi-task training's on 20 October at 09:14, the names' with
-D6 at 13:53); the claim stays the two-corpus one, SOFC-Exp a corpus
+of multi-task training with MR3 +2.93 [+0.14, +5.72] (specified on 20
+October, MR3's and multi-task training's at 09:14, when the results of 11
+of MR3's 16 units and of 4 of multi-task training's 9 were known, the
+names' with D6 at 13:53); the claim stays the two-corpus one, SOFC-Exp a corpus
 where no gain is shown.</p>
 <h3>The names on the strongest system</h3>
 <p>The names had been tested only on the single-task CRF head. A follow-up
@@ -526,9 +538,11 @@ advance reads a generic shift, on point estimates.</p>
 hundred annotated sentences to read documents whose names are mostly
 unseen in training (no large language model was compared), the advice
 is mention replacement with three copies. Its gain on held-out documents
-passed pre-registered on MaterioMiner (companion study) and is above 0
-over the 16 units of the three corpora (+1.46 [+0.28, +2.64],
-pre-specified) and over the 11 of MuLMS and MaterioMiner (+2.35 [+0.94,
+passed pre-registered on MaterioMiner (companion study; on the seven
+seeds its screen did not use, post hoc, +2.57 [+0.10, +5.03]
+fine-grained and +1.73 [−0.63, +4.08] coarse-grained) and is above 0
+over the 16 units of the three corpora (+1.46 [+0.28, +2.64], P = 0.018,
+specified on 20 October when 11 of the 16 units' results were known) and over the 11 of MuLMS and MaterioMiner (+2.35 [+0.94,
 +3.75], post hoc), while on MuLMS alone only its votes passed
 (Supplementary Note 7). It costs about twice the baseline's training time
 and needs no corpus. Neither three more copies nor the harvested names
@@ -574,8 +588,11 @@ between-corpus variance could be estimated, so the pooled intervals are
 conditional on these two corpora. Nor are the units independent:
 MaterioMiner's papers and SOFC-Exp's folds share training documents, as
 do 5 of the 21 pairs of MuLMS subfields; allowing for that (post hoc;
-Methods, <em>Statistics and reproducibility</em>) leaves D4, D5 and D11 above 0
-and puts D3's interval at [−0.13, +8.67]. The pooled criterion's
+Methods, <em>Statistics and reproducibility</em>) leaves D4, D5 and D11 (as
+registered, with its three unmatched subfields) above 0 and puts D3's
+interval at [−0.13, +8.67]; D4's interval would reach 0 at a correlation
+of 0.28 between papers, D5's at 0.44, and D11's at 0.53 between
+subfields that share a training article. The pooled criterion's
 condition that
 neither corpus's own interval lie below 0 is weak: at the observed
 spreads it would fail only if a corpus lost more than about 4.5 points
@@ -587,7 +604,7 @@ own screen result was recorded (its electrolysis runs had been pulled at
 05:03, and whether their scores were read is not recorded), and when
 mention replacement was already known to meet it (Methods, <em>Evaluation
 protocol</em>); under the earlier criterion there is no claim:
-D3, D4 and D6 would not have run, and D5 did not exist. The gate on D3 and D4 was last lifted at
+D3, D4 and D6 would not have run, and D5 did not exist. The gate on D3 and D4 (that they run only if D1 passed) was last lifted at
 18:42 that day, after the screen had chosen MR6 + names, by an
 amendment whose reading from the screen's spread put D5 at about
 [+0.1, +5.9]; the plan's estimate of a methods paper had fallen to
@@ -720,8 +737,11 @@ the units. A pooled rate is a recall or precision from counts summed
 over seeds and units, without an interval; a pooled decision or estimate
 is one paired difference over the units of two or more corpora, with its
 interval.</li>
-<li><em>Vote, sign-flip test.</em> A vote is the entity-level majority of the
-three models of a seed triple; the sign-flip test is the exact
+<li><em>Vote, sign-flip test.</em> A vote keeps an entity that at least two of
+three models predict with the same span and type; the three are the
+models of seeds 0–200, 300–500 or 600–800 (on the decision seeds the
+last two triples; seed 900 never votes), and a unit's vote score is the
+mean over its triples. The sign-flip test is the exact
 two-sided permutation test of a mean paired difference over all 2ⁿ
 assignments of signs to the n units.</li>
 <li><em>Decoding bias, recall-matched control.</em> A constant D added at decoding
@@ -833,7 +853,8 @@ less than MR6 (+2.06 against +2.97 over the CRF head). A batch with all
 the names variants' jobs is pushed before the quota is checked; the
 user is asked to cancel it, and the plan of 05:06 moves MR6 + names and
 the self-training variant to after 24 October, and the two MR3 + names
-variants to a smaller batch pushed in its place. The batch is not cancelled; from 08:10 the
+variants to a smaller batch to be pushed in its place, which never was
+(Supplementary Note 11). The batch is not canceled; from 08:10 the
 plan expects Kaggle to stop it at the week's quota and to rerun it
 after 24 October.</li>
 <li><em>08:11 and 08:13.</em> The screen's first part is recorded (MR6 and the two
@@ -885,7 +906,7 @@ the same kind: the names' side is the stored runs, and only the control,
 MR6 run again (identically) and decoded under the bias, was new. That of
 D9 and D10 (31 October, 19:15) followed the write-up of D1 to D8 and
 preceded its runs. Every other comparison, here or from the
-earlier protocols, is labelled pre-specified or post hoc where it
+earlier protocols, is labeled pre-specified or post hoc where it
 appears.</p>
 <p><strong>Runs.</strong> Kaggle T4 GPUs with deterministic CUDA, one frozen commit per
 batch, a pinned image and pinned libraries; model snapshots pinned by
@@ -1025,6 +1046,12 @@ type.</li>
 <li><em>The dictionary rule</em> (a probe on saved predictions) tags every
 verbatim match of a lexicon name as its type where the CRF head
 predicted O.</li>
+<li><em>The lexicon's settings</em> (five ablations, 3 seeds) harvest from 10,000
+or 20,000 of the corpus's 40,000 sentences (a fixed random sample, the
+first sentences of one seeded shuffle), at a marginal threshold of 0.7,
+or with two of the three teachers agreeing; or they draw a mention's
+replacement from the harvested names with probability 0.5 whenever its
+type has any, instead of uniformly over the pool's entries.</li>
 <li><em>Label propagation</em> (a rule on saved predictions) tags the untagged
 occurrences, in a document, of a word string that the model tags in
 most of its occurrences there, with the type it is most often given.</li>
@@ -1069,13 +1096,13 @@ seeds) before the runs; Supplementary Note 9 gives the difference each
 comparison could detect with 80% power at the observed spreads. No unit,
 seed or run was excluded from a decision (the entities that the MuLMS
 conversion drops are described under <em>Data</em>). A run's seed sets its
-random choices (initialisation, dropout, batch order and the swaps of
+random choices (initialization, dropout, batch order and the swaps of
 mention replacement), and a fixed split seed sets the training pools,
 validation sentences and folds. There was no blinding: the same scripts
 score every system, and the protocols, committed before their results,
 stand in for it.</p>
 <p><strong>Tests.</strong> The decision rule (<em>Evaluation protocol</em>) is a one-sample
-Student-t test of the mean paired difference against 0: its interval
+Student's t-test of the mean paired difference against 0: its interval
 lies above 0 exactly when the one-sided P value is below 0.025, that is,
 when the two-sided P value is below 0.05 with a positive mean; a pooled
 decision also requires that neither corpus's own interval lie below 0.
@@ -1092,13 +1119,13 @@ deviation of its per-unit differences, with the exact sign-flip P value
 beside them. They were computed on 1 November for the journal's
 reporting rules, from the per-unit differences the decisions used, and
 change no decision.</p>
-<p><strong>Assumptions.</strong> The t test assumes roughly normal per-unit differences.
+<p><strong>Assumptions.</strong> The t-test assumes roughly normal per-unit differences.
 With 4 to 11 units a test of normality has little power, and none was
 run. The exact two-sided sign-flip test, which assumes only that each
 difference is symmetric about 0 under the null hypothesis, is given
 beside it (post hoc): it agrees for D5 (P = 0.011), for its
-decision-seed reading D5′ (0.007) and for D11 (0.016), but with 4 units
-it cannot go below 0.125, so D3 and D4 rest on the t test's assumption.
+decision-seed reading D5′ (0.007) and for D11 (0.016, as registered), but with 4 units
+it cannot go below 0.125, so D3 and D4 rest on the t-test's assumption.
 Both tests also treat the units' differences as independent. They are
 not fully so: the training sets of any two MaterioMiner papers share two
 of their three papers, those of any two SOFC-Exp folds 27 of their 36
@@ -1106,13 +1133,21 @@ articles, and 5 of the 21 pairs of MuLMS subfields share an article of
 their training pools, and positively correlated differences make the
 intervals too narrow. As a sensitivity analysis (post hoc), every two
 units whose training sets share documents were given the correlation
-n_test/n that the corrected resampled t test assumes<sup>60</sup>, 1/K in a design of K folds: 1/4 for MaterioMiner's papers and,
+n_test/n that the corrected resampled t-test assumes<sup>60</sup>, 1/K in a design of K folds: 1/4 for MaterioMiner's papers and,
 conservatively, for the MuLMS pairs, 1/5 for SOFC-Exp's folds, and none
-across corpora. D3 then reads +4.27 [−0.13, +8.67] (P = 0.054), D4
+across corpora; with S² the sample variance of the n per-unit
+differences, the variance of their mean is then S²/(1 − ρ̄)·(n + Σρ)/n²,
+Σρ over the n(n − 1) ordered pairs of units and ρ̄ = Σρ/(n(n − 1)), with
+n − 1 degrees of freedom (at ρ = 1/K for every pair this is the corrected
+resampled test's variance). D3 then reads +4.27 [−0.13, +8.67] (P = 0.054), D4
 +1.77 [+0.09, +3.45], D5 +3.58 [+0.27, +6.88] and D11 +11.24 [+1.71,
 +20.77] (D5′, the decision-seed reading, [+0.38, +6.78]), and no other
 decision's interval clears 0 (Table S16); the
-decisions stand as registered. Figure 2 and Supplementary Note 12 show
+decisions stand as registered. The passes turn on the assumed
+correlation: D4's interval reaches 0 at a correlation of 0.28 between
+MaterioMiner's papers, D5's at 0.44 (the MuLMS pairs held at 1/4) and
+D11's at 0.53 between MuLMS subfields that share a training article
+(<code>post_hoc_dependence</code> of <code>ner_decision_tests.json</code>). Figure 2 and Supplementary Note 12 show
 the per-unit values; the Discussion gives what the pooled intervals
 assume about the corpora.</p>
 <p><strong>Multiplicity.</strong> No level was adjusted for the number of decisions: the
@@ -1130,9 +1165,15 @@ shown</em>; Supplementary Note 5), the training-size comparison over five
 draws of training articles (Supplementary Note 7), the intervals of a
 system's level rather than of a difference (Table S6; Table S11, row
 66) and those of a standard deviation (Supplementary Note 9). Such
-intervals accompany reported and post hoc comparisons as estimates, not
-tests; &quot;clears 0&quot; says only that the lower bound is above 0. Pooled
-rates carry no interval.</p>
+intervals accompany pre-specified and post hoc comparisons as estimates, not
+tests; &quot;clears 0&quot; says only that the lower bound is above 0. Each such interval excludes 0 exactly when the two-sided P value of
+the one-sample t-test behind it is below 0.05; where the text draws an
+inference from one, it gives that P value (computed on 1 November for
+reporting, <code>post_hoc_reported</code> of <code>ner_decision_tests.json</code>). Pooled
+rates carry no interval. The difference a comparison could detect with
+80% power (Supplementary Note 9) is SE·(t₀.₉₇₅,ν + t₀.₈₀,ν), SE being
+its interval's half-width divided by t₀.₉₇₅,ν and ν its degrees of
+freedom.</p>
 <p><strong>Reproducibility.</strong> Every run is deterministic, and every repeat of a
 run was identical (<em>Evaluation protocol</em>; Supplementary Note 2). The
 repository holds the code, every results file with its seeds and saved
@@ -1162,7 +1203,7 @@ Supplementary Note 7, which the companion reports in its survey, and
 self-training on the fatigue corpus over MaterioMiner's papers (the
 companion's decision of 15 October), whose comparison with MR3 the Discussion
 quotes; the
-companion summarises D1–D8 and the decomposition in the Results (<em>Whose gain is it</em>) in one table and cites this paper for them.</p>
+companion summarizes D1–D8 and the decomposition in the Results (<em>Whose gain is it</em>) in one table and cites this paper for them.</p>
 <h2>Data availability</h2>
 <p>The labeled corpora are public: MaterioMiner, release v1.0.1 (Fordatis,
 https://doi.org/10.24406/fordatis/329.2; CC BY 4.0), whose files the
@@ -1197,69 +1238,69 @@ produced each results file.</p>
 <p>The author declares no financial or non-financial competing interests.</p>
 <h2>References</h2>
 <ol>
-<li>Durmaz, A. R., Thomas, A., Mishra, L., Murthy, R. N. &amp; Straub, T. An ontology-based text mining dataset for extraction of process-structure-property entities. <em>Scientific Data</em> <strong>11</strong>, 1112 (2024). https://doi.org/10.1038/s41597-024-03926-5</li>
-<li>Friedrich, A. et al. The SOFC-Exp Corpus and Neural Approaches to Information Extraction in the Materials Science Domain. In <em>Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics</em> 1255–1268 (Association for Computational Linguistics, 2020). https://doi.org/10.18653/v1/2020.acl-main.116</li>
-<li>Schrader, T. P., Finco, M., Grünewald, S., Hildebrand, F. &amp; Friedrich, A. MuLMS: A Multi-Layer Annotated Text Corpus for Information Extraction in the Materials Science Domain. In <em>Proceedings of the Second Workshop on Information Extraction from Scientific Publications</em> 84–100 (Association for Computational Linguistics, 2023). https://doi.org/10.18653/v1/2023.wiesp-1.11</li>
-<li>Gupta, T., Zaki, M., Krishnan, N. M. A. &amp; Mausam. MatSciBERT: A materials domain language model for text mining and information extraction. <em>npj Computational Materials</em> <strong>8</strong>, 102 (2022). https://doi.org/10.1038/s41524-022-00784-w</li>
-<li>Devlin, J., Chang, M.-W., Lee, K. &amp; Toutanova, K. BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding. In <em>Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long and Short Papers)</em> 4171–4186 (Association for Computational Linguistics, 2019). https://doi.org/10.18653/v1/N19-1423</li>
-<li>Olivetti, E. A. et al. Data-driven materials research enabled by natural language processing and information extraction. <em>Applied Physics Reviews</em> <strong>7</strong>, 041317 (2020). https://doi.org/10.1063/5.0021106</li>
+<li>Durmaz, A. R., Thomas, A., Mishra, L., Murthy, R. N. &amp; Straub, T. An ontology-based text mining dataset for extraction of process-structure-property entities. <em>Sci. Data</em> <strong>11</strong>, 1112 (2024). https://doi.org/10.1038/s41597-024-03926-5</li>
+<li>Friedrich, A. et al. The SOFC-Exp Corpus and Neural Approaches to Information Extraction in the Materials Science Domain. In <em>Proc. 58th Annual Meeting of the Association for Computational Linguistics</em> 1255–1268 (Association for Computational Linguistics, 2020). https://doi.org/10.18653/v1/2020.acl-main.116</li>
+<li>Schrader, T. P., Finco, M., Grünewald, S., Hildebrand, F. &amp; Friedrich, A. MuLMS: A Multi-Layer Annotated Text Corpus for Information Extraction in the Materials Science Domain. In <em>Proc. Second Workshop on Information Extraction from Scientific Publications</em> 84–100 (Association for Computational Linguistics, 2023). https://doi.org/10.18653/v1/2023.wiesp-1.11</li>
+<li>Gupta, T., Zaki, M., Krishnan, N. M. A. &amp; Mausam. MatSciBERT: A materials domain language model for text mining and information extraction. <em>npj Comput. Mater.</em> <strong>8</strong>, 102 (2022). https://doi.org/10.1038/s41524-022-00784-w</li>
+<li>Devlin, J., Chang, M.-W., Lee, K. &amp; Toutanova, K. BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding. In <em>Proc. 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long and Short Papers)</em> 4171–4186 (Association for Computational Linguistics, 2019). https://doi.org/10.18653/v1/N19-1423</li>
+<li>Olivetti, E. A. et al. Data-driven materials research enabled by natural language processing and information extraction. <em>Appl. Phys. Rev.</em> <strong>7</strong>, 041317 (2020). https://doi.org/10.1063/5.0021106</li>
 <li>Kononova, O. et al. Opportunities and challenges of text mining in materials research. <em>iScience</em> <strong>24</strong>, 102155 (2021). https://doi.org/10.1016/j.isci.2021.102155</li>
-<li>Swain, M. C. &amp; Cole, J. M. ChemDataExtractor: A Toolkit for Automated Extraction of Chemical Information from the Scientific Literature. <em>Journal of Chemical Information and Modeling</em> <strong>56</strong>, 1894–1904 (2016). https://doi.org/10.1021/acs.jcim.6b00207</li>
-<li>Weston, L. et al. Named Entity Recognition and Normalization Applied to Large-Scale Information Extraction from the Materials Science Literature. <em>Journal of Chemical Information and Modeling</em> <strong>59</strong>, 3692–3702 (2019). https://doi.org/10.1021/acs.jcim.9b00470</li>
+<li>Swain, M. C. &amp; Cole, J. M. ChemDataExtractor: A Toolkit for Automated Extraction of Chemical Information from the Scientific Literature. <em>J. Chem. Inf. Model.</em> <strong>56</strong>, 1894–1904 (2016). https://doi.org/10.1021/acs.jcim.6b00207</li>
+<li>Weston, L. et al. Named Entity Recognition and Normalization Applied to Large-Scale Information Extraction from the Materials Science Literature. <em>J. Chem. Inf. Model.</em> <strong>59</strong>, 3692–3702 (2019). https://doi.org/10.1021/acs.jcim.9b00470</li>
 <li>Trewartha, A. et al. Quantifying the advantage of domain-specific pre-training on named entity recognition tasks in materials science. <em>Patterns</em> <strong>3</strong>, 100488 (2022). https://doi.org/10.1016/j.patter.2022.100488</li>
-<li>Song, Y., Miret, S. &amp; Liu, B. MatSci-NLP: Evaluating Scientific Language Models on Materials Science Language Tasks Using Text-to-Schema Modeling. In <em>Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)</em> 3621–3639 (Association for Computational Linguistics, 2023). https://doi.org/10.18653/v1/2023.acl-long.201</li>
-<li>Dagdelen, J. et al. Structured information extraction from scientific text with large language models. <em>Nature Communications</em> <strong>15</strong>, 1418 (2024). https://doi.org/10.1038/s41467-024-45563-x</li>
-<li>Polak, M. P. &amp; Morgan, D. Extracting accurate materials data from research papers with conversational language models and prompt engineering. <em>Nature Communications</em> <strong>15</strong>, 1569 (2024). https://doi.org/10.1038/s41467-024-45914-8</li>
-<li>Potu, S. T. et al. Ontology-conformal recognition of materials entities using language models. <em>Scientific Reports</em> <strong>15</strong>, 18597 (2025). https://doi.org/10.1038/s41598-025-03619-y</li>
+<li>Song, Y., Miret, S. &amp; Liu, B. MatSci-NLP: Evaluating Scientific Language Models on Materials Science Language Tasks Using Text-to-Schema Modeling. In <em>Proc. 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)</em> 3621–3639 (Association for Computational Linguistics, 2023). https://doi.org/10.18653/v1/2023.acl-long.201</li>
+<li>Dagdelen, J. et al. Structured information extraction from scientific text with large language models. <em>Nat. Commun.</em> <strong>15</strong>, 1418 (2024). https://doi.org/10.1038/s41467-024-45563-x</li>
+<li>Polak, M. P. &amp; Morgan, D. Extracting accurate materials data from research papers with conversational language models and prompt engineering. <em>Nat. Commun.</em> <strong>15</strong>, 1569 (2024). https://doi.org/10.1038/s41467-024-45914-8</li>
+<li>Potu, S. T. et al. Ontology-conformal recognition of materials entities using language models. <em>Sci. Rep.</em> <strong>15</strong>, 18597 (2025). https://doi.org/10.1038/s41598-025-03619-y</li>
 <li>Babl, F., Hennen, M., Murauer, J. &amp; Geierhos, M. Random Splitting Negatively Impacts NER Evaluation: Quantifying and Eliminating the Overestimation of NER Performance. In <em>Findings of the Association for Computational Linguistics: ACL 2025</em> 9724–9738 (Association for Computational Linguistics, 2025). https://doi.org/10.18653/v1/2025.findings-acl.504</li>
-<li>Gorman, K. &amp; Bedrick, S. We Need to Talk about Standard Splits. In <em>Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics</em> 2786–2791 (Association for Computational Linguistics, 2019). https://doi.org/10.18653/v1/P19-1267</li>
-<li>Søgaard, A., Ebert, S., Bastings, J. &amp; Filippova, K. We Need To Talk About Random Splits. In <em>Proceedings of the 16th Conference of the European Chapter of the Association for Computational Linguistics: Main Volume</em> 1823–1832 (Association for Computational Linguistics, 2021). https://doi.org/10.18653/v1/2021.eacl-main.156</li>
-<li>Augenstein, I., Derczynski, L. &amp; Bontcheva, K. Generalisation in named entity recognition: A quantitative analysis. <em>Computer Speech &amp; Language</em> <strong>44</strong>, 61–83 (2017). https://doi.org/10.1016/j.csl.2017.01.012</li>
-<li>Fu, J., Liu, P. &amp; Zhang, Q. Rethinking Generalization of Neural Models: A Named Entity Recognition Case Study. <em>Proceedings of the AAAI Conference on Artificial Intelligence</em> <strong>34</strong>, 7732–7739 (2020). https://doi.org/10.1609/aaai.v34i05.6276</li>
+<li>Gorman, K. &amp; Bedrick, S. We Need to Talk about Standard Splits. In <em>Proc. 57th Annual Meeting of the Association for Computational Linguistics</em> 2786–2791 (Association for Computational Linguistics, 2019). https://doi.org/10.18653/v1/P19-1267</li>
+<li>Søgaard, A., Ebert, S., Bastings, J. &amp; Filippova, K. We Need To Talk About Random Splits. In <em>Proc. 16th Conference of the European Chapter of the Association for Computational Linguistics: Main Volume</em> 1823–1832 (Association for Computational Linguistics, 2021). https://doi.org/10.18653/v1/2021.eacl-main.156</li>
+<li>Augenstein, I., Derczynski, L. &amp; Bontcheva, K. Generalisation in named entity recognition: A quantitative analysis. <em>Comput. Speech Lang.</em> <strong>44</strong>, 61–83 (2017). https://doi.org/10.1016/j.csl.2017.01.012</li>
+<li>Fu, J., Liu, P. &amp; Zhang, Q. Rethinking Generalization of Neural Models: A Named Entity Recognition Case Study. <em>Proc. AAAI Conf. Artif. Intell.</em> <strong>34</strong>, 7732–7739 (2020). https://doi.org/10.1609/aaai.v34i05.6276</li>
 <li>Kim, H. &amp; Kang, J. How Do Your Biomedical Named Entity Recognition Models Generalize to Novel Entities? <em>IEEE Access</em> <strong>10</strong>, 31513–31523 (2022). https://doi.org/10.1109/ACCESS.2022.3157854</li>
-<li>Lin, H. et al. A Rigorous Study on Named Entity Recognition: Can Fine-tuning Pretrained Model Lead to the Promised Land? In <em>Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)</em> 7291–7300 (Association for Computational Linguistics, 2020). https://doi.org/10.18653/v1/2020.emnlp-main.592</li>
-<li>Ghaddar, A., Langlais, P., Rashid, A. &amp; Rezagholizadeh, M. Context-aware Adversarial Training for Name Regularity Bias in Named Entity Recognition. <em>Transactions of the Association for Computational Linguistics</em> <strong>9</strong>, 586–604 (2021). https://doi.org/10.1162/tacl_a_00386</li>
+<li>Lin, H. et al. A Rigorous Study on Named Entity Recognition: Can Fine-tuning Pretrained Model Lead to the Promised Land? In <em>Proc. 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)</em> 7291–7300 (Association for Computational Linguistics, 2020). https://doi.org/10.18653/v1/2020.emnlp-main.592</li>
+<li>Ghaddar, A., Langlais, P., Rashid, A. &amp; Rezagholizadeh, M. Context-aware Adversarial Training for Name Regularity Bias in Named Entity Recognition. <em>Trans. Assoc. Comput. Linguist.</em> <strong>9</strong>, 586–604 (2021). https://doi.org/10.1162/tacl_a_00386</li>
 <li>Taillé, B., Guigue, V. &amp; Gallinari, P. Contextualized Embeddings in Named-Entity Recognition: An Empirical Study on Generalization. In <em>Advances in Information Retrieval: 42nd European Conference on IR Research (ECIR 2020), Part II</em> 383–391 (Springer, 2020). https://doi.org/10.1007/978-3-030-45442-5_48</li>
 <li>Agarwal, O., Yang, Y., Wallace, B. C. &amp; Nenkova, A. Entity-Switched Datasets: An Approach to Auditing the In-Domain Robustness of Named Entity Recognition Models. Preprint at https://arxiv.org/abs/2004.04123 (2020).</li>
-<li>Reimers, N. &amp; Gurevych, I. Reporting Score Distributions Makes a Difference: Performance Study of LSTM-networks for Sequence Tagging. In <em>Proceedings of the 2017 Conference on Empirical Methods in Natural Language Processing</em> 338–348 (Association for Computational Linguistics, 2017). https://doi.org/10.18653/v1/D17-1035</li>
-<li>Dror, R., Baumer, G., Shlomov, S. &amp; Reichart, R. The Hitchhiker's Guide to Testing Statistical Significance in Natural Language Processing. In <em>Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)</em> 1383–1392 (Association for Computational Linguistics, 2018). https://doi.org/10.18653/v1/P18-1128</li>
-<li>Bouthillier, X. et al. Accounting for Variance in Machine Learning Benchmarks. In <em>Proceedings of Machine Learning and Systems</em> 747–769 (2021). https://arxiv.org/abs/2103.03098</li>
-<li>Card, D. et al. With Little Power Comes Great Responsibility. In <em>Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)</em> 9263–9274 (Association for Computational Linguistics, 2020). https://doi.org/10.18653/v1/2020.emnlp-main.745</li>
-<li>Dai, X. &amp; Adel, H. An Analysis of Simple Data Augmentation for Named Entity Recognition. In <em>Proceedings of the 28th International Conference on Computational Linguistics</em> 3861–3867 (International Committee on Computational Linguistics, 2020). https://doi.org/10.18653/v1/2020.coling-main.343</li>
-<li>Mysore, S. et al. The Materials Science Procedural Text Corpus: Annotating Materials Synthesis Procedures with Shallow Semantic Structures. In <em>Proceedings of the 13th Linguistic Annotation Workshop</em> 56–64 (Association for Computational Linguistics, 2019). https://doi.org/10.18653/v1/W19-4007</li>
-<li>Elwing Torres, A., Silva de Moura, E., Soares da Silva, A., Nascimento, M. A. &amp; Mesquita, F. An experimental study on data augmentation techniques for named entity recognition on low-resource domains. <em>Natural Language Processing</em> <strong>32</strong>, 184–203 (2026). https://doi.org/10.1017/nlp.2026.10019</li>
-<li>Sharma, S. et al. When and how to paraphrase for named entity recognition? In <em>Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)</em> 7052–7087 (Association for Computational Linguistics, 2023). https://doi.org/10.18653/v1/2023.acl-long.390</li>
-<li>Bartolini, I. et al. Named Entity Recognition using context similarity data augmentation. In <em>Proceedings of the 32nd Symposium on Advanced Database Systems (SEBD 2024), CEUR Workshop Proceedings Vol. 3741</em> 331–338 (2024).</li>
-<li>Zhou, R. et al. MELM: Data Augmentation with Masked Entity Language Modeling for Low-Resource NER. In <em>Proceedings of the 60th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)</em> 2251–2262 (Association for Computational Linguistics, 2022). https://doi.org/10.18653/v1/2022.acl-long.160</li>
+<li>Reimers, N. &amp; Gurevych, I. Reporting Score Distributions Makes a Difference: Performance Study of LSTM-networks for Sequence Tagging. In <em>Proc. 2017 Conference on Empirical Methods in Natural Language Processing</em> 338–348 (Association for Computational Linguistics, 2017). https://doi.org/10.18653/v1/D17-1035</li>
+<li>Dror, R., Baumer, G., Shlomov, S. &amp; Reichart, R. The Hitchhiker's Guide to Testing Statistical Significance in Natural Language Processing. In <em>Proc. 56th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)</em> 1383–1392 (Association for Computational Linguistics, 2018). https://doi.org/10.18653/v1/P18-1128</li>
+<li>Bouthillier, X. et al. Accounting for Variance in Machine Learning Benchmarks. In <em>Proc. Machine Learning and Systems</em> 747–769 (2021). https://arxiv.org/abs/2103.03098</li>
+<li>Card, D. et al. With Little Power Comes Great Responsibility. In <em>Proc. 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)</em> 9263–9274 (Association for Computational Linguistics, 2020). https://doi.org/10.18653/v1/2020.emnlp-main.745</li>
+<li>Dai, X. &amp; Adel, H. An Analysis of Simple Data Augmentation for Named Entity Recognition. In <em>Proc. 28th International Conference on Computational Linguistics</em> 3861–3867 (International Committee on Computational Linguistics, 2020). https://doi.org/10.18653/v1/2020.coling-main.343</li>
+<li>Mysore, S. et al. The Materials Science Procedural Text Corpus: Annotating Materials Synthesis Procedures with Shallow Semantic Structures. In <em>Proc. 13th Linguistic Annotation Workshop</em> 56–64 (Association for Computational Linguistics, 2019). https://doi.org/10.18653/v1/W19-4007</li>
+<li>Elwing Torres, A., Silva de Moura, E., Soares da Silva, A., Nascimento, M. A. &amp; Mesquita, F. An experimental study on data augmentation techniques for named entity recognition on low-resource domains. <em>Nat. Lang. Process.</em> <strong>32</strong>, 184–203 (2026). https://doi.org/10.1017/nlp.2026.10019</li>
+<li>Sharma, S. et al. When and how to paraphrase for named entity recognition? In <em>Proc. 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)</em> 7052–7087 (Association for Computational Linguistics, 2023). https://doi.org/10.18653/v1/2023.acl-long.390</li>
+<li>Bartolini, I. et al. Named Entity Recognition using context similarity data augmentation. In <em>Proc. 32nd Symposium on Advanced Database Systems (SEBD 2024), CEUR Workshop Proceedings Vol. 3741</em> 331–338 (2024).</li>
+<li>Zhou, R. et al. MELM: Data Augmentation with Masked Entity Language Modeling for Low-Resource NER. In <em>Proc. 60th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)</em> 2251–2262 (Association for Computational Linguistics, 2022). https://doi.org/10.18653/v1/2022.acl-long.160</li>
 <li>Hu, X. et al. Entity-to-Text based Data Augmentation for various Named Entity Recognition Tasks. In <em>Findings of the Association for Computational Linguistics: ACL 2023</em> 9072–9087 (Association for Computational Linguistics, 2023). https://doi.org/10.18653/v1/2023.findings-acl.578</li>
-<li>Cai, J. et al. Graph Propagation based Data Augmentation for Named Entity Recognition. In <em>Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 2: Short Papers)</em> 110–118 (Association for Computational Linguistics, 2023). https://doi.org/10.18653/v1/2023.acl-short.11</li>
+<li>Cai, J. et al. Graph Propagation based Data Augmentation for Named Entity Recognition. In <em>Proc. 61st Annual Meeting of the Association for Computational Linguistics (Volume 2: Short Papers)</em> 110–118 (Association for Computational Linguistics, 2023). https://doi.org/10.18653/v1/2023.acl-short.11</li>
 <li>Amalvy, A., Labatut, V. &amp; Dufour, R. Remplacement de mentions pour l'adaptation d'un corpus de reconnaissance d'entités nommées à un domaine cible. In <em>Actes de la 29e Conférence sur le Traitement Automatique des Langues Naturelles. Volume 1 : conférence principale</em> 198–205 (2022).</li>
-<li>Ding, B. et al. DAGA: Data Augmentation with a Generation Approach for Low-resource Tagging Tasks. In <em>Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)</em> 6045–6057 (Association for Computational Linguistics, 2020). https://doi.org/10.18653/v1/2020.emnlp-main.488</li>
-<li>Chen, J., Wang, Z., Tian, R., Yang, Z. &amp; Yang, D. Local Additivity Based Data Augmentation for Semi-supervised NER. In <em>Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)</em> 1241–1251 (Association for Computational Linguistics, 2020). https://doi.org/10.18653/v1/2020.emnlp-main.95</li>
-<li>Chen, S., Aguilar, G., Neves, L. &amp; Solorio, T. Data Augmentation for Cross-Domain Named Entity Recognition. In <em>Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing</em> 5346–5356 (Association for Computational Linguistics, 2021). https://doi.org/10.18653/v1/2021.emnlp-main.434</li>
-<li>Liu, Z. et al. CrossNER: Evaluating Cross-Domain Named Entity Recognition. <em>Proceedings of the AAAI Conference on Artificial Intelligence</em> <strong>35</strong>, 13452–13460 (2021). https://doi.org/10.1609/aaai.v35i15.17587</li>
-<li>Riloff, E. &amp; Jones, R. Learning Dictionaries for Information Extraction by Multi-Level Bootstrapping. In <em>Proceedings of the Sixteenth National Conference on Artificial Intelligence (AAAI-99)</em> 474–479 (AAAI Press, 1999).</li>
-<li>Kozareva, Z. Bootstrapping Named Entity Recognition with Automatically Generated Gazetteer Lists. In <em>Proceedings of the Eleventh Conference of the European Chapter of the Association for Computational Linguistics: Student Research Workshop</em> 15–21 (Association for Computational Linguistics, 2006).</li>
-<li>Blum, A. &amp; Mitchell, T. Combining labeled and unlabeled data with co-training. In <em>Proceedings of the Eleventh Annual Conference on Computational Learning Theory</em> 92–100 (1998). https://doi.org/10.1145/279943.279962</li>
-<li>Zhou, Z.-H. &amp; Li, M. Tri-training: exploiting unlabeled data using three classifiers. <em>IEEE Transactions on Knowledge and Data Engineering</em> <strong>17</strong>, 1529–1541 (2005). https://doi.org/10.1109/TKDE.2005.186</li>
-<li>Zafarian, A. &amp; Asghari, H. Improving NER Models by Exploiting Named Entity Gazetteer as External Knowledge. In <em>Proceedings of the First International Workshop on NLP Solutions for Under Resourced Languages (NSURL 2019) co-located with ICNLSP 2019 - Short Papers</em> 107–111 (Association for Computational Linguistics, 2019).</li>
-<li>Meng, T., Fang, A., Rokhlenko, O. &amp; Malmasi, S. GEMNET: Effective Gated Gazetteer Representations for Recognizing Complex Entities in Low-context Input. In <em>Proceedings of the 2021 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies</em> 1499–1512 (Association for Computational Linguistics, 2021). https://doi.org/10.18653/v1/2021.naacl-main.118</li>
-<li>Song, C. H., Lawrie, D., Finin, T. &amp; Mayfield, J. Improving Neural Named Entity Recognition with Gazetteers. In <em>Proceedings of the Thirty-Third International Florida Artificial Intelligence Research Society Conference (FLAIRS-33)</em> (AAAI Press, 2020). https://arxiv.org/abs/2003.03072</li>
-<li>Shang, J. et al. Learning Named Entity Tagger using Domain-Specific Dictionary. In <em>Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing</em> 2054–2064 (Association for Computational Linguistics, 2018). https://doi.org/10.18653/v1/D18-1230</li>
-<li>Liang, C. et al. BOND: BERT-Assisted Open-Domain Named Entity Recognition with Distant Supervision. In <em>Proceedings of the 26th ACM SIGKDD International Conference on Knowledge Discovery &amp; Data Mining (KDD '20)</em> 1054–1064 (ACM, 2020). https://doi.org/10.1145/3394486.3403149</li>
-<li>Lison, P., Barnes, J., Hubin, A. &amp; Touileb, S. Named Entity Recognition without Labelled Data: A Weak Supervision Approach. In <em>Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics</em> 1518–1533 (2020). https://doi.org/10.18653/v1/2020.acl-main.139</li>
-<li>Wu, Q., Lin, Z., Karlsson, B. F., Lou, J.-G. &amp; Huang, B. Single-/Multi-Source Cross-Lingual NER via Teacher-Student Learning on Unlabeled Data in Target Language. In <em>Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics</em> 6505–6514 (Association for Computational Linguistics, 2020). https://doi.org/10.18653/v1/2020.acl-main.581</li>
-<li>Qu, X. et al. Distantly-Supervised Named Entity Recognition with Adaptive Teacher Learning and Fine-Grained Student Ensemble. <em>Proceedings of the AAAI Conference on Artificial Intelligence</em> <strong>37</strong>, 13501–13509 (2023). https://doi.org/10.1609/aaai.v37i11.26583</li>
-<li>Du, J. et al. Self-training Improves Pre-training for Natural Language Understanding. In <em>Proceedings of the 2021 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies</em> 5408–5418 (Association for Computational Linguistics, 2021). https://doi.org/10.18653/v1/2021.naacl-main.426</li>
-<li>van Miltenburg, E., van der Lee, C. &amp; Krahmer, E. Preregistering NLP research. In <em>Proceedings of the 2021 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies</em> 613–623 (Association for Computational Linguistics, 2021). https://doi.org/10.18653/v1/2021.naacl-main.51</li>
-<li>Lafferty, J., McCallum, A. &amp; Pereira, F. Conditional Random Fields: Probabilistic Models for Segmenting and Labeling Sequence Data. In <em>Proceedings of the 18th International Conference on Machine Learning (ICML 2001)</em> 282–289 (2001).</li>
-<li>Lample, G., Ballesteros, M., Subramanian, S., Kawakami, K. &amp; Dyer, C. Neural Architectures for Named Entity Recognition. In <em>Proceedings of the 2016 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies</em> 260–270 (Association for Computational Linguistics, 2016). https://doi.org/10.18653/v1/N16-1030</li>
-<li>The Europe PMC Consortium. Europe PMC: a full-text literature database for the life sciences and platform for innovation. <em>Nucleic Acids Research</em> <strong>43</strong>, D1042–D1048 (2015). https://doi.org/10.1093/nar/gku1061</li>
+<li>Ding, B. et al. DAGA: Data Augmentation with a Generation Approach for Low-resource Tagging Tasks. In <em>Proc. 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)</em> 6045–6057 (Association for Computational Linguistics, 2020). https://doi.org/10.18653/v1/2020.emnlp-main.488</li>
+<li>Chen, J., Wang, Z., Tian, R., Yang, Z. &amp; Yang, D. Local Additivity Based Data Augmentation for Semi-supervised NER. In <em>Proc. 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)</em> 1241–1251 (Association for Computational Linguistics, 2020). https://doi.org/10.18653/v1/2020.emnlp-main.95</li>
+<li>Chen, S., Aguilar, G., Neves, L. &amp; Solorio, T. Data Augmentation for Cross-Domain Named Entity Recognition. In <em>Proc. 2021 Conference on Empirical Methods in Natural Language Processing</em> 5346–5356 (Association for Computational Linguistics, 2021). https://doi.org/10.18653/v1/2021.emnlp-main.434</li>
+<li>Liu, Z. et al. CrossNER: Evaluating Cross-Domain Named Entity Recognition. <em>Proc. AAAI Conf. Artif. Intell.</em> <strong>35</strong>, 13452–13460 (2021). https://doi.org/10.1609/aaai.v35i15.17587</li>
+<li>Riloff, E. &amp; Jones, R. Learning Dictionaries for Information Extraction by Multi-Level Bootstrapping. In <em>Proc. Sixteenth National Conference on Artificial Intelligence (AAAI-99)</em> 474–479 (AAAI Press, 1999).</li>
+<li>Kozareva, Z. Bootstrapping Named Entity Recognition with Automatically Generated Gazetteer Lists. In <em>Proc. Eleventh Conference of the European Chapter of the Association for Computational Linguistics: Student Research Workshop</em> 15–21 (Association for Computational Linguistics, 2006).</li>
+<li>Blum, A. &amp; Mitchell, T. Combining labeled and unlabeled data with co-training. In <em>Proc. Eleventh Annual Conference on Computational Learning Theory</em> 92–100 (1998). https://doi.org/10.1145/279943.279962</li>
+<li>Zhou, Z.-H. &amp; Li, M. Tri-training: exploiting unlabeled data using three classifiers. <em>IEEE Trans. Knowl. Data Eng.</em> <strong>17</strong>, 1529–1541 (2005). https://doi.org/10.1109/TKDE.2005.186</li>
+<li>Zafarian, A. &amp; Asghari, H. Improving NER Models by Exploiting Named Entity Gazetteer as External Knowledge. In <em>Proc. First International Workshop on NLP Solutions for Under Resourced Languages (NSURL 2019) co-located with ICNLSP 2019 - Short Papers</em> 107–111 (Association for Computational Linguistics, 2019).</li>
+<li>Meng, T., Fang, A., Rokhlenko, O. &amp; Malmasi, S. GEMNET: Effective Gated Gazetteer Representations for Recognizing Complex Entities in Low-context Input. In <em>Proc. 2021 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies</em> 1499–1512 (Association for Computational Linguistics, 2021). https://doi.org/10.18653/v1/2021.naacl-main.118</li>
+<li>Song, C. H., Lawrie, D., Finin, T. &amp; Mayfield, J. Improving Neural Named Entity Recognition with Gazetteers. In <em>Proc. Thirty-Third International Florida Artificial Intelligence Research Society Conference (FLAIRS-33)</em> (AAAI Press, 2020). https://arxiv.org/abs/2003.03072</li>
+<li>Shang, J. et al. Learning Named Entity Tagger using Domain-Specific Dictionary. In <em>Proc. 2018 Conference on Empirical Methods in Natural Language Processing</em> 2054–2064 (Association for Computational Linguistics, 2018). https://doi.org/10.18653/v1/D18-1230</li>
+<li>Liang, C. et al. BOND: BERT-Assisted Open-Domain Named Entity Recognition with Distant Supervision. In <em>Proc. 26th ACM SIGKDD International Conference on Knowledge Discovery &amp; Data Mining (KDD '20)</em> 1054–1064 (ACM, 2020). https://doi.org/10.1145/3394486.3403149</li>
+<li>Lison, P., Barnes, J., Hubin, A. &amp; Touileb, S. Named Entity Recognition without Labelled Data: A Weak Supervision Approach. In <em>Proc. 58th Annual Meeting of the Association for Computational Linguistics</em> 1518–1533 (2020). https://doi.org/10.18653/v1/2020.acl-main.139</li>
+<li>Wu, Q., Lin, Z., Karlsson, B. F., Lou, J.-G. &amp; Huang, B. Single-/Multi-Source Cross-Lingual NER via Teacher-Student Learning on Unlabeled Data in Target Language. In <em>Proc. 58th Annual Meeting of the Association for Computational Linguistics</em> 6505–6514 (Association for Computational Linguistics, 2020). https://doi.org/10.18653/v1/2020.acl-main.581</li>
+<li>Qu, X. et al. Distantly-Supervised Named Entity Recognition with Adaptive Teacher Learning and Fine-Grained Student Ensemble. <em>Proc. AAAI Conf. Artif. Intell.</em> <strong>37</strong>, 13501–13509 (2023). https://doi.org/10.1609/aaai.v37i11.26583</li>
+<li>Du, J. et al. Self-training Improves Pre-training for Natural Language Understanding. In <em>Proc. 2021 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies</em> 5408–5418 (Association for Computational Linguistics, 2021). https://doi.org/10.18653/v1/2021.naacl-main.426</li>
+<li>van Miltenburg, E., van der Lee, C. &amp; Krahmer, E. Preregistering NLP research. In <em>Proc. 2021 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies</em> 613–623 (Association for Computational Linguistics, 2021). https://doi.org/10.18653/v1/2021.naacl-main.51</li>
+<li>Lafferty, J., McCallum, A. &amp; Pereira, F. Conditional Random Fields: Probabilistic Models for Segmenting and Labeling Sequence Data. In <em>Proc. 18th International Conference on Machine Learning (ICML 2001)</em> 282–289 (2001).</li>
+<li>Lample, G., Ballesteros, M., Subramanian, S., Kawakami, K. &amp; Dyer, C. Neural Architectures for Named Entity Recognition. In <em>Proc. 2016 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies</em> 260–270 (Association for Computational Linguistics, 2016). https://doi.org/10.18653/v1/N16-1030</li>
+<li>The Europe PMC Consortium. Europe PMC: a full-text literature database for the life sciences and platform for innovation. <em>Nucleic Acids Res.</em> <strong>43</strong>, D1042–D1048 (2015). https://doi.org/10.1093/nar/gku1061</li>
 <li>Loshchilov, I. &amp; Hutter, F. Decoupled Weight Decay Regularization. In <em>International Conference on Learning Representations</em> (2019). https://arxiv.org/abs/1711.05101</li>
-<li>Nadeau, C. &amp; Bengio, Y. Inference for the Generalization Error. <em>Machine Learning</em> <strong>52</strong>, 239–281 (2003). https://doi.org/10.1023/A:1024068626366</li>
+<li>Nadeau, C. &amp; Bengio, Y. Inference for the Generalization Error. <em>Mach. Learn.</em> <strong>52</strong>, 239–281 (2003). https://doi.org/10.1023/A:1024068626366</li>
 </ol>
-<h2>Figure legends</h2>
-<figure><img src="file:///home/user/AI_Research_Ontologies_GNN_GRL/docs/figures/fig8_method.png" alt="Figure 1"><figcaption><p><strong>Figure 1. The names method, MR6 + names.</strong> Three CRF-head teachers trained on the labeled
+<h2 class="legends">Figure legends</h2>
+<figure class="first"><img src="file:///home/user/AI_Research_Ontologies_GNN_GRL/docs/figures/fig8_method.png" alt="Figure 1"><figcaption><p><strong>Figure 1. The names method, MR6 + names.</strong> Three CRF-head teachers trained on the labeled
 sentences tag a 40,000-sentence corpus; the mentions all three tag alike
 with every marginal at 0.9 or more form the lexicon; the replacement pool
 holds the training mentions and the lexicon; mention replacement writes
@@ -1267,24 +1308,27 @@ six copies of each training sentence with its mentions swapped; the
 student trains on the gold sentences and the copies.</p>
 </figcaption></figure>
 <figure><img src="file:///home/user/AI_Research_Ontologies_GNN_GRL/docs/figures/fig9_units.png" alt="Figure 2"><figcaption><p><strong>Figure 2. The gain of MR6 + names on each held-out unit.</strong> The
-micro-F1 difference of MR6 + names from the CRF head (red circles) and
-from MR6 (blue squares), in percentage points, each the difference of
+micro-F1 difference of MR6 + names (six-copy mention replacement with the
+harvested names) from the CRF head (the baseline; red circles) and from
+MR6 (six-copy mention replacement without them; blue squares), in
+percentage points, each the difference of
 the two systems' seed means on the unit: MuLMS's 7 subfields on the
 decision seeds, MaterioMiner's 4 papers at both granularities and
 SOFC-Exp's 5 folds, where MR6 was not run (the protocol put it at about
 13 hours of one T4 GPU, on a corpus where the names method does not
 pass; Supplementary Note 11). The shaded bands, drawn across the 11
 units' rows, are the 95% Student-t intervals of the pooled differences
-of the units shown, D5′ (red; the post hoc decision-seed reading of D5)
-and D7 (blue), with dashed lines at their means; the registered D5,
+of the units shown, D5′ (red; the post hoc decision-seed reading of the
+pooled decision D5) and D7 (blue; the names against MR6), with dashed lines at their means; the registered D5,
 which takes MuLMS's units on all ten seeds, is given in red text below
 the rows. The units carry no error bars.</p>
 </figcaption></figure>
 <figure><img src="file:///home/user/AI_Research_Ontologies_GNN_GRL/docs/figures/fig7_names.png" alt="Figure 3"><figcaption><p><strong>Figure 3. Recall and precision on the unseen test names.</strong> Each point
 pools the predictions over seeds and held-out units, 70 runs (7
 subfields, 10 seeds) in <strong>a)</strong> and 40 (4 papers, 10 seeds) in <strong>b)</strong> and
-<strong>c)</strong>: the CRF head (black circles), MR3 (blue squares), MR6 (cyan
-diamonds) and MR6 + names (red stars) on <strong>a)</strong> MuLMS's held-out
+<strong>c)</strong>: the CRF head (the baseline; black circles), mention replacement
+with three and six copies (MR3, blue squares; MR6, cyan diamonds) and
+MR6 with the harvested names (MR6 + names, red stars) on <strong>a)</strong> MuLMS's held-out
 subfields, with the topic corpus and, orange plus sign, a mixed corpus;
 <strong>b)</strong> MaterioMiner's held-out papers, fine-grained; and <strong>c)</strong> the same
 papers, coarse-grained, with the fatigue corpus. Grey lines are iso-F1 curves; a grey arrow joins each
@@ -1297,11 +1341,12 @@ same seeds the two compare as in Table 4's note.</p>
 </figcaption></figure>
 <figure><img src="file:///home/user/AI_Research_Ontologies_GNN_GRL/docs/figures/fig10_recall_matched.png" alt="Figure 4"><figcaption><p><strong>Figure 4. The recall-matched control in each MuLMS subfield.</strong>
 <strong>a)</strong>–<strong>g)</strong> electrolysis, graphene, pemfc, poly, semi, sofc and steel
-(decision seeds). Blue lines with dots: MR6's recall over all test
-entities at each bias D of the grid (the matching, pre-specified); red
+(decision seeds). Blue lines with dots: the recall over all test
+entities of MR6 (six-copy mention replacement without the names) at each
+bias D of the grid (the matching, pre-specified); red
 lines with dots: its recall on the unseen test names the lexicon holds
 (post hoc); both pooled over the seeds. Dashed lines of the same
-colours: MR6 + names' values; dotted grey line: the matched bias D*. In
+colors: MR6 + names' values; dotted grey line: the matched bias D*. In
 the three flagged subfields (<strong>a)</strong>, <strong>c)</strong> and <strong>f)</strong>) the blue curve peaks
 below its dashed line; in every subfield the red curve stays below its
 dashed line. Pooled rates carry no error bars.</p>
@@ -1324,7 +1369,7 @@ held-out unit with its test size, and the training set per unit.</p>
 <tr>
 <td>MaterioMiner<sup>1</sup>, release v1.0.1, CC BY 4.0</td>
 <td>4 papers on fatigue of metals (s11340, ncomms7164, s41467, met10111458: 41, 81, 201, 153 sentences)</td>
-<td>the classes of the dataset's materials mechanics ontology (MMO) at two levels: fine-grained, its 27 classes with most entities, the other classes' entities relabelled O (1,328 entities; e.g. Alloy, Value, Mechanism, StateDescriptor, FatigueTestSpecimen, GrainBoundary); coarse-grained, 27 parent types (2,194 entities)</td>
+<td>the classes of the dataset's materials mechanics ontology (MMO) at two levels: fine-grained, its 27 classes with most entities, the other classes' entities relabeled O (1,328 entities; e.g. Alloy, Value, Mechanism, StateDescriptor, FatigueTestSpecimen, GrainBoundary); coarse-grained, 27 parent types (2,194 entities)</td>
 <td>one paper (41–201 sentences)</td>
 <td>the other three papers (275–435 sentences, of which 15% validate: 234–370 training sentences)</td>
 </tr>
@@ -1347,10 +1392,11 @@ held-out unit with its test size, and the training set per unit.</p>
 </section>
 <section class="tbl wide">
 <p><strong>Table 2.</strong> The twelve pre-registered decisions of the names route (D9
-to D12 the follow-ups) in the order taken: corpus and units (with
+to D12 the follow-ups) in the order taken, with D5′, the post hoc
+decision-seed reading of D5 and not a decision, in its own row: corpus and units (with
 MuLMS's seeds), comparison, the reference's and the system's mean micro
 F1 (for D11, recall), the mean paired difference with its 95% CI, the
-two-sided P value of the same t test (computed for reporting; Methods,
+two-sided P value of the same t-test (computed for reporting; Methods,
 <em>Statistics and reproducibility</em>), and the verdict.</p>
 <table>
 <thead>
@@ -1596,6 +1642,7 @@ two-sided sign-flip P value, and the status of each entry.</p>
 </table>
 </section>
 <section class="tbl">
+<p><strong>Table 3 (continued).</strong></p>
 <table>
 <thead>
 <tr>

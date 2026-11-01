@@ -16,5 +16,16 @@ def test_tables_and_figures():
     first = wrapped.split('<section class="tbl">')[1].split('</section>')[0]
     assert '<strong>Table 1.</strong>' in first and 'Its note.' in first      # caption and note kept
     placed = pp.place_figures(body, '/figs')
-    assert '<figure><img src="file:///figs/fig8_method.png"' in placed
+    assert '<figure class="first"><img src="file:///figs/fig8_method.png"' in placed
     assert '<figcaption><p><strong>Figure 1. A title.</strong> The legend.</p>' in placed
+
+
+def test_continued_table_caption():
+    """A table without a caption of its own, the second part of a table, is labelled as
+    that table continued."""
+    pytest.importorskip('markdown_it')
+    md = ('**Table 3.** Two parts.\n\n| a | b |\n|---|---|\n| 1 | 2 |\n\n'
+          '| c | d |\n|---|---|\n| 3 | 4 |\n')
+    wrapped = pp.wrap_tables(pp.to_html(md))
+    assert wrapped.count('<p><strong>Table 3 (continued).</strong></p>') == 1
+    assert wrapped.index('Table 3 (continued)') > wrapped.index('<strong>Table 3.</strong>')

@@ -469,7 +469,15 @@ papers, 1/5 between SOFC-Exp's folds, 1/4 between the 5 MuLMS subfield
 pairs whose training pools share an article, `mulms_pools`), the
 correlation the corrected resampled t test assumes for k-fold designs;
 `post_hoc_reported` gives the t test of MR3 over the CRF head on the 11
-pooled units, both seed bases (P 0.0038 and 0.0040). Table 10
+pooled units, both seed bases (P 0.0038 and 0.0040), and (round 16) the
+P values of the reported comparisons the paper draws inferences from
+(`inferences`; from per-unit values, or from the interval where the
+results store none), the companion study's MR3 decisions on MaterioMiner
+on the seeds its screen did not use (`mr3_materiominer_decision_seeds`,
+with `mr3_materiominer_all_seeds` reproducing the decisions) and D5 with
+the coarse-grained papers (`d5_coarse`); `post_hoc_dependence.tipping`
+gives the correlation at which each pass's adjusted interval reaches 0.
+Table 10
 (`table10_lexicon.md`, paper A's Table S3 and Table 5) adds, post hoc, F1
 on each lexicon part and the paired F1 gain on the held names, from
 `ner_lexicon_recall.json`'s pooled and per-unit recall and precision.

@@ -694,6 +694,28 @@
     "correlated_pairs": 5,
     "above_0": false
    }
+  },
+  "tipping": {
+   "D3": {
+    "group": "materiominer",
+    "rho": 0.23
+   },
+   "D4": {
+    "group": "materiominer",
+    "rho": 0.28
+   },
+   "D5": {
+    "group": "materiominer",
+    "rho": 0.44
+   },
+   "D5'": {
+    "group": "materiominer",
+    "rho": 0.54
+   },
+   "D11": {
+    "group": "mulms",
+    "rho": 0.53
+   }
   }
  },
  "post_hoc_reported": {
@@ -725,6 +747,176 @@
      3.75
     ]
    }
+  },
+  "inferences": {
+   "mr3_vs_crf_11_decision": {
+    "mean_diff": 2.46,
+    "ci95": [
+     1.0,
+     3.91
+    ],
+    "n_units": 11,
+    "p_two_sided": 0.0038
+   },
+   "mr6_vs_mr3_11_decision": {
+    "mean_diff": 0.33,
+    "ci95": [
+     -0.25,
+     0.92
+    ],
+    "n_units": 11,
+    "p_two_sided": 0.2315
+   },
+   "mr3_vs_crf_16": {
+    "mean_diff": 1.46,
+    "ci95": [
+     0.28,
+     2.64
+    ],
+    "n_units": 16,
+    "p_two_sided": 0.0184
+   },
+   "mr6_vs_crf_mulms_decision": {
+    "mean_diff": 2.68,
+    "ci95": [
+     0.13,
+     5.23
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.0424
+   },
+   "sofc_names_vs_mr3": {
+    "mean_diff": 0.45,
+    "ci95": [
+     0.04,
+     0.86
+    ],
+    "n_units": 5,
+    "p_two_sided": 0.0384
+   },
+   "unseen_recall_names_vs_mr6": {
+    "mean_diff": 2.56,
+    "ci95": [
+     0.76,
+     4.36
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.0131
+   },
+   "unseen_precision_names_vs_mr6": {
+    "mean_diff": -2.22,
+    "ci95": [
+     -5.03,
+     0.6
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.1019
+   },
+   "held_recall_names_vs_mr6": {
+    "mean_diff": 7.29,
+    "ci95": [
+     3.27,
+     11.3
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.0044
+   },
+   "held_in_minus_out": {
+    "mean_diff": 6.17,
+    "ci95": [
+     2.44,
+     9.9
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.0067
+   },
+   "held_names_vs_best_bias": {
+    "mean_diff": 6.52,
+    "ci95": [
+     2.15,
+     10.89
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.0107
+   },
+   "other_unseen_at_matched_bias": {
+    "mean_diff": -1.73,
+    "ci95": [
+     -3.02,
+     -0.44
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.0168
+   }
+  },
+  "mr3_materiominer_decision_seeds": {
+   "fine": {
+    "n_units": 4,
+    "mean_diff": 2.57,
+    "sd": 1.55,
+    "t": 3.32,
+    "df": 3,
+    "p_one_sided": 0.0226,
+    "p_two_sided": 0.0452,
+    "ci95": [
+     0.1,
+     5.03
+    ]
+   },
+   "coarse": {
+    "n_units": 4,
+    "mean_diff": 1.73,
+    "sd": 1.48,
+    "t": 2.33,
+    "df": 3,
+    "p_one_sided": 0.0509,
+    "p_two_sided": 0.1017,
+    "ci95": [
+     -0.63,
+     4.08
+    ]
+   }
+  },
+  "mr3_materiominer_all_seeds": {
+   "fine": {
+    "n_units": 4,
+    "mean_diff": 2.77,
+    "sd": 0.79,
+    "t": 6.98,
+    "df": 3,
+    "p_one_sided": 0.003,
+    "p_two_sided": 0.006,
+    "ci95": [
+     1.51,
+     4.03
+    ]
+   },
+   "coarse": {
+    "n_units": 4,
+    "mean_diff": 1.28,
+    "sd": 0.77,
+    "t": 3.33,
+    "df": 3,
+    "p_one_sided": 0.0223,
+    "p_two_sided": 0.0446,
+    "ci95": [
+     0.06,
+     2.51
+    ]
+   }
+  },
+  "d5_coarse": {
+   "n_units": 11,
+   "mean_diff": 2.67,
+   "sd": 3.84,
+   "t": 2.31,
+   "df": 10,
+   "p_one_sided": 0.0218,
+   "p_two_sided": 0.0436,
+   "ci95": [
+    0.09,
+    5.25
+   ]
   }
  }
 }

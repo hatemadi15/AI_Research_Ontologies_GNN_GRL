@@ -49,6 +49,9 @@ figure { break-before: page; break-inside: avoid; margin: 0; }
 figure img { display: block; max-width: 100%; max-height: 175mm; margin: 0 auto 6mm; }
 figure figcaption p { font-size: 9.5pt; }
 h2.tables { break-before: page; }
+h2.legends { break-before: page; }
+figure.first { break-before: avoid; }
+section.tbl > p:first-child { break-inside: avoid; break-after: avoid; }
 sup { font-size: 70%; line-height: 0; vertical-align: super; }
 """
 
@@ -68,11 +71,16 @@ def columns(table_html):
 def wrap_tables(body):
     """Each table with its caption (the nearest preceding "Table N." paragraph) and any
     paragraphs up to the next caption or heading, in a <section class="tbl">; wide ones get
-    landscape pages."""
-    out, pos = [], 0
+    landscape pages. A table with no caption of its own (the second part of a table) gets
+    "Table N (continued)."."""
+    out, pos, last = [], 0, None
     for m in re.finditer(r'<table>.*?</table>\n', body, re.S):
         cap = body.rfind('<p><strong>Table ', pos, m.start())
         start = cap if cap >= 0 else m.start()
+        number = re.match(r'<p><strong>Table (S?\d+)\.', body[cap:]) if cap >= 0 else None
+        last = number.group(1) if number else last
+        cont = (f'<p><strong>Table {last} (continued).</strong></p>\n'
+                if cap < 0 and last else '')
         end = m.end()
         nxt = re.search(r'<p><strong>Table |<h[1-3]|<table>', body[end:])
         tail = body[end:end + (nxt.start() if nxt else 0)]
@@ -80,7 +88,7 @@ def wrap_tables(body):
             end += len(tail)                     # the table's note, up to the next caption
         cls = 'tbl wide' if columns(m.group(0)) >= WIDE else 'tbl'
         out.append(body[pos:start])
-        out.append(f'<section class="{cls}">\n{body[start:end]}</section>\n')
+        out.append(f'<section class="{cls}">\n{cont}{body[start:end]}</section>\n')
         pos = end
     out.append(body[pos:])
     return ''.join(out)
@@ -93,7 +101,8 @@ def place_figures(body, figures_dir):
         src = os.path.join(figures_dir, FIGURES[n]) if n in FIGURES else None
         img = f'<img src="file://{html.escape(src)}" alt="Figure {n}">' if src else ''
         return f'<figure>{img}<figcaption>{m.group(0)}</figcaption></figure>\n'
-    return re.sub(r'<p><strong>Figure (\d+)\. .*?</p>\n', figure, body, flags=re.S)
+    body = re.sub(r'<p><strong>Figure (\d+)\. .*?</p>\n', figure, body, flags=re.S)
+    return body.replace('<figure>', '<figure class="first">', 1)
 
 
 def page(title, body):
@@ -108,6 +117,7 @@ def build(md_path, html_path, figures_dir, main):
     body = to_html(text)
     if main:
         body = body.replace('<h2>Tables</h2>', '<h2 class="tables">Tables</h2>')
+        body = body.replace('<h2>Figure legends</h2>', '<h2 class="legends">Figure legends</h2>')
         body = place_figures(body, figures_dir)
     body = wrap_tables(body)
     title = re.search(r'<h1>(.*?)</h1>', body)

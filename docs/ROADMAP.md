@@ -5990,6 +5990,84 @@ rebuilt from `subfield_folds`). Applied:
   - Table S16's seed ranges take en dashes.
   - The cover letter says many held-out names are unseen, not all.
 
+*Paper A, review round 16, part 2 (1 November, night): the referee and
+the consistency check of `7395d9e`.* The referee recommended major revision. It
+found every recomputed number and every status label but one correct, and
+the headline accurate. The consistency check found no number disagreeing
+between places. Each finding was checked against the record, then
+applied:
+
+- **MR3's 16-unit pool.** It is no longer labelled pre-specified. When
+  the 09:14 protocol fixed it, the results of 11 of its 16 units were
+  known: MuLMS MR3 at 18 October 00:48 (`c2ca3f6`) and MaterioMiner MR3
+  at 17 October 06:59 (`db7c78d`). For multi-task MR3, 4 of its 9 units
+  were known (`81134b7`). The text now states this, with P = 0.018.
+- **The companion study's MR3 decisions on MaterioMiner.** They averaged
+  in the three screen seeds that gated stage 2 (week 7 part 2b). On seeds
+  300–900 alone (post hoc, `mr3_materiominer_decision_seeds`):
+  - fine-grained +2.57 [+0.10, +5.03];
+  - coarse-grained +1.73 [−0.63, +4.08].
+
+  The advice now gives this reading. The all-seed decisions reproduce
+  exactly.
+- **Where the dependence check's passes vanish** (`tipping`):
+  - D4 at a correlation of 0.28 between papers;
+  - D5 at 0.44, with the MuLMS pairs held at 1/4;
+  - D11 at 0.53 between MuLMS subfields that share a training article.
+
+  These are in the Statistics and the Discussion. The variance formula is
+  now in the Methods.
+- **P values for the inferences** drawn from non-decision intervals
+  (`inferences`):
+  - MR3's three-term decomposition: 0.004, 0.23 and 0.25;
+  - the unseen-name recall gain, 0.013, against 0.10 for the precision
+    loss;
+  - in − out, 0.007;
+  - the held-name recall gain, 0.004;
+  - the best-bias lead, 0.011;
+  - the other unseen names at the matched bias, 0.017;
+  - SOFC-Exp's names over MR3, 0.038.
+
+  The Estimates paragraph states the rule. The detectable-difference
+  formula is in the Methods.
+- **Methods.**
+  - The votes defined, as the code forms them: the triples 0–200,
+    300–500 and 600–800, seed 900 never voting.
+  - The ablations defined. The "first" 10,000 or 20,000 sentences are
+    the first of one seeded shuffle, a random sample, as the protocol of
+    29 October says.
+  - "Pre-specified", O and the D3/D4 gate defined at first use; NER
+    spelled out.
+- **Labels and wording.**
+  - D11 qualified in the dependence sentences.
+  - D5′ marked as a reading, not a decision, in Tables 2 and S16.
+  - The 05:06 plan's smaller batch "to be pushed, which never was"
+    (`w12f`, SI Note 11).
+  - D5 with the coarse-grained papers, +2.67 [+0.09, +5.25] (post hoc,
+    `d5_coarse`, as ROADMAP 13.2 records), among the robustness checks.
+  - The companion gap given at both granularities (28–31 and 17–20).
+  - Mention replacement's swap probability given in the Introduction.
+- **Abstract** (143 words): "three-copy mention replacement alone".
+- **Legends** define their systems.
+- **Spelling** is American throughout, and "t-test" is used consistently.
+- **References** take Nature-style journal abbreviations ("Proc." for
+  proceedings).
+- **PDF.** The "Figure legends" heading starts its page with Figure 1, a
+  table's second part is captioned "(continued)", and captions stay with
+  their tables.
+- **Cover letter.** It carries the abstract's qualifications, and "I
+  adopted" replaces "we adopted".
+- **Not done.**
+  - Renumbering the SI by first citation in the main text. The notes and
+    tables are in order within the SI; this is a question for the
+    editorial office.
+  - Shortening the main text, the referee's readability advice; npj sets
+    no limit.
+  - The referee's alternative abstract, which drops "On MuLMS" and the
+    seed basis.
+  - Releasing per-unit lexicon-membership flags, and the author's items
+    (affiliation, AI assistant's name, DOI, companion preprint).
+
 ### Week 17 protocol: the harvested names on the strongest base (fixed before any run, 31 October, 19:10 UTC)
 
 *Why, and when.* The round-6 reviews of paper A (31 October) listed as a

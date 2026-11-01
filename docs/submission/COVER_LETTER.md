@@ -9,20 +9,23 @@ unlabeled papers to augment materials named entity recognition on unseen
 documents".
 
 Materials text mining depends on named-entity recognizers trained on a
-handful of annotated papers but run on new papers, many of whose
-materials, processes and values those papers never mention. The manuscript tests a
-cheap remedy. It harvests the names that three baseline taggers
-confidently agree on in 40,000 sentences of open-access papers, and feeds
-them to mention replacement, a standard data augmentation. On held-out
-documents the combination improves on a MatSciBERT baseline by 3.6 F1
-points, pooled over eleven held-out subfields and papers of two corpora,
-and on every held-out MaterioMiner paper at both annotation
-granularities; mention replacement alone gives about two thirds of that
-gain. On one corpus the harvested names raise recall on the unseen names
-their lexicon holds, at some cost in precision (a post hoc analysis),
-and a pre-registered test against a decoding bias matched in recall
-passes, though only through three subfields that the bias could not
-match.
+handful of annotated papers but run on new papers, most of whose names
+those papers never annotate. The manuscript tests a cheap remedy. It
+harvests the names that three baseline taggers confidently agree on in
+40,000 sentences of open-access papers, and feeds them to mention
+replacement, a standard data augmentation. On held-out documents the
+combination improves on a MatSciBERT baseline by 3.6 F1 points pooled
+over eleven held-out subfields and papers of two corpora, under a
+criterion adopted mid-study when mention replacement alone already met
+it, and on every held-out MaterioMiner paper at both annotation
+granularities; a third corpus shows no gain. Three-copy mention
+replacement alone gives about two thirds of that gain (post hoc), and
+over six-copy mention replacement the names add 0.8 F1, not
+established. On one corpus the harvested names raise recall on the
+unseen names their lexicon holds, at some cost in precision (a post hoc
+analysis), and a pre-registered test against a decoding bias matched in
+recall passes, though only through three subfields that the bias could
+not match.
 
 The paper suits *npj Computational Materials* for three reasons:
 
@@ -34,7 +37,7 @@ The paper suits *npj Computational Materials* for three reasons:
      repository before its results, with matched and recall-matched
      controls;
    - every comparison in every measure;
-   - the dated protocol record, including a criterion we adopted mid-study,
+   - the dated protocol record, including a criterion I adopted mid-study,
      disclosed in full.
 
    Readers can therefore calibrate what to adopt. Mention replacement, the

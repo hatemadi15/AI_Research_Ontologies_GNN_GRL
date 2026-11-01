@@ -241,3 +241,14 @@ D11 verdicts in Table S16; citations as superscripts; references
 completed from their DOIs (Torres et al. now its 2026 journal version);
 Data availability with the datasets' locations; the AI assistant's work
 in the Methods only. ROADMAP's round-15 note lists every item.
+Round 16 (a referee recommending major revision on substance, not on
+accuracy; a number audit and a consistency check finding no wrong number)
+led to: D7's seed basis in the abstract; F1 on the held names computed from
+counts; the dictionary probe's recall described correctly; MR3's 16-unit
+pool and the companion's MaterioMiner decisions given their true status
+(11 of 16 units known; the screen seeds averaged in, +1.73 [−0.63, +4.08]
+coarse-grained without them); where each pass of the dependence check
+vanishes; P values for every inference drawn from a non-decision interval;
+the votes, ablations and formulas defined in the Methods; American
+spelling; Nature-style journal abbreviations; a fuller cover letter.
+ROADMAP's two round-16 notes list every item.

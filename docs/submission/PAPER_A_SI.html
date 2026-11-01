@@ -23,6 +23,9 @@ figure { break-before: page; break-inside: avoid; margin: 0; }
 figure img { display: block; max-width: 100%; max-height: 175mm; margin: 0 auto 6mm; }
 figure figcaption p { font-size: 9.5pt; }
 h2.tables { break-before: page; }
+h2.legends { break-before: page; }
+figure.first { break-before: avoid; }
+section.tbl > p:first-child { break-inside: avoid; break-after: avoid; }
 sup { font-size: 70%; line-height: 0; vertical-align: super; }
 </style></head><body>
 <h1>Supplementary Information</h1>
@@ -30,14 +33,14 @@ sup { font-size: 70%; line-height: 0; vertical-align: super; }
 <p>Hatem Madi</p>
 <p>Supplementary Notes 1 to 13 give the protocol record, the compute and
 repeats, the corpora's composition, and the analyses the main text
-summarises; Tables S1 to S16 are numbered in order of appearance. Table
+summarizes; Tables S1 to S16 are numbered in order of appearance. Table
 and figure numbers without an S refer to the main text, whose sections
 are cited by name; the methods are all in the main text's Methods.</p>
 <h2>Supplementary Note 1: the protocol record</h2>
 <p>The repository names its protocols by the stage of the project in which
 they were fixed, a &quot;week&quot;; Table S1's first column gives that name with
 each protocol's decisions, and the main text cites the protocols by date. The
-week-12 screen's variants are labelled V1 to V8, as Supplementary Note 7 lists them.
+week-12 screen's variants are labeled V1 to V8, as Supplementary Note 7 lists them.
 The last rows give the companion study's protocols whose results the main
 text or these Notes quote; their decisions are not among the twelve of Table 2 or the twenty counted in the main text (Results, <em>What else was tried, and the count</em>).</p>
 <section class="tbl">
@@ -292,7 +295,9 @@ names, the share of the unseen test names in the lexicon (by the runs'
 stored counts, which call a test name unseen when no training sentence
 annotates its words with its type; for MR6 + names this gives the 22.2%
 of the main text's rule (Methods, <em>Data</em>) too), micro F1 on the 7 subfields and the
-differences from MR6 + names, MR3 and the CRF head.</p>
+differences from MR6 + names, MR3 and the CRF head. A corpus's &quot;first&quot;
+10,000 or 20,000 sentences are the first of one fixed seeded shuffle of
+its 40,000, a random sample (Methods, <em>Systems</em>).</p>
 <table>
 <thead>
 <tr>
@@ -645,6 +650,7 @@ each unit's F1 from its counts on them pooled over the seeds.</p>
 <p><strong>Paired gains</strong></p>
 </section>
 <section class="tbl wide">
+<p><strong>Table S3 (continued).</strong></p>
 <table>
 <thead>
 <tr>
@@ -978,7 +984,7 @@ filter and not the corpus was the bottleneck, is not borne out by the main text'
 <li><em>Seven variants on the topic corpora</em> (week 12, 18 October 11:00, a
 3-seed screen on the 7 subfields; Table S5, with the plan's labels, under
 which V5 was not assigned). The selection rule took the largest mean gain
-over MR3, which favours the noisiest variant; the screen decides
+over MR3, which favors the noisiest variant; the screen decides
 nothing, and two of its losers deserve a 10-seed test that was not run:
 self-training (the student trains on the sentences the teachers labeled,
 not only on their names) on the corpus's silver sentences (V6) was the
@@ -1461,7 +1467,7 @@ T4, a training run and twelve decodes per subfield and seed, in one
 session of 151 minutes.</p>
 <p><strong>Post hoc, after the result.</strong> Four analyses were added after the
 result, the first on the day of the result and the others after an
-internal review of the draft asked for them; all are labelled post hoc
+internal review of the draft asked for them; all are labeled post hoc
 in <code>ner_recall_matched.py</code> and its results file. (1) With the flagged
 subfields matched at the grid value of the nearest recall (2.5, 3 and
 2.5; <code>match_nearest</code>), D11 is +8.63 [+3.35, +13.90], positive in every
@@ -1485,7 +1491,7 @@ to 99% of a subfield's distinct lexicon names and 83 to 99.6% of its
 entries (Table S10), and they are 60 to 99.6% of the unseen test names a
 lexicon holds and 24 to 59% of the others (a minority in five of the
 seven subfields, 46% pooled), so a shift toward those two types could
-favour the held names without any name being learned. At D = 0, where no
+favor the held names without any name being learned. At D = 0, where no
 matching is involved, the materials names the lexicon holds gain +7.98
 [+2.15, +13.82] over MR6 (7 of 7 subfields) and the other materials
 names +0.89 [−3.48, +5.27]; values held +1.74 [−1.16, +4.65], the other
@@ -2481,10 +2487,10 @@ outputs. The user was asked to cancel version 8, and the plan, committed
 at 05:06 (<code>9e9d906</code>), split the names variants into <code>w12f</code> (V1 and V2),
 to run in its place, and <code>w12g</code> (V4 and V6), to run after the reset of
 24 October with the decision batch. At 08:10 the quota left 2.9 hours,
-the notes recorded that cancelling no longer changed the plan, and
+the notes recorded that canceling no longer changed the plan, and
 <code>w12e</code> was to run after the reset. The week-13 protocol, committed at
 09:14, also put <code>w12e</code> after the reset, beside <code>w13a</code>. <code>w12e</code> was not
-cancelled and <code>w12f</code> was never pushed: the next sessions on either
+canceled and <code>w12f</code> was never pushed: the next sessions on either
 Kaggle notebook (<code>ner-gpu-jobs-d</code>, <code>ner-gpu-jobs-c</code>) were those of 24
 October, <code>ner-gpu-jobs-d</code>'s version 9 and <code>ner-gpu-jobs-c</code>'s
 version 5. Kaggle did not stop the session: the quota read 43.99 hours
@@ -2567,7 +2573,7 @@ the mention filter. In <code>w14c</code> (31 October, 00:14 to about 09:55, 9.7
 session hours) each variant's teachers equalled week 10's on their
 subfield, and every run carried its topic corpus's SHA-256, the mention
 filter and the setting it changed. The three new options defaulted to
-the earlier behaviour byte for byte on the tiny model.</p>
+the earlier behavior byte for byte on the tiny model.</p>
 <p>The protocol listed what it would not run, and why: V4 on the multi-task
 model (MaterioMiner only, the names typed at both levels, no second
 corpus to repeat it on); the copy control on SOFC-Exp's article folds
@@ -2653,7 +2659,7 @@ minutes).</li>
 <li>20 October, <code>w12e</code>, <code>ner-gpu-jobs-d</code> version 8 (pushed 05:03, bundle
 <code>3ac85a8</code>): the second push of <code>w12a</code>'s names jobs, made before the
 quota was checked; the user was asked to cancel it, it was not
-cancelled, and it ended at 12:25 (441 minutes), found complete at
+canceled, and it ended at 12:25 (441 minutes), found complete at
 13:23 at 46.23 of the week's 45 quota hours.</li>
 <li>24 October, <code>w12b:mrm6</code>, <code>ner-gpu-jobs-d</code> version 9 (pushed 12:22):
 failed without a trace at 13:44 after 82 minutes, about 1.4 GPU hours
@@ -6101,7 +6107,7 @@ their 95% CIs.</p>
 </table>
 </section>
 <h2>Supplementary Note 13: further tables</h2>
-<p>Three analyses the Notes above summarise, in full, and the tests of the
+<p>Three analyses the Notes above summarize, in full, and the tests of the
 decisions. Table S13 gives the unseen-name trade of the main text (Results, <em>What the names do</em>) for every system against the one it
 builds on (post hoc, but for MR3 against the CRF head on MuLMS's unseen
 and seen test names, pre-specified on 17 October; <code>ner_mentions.py</code>,
@@ -7365,14 +7371,14 @@ freedom, its one- and two-sided P values, and the exact two-sided
 sign-flip P value over all 2ⁿ assignments of signs, from the per-unit
 differences each decision used (rounded to two decimals, so t and P can
 differ from the unrounded values in the last digit); D5′ is the post hoc
-reading of D5 on MuLMS's decision seeds, so its verdict reads &quot;above 0
-(post hoc)&quot;, and D11 passes as registered only with the three flagged
+reading of D5 on MuLMS's decision seeds and not a decision, so its
+verdict reads &quot;above 0 (post hoc)&quot;, and D11 passes as registered only with the three flagged
 subfields. Computed on 1 November for reporting: each decision was taken
 by the registered rule, the interval above 0 (for D5 and D7 with neither
 corpus's interval below 0), which is the one-sided test at 2.5%. The
 last column (post hoc) gives the interval and two-sided P value with the
 units correlated where their training sets share documents, at the
-correlation n_test/n that the corrected resampled t test assumes, 1/K
+correlation n_test/n that the corrected resampled t-test assumes, 1/K
 in a design of K folds: 1/4 between MaterioMiner's papers, 1/5 between SOFC-Exp's folds,
 1/4 between the 5 of 21 pairs of MuLMS subfields whose training pools
 share an article, none otherwise or across corpora; the variance of the
@@ -7382,7 +7388,7 @@ freedom (<code>decision_tests.py</code>, <code>post_hoc_dependence</code>).</p>
 <table>
 <thead>
 <tr>
-<th>Decision</th>
+<th>Decision or reading</th>
 <th>Comparison</th>
 <th>Units</th>
 <th>Δ [95% CI]</th>

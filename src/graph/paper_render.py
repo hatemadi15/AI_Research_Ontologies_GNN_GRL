@@ -127,6 +127,29 @@ def format_authors(field):
     return short[0] if len(short) == 1 else ', '.join(short[:-1]) + ' & ' + short[-1]
 
 
+# Nature-style journal abbreviations (ISO 4) of the journals paper A cites
+JOURNALS = {'Applied Physics Reviews': 'Appl. Phys. Rev.',
+            'Computer Speech & Language': 'Comput. Speech Lang.',
+            'IEEE Transactions on Knowledge and Data Engineering': 'IEEE Trans. Knowl. Data Eng.',
+            'Journal of Chemical Information and Modeling': 'J. Chem. Inf. Model.',
+            'Machine Learning': 'Mach. Learn.', 'Natural Language Processing': 'Nat. Lang. Process.',
+            'Nature Communications': 'Nat. Commun.', 'Nucleic Acids Research': 'Nucleic Acids Res.',
+            'Proceedings of the AAAI Conference on Artificial Intelligence':
+                'Proc. AAAI Conf. Artif. Intell.',
+            'Scientific Data': 'Sci. Data', 'Scientific Reports': 'Sci. Rep.',
+            'Transactions of the Association for Computational Linguistics':
+                'Trans. Assoc. Comput. Linguist.',
+            'npj Computational Materials': 'npj Comput. Mater.'}
+
+
+def venue_name(name):
+    """A journal's Nature-style abbreviation, or a proceedings title with "Proceedings of
+    (the)" shortened to "Proc." as Nature style does."""
+    if name in JOURNALS:
+        return JOURNALS[name]
+    return re.sub(r'^Proceedings of (the )?', 'Proc. ', name)
+
+
 def format_entry(e):
     """One reference in the journal's style."""
     authors = format_authors(e.get('author', ''))
@@ -137,12 +160,12 @@ def format_entry(e):
              and plain(e.get('archiveprefix', '')).lower() == 'arxiv' else '')
     url = plain(e.get('url', ''))
     if e['type'] == 'article':
-        venue = f"*{plain(e.get('journal', ''))}*"
+        venue = f"*{venue_name(plain(e.get('journal', '')))}*"
         vol = plain(e.get('volume', ''))
         where = venue + (f' **{vol}**' if vol else '') + (f', {pages}' if pages else '')
         tail = f'{where} ({year}).'
     elif e['type'] == 'inproceedings':
-        venue = f"In *{plain(e.get('booktitle', ''))}*"
+        venue = f"In *{venue_name(plain(e.get('booktitle', '')))}*"
         pub = plain(e.get('publisher', ''))
         tail = venue + (f' {pages}' if pages else '') + f" ({pub + ', ' if pub else ''}{year})."
     elif arxiv:
