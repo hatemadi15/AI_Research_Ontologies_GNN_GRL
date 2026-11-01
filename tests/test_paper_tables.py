@@ -416,6 +416,11 @@ def test_table12_post_hoc_parts():
     assert '| MAT | held | +12.02 [+11.02, +13.02], 7/7 | +9.87 [+8.87, +10.87], 7/7 |  | 184–1022 |  |' in text
     # 10% of 6 names and 5% of 577 names: about 29 more, all of the held part's recalled names
     assert '| other | held | +2.87 [+1.87, +3.87], 7/7 | +0.94 [−0.06, +1.94], 7/7 | +9.80 [+8.80, +10.80], 7/7 | 6–577 | +29 (100%) |' in text
+    # a part with a cell that loses names gets counts without shares
+    lost = {'minus_mr6_at_0': {'MAT_out': {**e(1.0), 'per_unit': {'a': 10.0}},
+                               'VALUE_out': {**e(-1.0), 'per_unit': {'a': -10.0}}},
+            'gold_per_run': {'a': {'MAT_out': 100.0, 'VALUE_out': 20.0}}}
+    assert pt.extra_names(lost, 'MAT_out') == '+10' and pt.extra_names(lost, 'VALUE_out') == '−2'
     assert '18.1 0.0156, 18.2 0.1406' in text and '| a | 2,392 (29,748) |' in text
     assert pt.table12_post_hoc({}) == ''
 

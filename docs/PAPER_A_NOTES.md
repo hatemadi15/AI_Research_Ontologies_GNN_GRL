@@ -54,7 +54,7 @@ mention of that fold's training sentences.
 **Journal structure.** Section 1 (with Box 1) is the Introduction,
 Sections 5 and 6 the Results, Sections 7 to 9 the Discussion, Sections 2
 to 4 the Methods, and the Supplementary Information the supplementary
-material. The main text is about 10,800 words to the Limitations with its six tables; for npj
+material. The main text is about 11,200 words to the Limitations with its six tables; for npj
 Computational Materials the Related work folds into the Introduction and
 the Limitations into the Discussion, and the AI-use statement (Ethics and
 broader impact) moves into the Methods; for ACL Rolling Review the paper
@@ -62,8 +62,8 @@ needs cutting to 8 pages and anonymising.
 
 **Before submission (the author's items).**
 - The affiliation on the title page.
-- The venue's word and abstract limits (the abstract is about 230 words
-  since round 12; the main text is about 10,800 words to the
+- The venue's word and abstract limits (the abstract is 150 words since
+  round 13; the main text is about 11,200 words to the
   Limitations, and the round-11 referee advised 5,000 to 6,000 for an npj
   Article, moving detail to the SI). The round-12 referee's list of what
   could move without loss: Section 3's clock times into a short table
@@ -74,12 +74,32 @@ needs cutting to 8 pages and anonymising.
   file with only the twelve decisions in every measure kept in the SI.
 - The title: the round-11 referee advised keeping it (accurate for F1)
   and not adding "are learned", which the matched control cannot show on
-  its own (Section 5.4).
+  its own (Section 5.4). npj Computational Materials asks for at most 15
+  words without punctuation (the current title has 19 and a colon);
+  options in that form: "Names harvested from unlabeled papers are not
+  shown to improve materials entity recognition" (13 words) or "A
+  preregistered test of harvested names for materials named entity
+  recognition" (11).
+- The venue's format. npj Computational Materials (content types page,
+  read 1 November): no main-text word or display-item limit; abstract at
+  most 150 words without subheadings (now 150); at most 60 references,
+  not strictly enforced (now 61); figure legends at most 350 words each;
+  the sections Introduction (no subheadings), Results (subheadings),
+  Discussion (no subheadings, and no limitations or conclusions
+  sections), Methods (subheadings, after the Discussion), then Data and
+  Code availability, Author contributions, Competing interests,
+  References and Figure legends. For that venue Sections 2 to 4 become
+  the Methods, Related work folds into the Introduction, Box 1 and
+  Section 6 into the Results, the Limitations and the Conclusion into the
+  Discussion, and the AI-use statement into the Methods; the citation
+  keys are rendered as numbered references from `docs/references.bib`.
 - The companion study (`docs/PAPER_B.md`) posted as a preprint or
   uploaded as a related manuscript, and cited by title where the text
   says "companion study".
 - The AI-use statement: the name and version of the AI assistant, which
-  the repository does not record.
+  the author states (each commit's session trailer identifies the
+  session that made it); and, if true, that the author critically revised
+  and approved the final text (Author contributions).
 - The commit this paper describes tagged, and an archived copy with a DOI
   deposited and cited in the Code availability statement.
 - Optionally: release the rebuilt lexicons (lists of terms; at least the
@@ -130,4 +150,20 @@ pooled comparisons in macro and weighted F1 (post hoc, new; the names
 against MR6 +0.83 [−0.01, +1.67] on the decision seeds, +1.12 [+0.21,
 +2.03] on all ten); the mechanism read at D = 0 without "training copies";
 D8's reading checked against its condition; four session times corrected
-from the manifests; and Tables S9, S11 and S13 regenerated.
+from the manifests; and Tables S9, S11 and S13 regenerated. Round 13 (a
+referee recommending major revision of the presentation, not the
+substance; a number audit) led to: the abstract cut to 150 words (npj's
+limit) with the decision-seed basis named; the secondary measures given
+on the decision seeds in both macro and weighted F1, with the pooled
+macro gain over MR3 (+1.33 [+0.29, +2.36]) beside the micro statements
+it qualifies; D11 stated with its four-subfield reading wherever it
+appears, and the other unseen names' loss scoped (−0.88 [−2.63, +0.87]
+on the four matched subfields); the Conclusion reordered, with the
+criterion's caveat; Section 3's 20 October account as a dated list,
+with the 18 October gate restored, the 13:35 reading and D6's widened
+condition; D9 and D10's control noted as run in the same batch; the
+internal reviews' role in the AI-use statement; the per-corpus
+condition's weakness in the Limitations; BERT and AdamW cited, a
+duplicate bibliography entry removed; session times sourced from the
+manifests. The venue's format (npj: title, sections) is the author's
+item above.

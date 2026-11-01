@@ -781,7 +781,8 @@ def table13(rows):
         "of the companion study's week-5 decision; the macro and weighted cells of the pooled "
         "11-unit rows are post hoc, recomputed from the run files (ner_robustness.py, "
         "pooled_measures, whose micro values equal the rows' to within 0.01)." + strict
-        + " An empty cell: the results do not hold that quantity. Left out: the per-type analyses (Tables 8 and A2), the "
+        + " An empty cell: the results do not hold that quantity, or, for the macro and "
+        "weighted cells of the other pooled rows, it was not computed. Left out: the per-type analyses (Tables 8 and A2), the "
         "lexicon split of week 15 (Table 10), F1 on the seen and unseen test names after week 11 "
         "(ner_mentions.json; exploratory), and the companion study's comparisons, among them "
         "MR3 and multi-task + MR3 against the CRF head on MaterioMiner's papers, whose units "

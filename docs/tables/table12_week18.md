@@ -81,16 +81,16 @@ Table 12, fifth part (post hoc). 18.1 per subfield is the sum of the names' gain
 | all 7 subfields | +7.29 [+3.27, +11.30] | +3.96 [−1.06, +8.98] |
 | the 4 matched subfields | +5.92 [−1.10, +12.94] | +0.14 [−4.89, +5.16] |
 
-Table 12, sixth part (post hoc). Recall on the unseen test names by type group and lexicon membership: the names minus the control at D*, at the nearest grid value for the flagged subfields, and minus MR6 at D = 0, paired over the subfields with the subfields above 0; the unseen test names per subfield in each cell; and the names MR6 + names recalls beyond MR6 at D = 0 in each cell, per seed summed over the subfields (each subfield's gain times its names), with the cell's share of its part's (held or not held) total.
+Table 12, sixth part (post hoc). Recall on the unseen test names by type group and lexicon membership: the names minus the control at D*, at the nearest grid value for the flagged subfields, and minus MR6 at D = 0, paired over the subfields with the subfields above 0; the unseen test names per subfield in each cell; and the names MR6 + names recalls beyond MR6 at D = 0 in each cell, per seed summed over the subfields (each subfield's gain times its names), with the cell's share of its part's total where every cell of the part adds names.
 
 | type | unseen names | names − control at D* | the flagged at the nearest recall | names − MR6 at D = 0 | test names per subfield | names recalled beyond MR6 at D = 0, per seed |
 |---|---|---|---|---|---|---|
 | MAT | held | +12.02 [+3.70, +20.34], 7/7 | +9.87 [+3.57, +16.16], 7/7 | +7.98 [+2.15, +13.82], 7/7 | 184–1022 | +316 (68%) |
-| MAT | not held | −1.19 [−5.59, +3.21], 4/7 | −1.58 [−5.61, +2.46], 2/7 | +0.89 [−3.48, +5.27], 5/7 | 129–2223 | +175 (46%) |
+| MAT | not held | −1.19 [−5.59, +3.21], 4/7 | −1.58 [−5.61, +2.46], 2/7 | +0.89 [−3.48, +5.27], 5/7 | 129–2223 | +175 |
 | VALUE | held | +9.43 [+0.02, +18.83], 6/7 | +5.61 [+0.27, +10.94], 6/7 | +1.74 [−1.16, +4.65], 4/7 | 56–313 | +23 (5%) |
-| VALUE | not held | +3.41 [−1.97, +8.80], 4/7 | +1.14 [−2.30, +4.58], 3/7 | −0.23 [−3.00, +2.53], 3/7 | 106–681 | −17 (−5%) |
+| VALUE | not held | +3.41 [−1.97, +8.80], 4/7 | +1.14 [−2.30, +4.58], 3/7 | −0.23 [−3.00, +2.53], 3/7 | 106–681 | −17 |
 | other | held | +2.87 [−4.82, +10.55], 5/7 | +0.94 [−5.84, +7.72], 4/7 | +9.80 [+3.34, +16.25], 6/7 | 6–577 | +126 (27%) |
-| other | not held | −3.91 [−7.32, −0.51], 1/7 | −3.58 [−6.49, −0.67], 1/7 | +1.38 [−0.82, +3.58], 6/7 | 754–2516 | +222 (59%) |
+| other | not held | −3.91 [−7.32, −0.51], 1/7 | −3.58 [−6.49, −0.67], 1/7 | +1.38 [−0.82, +3.58], 6/7 | 754–2516 | +222 |
 
 Exact two-sided sign-flip p over the 7 subfields (post hoc): 18.1 0.0156, 18.2 0.1406.
 

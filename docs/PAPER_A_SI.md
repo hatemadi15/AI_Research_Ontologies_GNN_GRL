@@ -34,7 +34,7 @@ and the amendments.
 | D7, D8 (week 14) | 29 October 12:07 (`2886267`), two minutes after the first batch was pushed and five hours before its first result, after MR6 + names' own results on the same units | 29 October | 29 October | — |
 | ablations (week 14) | 29 October, as above | 31 October | 31 October | — |
 | the lexicon-membership analysis (week 15; post hoc, no decision) | 31 October 16:13 (`2c60f33`): the rebuild, its checks and the reading fixed before the run | 31 October (`w15a`) | 31 October | — |
-| D9, D10 (week 17; follow-up) | 31 October 19:15 (`f39447c`), after D1 to D8 had been written up (the lexicon split's results arrived 26 minutes later), a pass expected to be unlikely; the code 19:41 (`013f9ac`) | 31 October 19:55 to 1 November 00:40 (`w17a`, `w17b`) | 1 November | — |
+| D9, D10 (week 17; follow-up) | 31 October 19:15 (`f39447c`), after D1 to D8 had been written up (the lexicon split's results arrived 26 minutes later), a pass expected to be unlikely; the code 19:41 (`013f9ac`) | 31 October 19:54 to 1 November 00:35 (`w17a`; `w17b` ended at 23:00) | 1 November | — |
 | D11, D12 (week 18; follow-up) | 1 November 10:51 (`e02c3be`), at the request of an internal review of the draft (main text, Ethics and broader impact), after D1 to D10 and the lexicon split were known; the names' side the stored decision runs of 24 October, only the control new; the code 10:58 (`7906996`) and the analysis 11:04 (`789f42e`), both before any run | 1 November 11:14 to 13:43 (`w18a`, pushed at 11:12, pulled at 13:58) | 1 November 14:06 (`13506a4`); the post hoc nearest-recall reading added after it, 14:16 (`ea8a92e`) | — |
 | companion, week 5: multi-task training against the CRF head on MaterioMiner's held-out papers, pre-specified without decision (fine-grained +3.72 [+0.57, +6.87]; multi-task training's own decision was on the random splits); and self-training on the fatigue corpus against the CRF head there, a decision that failed (+1.74 [−1.16, +4.64] fine-grained, +1.56 [−0.88, +4.00] coarse-grained; its votes too), which the names route reports again as V6's analogue (Table S11, rows 41–44) | 15 October 15:50 (`6f2dc11`) | 15 October | 15 October 23:20 (`1b30d82`) | — |
 | companion, week 7 part 1: label propagation within a document, six decisions on saved predictions | 16 October 11:46 (`cc73d37`) | saved predictions | 16 October 11:53 (MaterioMiner, `93966bb`) and 13:54 (SOFC-Exp, `ceabb78`) | 11:57 (`e41aa44`): retyping made a decision on SOFC-Exp, after MaterioMiner's results and before SOFC-Exp's |
@@ -44,9 +44,11 @@ and the amendments.
 | companion, week 9: multi-task training with MR3 against the CRF head, pre-specified without decision (fine-grained +6.73 [+6.03, +7.43]; its single-model decisions on MaterioMiner were against the multi-task model); MR3 on a MaterioMiner-sized SOFC-Exp, failing (+0.50 [−0.47, +1.46]) | 17 October 07:28 (`536cbe7`) | 17 October | 17 October 18:50 (`81134b7`) and 19:30 (`65c17b9`) | 12:30 (`fa69d9a`): part 1 runs from part 2's bundle, before any result |
 | companion: seen and unseen test names and the decomposition of the recall gap (post hoc, on saved predictions; no protocol) | — | saved predictions | MaterioMiner 16 October 17:00 (`3c06c11`); MuLMS and SOFC-Exp added with their runs | — |
 
-**Times.** Protocol and result times are the commits' (UTC); push, pull
-and run times are the session notes' (week 18's run times are those its
-Kaggle job wrote in its manifest, by the machine's clock), and GitHub's
+**Times.** Protocol and result times are the commits' (UTC); push and
+pull times are the session notes'; a session's end or length in
+Supplementary Note 11, and week 18's run times, are those its Kaggle jobs
+wrote in their manifest (each job's start plus its minutes, by the
+machine's clock), other run times the session notes'; and GitHub's
 records date only the pushes of commits. When the pooled decision was
 added at 09:14 on 20 October, the screen's first half was recorded (MR6
 and the gazetteer variants, at 08:11) and its second half, with MR6 +
@@ -85,7 +87,8 @@ log gives them.
 ## Supplementary Note 2: hyperparameters, compute and repeats
 
 MatSciBERT (110M parameters), token classification on the first sub-word,
-a linear-chain CRF with IOB2 constraints; AdamW, learning rate 5e-5,
+a linear-chain CRF with IOB2 constraints; AdamW (loshchilov2019decoupled),
+learning rate 5e-5,
 linear warm-up, batch size 16, up to 20 epochs, early stopping on
 validation micro F1 with patience 3, the best epoch's weights evaluated;
 the CRF layer at learning rate 5e-3 without weight decay, the encoder
@@ -758,16 +761,16 @@ S7); the two-sided t p-values are 0.013 for D11 and 0.096 for D12.
 | steel | recall, held names (post hoc) | 84.39 | 70.65 | 72.69 | 73.29 | 73.61 | 73.96 | 74.25 | 74.45 | 74.77 | 74.88 | 75.01 | 74.69 | 73.98 |
 | steel | recall, other unseen names (post hoc) | 43.70 | 39.06 | 41.14 | 42.04 | 43.02 | 43.85 | 44.72 | 45.32 | 45.97 | 46.61 | 47.18 | 48.19 | 48.40 |
 
-**Table S9.** Recall on the unseen test names by type group and lexicon membership (post hoc): the names minus the control at D*, with the flagged subfields at the nearest grid value instead, and minus MR6 at D = 0, paired over the seven subfields with the subfields above 0; then the unseen test names per subfield in each cell, and the names MR6 + names recalls beyond MR6 at D = 0 in each cell, per seed summed over the subfields (each subfield's gain times its names), with the cell's share of the held or the other names' total.
+**Table S9.** Recall on the unseen test names by type group and lexicon membership (post hoc): the names minus the control at D*, with the flagged subfields at the nearest grid value instead, and minus MR6 at D = 0, paired over the seven subfields with the subfields above 0; then the unseen test names per subfield in each cell, and the names MR6 + names recalls beyond MR6 at D = 0 in each cell, per seed summed over the subfields (each subfield's gain times its names), with, for the held names, whose cells all add names, the cell's share of their total.
 
 | Type | unseen names | names − control at D* | the flagged at the nearest recall | names − MR6 at D = 0 | test names per subfield | names recalled beyond MR6 at D = 0, per seed |
 |---|---|---|---|---|---|---|
 | MAT | held | +12.02 [+3.70, +20.34], 7/7 | +9.87 [+3.57, +16.16], 7/7 | +7.98 [+2.15, +13.82], 7/7 | 184–1022 | +316 (68%) |
-| MAT | not held | −1.19 [−5.59, +3.21], 4/7 | −1.58 [−5.61, +2.46], 2/7 | +0.89 [−3.48, +5.27], 5/7 | 129–2223 | +175 (46%) |
+| MAT | not held | −1.19 [−5.59, +3.21], 4/7 | −1.58 [−5.61, +2.46], 2/7 | +0.89 [−3.48, +5.27], 5/7 | 129–2223 | +175 |
 | VALUE | held | +9.43 [+0.02, +18.83], 6/7 | +5.61 [+0.27, +10.94], 6/7 | +1.74 [−1.16, +4.65], 4/7 | 56–313 | +23 (5%) |
-| VALUE | not held | +3.41 [−1.97, +8.80], 4/7 | +1.14 [−2.30, +4.58], 3/7 | −0.23 [−3.00, +2.53], 3/7 | 106–681 | −17 (−5%) |
+| VALUE | not held | +3.41 [−1.97, +8.80], 4/7 | +1.14 [−2.30, +4.58], 3/7 | −0.23 [−3.00, +2.53], 3/7 | 106–681 | −17 |
 | other | held | +2.87 [−4.82, +10.55], 5/7 | +0.94 [−5.84, +7.72], 4/7 | +9.80 [+3.34, +16.25], 6/7 | 6–577 | +126 (27%) |
-| other | not held | −3.91 [−7.32, −0.51], 1/7 | −3.58 [−6.49, −0.67], 1/7 | +1.38 [−0.82, +3.58], 6/7 | 754–2516 | +222 (59%) |
+| other | not held | −3.91 [−7.32, −0.51], 1/7 | −3.58 [−6.49, −0.67], 1/7 | +1.38 [−0.82, +3.58], 6/7 | 754–2516 | +222 |
 
 **Table S10.** The rebuilt lexicons of MuLMS's subfields by type: distinct names and, in parentheses, entries (occurrences in the corpus, which set how often a name is drawn; counts only, the names are not released).
 
@@ -786,8 +789,8 @@ S7); the two-sided t p-values are 0.013 for D11 and 0.096 for D12.
 This Note gives, week by week, the checks the runs of the names route
 passed, where the runs departed from what the protocols planned, which
 sessions failed, and when each of these happened; commit times are the
-commits' (UTC) and push, pull and run times the session notes', as in
-Supplementary Note 1.
+commits' (UTC), push and pull times the session notes', and a session's
+end or length its Kaggle manifest's, as in Supplementary Note 1.
 
 **Week 10.** The protocol of 17 October 20:21 (`a08356f`) listed the
 analyses week 10 would report, and looser matching was not among them.
@@ -805,7 +808,7 @@ on the held-out subfields, 13.1% lay inside a longer gold entity,
 against 9.0% on the random splits.
 
 **Week 11.** In `w11a` (MuLMS; pushed on 18 October at 01:50, done at
-04:44), per subfield both lanes' (a lane is one of a session's two T4
+04:42 and pulled at 04:44), per subfield both lanes' (a lane is one of a session's two T4
 GPUs, each running its own list of jobs) three teachers and silver counts were
 identical, and every teacher scored exactly as the stored week-10
 CRF-head run of its seed. In `w11b` (MaterioMiner) each lane ran one
@@ -921,7 +924,9 @@ refused.
 
 The screen was pushed on 20 October at 02:35 from bundle `47e2310`,
 `w12a` to `ner-gpu-jobs-d` (version 7) and `w12c` to `ner-gpu-jobs-c`
-(version 3). Between 03:56 and 04:10 both failed on the resume check: a
+(version 3). From 03:03 (`w12c`) and 03:11 (`w12a`) to 03:51 their later
+jobs failed on the resume check (the session notes recorded it from
+03:56): a
 results file stored one corpus SHA-256, each held-out subfield had its
 own topic corpus, and the second subfield's job refused to resume a file
 "from another corpus". `w12c` completed in 59 minutes with 4 of its 14
@@ -942,9 +947,12 @@ Electrolysis runs of V4, MR6 + names, on the screen's seeds had thus
 been pulled, though not collected or recorded, before the criterion was
 revised at 09:14. The record does not show whether their scores were
 read. Compared on 1 November with the pulled files, each of those twelve
-runs (V1, V2, V4 and V6 on electrolysis, three seeds each) equals its
-rerun in `w12e` and the committed file in every field but the run time
-and environment, predictions included; V4's electrolysis gain over the
+runs (V1, V2, V4 and V6 on electrolysis, three seeds each) is identical
+to its rerun in `w12e` and to the committed file in every score, the
+training history and the predictions; only the run time differs, and the
+first session's runs lack the per-run corpus hash that the resume fix
+(`3ac85a8`) added, the corpus being the same by that session's manifest.
+V4's electrolysis gain over the
 CRF head on those seeds is +2.06, below MR6's +2.97 (Table S12, rows 26
 and 24).
 
@@ -1076,7 +1084,7 @@ paper in review round 6 of 31 October as one added after the result;
 Section 5.3 now reads the fail by both: the first reading's condition
 holds on the point estimate but not on the interval, "does as well"
 being an equivalence D8 cannot establish, and the amendment of 12:32,
-made before any run, had already framed D8 as testing whether the names
+made before any of D8's runs, had already framed D8 as testing whether the names
 the topic adds are what the gain needs.
 
 **Week 17.** `smokebd`, a repeat of week 9's stored seed-0 `crf_mt_mr`
@@ -1198,8 +1206,9 @@ the names against MR3 on MaterioMiner's coarse-grained papers (micro
 row's per-unit values and its votes' macro and weighted F1. Some numbers
 quoted in the record are not in the tables: mention replacement's pooled
 gain with MaterioMiner's coarse-grained papers, +1.80 [+0.39, +3.22],
-which the protocol of 20 October (09:14) records (Section 3; from the
-run files +1.80 [+0.39, +3.21]); the same protocol's +2.34 [+0.94,
+which the protocol of 20 October (09:14) records (Section 3; +1.80
+[+0.39, +3.21] from per-unit values rounded to two decimals, the paper's
+convention); the same protocol's +2.34 [+0.94,
 +3.75] with the fine-grained papers, which row 75 gives as +2.35 from
 per-unit values rounded differently; the reading of 20 October (18:42),
 which put D5 at about [+0.1, +5.9] from the screen's values; and the two
@@ -1220,7 +1229,9 @@ reported again or recomputed), and the mean paired difference with its 95% CI (a
 for micro F1 and the votes, the units above 0) in micro F1 (or the
 measure the comparison names), macro, weighted and strict F1 and the
 votes; the macro and weighted cells of the 11-unit pooled rows are post
-hoc. An empty cell: the results do not hold that quantity.
+hoc. An empty cell: the results do not hold that quantity, or, for the
+macro and weighted cells of the other pooled rows (70 to 73), it was not
+computed.
 
 | # | week (protocol, UTC) | corpus, units (MuLMS seeds) | comparison (system − reference) | status | Δ micro F1 [95% CI], units above 0 | Δ macro F1 [95% CI] | Δ weighted F1 [95% CI] | Δ strict IOB2 micro F1 [95% CI] | votes: Δ micro F1 [95% CI], units above 0 |
 |---|---|---|---|---|---|---|---|---|---|

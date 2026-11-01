@@ -5752,6 +5752,33 @@ wrong times. Checked and applied:
 The main text is about 10,800 words to the Limitations; the referee's
 list of what to move to the SI is an author item (`docs/PAPER_A_NOTES.md`).
 
+*Paper A, review round 13 (1 November, night).* A referee (major
+revision of the presentation, not the substance: every decision,
+interval, p-value and count reproduced) and a number audit (every
+round-12 number reproduced; one wrong statement, five imprecise). Checked
+and applied: the secondary measures given on the decision seeds in macro
+and weighted F1 (names − MR6 +0.83 [−0.01, +1.67] and +0.89 [−0.40,
++2.18]), the all-ten readings and the pooled macro gain over MR3 (+1.33
+[+0.29, +2.36]) in Section 5.1, and "in micro F1" where it qualifies;
+D11 everywhere with its four-subfield reading (+6.05 [−3.33, +15.44]),
+the other unseen names' loss scoped (−0.88 [−2.63, +0.87] on the four
+matched, `without_flagged.prespecified.recall_out`); Section 3's 20
+October account as a dated list, restoring the 18 October gate (the
+week-12 protocol of 11:00 replaced week 11's MaterioMiner gate saying
+`w11b` could not run before 24 October; it ran on 19 October and its
+failure was recorded at 00:44 on 20 October, before the screen), the
+13:35 reading (D1 at about 0.5) and D6's condition widened at 18:42; D9
+and D10's control trained in the same batch; the first screen session's
+runs differ from their reruns only in run time and the per-run corpus
+hash (the manifest's hash is the same); session ends from the manifests
+(`w11a` 04:42, the screen's resume-check failures 03:03 to 03:51,
+`w17a` 00:35); the abstract cut to 150 words, npj Computational
+Materials' limit (its content-types page, read today: no main-text word
+or display-item limit, title at most 15 words without punctuation, at
+most 60 references); BERT and AdamW cited and a duplicate entry removed;
+Table 12's sixth part gives shares only for a part whose cells all add
+names. The venue's section structure and title are author items.
+
 ### Week 17 protocol: the harvested names on the strongest base (fixed before any run, 31 October, 19:10 UTC)
 
 *Why, and when.* The round-6 reviews of paper A (31 October) listed as a

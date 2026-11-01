@@ -671,7 +671,8 @@ def table12_curves(matched):
 def extra_names(types, key):
     """The names MR6 + names recalls beyond MR6 at D = 0 in a type cell of post_hoc_types, per
     seed summed over the subfields (each subfield's recall gain times its names in the cell),
-    with the cell's share of its part's total ('' without the gains)."""
+    with the cell's share of its part's total where no cell of the part loses names ('' without
+    the gains)."""
     gains, gold = types.get('minus_mr6_at_0') or {}, types.get('gold_per_run') or {}
 
     def extra(k):
@@ -683,10 +684,12 @@ def extra_names(types, key):
     if mine is None:
         return ''
     part = key.rsplit('_', 1)[1]
-    parts = [extra(k) for k in gains if k.rsplit('_', 1)[1] == part]
-    total = sum(x for x in parts if x is not None)
+    parts = [x for x in (extra(k) for k in gains if k.rsplit('_', 1)[1] == part) if x is not None]
     count = f'{mine:+.0f}'.replace('-', '\u2212')
-    return f'{count} ({100 * mine / total:.0f}%)'.replace('-', '\u2212') if total else count
+    # a share only where every cell of the part adds names, so that the shares are parts of a whole
+    if parts and min(parts) >= 0 and sum(parts) > 0:
+        return f'{count} ({100 * mine / sum(parts):.0f}%)'
+    return count
 
 
 def table12_post_hoc(matched):
@@ -728,7 +731,7 @@ def table12_post_hoc(matched):
                 'subfields above 0; the unseen test names per subfield in each cell; and the names '
                 'MR6 + names recalls beyond MR6 at D = 0 in each cell, per seed summed over the '
                 "subfields (each subfield's gain times its names), with the cell's share of its "
-                "part's (held or not held) total.\n\n"
+                "part's total where every cell of the part adds names.\n\n"
                 + markdown(['type', 'unseen names', 'names − control at D*',
                             'the flagged at the nearest recall', 'names − MR6 at D = 0',
                             'test names per subfield', 'names recalled beyond MR6 at D = 0, per seed'],
