@@ -1,36 +1,46 @@
 # Supplementary Information
 
-**Harvested names are not shown to add to mention replacement for materials named-entity recognition on held-out documents: a pre-registered test**
+**Names mined from unlabeled papers are not shown to improve data augmentation for materials named-entity recognition: a pre-registered test**
 
 Hatem Madi
 
 Supplementary Notes 1 to 9 give the protocol record, the hyperparameters,
-compute and repeats, the unlabeled corpora, and the analyses the main
-text summarises; Tables S1 to S6 are numbered in order of appearance.
-Section, table and figure numbers without an S refer to the main text.
+compute and repeats, the corpora, and the analyses the main text
+summarises; Tables S1 to S7 are numbered in order of appearance. Section,
+table and figure numbers without an S refer to the main text.
 
 ## Supplementary Note 1: the protocol record
 
 The repository names its protocols by the stage of the project in which
 they were fixed, a "week"; Table S1's first column gives that name with
 each protocol's decisions, and the main text cites the protocols by date.
+The last rows give the companion study's protocols whose results the main
+text quotes; their decisions are not among the ten of Table 2 or the
+eighteen of Section 6.
 
-**Table S1.** The protocol record of the names route: when each decision's
-protocol was committed (commit times, UTC; the protocol text's own
-written times are given below the table), when its runs ran, when its result was
-recorded, and the amendments.
+**Table S1.** The protocol record of the names route, then of the
+companion study's results quoted in the main text: when each protocol was
+committed (commit times, UTC; the protocol text's own written times are
+given below the table), when its runs ran, when its result was recorded,
+and the amendments.
 
 | Decision | Protocol committed (times UTC) | Runs | Result recorded | Amendments |
 |---|---|---|---|---|
 | the earlier protocols (Section 6): mention replacement on MuLMS (week 10); names from the other subfields' sentences (week 11) | 17 October 20:21 (`a08356f`); 18 October 01:13 (`427e34c`) | 17–20 October | week 10: 18 October 00:48 (`c2ca3f6`); week 11: 18 October (MuLMS, `14ed50f`) and 20 October (MaterioMiner, `04764ef`) | — |
 | D1, D2 (week 12) | 18 October 11:00 (`40631ce`; refined 11:05, `bd20cec`): the screen on seeds 0–200, the decisions on seeds 300–900 so that the selection's seed noise does not enter them; the MaterioMiner analogue gated on D1; the methods criterion: D1 plus a MaterioMiner pass | 20–24 October | 24 October | three amendments before any run added variants V4, V6, V7–V8 to the screen |
-| D3, D4 (week 12) | 18 October 11:00 (`40631ce`): the winner's MaterioMiner analogue decided against the CRF head per granularity, to run only if D1 passed; 20 October 00:51 (`ce0f592`): the analogue's batches, with its comparisons against MR3 and the votes reported; the gate lifted at 09:14 (`808ff4b`), restored at 13:53 (`5f7f827`), lifted again at 18:42 (`de62446`) | 24–25 October | 25 October (`3432988`) | — |
-| D5 (week 13) | 20 October 09:14 (`808ff4b`): the pooled decision over both corpora as a second route to the claim, "each unit its 10-seed mean", the stop rule lifted; amended three times the same day, before any decision run of the route: 09:25 (`e94f352`), the label-propagation rule's two MaterioMiner decisions and an SOFC-Exp report added after its MuLMS results (Supplementary Note 7); 13:53 (`5f7f827`), eighteen minutes after the screen chose MR6 + names, D6 added conditional on D1 and the analogue, which the morning's text ran whenever the screen had a winner, gated on D1; 18:42 (`de62446`), D6's condition widened to D1 or D5 and the analogue's morning condition restored, the gating recorded as a mistake | 24–25 October | 25 October (`3432988`) | the analysis took MuLMS's 10-seed means; the 7-seed reading is D5′ |
+| D3, D4 (week 12) | 18 October 11:00 (`40631ce`): the winner's MaterioMiner analogue decided against the CRF head per granularity, to run only if D1 passed; 20 October 00:51 (`ce0f592`): the analogue's batches, with its comparisons against MR3 and the votes pre-specified; the gate lifted at 09:14 (`808ff4b`), restored at 13:53 (`5f7f827`), lifted again at 18:42 (`de62446`) | 24–25 October | 25 October (`3432988`) | — |
+| D5 (week 13) | 20 October 09:14 (`808ff4b`): the pooled decision over both corpora as a second route to the claim, "each unit its 10-seed mean", the stop rule lifted; amended three times the same day, before any decision run of the route: 09:25 (`e94f352`), the label-propagation rule's two MaterioMiner decisions and an SOFC-Exp comparison pre-specified after its MuLMS results (Supplementary Note 7); 13:53 (`5f7f827`), eighteen minutes after the screen chose MR6 + names, D6 added conditional on D1 and the analogue, which the morning's text ran whenever the screen had a winner, gated on D1; 18:42 (`de62446`), D6's condition widened to D1 or D5 and the analogue's morning condition restored, the gating recorded as a mistake | 24–25 October | 25 October (`3432988`) | the analysis took MuLMS's 10-seed means; the 7-seed reading is D5′ |
 | D6 (week 13) | 20 October 13:53 (`5f7f827`), conditional on D1; widened to D1 or D5 at 18:42 (`de62446`) | 25 October | 25 October | — |
 | D7, D8 (week 14) | 29 October 12:07 (`2886267`), two minutes after the first batch was pushed and five hours before its results | 29 October | 29 October | — |
 | ablations (week 14) | 29 October, as above | 31 October | 31 October | — |
 | the lexicon-membership analysis (week 15; post hoc, no decision) | 31 October 16:13 (`2c60f33`): the rebuild, its checks and the reading fixed before the run | 31 October (`w15a`) | 31 October | — |
 | D9, D10 (week 17; follow-up) | 31 October 19:15 (`f39447c`), after D1 to D8 had been written up (the lexicon split's results arrived 26 minutes later), a pass expected to be unlikely; the code 19:41 (`013f9ac`) | 31 October 19:55 to 1 November 00:40 (`w17a`, `w17b`) | 1 November | — |
+| companion, week 5: multi-task training against the CRF head on MaterioMiner's held-out papers, pre-specified without decision (fine-grained +3.72 [+0.57, +6.87]; the week's decisions were on the random splits) | 15 October 15:50 (`6f2dc11`) | 15 October | 15 October 23:20 (`1b30d82`) | — |
+| companion, week 7 part 1: label propagation within a document, six decisions on saved predictions | 16 October 11:46 (`cc73d37`) | saved predictions | 16 October 11:53 (`93966bb`) | 11:57 (`e41aa44`): a retyping comparison on SOFC-Exp, before its results |
+| companion, week 7 part 2a: recall calibration, a bias on the CRF head's emissions chosen on validation folds; five decisions, none passing (fine-grained −0.59 [−1.75, +0.57], coarse-grained +0.17 [−0.14, +0.48], SOFC-Exp −0.21 [−0.58, +0.17]) | 16 October 13:11 (`61c9520`) | 16 October (`w7a`) | 16 October 15:33 (`503f690`) | — |
+| companion, week 7 part 2b: MR3 against the CRF head on MaterioMiner's held-out papers, both passing (+2.77 [+1.51, +4.03] fine-grained, +1.28 [+0.06, +2.51] coarse-grained), and on SOFC-Exp's official split, failing (−0.29 [−1.04, +0.47]) | 16 October 14:39 (`494cac1`): a 3-seed screen, then 10 seeds | 16–17 October | 17 October 06:59 (`db7c78d`; the screen at 04:19, `7d55340`) | — |
+| companion, week 9: multi-task training with MR3 against the CRF head, pre-specified without decision (fine-grained +6.73 [+6.03, +7.43]; the decisions were against the multi-task model); MR3 on a MaterioMiner-sized SOFC-Exp, failing (+0.50 [−0.47, +1.46]) | 17 October 07:28 (`536cbe7`) | 17 October | 17 October 18:50 (`81134b7`) and 19:30 (`65c17b9`) | 12:30 (`fa69d9a`): part 1 runs from part 2's bundle, before any result |
+| companion: seen and unseen test names and the decomposition of the recall gap (post hoc, on saved predictions; no protocol) | — | saved predictions | MaterioMiner 16 October 17:00 (`3c06c11`); MuLMS and SOFC-Exp added with their runs | — |
 
 **Times.** All times are the commits' (UTC). When the pooled decision was
 added at 09:14 on 20 October, the screen's first half was recorded (MR6
@@ -41,9 +51,10 @@ text's own written times differ from the commits': later by 6 to 53
 minutes in the 09:25, 09:47 and 13:53 commits of 20 October (which carry
 09:50 and 09:55, 10:40, and 14:00; the 09:47 commit recorded the
 label-propagation rule's results on SOFC-Exp's folds and MaterioMiner),
-earlier by about four hours in the 18:42 one (14:00 and 14:30), and
+earlier by four to five hours in the 18:42 one (14:00 and 14:30), and
 earlier by about six minutes in the week-17 protocol (written 19:10,
-committed 19:15:57). Week 16 was the companion paper's write-up and has no protocol.
+committed 19:15:57). Week 16 was the companion paper's write-up and has no
+protocol.
 
 ## Supplementary Note 2: hyperparameters, compute and repeats
 
@@ -95,33 +106,47 @@ rounded to two decimals; recomputed from the unrounded runs, no bound
 moves by more than about 0.01 and no verdict changes.
 
 **Repeats.** From week 5 on (15 October, 16:00 UTC), every GPU session
-except two first repeated an earlier run, and every repeat was identical:
-one batch of 15 October (23:14, `w5a`) ran none, and the follow-up's
-second session (`w17b`) instead reproduced the stored multi-task runs'
-scores through its teachers. The week-4 sessions of 15 October, which
-wrote the CRF head's first GPU reference runs, followed a session that ran
-one run twice, with identical results.
+except two began by repeating an earlier run, and every repeat was
+identical: one batch of 15 October (`w5a`, run 16:05 to 22:10 UTC) ran
+none, and the follow-up's second session (`w17b`) instead reproduced the
+stored multi-task runs' scores through its teachers. The week-4 sessions
+of 15 October, which wrote the CRF head's first GPU reference runs, began
+without a repeat after a smoke session that ran one CRF run three times,
+with identical scores and predictions.
 
-## Supplementary Note 3: the unlabeled corpora
+## Supplementary Note 3: the corpora
 
-Each corpus is 40,000 sentences of open-access full texts found on Europe
-PMC (europepmc2015europe) by a title query (for MuLMS's solid-oxide subfield: "solid oxide",
-"solid-oxide", "SOFC", "SOEC" and their plurals; for SOFC-Exp's corpus "solid oxide", "SOFC" and
-"SOFCs"; the other queries are in the repository's reports), with the dataset's own articles excluded by identifier, every
-sentence sharing a word 8-gram with a dataset sentence dropped (and, for
-MuLMS, any 50-character run), sentences of 5 to 120 words with at least
-half alphabetic characters, and formulas longer than 30 characters cut; sentences are split by a
+**The labeled corpora.** MaterioMiner's papers are DOIs
+10.1007/s11340-021-00758-x (s11340), 10.1038/ncomms7164,
+10.1038/s41467-020-19071-7 (s41467) and 10.3390/met10111458. Its
+fine-grained level keeps the 27 classes with most entities, ties broken
+by token count then name (the 27th and 28th classes tie at 24 entities),
+and relabels the other classes' entities O. MuLMS's kept entities by
+type: MAT 12,647, VALUE 4,628, PROPERTY 3,880, FORM 3,180, MEASUREMENT
+2,106, CITE 1,704, SAMPLE 1,391, TECHNIQUE 920, DEV 757, INSTRUMENT 370,
+NUM 260, UNIT 91, RANGE 18.
+
+**The unlabeled corpora.** Each is 40,000 sentences of open-access full
+texts found on Europe PMC (europepmc2015europe) by a query on titles (for
+MaterioMiner's fatigue corpus: "fatigue" in the title and a metal or
+process term, such as alloy, steel, titanium, weld or selective laser
+melting, in the title or abstract; for MuLMS's solid-oxide subfield:
+"solid oxide", "solid-oxide", "SOFC", "SOEC" and their plurals; for
+SOFC-Exp's corpus "solid oxide", "SOFC" and "SOFCs"; the other queries
+are in the repository's reports), with the dataset's own articles
+excluded by identifier, every sentence sharing a word 8-gram with a
+dataset sentence dropped (and, for MuLMS, any 50-character run),
+sentences of 5 to 120 words with at least half alphabetic characters, and
+formulas longer than 30 characters cut; sentences are split by a
 rule-based splitter that does not break after abbreviations or inside
 decimal numbers, and words by a regular expression that separates
-punctuation.
-Per corpus: 290–368 articles with text (292–370 selected), published
-between 1996 and 2026 (over 99% from 2009 on), 63–90% of them CC BY and
-10–33% CC BY-NC or ND (0.3–4% without a licence field), the largest
-journal holding 13–63% of the articles (MDPI Materials 52% of the steel
-corpus and 63% of the fatigue corpus). Each
-report records the query, the counts at every stage, the article
-identifiers with licences and the corpus's SHA-256; a rebuild that
-differs is detected by the hash.
+punctuation. Per corpus: 290–368 articles with text (292–370 selected),
+published between 1996 and 2026 (over 99% from 2009 on), 63–90% of them
+CC BY and 10–33% CC BY-NC or ND (0.3–4% without a licence field), the
+largest journal holding 13–63% of the articles (MDPI Materials 52% of the
+steel corpus and 63% of the fatigue corpus). Each report records the
+query, the counts at every stage, the article identifiers with licences
+and the corpus's SHA-256; a rebuild that differs is detected by the hash.
 
 ## Supplementary Note 4: the lexicon's settings
 
@@ -130,9 +155,12 @@ setting and runs on the 7 subfields at the screen's seeds (0 to 200)
 against the runs of MR6 + names on those seeds, which are the selected
 variant's and so a slightly flattering reference.
 
-**Table S2.** The lexicon's settings (pre-specified, 3 seeds): distinct names,
-the share of the unseen test names in the lexicon, micro F1 on the 7
-subfields and the differences from MR6 + names, MR3 and the CRF head.
+**Table S2.** The lexicon's settings (pre-specified, 3 seeds): distinct
+names, the share of the unseen test names in the lexicon (by the runs'
+stored counts, which call a test name unseen when no training sentence
+annotates its words with its type; for MR6 + names this gives the 22.2%
+of main Section 2's rule too), micro F1 on the 7 subfields and the
+differences from MR6 + names, MR3 and the CRF head.
 
 | Setting (the value in MR6 + names) | Distinct names (summed over the 7 subfields) | Unseen test names in the lexicon | Micro F1 | Δ vs MR6 + names [95% CI] | Δ vs MR3 | Δ vs CRF head |
 |---|---|---|---|---|---|---|
@@ -155,7 +183,7 @@ Within that limit, a quarter of the corpus (a quarter of the teachers'
 tagging) with the strictest filter is not distinguishable from the rest, consistent with
 Section 5.2: if the names add under a point, the settings
 that govern how many names enter cannot show an effect. On the unseen
-names the settings do move the trade of Section 5.4 (exploratory; the
+names the settings do move the trade of Section 5.4 (post hoc; the
 screen's 3 seeds pooled over the subfields, against the screen runs of
 MR6 + names at 48.1% recall and 50.0 precision, computed from their saved
 predictions): smaller lexicons recall fewer at higher precision (10,000
@@ -166,6 +194,8 @@ draws 46.2% at 53.7), a lower threshold more at lower precision (0.7:
 names stays between 49.1 and 49.7.
 
 ## Supplementary Note 5: what the names do, in detail
+
+Everything in this Note is post hoc.
 
 **Rates.** Over all ten seeds the names system makes, net of the
 predictions it drops, 474 more unseen-name predictions per run than MR6
@@ -180,8 +210,10 @@ same seeds), and its unseen-name F1 is slightly higher (49.35 against
 49.0). On MaterioMiner's papers, fine-grained, the names add to both
 pooled rates on unseen names (39.7% to 41.1% recall and 49.2 to 53.2
 precision over MR6; F1 43.9 to 46.4), and coarse-grained a little of each
-(53.0% to 54.2% and 52.4 to 53.2; F1 52.7 to 53.7), within paired
-intervals that cover 0.
+(53.0% to 54.2% and 52.4 to 53.2; F1 52.7 to 53.7). Paired over the four
+papers the changes are +0.86 [−3.38, +5.10] in recall and +1.32 [−6.62,
++9.25] in precision fine-grained, and +1.60 [−1.37, +4.57] and +1.16
+[−2.24, +4.57] coarse-grained, every interval covering 0.
 
 Per subfield, the lexicon's coverage
 of the unseen test names runs from 7% (semiconductors) to 36%
@@ -199,10 +231,14 @@ fall to −0.19 and −0.01 without the two subfields that drive them
 (semiconductors and solid oxide cells). The raw correlation
 with coverage runs against a simple dose–response in F1, though the
 membership split of Section 5.4 finds the recall gain on the held names in every
-subfield; F1 also pays the precision the names cost. 
+subfield; F1 also pays the precision the names cost.
 
 **The lexicon split in full.** Table S3 gives the levels and every paired
-comparison of the analysis of Section 5.4. On MuLMS's decision seeds
+comparison of the analysis of Section 5.4. A test name is unseen by main
+Section 2's words-only rule and in the lexicon when the lexicon holds its
+words with its type; a prediction is classed the same way by its words
+and predicted type, and the precision of each part is the share of its
+unseen predictions that are correct. On MuLMS's decision seeds
 the names add 8,336 predictions of names the lexicon holds, 39% of them
 right, and 12,206 of other names, 22% right (419 more unseen-name
 predictions per run, 29% right), so two thirds of the wrong predictions
@@ -211,6 +247,25 @@ ones too; precision falls on both parts, 74.7% to 69.0% on the held names
 and 46.4% to 44.0% on the others. The mixed-corpus system's own lexicon
 holds 18.3% of the unseen test names, not the topic lexicon's 22.2% by
 which its rows are split.
+
+**The reading rule.** Fixed before the run (31 October 16:13,
+`2c60f33`): "Name knowledge: the names' recall gain over MR6 is larger on
+the unseen names the lexicon holds than on those it does not, the paired
+interval of the difference above 0. A generic shift: the two gains are
+alike, the interval covering 0 with both gains positive. Mixed: the
+interval above 0 but the gain on the names not held also above 0." The
+rule does not say whether a gain is read on its point estimate or its
+interval. On MuLMS the difference's interval is above 0 (+6.17 [+2.44,
++9.90]) and the gain on the names not held is +1.12 [−0.78, +3.02]:
+mixed on its point estimate, name knowledge on its interval. On
+MaterioMiner both gains are positive at both granularities and the
+difference's interval covers 0 (fine-grained +4.33 [−5.33, +13.98],
+coarse-grained −1.54 [−3.60, +0.51]): a generic shift on point
+estimates, and none of the three outcomes on intervals, every gain
+interval covering 0. The outcome note of 31 October read MuLMS as name
+knowledge and MaterioMiner as a generic shift, the first on intervals and
+the second on point estimates; read one way throughout, the rule gives
+mixed and a generic shift, or name knowledge and none.
 
 **Table S3.** Recall on the unseen test names by lexicon membership (post
 hoc; lexicons rebuilt by the names method's own teachers; MuLMS on the
@@ -262,19 +317,20 @@ CIs, and the units where the gain on the held names is the larger.
 
 A recall-matched control (a bias toward tagging) was not run against the
 names; the nearest evidence is the
-companion study's recall-calibrated bias on the CRF head's emissions,
-not matched to the names and not run on MuLMS, which gave −0.59 [−1.75,
-+0.57] fine-grained and +0.17 [−0.14, +0.48] coarse-grained on
-MaterioMiner and −0.21 [−0.58, +0.17] on SOFC-Exp, the entities it added
-being right 19–22% of the time, against the names' net rate of 30%
-above. It is the first thing to do (Section 7).
+companion study's recall-calibrated bias on the CRF head's emissions
+(Table S1, week 7 part 2a), not matched to the names and not run on
+MuLMS, which gave −0.59 [−1.75, +0.57] fine-grained and +0.17 [−0.14,
++0.48] coarse-grained on MaterioMiner and −0.21 [−0.58, +0.17] on
+SOFC-Exp, the entities it added being right 19–22% of the time, against
+the names' net rate of 30% above. It is the first thing to do (Section
+7).
 
 ## Supplementary Note 6: per entity type
 
 Table S4 gives, per type, the F1 of the CRF head, MR6 and MR6 + names on
 MuLMS's subfields, averaged over the (seed, unit) pairs whose test set
 has the type (the MaterioMiner tables, both granularities, are in the
-repository); these are exploratory and are not decided on (Section 5.2).
+repository); these are post hoc and not decided on (Section 5.2).
 On MuLMS, MR6 + names gains over the CRF head on the 12 types with a
 non-zero score (RANGE, 3 entities per unit, scores 0 under every
 system), and MR6 holds more than half of that gain on 9 of them (not on
@@ -306,19 +362,20 @@ differences; types ordered by test support.
 | UNIT | 13.0 | 7 | 12.78 | 21.48 | 21.00 | +8.21 | −0.48 |
 | RANGE | 3.0 | 6 | 0.00 | 0.00 | 0.00 | +0.00 | +0.00 |
 
-## Supplementary Note 7: the earlier protocols, the screen and two other analyses
+## Supplementary Note 7: the earlier protocols, the screen and other analyses
 
 MR6 + names was reached through the protocols of weeks 10 and 11 and the
 screen of week 12, on MuLMS's held-out subfields and their MaterioMiner
 analogues, each committed before its runs and failing or passing as
 recorded:
 
-- *Mention replacement alone* (week 10, 17 October): +2.10 [−0.31, +4.51] against the
-  CRF head on MuLMS at 10 seeds, no; its votes +2.71 [+0.22, +5.20],
-  passes. On MaterioMiner it had passed at both granularities (+2.77 and
-  +1.28).
+- *Mention replacement alone* (week 10, 17 October 20:21): +2.10 [−0.31,
+  +4.51] against the CRF head on MuLMS at 10 seeds, no; its votes against
+  the CRF head's votes, +2.71 [+0.22, +5.20], pass. On MaterioMiner it had
+  passed at both granularities (+2.77 and +1.28; Table S1, week 7 part
+  2b).
 - *Names from the other subfields' unlabeled sentences* (week 11, 18
-  October): the
+  October 01:13): the
   three teachers tag the labeled subfields' sentences outside the pool,
   with a sentence-level filter (a sentence is silver when all its tags
   agree at 0.9), whose names hold 4.4% of a held-out subfield's unseen
@@ -329,9 +386,9 @@ recorded:
   Four decisions, none passing; the route's reading at the time, that the
   filter and not the corpus was the bottleneck, is not borne out by
   Section 5.3.
-- *Seven variants on the topic corpora* (week 12, 18 October, a 3-seed screen
-  on the 7 subfields; Table S5, with the plan's labels, under which V5
-  was not assigned). The selection rule took the largest mean gain
+- *Seven variants on the topic corpora* (week 12, 18 October 11:00, a
+  3-seed screen on the 7 subfields; Table S5, with the plan's labels, under
+  which V5 was not assigned). The selection rule took the largest mean gain
   over MR3, which favours the noisiest variant; the screen decides
   nothing, and two of its losers deserve a 10-seed test that was not run:
   self-training (the student trains on the sentences the teachers labeled,
@@ -357,7 +414,8 @@ head (no decision).
 | lexicon as a gazetteer feature, mention filter (V7) | 48.91 | −1.73 [−4.13, +0.67] | −0.03 [−2.02, +1.97] |
 | lexicon as a gazetteer feature, sentence filter (V8) | 48.79 | −1.85 [−3.59, −0.12] | −0.15 [−2.15, +1.86] |
 
-- *The lexicon as a dictionary* (a CPU probe, no decision): applied to
+- *The lexicon as a dictionary* (a CPU probe planned on 19 October before
+  it ran; no decision): applied to
   the CRF head's predictions as a rule, every verbatim match of a name
   tagged as its type where the head had tagged O, it helps where the
   head's recall trails its precision by 15 points or more (sofc +5.9,
@@ -383,23 +441,65 @@ MaterioMiner (pre-registered in an earlier week; fine-grained +0.30
 folds (pre-specified), where the annotators leave 14% of a tagged term's
 occurrences untagged on the official test set. It is not shown to add
 to mention replacement (+0.57 [−0.12, +1.25] on MuLMS). Two of its ten
-pre-registered decisions pass (six in week 7; four in week 13, two on
-MuLMS registered at 09:14 on 20 October and two on MaterioMiner at 09:25,
-after the MuLMS results, computed 22 minutes later from saved
-predictions), where about 0.25 would by chance.
+pre-registered decisions pass (six of 16 October, in the companion
+study's week 7; four of 20 October, in week 13, two on MuLMS registered
+at 09:14 and two on MaterioMiner at 09:25, after the MuLMS results,
+computed 22 minutes later from saved predictions), where about 0.25
+would by chance.
+
+**Training size on SOFC-Exp.** A decision of the companion study (17
+October 07:28; Table S1, week 9) trained on 10 of the official split's 26
+training articles (5 draws of 156–248 sentences, MaterioMiner's size; 10
+seeds each) and scored on its test articles: MR3 gained +0.50 [−0.47,
++1.46] over the CRF head and did not pass. MR6 + names was not run at
+that size.
 
 ## Supplementary Note 8: the follow-up in detail
 
-The two-head filter of the follow-up admitted lexicons of 16,455 to
-42,066 entries per paper (3,746 to 6,587 distinct fine-typed names). On
-the unseen test names the names' changes over the multi-task control are
-+0.58 [−2.93, +4.09] recall and +0.82 [−3.39, +5.03] precision
-fine-grained, and +1.45 [−0.69, +3.58] and +0.97 [−1.09, +3.03]
-coarse-grained (pre-specified; the paired intervals of Section
-5.4). Post hoc, F1 changes by +2.43 [+0.40, +4.47] on the seen and +0.43
-[−1.57, +2.44] on the unseen test names fine-grained, and by +0.02
-[−1.30, +1.34] and +1.20 [−0.82, +3.22] coarse-grained; no pattern is
-read from these. A names job took 82.5 to 122.7 minutes on a T4 (three
+**Design.** The control is the multi-task model (one encoder, a CRF head
+per granularity) with six-copy mention replacement; the names system adds
+a lexicon harvested by three multi-task teachers (the stored multi-task
+runs of seeds 0, 100 and 200, whose scores the jobs reproduced), each
+tagging the fatigue corpus with both heads. A mention is admitted when
+the three teachers agree on its coarse-grained span and type and on its
+fine-grained type at exactly that span, or on its having none, with every
+marginal at 0.9 or more on the coarse head and, where a fine type is
+tagged, on the fine head; it joins the pool under its pair of types. The
+protocol expected detectable differences of about 3.4 to 3.8 points
+fine-grained and 1.4 to 2.4 coarse-grained.
+
+**Table S6.** The follow-up: the names on the strongest MaterioMiner
+system. Micro F1 over the four held-out papers (10 seeds; both
+granularities from one model) with its 95% CI; the names against the
+matched control (decisions D9 and D10), and both against multi-task
+training with three-copy mention replacement, the multi-task model and
+the CRF head (pre-specified). A bound of −0.00 lies just below 0.
+
+| | System | micro F1 [95% CI] | Δ vs the control | Δ vs multi-task + MR3 | Δ vs multi-task | Δ vs CRF head |
+|---|---|---|---|---|---|---|
+| fine | multi-task + MR6 + names | 53.95 [47.52, 60.38] | +0.96 [−0.01, +1.92] (D9, no) | +0.76 [−0.15, +1.68] | +3.77 [+1.34, +6.21] | +7.49 [+5.96, +9.02] |
+| fine | multi-task + MR6 (the control) | 52.99 [46.93, 59.06] | | −0.19 [−2.05, +1.67] | +2.82 [−0.00, +5.64] | +6.54 [+4.14, +8.94] |
+| coarse | multi-task + MR6 + names | 61.25 [53.71, 68.80] | +0.85 [−0.72, +2.42] (D10, no) | +0.91 [−0.14, +1.97] | +3.21 [+0.46, +5.96] | +2.65 [−0.09, +5.38] |
+| coarse | multi-task + MR6 (the control) | 60.40 [53.66, 67.15] | | +0.06 [−0.74, +0.86] | +2.36 [+1.15, +3.56] | +1.80 [+0.19, +3.40] |
+
+**Lexicons.** The two-head filter admitted lexicons of 16,455 to 42,066
+entries per paper (3,746 to 6,587 distinct fine-typed names). By the
+runs' stored counts, which call a test name unseen when no training
+sentence annotates its words with its type, they hold 7.5% of the unseen
+test names fine-grained and 12.1% coarse-grained, pooled over the papers,
+against 9.6% and 18.3% for the single-task lexicons of D3 and D4, lower
+in 7 of the 8 paper–granularity cells; Table 5's 9.8% and 18.2% count by
+main Section 2's words-only rule.
+
+**Unseen names.** On the unseen test names the names' changes over the
+multi-task control are +0.58 [−2.93, +4.09] recall and +0.82 [−3.39,
++5.03] precision fine-grained, and +1.45 [−0.69, +3.58] and +0.97 [−1.09,
++3.03] coarse-grained (pre-specified; paired over the four papers). Post
+hoc, F1 changes by +2.43 [+0.40, +4.47] on the seen and +0.43 [−1.57,
++2.44] on the unseen test names fine-grained, and by +0.02 [−1.30, +1.34]
+and +1.20 [−0.82, +3.22] coarse-grained; no pattern is read from these.
+
+**Cost.** A names job took 82.5 to 122.7 minutes on a T4 (three
 teachers, their tagging of 40,000 sentences with two heads, and ten
 students): 10.0 minutes per student with the harvest shared over the
 job's ten students and about 38 charged to one, against 6.9 for a
@@ -413,7 +513,7 @@ detects with 80% power
 at the two-sided 5% level, from the half-width of its observed interval
 and its degrees of freedom (`ner_robustness.py`, `detectable`).
 
-**Table S6.** The difference each comparison could detect at 80% power
+**Table S7.** The difference each comparison could detect at 80% power
 and the two-sided 5% level, from its stored interval's half-width and
 degrees of freedom.
 
@@ -427,11 +527,11 @@ degrees of freedom.
 | MR3 − CRF head, pooled (post hoc, decision seeds) | 1.46 | 10 | 2.03 |
 | D1: MR6 + names − CRF head, MuLMS | 4.32 | 6 | 5.92 |
 | D2: MR6 + names − MR3, MuLMS | 2.55 | 6 | 3.50 |
-| MR6 + names − MR6, MuLMS (part of D7) | 2.02 | 6 | 2.77 |
+| MR6 + names − MR6, MuLMS (D7's per-corpus condition) | 2.02 | 6 | 2.77 |
 | D8: own-topic − mixed corpus, MuLMS | 1.83 | 6 | 2.51 |
 | D3: MR6 + names − CRF head, MaterioMiner fine | 2.88 | 3 | 3.77 |
 | D4: MR6 + names − CRF head, MaterioMiner coarse | 1.10 | 3 | 1.44 |
-| MR6 + names − MR6, MaterioMiner fine (pre-specified) | 3.80 | 3 | 4.97 |
+| MR6 + names − MR6, MaterioMiner fine (D7's per-corpus condition) | 3.80 | 3 | 4.97 |
 | the same, coarse (pre-specified) | 2.30 | 3 | 3.01 |
 | D6: MR6 + names − CRF head, SOFC-Exp, 5 folds | 1.17 | 4 | 1.57 |
 | D9: multi-task + MR6 + names − multi-task + MR6, MaterioMiner fine (follow-up) | 0.96 | 3 | 1.26 |

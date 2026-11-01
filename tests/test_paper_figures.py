@@ -240,6 +240,12 @@ def test_names_data_and_figure7(tmp_path):
         ('crf_mr6', 'MR6 (6 copies, no names)', 43.7, 53.9, 48.3, 70.0),
         ('crf_mrm_topic6', 'MR6 + names (topic corpus)', 47.3, 50.9, 49.0, 71.2)]
     assert pf.names_data({}) == {}
+    # one legend entry per marker: the names on both corpora share the red star
+    assert pf.names_legend({'crf', 'crf_mrm_topic6', 'crf_mrm6'}) == [
+        ('crf', 'CRF head'), ('crf_mrm_topic6', pf.NAMES_BOTH)]
+    assert pf.names_legend({'crf_mrm6'}) == [('crf_mrm6', 'MR6 + names (fatigue corpus)')]
+    # arrows join systems on the same seeds: the mixed corpus (seeds 300-900) has none to MR6
+    assert 'crf_mrm_mixed6' not in pf.NAMES_PARENT
     pytest.importorskip('matplotlib')
     import matplotlib
     matplotlib.use('Agg')

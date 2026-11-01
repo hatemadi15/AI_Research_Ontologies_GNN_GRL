@@ -5595,6 +5595,44 @@ differences (`ner_robustness.py`). One correction to this record: the
 control per corpus only, so the pooled figure is post hoc (paper A,
 Section 5.2). A further round reviews the restructure.
 
+*Paper A, review round 9 (1 November).* Three reviews of the
+restructure: a number audit (no interval or table cell wrong; 2
+blocking: the MaterioMiner comparison of MR6 + names against MR3 dated
+18 October, though the 20 October 00:51 batches (`ce0f592`) added it,
+and the eighteen decisions scoped "17 to 31 October", which would take
+in week 9's seven decisions of 17 October 07:28; 7 should-fix, among them
+the worked example's MR6 replacement Pd, absent from the electrolysis
+fold's training sentences, and Section 1 summing terms from two seed
+bases), a journal referee (minor revision; blocking: the abstract's
+"Mention replacement, not the names, carries the gain", which reads an
+interval as no effect, the unpublished companion study carrying four
+claims, and the affiliation, archive and AI statement; should-fix: the
+post hoc recall finding stated without its precision, about 1,800 words
+of cuts, terms used before their definition, the rule classing predicted
+spans unstated, Table 3's provenance in prose) and a consistency check
+(2 blocking: the abstract sentence above, and the lexicon split's
+reading rule misquoted as "clears 0"; 9 should-fix, among them the gate
+on D3 and D4 last lifted at 18:42, after the screen had chosen MR6 +
+names, the four-unit sign-flip floor under D3 and D4, and SOFC-Exp's
+lexicon coverage, which is no lower than the other corpora's). No number
+in a results file and no verdict changed. One correction to this record:
+the week-15 outcome above reads MuLMS as name knowledge on intervals and
+MaterioMiner as a generic shift on point estimates; the rule does not say
+which, and read one way throughout it gives mixed and a generic shift, or
+name knowledge and none (paper A, Section 5.4 and Supplementary Note 5;
+C28 and the results index corrected). Revised the same day: a new title
+and the abstract's last sentence ("Most of the gain is mention
+replacement's; the names' share is not established"), the post hoc
+recall finding taken out of the abstract rather than backed by a
+recall-matched control; Box 1 with the terms; Section 3's disclosure cut
+to its facts with the gate's times; Table 3 with a status column; the
+follow-up's table and filter, the reading rule, the training-size
+subsample, Table 1's notes and the earlier protocols moved to the
+Supplementary Information (now Tables S1–S7, the companion study's
+protocols added to S1); Figure 3 with one legend entry per marker and no
+arrow between points on different seeds (`paper_figures.py`). A further
+round reviews the revision.
+
 ### Week 17 protocol: the harvested names on the strongest base (fixed before any run, 31 October, 19:10 UTC)
 
 *Why, and when.* The round-6 reviews of paper A (31 October) listed as a

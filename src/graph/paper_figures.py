@@ -41,7 +41,8 @@ No training: reads the 10-seed GPU results (results/gpu) and writes PNG files.
       recall-precision plane with iso-F1 curves: the CRF head, mention replacement with 3
       copies, 6 copies without names, and 6 copies with the harvested names (the topic
       corpus's and the mixed corpus's on MuLMS, the fatigue corpus's on MaterioMiner), each
-      joined to the system it adds to.
+      joined to the system it adds to on the same seeds (the mixed corpus, on seeds 300-900
+      only, is not joined to MR6's ten); the legend has one entry per marker.
   fig8_method.png (paper A's method overview, no data): the pipeline as boxes and arrows:
       three CRF teachers trained on the labeled sentences tag an unlabeled corpus; the
       mentions all three tag alike and confidently form the lexicon; mention replacement
@@ -126,8 +127,20 @@ NAMES_SYSTEMS = {'crf': 'CRF head', 'crf_mr': 'MR3 (3 copies)',
                  'crf_mrm_topic6': 'MR6 + names (topic corpus)',
                  'crf_mrm6': 'MR6 + names (fatigue corpus)',
                  'crf_mrm_mixed6': 'MR6 + names (mixed corpus)'}
+# the arrows join systems on the same seeds: the mixed corpus (seeds 300-900) has none to MR6 (0-900)
 NAMES_PARENT = {'crf_mr': 'crf', 'crf_mr6': 'crf_mr', 'crf_mrm_topic6': 'crf_mr6',
-                'crf_mrm6': 'crf_mr6', 'crf_mrm_mixed6': 'crf_mr6'}
+                'crf_mrm6': 'crf_mr6'}
+NAMES_BOTH = 'MR6 + names (MuLMS: topic corpus; MaterioMiner: fatigue corpus)'
+
+
+def names_legend(shown):
+    """[(system, label)] of Figure 7's legend for the systems shown, in NAMES_SYSTEMS order, one
+    entry per marker: the names on MuLMS (topic corpus) and on MaterioMiner (fatigue corpus)
+    share the red star and so one entry."""
+    both = {'crf_mrm_topic6', 'crf_mrm6'} <= set(shown)
+    return [(system, NAMES_BOTH if both and system == 'crf_mrm_topic6' else label)
+            for system, label in NAMES_SYSTEMS.items()
+            if system in shown and not (both and system == 'crf_mrm6')]
 
 
 def load(directory, names):
@@ -585,7 +598,7 @@ def figure7(rows_by_setting, path):
         shown = {system for rows in rows_by_setting.values() for system, *_ in rows}
         handles = [Line2D([], [], linestyle='', marker=styles[system][0], color=styles[system][1],
                           ms=8 if styles[system][0] == '*' else 6, label=label)
-                   for system, label in NAMES_SYSTEMS.items() if system in shown]
+                   for system, label in names_legend(shown)]
         fig.legend(handles=handles, loc='lower center', ncol=3, fontsize=7, frameon=False,
                    bbox_to_anchor=(0.5, -0.01))
         fig.tight_layout(rect=(0, 0.03, 1, 1))

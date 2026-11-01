@@ -473,8 +473,10 @@ rebuilt teachers and coverage counts equal the stored runs'. Outcome (Table
 10, paper A's Table 5 and, in full, Supplementary Table S3): on MuLMS the names' recall gain over MR6 is +7.29
 [+3.27, +11.30] on the unseen names the lexicon holds and +1.12 [−0.78,
 +3.02] on the others (difference +6.17 [+2.44, +9.90], 7 of 7 subfields):
-name knowledge, as the reading fixed in advance defines it; on MaterioMiner
-the rule's letter reads a generic shift within four papers' wide intervals
+mixed on point estimates and name knowledge on intervals, the reading
+fixed in advance not saying which (paper A's round-9 revision, 1
+November); on MaterioMiner a generic shift on point estimates, and none of
+the three outcomes on intervals, within four papers' wide intervals
 (fine +4.33 [−5.33, +13.98], coarse −1.54 [−3.60, +0.51]); the wrong
 predictions the names add fall on both parts (two thirds on names the
 lexicon does not hold, 22% right).
