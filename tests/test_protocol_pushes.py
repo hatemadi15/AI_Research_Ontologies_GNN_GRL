@@ -1,5 +1,7 @@
-"""The push times of protocol commits from GitHub's event feed (protocol_pushes.py): the earliest
+"""The push times of protocol commits from GitHub's event feed and activity log (protocol_pushes.py): the earliest
 push that carried a commit, the bound from a later push's `before`, and the archive's union."""
+import json
+
 import protocol_pushes as pp
 
 
@@ -40,3 +42,40 @@ def test_archive_keeps_the_union(tmp_path):
                              ('2026-10-20T10:00:00Z', 'b', 'c', 'r')], path)
     assert rows == [('2026-10-20T09:00:00Z', '0', 'a', 'r'), ('2026-10-20T10:00:00Z', 'b', 'c', 'r')]
     assert pp.read_archive(path) == rows and path.read_text().startswith(pp.HEADER)
+
+
+class _Response:
+    def __init__(self, items, link=None):
+        self.items, self.headers = items, {'Link': link} if link else {}
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def read(self):
+        return json.dumps(self.items).encode()
+
+
+def test_fetch_activity_follows_repository_scoped_pages():
+    """The activity log's pushes, page after page, with GitHub's repositories/{id} next links
+    rewritten to the repos/{owner}/{repo} path."""
+    first = [{'timestamp': '2026-11-01T10:51:13Z', 'before': 'a' * 40, 'after': 'b' * 40,
+              'ref': 'refs/heads/x', 'activity_type': 'push'},
+             {'timestamp': '2026-11-01T10:50:00Z', 'activity_type': 'branch_deletion'}]
+    second = [{'timestamp': '2026-10-20T00:51:49Z', 'before': 'c' * 40, 'after': 'a' * 40,
+               'ref': 'refs/heads/x', 'activity_type': 'force_push'}]
+    link = ('<https://api.github.com/repositories/42/activity?per_page=100&after=CUR>; '
+            'rel="next", <https://api.github.com/repositories/42/activity?per_page=100>; rel="first"')
+    urls = []
+
+    def opener(request, timeout):
+        urls.append(request.full_url)
+        return _Response(first, link) if len(urls) == 1 else _Response(second)
+    rows = pp.fetch_activity('o/r', opener=opener)
+    assert urls == ['https://api.github.com/repos/o/r/activity?per_page=100',
+                    'https://api.github.com/repos/o/r/activity?per_page=100&after=CUR']
+    assert rows == [('2026-11-01T10:51:13Z', 'a' * 40, 'b' * 40, 'refs/heads/x'),
+                    ('2026-10-20T00:51:49Z', 'c' * 40, 'a' * 40, 'refs/heads/x')]
+    assert pp.next_link(None) is None and pp.next_link('<u?x=1>; rel="last"') is None

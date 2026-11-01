@@ -94,6 +94,18 @@ def test_mde_stratified_partial_and_detectable():
                                                                         'mde_80': nr.mde(1.5, 3)}
     assert d['MaterioMiner coarse: crf_mt_mrm6_vs_crf_mt_mr']['half_width'] == 2.0
     assert not [k for k in nr.detectable({}, {}, {}) if '17' in k]
+    # week 18: the two decisions against the recall-matched control, also without the flagged
+    # subfields (3 degrees of freedom here) and in the post hoc reading; absent without the file
+    one = {'ci95': [3.31, 19.18], 'n_units': 7}
+    matched = {'decisions': {'18.1': one, '18.2': {'ci95': [-0.79, 7.31], 'n_units': 7}},
+               'without_flagged': {'decisions': {'18.1': {'ci95': [-3.33, 15.44], 'n_units': 4}}},
+               'post_hoc_nearest': {'decisions': {'18.2': {'ci95': [-0.66, 3.41], 'n_units': 7}}}}
+    d18 = nr.detectable({}, {}, {}, matched)
+    assert d18['D11 MuLMS: recall_in_vs_recall_matched'] == {'half_width': 7.93, 'df': 6,
+                                                            'mde_80': nr.mde(7.935, 6)}
+    assert d18['D11 MuLMS: recall_in_vs_recall_matched without the flagged subfields']['df'] == 3
+    assert 'D12 MuLMS: f1_vs_recall_matched (post hoc, nearest recall)' in d18
+    assert not [k for k in nr.detectable({}, {}, {}) if 'D11' in k or 'D12' in k]
     # D6, SOFC-Exp's 5 article folds (4 degrees of freedom), from week13.folds
     d6 = nr.detectable({'week13': {'folds': {'crf_mrm6': {'minus_crf': {'micro': {'ci95': [-1.21, 1.14]}}}}}}, {}, {})
     assert d6['D6 SOFC-Exp: names_vs_crf'] == {'half_width': 1.17, 'df': 4, 'mde_80': 1.57}   # (1.14 + 1.21) / 2 rounds to 1.17

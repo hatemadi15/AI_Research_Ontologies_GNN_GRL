@@ -37,6 +37,7 @@ from ner_seed_analysis import (COPIES_CONTROL, WEEK14_ANALOGUE, WEEK14_WINNER, W
 ANALYSIS = 'ner_week5_seed_analysis.json'
 WEEK7 = 'ner_week7_comparisons.json'
 WEEK12 = 'ner_week12_comparisons.json'
+WEEK18 = 'ner_recall_matched.json'
 MULMS = 'mulms_leave_one_subfield_out'
 DECISION = tuple(range(300, 1000, 100))
 SYSTEMS = {'crf': 'CRF head', 'crf_mr': 'MR3', COPIES_CONTROL: 'MR6', WEEK14_WINNER: 'MR6 + names'}
@@ -153,12 +154,14 @@ def mde(half_width, df, power=0.80):
     return round(half_width / t975 * (t975 + stats.t.ppf(power, df)), 2)
 
 
-def detectable(analysis, robust_pooled, robust_grids):
+def detectable(analysis, robust_pooled, robust_grids, matched=None):
     """Per comparison the CI half-width, degrees of freedom and MDE at 80% power, from the stored
     intervals: the pooled comparisons of both bases (10 degrees of freedom), the MaterioMiner
     grids (3), the MuLMS decisions D1, D2 and D8 and the names against MR6 there (6), the
-    3-seed ablations against the method (6), and the week-17 decisions on the strongest base
-    with the names' increment over the week-9 system there (3)."""
+    3-seed ablations against the method (6), the week-17 decisions on the strongest base
+    with the names' increment over the week-9 system there (3), and the week-18 decisions
+    against the recall-matched control (`matched`, ner_recall_matched.json: the 7 subfields,
+    those without the flagged ones, and the post hoc nearest-recall reading)."""
     out = {}
 
     def add(name, entry, df):
@@ -193,6 +196,14 @@ def detectable(analysis, robust_pooled, robust_grids):
             entry.get(f'minus_{WEEK17_CONTROL}'), 3)
         add(f'MaterioMiner {g}: {WEEK17_NAMES}_vs_crf_mt_mr',
             (entry.get('names') or {}).get('minus_crf_mt_mr'), 3)
+    for part, label in (('', ''), ('without_flagged', ' without the flagged subfields'),
+                        ('post_hoc_nearest', ' (post hoc, nearest recall)')):
+        block = (matched or {}).get(part) if part else matched
+        for key, name in (('18.1', 'D11 MuLMS: recall_in_vs_recall_matched'),
+                          ('18.2', 'D12 MuLMS: f1_vs_recall_matched')):
+            entry = ((block or {}).get('decisions') or {}).get(key)
+            if entry:
+                add(name + label, entry, entry['n_units'] - 1)
     return out
 
 
@@ -343,8 +354,9 @@ def main(argv=None):
     analysis = load(os.path.join(args.results, ANALYSIS))
     week7, week12 = load(os.path.join(args.results, WEEK7)), load(os.path.join(args.results, WEEK12))
     robust, grid = pooled(analysis, week12), grids(analysis, week7, week12)
+    matched = load(os.path.join(args.results, WEEK18))
     out = {'pooled': robust, 'grids': grid, 'coverage_gain': coverage_gain(analysis),
-           'detectable': detectable(analysis, robust, grid), 'compute': compute(args.results)}
+           'detectable': detectable(analysis, robust, grid, matched), 'compute': compute(args.results)}
     path = args.out or os.path.join(args.results, 'ner_robustness.json')
     with open(path, 'w') as f:
         json.dump(out, f, indent=1)

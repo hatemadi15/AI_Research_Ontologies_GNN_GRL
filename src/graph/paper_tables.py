@@ -481,21 +481,43 @@ def table11(rows):
 def table12(matched):
     """Table 12 from ner_recall_matched.json (week 18): per MuLMS subfield the names' pooled recall,
     the control's at bias 0, the matched bias D* (flagged outside the grid) and the names minus the
-    control at D* in recall on the unseen names the lexicon holds, micro F1 and precision; then
-    the two decisions and the pre-specified comparisons over the subfields."""
+    control at D* in recall on the unseen names the lexicon holds, micro F1 and precision, a
+    flagged subfield's post hoc nearest-recall values in parentheses; then the two decisions and
+    the pre-specified comparisons over the subfields, the same without the flagged subfields
+    (pre-specified) and with them matched at the nearest recall (post hoc)."""
     header = ['subfield', "names' recall", "control's recall at 0", 'D*',
               'Δ recall, unseen names in the lexicon', 'Δ micro F1', 'Δ precision']
     d, pre = matched['decisions'], matched['prespecified']
+    nearest = matched.get('post_hoc_nearest') or {}
+    near_d, near_pre = nearest.get('decisions') or {}, nearest.get('prespecified') or {}
+
+    def cell(block, u, alt=None):
+        out = number(block['per_unit'][u], True)
+        return out + (f" ({number(alt['per_unit'][u], True)})" if alt else '')
     cells = []
     for u, v in matched['per_unit'].items():
-        cells.append([u, number(v['target_recall']), number(v['control_recall_at_0']),
-                      f"{v['d_star']:.2f}{' (flagged)' if v['flagged'] else ''}",
-                      number(d['18.1']['per_unit'][u], True), number(d['18.2']['per_unit'][u], True),
-                      number(pre['precision']['per_unit'][u], True)])
-    cells.append([f"mean [95% CI], {d['18.1']['n_units']} subfields", '', '', '',
-                  interval(d['18.1'], 'mean_diff', signed=True) + f" (18.1, {d['18.1']['verdict']})",
-                  interval(d['18.2'], 'mean_diff', signed=True) + f" (18.2, {d['18.2']['verdict']})",
-                  interval(pre['precision'], 'mean_diff', signed=True)])
+        near = v['flagged'] and u in (nearest.get('matched') or {})
+        star = number(v['d_star'])
+        if v['flagged']:
+            star += f" (flagged; {nearest['matched'][u]['d']:g} post hoc)" if near else ' (flagged)'
+        cells.append([u, number(v['target_recall']), number(v['control_recall_at_0']), star,
+                      cell(d['18.1'], u, near and near_d['18.1']),
+                      cell(d['18.2'], u, near and near_d['18.2']),
+                      cell(pre['precision'], u, near and near_pre['precision'])])
+    rows = [(f"mean [95% CI], {d['18.1']['n_units']} subfields", d, pre, True)]
+    without = matched.get('without_flagged')
+    if without:
+        rows.append((f"without the flagged subfields, {without['decisions']['18.1']['n_units']} "
+                     '(pre-specified)', without['decisions'], without['prespecified'], False))
+    if nearest:
+        rows.append(('the flagged subfields at the nearest recall, '
+                     f"{near_d['18.1']['n_units']} (post hoc)", near_d, near_pre, False))
+    for label, dec, pr, verdict in rows:
+        cells.append([label, '', '', ''] + [
+            interval(dec[k], 'mean_diff', signed=True)
+            + (f" ({k}, {dec[k]['verdict']})" if verdict else
+               f", {dec[k]['n_positive']}/{dec[k]['n_units']} above 0")
+            for k in ('18.1', '18.2')] + [interval(pr['precision'], 'mean_diff', signed=True)])
     extra = '; '.join(f"{name} {interval(pre[key], 'mean_diff', signed=True)}"
                       for key, name in (('unseen_recall', 'recall on the unseen names'),
                                         ('unseen_precision', 'precision on them'),
@@ -507,31 +529,26 @@ def table12(matched):
             "MuLMS's 7 held-out subfields at seeds 300 to 900 with a bias D on the entity "
             "emissions, matched per subfield to the names' recall over all test entities pooled "
             'over the seeds; the names minus the control at D*, paired over the subfields '
-            '(decisions 18.1 and 18.2, the week-6 rule; the rest pre-specified). Also, paired: '
-            f'{extra}.{readings(matched)}\n\n' + markdown(header, cells))
+            '(decisions 18.1 and 18.2, the week-6 rule; the rest pre-specified). A flagged '
+            "subfield's recall lies outside the control's range over the grid and is matched at "
+            'its end as the protocol fixed; in parentheses, matched post hoc at the grid value of '
+            "the control's recall nearest the names'. Also, paired: "
+            f'{extra}.\n\n' + markdown(header, cells) + '\n'
+            + table12_curves(matched))
 
 
-def readings(matched):
-    """The week-18 decisions without the flagged subfields (pre-specified) and with them matched
-    at the grid value of the nearest recall (post hoc), as a sentence ('' without flags)."""
-    out = ''
-    without, nearest = matched.get('without_flagged'), matched.get('post_hoc_nearest')
-    if without:
-        d = without['decisions']
-        out += (f" Without the flagged subfields ({', '.join(without['flagged'])}; pre-specified): "
-                f"18.1 {interval(d['18.1'], 'mean_diff', signed=True)}, "
-                f"{d['18.1']['n_positive']}/{d['18.1']['n_units']} above 0; "
-                f"18.2 {interval(d['18.2'], 'mean_diff', signed=True)}.")
-    if nearest:
-        d = nearest['decisions']
-        at = ', '.join(f"{u} at {v['d']:g} ({number(v['control_recall'])} against "
-                       f"{number(v['target_recall'])})" for u, v in nearest['matched'].items())
-        out += (' Post hoc, each flagged subfield matched instead at the grid value of the '
-                f"control's recall nearest the names' ({at}): "
-                f"18.1 {interval(d['18.1'], 'mean_diff', signed=True)}, "
-                f"{d['18.1']['n_positive']}/{d['18.1']['n_units']} above 0; "
-                f"18.2 {interval(d['18.2'], 'mean_diff', signed=True)}.")
-    return out
+def table12_curves(matched):
+    """The control's pooled recall over all test entities at every bias of the grid, per subfield,
+    beside the names' (Table 12, second part); '' without the curves."""
+    if not all('curve' in v for v in matched['per_unit'].values()):
+        return ''
+    grid = list(next(iter(matched['per_unit'].values()))['curve'])
+    header = ['subfield', "names' recall"] + [f'D = {g}'.replace('-', '\u2212') for g in grid]
+    cells = [[u, number(v['target_recall'])] + [number(v['curve'][g]['recall']) for g in grid]
+             for u, v in matched['per_unit'].items()]
+    return ("Table 12, second part. The control's recall over all test entities, pooled over the "
+            "seeds, at every bias of the grid, beside the names' (the matching's input).\n\n"
+            + markdown(header, cells))
 
 
 def table10(data):

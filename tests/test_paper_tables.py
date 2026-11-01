@@ -332,14 +332,23 @@ def test_table12_week18():
     assert '5.00 (flagged)' in rows[2]
     assert rows[3].startswith('| mean [95% CI], 2 subfields |')
     assert '+4.00 [+1.00, +7.00] (18.1, passes)' in rows[3] and '(18.2, no)' in rows[3]
-    assert 'Without the flagged' not in text and 'Post hoc' not in text      # no readings given
+    assert 'without the flagged' not in text and 'post hoc)' not in text    # no extra readings
     m = _matched()
     one = {'per_unit': {'semi': 5.0}, 'mean_diff': 5.0, 'ci95': [-1.0, 11.0], 'n_units': 1,
            'n_positive': 1, 'above_0': False}
-    m['without_flagged'] = {'flagged': ['sofc'], 'decisions': {'18.1': one, '18.2': one}}
+    two = {'per_unit': {'semi': 0.5, 'sofc': 0.2}, 'mean_diff': 0.35, 'ci95': [-1.0, 1.7],
+           'n_units': 2, 'n_positive': 2, 'above_0': False}
+    m['without_flagged'] = {'flagged': ['sofc'], 'decisions': {'18.1': one, '18.2': one},
+                            'prespecified': {'precision': one}}
     m['post_hoc_nearest'] = {'matched': {'sofc': {'d': 2.5, 'control_recall': 49.93,
                                                   'target_recall': 50.36}},
-                             'decisions': {'18.1': one, '18.2': one}}
-    text = pt.table12(m)
-    assert ' Without the flagged subfields (sofc; pre-specified): 18.1 +5.00 [−1.00, +11.00], 1/1 above 0;' in text
-    assert "(sofc at 2.5 (49.93 against 50.36)): 18.1 +5.00 [−1.00, +11.00], 1/1 above 0;" in text
+                             'decisions': {'18.1': two, '18.2': two},
+                             'prespecified': {'precision': two}}
+    m['per_unit']['semi']['curve'] = {'0': {'recall': 26.8}, '2.5': {'recall': 31.84}}
+    m['per_unit']['sofc']['curve'] = {'0': {'recall': 46.5}, '2.5': {'recall': 49.93}}
+    rows = [line for line in pt.table12(m).split('\n') if line.startswith('| ')]
+    assert '| 5.00 (flagged; 2.5 post hoc) | +3.00 (+0.20) |' in rows[2]
+    assert rows[4].startswith('| without the flagged subfields, 1 (pre-specified) |')
+    assert '+5.00 [−1.00, +11.00], 1/1 above 0' in rows[4]
+    assert rows[5].startswith('| the flagged subfields at the nearest recall, 2 (post hoc) |')
+    assert rows[7] == '| semi | 31.80 | 26.80 | 31.84 |' and rows[6].startswith('| subfield |')

@@ -938,6 +938,36 @@
    "half_width": 1.05,
    "df": 3,
    "mde_80": 1.38
+  },
+  "D11 MuLMS: recall_in_vs_recall_matched": {
+   "half_width": 7.93,
+   "df": 6,
+   "mde_80": 10.87
+  },
+  "D12 MuLMS: f1_vs_recall_matched": {
+   "half_width": 4.05,
+   "df": 6,
+   "mde_80": 5.55
+  },
+  "D11 MuLMS: recall_in_vs_recall_matched without the flagged subfields": {
+   "half_width": 9.38,
+   "df": 3,
+   "mde_80": 12.27
+  },
+  "D12 MuLMS: f1_vs_recall_matched without the flagged subfields": {
+   "half_width": 2.75,
+   "df": 3,
+   "mde_80": 3.6
+  },
+  "D11 MuLMS: recall_in_vs_recall_matched (post hoc, nearest recall)": {
+   "half_width": 5.28,
+   "df": 6,
+   "mde_80": 7.23
+  },
+  "D12 MuLMS: f1_vs_recall_matched (post hoc, nearest recall)": {
+   "half_width": 2.04,
+   "df": 6,
+   "mde_80": 2.79
   }
  },
  "compute": {
