@@ -4,7 +4,7 @@
 
 Hatem Madi
 
-Supplementary Notes 1 to 10 give the protocol record, the hyperparameters,
+Supplementary Notes 1 to 11 give the protocol record, the hyperparameters,
 compute and repeats, the corpora, and the analyses the main text
 summarises; Tables S1 to S10 are numbered in order of appearance. Section,
 table and figure numbers without an S refer to the main text.
@@ -761,3 +761,366 @@ S7); the two-sided t p-values are 0.013 for D11 and 0.096 for D12.
 | semi | 4,580 (7,429) | 132 (666) | 96 (116) | 20 (115) |  |  | 1 (1) |  |  | 1 (1) |
 | sofc | 4,011 (8,359) | 265 (5,167) | 38 (41) | 42 (153) | 3 (3) |  | 20 (678) |  |  | 1 (1) |
 | steel | 5,797 (12,164) | 1,492 (15,248) | 439 (791) | 224 (1,485) | 23 (24) | 35 (41) | 48 (571) | 3 (3) |  | 5 (5) |
+
+## Supplementary Note 11: checks, deviations, failures and timings of the names route
+
+This Note gives, week by week, the checks the runs of the names route
+passed, where the runs departed from what the protocols planned, which
+sessions failed, and when each of these happened; commit times are the
+commits' (UTC) and push, pull and run times the session notes', as in
+Supplementary Note 1.
+
+**Week 10.** The protocol of 17 October 20:21 (`a08356f`) listed the
+analyses week 10 would report, and looser matching was not among them.
+The looser-matching script had been introduced on 16 October as an
+exploratory analysis. It was adapted to MuLMS's protocols on 17 October
+at 21:43 (`6979420`), after `w10a` had been pushed at 20:57, and at
+21:55, before the results, a dry run on files from a tiny random model
+trained on MuLMS's real folds and splits went through the matching
+analysis. Week 10's result was recorded on 18 October at 00:48
+(`c2ca3f6`). On the held-out subfields the CRF head scored 48.66 with
+span and type exact, 54.59 on the span alone and 69.06 under any
+overlap, against 65.72, 70.22 and 81.68 on the random pool splits, so
+the gap of 17.06 points fell to 12.62 under overlap. Of its predictions
+on the held-out subfields, 13.1% lay inside a longer gold entity,
+against 9.0% on the random splits.
+
+**Week 11.** In `w11a` (MuLMS; pushed on 18 October at 01:50, done at
+04:44), per subfield both lanes' three teachers and silver counts were
+identical, and every teacher scored exactly as the stored week-10
+CRF-head run of its seed. In `w11b` (MaterioMiner) each lane ran one
+granularity, and per paper and granularity the three teachers scored
+exactly as the stored CRF-head runs of their seeds. That a student
+trained without silver names equals the `crf_mr` run of its seed was
+shown by a test on a tiny model, committed with the week's preparation
+on 18 October at 01:12 (`50c07dc`), not by a GPU run. At 01:32, before
+the pushes, one `w11a` job (graphene) and one `w11b` job
+(coarse-grained, paper s11340) ran on the real data with a tiny random
+model on the CPU; in the `w11a` job the random model found no silver
+sentence and the teacher of seed 0 reproduced week 10's tiny-model CRF
+run on graphene (1.11), and the `w11b` job's 963 copies equalled those
+of week 7's mention-replacement run of seed 0 on that paper. On a tiny
+random model, every existing option that the week-11 change touched
+wrote byte-identical results files.
+
+The protocol of 18 October 01:13 (`427e34c`) ran `w11b` after the weekly
+GPU quota's reset on 24 October, and `w11a` left about 1 GPU hour until
+then. The quota was raised to 45 hours a week on 19 October, and `w11b`
+was pushed that day at 21:06 to `ner-gpu-jobs-d` (version 6), before the
+reset. It ran 3.4 hours (9 jobs), and its result, decisions 3 and 4 of
+week 11 failing, was recorded on 20 October at 00:44 (`04764ef`). The
+protocol named its own commit as every batch's source; `w11b` ran from
+bundle `77c37be`, the commit of week 12's first amendment, and its files
+carry the `silver_filter` field that the week-12 code added, which
+`w11a`'s files lack. The week-12 code of 18 October 11:00 (`40631ce`)
+had been checked to repeat the week-11 code's runs byte for byte apart
+from `runtime_sec`, its silver-name runs differing only by that field;
+no such check of `77c37be`'s own change to `ner_baseline.py` is
+recorded.
+
+On 18 October at 04:52 (`fa64ed6`), after `w11a`'s result had been
+committed at 04:50, the plan made `w11b` the gate of the route: topic
+corpora for MuLMS only if decision 3 or 4 of week 11 passed, and
+otherwise the evaluation paper. Phase 0, measured on the CPU from 09:14
+that day (`8b9dd59`), was to decide whether topic corpora were worth the
+GPU hours. The week-12 protocol, committed at 11:00 (`40631ce`), made
+phase 0's coverage the gate instead of `w11b`, which it said could not
+run before the reset, and kept `w11b` first with its decisions as fixed.
+When `w11b`'s failure was recorded, at 00:44 on 20 October, the week-12
+protocol and its first two amendments were in place, and the week-12
+screen was pushed at 02:35. Under the plan of 04:52 that failure would
+have led to the evaluation paper.
+
+**Week 12.** Phase 0's first text, on 18 October at 09:14 (`8b9dd59`),
+tested only the SOFC corpus of the week-6 amendment, removed its overlap
+with MuLMS's sofc documents by a 30-character shingle (665 sentences,
+read then as some of those documents being among its articles), and put
+about 45 points of the coverage down to generic materials names and
+about 35 points to the topic. At 11:00 (`40631ce`), with the seven topic
+corpora built, the generic part was 45–65 points and the own topic added
+4–11 points on six subfields, while on graphene the own corpus was 3
+points behind the electrolysis corpus. The 30-character shingle had
+matched technical terms in 270–319 of each topic's articles and dropped
+62–224 articles per topic whole; it was widened to 50 characters, at
+which 15 sentences and no article of the SOFC pool shared a run with
+MuLMS, and at 60 none. No sentence of a topic corpus shared a
+50-character run with a held-out subfield's documents; the SOFC and
+fatigue corpora, used as controls, shared 0 to 5 sentences with a
+subfield's documents, which the counts left out. MuLMS ships no article
+identifiers: 16 of its 50 documents were found on Europe PMC by title
+and excluded by PMCID, the rest coming from journals Europe PMC does not
+index, and every sentence sharing an 8-word n-gram or a 50-character run
+with a MuLMS sentence was dropped as well. For MuLMS, therefore, the
+exclusion "by identifier" of Section 4 and Supplementary Note 3 covered
+16 of its 50 articles.
+
+Amendment 1 was committed on 19 October at 17:15 (`77c37be`), before any
+run, adding V4 (`crf_mrm_topic6`) and V6 (`crf_st3_topic`) to the
+screen. Amendment 2, V7 (`crf_gzm_topic`), was proposed at 20:54
+(`48f37d3`) and recorded as not adopted and the user's call. It was
+adopted nine minutes later, at 21:03 (`8a18962`), before any run.
+Amendment 3, V8 (`crf_gzs_topic`), was committed on 20 October at 01:50
+(`47e2310`) on the CPU probe's first six subfields, graphene pending,
+and kept the threshold at 0.9. The bundle rebuilt from `47e2310` was
+ready at 02:02, and the screen was pushed at 02:35 without waiting for
+graphene. Graphene's probe and the seven-subfield reading were committed
+at 07:01 (`dcbff64`). On graphene the sentence filter's 0.9 lexicon
+filled to −2.86, so that over the seven subfields it averaged +1.1 and
+reached −2.9, where amendment 3 had priced it on six at +1.8 on average
+and never below −0.3. The seven-subfield reading changed neither filter
+nor threshold.
+
+The protocol required, before any number was used, identical smoke
+repeats, each job's teachers equal to week 10's `crf_m0`, `_m100` and
+`_m200` on their subfield, the bundle's corpora matching the reports'
+SHA-256 (checked again by the runner), and every run recording
+`silver_filter` and `names`. Every teacher of every job equalled the
+stored CRF-head run of its seed in `w12c` (version 4), in `w12e` and in
+`w12b:mrm6`, and on MaterioMiner every teacher of `w12d:mrm6` equalled
+the stored week-5 run of its seed on its paper. From the resume fix on,
+every run recorded its own corpus's SHA-256. At the reset of 24 October
+the bundle's `BUNDLE.json` named `3ac85a8`, the SOFC corpus's SHA-256
+(1b6a00d2) and the seven topic corpora, and `ner_baseline.py`,
+`ner_consistency.py` and `kaggle/` were unchanged since, so the decision
+batches ran from it.
+
+On a tiny model and the tests' toy corpora, the code of 18 October 11:00
+(`40631ce`) repeated the week-11 code's runs byte for byte apart from
+`runtime_sec` for the CRF head, MR3, multi-task MR3, self-training and
+MuLMS's pool and held-out runs, and its silver-name runs differed only
+by the added `silver_filter` field, as recorded at 11:05 (`bd20cec`). On
+19 October the XLA port's CPU path repeated the pre-port files byte for
+byte apart from `runtime_sec` on every tiny-model option. With amendment
+2's feature, the paths it did not touch (`crf`, `mr`, `mt_mr`, `st3`,
+`mrs`, the MuLMS pool and unused-corpus runs) were byte-identical to
+`77c37be` on the tiny corpora. With the resume fix of 20 October
+(`3ac85a8`), the files of the other protocols were byte-identical to
+`77c37be` in 8 configurations, and a tiny end-to-end run showed two
+subfields extending one file, a repeat resuming and another corpus
+refused.
+
+The screen was pushed on 20 October at 02:35 from bundle `47e2310`,
+`w12a` to `ner-gpu-jobs-d` (version 7) and `w12c` to `ner-gpu-jobs-c`
+(version 3). Between 03:56 and 04:10 both failed on the resume check: a
+results file stored one corpus SHA-256, each held-out subfield had its
+own topic corpus, and the second subfield's job refused to resume a file
+"from another corpus". `w12c` completed in 59 minutes with 4 of its 14
+topic jobs done and 10 failed in 0.01 minutes; `w12a` lost every names
+job but the first of each variant, while its `crf_mr6` jobs ran. `w12c`
+had also put each feature variant's jobs in both lanes, which would have
+had the lanes write the same files at once. The fix, committed at 04:09
+(`3ac85a8`), made a run with `--subfields` record its own corpus, kept
+other subfields' runs in a file, resumed a subfield's run only from the
+same corpus and put one variant per lane. The bundle was rebuilt from
+`3ac85a8` at 04:20, and `w12c` was pushed again at 04:49 (version 4).
+The first `w12a` session ended at 05:03 (137.6 minutes, 2.3 quota hours)
+with the smoke repeat, electrolysis for V1, V2, V4 and V6 (29–38 minutes
+each) and the three `crf_mr6` jobs, and was pulled. Of its files only
+the three `crf_mr6` files were collected, at 08:06; V1, V2, V4 and V6
+ran again on all seven subfields, electrolysis included, as `w12e`.
+Electrolysis runs of V4, MR6 + names, on the screen's seeds had thus
+been pulled, though not collected or recorded, before the criterion was
+revised at 09:14.
+
+`w12e` was pushed at 05:03 to `ner-gpu-jobs-d` (version 8) before the
+quota was checked against the job times: it needed about 8.1 hours and
+`w12c` 3.1, against 9.14 hours left in the week, and the notes expected
+Kaggle to stop a session when the quota ran out and keep none of its
+outputs. The user was asked to cancel version 8, and the plan, committed
+at 05:06 (`9e9d906`), split the names variants into `w12f` (V1 and V2),
+to run in its place, and `w12g` (V4 and V6), to run after the reset of
+24 October with the decision batch. At 08:10 the quota left 2.9 hours,
+the notes recorded that cancelling no longer changed the plan, and
+`w12e` was to run after the reset. The week-13 protocol, committed at
+09:14, also put `w12e` after the reset, beside `w13a`. `w12e` was not
+cancelled and `w12f` was never pushed: the next sessions on either
+kernel were those of 24 October, kernel d's version 9 and kernel c's
+version 5. Kaggle did not stop the session: the quota read 43.99 hours
+used at 10:10, 45.25 at 11:25 with the session running, and 46.23 of 45
+at 13:23, when `w12e` completed (440 minutes, 28 jobs). The 1.23-hour
+overrun was not carried into the next week. V4's screen result was
+therefore recorded on 20 October at 13:35 (`5f844bd`), before the
+amendments of 13:53 (`5f7f827`) and 18:42 (`de62446`); under the plans
+of 05:03, 08:10 and 09:14 it would have come after the reset of 24
+October.
+
+The reset of 24 October reached the session at 12:16, 12 hours late,
+because the container had restarted. `w12b:mrm6`, pushed at 12:22
+(`ner-gpu-jobs-d`, version 9), failed without a trace at 13:44, after 82
+minutes: status ERROR, an empty log, no manifest and no outputs, the
+API's failure message empty, about 1.4 GPU hours charged. It was pushed
+again unchanged at 13:49 (version 10), with its live log kept every 20
+minutes, and completed at 18:09 (259.8 minutes). `w12d:mrm6`, pushed at
+18:10 (version 11), still had an empty live log at 20:05 and was taken
+to have hung before its setup. Version 11 ended in ERROR at 20:11 with
+an empty log and no manifest; the quota then read 12.05 hours used, 1.8
+fewer than at 20:04, so its hours were not charged. It was pushed again
+at 20:12 (version 12) and completed on 25 October at 00:55 (276.1
+minutes).
+
+A session note headed 20:25 on 24 October, committed at 20:18
+(`2c2409d`) and on GitHub at 20:18:40, before `w12d:mrm6`'s results,
+worked out what D5 needed. V4's 10-seed MuLMS units against the CRF head
+were +2.39, +1.75, +2.94, −2.76, +6.20, +12.16 and −0.40 (mean +3.18,
+standard deviation 4.84). With the four MaterioMiner papers spread as
+MR3's were there (standard deviation 0.8), the pooled 95% interval
+cleared 0 when the analogue's mean gain over the CRF head was about +1.6
+or more: at +1.77 the 11 units gave +2.67 [+0.09, +5.25], at +1.27,
++2.49 [−0.13, +5.11]. The note added that the decision was the
+protocol's, whatever these scenarios said; the analogue gained +4.27.
+
+The protocol of 18 October stated that, with the between-subfield
+standard deviations of weeks 10 and 11 (2.6 and 3.1 points), D1 would
+pass only for a mean gain of about 2.4–2.9 points or more. The screen's
+reading as committed at 13:35 on 20 October applied that bar: D2 needed
+a mean gain near 2.4–2.9, more than the screen's 1.45, while D1's +3.16
+was above it. At 18:42 (`de62446`) the reading was redone with V4's own
+spread: against the CRF head the standard deviation was 5.5 (sofc
++12.85, poly −3.72, steel −2.00), so the half-width over 7 subfields was
+5.1 and D1 needed a mean near 5, and D2 (standard deviation 3.0,
+half-width 2.8) a mean near 3, bars that the screen's +3.16 and +1.45
+did not reach. The same reading put D5's half-width near 2.9 for a
+pooled mean near 3.0 ([+0.1, +5.9] with the screen's values), with MR3's
+spread on the four MaterioMiner papers (0.8) as a proxy.
+
+**Week 13.** On 24 October, before `w13a` was pushed, the stored T4 runs
+showed SOFC-Exp's article folds costing more than the protocol's 4.5 and
+7.5 lane hours: the CRF head had taken 2.9 hours for its 10 seeds on the
+5 folds, and on the official split MR3 took 3.1 times the CRF head's run
+time and multi-task MR3 4.3 times, so about 8.8 and 12.5 lane hours. One
+session of both lanes would have put the multi-task lane past the
+runner's 10-hour deadline, after which no job starts and a running job
+is stopped 1.25 hours later. `w13a` was therefore split: it ran MR3 over
+both lanes, and a new batch, `w13c`, ran multi-task MR3, one after the
+other on `ner-gpu-jobs-c`, with the runs, their files and the analysis
+unchanged. The split was committed at 12:23:09 (`d6db00b`), in the
+minute `w13a` was pushed (version 5); its note is headed 12:30. `w13a`
+took 293.4 minutes and `w13c` 549.1, its multi-task jobs about 112
+minutes each instead of the 75 estimated. In `w13b` (`ner-gpu-jobs-d`,
+version 13; pushed on 25 October at 01:01, done at 11:24 after 619.8
+minutes), in both lanes every fold's three teachers equalled the stored
+week-8 CRF-head runs of their seeds, and the two lanes harvested the
+same silver mentions per fold (21,376–48,943, 4,835–9,290 distinct,
+20.3–33.4% of the fold's unseen test names). Lane 0's job took 615.2
+minutes and lane 1's 591.6, inside the 11.25-hour stop, so no fold was
+cut; amendment 13.4 had costed the batch at about 7.5 hours and the push
+note at about 8.8.
+
+**Week 14.** The protocol of 29 October 12:07 (`2886267`) ran `w14b`
+after the reset of 31 October. With 6.5 of the week's 45 hours unused
+after `w14a` and both kernels idle, `w14b` was pushed on 29 October at
+18:00 (`ner-gpu-jobs-d`, version 14) from the bundle of `8919928`, the
+notes recording a change of schedule only. It ran from 18:00 to 22:20
+(4.3 session hours). In `w14b` every lane's teachers equalled week 10's
+on their subfield, and every run carried its mixed corpus's SHA-256 and
+the mention filter. In `w14c` (31 October, 00:14 to about 09:55, 9.7
+session hours) each variant's teachers equalled week 10's on their
+subfield, and every run carried its topic corpus's SHA-256, the mention
+filter and the setting it changed. The three new options defaulted to
+the earlier behaviour byte for byte on the tiny model.
+
+The protocol listed what it would not run, and why: V4 on the multi-task
+model (MaterioMiner only, the names typed at both levels, no second
+corpus to repeat it on); the copy control on SOFC-Exp's article folds
+(about 13 lane hours on a corpus where the method does not pass); the
+names as a match feature (screened in week 12 as V7 and V8, below
+mention replacement); and the names as a dictionary. The names on the
+multi-task model were run after the write-up of D1 to D8, in the
+follow-up of 31 October (D9, D10). MR6 was not run on SOFC-Exp's folds.
+
+For a failing D8 the protocol fixed this reading: "A fail with the mixed
+variant above the CRF head (reported) means a large materials corpus of
+other topics does as well, a simpler method the paper then states, with
+13.2 as its decision on the topic corpora and this as the reported
+comparison; a fail with neither above the other means 7 units cannot
+separate them, which the paper says". At 12:32 (`102144c`), before any
+run of `w14b`, the protocol added the mixed corpora's coverage of the
+unseen test names (49–70%, against the topic corpora's 55–81%) and the
+sentence "So the mixed corpora hold most of what the topic corpora hold,
+which is what 14.2 tests: whether the names the topic adds, and the
+contexts they come in, are what the gain needs". D8 failed, −0.18
+[−2.01, +1.65], with the mixed variant at +3.38 [−0.89, +7.64] against
+the CRF head, and the outcome note of 22:38 read it by the first
+reading: "the topic's text is not what the gain needs; a large unlabeled
+materials corpus of other topics gives the same names-and-copies gain".
+Section 5.3 now frames D8 thus: "since the mixed corpus holds most of
+the same names, D8 tests the names only the topic corpus holds, not an
+off-topic source (a framing added after the result)". That framing
+entered the paper in review round 6 of 31 October, which cited the
+protocol's sentence of 12:32.
+
+**Week 17.** `smokebd`, a repeat of week 9's stored seed-0 `crf_mt_mr`
+run on paper s11340, was identical on both heads (54.05 fine-grained,
+62.29 coarse-grained, 887 augmented sentences, the same predictions), so
+the week-17 code had left the plain multi-task and mention-replacement
+paths as they were. Every names job's three teachers equalled the stored
+`crf_mt` runs' test F1, validation F1 and best epoch on both heads. Two
+fixes were made before any week-17 number was read: `collect --merge`
+refused the files because each session's copy carried the means of its
+own runs (`test_f1_mean` and the like), which are now recomputed with
+the summary; and the `week17` analysis looked for the multi-task
+reference's seed-0 file under a tag it does not carry (`crf_mt.json`),
+so its section came out empty on the first run, and it now uses
+`seed_family`, as `ner_mentions` does. The merge then united the two
+sessions' student files, four papers per file, leaving the committed
+`w17b` runs unchanged. The note of 1 November 00:30 first gave 49–65% as
+the single-task lexicons' share of a paper's unseen test names; that was
+the corpus's coverage, and the note was corrected on 1 November to
+8.4–18.6% fine-grained and 15.5–23.3% coarse-grained.
+
+**The odds stated in the methods plan.** The plan of 19 October 17:08
+(`09ac262`) put D1 on MuLMS at about 0.45, D2 at about 0.3, the
+MaterioMiner analogue given a MuLMS pass at about 0.6 and a methods
+paper at about 0.35–0.4. On 20 October at 08:13 (`25690bc`), after the
+CPU probe and the screen's first half and before the criterion was
+revised at 09:14, it put D1 for one of V1, V2, V4 and V6 at about 0.3,
+D2 at about 0.15 and a methods paper at about 0.2. The revision of 09:14
+(`808ff4b`) changed no odds. At 13:35 (`5f844bd`), with V4 the screen's
+winner, the plan put D1 at about 0.5, D2 at about 0.25, the analogue
+given D1 at about 0.5 and a methods paper through the route at about
+0.25, and at 13:53 (`5f7f827`) it added a pass on SOFC-Exp's folds given
+D1 at about 0.3. At 18:42 (`de62446`) those figures were replaced: D1
+about 0.3, D2 about 0.15, the analogue against the CRF head about 0.5,
+D5 about 0.4, a methods paper through the route about 0.3, and
+SOFC-Exp's folds about 0.3 given a pass of D1 or D5. The current text
+keeps the figures of 19 October, of 08:13 and of 18:42; those of 13:35
+and 13:53 survive only in the history. On 24 October at 18:15
+(`89b7261`), after D1 and D2 had failed, the plan put D5 at about 0.5,
+passing if the analogue gained about +2 or more, and a methods paper
+through the names method at about 0.35. After D5 passed (25 October
+01:11, `3432988`) it put a pass on SOFC-Exp's folds at about 0.3, and
+after D7 failed (29 October 17:38, `8919928`) a pass of D8 at about 0.3.
+
+**Sessions that failed, hung, lost jobs or were pushed again (weeks 10
+to 18).**
+
+1. 20 October, `w12a`, `ner-gpu-jobs-d` version 7 (pushed 02:35, bundle
+   `47e2310`): lost every names job but the first of each variant to the
+   resume check, and ended at 05:03 after 137.6 minutes; its names jobs
+   were pushed again as `w12e`.
+2. 20 October, `w12c`, `ner-gpu-jobs-c` version 3 (pushed 02:35, bundle
+   `47e2310`): completed in 59 minutes with 4 of its 14 topic jobs done
+   and 10 failed in 0.01 minutes; pushed again at 04:49 as version 4
+   from bundle `3ac85a8`, which ran all 15 jobs by 08:06 (196.7
+   minutes).
+3. 20 October, `w12e`, `ner-gpu-jobs-d` version 8 (pushed 05:03, bundle
+   `3ac85a8`): the second push of `w12a`'s names jobs, made before the
+   quota was checked; the user was asked to cancel it, it was not
+   cancelled, and it completed at 13:23 (440 minutes) at 46.23 of the
+   week's 45 quota hours.
+4. 24 October, `w12b:mrm6`, `ner-gpu-jobs-d` version 9 (pushed 12:22):
+   failed without a trace at 13:44 after 82 minutes, about 1.4 GPU hours
+   charged; pushed again unchanged at 13:49 as version 10, which
+   completed at 18:09.
+5. 24 October, `w12d:mrm6`, `ner-gpu-jobs-d` version 11 (pushed 18:10):
+   hung before its setup and ended in ERROR at 20:11, uncharged; pushed
+   again at 20:12 as version 12, which completed on 25 October at 00:55.
+
+Every other GPU session of weeks 10 to 18 was pushed once and completed
+its jobs: on `ner-gpu-jobs-d`, versions 4 (`w10a`), 5 (`w11a`), 6
+(`w11b`), 13 (`w13b`), 14 (`w14b`), 15 (`w17a`) and 16 (`w18a`); on
+`ner-gpu-jobs-c`, versions 5 (`w13a`), 6 (`w13c`), 7 (`w14a`), 8
+(`w14c`), 9 (`w15a`) and 10 (`w17b`). The list leaves out the CPU probe,
+whose container restarted at 02:20, 03:10 and 04:00 on 20 October,
+killing the graphene probe each time, and the six TPU sessions of 19
+October, to none of which a TPU was attached.

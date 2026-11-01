@@ -270,7 +270,17 @@ exist, and the screen had reported three of its seven variants, not MR6
 + names. The gate was re-imposed at 13:53, after the screen had chosen
 MR6 + names, and lifted again at 18:42 (Supplementary Note 1). Under the
 original criterion MR6 + names has no claim, since D1 failed, and D3 and
-D4 would not have run.
+D4 would not have run. Two timings bear on this (Supplementary Note 11):
+the screen's first session had run MR6 + names on one subfield,
+electrolysis, and was pulled at 05:03, before the revision, though those
+runs were not collected or recorded and were run again; and the screen's
+result for MR6 + names came at 13:35, before the amendments of 13:53 and
+18:42, only because a batch meant to wait for the quota's reset on 24
+October was not cancelled and ran past the week's quota. Earlier, on 18
+October, the plan of 04:52 had made week 11's MaterioMiner decisions the
+gate of the route (topic corpora only if one passed, otherwise the
+evaluation paper); the week-12 protocol replaced that gate at 11:00 with
+a coverage check, before those decisions ran and failed.
 
 Second, D5's protocol named MuLMS's decision seeds as the units' source
 and, in the same paragraph, "each unit its 10-seed mean". The analysis as
@@ -527,12 +537,16 @@ sentences, drawn equally from the six other subfields' corpora and built
 the same way, holds 49–70% of the subfield's unseen test names against
 the topic corpus's 55–81%. MR6 + names with the topic's own corpus scores
 51.73 against 51.91 with the mixed one, −0.18 [−2.01, +1.65] paired by
-subfield, in a comparison that detects 2.5 points; since the mixed corpus
-holds most of the same names, D8 tests the names only the topic corpus
-holds, not an off-topic source (a framing added after the result).
-Against the CRF head the mixed-corpus variant gains +3.38 [−0.89, +7.64],
-against MR3 +1.10 [−0.76, +2.97] and against MR6 +0.70 [−1.19, +2.58]
-(pre-specified); its own lexicon holds 18.3% of the unseen test names.
+subfield, in a comparison that detects 2.5 points. The mixed-corpus
+variant gains +3.38 [−0.89, +7.64] over the CRF head, +1.10 [−0.76,
++2.97] over MR3 and +0.70 [−1.19, +2.58] over MR6 (pre-specified), its
+own lexicon holding 18.3% of the unseen test names. The protocol fixed
+the reading of a fail with the mixed variant above the CRF head: a large
+materials corpus of other topics does as well, a simpler method. That
+variant's gain over the CRF head is above 0 on its point estimate only,
+and the mixed corpora hold most of the topic corpora's names, so a
+narrower reading, added after the result, is that D8 tests the names only
+the topic corpus holds, not an off-topic source.
 
 **Settings (pre-specified, 3 seeds).** Five ablations, of corpus size
 (10,000 and 20,000 sentences), threshold (0.7), agreement (2 of 3
