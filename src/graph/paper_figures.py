@@ -677,13 +677,15 @@ def figure9(rows, path):
         bands.append((g, start, y - 1))
         y += 0.5
     for g, start, end in bands:
-        ax.axhspan(start - 0.5, end + 0.5, color='#f2f2f2' if bands.index((g, start, end)) % 2 else 'white',
-                   zorder=0)
-        ax.text(0.01, start, g, fontsize=8.5, va='center', ha='left', style='italic',
-                transform=ax.get_yaxis_transform(), color='#333333')
+        shade = '#f2f2f2' if bands.index((g, start, end)) % 2 else 'white'
+        ax.axhspan(start - 0.5, end + 0.5, color=shade, zorder=0)
+        ax.text(0.01, start, g, fontsize=8.5, va='center', ha='left', style='italic', zorder=4,
+                transform=ax.get_yaxis_transform(), color='#333333',      # over the lines
+                bbox={'boxstyle': 'square,pad=0.15', 'fc': shade, 'ec': 'none'})
     pooled = [r for r in rows if r[0].startswith('MuLMS') or 'fine-grained' in r[0]]
-    for k, (values, color, name) in enumerate(((lambda rs: [r[2] for r in rs], 'tab:red', 'CRF head'),
-                                               (lambda rs: [r[3] for r in rs], 'tab:blue', 'MR6'))):
+    for k, (values, color, name, decision) in enumerate((
+            (lambda rs: [r[2] for r in rs], 'tab:red', 'CRF head', 'D5\u2032'),
+            (lambda rs: [r[3] for r in rs], 'tab:blue', 'MR6', 'D7'))):
         v = values(pooled)
         if len(v) == 11:
             m, lo, hi = mean_ci(v)
@@ -691,8 +693,10 @@ def figure9(rows, path):
             ax.fill_betweenx([top_y, bottom_y], lo, hi, color=color, alpha=0.08, zorder=1, lw=0)
             ax.vlines(m, top_y, bottom_y, color=color, lw=1, ls='--', zorder=2)
             ax.text(0.99, 0.995 - 0.04 * k,
-                    f'pooled, 11 units, vs {name}: {m:+.2f} [{lo:+.2f}, {hi:+.2f}]'.replace('-', '\u2212'),
-                    fontsize=8.5, color=color, ha='right', va='top', transform=ax.transAxes)
+                    (f'{decision} (pooled) vs {name}: '
+                     f'{m:+.2f} [{lo:+.2f}, {hi:+.2f}]').replace('-', '\u2212'),
+                    fontsize=8.5, color=color, ha='right', va='top', transform=ax.transAxes,
+                    zorder=5, bbox={'boxstyle': 'square,pad=0.15', 'fc': 'white', 'ec': 'none'})
     ax.axvline(0, color='black', lw=0.8, zorder=2)
     ax.set_yticks(ticks, labels, fontsize=9)
     ax.set_ylim(-0.7, y + 0.8)
@@ -717,14 +721,15 @@ def figure8(path):
     ax.axis('off')
     top, bottom, h = 7.4, 1.4, 3.2
     boxes = {  # name: (x, y, w, h, text, face)
-        'gold': (0.2, top, 2.6, h, 'Labeled training\nsentences\n(3 papers, or 340\nMuLMS sentences\nof other subfields)',
+        'gold': (0.2, top, 2.6, h, 'Labeled\ntraining sentences\n(3 papers; 340\nMuLMS sentences;\nor 36 SOFC-Exp\narticles)',
                  '#dbe9f6'),
-        'teachers': (3.1, top, 2.6, h, '3 CRF teachers\n(seeds 0, 100, 200;\nthe reference\'s\nown runs)', '#dbe9f6'),
-        'corpus': (6.0, top, 2.6, h, 'Unlabeled corpus\n40,000 sentences\n(the held-out topic,\nor a mix of others)',
+        'teachers': (3.1, top, 2.6, h, '3 CRF teachers\ntrained on them\n(seeds 0, 100\nand 200: the\nreference\'s runs)',
+                     '#dbe9f6'),
+        'corpus': (6.0, top, 2.6, h, 'Unlabeled corpus\nthe teachers tag:\n40,000 sentences\n(the held-out\ntopic, or a mix\nof others)',
                    '#fff2cc'),
-        'filter': (8.9, top, 2.6, h, 'Mention filter\nall 3 teachers agree\non span and type;\nmarginals \u2265 0.9',
+        'filter': (8.9, top, 2.6, h, 'Mention filter:\nall 3 teachers\nagree on span\nand type, every\nmarginal \u2265 0.9',
                    '#fff2cc'),
-        'lexicon': (11.8, top, 2.6, h, 'Lexicon\n4k to 13k names\nper subfield', '#fff2cc'),
+        'lexicon': (11.8, top, 2.6, h, 'Lexicon:\n4k to 13k names\nper MuLMS subfield', '#fff2cc'),
         'pool': (1.5, bottom, 3.6, h, 'Replacement pool\ntraining mentions\n(601 to 1,309)\n+ the lexicon\n(at least 92% of entries)',
                  '#e2f0d9'),
         'mr': (5.7, bottom, 3.6, h, 'Mention replacement\n6 copies per sentence;\neach mention swapped\n(p = 0.5) for a\nsame-type name',
@@ -745,8 +750,8 @@ def figure8(path):
         if text:
             ax.text((start[0] + end[0]) / 2, ya + ha + 0.2, text, ha='center', va='bottom',
                     fontsize=7, color='#333333')
-    arrow('gold', 'teachers', 'train')
-    arrow('teachers', 'corpus', 'tag')
+    arrow('gold', 'teachers')
+    arrow('teachers', 'corpus')
     arrow('corpus', 'filter')
     arrow('filter', 'lexicon')
     arrow('pool', 'mr')

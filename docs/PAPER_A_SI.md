@@ -31,18 +31,20 @@ and the amendments.
 | D3, D4 (week 12) | 18 October 11:00 (`40631ce`): the winner's MaterioMiner analogue decided against the CRF head per granularity, to run only if D1 passed; 20 October 00:51 (`ce0f592`): the analogue's batches, with its comparisons against MR3 and the votes pre-specified; the gate lifted at 09:14 (`808ff4b`), restored at 13:53 (`5f7f827`), lifted again at 18:42 (`de62446`) | 24–25 October | 25 October (`3432988`) | — |
 | D5 (week 13) | 20 October 09:14 (`808ff4b`): the pooled decision over both corpora as a second route to the claim, "each unit its 10-seed mean", the stop rule lifted; amended three times the same day, before any decision run of the route: 09:25 (`e94f352`), the label-propagation rule's two MaterioMiner decisions and an SOFC-Exp comparison pre-specified after its MuLMS results (Supplementary Note 7); 13:53 (`5f7f827`), eighteen minutes after the screen chose MR6 + names, D6 added conditional on D1 and the analogue, which the morning's text ran whenever the screen had a winner, gated on D1; 18:42 (`de62446`), D6's condition widened to D1 or D5 and the analogue's morning condition restored, the gating recorded as a mistake | 24–25 October | 25 October (`3432988`) | the analysis took MuLMS's 10-seed means; the 7-seed reading is D5′ |
 | D6 (week 13) | 20 October 13:53 (`5f7f827`), conditional on D1; widened to D1 or D5 at 18:42 (`de62446`) | 25 October | 25 October | — |
-| D7, D8 (week 14) | 29 October 12:07 (`2886267`), two minutes after the first batch was pushed and five hours before its results | 29 October | 29 October | — |
+| D7, D8 (week 14) | 29 October 12:07 (`2886267`), two minutes after the first batch was pushed and five hours before its first result, after MR6 + names' own results on the same units | 29 October | 29 October | — |
 | ablations (week 14) | 29 October, as above | 31 October | 31 October | — |
 | the lexicon-membership analysis (week 15; post hoc, no decision) | 31 October 16:13 (`2c60f33`): the rebuild, its checks and the reading fixed before the run | 31 October (`w15a`) | 31 October | — |
 | D9, D10 (week 17; follow-up) | 31 October 19:15 (`f39447c`), after D1 to D8 had been written up (the lexicon split's results arrived 26 minutes later), a pass expected to be unlikely; the code 19:41 (`013f9ac`) | 31 October 19:55 to 1 November 00:40 (`w17a`, `w17b`) | 1 November | — |
-| companion, week 5: multi-task training against the CRF head on MaterioMiner's held-out papers, pre-specified without decision (fine-grained +3.72 [+0.57, +6.87]; the week's decisions were on the random splits) | 15 October 15:50 (`6f2dc11`) | 15 October | 15 October 23:20 (`1b30d82`) | — |
-| companion, week 7 part 1: label propagation within a document, six decisions on saved predictions | 16 October 11:46 (`cc73d37`) | saved predictions | 16 October 11:53 (`93966bb`) | 11:57 (`e41aa44`): a retyping comparison on SOFC-Exp, before its results |
-| companion, week 7 part 2a: recall calibration, a bias on the CRF head's emissions chosen on validation folds; five decisions, none passing (fine-grained −0.59 [−1.75, +0.57], coarse-grained +0.17 [−0.14, +0.48], SOFC-Exp −0.21 [−0.58, +0.17]) | 16 October 13:11 (`61c9520`) | 16 October (`w7a`) | 16 October 15:33 (`503f690`) | — |
-| companion, week 7 part 2b: MR3 against the CRF head on MaterioMiner's held-out papers, both passing (+2.77 [+1.51, +4.03] fine-grained, +1.28 [+0.06, +2.51] coarse-grained), and on SOFC-Exp's official split, failing (−0.29 [−1.04, +0.47]) | 16 October 14:39 (`494cac1`): a 3-seed screen, then 10 seeds | 16–17 October | 17 October 06:59 (`db7c78d`; the screen at 04:19, `7d55340`) | — |
-| companion, week 9: multi-task training with MR3 against the CRF head, pre-specified without decision (fine-grained +6.73 [+6.03, +7.43]; the decisions were against the multi-task model); MR3 on a MaterioMiner-sized SOFC-Exp, failing (+0.50 [−0.47, +1.46]) | 17 October 07:28 (`536cbe7`) | 17 October | 17 October 18:50 (`81134b7`) and 19:30 (`65c17b9`) | 12:30 (`fa69d9a`): part 1 runs from part 2's bundle, before any result |
+| companion, week 5: multi-task training against the CRF head on MaterioMiner's held-out papers, pre-specified without decision (fine-grained +3.72 [+0.57, +6.87]; multi-task training's own decision was on the random splits) | 15 October 15:50 (`6f2dc11`) | 15 October | 15 October 23:20 (`1b30d82`) | — |
+| companion, week 7 part 1: label propagation within a document, six decisions on saved predictions | 16 October 11:46 (`cc73d37`) | saved predictions | 16 October 11:53 (MaterioMiner, `93966bb`) and 13:54 (SOFC-Exp, `ceabb78`) | 11:57 (`e41aa44`): retyping made a decision on SOFC-Exp, after MaterioMiner's results and before SOFC-Exp's |
+| companion, week 7 part 2a: recall calibration, a bias on the CRF head's emissions chosen on validation folds; five decisions, none passing (fine-grained −0.59 [−1.75, +0.57], coarse-grained +0.17 [−0.14, +0.48], SOFC-Exp −0.21 [−0.58, +0.17] paired by seed) | 16 October 13:11 (`61c9520`) | 16 October (`w7a`) | 16 October 15:33 (`503f690`) | — |
+| companion, week 7 part 2b: MR3 against the CRF head on MaterioMiner's held-out papers, both passing (+2.77 [+1.51, +4.03] fine-grained, +1.28 [+0.06, +2.51] coarse-grained), and on SOFC-Exp's official split, failing (−0.29 [−1.04, +0.47] paired by seed) | 16 October 14:39 (`494cac1`): a 3-seed screen, then 10 seeds | 17 October (`w7c` 03:42–04:15, `w7d` 04:19–06:47) | 17 October 06:59 (`db7c78d`; the screen at 04:19, `7d55340`) | — |
+| companion, week 8 part 1: SOFC-Exp's random sentence splits and article folds, the CRF head's 86.27 and 82.79 of Section 1 (pre-specified without decision) | 16 October 17:24 (`c06fc5e`) | 17 October | 17 October 10:11 (`8cd8fba`) | — |
+| companion, week 9: multi-task training with MR3 against the CRF head, pre-specified without decision (fine-grained +6.73 [+6.03, +7.43]; its single-model decisions on MaterioMiner were against the multi-task model); MR3 on a MaterioMiner-sized SOFC-Exp, failing (+0.50 [−0.47, +1.46]) | 17 October 07:28 (`536cbe7`) | 17 October | 17 October 18:50 (`81134b7`) and 19:30 (`65c17b9`) | 12:30 (`fa69d9a`): part 1 runs from part 2's bundle, before any result |
 | companion: seen and unseen test names and the decomposition of the recall gap (post hoc, on saved predictions; no protocol) | — | saved predictions | MaterioMiner 16 October 17:00 (`3c06c11`); MuLMS and SOFC-Exp added with their runs | — |
 
-**Times.** All times are the commits' (UTC). When the pooled decision was
+**Times.** Protocol and result times are the commits' (UTC); push, pull
+and run times are the session notes'. When the pooled decision was
 added at 09:14 on 20 October, the screen's first half was recorded (MR6
 and the gazetteer variants, at 08:11) and its second half, with MR6 +
 names, was not (13:35); the 18:42 amendment followed the spread between
@@ -51,10 +53,23 @@ text's own written times differ from the commits': later by 6 to 53
 minutes in the 09:25, 09:47 and 13:53 commits of 20 October (which carry
 09:50 and 09:55, 10:40, and 14:00; the 09:47 commit recorded the
 label-propagation rule's results on SOFC-Exp's folds and MaterioMiner),
-earlier by four to five hours in the 18:42 one (14:00 and 14:30), and
+earlier by about four hours in the 18:42 one (14:30), and
 earlier by about six minutes in the week-17 protocol (written 19:10,
 committed 19:15:57). Week 16 was the companion paper's write-up and has no
 protocol.
+
+**Push times.** GitHub's public event feed, archived in
+`results/github_push_events.tsv` (`protocol_pushes.py`), records when
+each commit reached GitHub, independently of the commit times. Every
+protocol commit of Table S1 from 16 to 29 October whose push the feed
+holds reached GitHub 2 to 8 seconds after its commit time (for example
+`40631ce` at 11:01:00 on 18 October, `5f7f827` at 13:53:46 and `de62446`
+at 18:42:58 on 20 October, `2886267` at 12:07:41 on 29 October). The
+feed lacks the pushes of `ce0f592` and `808ff4b`, which later pushes
+show on GitHub by 01:37 and 09:25 on 20 October, and of the week-5
+protocol (on GitHub by 15:56 on 15 October). The feed held no event after
+30 October 11:23 when it was archived on 1 November, so the protocols of
+31 October and later are not yet confirmed by it.
 
 ## Supplementary Note 2: hyperparameters, compute and repeats
 
@@ -321,7 +336,7 @@ companion study's recall-calibrated bias on the CRF head's emissions
 (Table S1, week 7 part 2a), not matched to the names and not run on
 MuLMS, which gave −0.59 [−1.75, +0.57] fine-grained and +0.17 [−0.14,
 +0.48] coarse-grained on MaterioMiner and −0.21 [−0.58, +0.17] on
-SOFC-Exp, the entities it added being right 19–22% of the time, against
+SOFC-Exp, paired by seed, the entities it added being right 19–22% of the time, against
 the names' net rate of 30% above. It is the first thing to do (Section
 7).
 
