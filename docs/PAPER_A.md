@@ -835,10 +835,14 @@ F1 (Section 5.5).
 subfields hold about 8,000 labeled sentences that the 340-sentence
 regime leaves unused, since mention replacement's gains shrink with
 training size (dai2020analysis; torres2024augmentation). Two variants
-dismissed on 3 seeds deserve 10: self-training on the corpus's
-teacher-labeled sentences, the one variant of the screen whose interval
-against the CRF head cleared 0, and the lexicon as a gazetteer feature
-(Supplementary Note 7). A bias on the tags that begin an entity only, or
+dismissed on MuLMS on 3 seeds deserve 10 there: self-training on the
+corpus's teacher-labeled sentences, the one variant of the screen whose
+interval against the CRF head cleared 0, though its MaterioMiner
+analogue, the companion study's self-training on the fatigue corpus over
+10 seeds, is not shown to beat MR3 (−1.03 [−4.47, +2.41] fine-grained,
++0.28 [−1.46, +2.01] coarse-grained, and its votes fall below MR3's
+coarse-grained, −1.32 [−1.85, −0.80]; pre-specified before the screen); and
+the lexicon as a gazetteer feature (Supplementary Note 7). A bias on the tags that begin an entity only, or
 one per entity type, might match the three subfields that one bias on
 every tag could not, since past D = 2.5 that bias lengthens and merges
 spans (Section 5.4). And the
