@@ -5518,17 +5518,51 @@ ones, against 8.4 to 18.6% and 15.5 to 23.3% for the single-task lexicons
 (lower in 7 of the 8 paper–granularity cells). Cost: a names job 82.5 to 122.7 minutes (mean 99.7: three
 teachers, their tagging of 40,000 sentences with two heads, 10 students),
 10.0 minutes per student against the control's 6.9 and the CRF head's
-1.6. The detectable differences were 1.3 points fine-grained and 2.1
-coarse-grained (paper A, Appendix E), tighter than the 3.4 to 3.8 and 1.4
-to 2.4 expected, because the four papers agree in sign. So the negative
+1.1 (fine-grained) to 1.3 (coarse-grained) on these papers. The
+detectable differences were 1.3 points fine-grained, tighter than the 3.4
+to 3.8 expected because the four papers' differences lie close together
+(0.16 to 1.62, SD 0.6), and 2.1 coarse-grained, within the 1.4 to 2.4
+expected (paper A, Appendix E; the reason first written here, that the
+papers agree in sign, was wrong and corrected on 1 November). So the negative
 result extends to the strongest base, with the caveat that this base's
-filter gives the names a little less to add; no decision changes, and the names
+filter's lexicons hold fewer unseen names (pooled 7.5% against 9.6%
+fine-grained, 12.1% against 18.3% coarse-grained), though whether that
+lowered the increment is not known; no decision changes, and the names
 route's eight decisions become ten, three passing. Paper A updated on 1
 November (a Section 5.7 with its own table, Table 2's two post-review
 rows, Appendices A, B and E, the Limitations, the decision counts; its
 tables renumbered in order of appearance: the lexicon split is now Table
 6, the per-type table 7, the strongest base 8 and the week-12 screen 9)
 and sent to a final review round.
+
+*Paper A, review round 7 (1 November, after the update above).* Three
+reviews of the updated draft: a number audit (5 blocking, 7 should-fix:
+the stale chance count of 8 decisions, the week-17 unseen-name trade
+mislabelled post hoc instead of reported, the wrong reason for D9's
+narrow interval, best epochs counted from 0, the code commit at 19:41
+not 19:40), a journal referee (major revision: length, an abstract over
+200 words that did not mark D7 as the pre-registered test or the
+criterion as adopted mid-study, internal vocabulary, the follow-up read
+as journal peer review) and a consistency check (a reversed sign for
+D8 in Section 1, the Bonferroni reading of a post hoc comparison, the
+seed bases of the decomposition, intervals read as no effect). Every
+finding was a wording or labelling fix; no number in a results file and
+no verdict changed. Revised the same day: a 199-word abstract and a
+title naming named-entity recognition; Section 1 rewritten with every
+term defined at first use; Section 3's disclosure shortened with the
+minute-level record moved to Appendix A; "the recipe" renamed MR6 +
+names throughout; the week-17 experiment labelled a follow-up (the
+internal reviews are named as the AI assistant's in the Ethics
+statement); Section 5.7 rewritten (the sign-flip floor of 0.125 for four
+units, the coverage drop pooled, whether it lowered the increment not
+known, the post hoc seen-name increment, the cost per student shared and
+charged to one); the count stated over eighteen decisions (adding
+13.3a and 13.3b, 0.45 expected by chance); Section 5.6's table moved to
+Appendix F (tables now 1–8 in order, then A1, E1, F1: the lexicon split
+6, the follow-up 7, the screen 8); Figures 1–3 fixed (the legend in the
+paper's system names, a clipped box, bands only across the 11 units);
+ChemDataExtractor and Bouthillier et al. cited; the draft notes moved to
+`docs/PAPER_A_NOTES.md`. A further round reviews the revision.
 
 ### Week 17 protocol: the harvested names on the strongest base (fixed before any run, 31 October, 19:10 UTC)
 

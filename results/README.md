@@ -500,5 +500,5 @@ levels 53.95/52.99 and 61.25/60.40; the two-head filter's lexicons hold
 6.5–16.3% (fine) and 6.7–24.6% (coarse) of a paper's unseen test names
 (`docs/tables/table11_week17.md`; the unseen-name trade in
 `gpu/ner_mentions.json`, `chain`; the detectable differences in
-`gpu/ner_robustness.json`). Both sessions' repeats (`smokebc`, `smokebd`)
-identical to the stored runs; the teachers equal the stored `crf_mt` runs.
+`gpu/ner_robustness.json`). The `w17a` session's repeats (`smokebc`,
+`smokebd`) identical to the stored runs (`w17b` ran none); the teachers equal the stored `crf_mt` runs.
