@@ -1868,3 +1868,15 @@ def test_week14_bullet(tmp_path):
             "(15.0% of the unseen names); the silver share capped at 0.5 +0.20 [-0.80, +1.20].")\
         in bullet
     assert bullet.endswith('.')
+
+
+def test_week18_note():
+    """The week-18 bullet: the D = 0 check, the matched biases with the flagged subfields, both
+    decisions with their verdicts and the pre-specified comparisons; '' without the file."""
+    from test_paper_tables import _matched
+    assert rr.week18_note({}) == ''
+    note = rr.week18_note(_matched())
+    assert note.startswith('* NER week 18') and note.endswith('\n')
+    assert '49 of 49 runs equal' in note and 'from +1.25 to +5.00 (flagged: sofc)' in note
+    assert '+4.00 [+1.00, +7.00], passes (decision 18.1)' in note
+    assert '+0.30 [-2.00, +2.60], no (decision 18.2)' in note

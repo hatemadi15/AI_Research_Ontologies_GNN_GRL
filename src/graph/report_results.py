@@ -1154,7 +1154,8 @@ def ner_notes(res):
                                    "the MaterioMiner analogue of the screen's winner, 10 seeds",
                                    week='12', names=WEEK7_SYSTEM_NAMES)
     return (note + sofc_note(analysis) + mulms_note(analysis) + week13_note(analysis)
-            + week14_note(analysis) + week17_note(analysis))
+            + week14_note(analysis) + week17_note(analysis)
+            + week18_note(res.get(GPU_PREFIX + WEEK18_FILE) or {}))
 
 
 WEEK13_CORPORA = {'mulms': "MuLMS's 7 held-out subfields",
@@ -1272,6 +1273,38 @@ def week17_note(analysis):
                  f"{delta_cell(e['control']['minus_crf_mt_mr']['micro'])} and the multi-task model "
                  f"{delta_cell(e['control']['minus_crf_mt']['micro'])} (reported)")
     return line + '\n'
+
+
+WEEK18_FILE = 'ner_recall_matched.json'
+
+
+def week18_note(matched):
+    """The week-18 bullet (ROADMAP §4, the week-18 protocol) from ner_recall_matched.json ('' without
+    its decisions): MR6 on MuLMS's held-out subfields with a bias on the entity emissions, matched
+    per subfield to the names' pooled recall; the names against it at the matched bias, decisions
+    18.1 (recall on the unseen names the lexicon holds) and 18.2 (micro F1), and the pre-specified
+    comparisons."""
+    d = matched.get('decisions')
+    if not d:
+        return ''
+    pre, checks = matched['prespecified'], matched['checks']
+    stars = [v['d_star'] for v in matched['per_unit'].values()]
+    flagged = [u for u, v in matched['per_unit'].items() if v['flagged']]
+    same = checks['n_runs_checked'] - len(checks['d0_differences'])
+    return ("* NER week 18 (the names against a recall-matched control: MR6 on MuLMS's 7 held-out "
+            "subfields at seeds 300 to 900 with a bias on the entity emissions, matched per subfield "
+            "to the names' pooled recall; post review). At bias 0, "
+            f"{same} of {checks['n_runs_checked']} runs equal their stored `crf_mr6` runs; the "
+            f"matched bias runs from {min(stars):+.2f} to {max(stars):+.2f}"
+            f"{' (flagged: ' + ', '.join(flagged) + ')' if flagged else ''}. The names against the "
+            f"control at it: recall on the unseen names the lexicon holds {delta_cell(d['18.1'])}, "
+            f"{d['18.1']['verdict']} (decision 18.1); micro F1 {delta_cell(d['18.2'])}, "
+            f"{d['18.2']['verdict']} (decision 18.2); pre-specified, precision "
+            f"{delta_cell(pre['precision'])}, on the unseen names recall "
+            f"{delta_cell(pre['unseen_recall'])}, precision {delta_cell(pre['unseen_precision'])} "
+            f"and F1 {delta_cell(pre['unseen_f1'])}, recall on the unseen names not in the lexicon "
+            f"{delta_cell(pre['recall_out'])}, in minus out {delta_cell(pre['in_minus_out'])}, and "
+            f"the bias's own F1 change {delta_cell(pre['bias_f1_change'])}\n")
 
 
 def week14_note(analysis):

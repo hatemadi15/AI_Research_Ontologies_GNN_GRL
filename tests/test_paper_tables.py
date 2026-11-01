@@ -303,3 +303,32 @@ def test_table11_week17():
     lines = [l for l in text.split('\n') if l.startswith('| fine')]
     assert len(lines) == 2 and 'multi-task + MR6 + names' in lines[0] and 'the control' in lines[1]
     assert '+0.50 [−1.00, +2.00]' in lines[0] and '+7.20 [+3.50, +10.90]' in lines[1]
+
+
+def _matched():
+    def paired(per_unit, mean, lo, hi, verdict=None):
+        out = {'per_unit': per_unit, 'mean_diff': mean, 'ci95': [lo, hi], 'n_units': 2,
+               'n_positive': 2, 'above_0': lo > 0}
+        return out | ({'verdict': verdict} if verdict else {})
+    keys = ('precision', 'unseen_recall', 'unseen_precision', 'unseen_f1', 'recall_out',
+            'in_minus_out', 'bias_f1_change')
+    return {'decisions': {'18.1': paired({'semi': 5.0, 'sofc': 3.0}, 4.0, 1.0, 7.0, 'passes'),
+                          '18.2': paired({'semi': 1.0, 'sofc': -0.4}, 0.3, -2.0, 2.6, 'no')},
+            'prespecified': {k: paired({'semi': 0.5, 'sofc': 0.1}, 0.3, -0.2, 0.8) for k in keys},
+            'per_unit': {'semi': {'target_recall': 31.8, 'control_recall_at_0': 26.8,
+                                  'd_star': 1.25, 'flagged': False},
+                         'sofc': {'target_recall': 50.4, 'control_recall_at_0': 46.5,
+                                  'd_star': 5.0, 'flagged': True}},
+            'checks': {'n_runs_checked': 49, 'd0_differences': {}}}
+
+
+def test_table12_week18():
+    """Table 12: per subfield the matching and the names minus the control at D*, then the two
+    decisions with their verdicts and the pre-specified comparisons."""
+    text = pt.table12(_matched())
+    assert text.startswith('Table 12.') and 'in minus out' in text
+    rows = [line for line in text.split('\n') if line.startswith('| ')]
+    assert rows[1].startswith('| semi | 31.80 | 26.80 | 1.25 | +5.00 | +1.00 | +0.50 |')
+    assert '5.00 (flagged)' in rows[2]
+    assert rows[3].startswith('| mean [95% CI], 2 subfields |')
+    assert '+4.00 [+1.00, +7.00] (18.1, passes)' in rows[3] and '(18.2, no)' in rows[3]

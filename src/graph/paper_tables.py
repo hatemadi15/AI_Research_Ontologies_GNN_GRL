@@ -478,6 +478,39 @@ def table11(rows):
             'and the CRF head (reported).\n\n' + markdown(header, cells))
 
 
+def table12(matched):
+    """Table 12 from ner_recall_matched.json (week 18): per MuLMS subfield the names' pooled recall,
+    the control's at bias 0, the matched bias D* (flagged outside the grid) and the names minus the
+    control at D* in recall on the unseen names the lexicon holds, micro F1 and precision; then
+    the two decisions and the pre-specified comparisons over the subfields."""
+    header = ['subfield', "names' recall", "control's recall at 0", 'D*',
+              'Δ recall, unseen names in the lexicon', 'Δ micro F1', 'Δ precision']
+    d, pre = matched['decisions'], matched['prespecified']
+    cells = []
+    for u, v in matched['per_unit'].items():
+        cells.append([u, number(v['target_recall']), number(v['control_recall_at_0']),
+                      f"{v['d_star']:.2f}{' (flagged)' if v['flagged'] else ''}",
+                      number(d['18.1']['per_unit'][u], True), number(d['18.2']['per_unit'][u], True),
+                      number(pre['precision']['per_unit'][u], True)])
+    cells.append([f"mean [95% CI], {d['18.1']['n_units']} subfields", '', '', '',
+                  interval(d['18.1'], 'mean_diff', signed=True) + f" (18.1, {d['18.1']['verdict']})",
+                  interval(d['18.2'], 'mean_diff', signed=True) + f" (18.2, {d['18.2']['verdict']})",
+                  interval(pre['precision'], 'mean_diff', signed=True)])
+    extra = '; '.join(f"{name} {interval(pre[key], 'mean_diff', signed=True)}"
+                      for key, name in (('unseen_recall', 'recall on the unseen names'),
+                                        ('unseen_precision', 'precision on them'),
+                                        ('unseen_f1', 'F1 on them'),
+                                        ('recall_out', 'recall on the unseen names not in the lexicon'),
+                                        ('in_minus_out', 'in minus out'),
+                                        ('bias_f1_change', "the bias's own F1 change")))
+    return ('Table 12. The names against a recall-matched control (week 18, post review): MR6 on '
+            "MuLMS's 7 held-out subfields at seeds 300 to 900 with a bias D on the entity "
+            "emissions, matched per subfield to the names' recall over all test entities pooled "
+            'over the seeds; the names minus the control at D*, paired over the subfields '
+            '(decisions 18.1 and 18.2, the week-6 rule; the rest pre-specified). Also, paired: '
+            f'{extra}.\n\n' + markdown(header, cells))
+
+
 def table10(data):
     """Table 10 from ner_lexicon_recall.json: per setting and system, recall on the unseen test
     names in and out of the rebuilt lexicon and the unseen predictions' lexicon share and
@@ -685,6 +718,11 @@ def main(argv=None):
         write('table11_week17.md', table11(rows))
     else:
         print('table 11: no week-17 runs')
+    matched = load(os.path.join(args.results, 'gpu', 'ner_recall_matched.json'))
+    if matched and matched.get('decisions'):
+        write('table12_week18.md', table12(matched))
+    else:
+        print('table 12: no recall-matched control')
     print(f"wrote {', '.join(written) or 'nothing'} to {args.out}")
     return written
 
