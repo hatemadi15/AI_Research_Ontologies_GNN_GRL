@@ -1,0 +1,432 @@
+{
+ "note": "Reporting only, computed on 1 November 2026 for the journal: the decisions were taken by the registered interval rule, which is a one-sided t test at 2.5%; the P values are those of the same t tests on the same per-unit differences, with the exact two-sided sign-flip P beside them.",
+ "decisions": [
+  {
+   "n_units": 7,
+   "mean_diff": 3.19,
+   "sd": 4.67,
+   "t": 1.81,
+   "df": 6,
+   "p_one_sided": 0.0603,
+   "p_two_sided": 0.1207,
+   "ci95": [
+    -1.13,
+    7.51
+   ],
+   "decision": "D1",
+   "comparison": "MuLMS: MR6 + names vs CRF head",
+   "per_unit": [
+    2.52,
+    0.47,
+    3.43,
+    -2.35,
+    6.12,
+    11.86,
+    0.28
+   ],
+   "stored_ci95": [
+    -1.13,
+    7.51
+   ],
+   "stored_mean_diff": 3.19,
+   "sign_flip_p_two_sided": 0.0781,
+   "passes": false,
+   "interval_matches": true,
+   "p_agrees": true
+  },
+  {
+   "n_units": 7,
+   "mean_diff": 0.92,
+   "sd": 2.76,
+   "t": 0.88,
+   "df": 6,
+   "p_one_sided": 0.2062,
+   "p_two_sided": 0.4125,
+   "ci95": [
+    -1.64,
+    3.48
+   ],
+   "decision": "D2",
+   "comparison": "MuLMS: MR6 + names vs MR3",
+   "per_unit": [
+    0.89,
+    -1.21,
+    1.04,
+    -3.02,
+    5.12,
+    3.62,
+    0.0
+   ],
+   "stored_ci95": [
+    -1.63,
+    3.48
+   ],
+   "stored_mean_diff": 0.92,
+   "sign_flip_p_two_sided": 0.4062,
+   "passes": false,
+   "interval_matches": true,
+   "p_agrees": true
+  },
+  {
+   "n_units": 4,
+   "mean_diff": 4.27,
+   "sd": 1.81,
+   "t": 4.72,
+   "df": 3,
+   "p_one_sided": 0.009,
+   "p_two_sided": 0.018,
+   "ci95": [
+    1.39,
+    7.15
+   ],
+   "decision": "D3",
+   "comparison": "MaterioMiner fine: MR6 + names vs CRF head",
+   "per_unit": [
+    1.99,
+    5.67,
+    3.64,
+    5.78
+   ],
+   "stored_ci95": [
+    1.39,
+    7.15
+   ],
+   "stored_mean_diff": 4.27,
+   "sign_flip_p_two_sided": 0.125,
+   "passes": true,
+   "interval_matches": true,
+   "p_agrees": true
+  },
+  {
+   "n_units": 4,
+   "mean_diff": 1.77,
+   "sd": 0.69,
+   "t": 5.12,
+   "df": 3,
+   "p_one_sided": 0.0072,
+   "p_two_sided": 0.0144,
+   "ci95": [
+    0.67,
+    2.87
+   ],
+   "decision": "D4",
+   "comparison": "MaterioMiner coarse: MR6 + names vs CRF head",
+   "per_unit": [
+    1.74,
+    2.56,
+    0.88,
+    1.91
+   ],
+   "stored_ci95": [
+    0.67,
+    2.88
+   ],
+   "stored_mean_diff": 1.77,
+   "sign_flip_p_two_sided": 0.125,
+   "passes": true,
+   "interval_matches": true,
+   "p_agrees": true
+  },
+  {
+   "n_units": 11,
+   "mean_diff": 3.58,
+   "sd": 3.92,
+   "t": 3.03,
+   "df": 10,
+   "p_one_sided": 0.0063,
+   "p_two_sided": 0.0127,
+   "ci95": [
+    0.95,
+    6.21
+   ],
+   "decision": "D5",
+   "comparison": "pooled 11 units (MuLMS seeds 0-900): MR6 + names vs CRF head",
+   "per_unit": [
+    2.39,
+    1.75,
+    2.94,
+    -2.76,
+    6.2,
+    12.16,
+    -0.4,
+    1.99,
+    5.67,
+    3.64,
+    5.78
+   ],
+   "stored_ci95": [
+    0.95,
+    6.21
+   ],
+   "stored_mean_diff": 3.58,
+   "sign_flip_p_two_sided": 0.0107,
+   "passes": true,
+   "interval_matches": true,
+   "p_agrees": true
+  },
+  {
+   "n_units": 11,
+   "mean_diff": 3.58,
+   "sd": 3.79,
+   "t": 3.14,
+   "df": 10,
+   "p_one_sided": 0.0053,
+   "p_two_sided": 0.0106,
+   "ci95": [
+    1.04,
+    6.13
+   ],
+   "decision": "D5'",
+   "comparison": "pooled 11 units (MuLMS seeds 300-900, post hoc reading): MR6 + names vs CRF head",
+   "per_unit": [
+    2.52,
+    0.47,
+    3.43,
+    -2.35,
+    6.12,
+    11.86,
+    0.28,
+    1.99,
+    5.67,
+    3.64,
+    5.78
+   ],
+   "stored_ci95": [
+    1.04,
+    6.13
+   ],
+   "stored_mean_diff": 3.58,
+   "sign_flip_p_two_sided": 0.0068,
+   "passes": true,
+   "interval_matches": true,
+   "p_agrees": true
+  },
+  {
+   "n_units": 5,
+   "mean_diff": -0.03,
+   "sd": 0.94,
+   "t": -0.08,
+   "df": 4,
+   "p_one_sided": 0.5284,
+   "p_two_sided": 0.9432,
+   "ci95": [
+    -1.2,
+    1.14
+   ],
+   "decision": "D6",
+   "comparison": "SOFC-Exp folds: MR6 + names vs CRF head",
+   "per_unit": [
+    -0.25,
+    0.03,
+    -0.6,
+    -0.88,
+    1.54
+   ],
+   "stored_ci95": [
+    -1.21,
+    1.14
+   ],
+   "stored_mean_diff": -0.04,
+   "sign_flip_p_two_sided": 1.0,
+   "passes": false,
+   "interval_matches": true,
+   "p_agrees": true
+  },
+  {
+   "n_units": 11,
+   "mean_diff": 0.8,
+   "sd": 2.17,
+   "t": 1.22,
+   "df": 10,
+   "p_one_sided": 0.1258,
+   "p_two_sided": 0.2517,
+   "ci95": [
+    -0.66,
+    2.26
+   ],
+   "decision": "D7",
+   "comparison": "pooled 11 units: MR6 + names vs MR6",
+   "per_unit": [
+    0.13,
+    -1.24,
+    1.16,
+    -2.28,
+    3.27,
+    3.32,
+    -0.77,
+    -2.08,
+    1.35,
+    3.28,
+    2.63
+   ],
+   "stored_ci95": [
+    -0.66,
+    2.26
+   ],
+   "stored_mean_diff": 0.8,
+   "sign_flip_p_two_sided": 0.2383,
+   "passes": false,
+   "interval_matches": true,
+   "p_agrees": true
+  },
+  {
+   "n_units": 7,
+   "mean_diff": -0.18,
+   "sd": 1.98,
+   "t": -0.24,
+   "df": 6,
+   "p_one_sided": 0.5926,
+   "p_two_sided": 0.8148,
+   "ci95": [
+    -2.01,
+    1.65
+   ],
+   "decision": "D8",
+   "comparison": "MuLMS: own-topic vs mixed corpus",
+   "per_unit": [
+    0.49,
+    -0.26,
+    -0.63,
+    -2.53,
+    3.73,
+    -1.54,
+    -0.54
+   ],
+   "stored_ci95": [
+    -2.01,
+    1.65
+   ],
+   "stored_mean_diff": -0.18,
+   "sign_flip_p_two_sided": 0.7969,
+   "passes": false,
+   "interval_matches": true,
+   "p_agrees": true
+  },
+  {
+   "n_units": 4,
+   "mean_diff": 0.95,
+   "sd": 0.61,
+   "t": 3.14,
+   "df": 3,
+   "p_one_sided": 0.0259,
+   "p_two_sided": 0.0517,
+   "ci95": [
+    -0.01,
+    1.92
+   ],
+   "decision": "D9",
+   "comparison": "MaterioMiner fine: multi-task + MR6 + names vs multi-task + MR6",
+   "per_unit": [
+    1.62,
+    0.9,
+    1.14,
+    0.16
+   ],
+   "stored_ci95": [
+    -0.01,
+    1.92
+   ],
+   "stored_mean_diff": 0.96,
+   "sign_flip_p_two_sided": 0.125,
+   "passes": false,
+   "interval_matches": true,
+   "p_agrees": true
+  },
+  {
+   "n_units": 4,
+   "mean_diff": 0.85,
+   "sd": 0.99,
+   "t": 1.72,
+   "df": 3,
+   "p_one_sided": 0.0916,
+   "p_two_sided": 0.1833,
+   "ci95": [
+    -0.72,
+    2.42
+   ],
+   "decision": "D10",
+   "comparison": "MaterioMiner coarse: multi-task + MR6 + names vs multi-task + MR6",
+   "per_unit": [
+    -0.51,
+    1.73,
+    0.79,
+    1.39
+   ],
+   "stored_ci95": [
+    -0.72,
+    2.42
+   ],
+   "stored_mean_diff": 0.85,
+   "sign_flip_p_two_sided": 0.25,
+   "passes": false,
+   "interval_matches": true,
+   "p_agrees": true
+  },
+  {
+   "n_units": 7,
+   "mean_diff": 11.24,
+   "sd": 8.58,
+   "t": 3.47,
+   "df": 6,
+   "p_one_sided": 0.0067,
+   "p_two_sided": 0.0133,
+   "ci95": [
+    3.31,
+    19.18
+   ],
+   "decision": "D11",
+   "comparison": "MuLMS: MR6 + names vs recall-matched MR6, recall on the unseen names the lexicon holds",
+   "per_unit": [
+    13.29,
+    0.22,
+    15.59,
+    1.93,
+    12.4,
+    25.61,
+    9.67
+   ],
+   "stored_ci95": [
+    3.31,
+    19.18
+   ],
+   "stored_mean_diff": 11.24,
+   "sign_flip_p_two_sided": 0.0156,
+   "passes": true,
+   "interval_matches": true,
+   "p_agrees": true
+  },
+  {
+   "n_units": 7,
+   "mean_diff": 3.26,
+   "sd": 4.38,
+   "t": 1.97,
+   "df": 6,
+   "p_one_sided": 0.048,
+   "p_two_sided": 0.0961,
+   "ci95": [
+    -0.79,
+    7.31
+   ],
+   "decision": "D12",
+   "comparison": "MuLMS: MR6 + names vs recall-matched MR6, micro F1",
+   "per_unit": [
+    7.13,
+    -1.31,
+    6.43,
+    -1.48,
+    2.2,
+    9.39,
+    0.47
+   ],
+   "stored_ci95": [
+    -0.79,
+    7.31
+   ],
+   "stored_mean_diff": 3.26,
+   "sign_flip_p_two_sided": 0.1406,
+   "passes": false,
+   "interval_matches": true,
+   "p_agrees": true
+  }
+ ]
+}

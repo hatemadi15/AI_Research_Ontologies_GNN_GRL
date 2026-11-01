@@ -453,6 +453,15 @@ micro values equal `pooled`'s to within 0.01, and its macro and weighted
 values fill the pooled rows of Table 13 (Supplementary Table S11). In
 macro F1 the names against MR6 are +0.83 [−0.01, +1.67] on the decision
 seeds and +1.12 [+0.21, +2.03] on all ten.
+`gpu/ner_decision_tests.json` (`decision_tests.py`, 1 November, for the
+journal's reporting rules; Table 16, `docs/tables/table16_decision_tests.md`,
+paper A's Table S16 and Table 2's P column) gives, for each of paper A's
+twelve decisions and D5′, the one-sample t test of the per-unit
+differences the decision used (n, mean, SD, t, degrees of freedom, one-
+and two-sided P) with the exact sign-flip P, and checks that the
+recomputed interval equals the stored one (to 0.01) and that the one-sided
+P is below 0.025 exactly where the interval clears 0; it changes no
+decision.
 `gpu/ner_week5_seed_analysis.json` adds `week14.types`, the per-type F1 of
 the names method and the 6-copy control against the CRF head on MuLMS's
 decision seeds and MaterioMiner's papers (Tables 8 and A2,

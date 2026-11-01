@@ -44,6 +44,9 @@ docs/tables/:
       sign-flip permutation p-value, and the leave-one-unit-out minimum for the names
       against the CRF head; then the same comparisons on MaterioMiner's papers per
       granularity.
+  table16_decision_tests.md (paper A): per decision of the names route, the t statistic with
+      its degrees of freedom and the one- and two-sided P values from the per-unit differences,
+      with the exact sign-flip P (ner_decision_tests.json, decision_tests.py; reporting only).
   tableA1_all_comparisons.md: every comparison of the comparisons files, the reported and
       descriptive ones too.
 A table whose results are missing is skipped (and named on stdout).
@@ -480,6 +483,32 @@ def table15(data):
             "and comparison, each held-out unit's recall gain on the unseen test names its lexicon "
             'holds and on the others, and their difference (the paired means are Table 10).\n\n'
             + markdown(header, cells))
+
+
+def table16(tests):
+    """Table 16 from ner_decision_tests.json (decision_tests.py): per decision of paper A's
+    names route, the units, the stored difference with its 95% CI, the standard deviation of
+    the per-unit differences, the t statistic with its degrees of freedom, the one- and two-sided P values and the exact two-sided sign-flip P,
+    and the verdict; reporting only, the decisions rest on the intervals."""
+    header = ['decision', 'comparison', 'units', 'Δ [95% CI]', 'SD', 't (df)', 'P one-sided',
+              'P two-sided', 'sign-flip P', 'verdict']
+    rows = [[r['decision'], r['comparison'], r['n_units'],
+             interval({'mean_diff': r['stored_mean_diff'], 'ci95': r['stored_ci95']},
+                      'mean_diff', signed=True), f"{r['sd']:.2f}",
+             f"{r['t']:.2f} ({r['df']})".replace('-', '−'), f"{r['p_one_sided']:.4f}",
+             f"{r['p_two_sided']:.4f}", f"{r['sign_flip_p_two_sided']:.4f}",
+             'passes' if r['passes'] else 'no']
+            for r in tests['decisions']]
+    return ("Table 16. The t statistic and P values of paper A's decisions (D5' the post hoc "
+            'reading of D5 on MuLMS\'s decision seeds): a one-sample Student-t test of the mean '
+            'paired difference against 0 over the units, n - 1 degrees of freedom, with the '
+            'standard deviation (SD) of the per-unit differences, from the '
+            'per-unit differences the decision used (rounded to two decimals, so t and P can '
+            'differ from the unrounded ones in the last digit), the exact two-sided sign-flip '
+            'P over all 2^n sign patterns beside it. Reporting only: each decision was taken by '
+            'the registered rule, the 95% interval above 0 (for the pooled ones, with neither '
+            "corpus's interval below 0), which is the one-sided test at 2.5%.\n\n"
+            + markdown(header, rows))
 
 
 def lexicon_rows(data):
@@ -957,6 +986,11 @@ def main(argv=None):
         print('table 10: no lexicon-membership file')
     if mentions and mentions.get('chain'):
         write('table14_chain.md', table14(mentions))
+    tests = load(os.path.join(args.results, 'gpu', 'ner_decision_tests.json'))
+    if tests:
+        write('table16_decision_tests.md', table16(tests))
+    else:
+        print('table 16: no decision tests file')
     rows = week17_rows(analysis)
     if rows:
         write('table11_week17.md', table11(rows))

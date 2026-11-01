@@ -33,7 +33,10 @@ comparison of the names route in every measure; the pooled rows' macro
 and weighted cells, post hoc, to `pooled_measures` in
 `results/gpu/ner_robustness.json`); Tables S13, S14 and
 S15 to `table14_chain.md`, `table15_lexicon_units.md` and
-`table5_probe.md`; Supplementary Note 11
+`table5_probe.md`; Table S16 and Table 2's P column to
+`table16_decision_tests.md` (`decision_tests.py`, from
+`results/gpu/ner_decision_tests.json`; reporting only, computed 1 November
+for the journal's statistics rules); Supplementary Note 11
 to the ROADMAP's session notes and `git log` (drafted with a source per
 sentence, re-checked). The
 push times of Supplementary Note 1 are `protocol_pushes.py`'s reading of
@@ -43,7 +46,7 @@ Supplementary Note 5 are the `chain` block of
 `docs/figures/fig8_method.png`, Figure 2 `fig9_units.png`, Figure 3
 `fig7_names.png`, Figure 4 `fig10_recall_matched.png`
 (`src/graph/paper_figures.py`). The worked example's
-lexicon entries (Section 4) are the most frequent MAT and PROPERTY
+lexicon entries (Methods, *Systems*) are the most frequent MAT and PROPERTY
 entries of the electrolysis subfield's rebuilt lexicon in
 `results/gpu_names/` (not committed); its MR6 replacement, Ni, is a MAT
 mention of that fold's training sentences.
@@ -51,14 +54,30 @@ mention of that fold's training sentences.
 **Claims.** The paper rests on C2, C17, C20–C26 and C28–C30 of
 `docs/PAPER.md`; citation keys refer to `docs/references.bib`.
 
-**Journal structure.** Section 1 (with Box 1) is the Introduction,
-Sections 5 and 6 the Results, Sections 7 to 9 the Discussion, Sections 2
-to 4 the Methods, and the Supplementary Information the supplementary
-material. The main text is about 11,200 words to the Limitations with its six tables; for npj
-Computational Materials the Related work folds into the Introduction and
-the Limitations into the Discussion, and the AI-use statement (Ethics and
-broader impact) moves into the Methods; for ACL Rolling Review the paper
-needs cutting to 8 pages and anonymising.
+**Journal structure.** Since 1 November the paper is in npj
+Computational Materials' Article format (its content-types and
+submission-guidelines pages, read 1 November): a title of 14 words
+without punctuation, an abstract of 150 words, the Introduction (no
+subheadings), the Results (subheadings), the Discussion (no subheadings;
+it holds the former Limitations and Conclusion), the Methods
+(subheadings), Data availability, Code availability, Acknowledgements,
+Author contributions, Competing interests, References and Figure
+legends. Earlier sections map as follows: Section 1 and Related work to
+the Introduction; Box 1 to Methods, *Terms used throughout*; Sections 2,
+3 and 4 to Methods, *Data*, *Evaluation protocol* and *Systems*;
+Sections 5.1 to 5.6 to the first six Results subsections (*The
+pre-registered decisions*, *Whose gain is it*, *The names' source and the
+lexicon's settings*, *What the names do*, *SOFC-Exp: no gain shown*, *The
+names on the strongest system*); Section 6 to Results, *What else was
+tried, and the count*; Sections 7 to 9 to the Discussion; the Ethics and
+broader impact statement to Methods, *Use of an AI assistant*. The review
+history below keeps the section numbers of its time. The source files
+keep citation keys; `python3 src/graph/paper_render.py` writes the
+submission copies, `docs/submission/PAPER_A.md` and
+`docs/submission/PAPER_A_SI.md`, with the keys numbered in order of first
+citation and the references in Nature style from `docs/references.bib`
+(more than five authors: the first, then et al.); rerun it after any edit
+of the source.
 
 **Before submission (the author's items).**
 - The affiliation on the title page.
@@ -72,27 +91,38 @@ needs cutting to 8 pages and anonymising.
   Note 8 holds the rest), Section 6's label-propagation sentence to
   Supplementary Note 7, and Tables S11 and S12 as a machine-readable data
   file with only the twelve decisions in every measure kept in the SI.
-- The title: the round-11 referee advised keeping it (accurate for F1)
-  and not adding "are learned", which the matched control cannot show on
-  its own (Section 5.4). npj Computational Materials asks for at most 15
-  words without punctuation (the current title has 19 and a colon);
-  options in that form: "Names harvested from unlabeled papers are not
-  shown to improve materials entity recognition" (13 words) or "A
-  preregistered test of harvested names for materials named entity
-  recognition" (11).
-- The venue's format. npj Computational Materials (content types page,
-  read 1 November): no main-text word or display-item limit; abstract at
-  most 150 words without subheadings (now 150); at most 60 references,
-  not strictly enforced (now 61); figure legends at most 350 words each;
-  the sections Introduction (no subheadings), Results (subheadings),
-  Discussion (no subheadings, and no limitations or conclusions
-  sections), Methods (subheadings, after the Discussion), then Data and
-  Code availability, Author contributions, Competing interests,
-  References and Figure legends. For that venue Sections 2 to 4 become
-  the Methods, Related work folds into the Introduction, Box 1 and
-  Section 6 into the Results, the Limitations and the Conclusion into the
-  Discussion, and the AI-use statement into the Methods; the citation
-  keys are rendered as numbered references from `docs/references.bib`.
+- The title (1 November, the author's choice of a positive title within
+  npj's 15 words without punctuation): "Harvesting names from unlabeled
+  papers to augment materials named entity recognition on unseen
+  documents" (14 words). It names the method and its aim without
+  claiming that the names improve recognition, which D2, D7, D9 and D10
+  do not show (the round-11 referee also advised against "are learned").
+  A positive alternative about what passed: "Preregistered tests show
+  mention replacement improves materials named entity recognition on
+  unseen papers" (13 words; D3, D4 and D5 are of MR6 + names, which
+  contains mention replacement, and MR3's own pooled gain is post hoc, so
+  this one needs care). The round-14 referee noted that an earlier option
+  here ("Names harvested from unlabeled papers are not shown to improve
+  materials entity recognition") contradicts D3 to D5: the names system
+  does improve on the baseline; the negative result is the increment
+  over mention replacement.
+- The venue's format, done 1 November (Journal structure above), with
+  the submission guidelines' rules (read 1 November): abstract 150 words;
+  60 references (the limit, not strictly enforced); figure legends 64 to
+  about 150 words (at most 350), each with a brief title, symbols written
+  out and panels lettered; tables at the end of the submission copy (the
+  renderer moves the blocks marked `<!-- table -->` with their notes);
+  a Statistics and reproducibility subsection in the Methods with each
+  decision's P value (Table 2, Table S16); no Supplementary Methods (the
+  training settings, the corpus construction and the recall-matched
+  control's design moved from Supplementary Notes 2, 3 and 10 into the
+  Methods); the companion study cited as "H.M., in preparation"; author
+  contributions by initials; competing interests and funding in the
+  journal's forms. Still the author's: the cover letter (with the
+  corresponding author's affiliation and contact, the related
+  manuscript, suggested referees), the Reporting Summary and editorial
+  policy checklist (encouraged at submission), and one PDF or Word file
+  with the figures for the first submission.
 - The companion study (`docs/PAPER_B.md`) posted as a preprint or
   uploaded as a related manuscript, and cited by title where the text
   says "companion study".
