@@ -465,6 +465,12 @@ def table14(mentions):
             + markdown(header, cells))
 
 
+def short_unit(unit):
+    """A MaterioMiner paper by the short name the paper uses (s11340 for
+    10.1007_s11340-021-00758-x.conll); a MuLMS subfield or SOFC-Exp fold as stored."""
+    return unit[:-len('.conll')].partition('_')[2].split('-')[0] if unit.endswith('.conll') else unit
+
+
 def table15(data):
     """Table 15 from ner_lexicon_recall.json: per setting and comparison, each unit's recall gain on
     the unseen test names the lexicon holds and on the others, and their difference."""
@@ -477,7 +483,7 @@ def table15(data):
             if not c:
                 continue
             for unit, v in c['per_unit'].items():
-                cells.append([label, name, unit.replace('.conll', ''), number(v['gain_in'], True),
+                cells.append([label, name, short_unit(unit), number(v['gain_in'], True),
                               number(v['gain_out'], True), number(v['in_minus_out'], True)])
     return ('Table 15. The lexicon split per unit (ner_lexicon_recall.json, post hoc): per setting '
             "and comparison, each held-out unit's recall gain on the unseen test names its lexicon "
@@ -505,7 +511,7 @@ def table16(tests):
             'standard deviation (SD) of the per-unit differences, from the '
             'per-unit differences the decision used (rounded to two decimals, so t and P can '
             'differ from the unrounded ones in the last digit), the exact two-sided sign-flip '
-            'P over all 2^n sign patterns beside it. Reporting only: each decision was taken by '
+            'P over all 2ⁿ sign patterns beside it. Reporting only: each decision was taken by '
             'the registered rule, the 95% interval above 0 (for the pooled ones, with neither '
             "corpus's interval below 0), which is the one-sided test at 2.5%.\n\n"
             + markdown(header, rows))

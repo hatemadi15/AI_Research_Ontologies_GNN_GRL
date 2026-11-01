@@ -595,6 +595,10 @@ def figure7(rows_by_setting, path):
                 bbox={'boxstyle': 'round,pad=0.12', 'fc': 'white', 'ec': 'none', 'alpha': 0.85}))
         ax.set(xlim=(x0 - (5 if narrow else 2), x1 + 4), ylim=(y0 - 1, y1 + 1))
         ax.set_title(setting, fontsize=9)
+        if n > 1:                        # panel letters, as the journal asks for multi-panel figures
+            ax.annotate('abcdefgh'[k], (0, 1), xycoords='axes fraction', xytext=(-30, 8),
+                        textcoords='offset points', fontsize=11, fontweight='bold',
+                        ha='left', va='bottom')
         ax.set_xlabel('recall on the unseen test names (%)', fontsize=8)
         ax.set_ylabel('precision on the unseen test names (%)', fontsize=8)
         ax.tick_params(labelsize=8)
@@ -690,22 +694,23 @@ def figure9(rows, path):
                 bbox={'boxstyle': 'square,pad=0.15', 'fc': shade, 'ec': 'none'})
     pooled = [r for r in rows if r[0].startswith('MuLMS') or 'fine-grained' in r[0]]
     for k, (values, color, name, decision) in enumerate((
-            (lambda rs: [r[2] for r in rs], 'tab:red', 'CRF head', 'D5\u2032'),
-            (lambda rs: [r[3] for r in rs], 'tab:blue', 'MR6', 'D7'))):
+            (lambda rs: [r[2] for r in rs], 'tab:red', 'CRF head',
+             'D5\u2032 (D5 on the decision seeds; post hoc)'),
+            (lambda rs: [r[3] for r in rs], 'tab:blue', 'MR6', 'D7 (pooled)'))):
         v = values(pooled)
         if len(v) == 11:
             m, lo, hi = mean_ci(v)
             top_y, bottom_y = min(pooled_rows) - 1.5, max(pooled_rows) + 0.5
             ax.fill_betweenx([top_y, bottom_y], lo, hi, color=color, alpha=0.08, zorder=1, lw=0)
             ax.vlines(m, top_y, bottom_y, color=color, lw=1, ls='--', zorder=2)
-            ax.text(0.99, 0.995 - 0.04 * k,
-                    (f'{decision} (pooled) vs {name}: '
+            ax.text(0.99, 0.015 + 0.04 * (1 - k),       # the empty lower right, clear of the rows
+                    (f'{decision} vs {name}: '
                      f'{m:+.2f} [{lo:+.2f}, {hi:+.2f}]').replace('-', '\u2212'),
-                    fontsize=8.5, color=color, ha='right', va='top', transform=ax.transAxes,
+                    fontsize=8.5, color=color, ha='right', va='bottom', transform=ax.transAxes,
                     zorder=5, bbox={'boxstyle': 'square,pad=0.15', 'fc': 'white', 'ec': 'none'})
     ax.axvline(0, color='black', lw=0.8, zorder=2)
     ax.set_yticks(ticks, labels, fontsize=9)
-    ax.set_ylim(-0.7, y + 0.8)
+    ax.set_ylim(-0.7, y + 1.6)              # room below the last row for the pooled labels
     ax.invert_yaxis()
     ax.set_xlabel('micro F1 of MR6 + harvested names minus the reference, on the held-out unit',
                   fontsize=9)
@@ -724,7 +729,10 @@ def figure10(matched, path):
     units = matched['per_unit']
     curves = matched['post_hoc_curves']['units']
     fig, axes = plt.subplots(2, 4, figsize=(9.6, 5.0))
-    for ax, (u, v) in zip(axes.flat, units.items()):
+    for k, (ax, (u, v)) in enumerate(zip(axes.flat, units.items())):
+        ax.annotate('abcdefgh'[k], (0, 1), xycoords='axes fraction', xytext=(-22, 6),
+                    textcoords='offset points', fontsize=10, fontweight='bold',
+                    ha='left', va='bottom')
         grid = [float(g) for g in v['curve']]
         overall = [v['curve'][g]['recall'] for g in v['curve']]
         held = [curves[u]['control'][g]['recall_in'] for g in v['curve']]

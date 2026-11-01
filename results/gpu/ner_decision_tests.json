@@ -428,5 +428,34 @@
    "interval_matches": true,
    "p_agrees": true
   }
- ]
+ ],
+ "post_hoc_stratified": {
+  "note": "post hoc: each pooled decision with its two corpora weighted equally, the mean of the corpus means and its 95% Welch interval",
+  "decisions": {
+   "D5": {
+    "mean": 3.73,
+    "ci95": [
+     1.39,
+     6.07
+    ],
+    "df": 8.3
+   },
+   "D5'": {
+    "mean": 3.73,
+    "ci95": [
+     1.46,
+     6.0
+    ],
+    "df": 8.4
+   },
+   "D7": {
+    "mean": 0.9,
+    "ci95": [
+     -0.88,
+     2.69
+    ],
+    "df": 5.9
+   }
+  }
+ }
 }

@@ -5788,6 +5788,66 @@ order, the plan labels 13.1a, 13.2, 13.4 and 14.2 mapped, 5 × 10⁻⁵ for
 c/d", the 340 of the 400 pool sentences that train, and C26 and C30 of
 `docs/PAPER.md` worded as the paper now reads.
 
+*Paper A in npj Computational Materials' format (1 November, late).* The
+author chose the venue and asked for a positive title, then for the
+headline to stay positive. The paper now has npj's sections; the title
+reads "Harvesting names from unlabeled papers to augment materials named
+entity recognition on unseen documents" (14 words). The journal's
+submission guidelines, read the same evening, added:
+- a Statistics and reproducibility subsection;
+- each decision's P value (`decision_tests.py`, Table 2's column and
+  Table S16, from the same per-unit differences, reporting only);
+- tables at the end of the submission copy;
+- no Supplementary Methods (the training settings, the corpus
+  construction and the control's design moved into the Methods);
+- figure legends with titles and lettered panels;
+- the back matter in the journal's forms;
+- `paper_render.py`, which writes `docs/submission/` with Nature-style
+  numbered references (60).
+
+*Paper A, review round 14 (1 November, night).* Three reviews of the
+round-13 text (`a127165`): a referee (minor revision; every recomputed
+number correct), a number audit (two times wrong by the manifests) and a
+consistency check (one blocking item). Each finding was checked against
+the record, then applied to the npj text:
+
+- **Abstract.** Rewritten to lead with what passed: the pooled +3.58, and
+  every MaterioMiner paper at both granularities. It keeps the
+  registered criterion in full (gains on MuLMS and MaterioMiner, not met;
+  the round-13 cut had dropped MaterioMiner), the pooled criterion's
+  mid-study adoption, the names' F1 increment over MR6 (not established)
+  and, post hoc, their recall on the held names, above MR6 at any bias.
+- **Introduction.** The contribution statement no longer credits D11
+  with the post hoc best-bias result, and "a negative result" is gone.
+- **D11.** Stated with its four-subfield reading wherever it appears.
+  Table 2's verdict now reads "passes (as registered)"; its note has the
+  flagged-subfield readings and D5's caveat.
+- **Secondary measures.** Macro and weighted F1 given together, with the
+  votes of every decision (Table S11's cells, checked).
+- **Pooled decisions.** The corpus-weighted Welch check:
+  - D5: +3.73 [+1.39, +6.07]
+  - D5′: [+1.46, +6.00]
+  - D7: +0.90 [−0.88, +2.69]
+
+  These are in `post_hoc_stratified` of `ner_decision_tests.json`.
+- **Record of 20 October.** The 05:03 request to cancel the batch; the
+  long sentence split; each gate named.
+- **Methods.** The pool's 92% sentence corrected, since draws are within
+  type and the lexicon is chiefly MAT and VALUE. D* is now stated as
+  chosen on the test set by design.
+- **Advice to practitioners.** Scoped to documents whose names are
+  mostly unseen in training, beside MR3's pre-specified 16-unit +1.46
+  [+0.28, +2.64].
+- **AI-use statement.** Names the author's decisions.
+- **Times from the manifests.** The screen's resume failures ended at
+  03:50, not 03:51 as the round-13 note above says. The multi-task jobs of
+  `w13c` took 77 to 120 minutes (mean 103), not about 112.
+- **Supplementary Information.** Fixed its draft-history wording, the
+  citation order of its tables, the Kaggle notebook gloss, two companion
+  protocols' dates, and the short paper names in Table S14.
+- **Figures.** Figures 3 and 4 have lettered panels; Figure 2's band is
+  labelled as D5 on the decision seeds.
+
 ### Week 17 protocol: the harvested names on the strongest base (fixed before any run, 31 October, 19:10 UTC)
 
 *Why, and when.* The round-6 reviews of paper A (31 October) listed as a

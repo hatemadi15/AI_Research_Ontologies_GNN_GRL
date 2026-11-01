@@ -196,4 +196,18 @@ internal reviews' role in the AI-use statement; the per-corpus
 condition's weakness in the Limitations; BERT and AdamW cited, a
 duplicate bibliography entry removed; session times sourced from the
 manifests. The venue's format (npj: title, sections) is the author's
-item above.
+item above. On 1 November the author chose npj Computational
+Materials and a positive title, and asked that the headline stay
+positive; the paper was converted to the journal's format (Journal
+structure above). Round 14 (a referee recommending minor revision, a
+number audit, a consistency check, all on the round-13 text) led to the
+abstract leading with what passed (the pooled +3.58 and every
+MaterioMiner paper at both granularities) while stating the registered
+criterion in full, the criterion's mid-study adoption and the names'
+unestablished F1 increment; the contribution statement without the post
+hoc result credited to D11; D11 with its four-subfield reading
+everywhere and Table 2's "passes (as registered)"; macro and weighted F1
+together, with every decision's votes; the corpus-weighted Welch check;
+the 05:03 cancel request; the practitioner advice scoped and given MR3's
+pre-specified 16-unit estimate; two manifest times corrected; and the
+figures' panel letters. ROADMAP's round-14 note lists every item.

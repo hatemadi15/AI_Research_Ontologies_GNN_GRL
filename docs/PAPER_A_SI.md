@@ -15,7 +15,7 @@ are cited by name; the methods are all in the main text's Methods.
 The repository names its protocols by the stage of the project in which
 they were fixed, a "week"; Table S1's first column gives that name with
 each protocol's decisions, and the main text cites the protocols by date. The
-week-12 screen's variants are labelled V1 to V8, as in Table S5.
+week-12 screen's variants are labelled V1 to V8, as Supplementary Note 7 lists them.
 The last rows give the companion study's protocols whose results the main
 text or these Notes quote; their decisions are not among the twelve of Table 2 or the twenty counted in the main text (Results, *What else was tried, and the count*).
 
@@ -30,7 +30,7 @@ and the amendments.
 | the earlier protocols (Results, *What else was tried, and the count*): mention replacement on MuLMS (week 10); names from the other subfields' sentences (week 11) | 17 October 20:21 (`a08356f`); 18 October 01:13 (`427e34c`) | 17–20 October | week 10: 18 October 00:48 (`c2ca3f6`); week 11: 18 October (MuLMS, `14ed50f`) and 20 October (MaterioMiner, `04764ef`) | — |
 | D1, D2 (week 12) | 18 October 11:00 (`40631ce`; refined 11:05, `bd20cec`): the screen on seeds 0–200, the decisions on seeds 300–900 so that the selection's seed noise does not enter them; the MaterioMiner analogue gated on D1; the methods criterion: D1 plus a MaterioMiner pass | 20–24 October | 24 October | three amendments before any run added variants V4, V6, V7–V8 to the screen |
 | D3, D4 (week 12) | 18 October 11:00 (`40631ce`): the winner's MaterioMiner analogue decided against the CRF head per granularity, to run only if D1 passed; 20 October 00:51 (`ce0f592`): the analogue's batches, with its comparisons against MR3 and the votes pre-specified; the gate lifted at 09:14 (`808ff4b`), restored at 13:53 (`5f7f827`), lifted again at 18:42 (`de62446`) | 24–25 October | 25 October (`3432988`) | — |
-| D5 (week 13) | 20 October 09:14 (`808ff4b`): the pooled decision over both corpora as a second route to the claim, "each unit its 10-seed mean", the stop rule lifted; amended three times the same day, before any decision run of the route: 09:25 (`e94f352`), the label-propagation rule's two MaterioMiner decisions and an SOFC-Exp comparison pre-specified after its MuLMS results (Supplementary Note 7); 13:53 (`5f7f827`), eighteen minutes after the screen chose MR6 + names, D6 added conditional on D1 and the analogue, which the morning's text ran whenever the screen had a winner, gated on D1; 18:42 (`de62446`), D6's condition widened to D1 or D5 and the analogue's morning condition restored, the gating recorded as a mistake | 24–25 October | 25 October (`3432988`) | the analysis took MuLMS's 10-seed means; the 7-seed reading is D5′ |
+| D5, with 13.1a, 13.1b, 13.1d and 13.3a, 13.3b (week 13) | 20 October 09:14 (`808ff4b`): the pooled decision over both corpora as a second route to the claim, "each unit its 10-seed mean", the stop rule lifted; amended three times the same day, before any decision run of the route: 09:25 (`e94f352`), the label-propagation rule's two MaterioMiner decisions and an SOFC-Exp comparison pre-specified after its MuLMS results (Supplementary Note 7); 13:53 (`5f7f827`), eighteen minutes after the screen chose MR6 + names, D6 added conditional on D1 and the analogue, which the morning's text ran whenever the screen had a winner, gated on D1; 18:42 (`de62446`), D6's condition widened to D1 or D5 and the analogue's morning condition restored, the gating recorded as a mistake | 24–25 October | 25 October (`3432988`) | the analysis took MuLMS's 10-seed means; the 7-seed reading is D5′ |
 | D6 (week 13) | 20 October 13:53 (`5f7f827`), conditional on D1; widened to D1 or D5 at 18:42 (`de62446`) | 25 October | 25 October | — |
 | D7, D8 (week 14) | 29 October 12:07 (`2886267`), two minutes after the first batch was pushed and five hours before its first result, after MR6 + names' own results on the same units | 29 October | 29 October | — |
 | ablations (week 14) | 29 October, as above | 31 October | 31 October | — |
@@ -47,7 +47,7 @@ and the amendments.
 
 **Times.** Protocol and result times are the commits' (UTC); push and
 pull times are the session notes'; a session's end or length in
-Supplementary Note 11, and week 18's run times, are those its Kaggle jobs
+Supplementary Note 11, and weeks 17 and 18's run times, are those its Kaggle jobs
 wrote in their manifest (each job's start plus its minutes, by the
 machine's clock), other run times the session notes'; and GitHub's
 records date only the pushes of commits. When the pooled decision was
@@ -127,9 +127,9 @@ moves by more than about 0.01 and no verdict changes.
 that completed, except two, began by repeating an earlier run, and every
 repeat was identical (the sessions that failed or hung left no record of
 their jobs: five on 17 October, before week 10, whose bundle had a new
-version within minutes of their push, and those of weeks 10 to 18 listed
-in Supplementary Note 11): one batch of 15 October (`w5a`, run 16:05 to 22:10 UTC) ran
-none, and the second session of the follow-up of 31 October (`w17b`) instead reproduced the
+version within about 20 minutes of their push, and two of weeks 10 to 18,
+items 4 and 5 of Supplementary Note 11): one batch of 15 October (`w5a`, run 16:05 to 22:10 UTC) ran
+none, and the second session of the follow-up of 31 October (19:15) (`w17b`) instead reproduced the
 stored multi-task runs' scores through its teachers. The week-4 sessions
 of 15 October, which wrote the CRF head's first GPU reference runs, began
 without a repeat after a smoke session that ran one CRF run three times,
@@ -434,9 +434,7 @@ head (no decision).
   ceiling (+2.68 filling the head's O tags, +11.18 overriding them).
 - *A second rule, label propagation within a document* (below): a
   term the model tags in most of its occurrences in a document is tagged
-  in the rest. Two of its ten pre-registered decisions pass, on two
-  corpora, both under a point; it is not shown to add to mention
-  replacement (+0.57 [−0.12, +1.25] on MuLMS).
+  in the rest.
 
 **Label propagation within a document.** A post-processing rule on the saved predictions: a surface form that the
 model tags in most of its occurrences in a document, with one most
@@ -484,8 +482,9 @@ that size.
 
 ## Supplementary Note 8: the follow-up on the strongest system in detail
 
-**Design.** The control is the multi-task model (one encoder, a CRF head
-per granularity) with six-copy mention replacement; the names system adds
+**Design.** Table S6 gives the follow-up's comparisons. The control is
+the multi-task model (one encoder, a CRF head per granularity) with
+six-copy mention replacement; the names system adds
 a lexicon harvested by three multi-task teachers (the stored multi-task
 runs of seeds 0, 100 and 200, whose scores the jobs reproduced), each
 tagging the fatigue corpus with both heads. A mention is admitted when
@@ -538,8 +537,8 @@ granularities (Supplementary Note 2).
 
 ## Supplementary Note 9: detectable differences
 
-The smallest true mean difference each decision and main comparison
-detects with 80% power
+Table S7 gives the smallest true mean difference each decision and main
+comparison detects with 80% power
 at the two-sided 5% level, from the half-width of its observed interval
 and its degrees of freedom (`ner_robustness.py`, `detectable`).
 
@@ -787,7 +786,7 @@ wrote byte-identical results files.
 The protocol of 18 October 01:13 (`427e34c`) ran `w11b` after the weekly
 GPU quota's reset on 24 October, and `w11a` left about 1 GPU hour until
 then. The quota was raised to 45 hours a week on 19 October, and `w11b`
-was pushed that day at 21:06 to `ner-gpu-jobs-d` (version 6), before the
+was pushed that day at 21:06 to the Kaggle notebook `ner-gpu-jobs-d` (version 6), before the
 reset. It ran 3.4 hours (9 jobs), and its result, decisions 3 and 4 of
 week 11 failing, was recorded on 20 October at 00:44 (`04764ef`). The
 protocol named its own commit as every batch's source; `w11b` ran from
@@ -881,7 +880,7 @@ refused.
 
 The screen was pushed on 20 October at 02:35 from bundle `47e2310`,
 `w12a` to `ner-gpu-jobs-d` (version 7) and `w12c` to `ner-gpu-jobs-c`
-(version 3). From 03:03 (`w12c`) and 03:11 (`w12a`) to 03:51 their later
+(version 3). From 03:03 (`w12c`) and 03:11 (`w12a`) to 03:50 their later
 jobs failed on the resume check (the session notes recorded it from
 03:56): a
 results file stored one corpus SHA-256, each held-out subfield had its
@@ -910,8 +909,8 @@ training history and the predictions; only the run time differs, and the
 first session's runs lack the per-run corpus hash that the resume fix
 (`3ac85a8`) added, the corpus being the same by that session's manifest.
 V4's electrolysis gain over the
-CRF head on those seeds is +2.06, below MR6's +2.97 (Table S11, rows 24
-and 26; per unit, Table S12).
+CRF head on those seeds is +2.06, below MR6's +2.97 (the electrolysis
+values of Table S11's rows 24 and 26, given per unit in Table S12).
 
 `w12e` was pushed at 05:03 to `ner-gpu-jobs-d` (version 8) before the
 quota was checked against the job times: it needed about 8.1 hours and
@@ -989,8 +988,8 @@ both lanes, and a new batch, `w13c`, ran multi-task MR3, one after the
 other on `ner-gpu-jobs-c`, with the runs, their files and the analysis
 unchanged. The split was committed at 12:23:09 (`d6db00b`), in the
 minute `w13a` was pushed (version 5); its note is headed 12:30. `w13a`
-took 293.4 minutes and `w13c` 549.1, its multi-task jobs about 112
-minutes each instead of the 75 estimated. In `w13b` (`ner-gpu-jobs-d`,
+took 293.4 minutes and `w13c` 549.1, its multi-task jobs 77 to 120
+minutes each (mean 103) instead of the 75 estimated. In `w13b` (`ner-gpu-jobs-d`,
 version 13; pushed on 25 October at 01:01, done at 11:21 after 619.8
 minutes), in both lanes every fold's three teachers equalled the stored
 week-8 CRF-head runs of their seeds, and the two lanes harvested the
@@ -1021,7 +1020,7 @@ corpus to repeat it on); the copy control on SOFC-Exp's article folds
 names as a match feature (screened in week 12 as V7 and V8, below
 mention replacement); and the names as a dictionary. The names on the
 multi-task model were run after the write-up of D1 to D8, in the
-follow-up of 31 October (D9, D10). MR6 was not run on SOFC-Exp's folds.
+follow-up of 31 October (19:15) (D9, D10). MR6 was not run on SOFC-Exp's folds.
 
 For a failing D8 the protocol fixed this reading: "A fail with the mixed
 variant above the CRF head (reported) means a large materials corpus of
@@ -1038,8 +1037,8 @@ contexts they come in, are what the gain needs". D8 failed, −0.18
 the CRF head, and the outcome note of 22:38 read it by the first
 reading: "the topic's text is not what the gain needs; a large unlabeled
 materials corpus of other topics gives the same names-and-copies gain".
-A narrower framing, citing the protocol's sentence of 12:32, entered the
-paper in review round 6 of 31 October as one added after the result; the main text (Results, *The names' source and the lexicon's settings*) now reads the fail by both: the first reading's condition
+A narrower framing, citing the protocol's sentence of 12:32, entered an
+earlier draft on 31 October as one added after the result; the main text (Results, *The names' source and the lexicon's settings*) reads the fail by both: the first reading's condition
 holds on the point estimate but not on the interval, "does as well"
 being an equivalence D8 cannot establish, and the amendment of 12:32,
 made before any of D8's runs, had already framed D8 as testing whether the names
@@ -1138,7 +1137,7 @@ models of each seed triple). Only micro F1 decides, except D11, on
 recall, week 10's decision on the votes (10.2) and, in the rows of V6's
 analogue, the companion study's week-5 decision on the votes. The macro
 and weighted cells of the 11-unit pooled rows are post hoc, recomputed
-from the run files for this revision (`ner_robustness.py`,
+from the run files on 1 November, after the decisions (`ner_robustness.py`,
 `pooled_measures`, whose micro values equal the rows' to within 0.01).
 A row's week is the protocol that named the comparison,
 with the commit time of the protocol or amendment; a post hoc row gives
@@ -1164,16 +1163,18 @@ the names against MR3 on MaterioMiner's coarse-grained papers (micro
 row's per-unit values and its votes' macro and weighted F1. Some numbers
 quoted in the record are not in the tables: mention replacement's pooled
 gain with MaterioMiner's coarse-grained papers, +1.80 [+0.39, +3.22],
-which the protocol of 20 October (09:14) records (Methods, *Evaluation protocol*; +1.80
-[+0.39, +3.21] from per-unit values rounded to two decimals, the paper's
-convention); the same protocol's +2.34 [+0.94,
+which the protocol of 20 October (09:14) records (Methods, *Evaluation protocol*);
+the same protocol's +2.34 [+0.94,
 +3.75] with the fine-grained papers, which row 75 gives as +2.35 from
 per-unit values rounded differently; the reading of 20 October (18:42),
 which put D5 at about [+0.1, +5.9] from the screen's values; and the two
 scenarios of 24 October with an assumed MaterioMiner gain, +2.67 [+0.09,
 +5.25] and +2.49 [−0.13, +5.11] (Supplementary Note 11). The tables leave out
 the per-type analyses (Supplementary Note 6), the lexicon split
-(Supplementary Note 5) and the companion study's own comparisons except
+(Supplementary Note 5), the multi-task names' recall and precision on the
+unseen test names against their control (pre-specified on 31 October,
+19:15; Supplementary Note 8 and Table S13) and the companion study's own
+comparisons except
 the two the names route reports again (label propagation and
 self-training on MaterioMiner's papers). The protocol of 20 October
 (09:14) also listed the label-propagation rule's votes as reported; they
@@ -1189,7 +1190,10 @@ measure the comparison names), macro, weighted and strict F1 and the
 votes; the macro and weighted cells of the 11-unit pooled rows are post
 hoc. An empty cell: the results do not hold that quantity, or, for the
 macro and weighted cells of the other pooled rows (70 to 73), it was not
-computed.
+computed. A status such as 10.1 names a decision outside Table 2 by its
+week and number (10.1 is week 10's decision 1; 13.1a as its protocol
+names it), and "pre-specified (13.3)" a comparison pre-specified with
+that decision.
 
 | # | week (protocol, UTC) | corpus, units (MuLMS seeds) | comparison (system − reference) | status | Δ micro F1 [95% CI], units above 0 | Δ macro F1 [95% CI] | Δ weighted F1 [95% CI] | Δ strict IOB2 micro F1 [95% CI] | votes: Δ micro F1 [95% CI], units above 0 |
 |---|---|---|---|---|---|---|---|---|---|
@@ -1356,7 +1360,7 @@ computed.
 | 161 | 18 (1 November 10:51) | MuLMS, 4 subfields (seeds 300–900; without the flagged electrolysis, pemfc, sofc) | MR6 + names − MR6 at bias 0: recall on the unseen test names the lexicon holds | post hoc | +5.92 [−1.10, +12.94], 4/4 |  |  |  |  |
 | 162 | 18 (1 November 10:51) | MuLMS, 4 subfields (seeds 300–900; without the flagged electrolysis, pemfc, sofc) | MR6 at bias 0 − MR6 at matched recall: recall on the unseen test names the lexicon holds | post hoc | +0.14 [−4.89, +5.16], 1/4 |  |  |  |  |
 
-**Table S12.** Per row of Table S11 (#): the per-unit differences of its
+**Table S12.** Per row of Table S11 (#) whose results hold per-unit values: the per-unit differences of its
 micro (or named) comparison and of its votes (MuLMS's subfields;
 MaterioMiner's papers s11340, ncomms7164, s41467 and met10111458;
 SOFC-Exp's folds), and its votes' macro and weighted F1 differences with
@@ -1523,7 +1527,8 @@ Three analyses the Notes above summarise, in full, and the tests of the
 decisions. Table S13 gives the unseen-name trade of the main text (Results, *What the names do*) for every system against the one it
 builds on (post hoc, but for MR3 against the CRF head on MuLMS's unseen
 and seen test names, pre-specified on 17 October; `ner_mentions.py`,
-`chain`), Table S14 the lexicon split of the main text (Results, *What the names do*) per held-out unit (post hoc; `ner_lexicon_recall.py`),
+`chain`; the multi-task names' rows against their control on
+MaterioMiner are pre-specified too, on 31 October, 19:15), Table S14 the lexicon split of the main text (Results, *What the names do*) per held-out unit (post hoc; `ner_lexicon_recall.py`),
 Table S15 the CPU probe of Supplementary Note 7 per subfield (no
 decision; `silver_lexicon.py`), and Table S16 the t statistic and P values
 of every decision (computed for reporting; `decision_tests.py`).
@@ -1639,38 +1644,38 @@ Table S3's).
 | MuLMS, 7 held-out subfields (seeds 300–900) | MR6 + names (mixed corpus) − MR6 | semi | +3.43 | +0.86 | +2.57 |
 | MuLMS, 7 held-out subfields (seeds 300–900) | MR6 + names (mixed corpus) − MR6 | sofc | +16.40 | +5.76 | +10.64 |
 | MuLMS, 7 held-out subfields (seeds 300–900) | MR6 + names (mixed corpus) − MR6 | steel | +6.20 | +1.77 | +4.43 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | 10.1007_s11340-021-00758-x | +1.25 | −3.14 | +4.39 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | 10.1038_ncomms7164 | +13.48 | +0.61 | +12.87 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | 10.1038_s41467-020-19071-7 | −0.45 | −0.08 | −0.37 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | 10.3390_met10111458 | +4.19 | +3.78 | +0.41 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | 10.1007_s11340-021-00758-x | +0.00 | +6.86 | −6.86 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | 10.1038_ncomms7164 | +35.22 | +5.64 | +29.58 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | 10.1038_s41467-020-19071-7 | +2.96 | +3.42 | −0.46 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | 10.3390_met10111458 | +12.90 | +8.08 | +4.82 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | 10.1007_s11340-021-00758-x | −1.25 | +10.00 | −11.25 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | 10.1038_ncomms7164 | +21.74 | +5.03 | +16.71 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | 10.1038_s41467-020-19071-7 | +3.41 | +3.50 | −0.09 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | 10.3390_met10111458 | +8.71 | +4.30 | +4.41 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | 10.1007_s11340-021-00758-x | +0.00 | +8.00 | −8.00 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | 10.1038_ncomms7164 | +21.30 | +1.61 | +19.69 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | 10.1038_s41467-020-19071-7 | +4.09 | +3.24 | +0.85 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | 10.3390_met10111458 | +9.68 | +3.81 | +5.87 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | 10.1007_s11340-021-00758-x | +1.54 | +4.85 | −3.31 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | 10.1038_ncomms7164 | −0.41 | −0.16 | −0.25 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | 10.1038_s41467-020-19071-7 | +0.67 | +1.75 | −1.08 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | 10.3390_met10111458 | −0.34 | +1.20 | −1.54 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | 10.1007_s11340-021-00758-x | +1.15 | +5.84 | −4.69 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | 10.1038_ncomms7164 | +3.06 | +3.48 | −0.42 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | 10.1038_s41467-020-19071-7 | +0.67 | +2.55 | −1.88 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | 10.3390_met10111458 | +0.75 | +2.63 | −1.88 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | 10.1007_s11340-021-00758-x | −0.39 | +0.99 | −1.38 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | 10.1038_ncomms7164 | +3.47 | +3.64 | −0.17 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | 10.1038_s41467-020-19071-7 | +0.00 | +0.80 | −0.80 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | 10.3390_met10111458 | +1.09 | +1.43 | −0.34 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | 10.1007_s11340-021-00758-x | +0.38 | +2.97 | −2.59 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | 10.1038_ncomms7164 | +0.82 | +3.12 | −2.30 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | 10.1038_s41467-020-19071-7 | −1.26 | +1.19 | −2.45 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | 10.3390_met10111458 | −0.41 | +1.99 | −2.40 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | s11340 | +1.25 | −3.14 | +4.39 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | ncomms7164 | +13.48 | +0.61 | +12.87 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | s41467 | −0.45 | −0.08 | −0.37 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | met10111458 | +4.19 | +3.78 | +0.41 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | s11340 | +0.00 | +6.86 | −6.86 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | ncomms7164 | +35.22 | +5.64 | +29.58 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | s41467 | +2.96 | +3.42 | −0.46 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | met10111458 | +12.90 | +8.08 | +4.82 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | s11340 | −1.25 | +10.00 | −11.25 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | ncomms7164 | +21.74 | +5.03 | +16.71 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | s41467 | +3.41 | +3.50 | −0.09 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | met10111458 | +8.71 | +4.30 | +4.41 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | s11340 | +0.00 | +8.00 | −8.00 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | ncomms7164 | +21.30 | +1.61 | +19.69 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | s41467 | +4.09 | +3.24 | +0.85 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | met10111458 | +9.68 | +3.81 | +5.87 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | s11340 | +1.54 | +4.85 | −3.31 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | ncomms7164 | −0.41 | −0.16 | −0.25 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | s41467 | +0.67 | +1.75 | −1.08 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | met10111458 | −0.34 | +1.20 | −1.54 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | s11340 | +1.15 | +5.84 | −4.69 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | ncomms7164 | +3.06 | +3.48 | −0.42 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | s41467 | +0.67 | +2.55 | −1.88 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | met10111458 | +0.75 | +2.63 | −1.88 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | s11340 | −0.39 | +0.99 | −1.38 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | ncomms7164 | +3.47 | +3.64 | −0.17 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | s41467 | +0.00 | +0.80 | −0.80 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | met10111458 | +1.09 | +1.43 | −0.34 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | s11340 | +0.38 | +2.97 | −2.59 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | ncomms7164 | +0.82 | +3.12 | −2.30 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | s41467 | −1.26 | +1.19 | −2.45 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | met10111458 | −0.41 | +1.99 | −2.40 |
 
 **Table S15.** The CPU probe per held-out MuLMS subfield (no decision):
 the share of the unseen test names the topic corpus holds and that the
@@ -1696,7 +1701,7 @@ reproducibility*): per decision, the units, the stored mean paired
 difference with its 95% CI, the standard deviation (SD) of the per-unit
 differences, the one-sample Student-t statistic with its degrees of
 freedom, its one- and two-sided P values, and the exact two-sided
-sign-flip P value over all 2^n assignments of signs, from the per-unit
+sign-flip P value over all 2ⁿ assignments of signs, from the per-unit
 differences each decision used (rounded to two decimals, so t and P can
 differ from the unrounded values in the last digit); D5′ is the post hoc
 reading of D5 on MuLMS's decision seeds. Computed on 1 November for

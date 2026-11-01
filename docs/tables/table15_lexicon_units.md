@@ -37,35 +37,35 @@ Table 15. The lexicon split per unit (ner_lexicon_recall.json, post hoc): per se
 | MuLMS, 7 held-out subfields (seeds 300–900) | MR6 + names (mixed corpus) − MR6 | semi | +3.43 | +0.86 | +2.57 |
 | MuLMS, 7 held-out subfields (seeds 300–900) | MR6 + names (mixed corpus) − MR6 | sofc | +16.40 | +5.76 | +10.64 |
 | MuLMS, 7 held-out subfields (seeds 300–900) | MR6 + names (mixed corpus) − MR6 | steel | +6.20 | +1.77 | +4.43 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | 10.1007_s11340-021-00758-x | +1.25 | −3.14 | +4.39 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | 10.1038_ncomms7164 | +13.48 | +0.61 | +12.87 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | 10.1038_s41467-020-19071-7 | −0.45 | −0.08 | −0.37 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | 10.3390_met10111458 | +4.19 | +3.78 | +0.41 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | 10.1007_s11340-021-00758-x | +0.00 | +6.86 | −6.86 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | 10.1038_ncomms7164 | +35.22 | +5.64 | +29.58 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | 10.1038_s41467-020-19071-7 | +2.96 | +3.42 | −0.46 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | 10.3390_met10111458 | +12.90 | +8.08 | +4.82 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | 10.1007_s11340-021-00758-x | −1.25 | +10.00 | −11.25 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | 10.1038_ncomms7164 | +21.74 | +5.03 | +16.71 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | 10.1038_s41467-020-19071-7 | +3.41 | +3.50 | −0.09 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | 10.3390_met10111458 | +8.71 | +4.30 | +4.41 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | 10.1007_s11340-021-00758-x | +0.00 | +8.00 | −8.00 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | 10.1038_ncomms7164 | +21.30 | +1.61 | +19.69 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | 10.1038_s41467-020-19071-7 | +4.09 | +3.24 | +0.85 |
-| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | 10.3390_met10111458 | +9.68 | +3.81 | +5.87 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | 10.1007_s11340-021-00758-x | +1.54 | +4.85 | −3.31 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | 10.1038_ncomms7164 | −0.41 | −0.16 | −0.25 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | 10.1038_s41467-020-19071-7 | +0.67 | +1.75 | −1.08 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | 10.3390_met10111458 | −0.34 | +1.20 | −1.54 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | 10.1007_s11340-021-00758-x | +1.15 | +5.84 | −4.69 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | 10.1038_ncomms7164 | +3.06 | +3.48 | −0.42 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | 10.1038_s41467-020-19071-7 | +0.67 | +2.55 | −1.88 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | 10.3390_met10111458 | +0.75 | +2.63 | −1.88 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | 10.1007_s11340-021-00758-x | −0.39 | +0.99 | −1.38 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | 10.1038_ncomms7164 | +3.47 | +3.64 | −0.17 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | 10.1038_s41467-020-19071-7 | +0.00 | +0.80 | −0.80 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | 10.3390_met10111458 | +1.09 | +1.43 | −0.34 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | 10.1007_s11340-021-00758-x | +0.38 | +2.97 | −2.59 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | 10.1038_ncomms7164 | +0.82 | +3.12 | −2.30 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | 10.1038_s41467-020-19071-7 | −1.26 | +1.19 | −2.45 |
-| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | 10.3390_met10111458 | −0.41 | +1.99 | −2.40 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | s11340 | +1.25 | −3.14 | +4.39 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | ncomms7164 | +13.48 | +0.61 | +12.87 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | s41467 | −0.45 | −0.08 | −0.37 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | met10111458 | +4.19 | +3.78 | +0.41 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | s11340 | +0.00 | +6.86 | −6.86 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | ncomms7164 | +35.22 | +5.64 | +29.58 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | s41467 | +2.96 | +3.42 | −0.46 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | met10111458 | +12.90 | +8.08 | +4.82 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | s11340 | −1.25 | +10.00 | −11.25 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | ncomms7164 | +21.74 | +5.03 | +16.71 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | s41467 | +3.41 | +3.50 | −0.09 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | met10111458 | +8.71 | +4.30 | +4.41 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | s11340 | +0.00 | +8.00 | −8.00 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | ncomms7164 | +21.30 | +1.61 | +19.69 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | s41467 | +4.09 | +3.24 | +0.85 |
+| MaterioMiner fine-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | met10111458 | +9.68 | +3.81 | +5.87 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | s11340 | +1.54 | +4.85 | −3.31 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | ncomms7164 | −0.41 | −0.16 | −0.25 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | s41467 | +0.67 | +1.75 | −1.08 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − MR6 | met10111458 | −0.34 | +1.20 | −1.54 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | s11340 | +1.15 | +5.84 | −4.69 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | ncomms7164 | +3.06 | +3.48 | −0.42 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | s41467 | +0.67 | +2.55 | −1.88 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 + names − CRF head | met10111458 | +0.75 | +2.63 | −1.88 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | s11340 | −0.39 | +0.99 | −1.38 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | ncomms7164 | +3.47 | +3.64 | −0.17 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | s41467 | +0.00 | +0.80 | −0.80 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR6 − CRF head | met10111458 | +1.09 | +1.43 | −0.34 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | s11340 | +0.38 | +2.97 | −2.59 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | ncomms7164 | +0.82 | +3.12 | −2.30 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | s41467 | −1.26 | +1.19 | −2.45 |
+| MaterioMiner coarse-grained, 4 held-out papers (10 seeds) | MR3 − CRF head | met10111458 | −0.41 | +1.99 | −2.40 |

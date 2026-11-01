@@ -31,3 +31,6 @@ def test_committed_decisions():
     passing = {r['decision'] for r in rows if r['passes']}
     assert passing == {'D3', 'D4', 'D5', "D5'", 'D11'}
     assert all(r['p_one_sided'] < 0.025 for r in rows if r['passes'])
+    strat = dt.stratified(rows)
+    assert strat['D5'] == {'mean': 3.73, 'ci95': [1.39, 6.07], 'df': 8.3}
+    assert strat["D5'"]['ci95'] == [1.46, 6.0] and strat['D7']['ci95'] == [-0.88, 2.69]

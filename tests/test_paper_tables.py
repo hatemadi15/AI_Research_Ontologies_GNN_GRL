@@ -452,4 +452,4 @@ def test_table14_chain_and_table15_lexicon_units():
                 '10.1038_ncomms7164.conll': {'gain_in': 1.0, 'gain_out': -0.5, 'in_minus_out': 1.5}}}}}}
     text = pt.table15(data)
     assert '| MR6 + names − MR6 | sofc | +14.09 | +1.51 | +12.58 |' in text
-    assert '| 10.1038_ncomms7164 | +1.00 | −0.50 | +1.50 |' in text
+    assert '| ncomms7164 | +1.00 | −0.50 | +1.50 |' in text          # the short paper name

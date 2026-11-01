@@ -9,7 +9,9 @@ below 0). That rule is a one-sided t test at 2.5%. From the per-unit differences
 used, this module computes the t statistic with n - 1 degrees of freedom and the one- and
 two-sided P values, and the exact two-sided sign-flip P value as well. It also recomputes the
 interval and checks it against the stored one. It reports and changes no decision; the paper
-labels the P values as computed for the journal's reporting rules.
+labels the P values as computed for the journal's reporting rules. `post_hoc_stratified` (round
+14 of the paper's internal review, post hoc) weights the two corpora of each pooled decision
+(D5, D5', D7) equally: the mean of the two corpus means with a Welch interval.
 
 Reads results/gpu/ner_week5_seed_analysis.json, ner_week12_comparisons.json,
 ner_recall_matched.json and ner_robustness.json; writes results/gpu/ner_decision_tests.json.
@@ -110,6 +112,26 @@ def decision_tests(analysis, week12, matched, robust):
     return rows
 
 
+def welch_average(a, b):
+    """The mean of two groups' means with its 95% Welch interval (Welch-Satterthwaite degrees
+    of freedom), each group weighted equally whatever its size."""
+    from scipy import stats
+    va, vb = statistics.variance(a) / len(a), statistics.variance(b) / len(b)
+    mean = (statistics.fmean(a) + statistics.fmean(b)) / 2
+    se = 0.5 * math.sqrt(va + vb)
+    df = (va + vb) ** 2 / (va ** 2 / (len(a) - 1) + vb ** 2 / (len(b) - 1))
+    half = float(stats.t.ppf(0.975, df)) * se
+    return {'mean': round(mean, 2), 'ci95': [round(mean - half, 2), round(mean + half, 2)],
+            'df': round(df, 1)}
+
+
+def stratified(rows, first=7):
+    """Per pooled decision (11 units: MuLMS's 7 subfields first, then MaterioMiner's 4 papers),
+    the corpus-weighted mean of its per-unit differences with the Welch interval."""
+    return {r['decision']: welch_average(r['per_unit'][:first], r['per_unit'][first:])
+            for r in rows if r['n_units'] == 11}
+
+
 def load(path):
     with open(path) as f:
         return json.load(f)
@@ -127,7 +149,11 @@ def main(argv=None):
                     'were taken by the registered interval rule, which is a one-sided t test at '
                     '2.5%; the P values are those of the same t tests on the same per-unit '
                     'differences, with the exact two-sided sign-flip P beside them.'),
-           'decisions': rows}
+           'decisions': rows,
+           'post_hoc_stratified': {'note': ('post hoc: each pooled decision with its two corpora '
+                                            'weighted equally, the mean of the corpus means and '
+                                            'its 95% Welch interval'),
+                                   'decisions': stratified(rows)}}
     path = args.out or os.path.join(args.results, 'ner_decision_tests.json')
     with open(path, 'w') as f:
         json.dump(out, f, indent=1)
@@ -138,6 +164,9 @@ def main(argv=None):
               f"t({r['df']}) = {r['t']:.2f}, P one-sided {r['p_one_sided']:.4f}, two-sided "
               f"{r['p_two_sided']:.4f}, sign-flip {r['sign_flip_p_two_sided']:.4f}, "
               f"{'passes' if r['passes'] else 'no'}{flags}")
+    for key, e in out['post_hoc_stratified']['decisions'].items():
+        print(f"{key:4s} corpora weighted equally: {e['mean']:+.2f} [{e['ci95'][0]:+.2f}, "
+              f"{e['ci95'][1]:+.2f}] (Welch, df {e['df']})")
 
 
 if __name__ == '__main__':
