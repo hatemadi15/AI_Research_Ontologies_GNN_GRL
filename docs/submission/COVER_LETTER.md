@@ -1,0 +1,73 @@
+# Cover letter (draft for the author; complete the bracketed items)
+
+[Date]
+
+Dear Editors of *npj Computational Materials*,
+
+I submit for your consideration the Article "Harvesting names from
+unlabeled papers to augment materials named entity recognition on unseen
+documents".
+
+Materials text mining depends on named-entity recognizers trained on a
+handful of annotated papers but run on new papers, whose materials,
+processes and values those papers never mention. The manuscript tests a
+cheap remedy. It harvests the names that three baseline taggers
+confidently agree on in 40,000 sentences of open-access papers, and feeds
+them to mention replacement, a standard data augmentation. On held-out
+documents the combination improves on a MatSciBERT baseline by 3.6 F1
+points, pooled over eleven held-out subfields and papers of two corpora,
+and it improves on every held-out MaterioMiner paper at both annotation
+granularities. The harvested names shift recall toward the unseen names
+their lexicon holds, by more than any decoding bias we tried gives a
+matched control (a post hoc analysis).
+
+The paper suits *npj Computational Materials* for three reasons:
+
+1. It addresses a practical bottleneck of materials data extraction,
+   generalization to documents unlike the annotated ones, with methods any
+   group can apply to its own corpora in a few GPU hours.
+2. It reports what the gains can and cannot be attributed to:
+   - twelve decisions, each fixed in a protocol committed to a public
+     repository before its runs, with matched and recall-matched controls;
+   - every comparison in every measure;
+   - the dated protocol record, including a criterion we adopted mid-study,
+     disclosed in full.
+
+   Readers can therefore calibrate what to adopt. Mention replacement, the
+   largest source of the gain, is the paper's recommendation.
+3. Everything is reproducible. The repository holds the code, the
+   protocols with their commit times, every results file with its seeds and
+   predictions, and the analyses behind every number. The runs are
+   deterministic, and every repeated run was identical.
+
+**Related work.** A companion evaluation study from the same programme
+(H. Madi, in preparation) shares this paper's data, baselines and
+protocol. It reports the gap between random splits and held-out documents,
+seed variance, and the other additions tested. [It has not been submitted
+elsewhere / It has been submitted to … and is uploaded as a related
+manuscript.] No other related manuscript is in press or under
+consideration elsewhere.
+
+**Use of AI.** An AI assistant was used, under my direction, to draft the
+protocols, write the code, run the experiments and draft the text, as the
+Methods state. I took the study's decisions and take responsibility for
+the content. [Name and version of the assistant.]
+
+**Competing interests and funding.** I declare no competing interests.
+The study received no funding; the GPU compute was Kaggle's free tier.
+
+**Suggested referees.** [Three to five experts without a conflict of
+interest, with affiliations and e-mail addresses. Candidates to consider,
+after checking their current affiliations and any conflict: an author of
+MaterioMiner (Durmaz et al.), of MuLMS (Schrader et al.), of SOFC-Exp
+(Friedrich et al.) or of MatSciBERT (Gupta et al.), and authors of NER
+data-augmentation studies (e.g. Dai and Adel).]
+
+**Excluded referees.** [None / names and reasons.]
+
+**Corresponding author.** Hatem Madi, [affiliation], [postal address],
+hatem.madi15@gmail.com, [ORCID].
+
+Sincerely,
+
+Hatem Madi

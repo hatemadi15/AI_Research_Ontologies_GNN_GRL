@@ -56,8 +56,8 @@ by fine-tuning [12] or prompting
 [13]. Potu et al. [14] report 66.74 F1 on
 MaterioMiner against 78.56 in distribution, a gap of about 12 points
 where our three-paper models lose 28–31 (companion study). Random
-sentence splits leak names between training and test ([15];
-[16] and [17] take opposite sides); taggers
+sentence splits leak names between training and test [15],
+and their use is disputed [16,17]; taggers
 score far lower on unseen mentions [18–20], lean on name regularity and the
 names themselves [21,22], narrow but do
 not close that gap with contextual embeddings [23],
@@ -773,7 +773,7 @@ ablations the screen's 3 (Results, *The names' source and the lexicon's settings
 entity counts as found only with its exact span and type; precision is
 the share of predicted entities that are correct, recall the share of
 gold (annotated) entities found, F1 their harmonic mean, micro over all
-entities of a test set (seqeval, [56], in its default
+entities of a test set (seqeval [56] in its default
 mode, as the datasets' own code scores), in percentage points.
 
 **Decision rule.** A method improves on its reference when the 95%

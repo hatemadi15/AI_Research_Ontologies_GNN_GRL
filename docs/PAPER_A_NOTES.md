@@ -77,7 +77,11 @@ submission copies, `docs/submission/PAPER_A.md` and
 `docs/submission/PAPER_A_SI.md`, with the keys numbered in order of first
 citation and the references in Nature style from `docs/references.bib`
 (more than five authors: the first, then et al.); rerun it after any edit
-of the source.
+of the source, then `python3 src/graph/paper_pdf.py`, which prints the
+submission PDFs (`docs/submission/PAPER_A.pdf` with each figure above its
+legend and the tables at the end, `PAPER_A_SI.pdf`);
+`docs/submission/README.md` lists the files and `COVER_LETTER.md` is a
+draft for the author.
 
 **Before submission (the author's items).**
 - The affiliation on the title page.

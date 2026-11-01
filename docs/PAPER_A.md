@@ -57,8 +57,8 @@ by fine-tuning (dagdelen2024structured) or prompting
 (polak2024extracting). Potu et al. (potu2025ontology) report 66.74 F1 on
 MaterioMiner against 78.56 in distribution, a gap of about 12 points
 where our three-paper models lose 28–31 (companion study). Random
-sentence splits leak names between training and test (babl2025random;
-gorman2019standard and sogaard2021random take opposite sides); taggers
+sentence splits leak names between training and test (babl2025random),
+and their use is disputed (gorman2019standard; sogaard2021random); taggers
 score far lower on unseen mentions (augenstein2017generalisation;
 fu2020rethinking; kim2022biomedical), lean on name regularity and the
 names themselves (lin2020rigorous; ghaddar2021context), narrow but do
@@ -930,7 +930,7 @@ ablations the screen's 3 (Results, *The names' source and the lexicon's settings
 entity counts as found only with its exact span and type; precision is
 the share of predicted entities that are correct, recall the share of
 gold (annotated) entities found, F1 their harmonic mean, micro over all
-entities of a test set (seqeval, nakayama2018seqeval, in its default
+entities of a test set (seqeval (nakayama2018seqeval) in its default
 mode, as the datasets' own code scores), in percentage points.
 
 **Decision rule.** A method improves on its reference when the 95%
