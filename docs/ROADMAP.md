@@ -5459,6 +5459,19 @@ bundle of `013f9ac` uploaded (19:41–19:54); `w17a` pushed to
 pushes: 33.4 of 45 hours; the two sessions are expected to take about 6
 and 5.6 hours. The first check-in is at 22:56 UTC.
 
+*Week 17, session notes (1 November, 00:30 UTC).* `w17b` (kernel c)
+finished at about 22:58 UTC: its two names jobs took 82.7 and 99.3 minutes
+(teachers, the two-head tagging of 40,000 sentences and 10 students each),
+far under the 2.8 hours estimated; pulled at 00:30, 20 student files
+(crf_mt_mrm6, 10 offsets, both granularities, each holding the two papers
+s41467 and met10111458) collected. The teachers of both jobs equal the
+stored `crf_mt` runs' test F1 on both heads at every seed. The multi-task
+mention filter admits far fewer names than the single-task one, because a
+mention needs the fine head's entity at exactly the coarse span with both
+heads' marginals at 0.9: fine 10.1038_s41467-020-1 8,867 mentions, 3,746 distinct, 6.5% of the unseen test names; fine 10.3390_met10111458. 14,850 mentions, 4,621 distinct, 7.6% of the unseen test names; coarse 10.1038_s41467-020-1 16,455 mentions, 6,180 distinct, 11.6% of the unseen test names; coarse 10.3390_met10111458. 17,722 mentions, 5,840 distinct, 6.7% of the unseen test names
+(the single-task fatigue lexicons held 49–65% of a paper's unseen names).
+No number is read before `w17a` (kernel d, still running at 00:31) is in.
+
 ### Week 17 protocol: the harvested names on the strongest base (fixed before any run, 31 October, 19:10 UTC)
 
 *Why, and when.* The round-6 reviews of paper A (31 October) listed as a
