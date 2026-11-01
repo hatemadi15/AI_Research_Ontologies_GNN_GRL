@@ -5777,7 +5777,16 @@ Materials' limit (its content-types page, read today: no main-text word
 or display-item limit, title at most 15 words without punctuation, at
 most 60 references); BERT and AdamW cited and a duplicate entry removed;
 Table 12's sixth part gives shares only for a part whose cells all add
-names. The venue's section structure and title are author items.
+names. The venue's section structure and title are author items. The
+round's consistency check (no blocking finding; it read the files before
+these edits, and half its items were already fixed) added: protocols
+cited by date in Section 3's list, the symbol D defined in Box 1, the
+counting rule of Section 5.6's lexicon shares, the five sessions that
+hung on 17 October beside Note 11's list, the SI's tables cited in
+order, the plan labels 13.1a, 13.2, 13.4 and 14.2 mapped, 5 × 10⁻⁵ for
+5e-5, Table S13's pre-specified rows, the notebooks named for "kernel
+c/d", the 340 of the 400 pool sentences that train, and C26 and C30 of
+`docs/PAPER.md` worded as the paper now reads.
 
 ### Week 17 protocol: the harvested names on the strongest base (fixed before any run, 31 October, 19:10 UTC)
 

@@ -13,7 +13,8 @@ table and figure numbers without an S refer to the main text.
 
 The repository names its protocols by the stage of the project in which
 they were fixed, a "week"; Table S1's first column gives that name with
-each protocol's decisions, and the main text cites the protocols by date.
+each protocol's decisions, and the main text cites the protocols by date. The
+week-12 screen's variants are labelled V1 to V8, as in Table S5.
 The last rows give the companion study's protocols whose results the main
 text or these Notes quote; their decisions are not among the twelve of Table 2 or the
 twenty of Section 6.
@@ -36,7 +37,7 @@ and the amendments.
 | the lexicon-membership analysis (week 15; post hoc, no decision) | 31 October 16:13 (`2c60f33`): the rebuild, its checks and the reading fixed before the run | 31 October (`w15a`) | 31 October | — |
 | D9, D10 (week 17; follow-up) | 31 October 19:15 (`f39447c`), after D1 to D8 had been written up (the lexicon split's results arrived 26 minutes later), a pass expected to be unlikely; the code 19:41 (`013f9ac`) | 31 October 19:54 to 1 November 00:35 (`w17a`; `w17b` ended at 23:00) | 1 November | — |
 | D11, D12 (week 18; follow-up) | 1 November 10:51 (`e02c3be`), at the request of an internal review of the draft (main text, Ethics and broader impact), after D1 to D10 and the lexicon split were known; the names' side the stored decision runs of 24 October, only the control new; the code 10:58 (`7906996`) and the analysis 11:04 (`789f42e`), both before any run | 1 November 11:14 to 13:43 (`w18a`, pushed at 11:12, pulled at 13:58) | 1 November 14:06 (`13506a4`); the post hoc nearest-recall reading added after it, 14:16 (`ea8a92e`) | — |
-| companion, week 5: multi-task training against the CRF head on MaterioMiner's held-out papers, pre-specified without decision (fine-grained +3.72 [+0.57, +6.87]; multi-task training's own decision was on the random splits); and self-training on the fatigue corpus against the CRF head there, a decision that failed (+1.74 [−1.16, +4.64] fine-grained, +1.56 [−0.88, +4.00] coarse-grained; its votes too), which the names route reports again as V6's analogue (Table S11, rows 41–44) | 15 October 15:50 (`6f2dc11`) | 15 October | 15 October 23:20 (`1b30d82`) | — |
+| companion, week 5: multi-task training against the CRF head on MaterioMiner's held-out papers, pre-specified without decision (fine-grained +3.72 [+0.57, +6.87]; multi-task training's own decision was on the random splits); and self-training on the fatigue corpus against the CRF head there, a decision that failed (+1.74 [−1.16, +4.64] fine-grained, +1.56 [−0.88, +4.00] coarse-grained; its votes too), which the names route reports again as V6's analogue (Supplementary Note 12) | 15 October 15:50 (`6f2dc11`) | 15 October | 15 October 23:20 (`1b30d82`) | — |
 | companion, week 7 part 1: label propagation within a document, six decisions on saved predictions | 16 October 11:46 (`cc73d37`) | saved predictions | 16 October 11:53 (MaterioMiner, `93966bb`) and 13:54 (SOFC-Exp, `ceabb78`) | 11:57 (`e41aa44`): retyping made a decision on SOFC-Exp, after MaterioMiner's results and before SOFC-Exp's |
 | companion, week 7 part 2a: recall calibration, a bias on the CRF head's emissions chosen on validation folds; five decisions, none passing (fine-grained −0.59 [−1.75, +0.57], coarse-grained +0.17 [−0.14, +0.48], SOFC-Exp −0.21 [−0.58, +0.17] paired by seed) | 16 October 13:11 (`61c9520`) | 16 October (`w7a`) | 16 October 15:33 (`503f690`) | — |
 | companion, week 7 part 2b: MR3 against the CRF head on MaterioMiner's held-out papers, both passing (+2.77 [+1.51, +4.03] fine-grained, +1.28 [+0.06, +2.51] coarse-grained), and on SOFC-Exp's official split, failing (−0.29 [−1.04, +0.47] paired by seed) | 16 October 14:39 (`494cac1`): a 3-seed screen, then 10 seeds | 17 October (`w7c` 03:42–04:15, `w7d` 04:19–06:47) | 17 October 06:59 (`db7c78d`; the screen at 04:19, `7d55340`) | — |
@@ -88,10 +89,10 @@ log gives them.
 
 MatSciBERT (110M parameters), token classification on the first sub-word,
 a linear-chain CRF with IOB2 constraints; AdamW (loshchilov2019decoupled),
-learning rate 5e-5,
+learning rate 5 × 10⁻⁵,
 linear warm-up, batch size 16, up to 20 epochs, early stopping on
 validation micro F1 with patience 3, the best epoch's weights evaluated;
-the CRF layer at learning rate 5e-3 without weight decay, the encoder
+the CRF layer at learning rate 5 × 10⁻³ without weight decay, the encoder
 with weight decay 0.01, warm-up over the first 10% of the steps, the
 gradient norm clipped at 1.0, dropout 0.1, inputs truncated at 512
 sub-words;
@@ -136,8 +137,10 @@ moves by more than about 0.01 and no verdict changes.
 
 **Repeats.** From week 5 on (15 October, 16:00 UTC), every GPU session
 that completed, except two, began by repeating an earlier run, and every
-repeat was identical (the sessions that failed or hung, Supplementary
-Note 11, left no record of their jobs): one batch of 15 October (`w5a`, run 16:05 to 22:10 UTC) ran
+repeat was identical (the sessions that failed or hung left no record of
+their jobs: five on 17 October, before week 10, whose bundle had a new
+version within minutes of their push, and those of weeks 10 to 18 listed
+in Supplementary Note 11): one batch of 15 October (`w5a`, run 16:05 to 22:10 UTC) ran
 none, and the second session of the follow-up of 31 October (`w17b`) instead reproduced the
 stored multi-task runs' scores through its teachers. The week-4 sessions
 of 15 October, which wrote the CRF head's first GPU reference runs, began
@@ -498,7 +501,8 @@ source are D2, D7, D8, D9, D10, D11 and D12; only D11 passes. The
 label-propagation rule's decisions are not counted, the rule being a
 post-processing rule on saved predictions rather than a use of names;
 four of them fall in the window (20 October, above), and with them the
-count is twenty-four, six passing (13.1a among them), about 0.6 expected
+count is twenty-four, six passing (13.1a, the rule's MuLMS decision of
+09:14, among them), about 0.6 expected
 by chance. The companion study's decisions, all earlier, are not counted
 either.
 
@@ -953,8 +957,8 @@ training history and the predictions; only the run time differs, and the
 first session's runs lack the per-run corpus hash that the resume fix
 (`3ac85a8`) added, the corpus being the same by that session's manifest.
 V4's electrolysis gain over the
-CRF head on those seeds is +2.06, below MR6's +2.97 (Table S12, rows 26
-and 24).
+CRF head on those seeds is +2.06, below MR6's +2.97 (Table S11, rows 24
+and 26; per unit, Table S12).
 
 `w12e` was pushed at 05:03 to `ner-gpu-jobs-d` (version 8) before the
 quota was checked against the job times: it needed about 8.1 hours and
@@ -968,7 +972,8 @@ the notes recorded that cancelling no longer changed the plan, and
 `w12e` was to run after the reset. The week-13 protocol, committed at
 09:14, also put `w12e` after the reset, beside `w13a`. `w12e` was not
 cancelled and `w12f` was never pushed: the next sessions on either
-kernel were those of 24 October, kernel d's version 9 and kernel c's
+Kaggle notebook (`ner-gpu-jobs-d`, `ner-gpu-jobs-c`) were those of 24
+October, `ner-gpu-jobs-d`'s version 9 and `ner-gpu-jobs-c`'s
 version 5. Kaggle did not stop the session: the quota read 43.99 hours
 used at 10:10, 45.25 at 11:25 with the session running, and 46.23 of 45
 at 13:23, when `w12e` was found complete; by its manifest it had ended
@@ -1039,12 +1044,13 @@ week-8 CRF-head runs of their seeds, and the two lanes harvested the
 same silver mentions per fold (21,376–48,943, 4,835–9,290 distinct,
 20.3–33.4% of the fold's unseen test names). Lane 0's job took 615.2
 minutes and lane 1's 591.6, inside the 11.25-hour stop, so no fold was
-cut; amendment 13.4 had costed the batch at about 7.5 hours and the push
+cut; the amendment of 13:53 (13.4, D6's) had costed the batch at about
+7.5 hours and the push
 note at about 8.8.
 
 **Week 14.** The protocol of 29 October 12:07 (`2886267`) ran `w14b`
 after the reset of 31 October. With 6.5 of the week's 45 hours unused
-after `w14a` and both kernels idle, `w14b` was pushed on 29 October at
+after `w14a` and both notebooks idle, `w14b` was pushed on 29 October at
 18:00 (`ner-gpu-jobs-d`, version 14) from the bundle of `8919928`, the
 notes recording a change of schedule only. It ran from 18:00 to 22:20
 (4.3 session hours). In `w14b` every lane's teachers equalled week 10's
@@ -1067,13 +1073,13 @@ follow-up of 31 October (D9, D10). MR6 was not run on SOFC-Exp's folds.
 For a failing D8 the protocol fixed this reading: "A fail with the mixed
 variant above the CRF head (reported) means a large materials corpus of
 other topics does as well, a simpler method the paper then states, with
-13.2 as its decision on the topic corpora and this as the reported
+13.2 [D5] as its decision on the topic corpora and this as the reported
 comparison; a fail with neither above the other means 7 units cannot
 separate them, which the paper says". At 12:32 (`102144c`), before any
 run of `w14b`, the protocol added the mixed corpora's coverage of the
 unseen test names (49–70%, against the topic corpora's 55–81%) and the
 sentence "So the mixed corpora hold most of what the topic corpora hold,
-which is what 14.2 tests: whether the names the topic adds, and the
+which is what 14.2 [D8] tests: whether the names the topic adds, and the
 contexts they come in, are what the gain needs". D8 failed, −0.18
 [−2.01, +1.65], with the mixed variant at +3.38 [−0.89, +7.64] against
 the CRF head, and the outcome note of 22:38 read it by the first
@@ -1563,7 +1569,9 @@ their 95% CIs.
 
 Three analyses the Notes above summarise, in full. Table S13 gives the
 unseen-name trade of Section 5.4 for every system against the one it
-builds on (post hoc; `ner_mentions.py`, `chain`), Table S14 the lexicon
+builds on (post hoc, but for MR3 against the CRF head on MuLMS's unseen
+and seen test names, pre-specified on 17 October; `ner_mentions.py`,
+`chain`), Table S14 the lexicon
 split of Section 5.4 per held-out unit (post hoc; `ner_lexicon_recall.py`),
 and Table S15 the CPU probe of Supplementary Note 7 per subfield (no
 decision; `silver_lexicon.py`).

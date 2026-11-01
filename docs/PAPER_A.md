@@ -155,7 +155,7 @@ rather than confirming it; none would survive a Bonferroni correction
   three models of a seed triple; the sign-flip test is the exact
   two-sided permutation test of a mean paired difference over all 2^n
   assignments of signs to the n units.
-- *Decoding bias, recall-matched control.* A constant added at decoding
+- *Decoding bias, recall-matched control.* A constant D added at decoding
   to the score of every tag but O (the tag of a word outside any
   entity), so that a trained model tags more spans (or, below 0, fewer);
   the recall-matched control is MR6 decoded with the bias at which its
@@ -259,17 +259,17 @@ methods paper. Under the original criterion MR6 + names has no claim,
 since D1 failed; D3, D4 and D6 would not have run, and D5 did not exist.
 The changes, in order (UTC; Supplementary Notes 1 and 11):
 
-- *18 October, 04:52.* The plan makes week 11's MaterioMiner decisions
-  the gate of the route: topic corpora only if one passes, otherwise the
+- *18 October, 04:52.* The plan makes the MaterioMiner decisions of the
+  protocol of 18 October (01:13) the gate of the route: topic corpora only if one passes, otherwise the
   evaluation paper.
-- *18 October, 11:00.* The week-12 protocol replaces that gate with a
+- *18 October, 11:00.* The protocol of 11:00 replaces that gate with a
   coverage check, saying those decisions cannot run before 24 October.
   A methods claim needs a pass against the CRF head on MuLMS alone (D1)
   and one on MaterioMiner; the MaterioMiner analogue (the same system on
   MaterioMiner's papers, with a corpus on fatigue; D3, D4) runs only if
   D1 passes.
-- *20 October, 00:44.* Week 11's MaterioMiner decisions, run after all,
-  are recorded: both fail, so under the plan of 04:52 the route would
+- *20 October, 00:44.* Those MaterioMiner decisions, run after all, are
+  recorded: both fail, so under the plan of 04:52 the route would
   have stopped. The screen is pushed at 02:35.
 - *05:03.* The screen's first session, which had run the names variants
   on electrolysis and MR6 on every subfield, is pulled; the names
@@ -288,7 +288,7 @@ The changes, in order (UTC; Supplementary Notes 1 and 11):
   the pooled criterion: the protocol records +2.34 [+0.94, +3.75] with
   MaterioMiner's fine-grained papers (+2.35 in Table 3, from per-unit
   values rounded differently) and +1.80 [+0.39, +3.22] with the
-  coarse-grained ones (post hoc). So do week 11's names, from the other
+  coarse-grained ones (post hoc). So do the names of 18 October (01:13), from the other
   subfields' sentences on MuLMS and the fatigue corpus on MaterioMiner
   (+2.39 [+0.71, +4.06], computed after the revision; post hoc;
   Supplementary Note 12). The names system's pooled result does not
@@ -359,7 +359,7 @@ throughout:
   fine-grained, multi-task training gains +3.72 [+0.57, +6.87] over it
   and multi-task training with three-copy mention replacement +6.73
   [+6.03, +7.43] (pre-specified comparisons without a decision in the
-  companion evaluation study; Supplementary Table S1); neither transfers
+  companion evaluation study; Table S1); neither transfers
   to SOFC-Exp, and MuLMS has one type level, so the CRF head is the
   reference the three corpora share. The follow-up of 31 October tested the names on
   that system, with six copies (Section 5.6).
@@ -846,13 +846,14 @@ filter over both heads (Supplementary Note 8). Neither decision passes
 two-sided t p = 0.052, and a sign-flip p of 0.125, the smallest four
 units allow); coarse-grained, three are. Over multi-task training with
 three-copy mention replacement the names' whole increment is +0.76
-[−0.15, +1.68] and +0.91 [−0.14, +1.97] (pre-specified; Supplementary
-Table S6): on this system too what the names add is about a point and
+[−0.15, +1.68] and +0.91 [−0.14, +1.97] (pre-specified; Table
+S6): on this system too what the names add is about a point and
 not established. The fine-grained spread rests on 3 degrees of freedom,
 so the interval, not the 1.3 points it would detect at that spread
 (Table S7), is the result. The two-head filter's lexicons hold fewer of
-the unseen test names than the single-task lexicons of D3 and D4 (7.5%
-against 9.6% fine-grained, 12.1% against 18.3% coarse-grained); whether
+the unseen test names than the single-task lexicons of D3 and D4 (by the
+runs' stored counts, Supplementary Note 8: 7.5% against 9.6%
+fine-grained, 12.1% against 18.3% coarse-grained); whether
 that lowered the increment is not known.
 
 ## 6 What else was tried, and the count
@@ -1064,7 +1065,8 @@ seeds and units to detect a point or two.
   every MuLMS decision except D5 as executed, but not its fit to these
   units.
 - **MuLMS's training pool is two or three articles.** Each MuLMS model
-  trains on 400 sentences of two or three of the other subfields'
+  trains on a pool of 400 sentences (340 for training, 60 for
+  validation) of two or three of the other subfields'
   articles (Table 1), a different set per held-out subfield with some
   articles recurring across sets; the 88% share of unseen names and the
   24-point spread between subfields reflect that.
