@@ -79,12 +79,21 @@ def test_mde_stratified_partial_and_detectable():
     analysis = {'week13': {'week12_winner': 'w'},
                 'mulms': {'week12': {'w': {'decision': {'minus_crf': {'micro': {'ci95': [-1.13, 7.51]}}}}}},
                 'week14': {'copies': {'mulms': {'decision': {}}}, 'topic': {'decision': {}},
-                           'ablations': {'x': {'minus_w': {'micro': {'ci95': [-1.0, 1.0]}}}}}}
+                           'ablations': {'x': {'minus_w': {'micro': {'ci95': [-1.0, 1.0]}}}}},
+                'week17': {'coarse': {'decision': '17.2',
+                                      'minus_crf_mt_mr6': {'micro': {'ci95': [-1.0, 2.0]}},
+                                      'names': {'minus_crf_mt_mr': {'micro': {'ci95': [0.0, 4.0]}}}}}}
     d = nr.detectable(analysis, robust, grids)
     assert d['pooled decision: names_vs_mr6'] == {'half_width': 1.46, 'df': 10, 'mde_80': 2.04}
     assert d['MaterioMiner fine: names_vs_crf']['df'] == 3
     assert d['D1 MuLMS: names_vs_crf']['half_width'] == 4.32
     assert 'ablation x: vs_method (3 seeds)' in d and 'D2 MuLMS: names_vs_mr3' not in d
+    # week 17: the decision against the matched control and the names against multi-task + MR3,
+    # 3 degrees of freedom (4 papers); absent without the section
+    assert d['17.2 MaterioMiner coarse: crf_mt_mrm6_vs_crf_mt_mr6'] == {'half_width': 1.5, 'df': 3,
+                                                                        'mde_80': nr.mde(1.5, 3)}
+    assert d['MaterioMiner coarse: crf_mt_mrm6_vs_crf_mt_mr']['half_width'] == 2.0
+    assert not [k for k in nr.detectable({}, {}, {}) if '17' in k]
 
 
 def test_job_costs_share_a_job_over_its_students():

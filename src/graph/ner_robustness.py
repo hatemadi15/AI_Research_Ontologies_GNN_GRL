@@ -31,7 +31,8 @@ import os
 import statistics
 
 import metrics
-from ner_seed_analysis import COPIES_CONTROL, WEEK14_ANALOGUE, WEEK14_WINNER
+from ner_seed_analysis import (COPIES_CONTROL, WEEK14_ANALOGUE, WEEK14_WINNER, WEEK17_CONTROL,
+                               WEEK17_NAMES)
 
 ANALYSIS = 'ner_week5_seed_analysis.json'
 WEEK7 = 'ner_week7_comparisons.json'
@@ -155,8 +156,9 @@ def mde(half_width, df, power=0.80):
 def detectable(analysis, robust_pooled, robust_grids):
     """Per comparison the CI half-width, degrees of freedom and MDE at 80% power, from the stored
     intervals: the pooled comparisons of both bases (10 degrees of freedom), the MaterioMiner
-    grids (3), the MuLMS decisions D1, D2 and D8 and the names against MR6 there (6), and the
-    3-seed ablations against the method (6)."""
+    grids (3), the MuLMS decisions D1, D2 and D8 and the names against MR6 there (6), the
+    3-seed ablations against the method (6), and the week-17 decisions on the strongest base
+    with the names' increment over the week-9 system there (3)."""
     out = {}
 
     def add(name, entry, df):
@@ -182,6 +184,13 @@ def detectable(analysis, robust_pooled, robust_grids):
     add('MuLMS: names_vs_mr6', cop.get('minus_crf_mr6'), 6)
     for name, entry in (analysis.get('week14', {}).get('ablations', {}) or {}).items():
         add(f'ablation {name}: vs_method (3 seeds)', entry.get(f'minus_{winner}') if isinstance(entry, dict) else None, 6)
+    for g, entry in (analysis.get('week17') or {}).items():
+        # week 17 (post review): the names on the multi-task model with 6 copies against the
+        # matched control (decisions 17.1 and 17.2) and against multi-task + MR3 (reported)
+        add(f"{entry.get('decision', '17')} MaterioMiner {g}: {WEEK17_NAMES}_vs_{WEEK17_CONTROL}",
+            entry.get(f'minus_{WEEK17_CONTROL}'), 3)
+        add(f'MaterioMiner {g}: {WEEK17_NAMES}_vs_crf_mt_mr',
+            (entry.get('names') or {}).get('minus_crf_mt_mr'), 3)
     return out
 
 
