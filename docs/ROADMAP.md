@@ -5634,6 +5634,36 @@ protocols added to S1); Figure 3 with one legend entry per marker and no
 arrow between points on different seeds (`paper_figures.py`). A further
 round reviews the revision.
 
+*Paper A, review round 10 (1 November).* Three fresh reviews of the
+round-9 revision: a number audit, a journal referee recommending minor
+revision, and a consistency check. Applied in part before the week-18
+runs (`e1cde40`): the abstract's MR3 interval on D5's seed basis (2.35
+[0.94, 3.75]); Box 1's teachers (trained on the training sentences
+paired with a held-out unit, never on the unit) and its paired and
+pooled terms made exact; Section 3's second and third disclosures
+restated with their times (D5 as executed averages in screen seeds whose
+runs were under way at 09:14; D7 and D8's protocol five hours before
+that batch's first result, after MR6 + names' own results on the same
+units); Table 3's statuses (MR6 − MR3 and MR6 − CRF head pre-specified
+per corpus on 29 October, MaterioMiner names − MR3 on 20 October at
+00:51, MR3 − CRF head the companion's decisions of 16 October 14:39);
+MR6's MuLMS gain over the CRF head given on the decision seeds with the
+all-seed reading; the SOFC-Exp paragraph exact about what is not shown;
+the practitioner advice scoped to encoder taggers; the AI-use and
+author-contribution statements; the companion protocols' rows of Table
+S1 corrected (times, commits, the week-8 part 1 row added). After the
+week-18 result: the abstract's last sentence ("Only mention
+replacement's part of the gain is established (post hoc); the names' is
+not"), the Conclusion pooled with its intervals, Section 6 cut to its
+count with the detail in Supplementary Note 7, and Section 5.4's
+reading-rule discussion cut to its verdicts with the detail in
+Supplementary Note 5. The week-18 result entered as D11 and D12 (Table
+2), Section 5.4's recall-matched control with Table 6, Supplementary
+Note 10 with Table S8, the counts (twelve decisions, four passing;
+twenty in Section 6, five passing), the Limitations, and the push times
+from GitHub's activity log (Supplementary Note 1). Round 11 reviews the
+result.
+
 ### Week 17 protocol: the harvested names on the strongest base (fixed before any run, 31 October, 19:10 UTC)
 
 *Why, and when.* The round-6 reviews of paper A (31 October) listed as a
