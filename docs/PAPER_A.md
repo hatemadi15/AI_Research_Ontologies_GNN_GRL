@@ -265,7 +265,11 @@ MaterioMiner analogue (D3, D4) only if D1 passed; the revision added a
 pooled decision (D5) as a second route to the claim, lifted that gate
 and lifted a stop rule (no fourth protocol on MuLMS). At 09:14 mention
 replacement was known, from runs already made, to meet the pooled
-criterion (post hoc; Table 3); the names system's pooled result did not
+criterion (post hoc; Table 3; the protocol itself records it, +2.34
+[+0.94, +3.75] with MaterioMiner's fine-grained papers and +1.80 [+0.39,
++3.22] with the coarse-grained ones), as did the names from the other
+subfields' sentences, computed after the revision (+2.39 [+0.71, +4.06],
+post hoc; Supplementary Note 12); the names system's pooled result did not
 exist, and the screen had reported three of its seven variants, not MR6
 + names. The gate was re-imposed at 13:53, after the screen had chosen
 MR6 + names, and lifted again at 18:42 (Supplementary Note 1). Under the
@@ -470,6 +474,19 @@ pooled gain over the CRF head (Section 5.2) has p = 0.004 on either seed
 basis, below 0.05/12, but as a post hoc comparison it belongs to no
 corrected family.
 
+**Other measures.** The protocols of weeks 10 to 14 also reported macro
+F1 (every type weighted equally), weighted F1 and the votes beside micro
+F1; none decides, except week 10's votes. On MuLMS macro F1 has means
+close to micro F1's or above them and much smaller spreads across
+subfields, so its intervals lie above 0 in 23 comparisons where micro
+F1's do not, among them D1 (+3.78 [+2.47, +5.10]), MR3's own week-10
+decision (+2.12 [+1.14, +3.09]) and MR6 + names against MR3 over all ten
+seeds (+1.72 [+0.44, +3.01]). Against the copy-matched control the
+names' macro-F1 increment on MuLMS is +0.53 [−0.56, +1.62] (D7's MuLMS
+part) and against the mixed corpus −0.24 [−1.56, +1.08] (D8).
+Supplementary Note 12 lists all 162 comparisons of the names route in
+every measure, with the votes and the per-unit values.
+
 **Figure 2.** Per held-out unit, the micro-F1 difference of MR6 + names
 from the CRF head (circles) and from MR6 (squares): MuLMS's 7 subfields
 on the decision seeds, MaterioMiner's 4 papers at both granularities and
@@ -516,8 +533,8 @@ the same picture
 (+2.35, +0.22, +1.02). Against MR3 the whole increment of MR6 + names,
 +1.13, has an interval that covers 0: the pre-registered pass over the
 CRF head is a property that mention replacement already has on these
-units (post hoc). Three intervals in this paper comparing a names variant with MR3
-lie above 0, none of them a decision: MaterioMiner coarse-grained (Table
+units (post hoc). Three intervals in micro F1 comparing a names variant
+with MR3 lie above 0, none of them a decision: MaterioMiner coarse-grained (Table
 3, 3 degrees of freedom), the 2-of-3-teachers ablation on 3 seeds
 (Supplementary Note 4) and SOFC-Exp (Section 5.5). Per entity type the
 pattern holds for most types (Supplementary Note 6).
@@ -841,7 +858,7 @@ interval against the CRF head cleared 0, though its MaterioMiner
 analogue, the companion study's self-training on the fatigue corpus over
 10 seeds, is not shown to beat MR3 (−1.03 [−4.47, +2.41] fine-grained,
 +0.28 [−1.46, +2.01] coarse-grained, and its votes fall below MR3's
-coarse-grained, −1.32 [−1.85, −0.80]; pre-specified before the screen); and
+coarse-grained, −1.32 [−1.85, −0.80]; post hoc, both sides' results known when it was named); and
 the lexicon as a gazetteer feature (Supplementary Note 7). A bias on the tags that begin an entity only, or
 one per entity type, might match the three subfields that one bias on
 every tag could not, since past D = 2.5 that bias lengthens and merges

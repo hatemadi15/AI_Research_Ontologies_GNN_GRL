@@ -5,7 +5,7 @@ a reader of the repository needs beside it.
 
 **Tables and figures to generated files.** The paper is the main text
 (`docs/PAPER_A.md`) and the Supplementary Information
-(`docs/PAPER_A_SI.md`, Notes 1 to 10, Tables S1 to S10). Table 1 is written
+(`docs/PAPER_A_SI.md`, Notes 1 to 12, Tables S1 to S12). Table 1 is written
 by hand from the conversions in `src/graph/`; Table 2 to
 `docs/tables/table6_held_out_decisions.md` and `table2_decisions.md` (D9
 and D10 to `table11_week17.md`, D11 and D12 to `table12_week18.md`, whose
@@ -26,8 +26,11 @@ record in `docs/ROADMAP.md` §4 and `git log`; Table S2 to
 S5 to the week-12 screen in `docs/ROADMAP.md`; Table S6 to
 `table11_week17.md`; Table S7 to `results/gpu/ner_robustness.json`
 (`detectable`); Tables S8, S9 and S10 to the second and fourth, sixth
-and seventh parts of `table12_week18.md`; Figure 4 is
-`docs/figures/fig10_recall_matched.png`. The
+and seventh parts of `table12_week18.md`; Tables S11 and S12 to the two
+parts of `table13_names_route.md` (`names_route_record.py`, every
+comparison of the names route in every measure); Supplementary Note 11
+to the ROADMAP's session notes and `git log` (drafted with a source per
+sentence, re-checked). The
 push times of Supplementary Note 1 are `protocol_pushes.py`'s reading of
 `results/github_push_activity.tsv` and `results/github_push_events.tsv`. The MaterioMiner paired unseen-name intervals of
 Supplementary Note 5 are the `chain` block of
