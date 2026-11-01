@@ -5466,10 +5466,13 @@ far under the 2.8 hours estimated; pulled at 00:30, 20 student files
 (crf_mt_mrm6, 10 offsets, both granularities, each holding the two papers
 s41467 and met10111458) collected. The teachers of both jobs equal the
 stored `crf_mt` runs' test F1 on both heads at every seed. The multi-task
-mention filter admits far fewer names than the single-task one, because a
-mention needs the fine head's entity at exactly the coarse span with both
+mention filter admits somewhat fewer names than the single-task one, because
+a mention needs the fine head's entity at exactly the coarse span with both
 heads' marginals at 0.9: fine 10.1038_s41467-020-1 8,867 mentions, 3,746 distinct, 6.5% of the unseen test names; fine 10.3390_met10111458. 14,850 mentions, 4,621 distinct, 7.6% of the unseen test names; coarse 10.1038_s41467-020-1 16,455 mentions, 6,180 distinct, 11.6% of the unseen test names; coarse 10.3390_met10111458. 17,722 mentions, 5,840 distinct, 6.7% of the unseen test names
-(the single-task fatigue lexicons held 49–65% of a paper's unseen names).
+(the single-task fatigue lexicons of D3 and D4 held 8.4–18.6% of a paper's
+unseen fine-grained names and 15.5–23.3% of its coarse-grained ones; the
+49–65% first written here was the corpus's coverage, corrected on 1
+November).
 No number is read before `w17a` (kernel d, still running at 00:31) is in.
 
 *Outcome (1 November, 01:31–02:15 UTC).* `w17a` finished at about 00:40
@@ -5505,22 +5508,27 @@ the seed triples, the names against the control +0.19 [−2.28, +2.66] and
 on this base the names raise both recall and precision on the unseen test
 names, fine-grained +0.58 [−2.93, +4.09] recall and +0.82 [−3.39, +5.03]
 precision, coarse-grained +1.45 [−0.69, +3.58] and +0.97 [−1.09, +3.03],
-none established. The two-head filter admits far fewer names than the
+none established. The two-head filter admits somewhat fewer names than the
 single-task one: 16,455 to 42,066 entries per paper (3,746 to 6,587
-distinct fine-typed names, 5,840 to 12,645 distinct coarse-typed),
-holding 6.5 to 16.3% of a paper's unseen fine-grained test names and 6.7
-to 24.6% of its coarse-grained ones, against 50 to 65% for the single-task
-lexicons. Cost: a names job 82.5 to 122.7 minutes (mean 99.7: three
+distinct fine-typed names, 5,840 to 12,645 distinct coarse-typed, against
+14,213 to 22,775 fine-typed and 33,084 to 66,273 coarse-typed entries for
+the single-task lexicons of D3 and D4), holding 6.5 to 16.3% of a paper's
+unseen fine-grained test names and 6.7 to 24.6% of its coarse-grained
+ones, against 8.4 to 18.6% and 15.5 to 23.3% for the single-task lexicons
+(lower in 7 of the 8 paper–granularity cells). Cost: a names job 82.5 to 122.7 minutes (mean 99.7: three
 teachers, their tagging of 40,000 sentences with two heads, 10 students),
 10.0 minutes per student against the control's 6.9 and the CRF head's
 1.6. The detectable differences were 1.3 points fine-grained and 2.1
 coarse-grained (paper A, Appendix E), tighter than the 3.4 to 3.8 and 1.4
 to 2.4 expected, because the four papers agree in sign. So the negative
 result extends to the strongest base, with the caveat that this base's
-filter gives the names less to add; no decision changes, and the names
-route's eight decisions become ten, three passing. Paper A updated the
-same night (Section 5.7, Table 2, Appendix A, the Limitations) and sent
-to a final review round.
+filter gives the names a little less to add; no decision changes, and the names
+route's eight decisions become ten, three passing. Paper A updated on 1
+November (a Section 5.7 with its own table, Table 2's two post-review
+rows, Appendices A, B and E, the Limitations, the decision counts; its
+tables renumbered in order of appearance: the lexicon split is now Table
+6, the per-type table 7, the strongest base 8 and the week-12 screen 9)
+and sent to a final review round.
 
 ### Week 17 protocol: the harvested names on the strongest base (fixed before any run, 31 October, 19:10 UTC)
 

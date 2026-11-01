@@ -2,7 +2,8 @@
 
 Hatem Madi (affiliation to be added; hatem.madi15@gmail.com)
 
-*Draft of 31 October 2026, revised after six adversarial review rounds. A
+*Draft of 1 November 2026, revised after six adversarial review rounds and
+a post-review experiment (Section 5.7). A
 number in square brackets is a 95% Student-t confidence interval of a mean
 paired difference over the held-out units named. The note at the end maps
 this draft's tables and figures to the repository's generated files and its
@@ -32,7 +33,10 @@ on the other; on MuLMS the recall gain is name knowledge, +7.3 points on
 the unseen names the lexicon holds (22% of them, pooled) against +1.1 on
 the others, +6.2 [+2.4, +9.9] apart (post hoc), while the wrong
 predictions the names add fall mostly on the other names.
-We report all eight decisions, the criterion's revision and a post hoc
+Post review, on the strongest base (multi-task training with six-copy
+mention replacement) the names add 0.96 [−0.01, 1.92] fine-grained and
+0.85 [−0.72, 2.42] coarse-grained, two further decisions that do not
+pass. We report all ten decisions, the criterion's revision and a post hoc
 robustness analysis. Mention replacement is worth using where most of a
 new document's names are unseen and training is a few hundred sentences;
 harvesting names, at six to fourteen times the training cost, is not
@@ -106,6 +110,14 @@ amendments and the one deviation in the analysis. The results are:
   where the recipe's decision failed, the matched control without names
   clears 0 over the CRF head (+2.68 [+0.13, +5.23], a comparison reported
   in the week-14 protocol).
+- The same holds on the strongest base, post review: on multi-task training with
+  six-copy mention replacement (+6.54 [+4.14, +8.94] over the CRF head
+  fine-grained) the names add +0.96 [−0.01, +1.92] fine-grained and +0.85
+  [−0.72, +2.42] coarse-grained over the matched control (D9, D10, a
+  protocol fixed after six review rounds of this paper and before its
+  run; Section 5.7), with every paper positive fine-grained and the
+  interval's lower bound at −0.01; three more copies add nothing there
+  (−0.19 [−2.05, +1.67]).
 - Neither the names' source nor the recipe's settings changes the result
   detectably, within about 2 to 3 points: a mixed corpus of the six other
   subfields' topics, which holds most of the same names, gives −0.18
@@ -123,9 +135,10 @@ amendments and the one deviation in the analysis. The results are:
   generic shift, within four papers' wide intervals (Section 5.4). On SOFC-Exp, where
   half the test names are seen, nothing helps (Section 5.5).
 
-Section 6 lists what else was tried on the way and the count: eight
-pre-registered decisions on the names route in its last three protocols,
-three passing, which share one corpus's four papers.
+Section 6 lists what else was tried on the way and the count: ten
+pre-registered decisions on the names route in its last four protocols,
+two of them post review, three passing, which share one corpus's four
+papers.
 
 ## 2 Data
 
@@ -199,8 +212,10 @@ the exact permutation test of a mean paired difference over all 2^n
 assignments of signs to the n units, two-sided. Protocols are named by
 the stage of the project in which they were fixed; the repository calls
 the stages weeks, though the protocols of weeks 10 to 14 were fixed
-between 17 and 29 October 2026 and their last runs ended on 31 October
-(Appendix A).
+between 17 and 29 October 2026 and their last runs ended on 31 October,
+and the *post-review* protocol of week 17 was fixed on 31 October after
+six review rounds of this paper, with its headline written, and run that
+night (Appendix A).
 
 **Decision rule.** A method improves on its reference when the 95%
 Student-t interval of the mean paired micro-F1 difference lies above 0,
@@ -240,7 +255,7 @@ variants, which use the names as a dictionary feature; recorded at
 08:11) and its second half, with the recipe, was
 not (recorded at 13:35); and the protocol itself computed, from runs
 already made, that plain mention replacement would pass the new pooled
-criterion (+2.34 [+0.94, +3.75] there, +2.35 in Table 3 by the
+criterion (+2.34 [+0.94, +3.75] there, +2.35 in Section 5.2 by the
 analysis's rounding; labelled post hoc because both corpora's results
 were known). The criterion under which the recipe
 passes was thus adopted knowing that mention replacement already met it, before
@@ -285,7 +300,7 @@ Sections 5.1 and 5.2 are post hoc.
 **Runs.** Kaggle T4 GPUs with deterministic CUDA, one frozen commit per
 batch, a pinned image and pinned libraries; model snapshots pinned by
 commit. Each GPU session first repeated one earlier run, and every
-repeat over weeks 4 to 14 was identical. Hyperparameters and compute are
+repeat over weeks 4 to 17 was identical. Hyperparameters and compute are
 in Appendix B.
 
 ## 4 Systems
@@ -308,7 +323,8 @@ last of the four systems compared throughout:
   with mention replacement +6.73 [+6.03, +7.43] fine-grained (our
   companion evaluation study); neither transfers to SOFC-Exp, and MuLMS
   has one type level, so the CRF head is the reference the three corpora
-  share.
+  share. The names were run on that strongest base post review (Section
+  5.7).
 - **MR3.** Mention replacement (dai2020analysis): three copies of each
   training sentence with an entity, each mention replaced with
   probability 0.5 by a training mention of the same type; copies that
@@ -373,11 +389,12 @@ student trains on the gold sentences and the copies.
 
 ### 5.1 The pre-registered decisions
 
-Table 2 lists the eight decisions of the names route in the order they
-were taken, with the seeds each used.
+Table 2 lists the ten decisions of the names route in the order they
+were taken, with the seeds each used; the last two were registered after
+six review rounds of this paper (post review, Section 5.7).
 
-**Table 2.** The eight pre-registered decisions of the names route in the
-order taken: corpus and units (with MuLMS's seeds), comparison, the
+**Table 2.** The ten pre-registered decisions of the names route (the last
+two post review) in the order taken: corpus and units (with MuLMS's seeds), comparison, the
 reference's and the system's mean micro F1, the mean paired difference
 with its 95% CI, and the verdict.
 
@@ -392,6 +409,8 @@ with its 95% CI, and the verdict.
 | D6 | SOFC-Exp, 5 article folds | MR6 + names vs CRF head | 82.79 | 82.75 | −0.04 [−1.21, +1.14] | no |
 | D7 | pooled, 11 units (300–900) | MR6 + names vs MR6 | | | +0.80 [−0.66, +2.26] | no |
 | D8 | MuLMS, 7 subfields (300–900) | own-topic corpus vs mixed corpus | 51.91 | 51.73 | −0.18 [−2.01, +1.65] | no |
+| D9 | MaterioMiner fine, 4 papers (post review) | multi-task + MR6 + names vs multi-task + MR6 | 52.99 | 53.95 | +0.96 [−0.01, +1.92] | no |
+| D10 | MaterioMiner coarse, 4 papers (post review) | multi-task + MR6 + names vs multi-task + MR6 | 60.40 | 61.25 | +0.85 [−0.72, +2.42] | no |
 
 The reference F1 on MuLMS is the 7-seed mean (48.54); the 10-seed mean
 quoted in Section 1 is 48.66. D5 and D5′ are two readings of one protocol
@@ -415,10 +434,11 @@ leaving any one unit out keeps the lower bound above 0 (lowest +0.44 and
 +0.54, without semiconductors). Figure 2 shows every unit.
 
 The decision rule carries no correction for the number of decisions.
-Under a Bonferroni bound of 0.05/8 none of the three passes would hold:
+Under a Bonferroni bound of 0.05/10 none of the three passes would hold:
 the two-sided t p-values from the per-unit differences are 0.013 for D5
-(0.011 for D5′), 0.018 for D3 and 0.014 for D4, while mention replacement's post hoc pooled gain over
-the CRF head (Section 5.2) has p = 0.004 on either seed basis and would.
+(0.011 for D5′), 0.018 for D3 and 0.014 for D4 (0.052 for D9 and 0.183
+for D10), while mention replacement's post hoc pooled gain over the CRF
+head (Section 5.2) has p = 0.004 on either seed basis and would hold.
 
 **Figure 2.** Per held-out unit, the micro-F1 difference of MR6 + names
 from the CRF head (circles) and from MR6 (squares): MuLMS's 7 subfields
@@ -496,7 +516,9 @@ between-unit spread near 3 points, an 11-unit half-width of about 2, and
 put the chance of a pass at about 0.4; "not established" is thus the
 designed outcome of a small effect, not evidence of none. The interval's
 upper bound, +2.3, is as large as mention replacement's whole gain; the
-comparison detects 2.0 points at 80% power.
+comparison detects 2.0 points at 80% power. On the strongest MaterioMiner
+base, post review, the names' increment is +0.96 [−0.01, +1.92]
+fine-grained and +0.85 [−0.72, +2.42] coarse-grained (Section 5.7).
 
 ### 5.3 The names' source and the recipe's settings
 
@@ -632,7 +654,7 @@ fixed before its run).** The lexicons were not stored with the runs. Week
 15 rebuilt each from its unit's own teachers and corpus (the rebuilt
 teachers' test F1 and the lexicon's coverage counts equal the stored
 runs' in every unit) and split the unseen test names by whether the
-lexicon holds them (Table 8). The reading was fixed in advance with three
+lexicon holds them (Table 6). The reading was fixed in advance with three
 outcomes: name knowledge if the names' recall gain over MR6 is larger on
 the held names than on the others, the paired interval of the difference
 above 0; a generic shift if the two gains are alike, the interval
@@ -668,7 +690,7 @@ holds, and the F1 increment stays within Section 5.2's noise because the
 gain is confined to that fifth while the wrong predictions land on both
 parts.
 
-**Table 8.** Recall on the unseen test names by lexicon membership (post
+**Table 6.** Recall on the unseen test names by lexicon membership (post
 hoc; lexicons rebuilt by the names method's own teachers; MuLMS on the
 decision seeds, MaterioMiner on 10 seeds). Levels: per system, the share
 of the unseen test names the lexicon holds (pooled over seeds and units),
@@ -748,7 +770,7 @@ SOFC-Exp as its boundary condition.
 
 ### 5.6 Per entity type
 
-Table 6 gives, per type, the F1 of the CRF head, MR6 and MR6 + names on
+Table 7 gives, per type, the F1 of the CRF head, MR6 and MR6 + names on
 MuLMS's subfields, averaged over the (seed, unit) pairs whose test set
 has the type (the MaterioMiner tables, both granularities, are in the
 repository); these are exploratory and are not decided on. The pattern of
@@ -763,7 +785,7 @@ two where MR6 had gained (MEP −8.0, STD −7.0) and one where it had not
 (MAT −5.8), and most on types with a handful of test entities (PRP −10.2,
 CPR −9.2).
 
-**Table 6.** Per entity type on MuLMS's 7 held-out subfields (decision
+**Table 7.** Per entity type on MuLMS's 7 held-out subfields (decision
 seeds): the test support per unit, the number of units with the type,
 micro F1 of the CRF head, MR6 and MR6 + names, and the names method's
 differences; types ordered by test support.
@@ -783,6 +805,66 @@ differences; types ordered by test support.
 | NUM | 37.1 | 7 | 5.57 | 8.11 | 8.71 | +3.14 | +0.60 |
 | UNIT | 13.0 | 7 | 12.78 | 21.48 | 21.00 | +8.21 | −0.48 |
 | RANGE | 3.0 | 6 | 0.00 | 0.00 | 0.00 | +0.00 | +0.00 |
+
+### 5.7 The names on the strongest base (post review)
+
+The round-6 reviews of this paper listed as untested whether the names
+add to the strongest MaterioMiner system, multi-task training with
+mention replacement (Section 4). A protocol for that test was committed
+on 31 October at 19:15 UTC, after six review rounds and with the headline
+written, before any run (Appendix A): two decisions by the rule of
+Section 3, the names against a matched control on MaterioMiner's four
+held-out papers over 10 seeds, fine-grained (D9) and coarse-grained (D10),
+with the prior stated low. The control is the multi-task model (one
+encoder, a CRF head per granularity) with six-copy mention replacement;
+the names system adds a lexicon harvested as in Section 4 but by three
+multi-task teachers (the stored multi-task runs of seeds 0, 100 and 200,
+whose scores the jobs reproduced), each tagging the fatigue corpus with
+both heads: a mention is admitted when the three teachers agree on its
+coarse-grained span and type and on its fine-grained type at exactly that
+span, or on its having none, with every marginal at 0.9 or more on each
+head, and it joins the pool under its pair of types, the key of
+multi-task mention replacement. Table 8 gives the result.
+
+**Table 8.** Post review: the names on the strongest MaterioMiner base.
+Micro F1 over the four held-out papers (10 seeds; both granularities from
+one model) with its 95% CI, the names against the matched control (D9,
+D10) and both against multi-task training with three-copy mention
+replacement, the multi-task model and the CRF head (reported).
+
+| | System | micro F1 [95% CI] | Δ vs the control | Δ vs multi-task + MR3 | Δ vs multi-task | Δ vs CRF head |
+|---|---|---|---|---|---|---|
+| fine | multi-task + MR6 + names | 53.95 [47.52, 60.38] | +0.96 [−0.01, +1.92] (D9, no) | +0.76 [−0.15, +1.68] | +3.77 [+1.34, +6.21] | +7.49 [+5.96, +9.02] |
+| fine | multi-task + MR6 (the control) | 52.99 [46.93, 59.06] | | −0.19 [−2.05, +1.67] | +2.82 [−0.00, +5.64] | +6.54 [+4.14, +8.94] |
+| coarse | multi-task + MR6 + names | 61.25 [53.71, 68.80] | +0.85 [−0.72, +2.42] (D10, no) | +0.91 [−0.14, +1.97] | +3.21 [+0.46, +5.96] | +2.65 [−0.09, +5.38] |
+| coarse | multi-task + MR6 (the control) | 60.40 [53.66, 67.15] | | +0.06 [−0.74, +0.86] | +2.36 [+1.15, +3.56] | +1.80 [+0.19, +3.40] |
+
+Neither decision passes. Fine-grained the names add +0.96 [−0.01, +1.92],
+every paper positive (0.16 to 1.62) with the interval's lower bound at
+−0.01 (two-sided t p = 0.052); coarse-grained +0.85 [−0.72, +2.42], three
+papers positive. The whole increment over the week-9 system, multi-task
+training with three copies, is +0.76 [−0.15, +1.68] and +0.91 [−0.14,
++1.97], and the three extra copies alone add −0.19 [−2.05, +1.67] and
++0.06 [−0.74, +0.86]: on this base too what the names add is about a point
+and not established, now in comparisons that detect 1.3 points
+fine-grained and 2.1 coarse-grained (Appendix E), tighter than the 3.4 to
+3.8 and 1.4 to 2.4 the protocol expected, because the four papers agree
+in sign. The votes over the seed triples give +0.19 [−2.28, +2.66] and
++0.63 [−1.65, +2.91]. On the unseen test names the names raise recall and
+precision together here, +0.58 [−2.93, +4.09] and +0.82 [−3.39, +5.03]
+fine-grained, +1.45 [−0.69, +3.58] and +0.97 [−1.09, +3.03]
+coarse-grained, none established (post hoc, the paired intervals of
+Section 5.4). Two caveats. The two-head filter admits lexicons of 16,455
+to 42,066 entries per paper (3,746 to 6,587 distinct fine-typed names)
+that hold 6.5 to 16.3% of a paper's unseen fine-grained test names and
+6.7 to 24.6% of its coarse-grained ones, against 8.4 to 18.6% and 15.5 to
+23.3% for the single-task lexicons of D3 and D4 (lower in 7 of the 8
+paper–granularity cells), so this test gives the names a little less to
+add, and a looser filter was not tried. And a names job costs 82.5 to
+122.7 minutes on a T4 (three teachers, their tagging of 40,000 sentences
+with two heads and ten students), 10.0 minutes per student against 6.9
+for a control run, which like a student gives both granularities, and 1.1
+for a CRF-head run of one granularity on these papers (Appendix B).
 
 ## 6 What else was tried, and the count
 
@@ -806,7 +888,7 @@ runs, each failing or passing as recorded:
   filter and not the corpus was the bottleneck, is not borne out by
   Section 5.3.
 - *Seven variants on the topic corpora* (week 12, a 3-seed screen on the
-  7 subfields; Table 7, with the plan's labels, under which V5 was not
+  7 subfields; Table 9, with the plan's labels, under which V5 was not
   assigned). The selection rule took the largest mean gain
   over MR3, which favours the noisiest variant; the screen decides
   nothing, and two of its losers deserve a 10-seed test that was not run:
@@ -819,7 +901,7 @@ runs, each failing or passing as recorded:
   lexicon, scored below MR3 on 3 seeds (V8's interval below 0, V7's
   covering it).
 
-**Table 7.** The week-12 screen: seven variants on MuLMS's 7 held-out
+**Table 9.** The week-12 screen: seven variants on MuLMS's 7 held-out
 subfields at 3 seeds, micro F1 and the differences from MR3 and the CRF
 head (no decision).
 
@@ -849,11 +931,11 @@ head (no decision).
   in the rest. Two of its ten pre-registered decisions pass, on two
   corpora, both under a point; it adds nothing to mention replacement.
 
-In all, the names route took eight pre-registered decisions in weeks 12
-to 14, of which three pass, sharing one corpus's four papers (Section
-5.1); with weeks 10 and 11, fourteen decisions on the route, four
-passing; about 0.35 of fourteen would pass by chance under independence,
-which these decisions do not have.
+In all, the names route took ten pre-registered decisions in weeks 12
+to 17, two of them post review, of which three pass, sharing one corpus's
+four papers (Section 5.1); with weeks 10 and 11, sixteen decisions on the
+route, four passing; about 0.4 of sixteen would pass by chance under
+independence, which these decisions do not have.
 
 ## 7 Discussion
 
@@ -863,7 +945,7 @@ on held-out documents passed pre-registered on MaterioMiner and is above
 0 post hoc over the 11 units of both corpora (+2.35 [+0.94, +3.75]); on
 MuLMS alone its decision failed. It costs twice the baseline's training
 time and no corpus. The extra copies and the harvested names are not
-shown to add to it. Against MR3 the names cost three times its training
+shown to add to it, nor to the strongest base (Section 5.7). Against MR3 the names cost three times its training
 time with the harvest shared over a job's students and seven times
 charged to one student, plus a 40,000-sentence corpus (Appendix B), for
 an increment of +1.13 [−0.51, +2.76]; against the matched control the
@@ -1003,10 +1085,12 @@ by three agreeing teachers, through mention replacement, improves on the
 baseline on held-out documents of two corpora under a pre-registered
 protocol; but mention replacement without the names gains most of it
 on the same units, the names' share, +0.8 points with an interval from
-−0.7 to +2.3, is not established, no dependence on their source or on the
+−0.7 to +2.3, is not established, nor is it on the strongest base post
+review (+0.96 [−0.01, +1.92] fine-grained, +0.85 [−0.72, +2.42]
+coarse-grained), no dependence on their source or on the
 filter was detected within about 2 to 3 points, and on MuLMS what they
 buy is recall on the unseen names the lexicon holds, a fifth of them, at
-the price of precision. We report the eight decisions, the criterion
+the price of precision. We report the ten decisions, the criterion
 revision, the amendments and the one deviation, and the analyses that
 would settle the question. The practical advice is mention replacement; the
 methodological advice is to test a names method against a matched copies
@@ -1027,7 +1111,7 @@ method and its control.
 - **Three passes on one corpus's papers.** The MaterioMiner passes at two
   granularities and the pooled pass share four papers; MuLMS alone passes
   nothing single-model; none of the three passes survives a Bonferroni
-  correction over the eight decisions (Section 5.1).
+  correction over the ten decisions (Section 5.1).
 - **A revised criterion.** The criterion under which the recipe passes
   was adopted on 20 October on the author's decision to push for a
   methods claim,
@@ -1048,10 +1132,15 @@ method and its control.
   set is where nothing helps, and the literature predicts smaller gains
   for mention replacement as training grows. The claim is scoped to a few
   hundred annotated sentences.
-- **The reference is not the strongest base.** On MaterioMiner,
-  multi-task training with mention replacement beats the CRF head by more
-  than the names route does (Section 4); the names were never run on that
-  base, so whether they add to the best system is untested.
+- **One test on the strongest base, post review.** The names were run on
+  multi-task training with six-copy mention replacement after six review
+  rounds of this paper, under a protocol fixed before the run (Section
+  5.7): +0.96 [−0.01, +1.92] fine-grained and +0.85 [−0.72, +2.42]
+  coarse-grained on one corpus's four papers, neither passing, the first
+  with every paper positive; the comparisons detect 1.3 and 2.1 points.
+  The two-head filter admits lexicons holding 7 to 25% of a paper's unseen
+  names, a little less than the single-task ones, and a looser filter was
+  not tried.
 - **The names' effect is only partly isolated.** The lexicon-membership
   split (Section 5.4) was run after the decisions, on rebuilt lexicons;
   it reads name knowledge on MuLMS and, by the rule's letter, a generic
@@ -1148,6 +1237,7 @@ recorded, and the amendments.
 | D7, D8 (week 14) | 29 October 12:07 (`2886267`), two minutes after the first batch was pushed and five hours before its results | 29 October | 29 October | — |
 | ablations (week 14) | 29 October, as above | 31 October | 31 October | — |
 | the lexicon-membership analysis (week 15; post hoc, no decision) | 31 October 16:13 (`2c60f33`): the rebuild, its checks and the reading fixed before the run | 31 October (`w15a`) | 31 October | — |
+| D9, D10 (week 17; post review) | 31 October 19:15 (`f39447c`), after six review rounds of this paper and with its headline written, the prior stated low; the code 19:40 (`013f9ac`) | 31 October 19:55 to 1 November 00:40 (`w17a`, `w17b`) | 1 November | — |
 
 ## Appendix B: hyperparameters and compute
 
@@ -1181,7 +1271,14 @@ against the CRF head's 8.1, so up to it they take 2.0, 2.9 and 3.1 times
 its updates. Runs
 used Kaggle sessions of two T4 GPUs with deterministic CUDA, one frozen
 commit per batch, a pinned image and pinned libraries; the three week-14
-batches alone took 19 session hours (5.2, 4.3 and 9.7).
+batches alone took 19 session hours (5.2, 4.3 and 9.7). The two week-17
+sessions took 4.7 and 3.1 hours: a names job on the multi-task base
+(three multi-task teachers, their tagging of the corpus with two heads,
+ten students) 82.5 to 122.7 minutes, 10.0 minutes per student, against
+6.9 minutes for a multi-task six-copy control run, 4.8 for the three-copy
+one, 2.0 for the multi-task model and 1.1 for the CRF head on the same
+papers; the students' best epoch came after 4.4 to 7.1 epochs on average
+per paper.
 
 ## Appendix C: the unlabeled corpora
 
@@ -1246,6 +1343,10 @@ degrees of freedom.
 | D8: own-topic − mixed corpus, MuLMS | 1.83 | 6 | 2.51 |
 | D3: MR6 + names − CRF head, MaterioMiner fine | 2.88 | 3 | 3.77 |
 | D4: MR6 + names − CRF head, MaterioMiner coarse | 1.10 | 3 | 1.44 |
+| D9: multi-task + MR6 + names − multi-task + MR6, MaterioMiner fine (post review) | 0.96 | 3 | 1.26 |
+| D10: the same, coarse (post review) | 1.57 | 3 | 2.05 |
+| multi-task + MR6 + names − multi-task + MR3, MaterioMiner fine (reported) | 0.91 | 3 | 1.20 |
+| the same, coarse (reported) | 1.05 | 3 | 1.38 |
 | ablation, 10,000 sentences − the recipe (3 seeds) | 1.63 | 6 | 2.23 |
 | ablation, 20,000 sentences − the recipe (3 seeds) | 2.29 | 6 | 3.14 |
 | ablation, threshold 0.7 − the recipe (3 seeds) | 1.47 | 6 | 2.01 |
@@ -1259,14 +1360,15 @@ and figures correspond to generated files: Table 2 to
 `docs/tables/table6_held_out_decisions.md` and `table2_decisions.md`;
 Table 3 to `table9_robustness.md`; Table 4 to `table7_ablations.md`; Table
 5 to `results/gpu/ner_mentions.json` (and `table4_unseen.md` for the CRF
-head); Table 6 to `table8_types.md` and `tableA2_types_fine.md`; Table 7
-to the week-12 screen in `docs/ROADMAP.md`; Figure 1 to
+head); Table 7 to `table8_types.md` and `tableA2_types_fine.md`; Table 9
+to the week-12 screen in `docs/ROADMAP.md`; Table 8 to `table11_week17.md`;
+Figure 1 to
 `docs/figures/fig8_method.png`, Figure 2 to `fig9_units.png`, Figure 3 to
 `fig7_names.png`; Appendix E to `results/gpu/ner_robustness.json`. The
-claims it rests on are C2, C17 and C20–C26 and C28 of `docs/PAPER.md`; citation
+claims it rests on are C2, C17, C20–C26, C28 and C29 of `docs/PAPER.md`; citation
 keys refer to `docs/references.bib`. For a journal's structure, Section 1
 is the Introduction, Sections 5 and 6 the Results, Sections 7 to 9 the
-Discussion, and Sections 2 to 4 with the appendices the Methods. Table 8 is `table10_lexicon.md`, from `results/gpu/ner_lexicon_recall.json`
+Discussion, and Sections 2 to 4 with the appendices the Methods. Table 6 is `table10_lexicon.md`, from `results/gpu/ner_lexicon_recall.json`
 (`ner_lexicon_recall.py`; the rebuilt lexicons themselves are not committed).
 
 Every interval in the paper is the analysis scripts' value, computed from
