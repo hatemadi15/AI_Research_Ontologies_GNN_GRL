@@ -470,7 +470,7 @@ and coverage counts equal the stored ones. Run record: `w15a` pushed to
 `ner-gpu-jobs-c` (version 9, bundle `2c60f33`) on 31 October at 16:30 UTC;
 pulled at 19:41 (16 jobs done; the smoke repeat identical); every unit's
 rebuilt teachers and coverage counts equal the stored runs'. Outcome (Table
-10, paper A's Table 6): on MuLMS the names' recall gain over MR6 is +7.29
+10, paper A's Table 5 and, in full, Supplementary Table S3): on MuLMS the names' recall gain over MR6 is +7.29
 [+3.27, +11.30] on the unseen names the lexicon holds and +1.12 [−0.78,
 +3.02] on the others (difference +6.17 [+2.44, +9.90], 7 of 7 subfields):
 name knowledge, as the reading fixed in advance defines it; on MaterioMiner

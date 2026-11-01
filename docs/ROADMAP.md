@@ -5564,6 +5564,37 @@ paper's system names, a clipped box, bands only across the 11 units);
 ChemDataExtractor and Bouthillier et al. cited; the draft notes moved to
 `docs/PAPER_A_NOTES.md`. A further round reviews the revision.
 
+*Paper A, review round 8 (1 November).* Three fresh reviews of the
+round-7 revision: a number audit (3 blocking: the follow-up described as
+registered after "the results above" although the week-15 lexicon split
+arrived 26 minutes after its protocol; "every test was fixed" where only
+decisions were; the CRF head called "the reference of every decision";
+7 should-fix, among them the inclusion rule of the eighteen decisions, D6
+missing from Appendix E, and the two counting rules behind 9.6% and 9.8%),
+a journal referee (major revision again, for length: Sections 1–9 at
+about 11,100 words) and a consistency check (1 blocking: the abstract's
+2.46 read as six-copy mention replacement; 11 should-fix, among them the
+lexicon-split rule read two ways, "the gain is confined to that fifth"
+contradicted by its own counts, and the deleted disclosure that the 18
+October protocol gated D3 and D4 on D1). No number in a results file and
+no verdict changed. Revised the same day by restructuring: a main text
+(`docs/PAPER_A.md`, Sections 1–9 about 8,700 words with tables, the
+narrative sections about 6,200 if Sections 2–4 serve as Methods) and a
+Supplementary Information file (`docs/PAPER_A_SI.md`, Notes 1–9, Tables
+S1–S6: the protocol record, compute and repeats, the corpora, the
+settings ablations, the names' mechanism in full, per type, the earlier
+protocols and the screen, the follow-up's details, detectable
+differences); protocols cited by date rather than week; "reported"
+renamed "pre-specified"; a worked example with the electrolysis
+lexicon's most frequent entries; eight verified references added
+(Europe PMC, seqeval, co- and tri-training, Olivetti et al., Kononova et
+al., Tshitoyan et al., Lison et al.); D6 added to the detectable
+differences (`ner_robustness.py`). One correction to this record: the
+14.1 outcome above calls the pooled control gain over the CRF head
+(+2.56 [+0.94, +4.18]) reported, but the week-14 protocol reported the
+control per corpus only, so the pooled figure is post hoc (paper A,
+Section 5.2). A further round reviews the restructure.
+
 ### Week 17 protocol: the harvested names on the strongest base (fixed before any run, 31 October, 19:10 UTC)
 
 *Why, and when.* The round-6 reviews of paper A (31 October) listed as a

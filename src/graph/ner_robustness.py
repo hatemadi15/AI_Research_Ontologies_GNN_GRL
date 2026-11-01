@@ -181,6 +181,8 @@ def detectable(analysis, robust_pooled, robust_grids):
     add('D1 MuLMS: names_vs_crf', dec.get('minus_crf'), 6)
     add('D2 MuLMS: names_vs_mr3', dec.get('minus_crf_mr'), 6)
     add('D8 MuLMS: own_vs_mixed', top.get('minus_crf_mrm_mixed6'), 6)
+    folds = analysis.get('week13', {}).get('folds', {}).get('crf_mrm6', {})
+    add('D6 SOFC-Exp: names_vs_crf', folds.get('minus_crf'), 4)      # 5 article folds
     add('MuLMS: names_vs_mr6', cop.get('minus_crf_mr6'), 6)
     for name, entry in (analysis.get('week14', {}).get('ablations', {}) or {}).items():
         add(f'ablation {name}: vs_method (3 seeds)', entry.get(f'minus_{winner}') if isinstance(entry, dict) else None, 6)

@@ -94,6 +94,9 @@ def test_mde_stratified_partial_and_detectable():
                                                                         'mde_80': nr.mde(1.5, 3)}
     assert d['MaterioMiner coarse: crf_mt_mrm6_vs_crf_mt_mr']['half_width'] == 2.0
     assert not [k for k in nr.detectable({}, {}, {}) if '17' in k]
+    # D6, SOFC-Exp's 5 article folds (4 degrees of freedom), from week13.folds
+    d6 = nr.detectable({'week13': {'folds': {'crf_mrm6': {'minus_crf': {'micro': {'ci95': [-1.21, 1.14]}}}}}}, {}, {})
+    assert d6['D6 SOFC-Exp: names_vs_crf'] == {'half_width': 1.17, 'df': 4, 'mde_80': 1.57}   # (1.14 + 1.21) / 2 rounds to 1.17
 
 
 def test_job_costs_share_a_job_over_its_students():

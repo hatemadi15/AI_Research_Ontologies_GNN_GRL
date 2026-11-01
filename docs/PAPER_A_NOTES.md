@@ -3,31 +3,39 @@
 `docs/PAPER_A.md` is the submission text of paper A; this file keeps what
 a reader of the repository needs beside it.
 
-**Tables and figures to generated files.** Table 1 is written by hand
-from the conversions in `src/graph/`; Table 2 to
+**Tables and figures to generated files.** The paper is the main text
+(`docs/PAPER_A.md`) and the Supplementary Information
+(`docs/PAPER_A_SI.md`, Notes 1 to 9). Table 1 is written by hand from the
+conversions in `src/graph/`; Table 2 to
 `docs/tables/table6_held_out_decisions.md` and `table2_decisions.md` (D9
 and D10 to `table11_week17.md`); Table 3 to `table9_robustness.md`; Table
-4 to `table7_ablations.md`; Table 5 to `results/gpu/ner_mentions.json`
-(and `table4_unseen.md` for the CRF head); Table 6 to
-`table10_lexicon.md`, from `results/gpu/ner_lexicon_recall.json`
-(`ner_lexicon_recall.py`; the rebuilt lexicons themselves are not
-committed); Table 7 to `table11_week17.md`; Table 8 to the week-12 screen
-in `docs/ROADMAP.md`; Table A1 to the protocol record in
-`docs/ROADMAP.md` §4 and `git log`; Table E1 to
-`results/gpu/ner_robustness.json` (`detectable`); Table F1 to
-`table8_types.md` (and `tableA2_types_fine.md` for MaterioMiner). Figure 1
-is `docs/figures/fig8_method.png`, Figure 2 `fig9_units.png`, Figure 3
-`fig7_names.png` (`src/graph/paper_figures.py`).
+4 to `results/gpu/ner_mentions.json` (and `table4_unseen.md` for the CRF
+head); Table 5 to the paired-gains block of `table10_lexicon.md`, from
+`results/gpu/ner_lexicon_recall.json` (`ner_lexicon_recall.py`; the
+rebuilt lexicons themselves are not committed); Table 6 to
+`table11_week17.md`. Table S1 to the protocol record in
+`docs/ROADMAP.md` §4 and `git log`; Table S2 to `table7_ablations.md`;
+Table S3 to `table10_lexicon.md`; Table S4 to `table8_types.md` (and
+`tableA2_types_fine.md` for MaterioMiner); Table S5 to the week-12 screen
+in `docs/ROADMAP.md`; Table S6 to `results/gpu/ner_robustness.json`
+(`detectable`). Figure 1 is `docs/figures/fig8_method.png`, Figure 2
+`fig9_units.png`, Figure 3 `fig7_names.png` (`src/graph/paper_figures.py`).
+The worked example's lexicon entries (Section 4) are the most frequent
+MAT and PROPERTY entries of the electrolysis subfield's rebuilt lexicon in
+`results/gpu_names/` (not committed).
 
 **Claims.** The paper rests on C2, C17, C20–C26, C28 and C29 of
 `docs/PAPER.md`; citation keys refer to `docs/references.bib`.
 
 **Journal structure.** Section 1 is the Introduction, Sections 5 and 6
-the Results, Sections 7 to 9 the Discussion, and Sections 2 to 4 with the
-appendices the Methods; for npj Computational Materials the AI-use
-statement (Ethics and broader impact) moves into the Methods. Before
+the Results, Sections 7 to 9 the Discussion, Sections 2 to 4 the Methods,
+and the Supplementary Information the supplementary material; with
+Sections 2 to 4 as Methods, the narrative sections (1 and 5 to 9) are
+about 6,200 words. For npj Computational Materials the AI-use statement
+(Ethics and broader impact) moves into the Methods; for ACL Rolling
+Review the paper needs cutting to 8 pages and anonymising. Before
 submission: the affiliation on the title page, the venue's abstract
-limit (the abstract is 199 words), and the name and version of the AI
+limit (the abstract is 200 words), and the name and version of the AI
 assistant if the venue asks for them.
 
 **Review history.** The draft of 30 October went through six adversarial

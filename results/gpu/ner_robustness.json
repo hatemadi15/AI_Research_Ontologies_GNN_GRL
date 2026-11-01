@@ -884,6 +884,11 @@
    "df": 6,
    "mde_80": 2.51
   },
+  "D6 SOFC-Exp: names_vs_crf": {
+   "half_width": 1.17,
+   "df": 4,
+   "mde_80": 1.57
+  },
   "MuLMS: names_vs_mr6": {
    "half_width": 2.02,
    "df": 6,
