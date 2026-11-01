@@ -121,11 +121,11 @@ MENTION_METHODS = {'crf_mt': 'multi-task', 'crf_mt_ens3': 'multi-task vote',
 NAMES_SETTINGS = {'mulms_leave_one_subfield_out': 'MuLMS, held-out subfields',
                   'fine_leave_one_paper_out': 'MaterioMiner fine-grained, held-out papers',
                   'coarse_leave_one_paper_out': 'MaterioMiner coarse-grained, held-out papers'}
-NAMES_SYSTEMS = {'crf': 'CRF head', 'crf_mr': 'mention replacement, 3 copies',
-                 'crf_mr6': '6 copies, no names',
-                 'crf_mrm_topic6': "6 copies + the topic corpus's names",
-                 'crf_mrm6': "6 copies + the fatigue corpus's names",
-                 'crf_mrm_mixed6': "6 copies + a mixed corpus's names"}
+NAMES_SYSTEMS = {'crf': 'CRF head', 'crf_mr': 'MR3 (3 copies)',
+                 'crf_mr6': 'MR6 (6 copies, no names)',
+                 'crf_mrm_topic6': 'MR6 + names (topic corpus)',
+                 'crf_mrm6': 'MR6 + names (fatigue corpus)',
+                 'crf_mrm_mixed6': 'MR6 + names (mixed corpus)'}
 NAMES_PARENT = {'crf_mr': 'crf', 'crf_mr6': 'crf_mr', 'crf_mrm_topic6': 'crf_mr6',
                 'crf_mrm6': 'crf_mr6', 'crf_mrm_mixed6': 'crf_mr6'}
 
@@ -644,11 +644,14 @@ def figure9(rows, path):
             groups.append(g)
     y = 0
     ticks, labels, bands, labelled = [], [], [], False
+    pooled_rows = []                 # the y of the 11 units' rows (MuLMS and MaterioMiner fine)
     for g in groups:
         members = [r for r in rows if r[0] == g]
         start = y                    # the group's header row, then its units
         y += 1
         for _, unit, vs_crf, vs_ctrl in members:
+            if g.startswith('MuLMS') or 'fine-grained' in g:
+                pooled_rows.append(y)
             ax.plot(vs_crf, y, 'o', color='tab:red', ms=6, zorder=3,
                     label=None if labelled else 'against the CRF head')
             if vs_ctrl is not None:
@@ -671,10 +674,11 @@ def figure9(rows, path):
         v = values(pooled)
         if len(v) == 11:
             m, lo, hi = mean_ci(v)
-            ax.axvspan(lo, hi, color=color, alpha=0.08, zorder=1)
-            ax.axvline(m, color=color, lw=1, ls='--', zorder=2)
+            top_y, bottom_y = min(pooled_rows) - 1.5, max(pooled_rows) + 0.5
+            ax.fill_betweenx([top_y, bottom_y], lo, hi, color=color, alpha=0.08, zorder=1, lw=0)
+            ax.vlines(m, top_y, bottom_y, color=color, lw=1, ls='--', zorder=2)
             ax.text(0.99, 0.995 - 0.04 * k,
-                    f'pooled, 11 units, vs {name}: {m:+.2f} [{lo:+.2f}, {hi:+.2f}]',
+                    f'pooled, 11 units, vs {name}: {m:+.2f} [{lo:+.2f}, {hi:+.2f}]'.replace('-', '\u2212'),
                     fontsize=8.5, color=color, ha='right', va='top', transform=ax.transAxes)
     ax.axvline(0, color='black', lw=0.8, zorder=2)
     ax.set_yticks(ticks, labels, fontsize=9)
@@ -696,7 +700,7 @@ def figure8(path):
     import matplotlib.pyplot as plt
     from matplotlib.patches import FancyBboxPatch
     fig, ax = plt.subplots(figsize=(7.2, 5.6))
-    ax.set(xlim=(0, 14.4), ylim=(0, 11.2))
+    ax.set(xlim=(-0.1, 14.6), ylim=(0, 11.2))
     ax.axis('off')
     top, bottom, h = 7.4, 1.4, 3.2
     boxes = {  # name: (x, y, w, h, text, face)
@@ -746,7 +750,7 @@ def figure8(path):
         ax.annotate('', (x_to, pool_top), (x_to, rail), arrowprops=head)
     ax.text(0.9, 6.1, 'training mentions', fontsize=7, color='#333333')
     ax.text(8.6, rail + 0.15, 'harvested names', fontsize=7, color='#333333', ha='center')
-    ax.text(0.2, 0.15, 'No silver sentence is trained on: the gold contexts stay, only the names change. Without the '
+    ax.text(0.2, 0.15, 'No teacher-labeled sentence is trained on: the gold contexts stay, only the names change. Without the '
             'lexicon the student is\nmention replacement with 6 copies (the control); with 3 copies and no lexicon, '
             'MR3 (mention replacement, Dai and Adel 2020, at a fixed setting).', fontsize=7, color='#333333',
             va='bottom', linespacing=1.3)

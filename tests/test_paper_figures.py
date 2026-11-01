@@ -237,8 +237,8 @@ def test_names_data_and_figure7(tmp_path):
     assert list(rows) == ['MuLMS, held-out subfields']       # no CRF head on the papers
     assert rows['MuLMS, held-out subfields'] == [
         ('crf', 'CRF head', 39.4, 55.8, 46.2, 70.0),
-        ('crf_mr6', '6 copies, no names', 43.7, 53.9, 48.3, 70.0),
-        ('crf_mrm_topic6', "6 copies + the topic corpus's names", 47.3, 50.9, 49.0, 71.2)]
+        ('crf_mr6', 'MR6 (6 copies, no names)', 43.7, 53.9, 48.3, 70.0),
+        ('crf_mrm_topic6', 'MR6 + names (topic corpus)', 47.3, 50.9, 49.0, 71.2)]
     assert pf.names_data({}) == {}
     pytest.importorskip('matplotlib')
     import matplotlib
