@@ -13,6 +13,18 @@ labels the P values as computed for the journal's reporting rules. `post_hoc_str
 14 of the paper's internal review, post hoc) weights the two corpora of each pooled decision
 (D5, D5', D7) equally: the mean of the two corpus means with a Welch interval.
 
+`post_hoc_dependence` (round 15, post hoc) drops the t test's assumption that the units'
+differences are independent where their training sets share documents: MaterioMiner's papers
+(leave one paper out, so any two training sets share two of three papers), SOFC-Exp's folds
+(three of four folds) and the MuLMS subfields whose 400-sentence training pools share an
+article (MULMS_POOLS). Such units get the correlation that the corrected resampled t test
+(Nadeau and Bengio 2003) assumes for k-fold designs, 1/K (1/4 and 1/5), and the MuLMS pairs that
+share an article MaterioMiner's 1/4; other pairs, and pairs across corpora, 0. Under that
+model the variance of the mean of n units is S^2 / (1 - rho_bar) * (n + sum of rho_ij) / n^2,
+which for K units all at 1/K is the corrected test's S^2 (1/K + 1/(K - 1)); the t statistic
+keeps n - 1 degrees of freedom. `post_hoc_reported` gives the t test of mention replacement's
+pooled gain over the CRF head (MR3, 11 units, both seed bases), which the paper quotes.
+
 Reads results/gpu/ner_week5_seed_analysis.json, ner_week12_comparisons.json,
 ner_recall_matched.json and ner_robustness.json; writes results/gpu/ner_decision_tests.json.
 
@@ -34,6 +46,23 @@ WEEK18 = 'ner_recall_matched.json'
 ROBUST = 'ner_robustness.json'
 # the recomputed interval may differ from the stored one by the per-unit rounding (two decimals)
 TOLERANCE = 0.02
+# the verdict printed for an interval above 0 where "passes" would mislead: D5' is a post hoc
+# reading, not a decision, and D11 passes as registered only with three flagged subfields
+VERDICTS = {"D5'": 'above 0 (post hoc)', 'D11': 'passes (as registered)'}
+# Each MuLMS held-out subfield's training pool: the articles of ner_baseline.subfield_folds
+# (split seed 0, --train-pool 400, MuLMS at revision bc1c97d) in pool order, the last one cut.
+# tests/test_decision_tests.py recomputes them when data/processed/mulms is present.
+MULMS_POOLS = {'electrolysis': ('graphene_02', 'poly_11', 'sofc_01'),
+               'graphene': ('steel_06', 'pemfc_02', 'steel_07'),
+               'pemfc': ('oastm_02', 'poly_02'),
+               'poly': ('graphene_02', 'oastm_06', 'pemfc_13'),
+               'semi': ('poly_11', 'poly_09', 'poly_04'),
+               'sofc': ('semi_05', 'poly_11'),
+               'steel': ('sofc_04', 'pemfc_10', 'semi_05')}
+MULMS_UNITS = tuple(sorted(MULMS_POOLS))
+# the leave-one-out designs and their number of units K: the correlation 1/K between any two
+LEAVE_ONE_OUT = {'materiominer': 4, 'sofc_exp': 5}
+SHARED_POOL_RHO = 0.25      # two MuLMS subfields whose pools share an article: MaterioMiner's 1/4
 
 
 def t_test(values):
@@ -107,9 +136,77 @@ def decision_tests(analysis, week12, matched, robust):
         rows.append(dict(test, decision=key, comparison=label, per_unit=values,
                          stored_ci95=list(stored['ci95']), stored_mean_diff=stored['mean_diff'],
                          sign_flip_p_two_sided=sign_flip_p(values), passes=bool(passes),
+                         verdict=VERDICTS.get(key, 'passes') if passes else 'no',
                          interval_matches=matches,
                          p_agrees=clears == (stored['ci95'][0] > 0)))
     return rows
+
+
+def layout(n):
+    """[(corpus, unit)] of a decision's n per-unit values, in the stored order: MuLMS's 7
+    subfields (sorted), MaterioMiner's 4 papers, SOFC-Exp's 5 folds, or the 11 pooled units
+    (MuLMS's first, then MaterioMiner's)."""
+    mulms = [('mulms', u) for u in MULMS_UNITS]
+    papers = [('materiominer', i) for i in range(LEAVE_ONE_OUT['materiominer'])]
+    folds = [('sofc_exp', i) for i in range(LEAVE_ONE_OUT['sofc_exp'])]
+    layouts = {len(mulms): mulms, len(papers): papers, len(folds): folds,
+               len(mulms) + len(papers): mulms + papers}
+    if n not in layouts:
+        raise ValueError(f'no unit layout for {n} units')
+    return layouts[n]
+
+
+def pair_rho(a, b):
+    """The assumed correlation of two units' differences: 1/K within a leave-one-out design,
+    SHARED_POOL_RHO for two MuLMS subfields whose pools share an article, else 0."""
+    if a[0] != b[0]:
+        return 0.0
+    if a[0] in LEAVE_ONE_OUT:
+        return 1 / LEAVE_ONE_OUT[a[0]]
+    return SHARED_POOL_RHO if set(MULMS_POOLS[a[1]]) & set(MULMS_POOLS[b[1]]) else 0.0
+
+
+def dependent_t(values, units):
+    """The t test of the mean of `values` when unit pairs are correlated (pair_rho): the
+    variance of the mean S^2 / (1 - rho_bar) * (n + sum_ij rho_ij) / n^2 (sum over ordered pairs
+    i != j, rho_bar its mean), n - 1 degrees of freedom; with the ratio of its standard error to
+    the independent one and the number of correlated pairs."""
+    from scipy import stats
+    n = len(values)
+    mean, s2 = statistics.fmean(values), statistics.variance(values)
+    rho = [pair_rho(units[i], units[j]) for i in range(n) for j in range(n) if i != j]
+    off = sum(rho)
+    se = math.sqrt(s2 / (1 - off / (n * (n - 1))) * (n + off) / n ** 2)
+    t = mean / se
+    half = float(stats.t.ppf(0.975, n - 1)) * se
+    return {'mean_diff': round(mean, 2), 'ci95': [round(mean - half, 2), round(mean + half, 2)],
+            'p_two_sided': round(float(2 * stats.t.sf(abs(t), n - 1)), 4),
+            'se_ratio': round(se / math.sqrt(s2 / n), 3),
+            'correlated_pairs': sum(1 for r in rho if r > 0) // 2}
+
+
+def dependence(rows):
+    """Per decision, dependent_t of its per-unit differences (post hoc), and whether the
+    interval still lies above 0."""
+    out = {}
+    for r in rows:
+        e = dependent_t(r['per_unit'], layout(r['n_units']))
+        out[r['decision']] = dict(e, above_0=e['ci95'][0] > 0)
+    return out
+
+
+def shared_pool_pairs():
+    """The pairs of MuLMS subfields whose training pools share an article, with the articles."""
+    return [[a, b, sorted(set(MULMS_POOLS[a]) & set(MULMS_POOLS[b]))]
+            for i, a in enumerate(MULMS_UNITS) for b in MULMS_UNITS[i + 1:]
+            if set(MULMS_POOLS[a]) & set(MULMS_POOLS[b])]
+
+
+def reported(robust):
+    """The t test of MR3 minus the CRF head over the 11 pooled units on both MuLMS seed bases
+    (ner_robustness.json), which the paper quotes with its P value."""
+    return {basis: t_test([float(v) for v in robust['pooled'][basis]['mr3_vs_crf']['per_run']])
+            for basis in ('decision', 'ten')}
 
 
 def welch_average(a, b):
@@ -143,8 +240,8 @@ def main(argv=None):
     parser.add_argument('--results', default=root)
     parser.add_argument('--out', default=None)
     args = parser.parse_args(argv)
-    rows = decision_tests(*(load(os.path.join(args.results, name))
-                            for name in (ANALYSIS, WEEK12, WEEK18, ROBUST)))
+    inputs = [load(os.path.join(args.results, name)) for name in (ANALYSIS, WEEK12, WEEK18, ROBUST)]
+    rows = decision_tests(*inputs)
     out = {'note': ('Reporting only, computed on 1 November 2026 for the journal: the decisions '
                     'were taken by the registered interval rule, which is a one-sided t test at '
                     '2.5%; the P values are those of the same t tests on the same per-unit '
@@ -153,7 +250,23 @@ def main(argv=None):
            'post_hoc_stratified': {'note': ('post hoc: each pooled decision with its two corpora '
                                             'weighted equally, the mean of the corpus means and '
                                             'its 95% Welch interval'),
-                                   'decisions': stratified(rows)}}
+                                   'decisions': stratified(rows)},
+           'post_hoc_dependence': {'note': ('post hoc (round 15): each decision with its units '
+                                            'correlated where their training sets share documents, '
+                                            'at the corrected resampled t test\'s 1/K (Nadeau and '
+                                            'Bengio 2003): 1/4 between MaterioMiner\'s papers, 1/5 '
+                                            'between SOFC-Exp\'s folds, 1/4 between MuLMS subfields '
+                                            'whose pools share an article, 0 otherwise'),
+                                   'rho': {'materiominer': 1 / LEAVE_ONE_OUT['materiominer'],
+                                           'sofc_exp': 1 / LEAVE_ONE_OUT['sofc_exp'],
+                                           'mulms_shared_pool': SHARED_POOL_RHO},
+                                   'mulms_pools': {k: list(v) for k, v in MULMS_POOLS.items()},
+                                   'shared_pool_pairs': shared_pool_pairs(),
+                                   'decisions': dependence(rows)},
+           'post_hoc_reported': {'note': ('t tests of comparisons the paper quotes with a P value: '
+                                          'MR3 minus the CRF head over the 11 pooled units, on '
+                                          "MuLMS's decision seeds (decision) and all ten (ten)"),
+                                 'mr3_vs_crf': reported(inputs[3])}}
     path = args.out or os.path.join(args.results, 'ner_decision_tests.json')
     with open(path, 'w') as f:
         json.dump(out, f, indent=1)
@@ -163,10 +276,17 @@ def main(argv=None):
               f"{r['ci95'][1]:+.2f}] (stored [{r['stored_ci95'][0]:+.2f}, {r['stored_ci95'][1]:+.2f}]) "
               f"t({r['df']}) = {r['t']:.2f}, P one-sided {r['p_one_sided']:.4f}, two-sided "
               f"{r['p_two_sided']:.4f}, sign-flip {r['sign_flip_p_two_sided']:.4f}, "
-              f"{'passes' if r['passes'] else 'no'}{flags}")
+              f"{r['verdict']}{flags}")
     for key, e in out['post_hoc_stratified']['decisions'].items():
         print(f"{key:4s} corpora weighted equally: {e['mean']:+.2f} [{e['ci95'][0]:+.2f}, "
               f"{e['ci95'][1]:+.2f}] (Welch, df {e['df']})")
+    for key, e in out['post_hoc_dependence']['decisions'].items():
+        print(f"{key:4s} units correlated: {e['mean_diff']:+.2f} [{e['ci95'][0]:+.2f}, "
+              f"{e['ci95'][1]:+.2f}], P two-sided {e['p_two_sided']:.4f}, SE x{e['se_ratio']:.3f}, "
+              f"{e['correlated_pairs']} correlated pairs{'' if e['above_0'] else ', covers 0'}")
+    for basis, e in out['post_hoc_reported']['mr3_vs_crf'].items():
+        print(f"MR3 - CRF head, 11 units, {basis}: {e['mean_diff']:+.2f} [{e['ci95'][0]:+.2f}, "
+              f"{e['ci95'][1]:+.2f}], P two-sided {e['p_two_sided']:.4f}")
 
 
 if __name__ == '__main__':

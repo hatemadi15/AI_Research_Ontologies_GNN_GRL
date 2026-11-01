@@ -5,7 +5,7 @@ a reader of the repository needs beside it.
 
 **Tables and figures to generated files.** The paper is the main text
 (`docs/PAPER_A.md`) and the Supplementary Information
-(`docs/PAPER_A_SI.md`, Notes 1 to 13, Tables S1 to S15). Table 1 is written
+(`docs/PAPER_A_SI.md`, Notes 1 to 13, Tables S1 to S16). Table 1 is written
 by hand from the conversions in `src/graph/`; Table 2 to
 `docs/tables/table6_held_out_decisions.md` and `table2_decisions.md` (D9
 and D10 to `table11_week17.md`, D11 and D12 to `table12_week18.md`, whose
@@ -85,10 +85,15 @@ draft for the author.
 
 **Before submission (the author's items).**
 - The affiliation on the title page.
-- The venue's word and abstract limits (the abstract is 150 words since
-  round 13; the main text is about 11,200 words to the
-  Limitations, and the round-11 referee advised 5,000 to 6,000 for an npj
-  Article, moving detail to the SI). The round-12 referee's list of what
+- The venue's limits: npj Computational Materials sets no main-text word
+  limit for an Article (its content-types page, read again on 1 November
+  in round 15: title up to 15 words without punctuation, abstract up to
+  150 words, 60 references "though not strictly enforced", legends up to
+  350 words, panels labelled a), b), c), all methods in the main text).
+  The abstract is 143 words since round 15 (149 if hyphenated words count
+  twice); the main text is long (about 7,300 words without the Methods),
+  and the round-11 referee advised 5,000 to 6,000, moving detail to the
+  SI. The round-12 referee's list of what
   could move without loss: Section 3's clock times into a short table
   (with three sentences of prose), Table 6's per-subfield rows (Table S8
   and Figure 4 hold them), Section 5.6 to about 120 words (Supplementary
@@ -215,3 +220,24 @@ together, with every decision's votes; the corpus-weighted Welch check;
 the 05:03 cancel request; the practitioner advice scoped and given MR3's
 pre-specified 16-unit estimate; two manifest times corrected; and the
 figures' panel letters. ROADMAP's round-14 note lists every item.
+Round 15 (a referee recommending major revision, a number audit and a
+consistency check, all on `800a85a`, none finding a wrong number) led
+to: an abstract that keeps the positive headline but gives mention
+replacement's own +2.35, says the tests were pre-registered, calls the
+first criterion "the original" (the pooled one was registered too) and
+states the recall finding with D11, as the week-18 protocol fixed, with
+the precision cost; the Introduction's contribution statement without
+results and its results list as prose; the Discussion's opening and
+advice scoped (not on MuLMS alone; F1 on the held names +1.13 [−1.84,
++4.11], post hoc, now in Tables 5 and S3); the Statistics subsection
+with the design items, the pooled condition, D11's unit values, the
+exceptions to the t intervals and a post hoc sensitivity analysis for
+units sharing training documents (D3 [−0.13, +8.67]; D4, D5 and D11
+stay above 0; Table S16's new column; Nadeau and Bengio cited, seqeval
+moved to the text as a website); the other systems' methods moved from
+the SI into the Methods; the registration disclosure corrected (which
+references were new runs, the 05:06 plan, half-known decisions); D5′ and
+D11 verdicts in Table S16; citations as superscripts; references
+completed from their DOIs (Torres et al. now its 2026 journal version);
+Data availability with the datasets' locations; the AI assistant's work
+in the Methods only. ROADMAP's round-15 note lists every item.

@@ -322,7 +322,7 @@ def test_week13_label_propagation_folds_and_the_pooled_estimates():
     assert status[(fine, 'multi-task + MR3 + label propagation with retyping − multi-task + MR3')][1] \
         == 'pre-specified'
     assert status[('SOFC-Exp, 5 folds', 'CRF head + label propagation − CRF head')][1] == \
-        'pre-specified (13.1c)'
+        'pre-specified (13.1c: reported, not a decision)'
     assert status[('SOFC-Exp, 5 folds', 'MR3 − CRF head')] == (nr.W13, 'decision 13.3a: no')
     assert status[('SOFC-Exp, 5 folds', 'multi-task + MR3 − MR3')][1] == 'pre-specified'
     assert status[('SOFC-Exp, 5 folds', 'MR6 + names − CRF head')] == (nr.W13_4, 'D6: no')
@@ -491,7 +491,8 @@ def test_week18_decisions_prespecified_readings_and_post_hoc():
     seven = 'MuLMS, 7 subfields (seeds 300–900)'
     four = 'MuLMS, 4 subfields (seeds 300–900; without the flagged electrolysis, pemfc, sofc)'
     assert got == [
-        (seven, f'{nr.MATCHED}: recall on {nr.HELD}', 'D11: passes'),
+        (seven, f'{nr.MATCHED}: recall on {nr.HELD}',
+         "D11: passes as registered, with the 3 flagged subfields matched at the grid's end"),
         (seven, f'{nr.MATCHED}: micro F1', 'D12: no'),
         (seven, f'{nr.MATCHED}: precision on all test entities', 'pre-specified'),
         (seven, 'MR6 at matched recall − MR6 at bias 0: micro F1', 'pre-specified'),

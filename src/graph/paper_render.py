@@ -3,11 +3,14 @@ paper_render.py - render paper A's Markdown sources for submission
 
 The sources (docs/PAPER_A.md, docs/PAPER_A_SI.md) cite by bibliography key, e.g.
 "(dai2020analysis; torres2024augmentation)". This script numbers the cited works in the order of
-their first citation in each file, replaces the keys by bracketed numbers ("[5,6]"; a run of three
-or more becomes a range, "[5–7]") and writes the reference list from docs/references.bib in the
-journal's style (authors as "Surname, I.", up to five, else the first and "et al."; title; venue;
-volume, pages or article number; year; DOI). The main text's "## References" section is filled;
-the SI gets a "## Supplementary references" section at its end. The main text's tables, each
+their first citation in each file, replaces the keys by superscript numbers in the Nature style
+("<sup>5,6</sup>", attached to the preceding word; a run of three or more becomes a range,
+"<sup>5–7</sup>"), so that square brackets stay for confidence intervals, and writes the reference
+list from docs/references.bib in the journal's style (authors as "Surname, I.", up to five, else
+the first and "et al."; title; venue; volume, pages or article number; year; DOI; an arXiv
+preprint as "Preprint at https://arxiv.org/abs/<id>", software on GitHub as "GitHub <url>"). The
+main text's "## References" section is filled; the SI gets a "## Supplementary references" section
+at its end when it cites anything. The main text's tables, each
 marked in the source by "<!-- table -->" and "<!-- /table -->" with its caption and note, move to
 a "## Tables" section at the end, as npj Computational Materials asks; references are numbered
 in the journal's order, the text and Methods first, then the tables, then the figure legends.
@@ -130,6 +133,9 @@ def format_entry(e):
     title = plain(e.get('title', '')).rstrip('.')
     year = plain(e.get('year', ''))
     pages = plain(e.get('pages', ''))
+    arxiv = (plain(e['eprint']) if e.get('eprint')
+             and plain(e.get('archiveprefix', '')).lower() == 'arxiv' else '')
+    url = plain(e.get('url', ''))
     if e['type'] == 'article':
         venue = f"*{plain(e.get('journal', ''))}*"
         vol = plain(e.get('volume', ''))
@@ -139,17 +145,22 @@ def format_entry(e):
         venue = f"In *{plain(e.get('booktitle', ''))}*"
         pub = plain(e.get('publisher', ''))
         tail = venue + (f' {pages}' if pages else '') + f" ({pub + ', ' if pub else ''}{year})."
+    elif arxiv:
+        tail = f'Preprint at https://arxiv.org/abs/{arxiv} ({year}).'
+    elif 'github.com/' in url:
+        tail = f'GitHub {url} ({year}).'
     else:
         tail = f'({year}).'
     if authors and not authors.endswith('.'):
         authors += '.'
-    out = f'{authors} {title}. {tail}' if authors else f'{title}. {tail}'
-    if e.get('eprint') and plain(e.get('archiveprefix', '')).lower() == 'arxiv':
-        out += f" Preprint at arXiv:{plain(e['eprint'])}."
+    title += '' if title.endswith(('?', '!')) else '.'
+    out = f'{authors} {title} {tail}' if authors else f'{title} {tail}'
     if e.get('doi'):
         out += f" https://doi.org/{plain(e['doi'])}"
-    elif e.get('url') and e['type'] == 'misc':
-        out += f" {plain(e['url'])}"
+    elif arxiv and e['type'] != 'misc':
+        out += f' https://arxiv.org/abs/{arxiv}'
+    elif url and e['type'] == 'misc' and not arxiv and 'github.com/' not in url:
+        out += f' {url}'
     return out
 
 
@@ -176,16 +187,17 @@ def compress(numbers):
 
 
 def number_citations(text, number):
-    """`text` with each cited key replaced by its number: a parenthesis of keys alone becomes one
-    bracket, any other key a bracket of its own."""
+    """`text` with each cited key replaced by its superscript number, attached to the preceding
+    word: a parenthesis of keys alone becomes one superscript, any other key one of its own."""
     def group(m):
         keys = re.split(r';\s*', m.group(1))
         if not all(k in number for k in keys):
             return m.group(0)
-        return '[' + compress([number[k] for k in keys]) + ']'
-    text = re.sub(r'\((' + KEY + r'(?:;\s*' + KEY + r')*)\)', group, text)
-    return re.sub(r'\b(' + KEY + r')\b',
-                  lambda m: f'[{number[m.group(1)]}]' if m.group(1) in number else m.group(0), text)
+        return '<sup>' + compress([number[k] for k in keys]) + '</sup>'
+    text = re.sub(r'[ \t]*\n?[ \t]*\((' + KEY + r'(?:;\s*' + KEY + r')*)\)', group, text)
+    return re.sub(r'[ \t]*\b(' + KEY + r')\b',
+                  lambda m: f'<sup>{number[m.group(1)]}</sup>' if m.group(1) in number
+                  else m.group(0), text)
 
 
 def split_tables(text):
@@ -201,7 +213,8 @@ def split_tables(text):
 
 def render(text, bib, heading, move_tables=False):
     """The rendered text: numbered citations, and the reference list under `heading`, which
-    replaces that section's body if the text has it and is appended otherwise. With
+    replaces that section's body if the text has it and is appended otherwise, when the text
+    cites anything. With
     move_tables the marked tables go to a "## Tables" section at the end, and the numbering
     follows the text before the reference list, then the tables, then the rest; otherwise
     the markers are dropped and the tables stay in place."""
@@ -219,7 +232,7 @@ def render(text, bib, heading, move_tables=False):
     m = re.search(r'(?m)^## ' + re.escape(heading) + r'\n.*?(?=^## |\Z)', body, re.S)
     if m:
         body = body[:m.start()] + section + ('\n' if m.end() < len(body) else '') + body[m.end():]
-    else:
+    elif keys:
         body = body.rstrip('\n') + '\n\n' + section
     if tables:
         body = (body.rstrip('\n') + '\n\n## Tables\n\n'

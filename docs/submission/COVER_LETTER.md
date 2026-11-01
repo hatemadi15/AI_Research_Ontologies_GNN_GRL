@@ -16,10 +16,13 @@ confidently agree on in 40,000 sentences of open-access papers, and feeds
 them to mention replacement, a standard data augmentation. On held-out
 documents the combination improves on a MatSciBERT baseline by 3.6 F1
 points, pooled over eleven held-out subfields and papers of two corpora,
-and it improves on every held-out MaterioMiner paper at both annotation
-granularities. The harvested names shift recall toward the unseen names
-their lexicon holds, by more than any decoding bias we tried gives a
-matched control (a post hoc analysis).
+and on every held-out MaterioMiner paper at both annotation
+granularities; mention replacement alone gives about two thirds of that
+gain. On one corpus the harvested names raise recall on the unseen names
+their lexicon holds, at some cost in precision (a post hoc analysis),
+and a pre-registered test against a decoding bias matched in recall
+passes, though only through three subfields that the bias could not
+match.
 
 The paper suits *npj Computational Materials* for three reasons:
 
@@ -28,7 +31,8 @@ The paper suits *npj Computational Materials* for three reasons:
    group can apply to its own corpora in a few GPU hours.
 2. It reports what the gains can and cannot be attributed to:
    - twelve decisions, each fixed in a protocol committed to a public
-     repository before its runs, with matched and recall-matched controls;
+     repository before its results, with matched and recall-matched
+     controls;
    - every comparison in every measure;
    - the dated protocol record, including a criterion we adopted mid-study,
      disclosed in full.

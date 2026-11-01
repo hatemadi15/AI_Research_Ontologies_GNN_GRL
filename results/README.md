@@ -461,7 +461,18 @@ differences the decision used (n, mean, SD, t, degrees of freedom, one-
 and two-sided P) with the exact sign-flip P, and checks that the
 recomputed interval equals the stored one (to 0.01) and that the one-sided
 P is below 0.025 exactly where the interval clears 0; it changes no
-decision.
+decision. Each row also carries its verdict words (D5′ "above 0 (post
+hoc)", D11 "passes (as registered)"). Post hoc (round 15 of paper A's
+review): `post_hoc_dependence` repeats each test with the units correlated
+where their training sets share documents (1/4 between MaterioMiner's
+papers, 1/5 between SOFC-Exp's folds, 1/4 between the 5 MuLMS subfield
+pairs whose training pools share an article, `mulms_pools`), the
+correlation the corrected resampled t test assumes for k-fold designs;
+`post_hoc_reported` gives the t test of MR3 over the CRF head on the 11
+pooled units, both seed bases (P 0.0038 and 0.0040). Table 10
+(`table10_lexicon.md`, paper A's Table S3 and Table 5) adds, post hoc, F1
+on each lexicon part and the paired F1 gain on the held names, from
+`ner_lexicon_recall.json`'s pooled and per-unit recall and precision.
 `gpu/ner_week5_seed_analysis.json` adds `week14.types`, the per-type F1 of
 the names method and the 6-copy control against the CRF head on MuLMS's
 decision seeds and MaterioMiner's papers (Tables 8 and A2,

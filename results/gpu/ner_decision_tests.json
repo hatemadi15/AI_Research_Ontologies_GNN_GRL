@@ -31,6 +31,7 @@
    "stored_mean_diff": 3.19,
    "sign_flip_p_two_sided": 0.0781,
    "passes": false,
+   "verdict": "no",
    "interval_matches": true,
    "p_agrees": true
   },
@@ -64,6 +65,7 @@
    "stored_mean_diff": 0.92,
    "sign_flip_p_two_sided": 0.4062,
    "passes": false,
+   "verdict": "no",
    "interval_matches": true,
    "p_agrees": true
   },
@@ -94,6 +96,7 @@
    "stored_mean_diff": 4.27,
    "sign_flip_p_two_sided": 0.125,
    "passes": true,
+   "verdict": "passes",
    "interval_matches": true,
    "p_agrees": true
   },
@@ -124,6 +127,7 @@
    "stored_mean_diff": 1.77,
    "sign_flip_p_two_sided": 0.125,
    "passes": true,
+   "verdict": "passes",
    "interval_matches": true,
    "p_agrees": true
   },
@@ -161,6 +165,7 @@
    "stored_mean_diff": 3.58,
    "sign_flip_p_two_sided": 0.0107,
    "passes": true,
+   "verdict": "passes",
    "interval_matches": true,
    "p_agrees": true
   },
@@ -198,6 +203,7 @@
    "stored_mean_diff": 3.58,
    "sign_flip_p_two_sided": 0.0068,
    "passes": true,
+   "verdict": "above 0 (post hoc)",
    "interval_matches": true,
    "p_agrees": true
   },
@@ -229,6 +235,7 @@
    "stored_mean_diff": -0.04,
    "sign_flip_p_two_sided": 1.0,
    "passes": false,
+   "verdict": "no",
    "interval_matches": true,
    "p_agrees": true
   },
@@ -266,6 +273,7 @@
    "stored_mean_diff": 0.8,
    "sign_flip_p_two_sided": 0.2383,
    "passes": false,
+   "verdict": "no",
    "interval_matches": true,
    "p_agrees": true
   },
@@ -299,6 +307,7 @@
    "stored_mean_diff": -0.18,
    "sign_flip_p_two_sided": 0.7969,
    "passes": false,
+   "verdict": "no",
    "interval_matches": true,
    "p_agrees": true
   },
@@ -329,6 +338,7 @@
    "stored_mean_diff": 0.96,
    "sign_flip_p_two_sided": 0.125,
    "passes": false,
+   "verdict": "no",
    "interval_matches": true,
    "p_agrees": true
   },
@@ -359,6 +369,7 @@
    "stored_mean_diff": 0.85,
    "sign_flip_p_two_sided": 0.25,
    "passes": false,
+   "verdict": "no",
    "interval_matches": true,
    "p_agrees": true
   },
@@ -392,6 +403,7 @@
    "stored_mean_diff": 11.24,
    "sign_flip_p_two_sided": 0.0156,
    "passes": true,
+   "verdict": "passes (as registered)",
    "interval_matches": true,
    "p_agrees": true
   },
@@ -425,6 +437,7 @@
    "stored_mean_diff": 3.26,
    "sign_flip_p_two_sided": 0.1406,
    "passes": false,
+   "verdict": "no",
    "interval_matches": true,
    "p_agrees": true
   }
@@ -455,6 +468,262 @@
      2.69
     ],
     "df": 5.9
+   }
+  }
+ },
+ "post_hoc_dependence": {
+  "note": "post hoc (round 15): each decision with its units correlated where their training sets share documents, at the corrected resampled t test's 1/K (Nadeau and Bengio 2003): 1/4 between MaterioMiner's papers, 1/5 between SOFC-Exp's folds, 1/4 between MuLMS subfields whose pools share an article, 0 otherwise",
+  "rho": {
+   "materiominer": 0.25,
+   "sofc_exp": 0.2,
+   "mulms_shared_pool": 0.25
+  },
+  "mulms_pools": {
+   "electrolysis": [
+    "graphene_02",
+    "poly_11",
+    "sofc_01"
+   ],
+   "graphene": [
+    "steel_06",
+    "pemfc_02",
+    "steel_07"
+   ],
+   "pemfc": [
+    "oastm_02",
+    "poly_02"
+   ],
+   "poly": [
+    "graphene_02",
+    "oastm_06",
+    "pemfc_13"
+   ],
+   "semi": [
+    "poly_11",
+    "poly_09",
+    "poly_04"
+   ],
+   "sofc": [
+    "semi_05",
+    "poly_11"
+   ],
+   "steel": [
+    "sofc_04",
+    "pemfc_10",
+    "semi_05"
+   ]
+  },
+  "shared_pool_pairs": [
+   [
+    "electrolysis",
+    "poly",
+    [
+     "graphene_02"
+    ]
+   ],
+   [
+    "electrolysis",
+    "semi",
+    [
+     "poly_11"
+    ]
+   ],
+   [
+    "electrolysis",
+    "sofc",
+    [
+     "poly_11"
+    ]
+   ],
+   [
+    "semi",
+    "sofc",
+    [
+     "poly_11"
+    ]
+   ],
+   [
+    "sofc",
+    "steel",
+    [
+     "semi_05"
+    ]
+   ]
+  ],
+  "decisions": {
+   "D1": {
+    "mean_diff": 3.19,
+    "ci95": [
+     -2.0,
+     8.38
+    ],
+    "p_two_sided": 0.1831,
+    "se_ratio": 1.201,
+    "correlated_pairs": 5,
+    "above_0": false
+   },
+   "D2": {
+    "mean_diff": 0.92,
+    "ci95": [
+     -2.15,
+     3.99
+    ],
+    "p_two_sided": 0.4912,
+    "se_ratio": 1.201,
+    "correlated_pairs": 5,
+    "above_0": false
+   },
+   "D3": {
+    "mean_diff": 4.27,
+    "ci95": [
+     -0.13,
+     8.67
+    ],
+    "p_two_sided": 0.0538,
+    "se_ratio": 1.528,
+    "correlated_pairs": 6,
+    "above_0": false
+   },
+   "D4": {
+    "mean_diff": 1.77,
+    "ci95": [
+     0.09,
+     3.45
+    ],
+    "p_two_sided": 0.0439,
+    "se_ratio": 1.528,
+    "correlated_pairs": 6,
+    "above_0": true
+   },
+   "D5": {
+    "mean_diff": 3.58,
+    "ci95": [
+     0.27,
+     6.88
+    ],
+    "p_two_sided": 0.0366,
+    "se_ratio": 1.257,
+    "correlated_pairs": 11,
+    "above_0": true
+   },
+   "D5'": {
+    "mean_diff": 3.58,
+    "ci95": [
+     0.38,
+     6.78
+    ],
+    "p_two_sided": 0.0317,
+    "se_ratio": 1.257,
+    "correlated_pairs": 11,
+    "above_0": true
+   },
+   "D6": {
+    "mean_diff": -0.03,
+    "ci95": [
+     -1.79,
+     1.73
+    ],
+    "p_two_sided": 0.9621,
+    "se_ratio": 1.5,
+    "correlated_pairs": 10,
+    "above_0": false
+   },
+   "D7": {
+    "mean_diff": 0.8,
+    "ci95": [
+     -1.04,
+     2.63
+    ],
+    "p_two_sided": 0.3558,
+    "se_ratio": 1.257,
+    "correlated_pairs": 11,
+    "above_0": false
+   },
+   "D8": {
+    "mean_diff": -0.18,
+    "ci95": [
+     -2.38,
+     2.01
+    ],
+    "p_two_sided": 0.8453,
+    "se_ratio": 1.201,
+    "correlated_pairs": 5,
+    "above_0": false
+   },
+   "D9": {
+    "mean_diff": 0.95,
+    "ci95": [
+     -0.52,
+     2.43
+    ],
+    "p_two_sided": 0.1322,
+    "se_ratio": 1.528,
+    "correlated_pairs": 6,
+    "above_0": false
+   },
+   "D10": {
+    "mean_diff": 0.85,
+    "ci95": [
+     -1.55,
+     3.25
+    ],
+    "p_two_sided": 0.3413,
+    "se_ratio": 1.528,
+    "correlated_pairs": 6,
+    "above_0": false
+   },
+   "D11": {
+    "mean_diff": 11.24,
+    "ci95": [
+     1.71,
+     20.77
+    ],
+    "p_two_sided": 0.0278,
+    "se_ratio": 1.201,
+    "correlated_pairs": 5,
+    "above_0": true
+   },
+   "D12": {
+    "mean_diff": 3.26,
+    "ci95": [
+     -1.6,
+     8.12
+    ],
+    "p_two_sided": 0.1518,
+    "se_ratio": 1.201,
+    "correlated_pairs": 5,
+    "above_0": false
+   }
+  }
+ },
+ "post_hoc_reported": {
+  "note": "t tests of comparisons the paper quotes with a P value: MR3 minus the CRF head over the 11 pooled units, on MuLMS's decision seeds (decision) and all ten (ten)",
+  "mr3_vs_crf": {
+   "decision": {
+    "n_units": 11,
+    "mean_diff": 2.46,
+    "sd": 2.17,
+    "t": 3.75,
+    "df": 10,
+    "p_one_sided": 0.0019,
+    "p_two_sided": 0.0038,
+    "ci95": [
+     1.0,
+     3.91
+    ]
+   },
+   "ten": {
+    "n_units": 11,
+    "mean_diff": 2.35,
+    "sd": 2.09,
+    "t": 3.72,
+    "df": 10,
+    "p_one_sided": 0.002,
+    "p_two_sided": 0.004,
+    "ci95": [
+     0.94,
+     3.75
+    ]
    }
   }
  }

@@ -494,16 +494,26 @@ def table15(data):
 def table16(tests):
     """Table 16 from ner_decision_tests.json (decision_tests.py): per decision of paper A's
     names route, the units, the stored difference with its 95% CI, the standard deviation of
-    the per-unit differences, the t statistic with its degrees of freedom, the one- and two-sided P values and the exact two-sided sign-flip P,
-    and the verdict; reporting only, the decisions rest on the intervals."""
+    the per-unit differences, the t statistic with its degrees of freedom, the one- and
+    two-sided P values and the exact two-sided sign-flip P, the verdict, and (post hoc) the
+    interval and P with the units correlated where their training sets share documents;
+    reporting only, the decisions rest on the intervals."""
+    dependence = (tests.get('post_hoc_dependence') or {}).get('decisions', {})
     header = ['decision', 'comparison', 'units', 'Δ [95% CI]', 'SD', 't (df)', 'P one-sided',
-              'P two-sided', 'sign-flip P', 'verdict']
+              'P two-sided', 'sign-flip P', 'verdict', 'units correlated: 95% CI, P (post hoc)']
+
+    def correlated(key):
+        e = dependence.get(key)
+        if not e:
+            return ''
+        return (interval({'mean_diff': e['mean_diff'], 'ci95': e['ci95']}, 'mean_diff',
+                         signed=True).split(' ', 1)[1] + f", {e['p_two_sided']:.3f}")
     rows = [[r['decision'], r['comparison'], r['n_units'],
              interval({'mean_diff': r['stored_mean_diff'], 'ci95': r['stored_ci95']},
                       'mean_diff', signed=True), f"{r['sd']:.2f}",
              f"{r['t']:.2f} ({r['df']})".replace('-', '−'), f"{r['p_one_sided']:.4f}",
              f"{r['p_two_sided']:.4f}", f"{r['sign_flip_p_two_sided']:.4f}",
-             'passes' if r['passes'] else 'no']
+             r.get('verdict') or ('passes' if r['passes'] else 'no'), correlated(r['decision'])]
             for r in tests['decisions']]
     return ("Table 16. The t statistic and P values of paper A's decisions (D5' the post hoc "
             'reading of D5 on MuLMS\'s decision seeds): a one-sample Student-t test of the mean '
@@ -513,7 +523,12 @@ def table16(tests):
             'differ from the unrounded ones in the last digit), the exact two-sided sign-flip '
             'P over all 2ⁿ sign patterns beside it. Reporting only: each decision was taken by '
             'the registered rule, the 95% interval above 0 (for the pooled ones, with neither '
-            "corpus's interval below 0), which is the one-sided test at 2.5%.\n\n"
+            "corpus's interval below 0), which is the one-sided test at 2.5%. The last column "
+            '(post hoc, round 15) gives the interval and two-sided P with the units correlated '
+            'where their training sets share documents, at the corrected resampled t test\'s '
+            "1/K: 1/4 between MaterioMiner's papers, 1/5 between SOFC-Exp's folds, 1/4 between "
+            'the 5 of 21 pairs of MuLMS subfields whose training pools share an article, 0 '
+            'otherwise and across corpora (decision_tests.py, post_hoc_dependence).\n\n'
             + markdown(header, rows))
 
 
@@ -787,28 +802,84 @@ def table12_post_hoc(matched):
     return out
 
 
+# the systems of each comparison of ner_lexicon_recall.py ('names': the setting's names system)
+LEXICON_PAIRS = {'names_vs_mr6': ('names', 'crf_mr6'), 'names_vs_crf': ('names', 'crf'),
+                 'mr6_vs_crf': ('crf_mr6', 'crf'), 'mr3_vs_crf': ('crf_mr', 'crf'),
+                 'mixed_vs_mr6': ('crf_mrm_mixed6', 'crf_mr6')}
+LEXICON_NAMES = {'mulms': 'crf_mrm_topic6', 'fine': 'crf_mrm6', 'coarse': 'crf_mrm6'}
+
+
+def f1_of(recall, precision):
+    """F1 from a recall and a precision in percent (None if either is missing or both are 0)."""
+    if recall is None or precision is None or recall + precision == 0:
+        return None
+    return 2 * recall * precision / (recall + precision)
+
+
+def held_f1_gain(part, setting, key):
+    """Post hoc (round 15): the paired gain in F1 on the unseen test names the lexicon holds,
+    each unit's F1 from its recall and precision on them pooled over the seeds, the method
+    minus its reference, with the 95% Student-t interval over the units; None without the
+    per-unit scores."""
+    import statistics
+    from scipy import stats
+    method, reference = LEXICON_PAIRS[key]
+    method = LEXICON_NAMES.get(setting, method) if method == 'names' else method
+    per_unit = part.get('per_unit') or {}
+    if method not in per_unit or reference not in per_unit:
+        return None
+    diffs = []
+    for unit in part['units']:
+        a, b = per_unit[method].get(unit), per_unit[reference].get(unit)
+        fa = a and f1_of(a['recall_in'], a['precision_in'])
+        fb = b and f1_of(b['recall_in'], b['precision_in'])
+        if fa is None or fb is None:
+            return None
+        diffs.append(fa - fb)
+    n = len(diffs)
+    if n < 2:
+        return None
+    mean = statistics.fmean(diffs)
+    half = float(stats.t.ppf(0.975, n - 1)) * statistics.stdev(diffs) / n ** 0.5
+    return {'mean_diff': round(mean, 2), 'ci95': [round(mean - half, 2), round(mean + half, 2)],
+            'n_units': n}
+
+
 def table10(data):
     """Table 10 from ner_lexicon_recall.json: per setting and system, recall on the unseen test
-    names in and out of the rebuilt lexicon and the unseen predictions' lexicon share and
-    precision, pooled over seeds and units; then the paired gains per part and their
-    difference."""
-    scores, comparisons = lexicon_rows(data)
+    names in and out of the rebuilt lexicon, the unseen predictions' lexicon share, precision
+    and F1 on each part, pooled over seeds and units; then the paired gains per part, their
+    difference and the paired F1 gain on the held names (post hoc)."""
+    scores, _ = lexicon_rows(data)
 
     def pct(x):
         return '' if x is None else f'{x:.1f}'
     header = ['setting', 'system', 'unseen test names in the lexicon (%)', 'recall, in',
               'recall, out', 'unseen predictions in the lexicon (%)', 'precision, in',
-              'precision, out']
+              'precision, out', 'F1, in', 'F1, out']
     cells = [[setting, system, pct(e['gold_share_in']), pct(e['recall_in']), pct(e['recall_out']),
-              pct(e['pred_share_in']), pct(e['precision_in']), pct(e['precision_out'])]
+              pct(e['pred_share_in']), pct(e['precision_in']), pct(e['precision_out']),
+              pct(f1_of(e['recall_in'], e['precision_in'])),
+              pct(f1_of(e['recall_out'], e['precision_out']))]
              for setting, system, e in scores]
     cheader = ['setting', 'comparison', 'recall gain on the names in the lexicon [95% CI]',
-               'recall gain on the names not in it [95% CI]', 'in − out [95% CI]', 'units with in > out']
-    ccells = [[setting, name, interval(c['gain_in'], 'mean_diff', signed=True),
-               interval(c['gain_out'], 'mean_diff', signed=True),
-               interval(c['in_minus_out'], 'mean_diff', signed=True),
-               f"{c['in_minus_out']['n_positive']}/{c['in_minus_out']['n_units']}"]
-              for setting, name, c in comparisons]
+               'recall gain on the names not in it [95% CI]', 'in − out [95% CI]',
+               'units with in > out', 'F1 gain on the names in the lexicon [95% CI]']
+    ccells = []
+    for key, label in LEXICON_SETTINGS.items():
+        part = data.get(key)
+        if not part:
+            continue
+        for ckey, name in LEXICON_COMPARISONS.items():
+            c = part['comparisons'].get(ckey)
+            if not c:
+                continue
+            gain = held_f1_gain(part, key, ckey)
+            ccells.append([label, name, interval(c['gain_in'], 'mean_diff', signed=True),
+                           interval(c['gain_out'], 'mean_diff', signed=True),
+                           interval(c['in_minus_out'], 'mean_diff', signed=True),
+                           f"{c['in_minus_out']['n_positive']}/{c['in_minus_out']['n_units']}",
+                           interval(gain, 'mean_diff', signed=True) if gain else ''])
     units = {k: ', '.join(v['units']) for k, v in data.items() if v}
     excluded = {k: v['excluded'] for k, v in data.items() if v and v['excluded']}
     return ('Table 10. Recall on the unseen test names by lexicon membership (week 15, post hoc; '
@@ -816,9 +887,11 @@ def table10(data):
             "names method's own teachers, batch w15a): per system, pooled over seeds and held-out "
             'units, recall on the unseen test names that the unit\'s lexicon holds (in) and on '
             'those it does not (out), and among the predicted entities whose name is unseen the '
-            'share that are lexicon names and the precision of each part; then, paired over the '
+            'share that are lexicon names and the precision of each part, with the F1 of each '
+            'part from its pooled recall and precision (round 15); then, paired over the '
             "units, a method's recall gain over its reference on each part and the difference of "
-            'the two gains with its 95% Student-t CI. Units used: '
+            'the two gains with its 95% Student-t CI, and the F1 gain on the held names, each '
+            "unit's F1 from its own pooled recall and precision on them (round 15). Units used: "
             + '; '.join(f'{LEXICON_SETTINGS[k]}: {u}' for k, u in units.items())
             + (f". Excluded (rebuilt teachers or coverage differ): {excluded}" if excluded else '')
             + '.\n\n' + markdown(header, cells) + '\n\n**Paired gains**\n\n' + markdown(cheader, ccells))

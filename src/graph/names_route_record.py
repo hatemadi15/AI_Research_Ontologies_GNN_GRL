@@ -444,7 +444,8 @@ def consistency_status(corpus, system, e):
         return f"decision {e['decision']}: {verdict(e['passes'])}"
     if system == 'crf' and corpus in GRANULARITIES:
         return "the companion study's week-7 comparison (16 October; reported), recomputed"
-    return 'pre-specified (13.1c)' if corpus == 'sofc_folds' else 'pre-specified'
+    return ('pre-specified (13.1c: reported, not a decision)' if corpus == 'sofc_folds'
+            else 'pre-specified')
 
 
 def corpus_label(corpus, n):
@@ -691,6 +692,9 @@ def week18(matched):
             if e:
                 text = (alias.format(paper_id) if alias else
                         f"{paper_id}: {e.get('verdict', verdict(above_0(e)))}")
+                if not alias and flagged and text.endswith(': passes'):
+                    text += (f' as registered, with the {len(flagged)} flagged subfields matched '
+                             "at the grid's end")
                 rows.append(row(W18, corpus(e['n_units'], reading), label, text, e))
         for key, label in WEEK18_PRESPECIFIED:
             e = pre.get(key)

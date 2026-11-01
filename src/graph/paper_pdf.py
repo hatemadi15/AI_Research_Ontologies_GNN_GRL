@@ -49,13 +49,15 @@ figure { break-before: page; break-inside: avoid; margin: 0; }
 figure img { display: block; max-width: 100%; max-height: 175mm; margin: 0 auto 6mm; }
 figure figcaption p { font-size: 9.5pt; }
 h2.tables { break-before: page; }
+sup { font-size: 70%; line-height: 0; vertical-align: super; }
 """
 
 
 def to_html(markdown_text):
-    """HTML from Markdown (CommonMark with tables)."""
+    """HTML from Markdown (CommonMark with tables; inline HTML kept, for the superscript
+    citations that paper_render.py writes)."""
     from markdown_it import MarkdownIt
-    return MarkdownIt('commonmark', {'html': False}).enable('table').render(markdown_text)
+    return MarkdownIt('commonmark', {'html': True}).enable('table').render(markdown_text)
 
 
 def columns(table_html):

@@ -44,7 +44,8 @@ def test_parse_and_style():
     assert pr.format_entry(bib['devlin2019bert']).startswith(
         'Devlin, J., Chang, M.-W., Lee, K. & Toutanova, K. BERT: Pre-training')
     assert '4171–4186 (Association for Computational Linguistics, 2019).' in pr.format_entry(bib['devlin2019bert'])
-    assert pr.format_entry(bib['nakayama2018seqeval']).endswith('(2018). https://github.com/chakki-works/seqeval')
+    assert pr.format_entry(bib['nakayama2018seqeval']).endswith(
+        'framework. GitHub https://github.com/chakki-works/seqeval (2018).')
     assert pr.format_entry(bib['many2020authors']).startswith('One, A. et al. Many.')
 
 
@@ -55,11 +56,11 @@ def test_numbering_and_sections():
             '(nakayama2018seqeval; gupta2022matscibert) and (seqeval, nakayama2018seqeval, default).\n\n'
             '## References\n\nplaceholder\n\n## Figure legends\n\nF.\n')
     out = pr.render(text, bib, 'References')
-    assert 'MatSciBERT [1] is BERT [2]; seqeval\n[1,3] and (seqeval, [3], default).' in out
+    assert 'MatSciBERT<sup>1</sup> is BERT<sup>2</sup>; seqeval<sup>1,3</sup> and (seqeval,<sup>3</sup>, default).' in out
     assert '## References\n\n1. Gupta, T.' in out and '\n3. Nakayama, H.' in out
     assert 'placeholder' not in out and out.endswith('## Figure legends\n\nF.\n')
     si = pr.render('Note (devlin2019bert).\n', bib, 'Supplementary references')
-    assert si.startswith('Note [1].') and si.endswith('## Supplementary references\n\n1. Devlin, J., '
+    assert si.startswith('Note<sup>1</sup>.') and si.endswith('## Supplementary references\n\n1. Devlin, J., '
                                                        'Chang, M.-W., Lee, K. & Toutanova, K. BERT: '
                                                        'Pre-training of Deep Bidirectional Transformers. '
                                                        'In *Proceedings of NAACL* 4171–4186 '
@@ -80,10 +81,50 @@ def test_tables_move_to_the_end():
             '(nakayama2018seqeval).\n\n| a |\n|---|\n| 1 |\n\nIts note.\n\n<!-- /table -->\n\n'
             'More (devlin2019bert).\n\n## References\n\nx\n\n## Figure legends\n\nF.\n')
     out = pr.render(text, bib, 'References', move_tables=True)
-    assert '<!--' not in out and out.index('More [2].') < out.index('## References')
-    assert out.endswith('## Tables\n\n**Table 1.** Corpora [3].\n\n| a |\n|---|\n| 1 |\n\nIts note.\n')
+    assert '<!--' not in out and out.index('More<sup>2</sup>.') < out.index('## References')
+    assert out.endswith('## Tables\n\n**Table 1.** Corpora<sup>3</sup>.\n\n| a |\n|---|\n| 1 |\n\nIts note.\n')
     assert '\n1. Gupta' in out and '\n2. Devlin' in out and '\n3. Nakayama' in out
-    assert 'Text [1].\n\nMore [2].' in out                      # the block's blank lines collapse
+    assert 'Text<sup>1</sup>.\n\nMore<sup>2</sup>.' in out      # the block's blank lines collapse
     kept = pr.render(text, bib, 'References')
-    assert '<!--' not in kept and kept.index('**Table 1.** Corpora [2].') < kept.index('More [3].')
+    assert '<!--' not in kept and kept.index('**Table 1.** Corpora<sup>2</sup>.') < kept.index('More<sup>3</sup>.')
     assert '## Tables' not in kept
+
+
+def test_preprints_questions_and_no_empty_section():
+    """An arXiv preprint reads "Preprint at https://arxiv.org/abs/<id> (year)."; a title ending
+    in a question mark gets no full stop; a proceedings paper with an arXiv id and no DOI ends
+    with the arXiv link; a file that cites nothing gets no reference section."""
+    bib = pr.parse_bib(r"""
+@misc{agarwal2020entityswitched,
+  author = {Agarwal, Oshin and Nenkova, Ani},
+  title  = {Entity-Switched Datasets},
+  year   = {2020},
+  eprint = {2004.04123},
+  archivePrefix = {arXiv},
+  url    = {https://arxiv.org/abs/2004.04123}
+}
+@article{kim2022biomedical,
+  author  = {Kim, Hyunjae and Kang, Jaewoo},
+  title   = {How Do Your Models Generalize?},
+  journal = {IEEE Access},
+  volume  = {10},
+  pages   = {31513--31523},
+  year    = {2022}
+}
+@inproceedings{loshchilov2019decoupled,
+  author    = {Loshchilov, Ilya and Hutter, Frank},
+  title     = {Decoupled Weight Decay Regularization},
+  booktitle = {International Conference on Learning Representations},
+  year      = {2019},
+  eprint    = {1711.05101},
+  archivePrefix = {arXiv}
+}
+""")
+    assert pr.format_entry(bib['agarwal2020entityswitched']) == (
+        'Agarwal, O. & Nenkova, A. Entity-Switched Datasets. Preprint at '
+        'https://arxiv.org/abs/2004.04123 (2020).')
+    assert pr.format_entry(bib['kim2022biomedical']) == (
+        'Kim, H. & Kang, J. How Do Your Models Generalize? *IEEE Access* **10**, 31513–31523 (2022).')
+    assert pr.format_entry(bib['loshchilov2019decoupled']).endswith(
+        '(2019). https://arxiv.org/abs/1711.05101')
+    assert pr.render('No citations here.\n', bib, 'Supplementary references') == 'No citations here.\n'

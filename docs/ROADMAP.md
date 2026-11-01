@@ -5848,6 +5848,117 @@ the record, then applied to the npj text:
 - **Figures.** Figures 3 and 4 have lettered panels; Figure 2's band is
   labelled as D5 on the decision seeds.
 
+*Paper A, review round 15 (1 November, night).* Three reviews of the npj
+text (`800a85a`): a referee (major revision: the headline credits the
+names with mention replacement's gain, and the units are treated as
+independent), a number audit (no blocking item; eight wording errors)
+and a consistency check (one blocking item, the affiliation, the
+author's). No number in the paper was wrong. Each finding was checked
+against the record, then applied, keeping the headline positive as the
+author asked:
+
+- **Abstract** (143 words). It keeps the gain over the baseline first,
+  then gives mention replacement's own +2.35 [+0.94, +3.75] (post hoc),
+  says the tests were pre-registered and calls the first criterion "the
+  original" (the pooled one was registered too, at 09:14 on 20 October).
+  It states the recall finding with D11, as the week-18 protocol fixed
+  ("paper A's abstract may state the recall finding with this
+  decision"), with the precision cost and D11's qualification. The
+  claim that every MaterioMiner paper gains is gone from the abstract:
+  MR3 does the same (fine +3.48, +3.24, +1.69, +2.69; coarse +1.61,
+  +2.10, +0.29, +1.14; checked from the run files).
+- **F1 on the held names** (post hoc): MR6 74.8, MR6 + names 75.1 pooled;
+  paired +1.13 [−1.84, +4.11]. It is now in Tables 5 and S3
+  (`paper_tables.held_f1_gain`) and beside every statement of the recall
+  gain, in the Introduction and the Discussion.
+- **Introduction and Discussion.** The contribution statement no longer
+  carries results or says "each comparison fixed before its new runs";
+  the results list is prose; "names" is defined at first use, values
+  included. The Discussion's opening no longer credits the names with
+  the gain: mention replacement with the names improves on MaterioMiner
+  and pooled, not on MuLMS alone. The advice "worth their cost where those
+  names matter more than F1" became what the names give (82.4% against
+  75.0% recall on the held names, 61% of their extra predictions of them
+  wrong, three to seven times an MR3 run), with the untested dictionary
+  rule.
+- **Statistics.** Rewritten: the design items npj asks for (how the
+  units and seeds were fixed, no exclusions, the seeds as randomization,
+  no blinding); the pooled decisions' second condition; D11's unit
+  values, pooled rates with the control interpolated at a D* chosen on the
+  test set; the exceptions to the t intervals; and the units' dependence.
+  Any two MaterioMiner training sets share two of three papers, any two
+  SOFC-Exp folds 27 of 36 articles, and 5 of 21 MuLMS pairs share an
+  article of their pools (`decision_tests.MULMS_POOLS`, checked against
+  `subfield_folds`). As a post hoc sensitivity analysis, with the
+  corrected resampled t test's correlation 1/K for such pairs (Nadeau and
+  Bengio 2003):
+  - D3: +4.27 [−0.13, +8.67], P = 0.054
+  - D4: [+0.09, +3.45]
+  - D5: [+0.27, +6.88]
+  - D11: [+1.71, +20.77]
+
+  No failing decision clears 0. The registered verdicts stand. This is
+  `post_hoc_dependence` in `ner_decision_tests.json` and Table S16's last
+  column.
+- **Methods.** The two-head filter, multi-task training, the sentence
+  filter, self-training, the gazetteer feature, the dictionary rule and
+  label propagation are now defined in the Methods, since npj allows no
+  Supplementary Methods. The pool sentence no longer says other types
+  are replaced mostly by training mentions (false in electrolysis, poly
+  and steel). The 512-sub-word sentence says no input was cut (the code
+  never truncates).
+- **Registration disclosure.** D7, D8, D11 and D12's references were the
+  new runs, not stored ones. The plan of 05:06 moved V4 and V6 after the
+  reset and V1 and V2 to a smaller batch. The names system's screen
+  result was "recorded" after 09:14, its electrolysis runs pulled at
+  05:03. The half-known decisions are defined under the Terms.
+- **Provenance.** The SOFC corpus's 36% coverage of the folds' unseen
+  names (27–43% per fold) is recorded only in the protocol of 13:53 on 20
+  October; `sofc_folds_coverage.py` was never committed, and the paper now
+  says so.
+- **Verdicts.** D5′ reads "above 0 (post hoc)" and D11 "passes (as
+  registered)" in Table S16 (`decision_tests.VERDICTS`). D11 is
+  qualified in Table 6, the Results, Table S11 and SI Note 7, and 13.1c
+  is labelled "reported, not a decision".
+- **Secondary measures.** Weighted F1 is given beside macro F1
+  everywhere. The sentence "on MuLMS alone the secondary measures give
+  the micro picture" is scoped to the names' own references. MR3's P of
+  0.004 is named as a t test and computed in `post_hoc_reported`.
+- **Format.**
+  - Citations are Nature-style superscripts, so brackets mean
+    intervals only.
+  - References were completed from their DOIs: pages and DOIs for six,
+    CrossNER's author corrected, Cai et al.'s published title, and
+    Torres et al. as its 2026 journal version.
+  - seqeval is cited in the text as a website, as npj asks, which frees
+    the place for Nadeau and Bengio (60 references).
+  - The SI has no empty references section.
+  - Data availability gives the datasets' locations.
+  - Author contributions no longer describe the AI assistant's work,
+    which stays in the Methods.
+  - Panels are labelled a), b), c), as npj asks.
+  - Figure 1 carries no author-year citation.
+  - Figure 2 gives the registered D5 beside the D5′ band, with the axis
+    unit, and Figure 3's legend gives the runs per point.
+- **Supplementary Information.**
+  - Times: Table S1's D5 row has each decision's own record time; the
+    resume failures run to 03:34 and 03:50; the D9 and D10 jobs started
+    at 19:58 and 19:59; and the multi-task jobs' 82.5 to 122.7 minutes
+    now name their source.
+  - Wording: "MaterioMiner's size" became its entity count, "solid
+    oxide cells" became fuel cells, and two typos were fixed.
+  - Note 10 quotes the week-18 rule on the abstract.
+  - Notes 11 to 13 name what they leave out.
+- **Not done, the author's.**
+  - The affiliation, the AI assistant's name and version, and what the
+    author verified personally.
+  - The tag and DOI.
+  - The title. The referee proposed a neutral and a mention-replacement
+    title; the author's positive title stays.
+  - Releasing per-unit lexicon-membership flags so that D11 can be
+    checked without a rebuild. This would release part of the lexicons,
+    which the repository does not hold.
+
 ### Week 17 protocol: the harvested names on the strongest base (fixed before any run, 31 October, 19:10 UTC)
 
 *Why, and when.* The round-6 reviews of paper A (31 October) listed as a

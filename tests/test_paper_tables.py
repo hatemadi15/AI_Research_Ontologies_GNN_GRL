@@ -1,6 +1,8 @@
 """The tables of the paper plan (paper_tables.py) from toy results files."""
 import json
 
+import pytest
+
 import paper_tables as pt
 
 
@@ -453,3 +455,34 @@ def test_table14_chain_and_table15_lexicon_units():
     text = pt.table15(data)
     assert '| MR6 + names − MR6 | sofc | +14.09 | +1.51 | +12.58 |' in text
     assert '| ncomms7164 | +1.00 | −0.50 | +1.50 |' in text          # the short paper name
+
+
+def test_table10_f1_on_the_held_names():
+    """Table 10's F1 columns come from the pooled recall and precision of each part, and the
+    paired F1 gain on the held names from each unit's own recall and precision on them."""
+    pytest.importorskip('scipy')
+    assert pt.f1_of(50.0, 50.0) == 50.0 and pt.f1_of(None, 50.0) is None and pt.f1_of(0, 0) is None
+
+    def unit(r, p):
+        return {'recall_in': r, 'precision_in': p}
+    part = {'units': ['a', 'b', 'c'],
+            'per_unit': {'crf_mrm_topic6': {'a': unit(80, 60), 'b': unit(70, 70), 'c': unit(90, 50)},
+                         'crf_mr6': {'a': unit(70, 70), 'b': unit(60, 80), 'c': unit(80, 60)}}}
+    gain = pt.held_f1_gain(part, 'mulms', 'names_vs_mr6')
+    expected = [pt.f1_of(80, 60) - 70, 70 - pt.f1_of(60, 80), pt.f1_of(90, 50) - pt.f1_of(80, 60)]
+    assert gain['n_units'] == 3 and gain['mean_diff'] == round(sum(expected) / 3, 2)
+    assert pt.held_f1_gain(part, 'mulms', 'mr3_vs_crf') is None       # systems not present
+
+
+def test_table16_verdicts_and_dependence_column():
+    """Table 16 prints each decision's own verdict words and, when the results hold them, the
+    post hoc interval and P with the units correlated."""
+    row = {'decision': "D5'", 'comparison': 'pooled', 'n_units': 11, 'stored_mean_diff': 3.58,
+           'stored_ci95': [1.04, 6.13], 'sd': 3.79, 't': 3.14, 'df': 10, 'p_one_sided': 0.0053,
+           'p_two_sided': 0.0106, 'sign_flip_p_two_sided': 0.0068, 'passes': True,
+           'verdict': 'above 0 (post hoc)'}
+    tests = {'decisions': [row], 'post_hoc_dependence': {'decisions': {"D5'": {
+        'mean_diff': 3.58, 'ci95': [0.38, 6.78], 'p_two_sided': 0.0317}}}}
+    text = pt.table16(tests)
+    assert '| above 0 (post hoc) | [+0.38, +6.78], 0.032 |' in text
+    assert '| passes | |' not in pt.table16({'decisions': [dict(row, verdict=None, passes=False)]})

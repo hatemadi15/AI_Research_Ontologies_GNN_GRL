@@ -596,7 +596,7 @@ def figure7(rows_by_setting, path):
         ax.set(xlim=(x0 - (5 if narrow else 2), x1 + 4), ylim=(y0 - 1, y1 + 1))
         ax.set_title(setting, fontsize=9)
         if n > 1:                        # panel letters, as the journal asks for multi-panel figures
-            ax.annotate('abcdefgh'[k], (0, 1), xycoords='axes fraction', xytext=(-30, 8),
+            ax.annotate('abcdefgh'[k] + ')', (0, 1), xycoords='axes fraction', xytext=(-30, 8),
                         textcoords='offset points', fontsize=11, fontweight='bold',
                         ha='left', va='bottom')
         ax.set_xlabel('recall on the unseen test names (%)', fontsize=8)
@@ -658,7 +658,9 @@ def unit_data(analysis):
     return rows
 
 
-def figure9(rows, path):
+def figure9(rows, path, registered=None):
+    """Paper A's Figure 2 (module docstring). registered: (mean, low, high) of D5 as decided
+    (MuLMS's units on all ten seeds), labelled beside the band of the units shown."""
     import matplotlib.pyplot as plt
     fig, ax = plt.subplots(figsize=(7.2, 7.2))
     groups = []
@@ -693,27 +695,32 @@ def figure9(rows, path):
                 transform=ax.get_yaxis_transform(), color='#333333',      # over the lines
                 bbox={'boxstyle': 'square,pad=0.15', 'fc': shade, 'ec': 'none'})
     pooled = [r for r in rows if r[0].startswith('MuLMS') or 'fine-grained' in r[0]]
-    for k, (values, color, name, decision) in enumerate((
-            (lambda rs: [r[2] for r in rs], 'tab:red', 'CRF head',
-             'D5\u2032 (D5 on the decision seeds; post hoc)'),
-            (lambda rs: [r[3] for r in rs], 'tab:blue', 'MR6', 'D7 (pooled)'))):
+    notes = []                       # the lower right's labels, top to bottom
+    if registered:
+        m, lo, hi = registered
+        notes.append(('tab:red', f'D5 vs CRF head as decided (MuLMS on all ten seeds): '
+                                 f'{m:+.2f} [{lo:+.2f}, {hi:+.2f}]'))
+    for values, color, label in (
+            (lambda rs: [r[2] for r in rs], 'tab:red',
+             'red band, D5\u2032 (the units shown; post hoc) vs CRF head'),
+            (lambda rs: [r[3] for r in rs], 'tab:blue', 'blue band, D7 vs MR6')):
         v = values(pooled)
         if len(v) == 11:
             m, lo, hi = mean_ci(v)
             top_y, bottom_y = min(pooled_rows) - 1.5, max(pooled_rows) + 0.5
             ax.fill_betweenx([top_y, bottom_y], lo, hi, color=color, alpha=0.08, zorder=1, lw=0)
             ax.vlines(m, top_y, bottom_y, color=color, lw=1, ls='--', zorder=2)
-            ax.text(0.99, 0.015 + 0.04 * (1 - k),       # the empty lower right, clear of the rows
-                    (f'{decision} vs {name}: '
-                     f'{m:+.2f} [{lo:+.2f}, {hi:+.2f}]').replace('-', '\u2212'),
-                    fontsize=8.5, color=color, ha='right', va='bottom', transform=ax.transAxes,
-                    zorder=5, bbox={'boxstyle': 'square,pad=0.15', 'fc': 'white', 'ec': 'none'})
+            notes.append((color, f'{label}: {m:+.2f} [{lo:+.2f}, {hi:+.2f}]'))
+    for k, (color, text) in enumerate(notes):     # the empty lower right, clear of the rows
+        ax.text(0.99, 0.015 + 0.04 * (len(notes) - 1 - k), text.replace('-', '\u2212'),
+                fontsize=8.5, color=color, ha='right', va='bottom', transform=ax.transAxes,
+                zorder=5, bbox={'boxstyle': 'square,pad=0.15', 'fc': 'white', 'ec': 'none'})
     ax.axvline(0, color='black', lw=0.8, zorder=2)
     ax.set_yticks(ticks, labels, fontsize=9)
-    ax.set_ylim(-0.7, y + 1.6)              # room below the last row for the pooled labels
+    ax.set_ylim(-0.7, y + 2.4)              # room below the last row for the pooled labels
     ax.invert_yaxis()
-    ax.set_xlabel('micro F1 of MR6 + harvested names minus the reference, on the held-out unit',
-                  fontsize=9)
+    ax.set_xlabel('micro F1 of MR6 + harvested names minus the reference on the held-out unit '
+                  '(percentage points)', fontsize=9)
     ax.tick_params(axis='x', labelsize=9)
     ax.grid(alpha=0.3, axis='x')
     ax.legend(fontsize=9, loc='upper center', bbox_to_anchor=(0.5, -0.07), ncol=2, frameon=False)
@@ -730,7 +737,7 @@ def figure10(matched, path):
     curves = matched['post_hoc_curves']['units']
     fig, axes = plt.subplots(2, 4, figsize=(9.6, 5.0))
     for k, (ax, (u, v)) in enumerate(zip(axes.flat, units.items())):
-        ax.annotate('abcdefgh'[k], (0, 1), xycoords='axes fraction', xytext=(-22, 6),
+        ax.annotate('abcdefgh'[k] + ')', (0, 1), xycoords='axes fraction', xytext=(-22, 6),
                     textcoords='offset points', fontsize=10, fontweight='bold',
                     ha='left', va='bottom')
         grid = [float(g) for g in v['curve']]
@@ -831,7 +838,7 @@ def figure8(path):
     ax.text(8.6, rail + 0.15, 'harvested names', fontsize=7, color='#333333', ha='center')
     ax.text(0.2, 0.15, 'No teacher-labeled sentence is trained on: the gold contexts stay, only the names change. Without the '
             'lexicon the student is\nmention replacement with 6 copies (the control); with 3 copies and no lexicon, '
-            'MR3 (mention replacement, Dai and Adel 2020, at a fixed setting).', fontsize=7, color='#333333',
+            'MR3 (mention replacement at a fixed setting).', fontsize=7, color='#333333',
             va='bottom', linespacing=1.3)
     fig.savefig(path, dpi=300, bbox_inches='tight')
     plt.close(fig)
@@ -961,7 +968,10 @@ def main(argv=None):
     written.append('fig8_method.png')
     units = unit_data(analysis)
     if units:
-        figure9(units, os.path.join(args.out, 'fig9_units.png'))
+        winner = analysis.get('week13', {}).get('week12_winner', 'crf_mrm_topic6')
+        d5 = analysis.get('week13', {}).get('pooled', {}).get(winner, {}).get('minus_crf')
+        figure9(units, os.path.join(args.out, 'fig9_units.png'),
+                registered=(d5['mean_diff'], *d5['ci95']) if d5 else None)
         written.append('fig9_units.png')
     else:
         print('fig9: no per-unit comparisons of the names method')

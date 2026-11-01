@@ -23,6 +23,7 @@ figure { break-before: page; break-inside: avoid; margin: 0; }
 figure img { display: block; max-width: 100%; max-height: 175mm; margin: 0 auto 6mm; }
 figure figcaption p { font-size: 9.5pt; }
 h2.tables { break-before: page; }
+sup { font-size: 70%; line-height: 0; vertical-align: super; }
 </style></head><body>
 <h1>Supplementary Information</h1>
 <p><strong>Harvesting names from unlabeled papers to augment materials named entity recognition on unseen documents</strong></p>
@@ -80,8 +81,8 @@ and the amendments.</p>
 <tr>
 <td>D5, with 13.1a, 13.1b, 13.1d and 13.3a, 13.3b (week 13)</td>
 <td>20 October 09:14 (<code>808ff4b</code>): the pooled decision over both corpora as a second route to the claim, &quot;each unit its 10-seed mean&quot;, the stop rule lifted; amended three times the same day, before any decision run of the route: 09:25 (<code>e94f352</code>), the label-propagation rule's two MaterioMiner decisions and an SOFC-Exp comparison pre-specified after its MuLMS results (Supplementary Note 7); 13:53 (<code>5f7f827</code>), eighteen minutes after the screen chose MR6 + names, D6 added conditional on D1 and the analogue, which the morning's text ran whenever the screen had a winner, gated on D1; 18:42 (<code>de62446</code>), D6's condition widened to D1 or D5 and the analogue's morning condition restored, the gating recorded as a mistake</td>
-<td>24–25 October</td>
-<td>25 October (<code>3432988</code>)</td>
+<td>24–25 October (13.1a, 13.1b and 13.1d on saved predictions)</td>
+<td>D5: 25 October 01:11 (<code>3432988</code>); 13.1a, 13.1b: 20 October 09:25 (<code>e94f352</code>); 13.1d: 09:47 (<code>aca3a4f</code>); 13.3a: 24 October 17:26 (<code>2432c8c</code>); 13.3b: 25 October 02:45 (<code>6fb8ddd</code>)</td>
 <td>the analysis took MuLMS's 10-seed means; the 7-seed reading is D5′</td>
 </tr>
 <tr>
@@ -115,7 +116,7 @@ and the amendments.</p>
 <tr>
 <td>D9, D10 (week 17; follow-up)</td>
 <td>31 October 19:15 (<code>f39447c</code>), after D1 to D8 had been written up (the lexicon split's results arrived 26 minutes later), a pass expected to be unlikely; the code 19:41 (<code>013f9ac</code>)</td>
-<td>31 October 19:54 to 1 November 00:35 (<code>w17a</code>; <code>w17b</code> ended at 23:00)</td>
+<td>31 October 19:58 to 1 November 00:35 (the first jobs started at 19:58, <code>w17b</code>, and 19:59, <code>w17a</code>; <code>w17b</code> ended at 23:00)</td>
 <td>1 November</td>
 <td>—</td>
 </tr>
@@ -239,7 +240,9 @@ commit per batch, a pinned image and pinned libraries; the three week-14
 batches alone took 19 session hours (5.2, 4.3 and 9.7). The two week-17
 sessions took 4.7 and 3.1 hours. A names job on the multi-task base
 (three multi-task teachers, their tagging of the corpus with two heads,
-ten students) took 82.5 to 122.7 minutes (mean 99.7), 10.0 minutes per
+ten students) took 82.5 to 122.7 minutes (mean 99.7, by the results
+files' run times; the session manifests give 82.7 to 122.9, mean 99.9),
+10.0 minutes per
 student with the harvest shared over its ten students; the harvest alone,
 the job less ten students at the control's rate, is about 31 minutes, so
 a student charged with all of it costs about 38. A multi-task six-copy
@@ -403,23 +406,23 @@ papers the changes are +0.86 [−3.38, +5.10] in recall and +1.32 [−6.62,
 <p>Per subfield, the lexicon's coverage
 of the unseen test names runs from 7% (semiconductors) to 36%
 (electrolysis), and the names' gain over MR6 on the decision seeds from
-−2.3 (polymers) to +3.3 (solid oxide cells); the two correlate negatively
+−2.3 (polymers) to +3.3 (solid oxide fuel cells); the two correlate negatively
 (Pearson r = −0.71, Spearman −0.61, 7 points), and the gain also
 correlates with how weak the CRF head is on the subfield (r = −0.76 with
-its F1; semiconductors at 32.5 and solid oxide cells at 43.5 gain most).
+its F1; semiconductors at 32.5 and solid oxide fuel cells at 43.5 gain most).
 The two readings cannot be separated here. Coverage and the baseline's F1
 are themselves correlated (r = 0.89); given F1, coverage keeps almost no
 association with the gain (partial r = −0.10) while F1 given coverage
 keeps some (−0.40), but with 7 points, 4 degrees of freedom for a partial
 correlation, neither is distinguishable from 0, and the raw correlations
 fall to −0.19 and −0.01 without the two subfields that drive them
-(semiconductors and solid oxide cells). The raw correlation
+(semiconductors and solid oxide fuel cells). The raw correlation
 with coverage runs against a simple dose–response in F1, though the membership split (main text, Results, <em>What the names do</em>) finds the recall gain on the held names in every
 subfield; F1 also pays the precision the names cost.</p>
 <p><strong>The lexicon split in full.</strong> Table S3 gives the levels and every paired
 comparison of the analysis in the main text (Results, <em>What the names do</em>), and Supplementary Note 13 each
 unit's gains and the unseen-name trade of every system against the one it
-builds on, in F1, recall and precision. A test name is unseen by main
+builds on, in F1, recall and precision. A test name is unseen by
 the main text's words-only rule (Methods, <em>Data</em>) and in the lexicon when the lexicon holds its
 words with its type; a prediction is classed the same way by its words
 and predicted type, and the precision of each part is the share of its
@@ -453,15 +456,18 @@ mixed and a generic shift, or name knowledge and none.</p>
 <section class="tbl wide">
 <p><strong>Table S3.</strong> Recall on the unseen test names by lexicon membership (post
 hoc; lexicons rebuilt by the names method's own teachers; MuLMS on the
-decision seeds, MaterioMiner on 10 seeds; a test name is unseen by main
+decision seeds, MaterioMiner on 10 seeds; a test name is unseen by
 the main text's words-only rule (Methods, <em>Data</em>); the mixed-corpus rows are split by the topic
 corpus's lexicon, the one rebuilt). Levels: per system, the share
 of the unseen test names the lexicon holds (pooled over seeds and units),
 recall on those and on the others, the share of the unseen-name
-predictions that are lexicon names, and precision on each part. Paired
-gains: per comparison, the recall gain on the held names and on the
-others, the difference of the two gains, paired over the units with 95%
-CIs, and the units where the gain on the held names is the larger.</p>
+predictions that are lexicon names, and precision and F1 on each part
+(F1 from the pooled recall and precision). Paired gains: per comparison,
+the recall gain on the held names and on the others, the difference of
+the two gains, paired over the units with 95% CIs, the units where the
+gain on the held names is the larger, and the F1 gain on the held names,
+each unit's F1 from its recall and precision on them pooled over the
+seeds.</p>
 <p><strong>Levels</strong></p>
 <table>
 <thead>
@@ -474,6 +480,8 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <th>unseen predictions in the lexicon (%)</th>
 <th>precision, in</th>
 <th>precision, out</th>
+<th>F1, in</th>
+<th>F1, out</th>
 </tr>
 </thead>
 <tbody>
@@ -486,6 +494,8 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <td>30.7</td>
 <td>74.3</td>
 <td>47.6</td>
+<td>73.1</td>
+<td>36.6</td>
 </tr>
 <tr>
 <td>MuLMS, 7 subfields</td>
@@ -496,6 +506,8 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <td>28.4</td>
 <td>74.1</td>
 <td>46.3</td>
+<td>74.8</td>
+<td>39.2</td>
 </tr>
 <tr>
 <td>MuLMS, 7 subfields</td>
@@ -506,6 +518,8 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <td>27.5</td>
 <td>74.7</td>
 <td>46.4</td>
+<td>74.8</td>
+<td>39.9</td>
 </tr>
 <tr>
 <td>MuLMS, 7 subfields</td>
@@ -516,6 +530,8 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <td>29.0</td>
 <td>69.0</td>
 <td>44.0</td>
+<td>75.1</td>
+<td>40.1</td>
 </tr>
 <tr>
 <td>MuLMS, 7 subfields</td>
@@ -526,6 +542,8 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <td>28.8</td>
 <td>70.7</td>
 <td>45.0</td>
+<td>75.7</td>
+<td>40.4</td>
 </tr>
 <tr>
 <td>MaterioMiner fine, 4 papers</td>
@@ -536,6 +554,8 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <td>13.0</td>
 <td>81.3</td>
 <td>46.4</td>
+<td>77.5</td>
+<td>37.0</td>
 </tr>
 <tr>
 <td>MaterioMiner fine, 4 papers</td>
@@ -546,6 +566,8 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <td>13.0</td>
 <td>82.7</td>
 <td>46.3</td>
+<td>82.9</td>
+<td>39.2</td>
 </tr>
 <tr>
 <td>MaterioMiner fine, 4 papers</td>
@@ -556,6 +578,8 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <td>12.3</td>
 <td>81.4</td>
 <td>44.6</td>
+<td>82.0</td>
+<td>39.3</td>
 </tr>
 <tr>
 <td>MaterioMiner fine, 4 papers</td>
@@ -566,6 +590,8 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <td>13.6</td>
 <td>81.2</td>
 <td>48.8</td>
+<td>83.8</td>
+<td>41.5</td>
 </tr>
 <tr>
 <td>MaterioMiner coarse, 4 papers</td>
@@ -576,6 +602,8 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <td>17.7</td>
 <td>82.2</td>
 <td>45.5</td>
+<td>80.9</td>
+<td>45.4</td>
 </tr>
 <tr>
 <td>MaterioMiner coarse, 4 papers</td>
@@ -586,6 +614,8 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <td>17.3</td>
 <td>82.8</td>
 <td>46.6</td>
+<td>80.9</td>
+<td>46.9</td>
 </tr>
 <tr>
 <td>MaterioMiner coarse, 4 papers</td>
@@ -596,6 +626,8 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <td>17.8</td>
 <td>81.5</td>
 <td>46.1</td>
+<td>81.0</td>
+<td>46.5</td>
 </tr>
 <tr>
 <td>MaterioMiner coarse, 4 papers</td>
@@ -606,6 +638,8 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <td>17.5</td>
 <td>82.4</td>
 <td>47.0</td>
+<td>81.6</td>
+<td>47.7</td>
 </tr>
 </tbody>
 </table>
@@ -621,6 +655,7 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <th>recall gain on the names not in it [95% CI]</th>
 <th>in − out [95% CI]</th>
 <th>units with in &gt; out</th>
+<th>F1 gain on the names in the lexicon [95% CI]</th>
 </tr>
 </thead>
 <tbody>
@@ -631,6 +666,7 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <td>+1.12 [−0.78, +3.02]</td>
 <td>+6.17 [+2.44, +9.90]</td>
 <td>7/7</td>
+<td>+1.13 [−1.84, +4.11]</td>
 </tr>
 <tr>
 <td>MuLMS, 7 subfields</td>
@@ -639,6 +675,7 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <td>+6.34 [+2.60, +10.07]</td>
 <td>+4.33 [+1.18, +7.48]</td>
 <td>6/7</td>
+<td>+3.29 [−1.27, +7.85]</td>
 </tr>
 <tr>
 <td>MuLMS, 7 subfields</td>
@@ -647,6 +684,7 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <td>+5.22 [+1.92, +8.52]</td>
 <td>−1.84 [−5.27, +1.60]</td>
 <td>3/7</td>
+<td>+2.15 [+0.15, +4.16]</td>
 </tr>
 <tr>
 <td>MuLMS, 7 subfields</td>
@@ -655,6 +693,7 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <td>+4.22 [+0.87, +7.57]</td>
 <td>−0.66 [−2.78, +1.45]</td>
 <td>3/7</td>
+<td>+2.02 [−0.02, +4.06]</td>
 </tr>
 <tr>
 <td>MuLMS, 7 subfields</td>
@@ -663,6 +702,7 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <td>+1.31 [−1.07, +3.68]</td>
 <td>+4.86 [+1.50, +8.21]</td>
 <td>7/7</td>
+<td>+1.18 [−1.63, +4.00]</td>
 </tr>
 <tr>
 <td>MaterioMiner fine, 4 papers</td>
@@ -671,6 +711,7 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <td>+0.29 [−4.23, +4.81]</td>
 <td>+4.33 [−5.33, +13.98]</td>
 <td>3/4</td>
+<td>+1.96 [−6.54, +10.46]</td>
 </tr>
 <tr>
 <td>MaterioMiner fine, 4 papers</td>
@@ -679,6 +720,7 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <td>+6.00 [+2.84, +9.16]</td>
 <td>+6.77 [−18.59, +32.13]</td>
 <td>2/4</td>
+<td>+6.57 [−18.80, +31.94]</td>
 </tr>
 <tr>
 <td>MaterioMiner fine, 4 papers</td>
@@ -687,6 +729,7 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <td>+5.71 [+1.05, +10.37]</td>
 <td>+2.44 [−15.96, +20.85]</td>
 <td>2/4</td>
+<td>+4.61 [−12.46, +21.68]</td>
 </tr>
 <tr>
 <td>MaterioMiner fine, 4 papers</td>
@@ -695,6 +738,7 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <td>+4.17 [−0.17, +8.50]</td>
 <td>+4.60 [−13.82, +23.03]</td>
 <td>3/4</td>
+<td>+5.73 [−9.03, +20.49]</td>
 </tr>
 <tr>
 <td>MaterioMiner coarse, 4 papers</td>
@@ -703,6 +747,7 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <td>+1.91 [−1.46, +5.28]</td>
 <td>−1.54 [−3.60, +0.51]</td>
 <td>0/4</td>
+<td>+1.17 [−2.23, +4.58]</td>
 </tr>
 <tr>
 <td>MaterioMiner coarse, 4 papers</td>
@@ -711,6 +756,7 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <td>+3.62 [+1.18, +6.07]</td>
 <td>−2.22 [−5.06, +0.62]</td>
 <td>0/4</td>
+<td>+1.47 [−1.36, +4.30]</td>
 </tr>
 <tr>
 <td>MaterioMiner coarse, 4 papers</td>
@@ -719,6 +765,7 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <td>+1.72 [−0.37, +3.80]</td>
 <td>−0.67 [−1.53, +0.19]</td>
 <td>0/4</td>
+<td>+0.30 [−2.84, +3.43]</td>
 </tr>
 <tr>
 <td>MaterioMiner coarse, 4 papers</td>
@@ -727,6 +774,7 @@ CIs, and the units where the gain on the held names is the larger.</p>
 <td>+2.32 [+0.88, +3.75]</td>
 <td>−2.44 [−2.63, −2.24]</td>
 <td>0/4</td>
+<td>+0.62 [−1.51, +2.75]</td>
 </tr>
 </tbody>
 </table>
@@ -1042,10 +1090,13 @@ other subfields' unlabeled sentences (four, none passing); and the two of
 20 October (09:14) on mention replacement without names on SOFC-Exp's
 folds (MR3, as in the main text's Results, <em>SOFC-Exp: no gain shown</em>; and multi-task training with mention
 replacement, −0.11 [−0.69, +0.46]; both failing). Of the twenty, five
-passed: D3, D4 and D5 against the CRF head, D11 on recall, and mention
+passed: D3, D4 and D5 against the CRF head, D11 on recall (as
+registered, only with three subfields that no bias matched; +6.05
+[−3.33, +15.44] on the four matched), and mention
 replacement's votes against the CRF head's votes. Of the twelve of Table
 2, the seven against a mention-replacement control or on the names'
-source are D2, D7, D8, D9, D10, D11 and D12; only D11 passes. The
+source are D2, D7, D8, D9, D10, D11 and D12; only D11 passes, as
+registered, with that qualification. The
 label-propagation rule's decisions are not counted, the rule being a
 post-processing rule on saved predictions rather than a use of names;
 four of them fall in the window (20 October, above), and with them the
@@ -1055,21 +1106,17 @@ by chance. The companion study's decisions, all earlier, are not counted
 either.</p>
 <p><strong>Training size on SOFC-Exp.</strong> A decision of the companion study (17
 October 07:28; Table S1, week 9) trained on 10 of the official split's 26
-training articles (5 draws of 156–248 sentences, MaterioMiner's size; 10
+training articles (5 draws of 10 articles, 156–248 sentences and 820–1,276
+entities each, as many entities as MaterioMiner's training sets hold; 10
 seeds each) and scored on its test articles: MR3 gained +0.50 [−0.47,
 +1.46] over the CRF head and did not pass. MR6 + names was not run at
 that size.</p>
 <h2>Supplementary Note 8: the follow-up on the strongest system in detail</h2>
-<p><strong>Design.</strong> Table S6 gives the follow-up's comparisons. The control is
-the multi-task model (one encoder, a CRF head per granularity) with
-six-copy mention replacement; the names system adds
-a lexicon harvested by three multi-task teachers (the stored multi-task
-runs of seeds 0, 100 and 200, whose scores the jobs reproduced), each
-tagging the fatigue corpus with both heads. A mention is admitted when
-the three teachers agree on its coarse-grained span and type and on its
-fine-grained type at exactly that span, or on its having none, with every
-marginal at 0.9 or more on the coarse head and, where a fine type is
-tagged, on the fine head; it joins the pool under its pair of types. The
+<p><strong>Design.</strong> Table S6 gives the follow-up's comparisons. The control,
+multi-task training with six-copy mention replacement, and the names
+system's two-head filter are described in the main text's Methods
+(<em>Systems</em>); the three multi-task teachers are the stored multi-task runs
+of seeds 0, 100 and 200, whose scores the jobs reproduced. The
 protocol expected detectable differences of about 3.4 to 3.8 points
 fine-grained and 1.4 to 2.4 coarse-grained.</p>
 <section class="tbl wide">
@@ -1147,7 +1194,8 @@ multi-task control are +0.58 [−2.93, +4.09] recall and +0.82 [−3.39,
 hoc, F1 changes by +2.43 [+0.40, +4.47] on the seen and +0.43 [−1.57,
 +2.44] on the unseen test names fine-grained, and by +0.02 [−1.30, +1.34]
 and +1.20 [−0.82, +3.22] coarse-grained; no pattern is read from these.</p>
-<p><strong>Cost.</strong> A names job took 82.5 to 122.7 minutes on a T4 (three
+<p><strong>Cost.</strong> A names job took 82.5 to 122.7 minutes on a T4 (by the
+results files' run times; three
 teachers, their tagging of 40,000 sentences with two heads, and ten
 students): 10.0 minutes per student with the harvest shared over the
 job's ten students and about 38 charged to one, against 6.9 for a
@@ -1368,6 +1416,12 @@ knowledge or a generic shift toward tagging more spans. The control
 matched bias D*, the flagged subfields and the two decisions are defined
 in the Methods (<em>Systems</em>, <em>The recall-matched control</em>); the decisions
 apply the main text's decision rule (Methods, <em>Evaluation protocol</em>).
+The protocol also fixed what the abstract could say: &quot;18.1 passes: …
+paper A's abstract may state the recall finding with this decision.
+18.1 fails: that is not shown, and the finding stays out of the
+abstract.&quot; D11 (18.1) passed as registered, and the abstract states the
+recall finding with it and its qualification, the three subfields the
+bias could not match.
 The protocol expected D12 near +0.7 to +1.3
 (the names' F1 over MR6 at D = 0 on these units is +0.51 [−1.51,
 +2.53], and on MaterioMiner a bias from 0 to 1 had cost the CRF head
@@ -2255,7 +2309,8 @@ S7); the two-sided t-test P values are 0.013 for D11 and 0.096 for D12.</p>
 </table>
 </section>
 <h2>Supplementary Note 11: checks, deviations, failures and timings of the names route</h2>
-<p>This Note gives, week by week, the checks the runs of the names route
+<p>This Note gives, week by week (weeks 15 and 18 in Supplementary Notes 5
+and 10), the checks the runs of the names route
 passed, where the runs departed from what the protocols planned, which
 sessions failed, and when each of these happened; commit times are the
 commits' (UTC), push and pull times the session notes', and a session's
@@ -2383,7 +2438,7 @@ subfields extending one file, a repeat resuming and another corpus
 refused.</p>
 <p>The screen was pushed on 20 October at 02:35 from bundle <code>47e2310</code>,
 <code>w12a</code> to <code>ner-gpu-jobs-d</code> (version 7) and <code>w12c</code> to <code>ner-gpu-jobs-c</code>
-(version 3). From 03:03 (<code>w12c</code>) and 03:11 (<code>w12a</code>) to 03:50 their later
+(version 3). From 03:03 (<code>w12c</code>) and 03:11 (<code>w12a</code>) to 03:34 and 03:50 their later
 jobs failed on the resume check (the session notes recorded it from
 03:56): a
 results file stored one corpus SHA-256, each held-out subfield had its
@@ -2617,7 +2672,8 @@ October, to none of which a TPU was attached.</p>
 to 1 November that the results files hold, 162 rows in all (160 paired
 comparisons, a gap between unpaired settings and a level), one each:
 the twelve decisions of Table 2 and the other decisions of those
-protocols, the screen, every pre-specified comparison and the post hoc
+protocols, the screen, every pre-specified comparison the results files
+hold but those listed at the end of this Note, and the post hoc
 ones. Each row gives micro F1 (or the measure the comparison names:
 recall, as in D11, precision, or F1 on the seen or unseen test names)
 and, where the results hold them, macro F1 (every type weighted
@@ -2640,16 +2696,19 @@ comparisons, all on MuLMS and every one against the CRF head (13) or MR3
 +3.09]); and 3 pooled post hoc rows, the names against MR3 on both seed
 bases (+1.33 [+0.29, +2.36] on the decision seeds, +1.73 [+0.84, +2.61]
 on all ten) and against MR6 on all ten (+1.12 [+0.21, +2.03]). Over MR3
-those pooled gains also count the three extra copies (MR6 over MR3,
-+0.50 [−0.31, +1.30] and +0.61 [−0.15, +1.37]), and the screen's seeds
-lift the all-ten readings (over MR3 on MuLMS, +1.72 [+0.44, +3.01] on all
-ten against +1.10 [−0.46, +2.65] on the decision seeds). Weighted F1's
+those pooled gains also count the three extra copies (MR6 over MR3, in
+macro F1 +0.50 [−0.31, +1.30] and +0.61 [−0.15, +1.37], in weighted F1
++0.36 [−0.11, +0.82] and +0.32 [−0.26, +0.90]), and the screen's seeds
+lift the all-ten readings (over MR3 on MuLMS, in macro F1 +1.72 [+0.44,
++3.01] on all ten against +1.10 [−0.46, +2.65] on the decision seeds, in
+weighted F1 +1.62 [−0.05, +3.29] against +1.17 [−1.09, +3.44]). Weighted F1's
 interval clears 0 where micro F1's does not in 20 rows (16 per-corpus on
 MuLMS, among them D1 at +4.17 [+0.39, +7.95], 3 on MaterioMiner, and the
 pooled names against MR3 on all ten); the converse, micro F1 above 0 and
 macro F1 not, occurs in 8 rows, 7 on MaterioMiner or SOFC-Exp, among them
 the names against MR3 on MaterioMiner's coarse-grained papers (micro
-+0.49 [+0.06, +0.92], macro −0.39 [−2.14, +1.36]). Table S12 gives each
++0.49 [+0.06, +0.92], macro −0.39 [−2.14, +1.36], weighted +0.49
+[−0.03, +1.02]). Table S12 gives each
 row's per-unit values and its votes' macro and weighted F1. Some numbers
 quoted in the record are not in the tables: mention replacement's pooled
 gain with MaterioMiner's coarse-grained papers, +1.80 [+0.39, +3.22],
@@ -2682,8 +2741,8 @@ hoc. An empty cell: the results do not hold that quantity, or, for the
 macro and weighted cells of the other pooled rows (70 to 73), it was not
 computed. A status such as 10.1 names a decision outside Table 2 by its
 week and number (10.1 is week 10's decision 1; 13.1a as its protocol
-names it), and &quot;pre-specified (13.3)&quot; a comparison pre-specified with
-that decision.</p>
+names it; 13.1d names two decisions, one per granularity), and
+&quot;pre-specified (13.3)&quot; a comparison pre-specified with that decision.</p>
 <table>
 <thead>
 <tr>
@@ -3425,7 +3484,7 @@ that decision.</p>
 <td>13 (amendment, 20 October 09:25)</td>
 <td>SOFC-Exp, 5 folds</td>
 <td>CRF head + label propagation − CRF head</td>
-<td>pre-specified (13.1c)</td>
+<td>pre-specified (13.1c: reported, not a decision)</td>
 <td>−0.44 [−0.72, −0.16], 0/5</td>
 <td>−0.50 [−0.92, −0.08]</td>
 <td>−0.35 [−0.63, −0.07]</td>
@@ -3437,7 +3496,7 @@ that decision.</p>
 <td>13 (amendment, 20 October 09:25)</td>
 <td>SOFC-Exp, 5 folds</td>
 <td>CRF head + label propagation with retyping − CRF head</td>
-<td>pre-specified (13.1c)</td>
+<td>pre-specified (13.1c: reported, not a decision)</td>
 <td>−0.43 [−0.68, −0.18], 0/5</td>
 <td>−0.49 [−0.86, −0.11]</td>
 <td>−0.34 [−0.59, −0.09]</td>
@@ -4253,7 +4312,7 @@ that decision.</p>
 <td>18 (1 November 10:51)</td>
 <td>MuLMS, 7 subfields (seeds 300–900)</td>
 <td>MR6 + names − MR6 at matched recall: recall on the unseen test names the lexicon holds</td>
-<td>D11: passes</td>
+<td>D11: passes as registered, with the 3 flagged subfields matched at the grid's end</td>
 <td>+11.24 [+3.31, +19.18], 7/7</td>
 <td></td>
 <td></td>
@@ -6042,11 +6101,16 @@ their 95% CIs.</p>
 decisions. Table S13 gives the unseen-name trade of the main text (Results, <em>What the names do</em>) for every system against the one it
 builds on (post hoc, but for MR3 against the CRF head on MuLMS's unseen
 and seen test names, pre-specified on 17 October; <code>ner_mentions.py</code>,
-<code>chain</code>; the multi-task names' rows against their control on
-MaterioMiner are pre-specified too, on 31 October, 19:15), Table S14 the lexicon split of the main text (Results, <em>What the names do</em>) per held-out unit (post hoc; <code>ner_lexicon_recall.py</code>),
+<code>chain</code>; of the multi-task names' rows against their control on
+MaterioMiner, recall and precision on the unseen test names are
+pre-specified, on 31 October, 19:15, and F1 and the seen names' rows
+post hoc), Table S14 the lexicon split of the main text (Results, <em>What the names do</em>) per held-out unit (post hoc; <code>ner_lexicon_recall.py</code>),
 Table S15 the CPU probe of Supplementary Note 7 per subfield (no
 decision; <code>silver_lexicon.py</code>), and Table S16 the t statistic and P values
-of every decision (computed for reporting; <code>decision_tests.py</code>).</p>
+of every decision (computed for reporting; <code>decision_tests.py</code>), with,
+post hoc, each decision's interval and P value when the units whose
+training sets share documents are allowed to be correlated (Methods,
+<em>Statistics and reproducibility</em>).</p>
 <section class="tbl wide">
 <p><strong>Table S13.</strong> The unseen-name trade in full: per setting, each system
 against the one it builds on, the mean paired difference over the units
@@ -7297,10 +7361,19 @@ freedom, its one- and two-sided P values, and the exact two-sided
 sign-flip P value over all 2ⁿ assignments of signs, from the per-unit
 differences each decision used (rounded to two decimals, so t and P can
 differ from the unrounded values in the last digit); D5′ is the post hoc
-reading of D5 on MuLMS's decision seeds. Computed on 1 November for
-reporting: each decision was taken by the registered rule, the interval
-above 0 (for D5 and D7 with neither corpus's interval below 0), which is
-the one-sided test at 2.5%.</p>
+reading of D5 on MuLMS's decision seeds, so its verdict reads &quot;above 0
+(post hoc)&quot;, and D11 passes as registered only with the three flagged
+subfields. Computed on 1 November for reporting: each decision was taken
+by the registered rule, the interval above 0 (for D5 and D7 with neither
+corpus's interval below 0), which is the one-sided test at 2.5%. The
+last column (post hoc) gives the interval and two-sided P value with the
+units correlated where their training sets share documents, at the
+correlation the corrected resampled t test assumes for k-fold designs,
+1/K: 1/4 between MaterioMiner's papers, 1/5 between SOFC-Exp's folds,
+1/4 between the 5 of 21 pairs of MuLMS subfields whose training pools
+share an article, none otherwise or across corpora; the variance of the
+mean of n units is then S²/(1 − ρ̄)·(n + Σρ)/n², with n − 1 degrees of
+freedom (<code>decision_tests.py</code>, <code>post_hoc_dependence</code>).</p>
 <table>
 <thead>
 <tr>
@@ -7314,6 +7387,7 @@ the one-sided test at 2.5%.</p>
 <th>P, two-sided</th>
 <th>Sign-flip P</th>
 <th>Verdict</th>
+<th>Units correlated: 95% CI, P (post hoc)</th>
 </tr>
 </thead>
 <tbody>
@@ -7328,6 +7402,7 @@ the one-sided test at 2.5%.</p>
 <td>0.1207</td>
 <td>0.0781</td>
 <td>no</td>
+<td>[−2.00, +8.38], 0.183</td>
 </tr>
 <tr>
 <td>D2</td>
@@ -7340,6 +7415,7 @@ the one-sided test at 2.5%.</p>
 <td>0.4125</td>
 <td>0.4062</td>
 <td>no</td>
+<td>[−2.15, +3.99], 0.491</td>
 </tr>
 <tr>
 <td>D3</td>
@@ -7352,6 +7428,7 @@ the one-sided test at 2.5%.</p>
 <td>0.0180</td>
 <td>0.1250</td>
 <td>passes</td>
+<td>[−0.13, +8.67], 0.054</td>
 </tr>
 <tr>
 <td>D4</td>
@@ -7364,10 +7441,11 @@ the one-sided test at 2.5%.</p>
 <td>0.0144</td>
 <td>0.1250</td>
 <td>passes</td>
+<td>[+0.09, +3.45], 0.044</td>
 </tr>
 <tr>
 <td>D5</td>
-<td>pooled 11 units (MuLMS seeds 0–900): MR6 + names vs CRF head</td>
+<td>pooled 11 units (MuLMS seeds 0-900): MR6 + names vs CRF head</td>
 <td>11</td>
 <td>+3.58 [+0.95, +6.21]</td>
 <td>3.92</td>
@@ -7376,10 +7454,11 @@ the one-sided test at 2.5%.</p>
 <td>0.0127</td>
 <td>0.0107</td>
 <td>passes</td>
+<td>[+0.27, +6.88], 0.037</td>
 </tr>
 <tr>
 <td>D5′</td>
-<td>pooled 11 units (MuLMS seeds 300–900, post hoc reading): MR6 + names vs CRF head</td>
+<td>pooled 11 units (MuLMS seeds 300-900, post hoc reading): MR6 + names vs CRF head</td>
 <td>11</td>
 <td>+3.58 [+1.04, +6.13]</td>
 <td>3.79</td>
@@ -7387,7 +7466,8 @@ the one-sided test at 2.5%.</p>
 <td>0.0053</td>
 <td>0.0106</td>
 <td>0.0068</td>
-<td>passes</td>
+<td>above 0 (post hoc)</td>
+<td>[+0.38, +6.78], 0.032</td>
 </tr>
 <tr>
 <td>D6</td>
@@ -7400,6 +7480,7 @@ the one-sided test at 2.5%.</p>
 <td>0.9432</td>
 <td>1.0000</td>
 <td>no</td>
+<td>[−1.79, +1.73], 0.962</td>
 </tr>
 <tr>
 <td>D7</td>
@@ -7412,6 +7493,7 @@ the one-sided test at 2.5%.</p>
 <td>0.2517</td>
 <td>0.2383</td>
 <td>no</td>
+<td>[−1.04, +2.63], 0.356</td>
 </tr>
 <tr>
 <td>D8</td>
@@ -7424,6 +7506,7 @@ the one-sided test at 2.5%.</p>
 <td>0.8148</td>
 <td>0.7969</td>
 <td>no</td>
+<td>[−2.38, +2.01], 0.845</td>
 </tr>
 <tr>
 <td>D9</td>
@@ -7436,6 +7519,7 @@ the one-sided test at 2.5%.</p>
 <td>0.0517</td>
 <td>0.1250</td>
 <td>no</td>
+<td>[−0.52, +2.43], 0.132</td>
 </tr>
 <tr>
 <td>D10</td>
@@ -7448,6 +7532,7 @@ the one-sided test at 2.5%.</p>
 <td>0.1833</td>
 <td>0.2500</td>
 <td>no</td>
+<td>[−1.55, +3.25], 0.341</td>
 </tr>
 <tr>
 <td>D11</td>
@@ -7459,7 +7544,8 @@ the one-sided test at 2.5%.</p>
 <td>0.0067</td>
 <td>0.0133</td>
 <td>0.0156</td>
-<td>passes</td>
+<td>passes (as registered)</td>
+<td>[+1.71, +20.77], 0.028</td>
 </tr>
 <tr>
 <td>D12</td>
@@ -7472,9 +7558,9 @@ the one-sided test at 2.5%.</p>
 <td>0.0961</td>
 <td>0.1406</td>
 <td>no</td>
+<td>[−1.60, +8.12], 0.152</td>
 </tr>
 </tbody>
 </table>
 </section>
-<h2>Supplementary references</h2>
 </body></html>
