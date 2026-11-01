@@ -504,3 +504,24 @@ levels 53.95/52.99 and 61.25/60.40; the two-head filter's lexicons hold
 `gpu/ner_mentions.json`, `chain`; the detectable differences in
 `gpu/ner_robustness.json`). The `w17a` session's repeats (`smokebc`,
 `smokebd`) identical to the stored runs (`w17b` ran none); the teachers equal the stored `crf_mt` runs.
+
+Week 18 (the week-18 protocol, ROADMAP §4; fixed 1 November 10:51 UTC
+before any run): the names against a recall-matched control on MuLMS's 7
+held-out subfields at the decision seeds 300 to 900. `crf_mr6_bias_m<N>`
+are the stored `crf_mr6` jobs run again with `--entity-bias` over the grid
+−2 to 5 (training untouched; the test predictions per bias in
+`test_pred_bias`), one file per seed offset holding the 7 subfields.
+`gpu/ner_recall_matched.json` (`ner_recall_matched.py`, committed before
+the result) holds the checks, per subfield the matched bias D* with its
+flag and the control's recall, precision and F1 at every bias, the
+decisions 18.1 (recall on the unseen names the lexicon holds) and 18.2
+(micro F1) with the pre-specified comparisons, the same without the
+flagged subfields (`without_flagged`), and a post hoc reading with the
+flagged subfields matched at the nearest recall (`post_hoc_nearest`,
+added after the result). Run record: `w18a` pushed to `ner-gpu-jobs-d`
+(version 16, bundle `7906996`) at 11:12:34 UTC on 1 November, pulled at
+13:58; `smokebe` identical to `smokebc`; at D = 0 all 49 runs equal their
+stored `crf_mr6` runs. Outcome: 18.1 +11.24 [+3.31, +19.18], passes;
+18.2 +3.26 [−0.79, +7.31], no; electrolysis, pemfc and sofc flagged
+(without them +6.05 [−3.33, +15.44] and −0.03 [−2.78, +2.72]; post hoc
++8.63 [+3.35, +13.90] and +1.37 [−0.66, +3.41]); `docs/tables/table12_week18.md`.

@@ -486,3 +486,20 @@ coarse-grained +0.85 [−0.72, +2.42], both no; the names against multi-task
 lexicons hold 7–25% of a paper's unseen test names. The negative result
 extends to the strongest base (ROADMAP, the week-17 outcome; paper A,
 Section 5.7).
+
+### Week 18 (1 November, after nine review rounds of paper A)
+
+The names against a recall-matched control: the round-9 referee asked
+whether the names' recall gain on the unseen names their lexicon holds is
+name knowledge or a generic shift toward tagging more spans. Pre-registered
+in ROADMAP §4 ("Week 18 protocol") before any run: MR6 on MuLMS's held-out
+subfields decoded with a bias on every entity tag, matched per subfield to
+the names' recall; decisions 18.1 (recall on the held names) and 18.2
+(micro F1).
+
+*Outcome (1 November).* 18.1 +11.24 [+3.31, +19.18], passes; 18.2 +3.26
+[−0.79, +7.31], no. Three subfields could not be matched (the bias's
+recall peaks short of the names'); without them 18.1 is +6.05 [−3.33,
++15.44], all four positive, and matched post hoc at the nearest recall
++8.63 [+3.35, +13.90]. The names carry name knowledge that does not show
+in F1 (ROADMAP, the week-18 outcome; paper A, Section 5.4).

@@ -1880,3 +1880,12 @@ def test_week18_note():
     assert '49 of 49 runs equal' in note and 'from +1.25 to +5.00 (flagged: sofc)' in note
     assert '+4.00 [+1.00, +7.00], passes (decision 18.1)' in note
     assert '+0.30 [-2.00, +2.60], no (decision 18.2)' in note
+    assert 'without the flagged' not in note
+    m = _matched()
+    one = {'mean_diff': 5.0, 'ci95': [-1.0, 11.0], 'n_units': 1, 'n_positive': 1}
+    m['without_flagged'] = {'flagged': ['sofc'], 'decisions': {'18.1': one, '18.2': one}}
+    m['post_hoc_nearest'] = {'decisions': {'18.1': one, '18.2': one}}
+    note = rr.week18_note(m)
+    assert ('; without the flagged subfields (pre-specified): 18.1 +5.00 [-1.00, +11.00] '
+            '(1/1 above 0), 18.2 +5.00 [-1.00, +11.00]; the flagged subfields matched') in note
+    assert note.endswith("(post hoc): 18.1 +5.00 [-1.00, +11.00] (1/1 above 0), 18.2 +5.00 [-1.00, +11.00]\n")

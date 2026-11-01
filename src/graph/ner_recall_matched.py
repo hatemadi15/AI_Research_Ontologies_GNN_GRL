@@ -18,6 +18,12 @@ Pre-specified, no decision: precision on all test entities; recall, precision an
 test names; recall on the unseen names the lexicon does not hold and in - out; the bias's own F1
 change (the control at D*_u minus at 0); D*_u, w and the flags; the control's curves.
 
+Post hoc (added after the result, 1 November): the protocol's "nearer end of G" for a flagged
+subfield assumed the control's recall to rise with the bias; in the three flagged subfields it
+peaks at D = 2.5 or 3 and falls after, so the end of G (5) puts the control 2.4 to 2.9 points of
+recall below the names. post_hoc_nearest matches a flagged subfield instead at the grid value
+whose recall comes nearest the names' (match_nearest); the other subfields are unchanged.
+
 Checks before any number is used: every control run at D = 0 equals its stored crf_mr6 run (F1,
 precision, recall, best epoch, training history, test predictions, and test_pred_bias at 0); the
 rebuilt lexicons pass week 15's checks against the stored names runs. The control is read from
@@ -96,6 +102,16 @@ def match(curve, target):
     return path[-1], path[-1], 0.0, True
 
 
+def match_nearest(curve, target):
+    """Post hoc (module docstring): as match, but a flagged subfield is matched at the grid value
+    whose recall comes nearest the target (the smaller |D| on a tie), still flagged."""
+    d_a, d_b, w, flagged = match(curve, target)
+    if not flagged:
+        return d_a, d_b, w, flagged
+    d = min(curve, key=lambda x: (abs(curve[x] - target), abs(x)))
+    return d, d, 0.0, True
+
+
 def blend(a, b, w):
     """(1 - w) a + w b of two Counters (or numbers)."""
     if isinstance(a, Counter):
@@ -123,15 +139,15 @@ def d0_check(control_run, stored_run):
     return diff
 
 
-def unit_analysis(names_runs, control_runs):
-    """Per subfield: the matching and every compared quantity. names_runs: [Counter] per seed;
-    control_runs: [{D: Counter}] per seed, the same seeds in the same order."""
+def unit_analysis(names_runs, control_runs, matcher=match):
+    """Per subfield: the matching (by `matcher`) and every compared quantity. names_runs: [Counter]
+    per seed; control_runs: [{D: Counter}] per seed, the same seeds in the same order."""
     pooled_names = sum(names_runs, Counter())
     grid = sorted(control_runs[0])
     pooled = {d: sum((r[d] for r in control_runs), Counter()) for d in grid}
     curve = {d: rates(pooled[d])['recall'] for d in grid}
     target = rates(pooled_names)['recall']
-    d_a, d_b, w, flagged = match(curve, target)
+    d_a, d_b, w, flagged = matcher(curve, target)
     at = blend(pooled[d_a], pooled[d_b], w)
     f1_control = [blend(f1_of(r[d_a]), f1_of(r[d_b]), w) for r in control_runs]
     f1_names = [f1_of(r) for r in names_runs]
@@ -232,6 +248,15 @@ def analyse(directory=nm.RESULTS_DIR, names_dir=lr.NAMES_DIR, offsets=DECISION_O
     if flagged:
         result['without_flagged'] = {'flagged': flagged,
                                      **comparisons(units, keep=set(units) - set(flagged))}
+        nearest = {u: unit_analysis(per_unit_names[u], per_unit_control[u], match_nearest)
+                   for u in units}
+        result['post_hoc_nearest'] = {
+            'note': 'post hoc: each flagged subfield matched at the grid value whose pooled '
+                    "recall comes nearest the names' (module docstring)",
+            'matched': {u: {'d': nearest[u]['d_star'],
+                            'control_recall': nearest[u]['control_at_d_star']['recall'],
+                            'target_recall': nearest[u]['target_recall']} for u in flagged},
+            **comparisons(nearest)}
     result['per_unit'] = {u: {k: v for k, v in units[u].items() if k != '_diffs'}
                           for u in units}
     return result

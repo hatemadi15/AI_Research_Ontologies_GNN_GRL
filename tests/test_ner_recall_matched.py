@@ -23,6 +23,16 @@ def test_match_finds_the_first_crossing_from_zero():
     assert (d_a, d_b) == (0.5, 1.0) and w == pytest.approx(2 / 3)
 
 
+def test_match_nearest_moves_only_flagged_units():
+    """Post hoc: a flagged unit goes to the grid value of the nearest recall, the others keep the
+    protocol's crossing."""
+    peaked = {0.0: 44.0, 0.5: 46.0, 1.0: 47.5, 2.0: 47.0, 5.0: 45.0}
+    assert rm.match(peaked, 48.0) == (5.0, 5.0, 0.0, True)          # the protocol: the end of G
+    assert rm.match_nearest(peaked, 48.0) == (1.0, 1.0, 0.0, True)  # post hoc: the peak
+    assert rm.match_nearest(peaked, 46.5) == rm.match(peaked, 46.5)
+    assert rm.match_nearest({0.0: 44.0, 1.0: 47.0, 2.0: 47.0}, 50.0) == (1.0, 1.0, 0.0, True)
+
+
 def test_blend_rates_and_f1():
     a = Counter({('all', 'correct'): 40, ('all', 'pred'): 80, ('all', 'gold'): 100})
     b = Counter({('all', 'correct'): 50, ('all', 'pred'): 120, ('all', 'gold'): 100})

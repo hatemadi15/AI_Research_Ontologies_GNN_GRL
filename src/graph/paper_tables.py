@@ -508,7 +508,30 @@ def table12(matched):
             "emissions, matched per subfield to the names' recall over all test entities pooled "
             'over the seeds; the names minus the control at D*, paired over the subfields '
             '(decisions 18.1 and 18.2, the week-6 rule; the rest pre-specified). Also, paired: '
-            f'{extra}.\n\n' + markdown(header, cells))
+            f'{extra}.{readings(matched)}\n\n' + markdown(header, cells))
+
+
+def readings(matched):
+    """The week-18 decisions without the flagged subfields (pre-specified) and with them matched
+    at the grid value of the nearest recall (post hoc), as a sentence ('' without flags)."""
+    out = ''
+    without, nearest = matched.get('without_flagged'), matched.get('post_hoc_nearest')
+    if without:
+        d = without['decisions']
+        out += (f" Without the flagged subfields ({', '.join(without['flagged'])}; pre-specified): "
+                f"18.1 {interval(d['18.1'], 'mean_diff', signed=True)}, "
+                f"{d['18.1']['n_positive']}/{d['18.1']['n_units']} above 0; "
+                f"18.2 {interval(d['18.2'], 'mean_diff', signed=True)}.")
+    if nearest:
+        d = nearest['decisions']
+        at = ', '.join(f"{u} at {v['d']:g} ({number(v['control_recall'])} against "
+                       f"{number(v['target_recall'])})" for u, v in nearest['matched'].items())
+        out += (' Post hoc, each flagged subfield matched instead at the grid value of the '
+                f"control's recall nearest the names' ({at}): "
+                f"18.1 {interval(d['18.1'], 'mean_diff', signed=True)}, "
+                f"{d['18.1']['n_positive']}/{d['18.1']['n_units']} above 0; "
+                f"18.2 {interval(d['18.2'], 'mean_diff', signed=True)}.")
+    return out
 
 
 def table10(data):

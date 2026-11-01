@@ -1304,7 +1304,23 @@ def week18_note(matched):
             f"{delta_cell(pre['unseen_recall'])}, precision {delta_cell(pre['unseen_precision'])} "
             f"and F1 {delta_cell(pre['unseen_f1'])}, recall on the unseen names not in the lexicon "
             f"{delta_cell(pre['recall_out'])}, in minus out {delta_cell(pre['in_minus_out'])}, and "
-            f"the bias's own F1 change {delta_cell(pre['bias_f1_change'])}\n")
+            f"the bias's own F1 change {delta_cell(pre['bias_f1_change'])}{week18_readings(matched)}"
+            "\n")
+
+
+def week18_readings(matched):
+    """The week-18 decisions without the flagged subfields (pre-specified) and with them matched at
+    the grid value of the nearest recall (post hoc); '' without flags."""
+    out = ''
+    for key, label in (('without_flagged', 'without the flagged subfields (pre-specified)'),
+                       ('post_hoc_nearest', "the flagged subfields matched at the grid value of "
+                                            "the control's recall nearest the names' (post hoc)")):
+        d = (matched.get(key) or {}).get('decisions')
+        if d:
+            out += (f"; {label}: 18.1 {delta_cell(d['18.1'])} "
+                    f"({d['18.1']['n_positive']}/{d['18.1']['n_units']} above 0), "
+                    f"18.2 {delta_cell(d['18.2'])}")
+    return out
 
 
 def week14_note(analysis):
