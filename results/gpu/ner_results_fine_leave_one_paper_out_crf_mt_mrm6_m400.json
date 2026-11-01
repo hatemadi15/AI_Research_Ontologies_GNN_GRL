@@ -1957,63 +1957,1152 @@
         "deterministic": true,
         "cublas_workspace_config": ":4096:8"
       }
+    },
+    {
+      "f1": 62.5,
+      "precision": 58.82,
+      "recall": 66.67,
+      "f1_strict": 62.5,
+      "per_class": {
+        "Alloy": {
+          "precision": 0.75,
+          "recall": 0.75,
+          "f1-score": 0.75,
+          "support": 4.0
+        },
+        "Crack": {
+          "precision": 0.375,
+          "recall": 0.75,
+          "f1-score": 0.5,
+          "support": 4.0
+        },
+        "CrackInitation": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 2.0
+        },
+        "DataSet": {
+          "precision": 0.4167,
+          "recall": 0.4545,
+          "f1-score": 0.4348,
+          "support": 11.0
+        },
+        "FatigueTest": {
+          "precision": 1.0,
+          "recall": 0.6667,
+          "f1-score": 0.8,
+          "support": 3.0
+        },
+        "FatigueTestSpecimen": {
+          "precision": 0.5,
+          "recall": 0.3333,
+          "f1-score": 0.4,
+          "support": 3.0
+        },
+        "GrainBoundary": {
+          "precision": 0.3333,
+          "recall": 1.0,
+          "f1-score": 0.5,
+          "support": 1.0
+        },
+        "Location": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 4.0
+        },
+        "MaterialClass": {
+          "precision": 0.4,
+          "recall": 1.0,
+          "f1-score": 0.5714,
+          "support": 2.0
+        },
+        "MechanicalTreatment": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 1.0
+        },
+        "Mechanism": {
+          "precision": 0.5714,
+          "recall": 0.6667,
+          "f1-score": 0.6154,
+          "support": 6.0
+        },
+        "Microstructure": {
+          "precision": 0.6667,
+          "recall": 1.0,
+          "f1-score": 0.8,
+          "support": 2.0
+        },
+        "MicrostructureEntity": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 1.0
+        },
+        "StateDescriptor": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 1.0
+        },
+        "StressAmplitude": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 1.0
+        },
+        "TestSpecimen": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "Value": {
+          "precision": 0.9286,
+          "recall": 0.9286,
+          "f1-score": 0.9286,
+          "support": 14.0
+        },
+        "micro avg": {
+          "precision": 0.5882,
+          "recall": 0.6667,
+          "f1-score": 0.625,
+          "support": 60.0
+        },
+        "macro avg": {
+          "precision": 0.526,
+          "recall": 0.6206,
+          "f1-score": 0.5471,
+          "support": 60.0
+        },
+        "weighted avg": {
+          "precision": 0.608,
+          "recall": 0.6667,
+          "f1-score": 0.622,
+          "support": 60.0
+        }
+      },
+      "seed": 400,
+      "best_epoch": 11,
+      "val_f1": 87.86,
+      "n_train": 370,
+      "n_val": 65,
+      "n_test": 41,
+      "history": [
+        {
+          "epoch": 0,
+          "train_loss": 10490.2557,
+          "val_f1": 44.31,
+          "train_loss_fine": 4780.1545,
+          "train_loss_coarse": 5710.1012,
+          "val_f1_fine": 44.31,
+          "val_f1_coarse": 48.95
+        },
+        {
+          "epoch": 1,
+          "train_loss": 1504.4715,
+          "val_f1": 79.0,
+          "train_loss_fine": 684.4278,
+          "train_loss_coarse": 820.0437,
+          "val_f1_fine": 79.0,
+          "val_f1_coarse": 77.47
+        },
+        {
+          "epoch": 2,
+          "train_loss": 343.9207,
+          "val_f1": 85.13,
+          "train_loss_fine": 156.8576,
+          "train_loss_coarse": 187.0631,
+          "val_f1_fine": 85.13,
+          "val_f1_coarse": 76.92
+        },
+        {
+          "epoch": 3,
+          "train_loss": 129.8384,
+          "val_f1": 82.76,
+          "train_loss_fine": 63.3196,
+          "train_loss_coarse": 66.5188,
+          "val_f1_fine": 82.76,
+          "val_f1_coarse": 77.94
+        },
+        {
+          "epoch": 4,
+          "train_loss": 63.9611,
+          "val_f1": 83.98,
+          "train_loss_fine": 32.6221,
+          "train_loss_coarse": 31.3391,
+          "val_f1_fine": 83.98,
+          "val_f1_coarse": 78.46
+        },
+        {
+          "epoch": 5,
+          "train_loss": 35.4345,
+          "val_f1": 86.14,
+          "train_loss_fine": 16.6579,
+          "train_loss_coarse": 18.7767,
+          "val_f1_fine": 86.14,
+          "val_f1_coarse": 80.32
+        },
+        {
+          "epoch": 6,
+          "train_loss": 24.255,
+          "val_f1": 85.01,
+          "train_loss_fine": 11.9101,
+          "train_loss_coarse": 12.3449,
+          "val_f1_fine": 85.01,
+          "val_f1_coarse": 81.03
+        },
+        {
+          "epoch": 7,
+          "train_loss": 15.3254,
+          "val_f1": 86.34,
+          "train_loss_fine": 7.2003,
+          "train_loss_coarse": 8.125,
+          "val_f1_fine": 86.34,
+          "val_f1_coarse": 81.4
+        },
+        {
+          "epoch": 8,
+          "train_loss": 10.1191,
+          "val_f1": 86.68,
+          "train_loss_fine": 5.3257,
+          "train_loss_coarse": 4.7934,
+          "val_f1_fine": 86.68,
+          "val_f1_coarse": 80.25
+        },
+        {
+          "epoch": 9,
+          "train_loss": 6.9622,
+          "val_f1": 85.22,
+          "train_loss_fine": 3.8212,
+          "train_loss_coarse": 3.1411,
+          "val_f1_fine": 85.22,
+          "val_f1_coarse": 79.68
+        },
+        {
+          "epoch": 10,
+          "train_loss": 5.6459,
+          "val_f1": 86.13,
+          "train_loss_fine": 2.244,
+          "train_loss_coarse": 3.4019,
+          "val_f1_fine": 86.13,
+          "val_f1_coarse": 80.13
+        },
+        {
+          "epoch": 11,
+          "train_loss": 5.5953,
+          "val_f1": 87.86,
+          "train_loss_fine": 2.0625,
+          "train_loss_coarse": 3.5329,
+          "val_f1_fine": 87.86,
+          "val_f1_coarse": 80.7
+        },
+        {
+          "epoch": 12,
+          "train_loss": 4.6862,
+          "val_f1": 86.27,
+          "train_loss_fine": 1.7641,
+          "train_loss_coarse": 2.9222,
+          "val_f1_fine": 86.27,
+          "val_f1_coarse": 80.57
+        },
+        {
+          "epoch": 13,
+          "train_loss": 5.1089,
+          "val_f1": 87.68,
+          "train_loss_fine": 2.7039,
+          "train_loss_coarse": 2.405,
+          "val_f1_fine": 87.68,
+          "val_f1_coarse": 80.45
+        },
+        {
+          "epoch": 14,
+          "train_loss": 0.7024,
+          "val_f1": 87.53,
+          "train_loss_fine": 0.4439,
+          "train_loss_coarse": 0.2586,
+          "val_f1_fine": 87.53,
+          "val_f1_coarse": 80.38
+        }
+      ],
+      "multi_task": {
+        "n_examples": 382,
+        "n_split_examples": 24,
+        "other_best_epoch": 7
+      },
+      "test_index": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40
+      ],
+      "test_gold": [
+        "O O O B-FatigueTest I-FatigueTest O B-FatigueTestSpecimen I-FatigueTestSpecimen O O O O O O O O O O O O O B-DataSet O O O O B-DataSet O O O O",
+        "O B-DataSet I-DataSet O O O O O O B-MicrostructureEntity I-MicrostructureEntity O O O O O O O B-Mechanism I-Mechanism O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O B-Alloy I-Alloy O B-Alloy I-Alloy O O O B-MaterialClass I-MaterialClass I-MaterialClass O O O O O O O",
+        "O O O O O O O O O O O O O",
+        "O O B-FatigueTestSpecimen I-FatigueTestSpecimen I-FatigueTestSpecimen O O O B-StateDescriptor O O O O O O B-Value I-Value O O O O O O O O O B-MechanicalTreatment I-MechanicalTreatment O O O O",
+        "O B-FatigueTestSpecimen O O O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O O B-Value I-Value O O O O O O O O B-Value I-Value O O O",
+        "O O O O O O O O O O O O B-CrackInitation I-CrackInitation O O B-Location I-Location O O O O O B-Microstructure O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O O B-DataSet O O O O O",
+        "O O O O O O O O O O O O O O O",
+        "O B-DataSet I-DataSet O O O O O O O O O O O O O O O O O O B-Value I-Value O B-Value I-Value I-Value O B-Value I-Value O O O",
+        "O O O O O O O O O O",
+        "O O O O O O O O O B-Location I-Location I-Location O",
+        "O O O O O O O O O O O O O O O O O O O B-Value O O O O O O O O O O O O O",
+        "O O O O O O O B-Value I-Value O O O O O O",
+        "O O O O O O O O O O O",
+        "O B-DataSet I-DataSet O O O O O O O O B-Value I-Value I-Value O O O O O B-Value I-Value I-Value O O",
+        "O O O O B-MaterialClass I-MaterialClass I-MaterialClass B-Alloy O O O",
+        "O O O O O O O O O O O O O O O O O O O B-FatigueTest O O O O O O O O O",
+        "O O O O O O O O O O O O O O O B-DataSet I-DataSet O O O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O B-DataSet O O O",
+        "O O O O O O O O O O B-Alloy I-Alloy I-Alloy I-Alloy I-Alloy I-Alloy I-Alloy O O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O O O O O O B-Value I-Value I-Value O O O O O O O O O B-GrainBoundary I-GrainBoundary O O O O O",
+        "O O O O O O O O O O O B-DataSet O B-FatigueTest O O O O O O O B-Microstructure O",
+        "O O O O O O B-DataSet I-DataSet I-DataSet I-DataSet I-DataSet O O O O O O O O O O O O O O O O B-Mechanism I-Mechanism O O O O O O O O",
+        "O O O O O O O O",
+        "O O O O O B-Value I-Value I-Value I-Value I-Value I-Value O O O O O O O O O O O",
+        "O O O O O B-Value I-Value I-Value O B-Value I-Value I-Value O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O O O O B-Mechanism I-Mechanism O O O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O B-Mechanism I-Mechanism O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O B-Mechanism O",
+        "O O O O O O O O O O O O O O O O O O O O B-DataSet I-DataSet I-DataSet O O",
+        "O O O O O O B-Location I-Location O O B-Crack O O O O O O O O O O",
+        "O B-Location I-Location I-Location O O O B-Crack I-Crack O O B-Crack I-Crack O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O B-Mechanism I-Mechanism O O B-Crack O O O O O O O O O O O O O O O",
+        "B-CrackInitation I-CrackInitation O O O O O O O B-StressAmplitude I-StressAmplitude O O O O O O O O O O O O O O O O O"
+      ],
+      "test_pred": [
+        "O O O O O O B-FatigueTestSpecimen I-FatigueTestSpecimen O O O O O O O O O O O O O B-DataSet O O O O O O B-Mechanism I-Mechanism O",
+        "O B-DataSet I-DataSet O O O O O O B-MicrostructureEntity I-MicrostructureEntity O O O O O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O B-Alloy I-Alloy O B-Alloy I-Alloy O O O B-MaterialClass I-MaterialClass I-MaterialClass O O O O O O O",
+        "O O O O O O O O O O O O O",
+        "O O O B-FatigueTestSpecimen I-FatigueTestSpecimen O O O B-StateDescriptor B-MaterialClass I-MaterialClass O O O O B-Value I-Value O O O O O O O O O O O O O O O",
+        "O B-TestSpecimen O O O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O O B-Value I-Value O O O O O O O O B-Value I-Value O O O",
+        "O O O O O O O O O O O O B-CrackInitation I-CrackInitation O O O B-Location O O O O B-Microstructure B-Microstructure O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O O B-DataSet O O O O O",
+        "O O O O O O O O O O O O O O O",
+        "O O B-DataSet O O O O O O O O O O O O O O O O O O B-Value I-Value O B-Value I-Value I-Value O B-Value I-Value O O O",
+        "O O O O O O O O O O",
+        "B-Mechanism I-Mechanism O O O O O O O O O O O",
+        "O O O O O O O O O O B-DataSet O O O O O O O O B-Value O O O O O O O B-GrainBoundary I-GrainBoundary O O O O",
+        "O O O O O B-DataSet O B-Value I-Value O O O O O O",
+        "O O O O O B-Value O O O O O",
+        "O O B-DataSet O O O O O O O O B-Value I-Value I-Value O O O O O B-Value I-Value I-Value O O",
+        "O O O O B-MaterialClass I-MaterialClass I-MaterialClass B-Alloy O O O",
+        "O O O O O O O O O O O O O O O O O O O B-FatigueTest O O O O O O O O O",
+        "O O O O O O O O O O O O O O O B-DataSet B-DataSet O O O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O B-DataSet O O O",
+        "O O O B-Crack I-Crack I-Crack O O O O B-MaterialClass I-MaterialClass I-MaterialClass I-MaterialClass B-Alloy I-Alloy I-Alloy O O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O B-GrainBoundary I-GrainBoundary O O O O O",
+        "O B-Location O O O O O O O O O B-DataSet O B-FatigueTest O O O O O O O B-Microstructure O",
+        "O O O O O O O O O O O O O O O B-GrainBoundary I-GrainBoundary I-GrainBoundary O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O",
+        "O O O O O B-Value I-Value I-Value I-Value I-Value I-Value O O O O O O O O O O O",
+        "O O O O O B-Value I-Value I-Value O B-Value I-Value I-Value O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O B-Crack I-Crack I-Crack O O O B-Mechanism I-Mechanism O O O O O O O O",
+        "O O O O B-Location O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O B-Mechanism I-Mechanism O B-MaterialClass",
+        "O O O O O O O O O O O O O O O O O O O O O O O B-Mechanism O O O O O O O O O O B-Mechanism O",
+        "O O O O O B-Crack I-Crack I-Crack O O O O O O O O O O O B-DataSet I-DataSet I-DataSet O O O",
+        "O O O O O O O O O O B-Crack O O O O O O O O O O",
+        "O B-Crack I-Crack O O O O B-Crack I-Crack O O B-Crack I-Crack O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O B-Mechanism I-Mechanism O O B-Crack I-Crack O O O O O O O O O O O O O O",
+        "B-CrackInitation I-CrackInitation O O O O O O O O O O O O O O O O O O O O O O O O O O"
+      ],
+      "self_training": {
+        "n_sampled": 40000,
+        "n_skipped": 0,
+        "marginal_threshold": 0.9,
+        "silver_filter": "mentions",
+        "n_names": 26134,
+        "names": {
+          "fine": {
+            "n_mentions": 19257,
+            "n_distinct": 6240,
+            "n_test_entities": 60,
+            "n_test_unseen": 43,
+            "n_test_unseen_in_silver": 7
+          },
+          "coarse": {
+            "n_mentions": 26134,
+            "n_distinct": 8323,
+            "n_test_entities": 173,
+            "n_test_unseen": 129,
+            "n_test_unseen_in_silver": 10
+          }
+        },
+        "teachers": [
+          {
+            "seed": 0,
+            "fine": {
+              "val_f1": 87.34,
+              "test_f1": 56.41,
+              "test_f1_strict": 56.41,
+              "test_macro_f1": 46.66,
+              "best_epoch": 10
+            },
+            "coarse": {
+              "val_f1": 81.47,
+              "test_f1": 54.8,
+              "test_f1_strict": 54.8,
+              "test_macro_f1": 41.29,
+              "best_epoch": 11
+            }
+          },
+          {
+            "seed": 100,
+            "fine": {
+              "val_f1": 84.03,
+              "test_f1": 61.16,
+              "test_f1_strict": 61.16,
+              "test_macro_f1": 51.87,
+              "best_epoch": 6
+            },
+            "coarse": {
+              "val_f1": 82.49,
+              "test_f1": 59.1,
+              "test_f1_strict": 59.1,
+              "test_macro_f1": 43.42,
+              "best_epoch": 6
+            }
+          },
+          {
+            "seed": 200,
+            "fine": {
+              "val_f1": 87.1,
+              "test_f1": 57.85,
+              "test_f1_strict": 57.85,
+              "test_macro_f1": 51.33,
+              "best_epoch": 13
+            },
+            "coarse": {
+              "val_f1": 81.03,
+              "test_f1": 60.45,
+              "test_f1_strict": 60.45,
+              "test_macro_f1": 53.29,
+              "best_epoch": 19
+            }
+          }
+        ]
+      },
+      "n_augmented": 1804,
+      "run_id": "10.1007_s11340-021-00758-x.conll",
+      "runtime_sec": 7362.6,
+      "environment": {
+        "device": "Tesla T4",
+        "cuda": "12.8",
+        "cudnn": 91900,
+        "torch": "2.11.0+cu128",
+        "transformers": "5.18.0",
+        "deterministic": true,
+        "cublas_workspace_config": ":4096:8"
+      }
+    },
+    {
+      "f1": 50.22,
+      "precision": 58.88,
+      "recall": 43.77,
+      "f1_strict": 50.22,
+      "per_class": {
+        "Alloy": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 6.0
+        },
+        "Crack": {
+          "precision": 0.7647,
+          "recall": 0.5652,
+          "f1-score": 0.65,
+          "support": 46.0
+        },
+        "CrackInitation": {
+          "precision": 0.6842,
+          "recall": 0.65,
+          "f1-score": 0.6667,
+          "support": 20.0
+        },
+        "DataSet": {
+          "precision": 0.625,
+          "recall": 0.5,
+          "f1-score": 0.5556,
+          "support": 10.0
+        },
+        "FatigueLifetime": {
+          "precision": 0.6667,
+          "recall": 1.0,
+          "f1-score": 0.8,
+          "support": 2.0
+        },
+        "FatigueTest": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "FatigueTestSpecimen": {
+          "precision": 0.0667,
+          "recall": 1.0,
+          "f1-score": 0.125,
+          "support": 1.0
+        },
+        "GrainBoundary": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 39.0
+        },
+        "LoadingType": {
+          "precision": 0.5,
+          "recall": 0.3333,
+          "f1-score": 0.4,
+          "support": 3.0
+        },
+        "Location": {
+          "precision": 0.5,
+          "recall": 0.3,
+          "f1-score": 0.375,
+          "support": 10.0
+        },
+        "MaterialClass": {
+          "precision": 0.7333,
+          "recall": 0.8462,
+          "f1-score": 0.7857,
+          "support": 13.0
+        },
+        "MechanicalProperty": {
+          "precision": 1.0,
+          "recall": 0.5,
+          "f1-score": 0.6667,
+          "support": 2.0
+        },
+        "MechanicalTestDataSet": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "Mechanism": {
+          "precision": 0.6667,
+          "recall": 0.4348,
+          "f1-score": 0.5263,
+          "support": 23.0
+        },
+        "Microstructure": {
+          "precision": 0.7,
+          "recall": 0.875,
+          "f1-score": 0.7778,
+          "support": 8.0
+        },
+        "MicrostructureEntity": {
+          "precision": 1.0,
+          "recall": 0.6667,
+          "f1-score": 0.8,
+          "support": 3.0
+        },
+        "StateDescriptor": {
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1-score": 0.6667,
+          "support": 4.0
+        },
+        "StressAmplitude": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "TensileYieldStrength": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "TestSpecimen": {
+          "precision": 1.0,
+          "recall": 0.1176,
+          "f1-score": 0.2105,
+          "support": 17.0
+        },
+        "TestingMedium": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "TwinBoundary": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 26.0
+        },
+        "Value": {
+          "precision": 0.55,
+          "recall": 0.6875,
+          "f1-score": 0.6111,
+          "support": 32.0
+        },
+        "micro avg": {
+          "precision": 0.5888,
+          "recall": 0.4377,
+          "f1-score": 0.5022,
+          "support": 265.0
+        },
+        "macro avg": {
+          "precision": 0.4764,
+          "recall": 0.4555,
+          "f1-score": 0.4181,
+          "support": 265.0
+        },
+        "weighted avg": {
+          "precision": 0.5324,
+          "recall": 0.4377,
+          "f1-score": 0.4511,
+          "support": 265.0
+        }
+      },
+      "seed": 400,
+      "best_epoch": 4,
+      "val_f1": 83.57,
+      "n_train": 336,
+      "n_val": 59,
+      "n_test": 81,
+      "history": [
+        {
+          "epoch": 0,
+          "train_loss": 9546.8578,
+          "val_f1": 42.64,
+          "train_loss_fine": 4293.9539,
+          "train_loss_coarse": 5252.9039,
+          "val_f1_fine": 42.64,
+          "val_f1_coarse": 46.54
+        },
+        {
+          "epoch": 1,
+          "train_loss": 1463.2026,
+          "val_f1": 71.39,
+          "train_loss_fine": 640.9708,
+          "train_loss_coarse": 822.2318,
+          "val_f1_fine": 71.39,
+          "val_f1_coarse": 75.68
+        },
+        {
+          "epoch": 2,
+          "train_loss": 320.5586,
+          "val_f1": 79.54,
+          "train_loss_fine": 139.8623,
+          "train_loss_coarse": 180.6962,
+          "val_f1_fine": 79.54,
+          "val_f1_coarse": 78.89
+        },
+        {
+          "epoch": 3,
+          "train_loss": 113.6851,
+          "val_f1": 79.89,
+          "train_loss_fine": 53.8448,
+          "train_loss_coarse": 59.8404,
+          "val_f1_fine": 79.89,
+          "val_f1_coarse": 77.68
+        },
+        {
+          "epoch": 4,
+          "train_loss": 65.4004,
+          "val_f1": 83.57,
+          "train_loss_fine": 35.2106,
+          "train_loss_coarse": 30.1898,
+          "val_f1_fine": 83.57,
+          "val_f1_coarse": 80.96
+        },
+        {
+          "epoch": 5,
+          "train_loss": 36.8925,
+          "val_f1": 82.02,
+          "train_loss_fine": 18.9117,
+          "train_loss_coarse": 17.9808,
+          "val_f1_fine": 82.02,
+          "val_f1_coarse": 80.41
+        },
+        {
+          "epoch": 6,
+          "train_loss": 21.3803,
+          "val_f1": 81.14,
+          "train_loss_fine": 8.3441,
+          "train_loss_coarse": 13.0362,
+          "val_f1_fine": 81.14,
+          "val_f1_coarse": 80.48
+        },
+        {
+          "epoch": 7,
+          "train_loss": 13.0076,
+          "val_f1": 81.13,
+          "train_loss_fine": 7.1896,
+          "train_loss_coarse": 5.818,
+          "val_f1_fine": 81.13,
+          "val_f1_coarse": 80.34
+        }
+      ],
+      "multi_task": {
+        "n_examples": 344,
+        "n_split_examples": 16,
+        "other_best_epoch": 4
+      },
+      "test_index": [
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121
+      ],
+      "test_gold": [
+        "O O O O O B-TwinBoundary I-TwinBoundary I-TwinBoundary O B-Mechanism I-Mechanism",
+        "B-Mechanism I-Mechanism O B-Mechanism O O B-MaterialClass I-MaterialClass O O O O O O O O O O O O",
+        "O O O B-FatigueLifetime I-FatigueLifetime O O O O O O B-Microstructure I-Microstructure O B-Mechanism O",
+        "O O O O O O O B-MaterialClass I-MaterialClass O O B-TwinBoundary I-TwinBoundary I-TwinBoundary O B-TwinBoundary O O O B-MicrostructureEntity I-MicrostructureEntity O O O B-CrackInitation I-CrackInitation O",
+        "O O O O O O O O O O O B-TwinBoundary O B-MechanicalProperty I-MechanicalProperty O O O O O B-MaterialClass I-MaterialClass O",
+        "O O O O O O B-TwinBoundary O O O O O O O O B-CrackInitation I-CrackInitation I-CrackInitation O O O O O O B-Mechanism I-Mechanism O B-MaterialClass I-MaterialClass O",
+        "O O O O O O O O O O O O O O O O B-TwinBoundary O",
+        "O O O O O O O O O B-Microstructure I-Microstructure O",
+        "O O O O O O O O O B-MaterialClass I-MaterialClass O O O O O O O O O O O O O O O O O O O O B-Mechanism I-Mechanism O B-Mechanism O O O O O O O O O O O O O O O O O O O O B-MaterialClass I-MaterialClass O O B-Mechanism O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O B-Microstructure I-Microstructure O B-Mechanism O O B-FatigueLifetime I-FatigueLifetime O O",
+        "B-TwinBoundary I-TwinBoundary I-TwinBoundary O B-TwinBoundary O O O O O O O O O B-Mechanism O O O O O O O O O O O O O O O O O O",
+        "O O O O O O B-Alloy I-Alloy O O B-MaterialClass I-MaterialClass I-MaterialClass I-MaterialClass I-MaterialClass I-MaterialClass I-MaterialClass I-MaterialClass O O O O O O O O O O O O B-Crack O O O B-TwinBoundary I-TwinBoundary I-TwinBoundary O O O O O O O O O O O O O",
+        "O O O O O O O B-TwinBoundary I-TwinBoundary I-TwinBoundary O B-Mechanism O O O O O B-CrackInitation I-CrackInitation I-CrackInitation O O O O O O B-Mechanism I-Mechanism O O O O O",
+        "O O O O O O O O O O O O O B-MaterialClass I-MaterialClass O",
+        "O O O B-StateDescriptor I-StateDescriptor B-TestSpecimen O",
+        "O O O O O O O B-StateDescriptor B-TestSpecimen O B-Alloy I-Alloy O O O O O O O O O O O O",
+        "O B-TestSpecimen O O O O O O O O B-TestSpecimen O B-Value I-Value I-Value O O O O O O O O O B-TestSpecimen O B-Value I-Value I-Value O O O O O O O O O O O O",
+        "O O O O O O O O B-TestSpecimen O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O B-StateDescriptor B-TestSpecimen O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O B-Mechanism O O O O O O B-MaterialClass O O O O O B-MaterialClass I-MaterialClass O O O O O O O O O O B-TestSpecimen O O O O O O O B-Crack I-Crack I-Crack O O O O B-Crack I-Crack O O O O O O",
+        "O B-Crack I-Crack O O O O O B-MicrostructureEntity I-MicrostructureEntity O O B-CrackInitation I-CrackInitation O O O",
+        "B-Crack I-Crack O O",
+        "O O O B-CrackInitation I-CrackInitation O O B-Location O O O O B-Crack I-Crack O O B-Crack I-Crack I-Crack I-Crack I-Crack I-Crack O O O B-Crack I-Crack O O O O O",
+        "O O B-GrainBoundary I-GrainBoundary O O O",
+        "B-Crack I-Crack O O O B-GrainBoundary I-GrainBoundary I-GrainBoundary I-GrainBoundary I-GrainBoundary O O O O O O",
+        "O O O O O O O O O O O",
+        "O O O O O O O O O O B-DataSet O O O O O O O O O O O O O O O O O O O O B-Crack O O O O O O B-TestSpecimen O O",
+        "O O O O B-Crack I-Crack O O B-FatigueTestSpecimen O B-Crack I-Crack O O O O O O O O O O O O O B-GrainBoundary O O B-Crack I-Crack O O O O B-CrackInitation I-CrackInitation B-Location O",
+        "O O B-CrackInitation I-CrackInitation O O O O O O O O O B-Crack O O O B-GrainBoundary O O B-CrackInitation B-Location O O O B-MicrostructureEntity I-MicrostructureEntity O O O O O",
+        "O O O O O B-CrackInitation I-CrackInitation I-CrackInitation O O O O O O O O O O O O O O O O O O O O O B-MaterialClass O O O O O O O O O O O B-Crack O O O O O O O O B-MaterialClass I-MaterialClass O O O O O O O",
+        "O B-CrackInitation O B-Crack I-Crack O O O O B-GrainBoundary O O O B-Crack I-Crack O O O O O O",
+        "O O O O B-Crack O O O O B-GrainBoundary O O O O O O O",
+        "O O O O O O O O B-GrainBoundary I-GrainBoundary O O O O O O B-Crack I-Crack I-Crack O",
+        "O B-GrainBoundary O O O O O O O O O B-Crack O O O O O O O O O",
+        "O O O O O B-GrainBoundary O O",
+        "O O O O B-GrainBoundary O O O B-GrainBoundary O B-GrainBoundary O O O O B-DataSet O O B-DataSet O O O O O",
+        "B-GrainBoundary O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "B-GrainBoundary O O O B-Value I-Value I-Value O O O O O O O O O O O O O O",
+        "O O B-GrainBoundary O O O O O O B-TwinBoundary I-TwinBoundary I-TwinBoundary O O O O O O O B-MechanicalProperty I-MechanicalProperty O O O B-Mechanism I-Mechanism I-Mechanism O B-MaterialClass I-MaterialClass O O O O O O O",
+        "O O O O O O O O O B-TwinBoundary I-TwinBoundary I-TwinBoundary O",
+        "O O O O O O O B-StateDescriptor B-Alloy I-Alloy O",
+        "O O O O B-DataSet O O O B-DataSet O O B-Value O B-Value B-TestSpecimen O O O O B-LoadingType O O O B-Crack I-Crack O O B-Crack I-Crack O O O O O O",
+        "O B-DataSet I-DataSet O O O O O O",
+        "O O O B-Value I-Value I-Value O O O O O O O B-DataSet O O O O O O O O O O O O O O B-Crack I-Crack O",
+        "O O O B-Value I-Value I-Value O",
+        "O O O O O O B-Crack I-Crack O",
+        "O O O O O O O O O O O B-Crack O O O O O B-Crack I-Crack O",
+        "O O O O O O B-DataSet O O O O O O O O B-DataSet O O O O B-GrainBoundary I-GrainBoundary I-GrainBoundary O B-GrainBoundary I-GrainBoundary I-GrainBoundary O B-Crack I-Crack O",
+        "O O O O O O O O O O O O O O B-TwinBoundary I-TwinBoundary I-TwinBoundary O B-Crack I-Crack O O O O O B-Microstructure O O O O O O O O O",
+        "O B-Crack O O O B-GrainBoundary O O B-Microstructure O O O O O O O O O O O O O B-Value B-TwinBoundary I-TwinBoundary I-TwinBoundary O B-Value B-Crack I-Crack O O O B-Value O O O O O O",
+        "O O O O O B-TwinBoundary I-TwinBoundary I-TwinBoundary O O O B-CrackInitation I-CrackInitation B-Location O",
+        "O O O O B-CrackInitation B-Location O O B-Crack I-Crack O O O O O O O O O O O O B-Value I-Value I-Value O B-TestSpecimen O O O O",
+        "O O B-GrainBoundary O O O O O O O B-TestSpecimen O O B-Crack I-Crack O O O",
+        "O B-Crack I-Crack O O O B-TwinBoundary I-TwinBoundary O O B-TwinBoundary I-TwinBoundary I-TwinBoundary O O O O O B-DataSet O O O O O O O O O O O O B-TestSpecimen O O O O O O O O O O O",
+        "O O B-GrainBoundary O O O O O O O B-Crack I-Crack O O O O O O O O B-CrackInitation I-CrackInitation O",
+        "O O O B-GrainBoundary O O O O O O O O O O O O O B-Crack I-Crack O O O B-Microstructure O O O O",
+        "O O O O B-Value O O B-Value O O B-Value O B-GrainBoundary I-GrainBoundary O B-Crack I-Crack O O B-GrainBoundary O O O B-Value O O B-Value O O O O B-Value O O B-Value O O B-TwinBoundary I-TwinBoundary I-TwinBoundary O",
+        "O O O O O B-GrainBoundary I-GrainBoundary O B-Crack I-Crack O O O O O O B-CrackInitation I-CrackInitation O B-GrainBoundary I-GrainBoundary O O O O B-GrainBoundary I-GrainBoundary O O O B-Crack I-Crack O O O O O O O O B-CrackInitation B-Location O",
+        "O O O B-Value O O B-Value B-Crack I-Crack O O O O B-GrainBoundary I-GrainBoundary O",
+        "O O O O O O O O B-Location O B-Crack I-Crack O O O B-Crack I-Crack I-Crack O O O O O O B-GrainBoundary O O O O O",
+        "O O O O O O O O O B-GrainBoundary I-GrainBoundary O O B-GrainBoundary O O O B-Crack B-Location O O O O O O O",
+        "O O O O O O O O O O O B-Crack B-Location O O B-Value B-Crack I-Crack O O O B-TestSpecimen O O O O O O B-Microstructure O O O O O O O O O",
+        "O B-Alloy I-Alloy O O O O O B-CrackInitation I-CrackInitation O O O O O O",
+        "O O O O O O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O O B-Crack O O B-TwinBoundary O O O O O B-Value I-Value O O O O O",
+        "O O O B-CrackInitation I-CrackInitation O O O B-TwinBoundary O O O O O O O O O O O O O O O O O O O O O B-Mechanism O O B-GrainBoundary O O O O O B-Mechanism O O O",
+        "O B-Mechanism I-Mechanism O O O O O O B-CrackInitation I-CrackInitation O B-Mechanism I-Mechanism O B-Mechanism I-Mechanism I-Mechanism O",
+        "O O O O O O O O O O O O O O O O B-GrainBoundary I-GrainBoundary O O O O O O O O O O O O O O O O O O O O O O O O O B-GrainBoundary O B-Mechanism O O O O O B-GrainBoundary I-GrainBoundary O",
+        "B-TwinBoundary O O O O O O O O O O O O O B-Mechanism I-Mechanism O O O O O O O O O",
+        "O O O O O O O O O O B-TwinBoundary I-TwinBoundary O",
+        "O B-TwinBoundary I-TwinBoundary O O O O O B-Alloy I-Alloy O O O O O O O O O O O O O B-TwinBoundary O O O O B-GrainBoundary I-GrainBoundary O",
+        "O O O O O O O B-TwinBoundary O O O O O O O O O B-GrainBoundary I-GrainBoundary O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O O O O B-Alloy I-Alloy O O O O O O O O O O O O B-CrackInitation I-CrackInitation O B-TwinBoundary I-TwinBoundary I-TwinBoundary O O O O O O O",
+        "O O O O O O B-CrackInitation I-CrackInitation O O O O O O O B-Crack O O O O B-GrainBoundary O O O O O O",
+        "O O O O O B-GrainBoundary O O O O B-LoadingType O O O B-LoadingType O O O B-Mechanism I-Mechanism O O O O O O O O B-Mechanism O O B-GrainBoundary I-GrainBoundary O O O O O O O O O O",
+        "O O B-TestSpecimen O O O O O B-Value I-Value O O O B-Value I-Value O O O O O O O O",
+        "O O O O O B-Value O B-Value I-Value I-Value O O O O B-Location I-Location O B-Value I-Value I-Value O O O O O O",
+        "O O O O B-TestSpecimen O O O O O O O O O B-Value I-Value O O O O O B-Value I-Value I-Value I-Value I-Value O B-Value I-Value O O O O O O O O O O O O O O O O O B-TestSpecimen O O O O O O",
+        "O O O O O O O O O O O O O O O O B-Value I-Value I-Value O",
+        "O O O O B-Microstructure I-Microstructure O O O O O O O O O B-Value I-Value I-Value O O O O O O",
+        "O O O O O O O O O O O O O O O O"
+      ],
+      "test_pred": [
+        "O O O O O B-GrainBoundary I-GrainBoundary I-GrainBoundary O O O",
+        "O O O O O O B-MaterialClass I-MaterialClass O O O O O O O O O O O O",
+        "O O O B-FatigueLifetime I-FatigueLifetime O O O O O O B-Microstructure I-Microstructure O O O",
+        "O O O O O O O B-MaterialClass I-MaterialClass O O O O O O O O O O B-MicrostructureEntity I-MicrostructureEntity O O O B-CrackInitation I-CrackInitation O",
+        "O O O O O O O O O O O O O B-TensileYieldStrength I-TensileYieldStrength O O O O O B-MaterialClass I-MaterialClass O",
+        "O O O O O O O O O O O O O O O O B-CrackInitation I-CrackInitation O O O O O O O O O B-MaterialClass I-MaterialClass O",
+        "O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O B-MaterialClass O B-Microstructure I-Microstructure O",
+        "O O O O O O O O O B-MaterialClass I-MaterialClass O O O O O O O O O O O O O O O O O O O O B-Mechanism I-Mechanism O B-Mechanism O O O O O O O O O O O O O O O O O O O O B-MaterialClass I-MaterialClass O O B-Mechanism O B-TestingMedium I-TestingMedium O O O O O O O O O O O O O O O O O O O B-FatigueLifetime I-FatigueLifetime I-FatigueLifetime O O O O O O O O O O O O O O O B-Microstructure I-Microstructure O B-Mechanism O O B-FatigueLifetime I-FatigueLifetime O O",
+        "O O O O O O O O O O O O O O B-Mechanism O O O O O O O O O O O O O O O O O O",
+        "O O O O O O B-Alloy I-Alloy O O B-MaterialClass I-MaterialClass I-MaterialClass I-MaterialClass I-MaterialClass I-MaterialClass I-MaterialClass I-MaterialClass O O O B-TestingMedium I-TestingMedium O O O O O O O B-Crack O O O B-Value I-Value O O O O O O O O O O O O O O",
+        "O O O O O O O B-Value I-Value O O B-StateDescriptor O O O O O O B-CrackInitation I-CrackInitation O O O O O O O O O O O O O",
+        "O O O O O O O O O O O O O B-MaterialClass I-MaterialClass O",
+        "B-FatigueTest I-FatigueTest O B-StateDescriptor I-StateDescriptor B-FatigueTestSpecimen O",
+        "O O B-FatigueTest I-FatigueTest I-FatigueTest I-FatigueTest O B-StateDescriptor B-FatigueTestSpecimen O B-Alloy I-Alloy O O O O O O O O O O O O",
+        "O B-TestSpecimen O O O O O O O O B-FatigueTestSpecimen O B-Value I-Value I-Value O O O O O O O O O B-FatigueTestSpecimen O B-Value I-Value I-Value O O O O O O O O O O O O",
+        "O O O O O O O O B-FatigueTestSpecimen O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O B-StateDescriptor B-FatigueTestSpecimen O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O B-StateDescriptor O B-MaterialClass I-MaterialClass I-MaterialClass I-MaterialClass I-MaterialClass I-MaterialClass O O O B-MaterialClass O B-MaterialClass I-MaterialClass O O O O O O O O O O B-FatigueTestSpecimen O O O O O O O O O O O O O O B-Crack I-Crack O O O O O O",
+        "O O O O O O O O B-Microstructure I-Microstructure O O B-CrackInitation I-CrackInitation O O O",
+        "O O O O",
+        "O O O B-CrackInitation I-CrackInitation O O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O",
+        "B-Crack I-Crack O O O O O O O O O O O O O O",
+        "O O O O O O O O B-Crack I-Crack O",
+        "O O O O O O O O O O B-DataSet O O O O O O O O O O O O O O O O O O O O B-Crack O O O O O O O O O",
+        "O O O O B-Crack I-Crack O O B-FatigueTestSpecimen O O B-Crack O O O O O O O O O O O O O O O O B-Crack I-Crack O O O B-CrackInitation I-CrackInitation I-CrackInitation I-CrackInitation O",
+        "O O B-CrackInitation I-CrackInitation O O O B-Mechanism O O O O O B-Crack O O O O O O B-Crack I-Crack O O O B-MicrostructureEntity I-MicrostructureEntity O O O O O",
+        "O O O O O B-CrackInitation I-CrackInitation I-CrackInitation O O O O O B-StateDescriptor I-StateDescriptor O O O O O O O O O O O O O O B-MaterialClass I-MaterialClass O O O O O O O O O O B-Crack O O O O O O O O B-MaterialClass I-MaterialClass O O O O O O O",
+        "O B-CrackInitation O B-Crack I-Crack O O O O O O O O O O O O O O O O",
+        "O O O O B-Crack O O O O O O O O O O O O",
+        "O O O O O O O O O O O O O B-Location O O O O O O",
+        "O O O O O O O O O O O B-Crack O O O O O O O O O",
+        "O O O O O O O O",
+        "B-StressAmplitude I-StressAmplitude O O O O O O B-Crack O O O O O O B-DataSet O B-DataSet I-DataSet O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O B-Value I-Value I-Value O O O O O O O O O O O O O O",
+        "O O O O O O O O O B-Value I-Value O O O O O O O O B-MechanicalProperty I-MechanicalProperty O O O O O O O B-MaterialClass I-MaterialClass O O O O O O O",
+        "O O O O O O O O O B-Value I-Value O O",
+        "O O O O O O O B-StateDescriptor B-Alloy I-Alloy O",
+        "O O O B-DataSet I-DataSet O O O B-DataSet O O B-Value I-Value B-StateDescriptor B-FatigueTestSpecimen O O O O B-LoadingType O O O B-Crack I-Crack O O O O O O O O O O",
+        "O O O O O O O O O",
+        "O O O B-Value I-Value I-Value O O O O O O O B-DataSet O O O O O O O O O O B-Mechanism I-Mechanism O O B-Crack I-Crack O",
+        "O O O B-Value I-Value I-Value O",
+        "O O O O O O O O O",
+        "O O O O O O O O O O O O O O O O O B-Crack I-Crack O",
+        "O O O O O O B-DataSet O O O O O O O B-DataSet I-DataSet O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O O O O O B-Value I-Value O O O O O O O O O B-Microstructure O O O O O O O O O",
+        "O B-Crack O O O O O O B-Microstructure O O O O O O O O O O O O O B-Value I-Value I-Value O O O O B-Crack O O O B-Value O O O O O O",
+        "O O O O O B-Value I-Value O O O O B-CrackInitation I-CrackInitation I-CrackInitation O",
+        "O O O O B-Crack I-Crack O O B-Crack I-Crack O O O O O O B-FatigueTest I-FatigueTest O O O O B-Value I-Value I-Value O B-FatigueTestSpecimen O O O O",
+        "O O O O O O O O O O B-FatigueTestSpecimen O O O O O O O",
+        "O B-Crack I-Crack O O O B-Value I-Value O O B-Value I-Value O O O O O O B-MechanicalTestDataSet O O O O O O O O O O O O B-FatigueTestSpecimen O O O O O O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O B-CrackInitation I-CrackInitation O",
+        "O O O O O O O O O O O O O O O O O B-Crack I-Crack O O O B-Microstructure O O O O",
+        "O O O O B-Value O O B-Value O O B-Value O O O O O O O O O O O O B-Value O O B-Value O O B-Value O B-Value O O B-Value O O B-Value I-Value O O",
+        "O O O O O O O O B-Crack I-Crack O O O O O O B-CrackInitation I-CrackInitation O O O O O O O O O O O O B-Crack I-Crack O O O O O O O O B-CrackInitation I-CrackInitation O",
+        "O O O O O O O O O O O O O O O O",
+        "O O O O O O O O B-Location O B-Crack I-Crack O O O O B-Crack I-Crack O O O O O O O O O O O O",
+        "O O O O O O O O O O O O O O O O O B-Crack B-Location O O O O O O O",
+        "O O O O O O O O O O O B-Crack B-Location O O B-Value B-Crack I-Crack O O O B-FatigueTestSpecimen O O O O O O B-Microstructure O O O O O O O O O",
+        "O B-Alloy I-Alloy O O O O O B-CrackInitation I-CrackInitation O O O B-CrackInitation I-CrackInitation O",
+        "O O O O O O O B-Crack I-Crack I-Crack O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O B-MechanicalTestDataSet O O O O O O O O O B-Crack O O O O O O O B-Value I-Value I-Value O O B-Location I-Location O",
+        "O O O B-CrackInitation I-CrackInitation O O O O O O O O O O O O B-Location I-Location O O O O O O O O O O O B-Mechanism O O O O O O O O O O O O",
+        "O B-Mechanism I-Mechanism O O O O O O B-CrackInitation I-CrackInitation O B-Mechanism I-Mechanism O B-Mechanism I-Mechanism I-Mechanism O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O O O O",
+        "O O O O O O O O B-Alloy I-Alloy O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O B-LoadingType I-LoadingType O O O O O O O O O O O",
+        "O O O O O B-Value I-Value O O O O O O B-Alloy I-Alloy O O O O O O O O O O O O B-CrackInitation I-CrackInitation O B-Value I-Value O O O O O O O O",
+        "O O O B-Mechanism I-Mechanism O B-CrackInitation I-CrackInitation O O O O O O O B-Crack O O O O O O O O O O O",
+        "O O O O O O O O O O B-Mechanism O O O B-Mechanism O O O O O O O O O O O O O B-Mechanism O O O O O O O O O O O O O O",
+        "O B-FatigueTestSpecimen I-FatigueTestSpecimen O O O O O B-Value I-Value O O O B-Value I-Value O O O O O O O O",
+        "O O O O O B-Value O B-Value I-Value I-Value O O O O O O O B-Value I-Value I-Value O O O O O O",
+        "O O O O B-TestSpecimen O O O O O O O O O B-Value I-Value O O O O O B-Value I-Value I-Value O O O B-Value I-Value I-Value I-Value I-Value I-Value I-Value I-Value I-Value I-Value I-Value I-Value I-Value I-Value I-Value I-Value O O O B-FatigueTestSpecimen O O O O O O",
+        "O O O O O O O O O O O O O O O B-Value I-Value I-Value I-Value O",
+        "O B-FatigueTest O O B-Microstructure B-Microstructure O O O O O O O O O B-Value I-Value I-Value O O O O O O",
+        "O O O O O O O O O O O O O O O O"
+      ],
+      "self_training": {
+        "n_sampled": 40000,
+        "n_skipped": 0,
+        "marginal_threshold": 0.9,
+        "silver_filter": "mentions",
+        "n_names": 42066,
+        "names": {
+          "fine": {
+            "n_mentions": 23784,
+            "n_distinct": 6587,
+            "n_test_entities": 265,
+            "n_test_unseen": 216,
+            "n_test_unseen_in_silver": 17
+          },
+          "coarse": {
+            "n_mentions": 42066,
+            "n_distinct": 12645,
+            "n_test_entities": 400,
+            "n_test_unseen": 297,
+            "n_test_unseen_in_silver": 73
+          }
+        },
+        "teachers": [
+          {
+            "seed": 0,
+            "fine": {
+              "val_f1": 81.74,
+              "test_f1": 50.11,
+              "test_f1_strict": 50.11,
+              "test_macro_f1": 42.65,
+              "best_epoch": 16
+            },
+            "coarse": {
+              "val_f1": 79.25,
+              "test_f1": 65.85,
+              "test_f1_strict": 65.85,
+              "test_macro_f1": 60.64,
+              "best_epoch": 14
+            }
+          },
+          {
+            "seed": 100,
+            "fine": {
+              "val_f1": 79.66,
+              "test_f1": 46.46,
+              "test_f1_strict": 46.46,
+              "test_macro_f1": 34.5,
+              "best_epoch": 11
+            },
+            "coarse": {
+              "val_f1": 81.71,
+              "test_f1": 64.11,
+              "test_f1_strict": 64.11,
+              "test_macro_f1": 57.44,
+              "best_epoch": 14
+            }
+          },
+          {
+            "seed": 200,
+            "fine": {
+              "val_f1": 81.9,
+              "test_f1": 44.65,
+              "test_f1_strict": 44.65,
+              "test_macro_f1": 41.7,
+              "best_epoch": 12
+            },
+            "coarse": {
+              "val_f1": 81.03,
+              "test_f1": 65.33,
+              "test_f1_strict": 65.33,
+              "test_macro_f1": 51.79,
+              "best_epoch": 16
+            }
+          }
+        ]
+      },
+      "n_augmented": 1653,
+      "run_id": "10.1038_ncomms7164.conll",
+      "runtime_sec": 5668.9,
+      "environment": {
+        "device": "Tesla T4",
+        "cuda": "12.8",
+        "cudnn": 91900,
+        "torch": "2.11.0+cu128",
+        "transformers": "5.18.0",
+        "deterministic": true,
+        "cublas_workspace_config": ":4096:8"
+      }
     }
   ],
-  "test_f1_mean": 52.28,
-  "test_f1_std": 1.01,
-  "test_f1_strict_mean": 52.28,
+  "test_f1_mean": 54.32,
+  "test_f1_std": 4.85,
+  "test_f1_strict_mean": 54.32,
   "summary": {
-    "n_runs": 2,
+    "n_runs": 4,
     "run_ids": [
       "10.1038_s41467-020-19071-7.conll",
-      "10.3390_met10111458.conll"
+      "10.3390_met10111458.conll",
+      "10.1007_s11340-021-00758-x.conll",
+      "10.1038_ncomms7164.conll"
     ],
     "micro": {
-      "mean": 52.28,
-      "pop_sd": 1.01,
+      "mean": 54.32,
+      "pop_sd": 4.85,
       "ci95": [
-        39.45,
-        65.11
+        45.41,
+        63.23
       ],
       "per_run": [
         53.29,
-        51.27
+        51.27,
+        62.5,
+        50.22
       ]
     },
     "micro_strict": {
-      "mean": 52.28,
-      "pop_sd": 1.01,
+      "mean": 54.32,
+      "pop_sd": 4.85,
       "ci95": [
-        39.45,
-        65.11
+        45.41,
+        63.23
       ],
       "per_run": [
         53.29,
-        51.27
+        51.27,
+        62.5,
+        50.22
       ]
     },
     "macro": {
-      "mean": 43.17,
-      "pop_sd": 1.23,
+      "mean": 45.72,
+      "pop_sd": 5.29,
       "ci95": [
-        27.48,
-        58.87
+        35.99,
+        55.44
       ],
       "per_run": [
         41.94,
-        44.41
+        44.41,
+        54.71,
+        41.81
       ]
     },
     "weighted": {
-      "mean": 46.56,
-      "pop_sd": 2.68,
+      "mean": 50.11,
+      "pop_sd": 7.26,
       "ci95": [
-        12.51,
-        80.61
+        36.77,
+        63.44
       ],
       "per_run": [
         49.24,
-        43.88
+        43.88,
+        62.2,
+        45.11
       ]
     }
   }

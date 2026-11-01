@@ -1289,11 +1289,12 @@ def check_collect(new, old=None, environments=(), merge=False):
 
 def merged(old, new):
     """`new` with the runs of `old` that it lacks (two sessions that wrote the same file for
-    different units, week 17), old's first, and the summary recomputed; the files must agree
-    outside their runs and summary."""
+    different units, week 17), old's first, and the summary and the run means recomputed
+    (summarize); the files must agree outside their runs and those aggregates."""
     sys.path.insert(0, str(ROOT / 'src' / 'graph'))
     from ner_baseline import summarize
-    strip = lambda f: {k: v for k, v in f.items() if k not in ('runs', 'summary')}  # noqa: E731
+    aggregates = ('runs', 'summary', 'test_f1_mean', 'test_f1_std', 'test_f1_strict_mean')
+    strip = lambda f: {k: v for k, v in f.items() if k not in aggregates}  # noqa: E731
     if strip(old) != strip(new):
         raise ValueError('the files differ outside their runs and summary')
     ids = {r.get('run_id') for r in new.get('runs', [])}

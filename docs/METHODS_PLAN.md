@@ -479,3 +479,10 @@ the single-task base, on these papers included); a pass is a pass on one
 corpus's four papers and is reported as such; a fail extends paper A's
 negative result to the strongest base. Paper A is updated either way
 (Section 5.2 or a 5.7, Table 2, Appendix A, the Limitations).
+
+*Outcome (1 November).* 17.1 fine-grained +0.96 [−0.01, +1.92] and 17.2
+coarse-grained +0.85 [−0.72, +2.42], both no; the names against multi-task
++ MR3 +0.76 [−0.15, +1.68] and +0.91 [−0.14, +1.97]; the two-head filter's
+lexicons hold 7–25% of a paper's unseen test names. The negative result
+extends to the strongest base (ROADMAP, the week-17 outcome; paper A,
+Section 5.7).

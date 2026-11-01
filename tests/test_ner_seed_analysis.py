@@ -792,7 +792,9 @@ def test_week17_names_on_the_strongest_base(tmp_path):
     def write(prefix, system, score):
         for j, off in enumerate(range(0, 1000, 100)):
             runs = [_run(name, score(j, k)) for k, name in enumerate(papers)]
-            (tmp_path / f'ner_results_{prefix}_{system}_m{off}.json').write_text(
+            # the multi-task reference's seed-0 file carries no tag, as in results/gpu
+            tag = '' if system == 'crf_mt' and off == 0 else f'_m{off}'
+            (tmp_path / f'ner_results_{prefix}_{system}{tag}.json').write_text(
                 json.dumps({'runs': runs}))
     fine = 'fine_leave_one_paper_out'
     for system, base in (('crf', 40), ('crf_mt', 43), ('crf_mt_mr', 46), ('crf_mt_mr6', 46.5)):

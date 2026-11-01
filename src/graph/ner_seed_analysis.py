@@ -1025,7 +1025,9 @@ def week17(directory):
     for g, decision in zip(GRANULARITIES, ('17.1', '17.2')):
         prefix = f'ner_results_{g}_{LOPO}_'
         systems = (*WEEK17_REFERENCES, WEEK17_CONTROL, WEEK17_NAMES)
-        files = {s: load_files(directory, [f'{prefix}{s}_m{off}.json' for off in WEEK5_OFFSETS])
+        # the multi-task reference's seed-0 file carries no tag (seed_family, as ner_mentions)
+        files = {s: load_files(directory, [f'{prefix}{v}.json' for v in
+                                           seed_family(s, untagged_zero=s == 'crf_mt')])
                  for s in systems}
         if not all(files.values()):
             continue

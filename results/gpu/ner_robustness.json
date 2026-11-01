@@ -913,6 +913,26 @@
    "half_width": 1.71,
    "df": 6,
    "mde_80": 2.35
+  },
+  "17.1 MaterioMiner fine: crf_mt_mrm6_vs_crf_mt_mr6": {
+   "half_width": 0.96,
+   "df": 3,
+   "mde_80": 1.26
+  },
+  "MaterioMiner fine: crf_mt_mrm6_vs_crf_mt_mr": {
+   "half_width": 0.91,
+   "df": 3,
+   "mde_80": 1.2
+  },
+  "17.2 MaterioMiner coarse: crf_mt_mrm6_vs_crf_mt_mr6": {
+   "half_width": 1.57,
+   "df": 3,
+   "mde_80": 2.05
+  },
+  "MaterioMiner coarse: crf_mt_mrm6_vs_crf_mt_mr": {
+   "half_width": 1.05,
+   "df": 3,
+   "mde_80": 1.38
   }
  },
  "compute": {

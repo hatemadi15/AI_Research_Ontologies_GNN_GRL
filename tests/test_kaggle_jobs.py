@@ -1416,11 +1416,15 @@ def test_week17_batches_and_merge(tmp_path, monkeypatch):
               'model': 'm', 'labels': ['A'], 'config': {'x': 1}}
     dest = tmp_path / 'gpu'
     dest.mkdir()
-    old = {**common, 'runs': [run('p1', 50.0), run('p2', 51.0)]}
+    # each session's file carries the means of its own runs (test_f1_mean and the like,
+    # recomputed by summarize): they differ and are not a refusal
+    old = {**common, 'runs': [run('p1', 50.0), run('p2', 51.0)], 'test_f1_mean': 50.5,
+           'test_f1_std': 0.5, 'test_f1_strict_mean': 50.5}
     (dest / 'ner_results_fine_leave_one_paper_out_crf_mt_mrm6_m0.json').write_text(json.dumps(old))
     pulled = tmp_path / 'pulled'
     pulled.mkdir()
-    new = {**common, 'runs': [run('p3', 52.0), run('p4', 53.0)]}
+    new = {**common, 'runs': [run('p3', 52.0), run('p4', 53.0)], 'test_f1_mean': 52.5,
+           'test_f1_std': 0.5, 'test_f1_strict_mean': 52.5}
     (pulled / 'ner_results_fine_leave_one_paper_out_crf_mt_mrm6_m0.json').write_text(json.dumps(new))
     copied, problems = kj.collect(str(pulled), dest)
     assert not copied and 'missing' in ' '.join(problems['ner_results_fine_leave_one_paper_out_crf_mt_mrm6_m0.json'])
@@ -1432,3 +1436,22 @@ def test_week17_batches_and_merge(tmp_path, monkeypatch):
     (pulled / 'ner_results_fine_leave_one_paper_out_crf_mt_mrm6_m0.json').write_text(json.dumps(changed))
     copied, problems = kj.collect(str(pulled), dest, merge=True)
     assert not copied and 'changed' in ' '.join(problems['ner_results_fine_leave_one_paper_out_crf_mt_mrm6_m0.json'])
+    # a difference outside the runs and their aggregates is refused
+    with pytest.raises(ValueError):
+        kj.merged({**old, 'config': {'x': 2}}, new)
+
+
+def test_merged_recomputes_the_run_means():
+    """The united file's test_f1_mean, test_f1_std and test_f1_strict_mean cover both sessions'
+    runs (the real summarize), old's runs first."""
+    def run(run_id, f1):
+        return {'run_id': run_id, 'f1': f1, 'f1_strict': f1,
+                'per_class': {'macro avg': {'f1-score': f1 / 100}, 'weighted avg': {'f1-score': f1 / 100}}}
+    old = {'config': {'x': 1}, 'runs': [run('p1', 50.0), run('p2', 52.0)], 'test_f1_mean': 51.0,
+           'test_f1_std': 1.0, 'test_f1_strict_mean': 51.0}
+    new = {'config': {'x': 1}, 'runs': [run('p3', 54.0), run('p4', 56.0)], 'test_f1_mean': 55.0,
+           'test_f1_std': 1.0, 'test_f1_strict_mean': 55.0}
+    got = kj.merged(old, new)
+    assert [r['run_id'] for r in got['runs']] == ['p1', 'p2', 'p3', 'p4']
+    assert (got['test_f1_mean'], got['test_f1_strict_mean'], got['summary']['n_runs']) == (53.0, 53.0, 4)
+    assert got['test_f1_std'] == round((5 ** 0.5), 2) and got['summary']['micro']['per_run'] == [50.0, 52.0, 54.0, 56.0]

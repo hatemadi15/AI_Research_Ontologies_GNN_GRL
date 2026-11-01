@@ -491,4 +491,14 @@ CRF head reported (`ner_week5_seed_analysis.json`, `week17`). Run record:
 `w17a` pushed to `ner-gpu-jobs-d` (version 15, bundle `013f9ac`) at
 19:54:50 UTC and `w17b` to `ner-gpu-jobs-c` (version 10, the same bundle)
 at 19:54:53 UTC on 31 October; the two sessions write the student files
-for different papers, united by `kaggle_jobs.py collect --merge`.
+for different papers, united by `kaggle_jobs.py collect --merge`. Outcome
+(1 November): 17.1 fine-grained +0.96 [−0.01, +1.92], no (every paper
+positive); 17.2 coarse-grained +0.85 [−0.72, +2.42], no; the names
+against multi-task + MR3 +0.76 [−0.15, +1.68] and +0.91 [−0.14, +1.97],
+the control against it −0.19 [−2.05, +1.67] and +0.06 [−0.74, +0.86];
+levels 53.95/52.99 and 61.25/60.40; the two-head filter's lexicons hold
+6.5–16.3% (fine) and 6.7–24.6% (coarse) of a paper's unseen test names
+(`docs/tables/table11_week17.md`; the unseen-name trade in
+`gpu/ner_mentions.json`, `chain`; the detectable differences in
+`gpu/ner_robustness.json`). Both sessions' repeats (`smokebc`, `smokebd`)
+identical to the stored runs; the teachers equal the stored `crf_mt` runs.

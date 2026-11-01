@@ -1918,63 +1918,1269 @@
         "deterministic": true,
         "cublas_workspace_config": ":4096:8"
       }
+    },
+    {
+      "f1": 66.29,
+      "precision": 64.48,
+      "recall": 68.21,
+      "f1_strict": 66.29,
+      "per_class": {
+        "CEL": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 2.0
+        },
+        "CGE": {
+          "precision": 0.5,
+          "recall": 0.5,
+          "f1-score": 0.5,
+          "support": 8.0
+        },
+        "CHP": {
+          "precision": 0.8947,
+          "recall": 0.8095,
+          "f1-score": 0.85,
+          "support": 21.0
+        },
+        "CPR": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 1.0
+        },
+        "DAM": {
+          "precision": 0.8421,
+          "recall": 0.6957,
+          "f1-score": 0.7619,
+          "support": 23.0
+        },
+        "DAT": {
+          "precision": 0.5,
+          "recall": 0.5455,
+          "f1-score": 0.5217,
+          "support": 11.0
+        },
+        "DEF": {
+          "precision": 0.5714,
+          "recall": 0.8889,
+          "f1-score": 0.6957,
+          "support": 9.0
+        },
+        "EQU": {
+          "precision": 0.5,
+          "recall": 0.8333,
+          "f1-score": 0.625,
+          "support": 6.0
+        },
+        "LOC": {
+          "precision": 0.375,
+          "recall": 0.4286,
+          "f1-score": 0.4,
+          "support": 7.0
+        },
+        "MAC": {
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1-score": 0.6667,
+          "support": 2.0
+        },
+        "MAT": {
+          "precision": 0.6667,
+          "recall": 0.3333,
+          "f1-score": 0.4444,
+          "support": 6.0
+        },
+        "MEC": {
+          "precision": 0.6154,
+          "recall": 0.7273,
+          "f1-score": 0.6667,
+          "support": 11.0
+        },
+        "MEP": {
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1-score": 0.6667,
+          "support": 1.0
+        },
+        "MFP": {
+          "precision": 0.8889,
+          "recall": 0.8889,
+          "f1-score": 0.8889,
+          "support": 9.0
+        },
+        "MIC": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 8.0
+        },
+        "MIP": {
+          "precision": 0.5,
+          "recall": 0.4286,
+          "f1-score": 0.4615,
+          "support": 7.0
+        },
+        "MOD": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "MTP": {
+          "precision": 0.2,
+          "recall": 1.0,
+          "f1-score": 0.3333,
+          "support": 1.0
+        },
+        "OBJ": {
+          "precision": 0.5,
+          "recall": 0.75,
+          "f1-score": 0.6,
+          "support": 4.0
+        },
+        "ODE": {
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1-score": 0.6667,
+          "support": 1.0
+        },
+        "PRO": {
+          "precision": 0.4545,
+          "recall": 0.5,
+          "f1-score": 0.4762,
+          "support": 10.0
+        },
+        "PRP": {
+          "precision": 1.0,
+          "recall": 0.5714,
+          "f1-score": 0.7273,
+          "support": 7.0
+        },
+        "SDE": {
+          "precision": 0.3333,
+          "recall": 0.3333,
+          "f1-score": 0.3333,
+          "support": 3.0
+        },
+        "STD": {
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1-score": 0.6667,
+          "support": 1.0
+        },
+        "VAL": {
+          "precision": 0.8333,
+          "recall": 0.7143,
+          "f1-score": 0.7692,
+          "support": 14.0
+        },
+        "micro avg": {
+          "precision": 0.6448,
+          "recall": 0.6821,
+          "f1-score": 0.6629,
+          "support": 173.0
+        },
+        "macro avg": {
+          "precision": 0.567,
+          "recall": 0.6779,
+          "f1-score": 0.5889,
+          "support": 173.0
+        },
+        "weighted avg": {
+          "precision": 0.6856,
+          "recall": 0.6821,
+          "f1-score": 0.6696,
+          "support": 173.0
+        }
+      },
+      "seed": 300,
+      "best_epoch": 11,
+      "val_f1": 83.12,
+      "n_train": 370,
+      "n_val": 65,
+      "n_test": 41,
+      "history": [
+        {
+          "epoch": 0,
+          "train_loss": 10343.2006,
+          "val_f1": 48.67,
+          "train_loss_fine": 4830.1753,
+          "train_loss_coarse": 5513.0252,
+          "val_f1_fine": 40.23,
+          "val_f1_coarse": 48.67
+        },
+        {
+          "epoch": 1,
+          "train_loss": 1549.5402,
+          "val_f1": 80.13,
+          "train_loss_fine": 696.3189,
+          "train_loss_coarse": 853.2213,
+          "val_f1_fine": 82.04,
+          "val_f1_coarse": 80.13
+        },
+        {
+          "epoch": 2,
+          "train_loss": 360.8099,
+          "val_f1": 81.6,
+          "train_loss_fine": 165.176,
+          "train_loss_coarse": 195.6339,
+          "val_f1_fine": 85.09,
+          "val_f1_coarse": 81.6
+        },
+        {
+          "epoch": 3,
+          "train_loss": 116.8301,
+          "val_f1": 80.57,
+          "train_loss_fine": 59.313,
+          "train_loss_coarse": 57.5171,
+          "val_f1_fine": 86.7,
+          "val_f1_coarse": 80.57
+        },
+        {
+          "epoch": 4,
+          "train_loss": 75.6531,
+          "val_f1": 81.79,
+          "train_loss_fine": 40.4496,
+          "train_loss_coarse": 35.2035,
+          "val_f1_fine": 86.13,
+          "val_f1_coarse": 81.79
+        },
+        {
+          "epoch": 5,
+          "train_loss": 32.3592,
+          "val_f1": 80.38,
+          "train_loss_fine": 15.792,
+          "train_loss_coarse": 16.5672,
+          "val_f1_fine": 85.43,
+          "val_f1_coarse": 80.38
+        },
+        {
+          "epoch": 6,
+          "train_loss": 20.011,
+          "val_f1": 80.89,
+          "train_loss_fine": 10.4864,
+          "train_loss_coarse": 9.5246,
+          "val_f1_fine": 86.2,
+          "val_f1_coarse": 80.89
+        },
+        {
+          "epoch": 7,
+          "train_loss": 10.8392,
+          "val_f1": 82.62,
+          "train_loss_fine": 5.3631,
+          "train_loss_coarse": 5.4761,
+          "val_f1_fine": 87.5,
+          "val_f1_coarse": 82.62
+        },
+        {
+          "epoch": 8,
+          "train_loss": 6.8778,
+          "val_f1": 82.99,
+          "train_loss_fine": 3.2832,
+          "train_loss_coarse": 3.5946,
+          "val_f1_fine": 89.22,
+          "val_f1_coarse": 82.99
+        },
+        {
+          "epoch": 9,
+          "train_loss": 6.7907,
+          "val_f1": 82.69,
+          "train_loss_fine": 3.3002,
+          "train_loss_coarse": 3.4905,
+          "val_f1_fine": 87.92,
+          "val_f1_coarse": 82.69
+        },
+        {
+          "epoch": 10,
+          "train_loss": 4.8644,
+          "val_f1": 81.09,
+          "train_loss_fine": 2.7834,
+          "train_loss_coarse": 2.081,
+          "val_f1_fine": 86.68,
+          "val_f1_coarse": 81.09
+        },
+        {
+          "epoch": 11,
+          "train_loss": 5.515,
+          "val_f1": 83.12,
+          "train_loss_fine": 2.8681,
+          "train_loss_coarse": 2.647,
+          "val_f1_fine": 88.89,
+          "val_f1_coarse": 83.12
+        },
+        {
+          "epoch": 12,
+          "train_loss": 6.2718,
+          "val_f1": 81.15,
+          "train_loss_fine": 4.6552,
+          "train_loss_coarse": 1.6165,
+          "val_f1_fine": 86.62,
+          "val_f1_coarse": 81.15
+        },
+        {
+          "epoch": 13,
+          "train_loss": 2.1132,
+          "val_f1": 82.43,
+          "train_loss_fine": 1.1811,
+          "train_loss_coarse": 0.9321,
+          "val_f1_fine": 89.6,
+          "val_f1_coarse": 82.43
+        },
+        {
+          "epoch": 14,
+          "train_loss": 1.3551,
+          "val_f1": 82.11,
+          "train_loss_fine": 1.0617,
+          "train_loss_coarse": 0.2934,
+          "val_f1_fine": 87.59,
+          "val_f1_coarse": 82.11
+        },
+        {
+          "epoch": 15,
+          "train_loss": 0.6835,
+          "val_f1": 82.24,
+          "train_loss_fine": 0.282,
+          "train_loss_coarse": 0.4015,
+          "val_f1_fine": 87.59,
+          "val_f1_coarse": 82.24
+        },
+        {
+          "epoch": 16,
+          "train_loss": 0.4373,
+          "val_f1": 81.34,
+          "train_loss_fine": 0.2314,
+          "train_loss_coarse": 0.206,
+          "val_f1_fine": 86.89,
+          "val_f1_coarse": 81.34
+        }
+      ],
+      "multi_task": {
+        "n_examples": 382,
+        "n_split_examples": 24,
+        "other_best_epoch": 13
+      },
+      "test_index": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40
+      ],
+      "test_gold": [
+        "O O O B-CHP I-CHP O B-OBJ I-OBJ O O B-DAM O O O O O O O O O O B-DAT O O O B-DAT O O B-DAM O O",
+        "O B-DAT I-DAT O O O O B-DAM O B-MIC I-MIC O O O O O O O B-MEC I-MEC O",
+        "O O B-CHP O O O B-CHP O B-CHP I-CHP I-CHP I-CHP I-CHP I-CHP O B-CHP O O O O B-CHP I-CHP I-CHP O B-CHP O O O O O O O O O O O O O",
+        "O O O O B-MAT I-MAT O B-MAT I-MAT O O O B-MAC I-MAC I-MAC O O O O O O O",
+        "O O O O O O O O B-CEL I-CEL O O O",
+        "B-SDE O B-OBJ I-OBJ I-OBJ O O O B-STD B-OBJ I-OBJ O O B-PRO O B-VAL I-VAL O O O O B-MFP I-MFP O B-MFP O B-MFP I-MFP O O B-MFP O",
+        "O B-OBJ B-MFP O O B-MFP I-MFP O O B-MFP I-MFP I-MFP O O B-SDE O B-MFP I-MFP O O O B-PRO I-PRO O O O O O O O",
+        "O O O O O O B-PRO O O B-PRO O B-VAL I-VAL O B-PRO I-PRO I-PRO I-PRO I-PRO I-PRO O B-VAL I-VAL O O O",
+        "O B-MFP I-MFP O O O O O B-SDE I-SDE I-SDE O B-MEC I-MEC O O B-LOC I-LOC O O O O B-MIC O O O O",
+        "O O O O O O O O B-CHP I-CHP O O O O B-EQU O O B-EQU I-EQU I-EQU O B-EQU O O O O O B-CHP B-DAT O O O O O",
+        "O B-CHP O O B-EQU I-EQU I-EQU O O O B-EQU I-EQU I-EQU I-EQU O",
+        "O B-DAT I-DAT O O B-PRP I-PRP O B-PRP O O B-PRP I-PRP I-PRP O O B-PRP O O O O B-VAL I-VAL O B-VAL I-VAL I-VAL O B-VAL I-VAL O O O",
+        "O B-PRP I-PRP I-PRP O O B-PRO I-PRO I-PRO O",
+        "B-PRP I-PRP O O B-PRO I-PRO O O O B-LOC I-LOC I-LOC O",
+        "O O O O O O O O O B-CHP O O O B-PRO I-PRO O B-PRO O O B-VAL O O O O O B-MIC O B-DEF I-DEF I-DEF O O O",
+        "O B-MIP O O B-CHP O O B-VAL I-VAL O O O O B-MIC O",
+        "B-MIC O O O O O O O O O O",
+        "O B-DAT I-DAT O O B-MIP I-MIP I-MIP I-MIP O O B-VAL I-VAL I-VAL O B-MIC I-MIC O O B-VAL I-VAL I-VAL B-MIP O",
+        "O O B-CPR O B-MAC I-MAC I-MAC B-MAT O O O",
+        "O O O B-EQU I-EQU I-EQU I-EQU I-EQU I-EQU I-EQU I-EQU I-EQU I-EQU O O O O B-CHP O B-CHP O O O B-DAM O O B-LOC I-LOC O",
+        "O O O O O O O B-DAM I-DAM O O O O B-CHP I-CHP B-DAT I-DAT O O O B-CHP I-CHP I-CHP I-CHP O",
+        "O O O B-CHP I-CHP O O O O O O B-PRO I-PRO I-PRO I-PRO O O B-DAM I-DAM I-DAM O O O O B-DAM O B-DAM O B-DAM O O O O",
+        "O O B-CHP I-CHP I-CHP O B-CHP O B-DAT O O O",
+        "O O O B-DAM I-DAM I-DAM O B-DAM O O B-MAT I-MAT I-MAT I-MAT B-MAT I-MAT B-MAT O O O O O O O",
+        "O O O O O O O O B-DAM O O B-MEC O B-MEC I-MEC O O O O O O O B-LOC O B-DEF O",
+        "B-DEF I-DEF O O O O O O O O B-PRP I-PRP O O O B-VAL I-VAL I-VAL O O B-DAM O O O O O O B-DEF I-DEF O O B-LOC O O",
+        "B-DAM I-DAM O O O O O O O O B-CHP B-DAT O B-CHP O O O O O O O B-MIC O",
+        "O O B-DEF I-DEF O O B-DAT I-DAT I-DAT I-DAT I-DAT O O O O B-DEF I-DEF I-DEF O B-DEF O O B-DEF O O O O B-MEC I-MEC O O O O O O O O",
+        "O B-MIP I-MIP I-MIP O O O O",
+        "O O O O O B-VAL I-VAL I-VAL I-VAL I-VAL I-VAL B-CGE I-CGE O O O O O O O O O",
+        "O O O O O B-VAL I-VAL I-VAL O B-VAL I-VAL I-VAL B-CGE I-CGE I-CGE O O O",
+        "O O O O O O O B-CGE I-CGE O O B-CGE I-CGE I-CGE O O O O B-CGE I-CGE O O O",
+        "O O O B-DAM I-DAM I-DAM O B-DAM I-DAM I-DAM O O O B-MEC I-MEC O O O O O O B-CGE I-CGE",
+        "O O O B-DAM I-DAM O O B-MIC O O B-MIP I-MIP O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O B-MEC I-MEC O B-CGE",
+        "O O O O O O O O O O O O O B-MIP I-MIP O O B-CGE I-CGE I-CGE O B-MIP I-MIP I-MIP O O O O O O B-CEL I-CEL O O B-MEC O",
+        "O O O B-DAM O B-DAM I-DAM I-DAM O O B-ODE I-ODE O O O O O O O O B-DAT I-DAT I-DAT O O",
+        "O O O O O O B-LOC I-LOC O O B-DAM O O O O O O O B-DEF I-DEF O",
+        "O B-LOC I-LOC I-LOC O O O B-DAM I-DAM O O B-DAM I-DAM O O O O O O O O O O O O O O O O",
+        "O O O O O B-MEP I-MEP I-MEP O B-MEC I-MEC O O B-DAM O O O O O O O O O O O O O O O",
+        "B-MEC I-MEC O B-MEC O O O O O B-MTP I-MTP O O O O O O O O O O O O O O O O O"
+      ],
+      "test_pred": [
+        "O O O B-CHP I-CHP O B-OBJ I-OBJ O O B-PRO I-PRO I-PRO O B-MOD I-MOD O B-EQU I-EQU O O B-MEC I-MEC O O B-MOD I-MOD I-MOD B-MEC I-MEC O",
+        "O B-DAT I-DAT O O O O B-DAM O B-MIC I-MIC O O O O O O O O O O",
+        "O O O O O O B-CHP O B-CHP I-CHP I-CHP I-CHP I-CHP I-CHP O B-CHP O O O O B-CHP I-CHP I-CHP O B-CHP O O O O O O O O O O O O O",
+        "O O O O B-MAT I-MAT O B-MAT I-MAT O O O B-MAC I-MAC I-MAC O O O O O O O",
+        "O O O O B-DAT I-DAT O O B-MAC I-MAC O O O",
+        "B-OBJ I-OBJ I-OBJ I-OBJ I-OBJ O O O B-STD B-OBJ I-OBJ O O B-PRO O B-VAL I-VAL O O O O B-MFP I-MFP O B-MFP O B-MFP I-MFP O O B-MFP O",
+        "O B-OBJ O O O B-MFP I-MFP O O B-MFP I-MFP I-MFP O O B-SDE O B-MFP I-MFP O O O B-PRO I-PRO O O O O O O O",
+        "O O O O O O O O O B-PRO O B-VAL I-VAL O B-PRO O B-PRO I-PRO I-PRO I-PRO O B-VAL I-VAL O O O",
+        "O B-MFP I-MFP O O O O O B-MEC I-MEC I-MEC O B-MEC I-MEC O O O B-LOC O O O O B-MIC O O O O",
+        "O O O O O O O O B-CHP I-CHP O O O O B-EQU O O B-EQU I-EQU I-EQU O B-EQU O O O O O B-CHP B-DAT O O O O O",
+        "O B-CHP O O B-EQU I-EQU I-EQU O O O B-EQU I-EQU I-EQU I-EQU O",
+        "O B-CHP B-DAT O O B-PRP I-PRP O B-PRP O O B-PRP I-PRP I-PRP O O B-PRP O O O O B-VAL I-VAL O B-VAL I-VAL I-VAL O B-VAL I-VAL O O O",
+        "O O B-MTP I-MTP O O B-MIP I-MIP I-MIP O",
+        "B-MTP I-MTP O O B-PRO I-PRO O O O O O O O",
+        "O O O O O O O O O B-CHP B-OBJ O O B-MIP I-MIP O B-PRO O O B-VAL O O O O O B-MIC O B-DEF I-DEF I-DEF O O O",
+        "O B-MIP O O B-CHP B-OBJ O B-VAL I-VAL O O O O B-MIC O",
+        "B-MIC O O O O B-VAL I-VAL I-VAL O O O",
+        "O B-CHP B-DAT O O B-PRO I-PRO I-PRO I-PRO O O B-VAL I-VAL I-VAL O B-MIC I-MIC O O B-VAL I-VAL I-VAL B-PRO O",
+        "O O B-CPR O B-MAC I-MAC I-MAC B-VAL O B-PRO I-PRO",
+        "O O O B-EQU I-EQU I-EQU I-EQU I-EQU I-EQU I-EQU I-EQU I-EQU B-EQU O O O O B-DAT O B-CHP O O O B-DEF O O B-LOC I-LOC O",
+        "O B-MFP O O O O O B-DAM I-DAM O O O B-EQU I-EQU I-EQU B-DAT I-DAT O O O B-CHP I-CHP I-CHP I-CHP O",
+        "O O O B-CHP I-CHP O O O O O O B-MIP I-MIP I-MIP I-MIP O O B-DAM I-DAM I-DAM O O O O B-DAM O B-DAM O B-DAM O O O O",
+        "O O B-CHP I-CHP I-CHP O B-CHP O B-DAT O O O",
+        "O O O B-DAM I-DAM I-DAM O B-DAM O O B-STD I-STD O B-MAC B-MAT I-MAT I-MAT O O O O O O O",
+        "O O O O O O O O B-DAM O O B-MEC I-MEC I-MEC I-MEC O O O O O O O B-LOC I-LOC I-LOC O",
+        "B-DEF I-DEF O O O O O O O O B-MTP I-MTP O O O B-MTP I-MTP I-MTP O O B-DAM O O O O O O B-DEF I-DEF O O B-LOC O O",
+        "B-DAM B-LOC O O O O O O O O B-EQU B-DAT O B-CHP O O O O O O O B-MIC O",
+        "O O B-DEF I-DEF O O B-DAT I-DAT I-DAT I-DAT I-DAT O O O O B-DEF I-DEF I-DEF O B-DEF O O B-DEF O O O O B-MEC I-MEC O O O O O O O O",
+        "O B-MEP I-MEP I-MEP O O O O",
+        "O O O O O B-DEF I-DEF I-DEF I-DEF I-DEF I-DEF B-CGE I-CGE O O O O O B-DAT O O O",
+        "O O O O O B-DEF I-DEF I-DEF O B-DEF I-DEF I-DEF B-CGE B-CGE I-CGE O O O",
+        "O O O O O O O B-CGE I-CGE O O B-CGE I-CGE O O B-SDE O O B-CGE I-CGE O O O",
+        "O O O B-LOC B-DAM I-DAM O B-DAM I-DAM I-DAM O O O B-MEC I-MEC O O O O O O O O",
+        "O O O B-DAM I-DAM O O B-MIC O O B-MIP I-MIP O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O B-MEC I-MEC O B-CGE",
+        "O O O O O O O O O O O O O B-MIP I-MIP O O B-CGE I-CGE O O B-SDE O B-MEC O O O O O O B-DEF I-DEF O O B-MEC O",
+        "O O O B-DEF O B-DAM I-DAM I-DAM O O B-ODE I-ODE O O O O O O O B-DAT I-DAT I-DAT O O O",
+        "O O O O O O O B-LOC O O B-DAM O O O O O O O B-DEF I-DEF O",
+        "O B-LOC I-LOC I-LOC O O O B-DAM I-DAM O O B-DAM I-DAM O O O B-ODE I-ODE O O O O O O O O O O O",
+        "O O O O O B-MEP I-MEP I-MEP O B-MEC I-MEC O O B-DAM I-DAM O O O O O O O O O O O O O O",
+        "B-MEC I-MEC O B-MEC O O O O O B-MTP I-MTP O O O O O O O O O O O O O O O O O"
+      ],
+      "self_training": {
+        "n_sampled": 40000,
+        "n_skipped": 0,
+        "marginal_threshold": 0.9,
+        "silver_filter": "mentions",
+        "n_names": 26134,
+        "names": {
+          "fine": {
+            "n_mentions": 19257,
+            "n_distinct": 6240,
+            "n_test_entities": 60,
+            "n_test_unseen": 43,
+            "n_test_unseen_in_silver": 7
+          },
+          "coarse": {
+            "n_mentions": 26134,
+            "n_distinct": 8323,
+            "n_test_entities": 173,
+            "n_test_unseen": 129,
+            "n_test_unseen_in_silver": 10
+          }
+        },
+        "teachers": [
+          {
+            "seed": 0,
+            "fine": {
+              "val_f1": 87.34,
+              "test_f1": 56.41,
+              "test_f1_strict": 56.41,
+              "test_macro_f1": 46.66,
+              "best_epoch": 10
+            },
+            "coarse": {
+              "val_f1": 81.47,
+              "test_f1": 54.8,
+              "test_f1_strict": 54.8,
+              "test_macro_f1": 41.29,
+              "best_epoch": 11
+            }
+          },
+          {
+            "seed": 100,
+            "fine": {
+              "val_f1": 84.03,
+              "test_f1": 61.16,
+              "test_f1_strict": 61.16,
+              "test_macro_f1": 51.87,
+              "best_epoch": 6
+            },
+            "coarse": {
+              "val_f1": 82.49,
+              "test_f1": 59.1,
+              "test_f1_strict": 59.1,
+              "test_macro_f1": 43.42,
+              "best_epoch": 6
+            }
+          },
+          {
+            "seed": 200,
+            "fine": {
+              "val_f1": 87.1,
+              "test_f1": 57.85,
+              "test_f1_strict": 57.85,
+              "test_macro_f1": 51.33,
+              "best_epoch": 13
+            },
+            "coarse": {
+              "val_f1": 81.03,
+              "test_f1": 60.45,
+              "test_f1_strict": 60.45,
+              "test_macro_f1": 53.29,
+              "best_epoch": 19
+            }
+          }
+        ]
+      },
+      "n_augmented": 1810,
+      "run_id": "10.1007_s11340-021-00758-x.conll",
+      "runtime_sec": 7362.6,
+      "environment": {
+        "device": "Tesla T4",
+        "cuda": "12.8",
+        "cudnn": 91900,
+        "torch": "2.11.0+cu128",
+        "transformers": "5.18.0",
+        "deterministic": true,
+        "cublas_workspace_config": ":4096:8"
+      }
+    },
+    {
+      "f1": 68.61,
+      "precision": 66.59,
+      "recall": 70.75,
+      "f1_strict": 68.61,
+      "per_class": {
+        "CEL": {
+          "precision": 0.7778,
+          "recall": 0.875,
+          "f1-score": 0.8235,
+          "support": 8.0
+        },
+        "CGE": {
+          "precision": 0.4286,
+          "recall": 0.6,
+          "f1-score": 0.5,
+          "support": 5.0
+        },
+        "CHP": {
+          "precision": 0.7222,
+          "recall": 1.0,
+          "f1-score": 0.8387,
+          "support": 13.0
+        },
+        "CPR": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 2.0
+        },
+        "DAM": {
+          "precision": 0.5882,
+          "recall": 0.7692,
+          "f1-score": 0.6667,
+          "support": 52.0
+        },
+        "DAT": {
+          "precision": 0.9091,
+          "recall": 1.0,
+          "f1-score": 0.9524,
+          "support": 10.0
+        },
+        "DEF": {
+          "precision": 0.7069,
+          "recall": 0.519,
+          "f1-score": 0.5985,
+          "support": 79.0
+        },
+        "EQU": {
+          "precision": 0.8333,
+          "recall": 0.5556,
+          "f1-score": 0.6667,
+          "support": 9.0
+        },
+        "ETP": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "LOC": {
+          "precision": 0.4167,
+          "recall": 0.4167,
+          "f1-score": 0.4167,
+          "support": 12.0
+        },
+        "MAC": {
+          "precision": 0.8,
+          "recall": 0.9231,
+          "f1-score": 0.8571,
+          "support": 13.0
+        },
+        "MAT": {
+          "precision": 0.8571,
+          "recall": 1.0,
+          "f1-score": 0.9231,
+          "support": 6.0
+        },
+        "MEC": {
+          "precision": 0.7534,
+          "recall": 0.7639,
+          "f1-score": 0.7586,
+          "support": 72.0
+        },
+        "MEP": {
+          "precision": 0.4444,
+          "recall": 0.8,
+          "f1-score": 0.5714,
+          "support": 5.0
+        },
+        "MFP": {
+          "precision": 0.5714,
+          "recall": 1.0,
+          "f1-score": 0.7273,
+          "support": 4.0
+        },
+        "MIC": {
+          "precision": 0.6471,
+          "recall": 0.6875,
+          "f1-score": 0.6667,
+          "support": 16.0
+        },
+        "MIP": {
+          "precision": 0.8333,
+          "recall": 0.3571,
+          "f1-score": 0.5,
+          "support": 14.0
+        },
+        "MOD": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 2.0
+        },
+        "MTP": {
+          "precision": 0.5,
+          "recall": 0.5,
+          "f1-score": 0.5,
+          "support": 4.0
+        },
+        "OBJ": {
+          "precision": 0.8095,
+          "recall": 0.9444,
+          "f1-score": 0.8718,
+          "support": 18.0
+        },
+        "ODE": {
+          "precision": 0.8,
+          "recall": 1.0,
+          "f1-score": 0.8889,
+          "support": 4.0
+        },
+        "PQT": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 1.0
+        },
+        "PRO": {
+          "precision": 0.5385,
+          "recall": 1.0,
+          "f1-score": 0.7,
+          "support": 7.0
+        },
+        "PRP": {
+          "precision": 0.6667,
+          "recall": 0.6667,
+          "f1-score": 0.6667,
+          "support": 3.0
+        },
+        "SDE": {
+          "precision": 0.5,
+          "recall": 0.6667,
+          "f1-score": 0.5714,
+          "support": 6.0
+        },
+        "STD": {
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1-score": 0.6667,
+          "support": 4.0
+        },
+        "VAL": {
+          "precision": 0.6286,
+          "recall": 0.7097,
+          "f1-score": 0.6667,
+          "support": 31.0
+        },
+        "micro avg": {
+          "precision": 0.6659,
+          "recall": 0.7075,
+          "f1-score": 0.6861,
+          "support": 400.0
+        },
+        "macro avg": {
+          "precision": 0.5642,
+          "recall": 0.6576,
+          "f1-score": 0.5926,
+          "support": 400.0
+        },
+        "weighted avg": {
+          "precision": 0.6803,
+          "recall": 0.7075,
+          "f1-score": 0.6803,
+          "support": 400.0
+        }
+      },
+      "seed": 300,
+      "best_epoch": 7,
+      "val_f1": 82.83,
+      "n_train": 336,
+      "n_val": 59,
+      "n_test": 81,
+      "history": [
+        {
+          "epoch": 0,
+          "train_loss": 9364.37,
+          "val_f1": 43.3,
+          "train_loss_fine": 4290.8897,
+          "train_loss_coarse": 5073.4802,
+          "val_f1_fine": 40.58,
+          "val_f1_coarse": 43.3
+        },
+        {
+          "epoch": 1,
+          "train_loss": 1531.1401,
+          "val_f1": 72.47,
+          "train_loss_fine": 664.5635,
+          "train_loss_coarse": 866.5766,
+          "val_f1_fine": 72.67,
+          "val_f1_coarse": 72.47
+        },
+        {
+          "epoch": 2,
+          "train_loss": 315.7059,
+          "val_f1": 77.93,
+          "train_loss_fine": 135.9865,
+          "train_loss_coarse": 179.7195,
+          "val_f1_fine": 75.0,
+          "val_f1_coarse": 77.93
+        },
+        {
+          "epoch": 3,
+          "train_loss": 115.5558,
+          "val_f1": 79.25,
+          "train_loss_fine": 55.4081,
+          "train_loss_coarse": 60.1477,
+          "val_f1_fine": 77.91,
+          "val_f1_coarse": 79.25
+        },
+        {
+          "epoch": 4,
+          "train_loss": 59.2908,
+          "val_f1": 81.3,
+          "train_loss_fine": 27.7297,
+          "train_loss_coarse": 31.5611,
+          "val_f1_fine": 75.5,
+          "val_f1_coarse": 81.3
+        },
+        {
+          "epoch": 5,
+          "train_loss": 39.3791,
+          "val_f1": 80.14,
+          "train_loss_fine": 17.8875,
+          "train_loss_coarse": 21.4917,
+          "val_f1_fine": 77.36,
+          "val_f1_coarse": 80.14
+        },
+        {
+          "epoch": 6,
+          "train_loss": 20.6431,
+          "val_f1": 82.56,
+          "train_loss_fine": 10.3104,
+          "train_loss_coarse": 10.3327,
+          "val_f1_fine": 80.0,
+          "val_f1_coarse": 82.56
+        },
+        {
+          "epoch": 7,
+          "train_loss": 14.4883,
+          "val_f1": 82.83,
+          "train_loss_fine": 7.1013,
+          "train_loss_coarse": 7.387,
+          "val_f1_fine": 80.79,
+          "val_f1_coarse": 82.83
+        },
+        {
+          "epoch": 8,
+          "train_loss": 9.1372,
+          "val_f1": 80.2,
+          "train_loss_fine": 4.5139,
+          "train_loss_coarse": 4.6232,
+          "val_f1_fine": 80.68,
+          "val_f1_coarse": 80.2
+        },
+        {
+          "epoch": 9,
+          "train_loss": 5.8488,
+          "val_f1": 79.59,
+          "train_loss_fine": 3.3302,
+          "train_loss_coarse": 2.5186,
+          "val_f1_fine": 77.49,
+          "val_f1_coarse": 79.59
+        },
+        {
+          "epoch": 10,
+          "train_loss": 5.8978,
+          "val_f1": 80.61,
+          "train_loss_fine": 2.8871,
+          "train_loss_coarse": 3.0107,
+          "val_f1_fine": 80.11,
+          "val_f1_coarse": 80.61
+        }
+      ],
+      "multi_task": {
+        "n_examples": 344,
+        "n_split_examples": 16,
+        "other_best_epoch": 7
+      },
+      "test_index": [
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121
+      ],
+      "test_gold": [
+        "O O O O B-DEF I-DEF I-DEF O B-MEC I-MEC",
+        "B-MEC I-MEC O B-MEC O O B-MAC I-MAC O B-MEC O O O O O O O O O O",
+        "O O O B-MEP I-MEP O O O O O O B-MIC I-MIC O B-MEC O",
+        "O O O B-MEC I-MEC O O B-MAC I-MAC O O B-DEF I-DEF I-DEF O B-DEF O O O B-MIC I-MIC O O O B-MEC I-MEC O",
+        "O O O O O O O O O O O B-DEF O B-MEP I-MEP O B-CPR I-CPR O O B-MAC I-MAC O",
+        "O O O O O O B-DEF O O O B-MEC I-MEC O O O B-MEC I-MEC I-MEC O B-MEC O O O O B-MEC I-MEC O B-MAC I-MAC O",
+        "O O O O O O O B-MOD I-MOD O O O O O O O B-DEF O",
+        "O O O O O O O O O B-MIC I-MIC O",
+        "O O O B-CEL O B-CEL O O O B-MAC I-MAC O O O B-MEP O B-MEC O O O O O O O O O O O O O O B-MEC I-MEC O B-MEC O O O O O O O O O O O O O O O O O O O O B-MAC I-MAC O O B-MEC O O O O O O O O O O O O O O O O O O O O O O O O O O O B-MEC I-MEC O O O O O O O O O O O B-MIC I-MIC O B-MEC O O B-MEP I-MEP O O",
+        "B-DEF I-DEF I-DEF O B-DEF O O O O O O O O O B-MEC O O O O B-MIP I-MIP I-MIP O O B-MIP I-MIP O O O O O O O",
+        "O O O O O O B-MAT I-MAT O O B-MAC I-MAC I-MAC I-MAC I-MAC I-MAC I-MAC I-MAC O O O O O O O O O O O O B-DAM O O O B-DEF I-DEF I-DEF O O O O O O O O O O O O O",
+        "O O O O O O O B-DEF I-DEF I-DEF O B-MEC O O O O O B-MEC I-MEC I-MEC O B-MEC O O O O B-MEC I-MEC O O O O O",
+        "O O O O O O O B-MEC O O O O O B-MAC I-MAC O",
+        "B-CHP I-CHP O B-STD I-STD B-OBJ O",
+        "O O B-CHP I-CHP I-CHP I-CHP O B-STD B-OBJ O B-MAT I-MAT O O B-EQU I-EQU I-EQU O B-EQU O O O O O",
+        "O B-OBJ O O O O B-PRO O O B-SDE B-OBJ O B-VAL I-VAL I-VAL O O O O B-MIC I-MIC O O B-SDE B-OBJ O B-VAL I-VAL I-VAL O O O B-MIC O O O O O B-PRO I-PRO O",
+        "O O O B-MEC I-MEC O O O B-OBJ O O O O O B-CEL O B-MEC O O O B-MEC O O O O O B-MEC O O O O O O O",
+        "O O O B-STD B-OBJ O O O O O O O O B-MEC I-MEC O B-MEC I-MEC B-MEC O O O O O O",
+        "O O O O O B-MEC O B-CGE I-CGE O B-CGE O B-MAC O O O B-CEL O B-MAC I-MAC O O O O O O O O O B-SDE B-OBJ O O O O O O O B-DAM I-DAM I-DAM O O O O B-DAM I-DAM O O O O O O",
+        "O B-DAM I-DAM O O O O O B-MIC I-MIC O O B-MEC I-MEC O B-MEC O",
+        "B-DAM I-DAM O O",
+        "O O O B-MEC I-MEC O B-MEC B-LOC O O O O B-DAM I-DAM O O B-DAM I-DAM I-DAM I-DAM I-DAM I-DAM O O O B-DAM I-DAM O O O O O",
+        "O O B-DEF I-DEF O O O",
+        "B-DAM I-DAM O O O B-DEF I-DEF I-DEF I-DEF I-DEF O O O O O O",
+        "O O O O O O O B-DAM I-DAM I-DAM O",
+        "O O O O B-CHP I-CHP I-CHP O B-CHP O B-DAT O O O O O O O B-MIP I-MIP O O O O O O O O O O O B-DAM O O B-DEF I-DEF O O B-OBJ O O",
+        "O O O O B-DAM I-DAM O O B-OBJ O B-DAM I-DAM O O O B-LOC I-LOC O O O O O O O O B-DEF O O B-DAM I-DAM O O O O B-MEC I-MEC B-LOC O",
+        "O O B-MEC I-MEC O O O B-MEC O B-MEC I-MEC O O B-DAM O O O B-DEF O O B-MEC B-LOC O O O B-MIC I-MIC O O O O O",
+        "O O O O O B-MEC I-MEC I-MEC O O B-MEC O B-MIC I-MIC I-MIC I-MIC O O O O O O O O O O O O O B-MAC O O O O O O O O O O O B-DAM O O B-DAM I-DAM O O O O B-MAC I-MAC O O O O O O O",
+        "O B-MEC O B-DAM I-DAM O O O O B-DEF O O O B-DAM I-DAM O O O O O O",
+        "O O O O B-DAM O O O O B-DEF O O O O B-MEC I-MEC O",
+        "O O O O O O O O B-DEF I-DEF O O O O O B-DAM I-DAM I-DAM I-DAM O",
+        "O B-DEF O O O O B-MIP I-MIP I-MIP O O B-DAM O O O O O O O O O",
+        "B-MIP I-MIP I-MIP O O B-DEF O O",
+        "O O O O B-DEF O O O B-DEF O B-DEF O O O B-EQU B-DAT O B-CHP B-DAT O O O O O",
+        "B-DEF O O O O O B-MIP I-MIP O O O O O O B-MIP O B-MOD I-MOD I-MOD I-MOD O O O O O O O",
+        "B-DEF O B-MIP O B-VAL I-VAL I-VAL O O O O O O O O O O O O O O",
+        "O O B-DEF O O O O O O B-DEF I-DEF I-DEF O O O O O O O B-MEP I-MEP O B-CPR O B-MEC I-MEC I-MEC O B-MAC I-MAC O O O O O O O",
+        "O O O O O O O B-MIP O B-DEF I-DEF I-DEF O",
+        "O O O B-CHP I-CHP I-CHP O B-STD B-MAT I-MAT O",
+        "O O O B-CHP B-DAT O O B-EQU B-DAT O O B-VAL I-VAL O B-OBJ O O B-MEC O B-MTP O O O B-DAM I-DAM O O B-DAM I-DAM O O O O O O",
+        "O B-DAT I-DAT O B-ODE I-ODE O B-MIC O",
+        "O O O B-VAL I-VAL I-VAL O O O O O B-PRP B-EQU B-DAT O O O O O O O O B-MEC I-MEC I-MEC I-MEC O O B-DAM I-DAM O",
+        "O O O B-VAL I-VAL I-VAL O",
+        "O O O O O O B-DAM I-DAM O",
+        "B-CHP O B-CHP I-CHP O O O O O O O B-DAM O O O O O B-DAM I-DAM O",
+        "O O O O O B-EQU B-DAT O O O O O O O B-CHP B-DAT O O O O B-DEF I-DEF I-DEF O B-DEF I-DEF I-DEF O B-DAM I-DAM O",
+        "O O O O O O O O O O O O B-MIP O B-DEF I-DEF I-DEF O B-DAM I-DAM O O B-MIP O O B-MIC O O O O O O O O O",
+        "O B-DAM O O O B-DEF O O B-MIC O O O O O O O O O B-PRO O O O B-VAL B-DEF I-DEF I-DEF O B-VAL B-DAM I-DAM O O O B-VAL O O O O O O",
+        "O O O O O B-DEF I-DEF I-DEF O O O B-MEC I-MEC B-LOC O",
+        "O O O O B-MEC B-LOC O O B-DAM I-DAM O O O O B-CHP I-CHP I-CHP I-CHP O O B-SDE O B-VAL I-VAL I-VAL O B-OBJ O B-MIC I-MIC O",
+        "O O B-DEF O O O O B-LOC O O B-OBJ O O B-DAM I-DAM O O O",
+        "O B-DAM I-DAM O O O B-DEF I-DEF O O B-DEF I-DEF I-DEF O O O O O B-DAT O O O O O O O O O O O O B-OBJ O O O O O O O O O O O",
+        "O O B-DEF O O B-MEC I-MEC O O O B-DAM I-DAM O O O O O O O O B-MEC I-MEC O",
+        "O O O B-DEF O O B-MIP I-MIP O O O O O O O O O B-DAM I-DAM O O O B-MIC O O O O",
+        "O O O O B-VAL O O B-VAL O O B-VAL O B-DEF I-DEF O B-DAM I-DAM O O B-DEF O O O B-VAL O O B-VAL O O O O B-VAL O O B-VAL O O B-DEF I-DEF I-DEF O",
+        "O O O O O B-DEF I-DEF O B-DAM I-DAM O O O O O O B-MEC I-MEC O B-DEF I-DEF O O O O B-DEF I-DEF O O O B-DAM I-DAM O O O O O O O O B-MEC B-LOC O",
+        "O O O B-VAL O O B-VAL B-DAM I-DAM O O O O B-DEF I-DEF O",
+        "O O O O B-DEF I-DEF O O B-LOC O B-DAM I-DAM O O O B-DAM I-DAM I-DAM O O O O O O B-DEF O O B-MEC I-MEC O",
+        "O O O B-DEF O O O O O B-DEF I-DEF O O B-DEF O O O B-DAM B-LOC O O O O O O O",
+        "O O O O O O B-DEF I-DEF O O O B-DAM B-LOC O O B-VAL B-DAM I-DAM O O B-SDE B-OBJ O O O O O O B-MIC O O O O O O O O O",
+        "O B-MAT I-MAT O O O O O B-MEC I-MEC O O O B-MEC I-MEC O",
+        "O O O O O O B-DAM I-DAM B-DAM O",
+        "O O B-CEL O O O O O B-DEF O O O O O O O O O B-MIP I-MIP O O O O O O O B-PQT I-PQT I-PQT O O O O O O O O",
+        "O O O O O O O O O O O B-DAM O O B-DEF O O O O O B-VAL I-VAL O O B-ODE I-ODE O",
+        "O O O B-MEC I-MEC O O O B-DEF O O B-ODE I-ODE O O O O B-ODE I-ODE O O O O O O O O O O O B-MEC O O B-DEF O O O O O B-MEC O O O",
+        "O B-MEC I-MEC O O O O O O B-MEC I-MEC O B-MEC I-MEC O B-MEC I-MEC I-MEC O",
+        "O O O O O O O O O O O B-CGE I-CGE O O O B-DEF I-DEF O O O O B-MEC I-MEC O O O O O O O O O O O O O O O O O O O B-DEF O B-MEC O B-DEF O O O B-DEF I-DEF O",
+        "B-DEF O B-DEF O O B-CGE I-CGE O O O O O O O B-MEC I-MEC O O O O O O O O O",
+        "B-DEF O O O O O O O O O B-DEF I-DEF O",
+        "O B-DEF I-DEF O B-CGE I-CGE I-CGE O B-MAT I-MAT O O O O B-DEF I-DEF O O O O O O O B-DEF O B-DEF O O B-DEF I-DEF O",
+        "O O O O B-DEF I-DEF O B-DEF O O O O O B-DAM I-DAM O O B-DEF I-DEF O O O O O O B-MTP I-MTP O B-DAM I-DAM I-DAM O O O O O O O",
+        "O O O O O B-DEF I-DEF I-DEF O O O O O B-MAT I-MAT O O O O O O O O O O O O B-MEC I-MEC O B-DEF I-DEF I-DEF O O O O O O O",
+        "O O O B-DEF O O B-MEC I-MEC O O O O O O O B-DAM O O O O B-DEF O O O O O O",
+        "O O B-MEC O O B-DEF O O O O B-MTP O O O B-MTP O O O B-MEC I-MEC O O O O O O O O B-MEC O O B-DEF I-DEF O O O O O O O O B-MEC O",
+        "O B-SDE B-OBJ O O B-PRO I-PRO O B-VAL I-VAL O B-PRO O B-VAL I-VAL O O O O B-MFP I-MFP I-MFP O",
+        "O O B-MFP I-MFP O B-VAL O B-VAL I-VAL I-VAL B-PRO O B-MFP O B-LOC I-LOC O B-VAL I-VAL I-VAL O O O O O O",
+        "O B-MFP O O B-OBJ O O O O B-CEL O B-CEL O O B-VAL I-VAL O O B-PRP I-PRP O B-VAL I-VAL I-VAL I-VAL I-VAL O B-VAL I-VAL O O O O O O O O O O O O O O O O O B-OBJ O O O O B-CEL O",
+        "O O O O O B-PRO I-PRO O O O O O O O O O B-VAL I-VAL I-VAL O",
+        "O B-CHP O O B-MIC I-MIC O O O B-CHP O O B-PRP I-PRP O B-VAL I-VAL I-VAL O O B-EQU I-EQU I-EQU O",
+        "O B-DEF I-DEF O B-MIP I-MIP I-MIP O O O B-EQU I-EQU O B-EQU I-EQU O"
+      ],
+      "test_pred": [
+        "O O O O B-DEF I-DEF I-DEF O B-MEC I-MEC",
+        "B-MEC I-MEC O B-MEC O O B-MAC I-MAC O O O O O O O O O O O O",
+        "O O O B-MEP I-MEP O O O O O O B-MIC I-MIC O B-CEL O",
+        "O O O B-MEC I-MEC O O B-MAC I-MAC O O B-DEF I-DEF I-DEF O B-DEF O O O B-MIC I-MIC O O O B-MEC I-MEC O",
+        "O O O O O O O O O O O B-MIC O B-MEP I-MEP O B-MEP I-MEP O O B-MAC I-MAC O",
+        "O O O O O O B-DAM O O O B-MEC I-MEC O O O B-MEC I-MEC I-MEC O B-MEC O O O O B-MEC I-MEC O B-MAC I-MAC O",
+        "O O O O O O O B-MEP I-MEP O O O O O O O B-DEF O",
+        "O O O O O O O O O B-MIC I-MIC O",
+        "O O O B-CEL O B-CEL O O O B-MAC I-MAC O O O B-MEP O B-MEC O O O O O O O O O O O O O O B-MEC I-MEC O B-MEC O O O B-MEC I-MEC O B-MEC I-MEC O B-MEC I-MEC O O O O O O O O O B-MAC I-MAC O O B-MEC O B-ETP I-ETP O O O B-OBJ I-OBJ I-OBJ O O O O O O O O O O O O O B-MEP I-MEP I-MEP O O B-MEC I-MEC O O O O O O O O O O O B-MAC I-MAC O B-MEC O O B-MEP I-MEP I-MEP O",
+        "B-DEF I-DEF I-DEF O B-DEF O O O O O O O O O B-MEC O O O O B-PRO I-PRO I-PRO O O B-PRO I-PRO O O O O O O O",
+        "O O O O O O B-MAT I-MAT O O B-MAC I-MAC I-MAC I-MAC I-MAC I-MAC I-MAC I-MAC O O O B-ETP I-ETP O O O B-OBJ I-OBJ I-OBJ O B-DAM O O O B-VAL I-VAL B-DAM O O O O O O O O O O O O O",
+        "O O O O O O O B-DEF I-DEF I-DEF O B-ETP O O O O O B-MEC B-MEC I-MEC O B-MEC O O O O B-MEC I-MEC O O O O O",
+        "O O O O O O O B-MEC O O O O O B-MAC I-MAC O",
+        "B-CHP I-CHP O B-STD I-STD B-OBJ O",
+        "O O B-CHP I-CHP I-CHP I-CHP O B-STD B-OBJ O B-MAT I-MAT O O B-EQU I-EQU I-EQU O B-EQU O O O O O",
+        "O B-OBJ O O O O B-PRO O O B-SDE B-OBJ O B-VAL I-VAL I-VAL O O O O B-SDE B-MIC O O O B-OBJ O B-VAL I-VAL I-VAL O O O B-MIC O O O O O B-PRO I-PRO O",
+        "O O O B-MEC I-MEC O O O B-OBJ O O O O O B-CEL O B-MEC O O O B-MEC O O O B-MEC I-MEC I-MEC O O O O O O O",
+        "O O O B-STD B-OBJ O O O O O O O O B-MEC I-MEC O B-MEC I-MEC I-MEC O O O O O O",
+        "O O O O O B-ETP O B-MAC I-MAC I-MAC I-MAC I-MAC I-MAC O O O B-MAC O B-MAC I-MAC O O O O O O O O O B-SDE B-OBJ O O O O O O O B-DAM I-DAM I-DAM O O O O B-DAM I-DAM O O O O O O",
+        "O B-DAM I-DAM O O O O O B-MIC I-MIC O O B-MEC I-MEC O B-MEC O",
+        "B-CHP I-CHP I-CHP O",
+        "O O O B-DAM I-DAM O B-DAM I-DAM O O O O B-DAM I-DAM O O B-DEF I-DEF O B-DEF O B-DAM O O O B-DAM I-DAM O O O O O",
+        "B-PRO O B-DAM I-DAM O O O",
+        "B-DAM I-DAM O O O B-DAM I-DAM I-DAM I-DAM I-DAM O O O O O O",
+        "O O O O O O O O B-DAM I-DAM O",
+        "O O O O B-CHP I-CHP I-CHP O B-CHP O B-DAT O O O O O O O B-MIP I-MIP O O O O O O O O O O O B-DAM O O B-DEF I-DEF O O B-MFP I-MFP O",
+        "O O O O B-DAM I-DAM O O B-OBJ O B-STD B-DAM O O O B-LOC I-LOC O O O O O O O O B-DEF O O B-DAM I-DAM O O O B-DEF I-DEF I-DEF I-DEF O",
+        "O O B-MEC I-MEC O O O B-MEC O B-MEC I-MEC O O B-DAM O O O B-DEF O O B-DEF I-DEF O O O B-MIC I-MIC O O O O O",
+        "O O O O O B-MEC I-MEC I-MEC O O B-MEC O B-DAM I-DAM I-DAM I-DAM O O O O O O O O O O O O O B-MAC O O O O O O O O O O O B-DAM O O B-DAM I-DAM O O O O B-MAC I-MAC O O O O O O O",
+        "O B-MEC O B-DAM I-DAM O O O O B-DEF O O O B-DAM I-DAM O O O O O O",
+        "O O O O B-DAM O O O O B-DEF O O O O B-MEC I-MEC O",
+        "O O O O O O O O B-DEF I-DEF O O O B-LOC O B-DAM O B-DAM I-DAM O",
+        "O B-DEF O O O O B-MEC I-MEC I-MEC O O B-DAM O O O O O O O O O",
+        "B-MEC I-MEC I-MEC O O B-DEF I-DEF O",
+        "B-MTP I-MTP O O B-DEF O O O B-STD O B-STD O O O B-CHP B-DAT O B-CHP B-DAT O O O O O",
+        "B-DEF O O O O O B-MIP I-MIP O O O O O O B-MIP O B-MEC I-MEC I-MEC I-MEC O O O O O O O",
+        "B-DEF O B-PRO O B-VAL I-VAL I-VAL O O O O B-SDE O O O O O O B-SDE O O",
+        "O B-DEF I-DEF O O O O O O B-DEF I-DEF I-DEF O O O O O O O B-MEP I-MEP O O O B-MEC I-MEC I-MEC O B-MAC I-MAC O O O O O O O",
+        "O O O O O O O B-PQT O B-OBJ I-OBJ I-OBJ O",
+        "O O O B-CHP I-CHP I-CHP O B-STD B-MAT I-MAT O",
+        "O O O B-CHP B-DAT O O B-CHP B-DAT O O B-VAL I-VAL O B-OBJ O O B-MEC O B-MTP O O O B-DAM I-DAM O O B-DAM I-DAM O O O O O O",
+        "O B-DAT I-DAT O B-ODE I-ODE O B-MIC O",
+        "B-PRO I-PRO O B-VAL I-VAL I-VAL O O O O B-PRP I-PRP B-CHP B-DAT O O B-LOC I-LOC O O O B-MEC I-MEC O B-MEC I-MEC O O B-DAM I-DAM O",
+        "B-EQU I-EQU O B-VAL I-VAL I-VAL O",
+        "O O O O O O B-DAM I-DAM O",
+        "B-CHP O B-CHP I-CHP O O O O O O O B-MIC O O O O O B-DAM I-DAM O",
+        "O O O O O B-CHP B-DAT O O O O O O O B-CHP B-DAT O O O O B-DAM O O O B-STD O B-DEF O B-DAM I-DAM O",
+        "O O O O O O O O O O O O O O B-DAM I-DAM I-DAM O B-DAM I-DAM O O O O O B-MIC O O O O O O O O O",
+        "O B-DAM O O O B-DEF O O B-MIC O O O O O O O O O B-PRO O O O B-VAL I-VAL I-VAL B-DAM O B-VAL B-DEF I-DEF O O O B-VAL O O O O O O",
+        "O O O O O B-DAM I-DAM I-DAM O O B-DAM I-DAM I-DAM I-DAM O",
+        "O O O O B-DAM I-DAM O O B-DAM I-DAM O O O O B-CHP I-CHP I-CHP I-CHP O O O O B-VAL I-VAL I-VAL O B-OBJ O B-PRO B-MIC O",
+        "O O B-DEF O O O O B-LOC O O B-OBJ O O B-DAM I-DAM O O O",
+        "O B-DAM I-DAM O O O B-VAL I-VAL O O B-VAL I-VAL B-LOC O O O O O B-DAT O O O O O O O O O O O O B-OBJ O O O O O O O O O O O",
+        "O O B-MIC I-MIC O B-MEC I-MEC O O O B-DAM I-DAM O O O O O O O O B-MEC I-MEC O",
+        "O O O B-DEF I-DEF O B-MEP I-MEP O O O O O O O O O B-DAM I-DAM O O O B-MIC O O O O",
+        "O O O O B-VAL O O B-VAL O B-VAL I-VAL O B-DAM I-DAM O B-DAM I-DAM O B-DEF I-DEF O O O B-VAL O B-VAL I-VAL O O B-SDE O B-VAL O B-VAL I-VAL O O B-VAL I-VAL B-DEF O",
+        "O O O O O B-DEF I-DEF O B-DAM I-DAM O O O O O O B-MEC I-MEC O B-DEF I-DEF O O O O B-DEF I-DEF O O O B-DAM I-DAM O O O O O O O O B-DEF I-DEF O",
+        "O O O B-VAL O O O B-DAM I-DAM O O O O B-DEF I-DEF O",
+        "O O O O B-DEF I-DEF O O B-LOC O B-DAM I-DAM O O O B-DAM B-DAM I-DAM O O O O O O B-DEF I-DEF O B-MEC I-MEC O",
+        "O O O B-DEF O O O O O B-DEF I-DEF O O B-DEF B-LOC O O B-DAM B-LOC O B-VAL O B-VAL O O O",
+        "O O O O O O B-DEF I-DEF O O O B-DAM B-LOC O O O B-DAM I-DAM O O B-SDE B-OBJ O O O O O O B-MIC O O O O O O O O O",
+        "O B-MAT I-MAT O O O O O B-MEC I-MEC O O O B-MEC I-MEC O",
+        "O O O O O O O B-DAM I-DAM O",
+        "O O B-CEL O O O O O B-MEC I-MEC O O O O O O O O B-MIP I-MIP O O O O O O O B-MTP I-MTP I-MTP I-MTP O O O O O O O",
+        "O B-DAT O O O O O O O O O B-DAM O O B-DAM O O O O B-VAL I-VAL I-VAL O O B-ODE I-ODE O",
+        "O O O B-MEC I-MEC O O O B-DAM O O B-ODE I-ODE O O O O B-ODE I-ODE O O O O O O O O O O O B-MEC O O B-DEF O O O O O B-MEC O O O",
+        "O B-MEC I-MEC O O O O O O B-MEC I-MEC O B-MEC I-MEC O B-MEC I-MEC I-MEC O",
+        "O O O O O O O O O B-ODE O B-CGE I-CGE O O O B-CGE I-CGE O O B-MEC O B-MEC I-MEC O O O O O O O O O O O O O O O B-DAM I-DAM O O B-DEF O B-MEC O B-DEF O O O B-CGE I-CGE O",
+        "B-DEF O B-DEF O O B-CGE I-CGE O O O O O O O B-MEC I-MEC O O O O O O O O O",
+        "B-DEF O O O O O O O O O B-CGE I-CGE O",
+        "O B-CGE I-CGE O B-CGE I-CGE I-CGE O B-MAT I-MAT O O O O B-DEF I-DEF O O O O O O O B-DAM O B-DEF O O O B-DEF O",
+        "O O B-MIP O B-DEF I-DEF O B-DAM O O O B-MEC O B-DEF I-DEF O O B-LOC I-LOC O O O O O O B-MTP I-MTP O B-DAM I-DAM I-DAM O O O O O O O",
+        "O O O O O B-CEL O B-DEF O O O O O B-MAT I-MAT O O O O O O O O O O O O B-MEC I-MEC O B-MAT I-MAT I-MAT O O O O O O O",
+        "O O O B-DEF I-DEF O B-MEC I-MEC O O O O O O B-DAM I-DAM O O O O B-DEF O O O O O O",
+        "O O B-MEC O O B-DEF O O O O B-MEC O O O B-MEC O O B-MEC I-MEC I-MEC O O O O O O O O B-MEC O O B-LOC I-LOC O O O O O O O O B-MEC O",
+        "O B-SDE B-OBJ O O B-PRO I-PRO O B-VAL I-VAL O B-PRO O B-VAL I-VAL O B-MFP I-MFP O B-MFP I-MFP I-MFP O",
+        "O O B-MFP I-MFP O B-VAL O B-VAL I-VAL I-VAL B-PRO O B-MFP O O B-LOC O B-VAL I-VAL I-VAL O O O O O O",
+        "O B-MFP O O B-OBJ O B-MFP I-MFP O B-CEL O B-CEL O O B-VAL I-VAL O O B-PRP I-PRP O B-VAL I-VAL I-VAL I-VAL I-VAL O B-VAL I-VAL I-VAL I-VAL I-VAL I-VAL I-VAL I-VAL I-VAL I-VAL I-VAL I-VAL I-VAL I-VAL I-VAL I-VAL O O O B-OBJ O O O O B-CEL O",
+        "O O O O O B-PRO I-PRO O O O O O O O O B-VAL I-VAL I-VAL I-VAL O",
+        "O B-CHP O O B-OBJ B-MIC O O O B-CHP O O B-PRP I-PRP O B-VAL I-VAL I-VAL O O B-EQU I-EQU I-EQU O",
+        "O B-DEF I-DEF O B-MIP I-MIP I-MIP O O O B-EQU I-EQU O B-EQU I-EQU O"
+      ],
+      "self_training": {
+        "n_sampled": 40000,
+        "n_skipped": 0,
+        "marginal_threshold": 0.9,
+        "silver_filter": "mentions",
+        "n_names": 42066,
+        "names": {
+          "fine": {
+            "n_mentions": 23784,
+            "n_distinct": 6587,
+            "n_test_entities": 265,
+            "n_test_unseen": 216,
+            "n_test_unseen_in_silver": 17
+          },
+          "coarse": {
+            "n_mentions": 42066,
+            "n_distinct": 12645,
+            "n_test_entities": 400,
+            "n_test_unseen": 297,
+            "n_test_unseen_in_silver": 73
+          }
+        },
+        "teachers": [
+          {
+            "seed": 0,
+            "fine": {
+              "val_f1": 81.74,
+              "test_f1": 50.11,
+              "test_f1_strict": 50.11,
+              "test_macro_f1": 42.65,
+              "best_epoch": 16
+            },
+            "coarse": {
+              "val_f1": 79.25,
+              "test_f1": 65.85,
+              "test_f1_strict": 65.85,
+              "test_macro_f1": 60.64,
+              "best_epoch": 14
+            }
+          },
+          {
+            "seed": 100,
+            "fine": {
+              "val_f1": 79.66,
+              "test_f1": 46.46,
+              "test_f1_strict": 46.46,
+              "test_macro_f1": 34.5,
+              "best_epoch": 11
+            },
+            "coarse": {
+              "val_f1": 81.71,
+              "test_f1": 64.11,
+              "test_f1_strict": 64.11,
+              "test_macro_f1": 57.44,
+              "best_epoch": 14
+            }
+          },
+          {
+            "seed": 200,
+            "fine": {
+              "val_f1": 81.9,
+              "test_f1": 44.65,
+              "test_f1_strict": 44.65,
+              "test_macro_f1": 41.7,
+              "best_epoch": 12
+            },
+            "coarse": {
+              "val_f1": 81.03,
+              "test_f1": 65.33,
+              "test_f1_strict": 65.33,
+              "test_macro_f1": 51.79,
+              "best_epoch": 16
+            }
+          }
+        ]
+      },
+      "n_augmented": 1633,
+      "run_id": "10.1038_ncomms7164.conll",
+      "runtime_sec": 5668.9,
+      "environment": {
+        "device": "Tesla T4",
+        "cuda": "12.8",
+        "cudnn": 91900,
+        "torch": "2.11.0+cu128",
+        "transformers": "5.18.0",
+        "deterministic": true,
+        "cublas_workspace_config": ":4096:8"
+      }
     }
   ],
-  "test_f1_mean": 56.58,
-  "test_f1_std": 2.03,
-  "test_f1_strict_mean": 56.58,
+  "test_f1_mean": 62.01,
+  "test_f1_std": 5.68,
+  "test_f1_strict_mean": 62.01,
   "summary": {
-    "n_runs": 2,
+    "n_runs": 4,
     "run_ids": [
       "10.1038_s41467-020-19071-7.conll",
-      "10.3390_met10111458.conll"
+      "10.3390_met10111458.conll",
+      "10.1007_s11340-021-00758-x.conll",
+      "10.1038_ncomms7164.conll"
     ],
     "micro": {
-      "mean": 56.58,
-      "pop_sd": 2.03,
+      "mean": 62.01,
+      "pop_sd": 5.68,
       "ci95": [
-        30.84,
-        82.31
+        51.57,
+        72.45
       ],
       "per_run": [
         54.55,
-        58.6
+        58.6,
+        66.29,
+        68.61
       ]
     },
     "micro_strict": {
-      "mean": 56.58,
-      "pop_sd": 2.03,
+      "mean": 62.01,
+      "pop_sd": 5.68,
       "ci95": [
-        30.84,
-        82.31
+        51.57,
+        72.45
       ],
       "per_run": [
         54.55,
-        58.6
+        58.6,
+        66.29,
+        68.61
       ]
     },
     "macro": {
-      "mean": 45.33,
-      "pop_sd": 3.17,
+      "mean": 52.2,
+      "pop_sd": 7.23,
       "ci95": [
-        5.05,
-        85.61
+        38.92,
+        65.49
       ],
       "per_run": [
         42.16,
-        48.5
+        48.5,
+        58.89,
+        59.26
       ]
     },
     "weighted": {
-      "mean": 55.84,
-      "pop_sd": 2.34,
+      "mean": 61.67,
+      "pop_sd": 6.07,
       "ci95": [
-        26.05,
-        85.64
+        50.52,
+        72.82
       ],
       "per_run": [
         53.5,
-        58.19
+        58.19,
+        66.96,
+        68.03
       ]
     }
   }
