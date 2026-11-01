@@ -114,7 +114,8 @@ neighbouring sentences of the same paper and part on each side (FLERT) and tags 
 sentence; SOFC-Exp takes them from its article texts (`context.json`). With `--multi-task`,
 both heads read that input (files `_crf_mt_ctx`).
 
-`--entity-bias D [D ...]` (with `--crf`; ROADMAP §4, week 7) decodes the test and
+`--entity-bias D [D ...]` (with `--crf`; ROADMAP §4, week 7; on MuLMS's held-out subfields,
+week 18's recall-matched control) decodes the test and
 validation sentences again with D added to the emission of every tag but O, for each D
 (recall calibration: the F1-optimal threshold of a calibrated model is half its F1, below
 the 0.5 that a Viterbi decode applies). The run's own scores are those of D = 0. Per D it
@@ -3551,6 +3552,8 @@ def parse_args(argv=None):
             if option == 'self_train' and (getattr(args, 'augment_names', False)
                                            or hasattr(args, 'teachers')):
                 continue          # silver names (week 11) or self-training with teachers (12)
+            if option == 'entity_bias' and getattr(args, 'leave_one_subfield_out', False):
+                continue          # the recall-matched control on held-out subfields (week 18)
             if getattr(args, option, None) not in (None, False):
                 parser.error(f"--{option.replace('_', '-')} is not available with "
                              f"--granularity mulms")

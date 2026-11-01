@@ -1455,3 +1455,34 @@ def test_merged_recomputes_the_run_means():
     assert [r['run_id'] for r in got['runs']] == ['p1', 'p2', 'p3', 'p4']
     assert (got['test_f1_mean'], got['test_f1_strict_mean'], got['summary']['n_runs']) == (53.0, 53.0, 4)
     assert got['test_f1_std'] == round((5 ** 0.5), 2) and got['summary']['micro']['per_run'] == [50.0, 52.0, 54.0, 56.0]
+
+
+def test_week18_recall_matched_batch(monkeypatch):
+    """w18a (week 18): a repeat, then w14a's MR6 jobs on MuLMS (seed offsets 300 to 900) with
+    --entity-bias over BIAS_GRID_W18 and nothing else changed, so that bias 0 reproduces the
+    stored crf_mr6 runs; the 7 jobs balanced over the lanes; the variant crf_mr6_bias_m<N>."""
+    monkeypatch.setattr(nb.os.path, 'isfile', lambda path: True)    # the corpus is not here
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda report=None: 'x' * 64)
+    monkeypatch.setattr(kj, 'mulms_files', lambda: {'a_01.conll': 'a' * 64})
+    lane0, lane1 = _parsed(kj.batch_lanes('w18a'))
+    assert lane0[0].tag == 'smokebe' and lane0[0].granularity == 'fine'
+    assert not _get(lane0[0], 'entity_bias')
+    jobs = lane0[1:] + lane1
+    assert len(jobs) == 7 and min(len(lane0) - 1, len(lane1)) >= 3
+    assert sorted(a.tag for a in jobs) == [f'm{off}' for off in range(300, 1000, 100)]
+    grid = [float(b) for b in kj.BIAS_GRID_W18]
+    assert len(set(grid)) == 11 and 0.0 not in grid and min(grid) == -2 and max(grid) == 5
+    for a in jobs:
+        assert a.granularity == 'mulms' and nb.protocol_name(a) == 'leave_one_subfield_out'
+        assert (a.train_pool, a.augment_mentions, a.crf, a.save_predictions) == (400, 6, True, True)
+        assert a.entity_bias == grid and nb.entity_biases(a) == sorted({0.0, *grid})
+        assert nb.variant_name(a) == f'crf_mr6_bias_{a.tag}'
+        assert _get(a, 'seed_offset', 0) == int(a.tag[1:])
+    # the same job as w14a's but for the biases: the training is the stored crf_mr6 run's
+    for off in range(300, 1000, 100):
+        with_bias = kj.mr6_bias_mulms_job(off)
+        at = with_bias.index('--entity-bias')
+        assert with_bias[:at] + with_bias[at + 1 + len(kj.BIAS_GRID_W18):] == kj.mr6_mulms_job(off)
+    assert 'w18a' in kj.BATCHES and kj.batch_name('w18a') == 'w18a'
+    spec = kj.batch_spec('w18a')
+    assert spec['mulms_files'] == {'a_01.conll': 'a' * 64} and 'topic_corpora' not in spec

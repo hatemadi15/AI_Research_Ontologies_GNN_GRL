@@ -201,6 +201,12 @@ Week 14 (the ablations that make the paper; ROADMAP §4, week 14):
           in lane 0; 2 of 3 teachers (crf_mrm_topictwo6) and the silver share 0.5
           (crf_mrm_topiccap6) in lane 1
 
+Week 18 (the names against a recall-matched control; ROADMAP §4, week 18):
+  w18a    18.1 and 18.2: the CRF run of smoke4 again (smokebe), then MR6 on MuLMS's 7 held-out
+          subfields at seed offsets 300 to 900, w14a's jobs (one per offset over the subfields)
+          with --entity-bias over BIAS_GRID_W18 (crf_mr6_bias_m<N>), balanced over the lanes;
+          at bias 0 each run must equal its stored crf_mr6 run
+
 The TPU spike (docs/METHODS_PLAN.md §5; every batch named tpu... runs on the TPU v5e-8, one
 lane per chip, its jobs with --device xla, its results in results/tpu/, a family of their own):
   tpu-smoke1  one fine-grained CRF job (the 4 held-out papers, seed 0) on one chip (crf_tpu1):
@@ -296,6 +302,8 @@ COST = {'crf': 1.0, 'mt': 1.7, 'ls': 1.1, 'mt_ls': 1.8, 'st': 2.5, 'st3': 22.0,
         'mr6': 6.6}          # 6 copies: about 7 times
 # week 7, part 2a: the biases that --entity-bias decodes besides 0 (ROADMAP §4)
 BIAS_GRID = ('-1', '-0.5', '0.25', '0.5', '0.75', '1', '1.25', '1.5', '2', '2.5', '3')
+# week 18: the biases of the recall-matched control besides 0 (ROADMAP §4, week 18)
+BIAS_GRID_W18 = ('-2', '-1', '-0.5', '0.5', '1', '1.5', '2', '2.5', '3', '4', '5')
 # week 6: the options of each method on the held-out papers, and the stage-2 parts
 METHOD_FLAGS = {'deberta': ('--model', DEBERTA), 'ctx': ('--context', '64'),
                 'mr': ('--augment-mentions', '3')}
@@ -529,6 +537,14 @@ def mr6_mulms_job(offset):
             str(MULMS_POOL), '--crf', '--augment-mentions', str(MR6_COPIES), '--tag',
             f'm{offset}', *(('--seed-offset', str(offset)) if offset else ()),
             '--save-predictions', '--threads', str(THREADS)]
+
+
+def mr6_bias_mulms_job(offset):
+    """Week 18 on MuLMS: mr6_mulms_job with --entity-bias over BIAS_GRID_W18 (crf_mr6_bias_m<N>),
+    the recall-matched control; the bias acts only at decoding."""
+    job = mr6_mulms_job(offset)
+    at = job.index('--save-predictions')
+    return job[:at] + ['--entity-bias', *BIAS_GRID_W18] + job[at:]
 
 
 def week12_variant(name):
@@ -1020,6 +1036,16 @@ def batch_lanes(name):
         # week 17, the second session: the names jobs of the other two papers on one lane (they
         # share their files); the other lane is empty
         return [[mt_names_paper_job(PAPERS[2]), mt_names_paper_job(PAPERS[3])], []]
+    if name == 'w18a':
+        # week 18 (ROADMAP §4, the week-18 protocol): the recall-matched control. w14a's MR6
+        # jobs on MuLMS (crf_mr6_m<N>, seed offsets 300 to 900) again with --entity-bias over
+        # BIAS_GRID_W18 (crf_mr6_bias_m<N>; training untouched, so bias 0 must reproduce the
+        # stored runs); first the repeat of the CRF run of smoke4 (smokebe); the jobs balanced
+        # over the lanes as w14a's
+        jobs = [(COST['mulms'] * MULMS_SUBFIELDS * COST['mr6'], mr6_bias_mulms_job(off))
+                for off in OFFSETS_W5]
+        lanes = balance(jobs, loads=[COST['crf'], 0.0])
+        return [[repeat + ['--tag', 'smokebe']] + lanes[0], lanes[1]]
     if name == 'w14a':
         # week 14, 14.1: the 6-copy control without names (crf_mr6_m<N>) on MuLMS's held-out
         # subfields, seed offsets 300 to 900 (one job per offset over the 7 subfields), and
@@ -1042,7 +1068,7 @@ BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'i
            'w7c', 'w7d', 'w7e', 'w8a', 'w8b', 'w9a', 'w9b', 'w10a', 'w11a', 'w11b', 'w12a', 'w12c',
            'w12e', 'w12f', 'w12g', 'w13a', 'w13b', 'w13c',
            *(f'w12b:{v}' for v in WEEK12_VARIANTS), *(f'w12d:{v}' for v in WEEK12_ANALOGUES),
-           'tpu-smoke1', 'tpu-smoke', 'w14a', 'w14b', 'w14c', 'w15a', 'w17a', 'w17b')
+           'tpu-smoke1', 'tpu-smoke', 'w14a', 'w14b', 'w14c', 'w15a', 'w17a', 'w17b', 'w18a')
 
 
 def batch_extras(name):
