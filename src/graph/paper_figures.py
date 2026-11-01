@@ -57,6 +57,11 @@ A figure whose results are missing is skipped (and named on stdout).
 
 Usage:
   python src/graph/paper_figures.py [--results results/gpu] [--out docs/figures]
+  fig10_recall_matched.png (paper A's Figure 4; ner_recall_matched.json, week 18): per MuLMS
+      held-out subfield, the recall-matched control's recall at every bias D of the grid, on all
+      test entities (the matching, pre-specified) and on the unseen test names the lexicon holds
+      (post hoc), pooled over the decision seeds, with the names' values as dashed lines and the
+      matched bias D* marked (flagged where the grid cannot reach the names' recall).
 """
 
 import argparse
@@ -96,6 +101,7 @@ SHORT_PAPER = {'10.1007_s11340-021-00758-x': 's11340', '10.1038_ncomms7164': 'nc
 SCREEN_TRIPLE = (0, 1, 2)                 # seed offsets 0, 100 and 200 (the week-6 screen)
 # Figure 5: seen and unseen test entities (ner_mentions.py)
 MENTIONS = 'ner_mentions.json'
+MATCHED = 'ner_recall_matched.json'
 SCREEN_SEEDS = (0, 100, 200)
 MENTION_SETTINGS = {'fine_random_split_vary': 'fine, random splits',
                     'fine_published_split': 'fine, published split',
@@ -711,6 +717,53 @@ def figure9(rows, path):
     plt.close(fig)
 
 
+def figure10(matched, path):
+    """Paper A's Figure 4 (module docstring): small multiples, one panel per subfield."""
+    import matplotlib.pyplot as plt
+    from matplotlib.lines import Line2D
+    units = matched['per_unit']
+    curves = matched['post_hoc_curves']['units']
+    fig, axes = plt.subplots(2, 4, figsize=(9.6, 5.0))
+    for ax, (u, v) in zip(axes.flat, units.items()):
+        grid = [float(g) for g in v['curve']]
+        overall = [v['curve'][g]['recall'] for g in v['curve']]
+        held = [curves[u]['control'][g]['recall_in'] for g in v['curve']]
+        ax.plot(grid, held, '-o', color='tab:red', lw=1.5, ms=3.5, zorder=3)
+        ax.plot(grid, overall, '-o', color='tab:blue', lw=1.5, ms=3.5, zorder=3)
+        ax.axhline(curves[u]['names']['recall_in'], color='tab:red', lw=1.2, ls='--', zorder=2)
+        ax.axhline(v['target_recall'], color='tab:blue', lw=1.2, ls='--', zorder=2)
+        ax.axvline(v['d_star'], color='#555555', lw=0.9, ls=':', zorder=1)
+        ax.text(v['d_star'], 0.03, ' D*', transform=ax.get_xaxis_transform(), fontsize=7.5,
+                color='#333333', ha='left' if v['d_star'] < 4 else 'right', va='bottom')
+        values = overall + held + [curves[u]['names']['recall_in'], v['target_recall']]
+        pad = 0.08 * (max(values) - min(values))
+        ax.set_ylim(min(values) - pad, max(values) + pad)
+        ax.set_title(u + (' (flagged)' if v['flagged'] else ''), fontsize=9)
+        ax.set_xticks([-2, 0, 2, 4], ['\u22122', '0', '2', '4'], fontsize=7.5)
+        ax.tick_params(axis='y', labelsize=7.5)
+        ax.grid(alpha=0.3)
+    for ax in axes[1, :]:
+        ax.set_xlabel('bias D on every entity tag', fontsize=8)
+    for ax in axes[:, 0]:
+        ax.set_ylabel('recall (%)', fontsize=8)
+    legend = axes.flat[len(units)] if len(units) < axes.size else None
+    if legend is not None:
+        legend.axis('off')
+        handles = [Line2D([], [], color='tab:blue', marker='o', ms=3.5, lw=1.5,
+                          label='MR6 under the bias:\nall test entities'),
+                   Line2D([], [], color='tab:blue', ls='--', lw=1.2,
+                          label='MR6 + names: all test entities\n(the matching target)'),
+                   Line2D([], [], color='tab:red', marker='o', ms=3.5, lw=1.5,
+                          label='MR6 under the bias: unseen\nnames the lexicon holds'),
+                   Line2D([], [], color='tab:red', ls='--', lw=1.2,
+                          label='MR6 + names: unseen\nnames the lexicon holds'),
+                   Line2D([], [], color='#555555', ls=':', lw=0.9, label='matched bias D*')]
+        legend.legend(handles=handles, loc='center', fontsize=7.5, frameon=False)
+    fig.tight_layout()
+    fig.savefig(path, dpi=300, bbox_inches='tight')
+    plt.close(fig)
+
+
 def figure8(path):
     """Paper A's method overview: boxes and arrows, no data; 7.2 inches wide (a journal's
     double column) with 7.5-point type."""
@@ -904,6 +957,12 @@ def main(argv=None):
         written.append('fig9_units.png')
     else:
         print('fig9: no per-unit comparisons of the names method')
+    matched = (load(args.results, [MATCHED]) or [{}])[0]
+    if matched.get('per_unit') and matched.get('post_hoc_curves'):
+        figure10(matched, os.path.join(args.out, 'fig10_recall_matched.png'))
+        written.append('fig10_recall_matched.png')
+    else:
+        print('fig10: no recall-matched control')
     print(f"wrote {', '.join(written) or 'nothing'} to {args.out}")
     return written
 

@@ -281,3 +281,23 @@ def test_unit_data_and_figure9(tmp_path):
     pytest.importorskip('scipy')
     pf.figure9(rows, tmp_path / 'fig9.png')
     assert (tmp_path / 'fig9.png').stat().st_size > 10000
+
+
+def test_figure10_recall_matched(tmp_path):
+    """Figure 4 of paper A: one panel per subfield, the control's recall at every bias on all
+    test entities and on the unseen names the lexicon holds, written as a PNG."""
+    pytest.importorskip('matplotlib')
+    import matplotlib
+    matplotlib.use('Agg')
+    grid = ('-2', '0', '2.5', '5')
+    curve = {g: {'recall': 40.0 + float(g), 'precision': 50.0, 'f1_pooled': 45.0,
+                 'f1_seed_mean': 45.0} for g in grid}
+    matched = {'per_unit': {u: {'curve': curve, 'target_recall': 44.0, 'd_star': d,
+                                'flagged': flagged}
+                            for u, d, flagged in (('semi', 2.5, False), ('sofc', 5.0, True))},
+               'post_hoc_curves': {'units': {u: {'names': {'recall_in': 80.0},
+                                                 'control': {g: {'recall_in': 70.0} for g in grid}}
+                                             for u in ('semi', 'sofc')}}}
+    path = tmp_path / 'fig10.png'
+    pf.figure10(matched, str(path))
+    assert path.exists() and path.stat().st_size > 10_000

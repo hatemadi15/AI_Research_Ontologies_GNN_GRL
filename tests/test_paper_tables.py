@@ -344,11 +344,51 @@ def test_table12_week18():
                                                   'target_recall': 50.36}},
                              'decisions': {'18.1': two, '18.2': two},
                              'prespecified': {'precision': two}}
-    m['per_unit']['semi']['curve'] = {'0': {'recall': 26.8}, '2.5': {'recall': 31.84}}
-    m['per_unit']['sofc']['curve'] = {'0': {'recall': 46.5}, '2.5': {'recall': 49.93}}
+    for u, r0, r1 in (('semi', 26.8, 31.84), ('sofc', 46.5, 49.93)):
+        m['per_unit'][u]['curve'] = {'0': {'recall': r0, 'precision': 50.0, 'f1_pooled': 40.0},
+                                     '2.5': {'recall': r1, 'precision': 45.0, 'f1_pooled': 40.0}}
+        m['per_unit'][u]['names'] = {'recall': m['per_unit'][u]['target_recall'],
+                                     'precision': 50.0}
+        m['per_unit'][u]['between'] = [0.0, 2.5]
+        m['per_unit'][u]['w'] = 0.5
     rows = [line for line in pt.table12(m).split('\n') if line.startswith('| ')]
     assert '| 5.00 (flagged; 2.5 post hoc) | +3.00 (+0.20) |' in rows[2]
     assert rows[4].startswith('| without the flagged subfields, 1 (pre-specified) |')
     assert '+5.00 [−1.00, +11.00], 1/1 above 0' in rows[4]
     assert rows[5].startswith('| the flagged subfields at the nearest recall, 2 (post hoc) |')
-    assert rows[7] == '| semi | 31.80 | 26.80 | 31.84 |' and rows[6].startswith('| subfield |')
+    assert rows[6].startswith('| subfield | rate | names |')
+    assert rows[7] == '| semi | recall | 31.80 | 26.80 | 31.84 |'
+
+def test_table12_parts_from_the_curves():
+    """Table 12's second to fourth parts: the control's recall, precision and F1 at every bias
+    beside the names' (F1 from their pooled recall and precision), the bracket of D* and the
+    pre-specified comparisons per subfield, and the post hoc curves on the unseen names with
+    the names minus the control at its best bias."""
+    def paired(per_unit, mean=1.0):
+        return {'per_unit': per_unit, 'mean_diff': mean, 'ci95': [-1.0, 3.0], 'n_units': 2,
+                'n_positive': 2}
+    keys = ('unseen_recall', 'unseen_precision', 'unseen_f1', 'recall_out', 'in_minus_out',
+            'bias_f1_change', 'precision')
+    curve = {'0': {'recall': 40.0, 'precision': 60.0, 'f1_pooled': 48.0},
+             '5': {'recall': 45.0, 'precision': 50.0, 'f1_pooled': 47.37}}
+    m = {'per_unit': {'semi': {'names': {'recall': 50.0, 'precision': 50.0}, 'curve': curve,
+                               'between': [0.0, 5.0], 'w': 0.5, 'flagged': False},
+                      'sofc': {'names': {'recall': 60.0, 'precision': 40.0}, 'curve': curve,
+                               'between': [5.0, 5.0], 'w': 0.0, 'flagged': True}},
+         'prespecified': {k: paired({'semi': 2.0, 'sofc': -1.0}) for k in keys},
+         'post_hoc_nearest': {'prespecified': {k: paired({'semi': 2.0, 'sofc': 0.5}) for k in keys}},
+         'post_hoc_curves': {'units': {u: {'names': {'recall_in': 80.0, 'recall_out': 30.0},
+                                           'control': {'0': {'recall_in': 70.0, 'recall_out': 32.0},
+                                                       '5': {'recall_in': 60.0, 'recall_out': 35.0}}}
+                                       for u in ('semi', 'sofc')},
+                             'names_minus_best': {'recall_in': paired({'semi': 10.0, 'sofc': 10.0}, 10.0),
+                                                  'recall_out': paired({'semi': -5.0, 'sofc': -5.0}, -5.0)}}}
+    text = pt.table12_curves(m)
+    rows = [line for line in text.split('\n') if line.startswith('| ')]
+    assert '| sofc | F1 | 48.00 | 48.00 | 47.37 |' in rows      # 2 * 60 * 40 / 100 = 48
+    assert '| semi | 0.00 to 5.00, w = 0.50 | +2.00 |' in text
+    assert '| sofc | 5.00 | −1.00 (+0.50) |' in text
+    assert '| semi | held | 80.00 | 70.00 | 60.00 | +10.00 |' in rows
+    assert any(r.startswith('| mean [95% CI] | not held |') and r.endswith('2/2 above 0 |') for r in rows)
+    assert pt.table12_curves({'per_unit': {'x': {}}}) == ''
+

@@ -23,6 +23,8 @@ subfield assumed the control's recall to rise with the bias; in the three flagge
 peaks at D = 2.5 or 3 and falls after, so the end of G (5) puts the control 2.4 to 2.9 points of
 recall below the names. post_hoc_nearest matches a flagged subfield instead at the grid value
 whose recall comes nearest the names' (match_nearest); the other subfields are unchanged.
+post_hoc_curves (also added after the result) gives, per subfield and bias, the control's pooled
+rates on the unseen test names, in and out of the lexicon, beside the pre-specified curve.
 
 Checks before any number is used: every control run at D = 0 equals its stored crf_mr6 run (F1,
 precision, recall, best epoch, training history, test predictions, and test_pred_bias at 0); the
@@ -48,6 +50,7 @@ GRANULARITY, PROTOCOL = 'mulms', 'leave_one_subfield_out'
 CONTROL, NAMES, STORED = 'crf_mr6_bias', 'crf_mrm_topic6', 'crf_mr6'
 NAMES_PATTERN = lr.SETTINGS['mulms'][5]
 D0_FIELDS = ('f1', 'precision', 'recall', 'best_epoch', 'history', 'test_pred')
+DETAIL = ('recall_in', 'recall_out', 'unseen_recall', 'unseen_precision', 'unseen_f1')
 
 
 def run_counts(words_of, test, gold_tags, pred_tags, forms, lexicon):
@@ -168,6 +171,8 @@ def unit_analysis(names_runs, control_runs, matcher=match):
                                  'f1_seed_mean': round(sum(f1_of(r[d]) for r in control_runs)
                                                        / len(control_runs), 2)}
                       for d in grid},
+            'curve_detail': {f'{d:g}': {k: round(v, 2) for k, v in rates(pooled[d]).items()
+                                        if k in DETAIL and v is not None} for d in grid},
             '_diffs': {'recall_in': names['recall_in'] - control['recall_in'],
                        'f1': sum(f1_names) / len(f1_names) - mean,
                        'precision': names['precision'] - control['precision'],
@@ -257,8 +262,19 @@ def analyse(directory=nm.RESULTS_DIR, names_dir=lr.NAMES_DIR, offsets=DECISION_O
                             'control_recall': nearest[u]['control_at_d_star']['recall'],
                             'target_recall': nearest[u]['target_recall']} for u in flagged},
             **comparisons(nearest)}
-    result['per_unit'] = {u: {k: v for k, v in units[u].items() if k != '_diffs'}
-                          for u in units}
+    result['per_unit'] = {u: {k: v for k, v in units[u].items()
+                              if k not in ('_diffs', 'curve_detail')} for u in units}
+    result['post_hoc_curves'] = {
+        'note': "post hoc: the control's pooled rates on the unseen test names at every bias, "
+                'in and out of the lexicon (module docstring); names_minus_best: the names minus '
+                "the control at the bias of the grid that gives the control its highest rate",
+        'units': {u: {'names': {k: units[u]['names'][k] for k in DETAIL
+                                if k in units[u]['names']},
+                      'control': units[u]['curve_detail']} for u in units},
+        'names_minus_best': {key: paired({u: units[u]['names'][key]
+                                          - max(c[key] for c in units[u]['curve_detail'].values())
+                                          for u in units})
+                             for key in ('recall_in', 'recall_out')}}
     return result
 
 

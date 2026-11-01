@@ -1390,5 +1390,715 @@
     }
    }
   }
+ },
+ "post_hoc_curves": {
+  "note": "post hoc: the control's pooled rates on the unseen test names at every bias, in and out of the lexicon (module docstring); names_minus_best: the names minus the control at the bias of the grid that gives the control its highest rate",
+  "units": {
+   "electrolysis": {
+    "names": {
+     "recall_in": 90.02,
+     "recall_out": 38.23,
+     "unseen_recall": 56.85,
+     "unseen_precision": 53.89,
+     "unseen_f1": 55.33
+    },
+    "control": {
+     "-2": {
+      "unseen_recall": 50.84,
+      "unseen_precision": 59.8,
+      "unseen_f1": 54.96,
+      "recall_in": 82.34,
+      "recall_out": 33.14
+     },
+     "-1": {
+      "unseen_recall": 53.09,
+      "unseen_precision": 57.48,
+      "unseen_f1": 55.2,
+      "recall_in": 83.17,
+      "recall_out": 36.19
+     },
+     "-0.5": {
+      "unseen_recall": 54.12,
+      "unseen_precision": 56.6,
+      "unseen_f1": 55.33,
+      "recall_in": 83.54,
+      "recall_out": 37.61
+     },
+     "0": {
+      "unseen_recall": 54.95,
+      "unseen_precision": 55.54,
+      "unseen_f1": 55.24,
+      "recall_in": 83.62,
+      "recall_out": 38.84
+     },
+     "0.5": {
+      "unseen_recall": 55.6,
+      "unseen_precision": 54.54,
+      "unseen_f1": 55.06,
+      "recall_in": 83.44,
+      "recall_out": 39.97
+     },
+     "1": {
+      "unseen_recall": 56.11,
+      "unseen_precision": 53.46,
+      "unseen_f1": 54.76,
+      "recall_in": 83.1,
+      "recall_out": 40.96
+     },
+     "1.5": {
+      "unseen_recall": 56.39,
+      "unseen_precision": 52.23,
+      "unseen_f1": 54.23,
+      "recall_in": 82.62,
+      "recall_out": 41.66
+     },
+     "2": {
+      "unseen_recall": 56.51,
+      "unseen_precision": 50.93,
+      "unseen_f1": 53.58,
+      "recall_in": 81.91,
+      "recall_out": 42.25
+     },
+     "2.5": {
+      "unseen_recall": 56.63,
+      "unseen_precision": 49.64,
+      "unseen_f1": 52.9,
+      "recall_in": 81.26,
+      "recall_out": 42.8
+     },
+     "3": {
+      "unseen_recall": 56.64,
+      "unseen_precision": 48.36,
+      "unseen_f1": 52.17,
+      "recall_in": 80.6,
+      "recall_out": 43.19
+     },
+     "4": {
+      "unseen_recall": 55.9,
+      "unseen_precision": 45.52,
+      "unseen_f1": 50.18,
+      "recall_in": 78.65,
+      "recall_out": 43.12
+     },
+     "5": {
+      "unseen_recall": 54.49,
+      "unseen_precision": 42.59,
+      "unseen_f1": 47.81,
+      "recall_in": 76.73,
+      "recall_out": 42.01
+     }
+    }
+   },
+   "graphene": {
+    "names": {
+     "recall_in": 84.91,
+     "recall_out": 30.09,
+     "unseen_recall": 41.71,
+     "unseen_precision": 49.32,
+     "unseen_f1": 45.2
+    },
+    "control": {
+     "-2": {
+      "unseen_recall": 39.75,
+      "unseen_precision": 54.94,
+      "unseen_f1": 46.13,
+      "recall_in": 84.0,
+      "recall_out": 27.85
+     },
+     "-1": {
+      "unseen_recall": 41.39,
+      "unseen_precision": 52.57,
+      "unseen_f1": 46.32,
+      "recall_in": 84.75,
+      "recall_out": 29.73
+     },
+     "-0.5": {
+      "unseen_recall": 42.23,
+      "unseen_precision": 51.75,
+      "unseen_f1": 46.51,
+      "recall_in": 84.69,
+      "recall_out": 30.81
+     },
+     "0": {
+      "unseen_recall": 42.85,
+      "unseen_precision": 50.56,
+      "unseen_f1": 46.38,
+      "recall_in": 84.43,
+      "recall_out": 31.66
+     },
+     "0.5": {
+      "unseen_recall": 43.55,
+      "unseen_precision": 49.66,
+      "unseen_f1": 46.4,
+      "recall_in": 84.26,
+      "recall_out": 32.6
+     },
+     "1": {
+      "unseen_recall": 44.22,
+      "unseen_precision": 48.58,
+      "unseen_f1": 46.3,
+      "recall_in": 84.0,
+      "recall_out": 33.53
+     },
+     "1.5": {
+      "unseen_recall": 44.92,
+      "unseen_precision": 47.75,
+      "unseen_f1": 46.29,
+      "recall_in": 83.94,
+      "recall_out": 34.42
+     },
+     "2": {
+      "unseen_recall": 45.27,
+      "unseen_precision": 46.82,
+      "unseen_f1": 46.03,
+      "recall_in": 83.46,
+      "recall_out": 35.0
+     },
+     "2.5": {
+      "unseen_recall": 45.68,
+      "unseen_precision": 45.87,
+      "unseen_f1": 45.77,
+      "recall_in": 82.98,
+      "recall_out": 35.65
+     },
+     "3": {
+      "unseen_recall": 46.1,
+      "unseen_precision": 45.11,
+      "unseen_f1": 45.6,
+      "recall_in": 82.76,
+      "recall_out": 36.24
+     },
+     "4": {
+      "unseen_recall": 46.42,
+      "unseen_precision": 43.26,
+      "unseen_f1": 44.79,
+      "recall_in": 81.9,
+      "recall_out": 36.88
+     },
+     "5": {
+      "unseen_recall": 46.78,
+      "unseen_precision": 41.35,
+      "unseen_f1": 43.9,
+      "recall_in": 81.15,
+      "recall_out": 37.54
+     }
+    }
+   },
+   "pemfc": {
+    "names": {
+     "recall_in": 84.92,
+     "recall_out": 38.19,
+     "unseen_recall": 48.17,
+     "unseen_precision": 52.59,
+     "unseen_f1": 50.28
+    },
+    "control": {
+     "-2": {
+      "unseen_recall": 40.95,
+      "unseen_precision": 58.48,
+      "unseen_f1": 48.17,
+      "recall_in": 75.86,
+      "recall_out": 31.47
+     },
+     "-1": {
+      "unseen_recall": 43.99,
+      "unseen_precision": 56.31,
+      "unseen_f1": 49.4,
+      "recall_in": 77.63,
+      "recall_out": 34.86
+     },
+     "-0.5": {
+      "unseen_recall": 45.1,
+      "unseen_precision": 54.91,
+      "unseen_f1": 49.52,
+      "recall_in": 77.95,
+      "recall_out": 36.18
+     },
+     "0": {
+      "unseen_recall": 45.98,
+      "unseen_precision": 53.43,
+      "unseen_f1": 49.43,
+      "recall_in": 78.09,
+      "recall_out": 37.26
+     },
+     "0.5": {
+      "unseen_recall": 46.7,
+      "unseen_precision": 52.11,
+      "unseen_f1": 49.25,
+      "recall_in": 77.74,
+      "recall_out": 38.27
+     },
+     "1": {
+      "unseen_recall": 47.28,
+      "unseen_precision": 50.86,
+      "unseen_f1": 49.01,
+      "recall_in": 77.19,
+      "recall_out": 39.16
+     },
+     "1.5": {
+      "unseen_recall": 47.71,
+      "unseen_precision": 49.58,
+      "unseen_f1": 48.63,
+      "recall_in": 76.39,
+      "recall_out": 39.92
+     },
+     "2": {
+      "unseen_recall": 48.0,
+      "unseen_precision": 48.35,
+      "unseen_f1": 48.18,
+      "recall_in": 75.58,
+      "recall_out": 40.51
+     },
+     "2.5": {
+      "unseen_recall": 48.19,
+      "unseen_precision": 47.13,
+      "unseen_f1": 47.65,
+      "recall_in": 74.55,
+      "recall_out": 41.03
+     },
+     "3": {
+      "unseen_recall": 48.33,
+      "unseen_precision": 45.86,
+      "unseen_f1": 47.06,
+      "recall_in": 73.74,
+      "recall_out": 41.43
+     },
+     "4": {
+      "unseen_recall": 47.92,
+      "unseen_precision": 43.39,
+      "unseen_f1": 45.55,
+      "recall_in": 71.89,
+      "recall_out": 41.42
+     },
+     "5": {
+      "unseen_recall": 46.82,
+      "unseen_precision": 41.01,
+      "unseen_f1": 43.72,
+      "recall_in": 69.33,
+      "recall_out": 40.71
+     }
+    }
+   },
+   "poly": {
+    "names": {
+     "recall_in": 71.22,
+     "recall_out": 38.98,
+     "unseen_recall": 49.02,
+     "unseen_precision": 41.98,
+     "unseen_f1": 45.22
+    },
+    "control": {
+     "-2": {
+      "unseen_recall": 41.26,
+      "unseen_precision": 55.53,
+      "unseen_f1": 47.34,
+      "recall_in": 61.57,
+      "recall_out": 32.08
+     },
+     "-1": {
+      "unseen_recall": 43.96,
+      "unseen_precision": 52.27,
+      "unseen_f1": 47.76,
+      "recall_in": 64.51,
+      "recall_out": 34.67
+     },
+     "-0.5": {
+      "unseen_recall": 45.11,
+      "unseen_precision": 50.42,
+      "unseen_f1": 47.62,
+      "recall_in": 65.47,
+      "recall_out": 35.91
+     },
+     "0": {
+      "unseen_recall": 46.18,
+      "unseen_precision": 48.67,
+      "unseen_f1": 47.39,
+      "recall_in": 66.58,
+      "recall_out": 36.95
+     },
+     "0.5": {
+      "unseen_recall": 47.44,
+      "unseen_precision": 47.17,
+      "unseen_f1": 47.3,
+      "recall_in": 67.65,
+      "recall_out": 38.31
+     },
+     "1": {
+      "unseen_recall": 48.46,
+      "unseen_precision": 45.53,
+      "unseen_f1": 46.95,
+      "recall_in": 68.65,
+      "recall_out": 39.33
+     },
+     "1.5": {
+      "unseen_recall": 49.44,
+      "unseen_precision": 43.78,
+      "unseen_f1": 46.44,
+      "recall_in": 69.56,
+      "recall_out": 40.35
+     },
+     "2": {
+      "unseen_recall": 50.0,
+      "unseen_precision": 42.04,
+      "unseen_f1": 45.68,
+      "recall_in": 69.83,
+      "recall_out": 41.04
+     },
+     "2.5": {
+      "unseen_recall": 50.56,
+      "unseen_precision": 40.37,
+      "unseen_f1": 44.89,
+      "recall_in": 70.02,
+      "recall_out": 41.77
+     },
+     "3": {
+      "unseen_recall": 51.02,
+      "unseen_precision": 38.8,
+      "unseen_f1": 44.08,
+      "recall_in": 70.07,
+      "recall_out": 42.4
+     },
+     "4": {
+      "unseen_recall": 50.83,
+      "unseen_precision": 35.51,
+      "unseen_f1": 41.81,
+      "recall_in": 69.41,
+      "recall_out": 42.43
+     },
+     "5": {
+      "unseen_recall": 49.57,
+      "unseen_precision": 32.59,
+      "unseen_f1": 39.33,
+      "recall_in": 67.52,
+      "recall_out": 41.46
+     }
+    }
+   },
+   "semi": {
+    "names": {
+     "recall_in": 81.36,
+     "recall_out": 26.87,
+     "unseen_recall": 30.8,
+     "unseen_precision": 49.67,
+     "unseen_f1": 38.02
+    },
+    "control": {
+     "-2": {
+      "unseen_recall": 20.01,
+      "unseen_precision": 61.57,
+      "unseen_f1": 30.21,
+      "recall_in": 67.15,
+      "recall_out": 16.35
+     },
+     "-1": {
+      "unseen_recall": 22.99,
+      "unseen_precision": 57.33,
+      "unseen_f1": 32.82,
+      "recall_in": 71.58,
+      "recall_out": 19.22
+     },
+     "-0.5": {
+      "unseen_recall": 24.42,
+      "unseen_precision": 55.05,
+      "unseen_f1": 33.84,
+      "recall_in": 73.32,
+      "recall_out": 20.63
+     },
+     "0": {
+      "unseen_recall": 25.73,
+      "unseen_precision": 53.08,
+      "unseen_f1": 34.66,
+      "recall_in": 73.58,
+      "recall_out": 22.02
+     },
+     "0.5": {
+      "unseen_recall": 26.9,
+      "unseen_precision": 50.87,
+      "unseen_f1": 35.19,
+      "recall_in": 73.35,
+      "recall_out": 23.29
+     },
+     "1": {
+      "unseen_recall": 28.02,
+      "unseen_precision": 48.73,
+      "unseen_f1": 35.58,
+      "recall_in": 73.12,
+      "recall_out": 24.52
+     },
+     "1.5": {
+      "unseen_recall": 29.1,
+      "unseen_precision": 46.73,
+      "unseen_f1": 35.87,
+      "recall_in": 72.16,
+      "recall_out": 25.76
+     },
+     "2": {
+      "unseen_recall": 29.92,
+      "unseen_precision": 44.62,
+      "unseen_f1": 35.82,
+      "recall_in": 70.5,
+      "recall_out": 26.78
+     },
+     "2.5": {
+      "unseen_recall": 30.71,
+      "unseen_precision": 42.63,
+      "unseen_f1": 35.7,
+      "recall_in": 68.85,
+      "recall_out": 27.75
+     },
+     "3": {
+      "unseen_recall": 31.25,
+      "unseen_precision": 40.73,
+      "unseen_f1": 35.37,
+      "recall_in": 66.88,
+      "recall_out": 28.49
+     },
+     "4": {
+      "unseen_recall": 31.0,
+      "unseen_precision": 36.27,
+      "unseen_f1": 33.43,
+      "recall_in": 62.03,
+      "recall_out": 28.59
+     },
+     "5": {
+      "unseen_recall": 30.05,
+      "unseen_precision": 32.45,
+      "unseen_f1": 31.2,
+      "recall_in": 57.37,
+      "recall_out": 27.93
+     }
+    }
+   },
+   "sofc": {
+    "names": {
+     "recall_in": 85.32,
+     "recall_out": 42.13,
+     "unseen_recall": 50.01,
+     "unseen_precision": 61.5,
+     "unseen_f1": 55.17
+    },
+    "control": {
+     "-2": {
+      "unseen_recall": 39.68,
+      "unseen_precision": 64.28,
+      "unseen_f1": 49.07,
+      "recall_in": 67.13,
+      "recall_out": 33.55
+     },
+     "-1": {
+      "unseen_recall": 43.35,
+      "unseen_precision": 61.73,
+      "unseen_f1": 50.94,
+      "recall_in": 69.86,
+      "recall_out": 37.43
+     },
+     "-0.5": {
+      "unseen_recall": 44.86,
+      "unseen_precision": 60.35,
+      "unseen_f1": 51.46,
+      "recall_in": 70.82,
+      "recall_out": 39.06
+     },
+     "0": {
+      "unseen_recall": 46.21,
+      "unseen_precision": 59.0,
+      "unseen_f1": 51.83,
+      "recall_in": 71.23,
+      "recall_out": 40.62
+     },
+     "0.5": {
+      "unseen_recall": 47.39,
+      "unseen_precision": 57.68,
+      "unseen_f1": 52.03,
+      "recall_in": 71.38,
+      "recall_out": 42.03
+     },
+     "1": {
+      "unseen_recall": 48.31,
+      "unseen_precision": 56.43,
+      "unseen_f1": 52.05,
+      "recall_in": 70.97,
+      "recall_out": 43.25
+     },
+     "1.5": {
+      "unseen_recall": 49.01,
+      "unseen_precision": 55.09,
+      "unseen_f1": 51.88,
+      "recall_in": 70.49,
+      "recall_out": 44.22
+     },
+     "2": {
+      "unseen_recall": 49.61,
+      "unseen_precision": 53.69,
+      "unseen_f1": 51.57,
+      "recall_in": 70.1,
+      "recall_out": 45.03
+     },
+     "2.5": {
+      "unseen_recall": 49.65,
+      "unseen_precision": 52.02,
+      "unseen_f1": 50.81,
+      "recall_in": 69.09,
+      "recall_out": 45.31
+     },
+     "3": {
+      "unseen_recall": 49.59,
+      "unseen_precision": 50.36,
+      "unseen_f1": 49.97,
+      "recall_in": 67.59,
+      "recall_out": 45.57
+     },
+     "4": {
+      "unseen_recall": 49.25,
+      "unseen_precision": 47.2,
+      "unseen_f1": 48.2,
+      "recall_in": 64.89,
+      "recall_out": 45.75
+     },
+     "5": {
+      "unseen_recall": 47.21,
+      "unseen_precision": 43.42,
+      "unseen_f1": 45.24,
+      "recall_in": 59.72,
+      "recall_out": 44.42
+     }
+    }
+   },
+   "steel": {
+    "names": {
+     "recall_in": 84.39,
+     "recall_out": 43.7,
+     "unseen_recall": 54.11,
+     "unseen_precision": 54.24,
+     "unseen_f1": 54.17
+    },
+    "control": {
+     "-2": {
+      "unseen_recall": 47.14,
+      "unseen_precision": 64.7,
+      "unseen_f1": 54.54,
+      "recall_in": 70.65,
+      "recall_out": 39.06
+     },
+     "-1": {
+      "unseen_recall": 49.21,
+      "unseen_precision": 61.96,
+      "unseen_f1": 54.85,
+      "recall_in": 72.69,
+      "recall_out": 41.14
+     },
+     "-0.5": {
+      "unseen_recall": 50.03,
+      "unseen_precision": 60.49,
+      "unseen_f1": 54.77,
+      "recall_in": 73.29,
+      "recall_out": 42.04
+     },
+     "0": {
+      "unseen_recall": 50.85,
+      "unseen_precision": 59.15,
+      "unseen_f1": 54.68,
+      "recall_in": 73.61,
+      "recall_out": 43.02
+     },
+     "0.5": {
+      "unseen_recall": 51.55,
+      "unseen_precision": 57.55,
+      "unseen_f1": 54.38,
+      "recall_in": 73.96,
+      "recall_out": 43.85
+     },
+     "1": {
+      "unseen_recall": 52.27,
+      "unseen_precision": 56.09,
+      "unseen_f1": 54.12,
+      "recall_in": 74.25,
+      "recall_out": 44.72
+     },
+     "1.5": {
+      "unseen_recall": 52.77,
+      "unseen_precision": 54.43,
+      "unseen_f1": 53.59,
+      "recall_in": 74.45,
+      "recall_out": 45.32
+     },
+     "2": {
+      "unseen_recall": 53.34,
+      "unseen_precision": 52.95,
+      "unseen_f1": 53.14,
+      "recall_in": 74.77,
+      "recall_out": 45.97
+     },
+     "2.5": {
+      "unseen_recall": 53.84,
+      "unseen_precision": 51.45,
+      "unseen_f1": 52.62,
+      "recall_in": 74.88,
+      "recall_out": 46.61
+     },
+     "3": {
+      "unseen_recall": 54.3,
+      "unseen_precision": 49.97,
+      "unseen_f1": 52.05,
+      "recall_in": 75.01,
+      "recall_out": 47.18
+     },
+     "4": {
+      "unseen_recall": 54.97,
+      "unseen_precision": 47.06,
+      "unseen_f1": 50.71,
+      "recall_in": 74.69,
+      "recall_out": 48.19
+     },
+     "5": {
+      "unseen_recall": 54.95,
+      "unseen_precision": 44.07,
+      "unseen_f1": 48.91,
+      "recall_in": 73.98,
+      "recall_out": 48.4
+     }
+    }
+   }
+  },
+  "names_minus_best": {
+   "recall_in": {
+    "per_unit": {
+     "electrolysis": 6.4,
+     "graphene": 0.16,
+     "pemfc": 6.83,
+     "poly": 1.15,
+     "semi": 7.78,
+     "sofc": 13.94,
+     "steel": 9.38
+    },
+    "mean_diff": 6.52,
+    "ci95": [
+     2.15,
+     10.89
+    ],
+    "n_units": 7,
+    "n_positive": 7,
+    "above_0": true
+   },
+   "recall_out": {
+    "per_unit": {
+     "electrolysis": -4.96,
+     "graphene": -7.45,
+     "pemfc": -3.24,
+     "poly": -3.45,
+     "semi": -1.72,
+     "sofc": -3.62,
+     "steel": -4.7
+    },
+    "mean_diff": -4.16,
+    "ci95": [
+     -5.82,
+     -2.5
+    ],
+    "n_units": 7,
+    "n_positive": 0,
+    "above_0": false
+   }
+  }
  }
 }

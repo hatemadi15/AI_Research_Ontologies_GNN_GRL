@@ -538,17 +538,74 @@ def table12(matched):
 
 
 def table12_curves(matched):
-    """The control's pooled recall over all test entities at every bias of the grid, per subfield,
-    beside the names' (Table 12, second part); '' without the curves."""
-    if not all('curve' in v for v in matched['per_unit'].values()):
+    """Table 12, second to fourth parts: per subfield the control's pooled recall, precision and
+    F1 over all test entities at every bias of the grid, beside the names' (pre-specified); the
+    per-subfield bracket and the pre-specified comparisons at D* (a flagged subfield's post hoc
+    nearest-recall value in parentheses); and, post hoc, the control's recall on the unseen test
+    names in and out of the lexicon at every bias, beside the names'. '' without the curves."""
+    units = matched['per_unit']
+    if not all('curve' in v for v in units.values()):
         return ''
-    grid = list(next(iter(matched['per_unit'].values()))['curve'])
-    header = ['subfield', "names' recall"] + [f'D = {g}'.replace('-', '\u2212') for g in grid]
-    cells = [[u, number(v['target_recall'])] + [number(v['curve'][g]['recall']) for g in grid]
-             for u, v in matched['per_unit'].items()]
-    return ("Table 12, second part. The control's recall over all test entities, pooled over the "
-            "seeds, at every bias of the grid, beside the names' (the matching's input).\n\n"
-            + markdown(header, cells))
+    grid = list(next(iter(units.values()))['curve'])
+    dcols = [f'D = {g}'.replace('-', '\u2212') for g in grid]
+
+    def f1(r, p):
+        return 2 * r * p / (r + p) if r + p else 0.0
+    rows = []
+    for u, v in units.items():
+        names = {'recall': v['names']['recall'], 'precision': v['names']['precision'],
+                 'F1': f1(v['names']['recall'], v['names']['precision'])}
+        for label, key in (('recall', 'recall'), ('precision', 'precision'), ('F1', 'f1_pooled')):
+            rows.append([u, label, number(names[label])]
+                        + [number(v['curve'][g][key]) for g in grid])
+    out = ("Table 12, second part (pre-specified). The control's recall, precision and F1 over "
+           'all test entities, pooled over the seeds, at every bias of the grid, beside the '
+           "names' (pooled the same way; the matching's input is the recall rows).\n\n"
+           + markdown(['subfield', 'rate', 'names'] + dcols, rows))
+    pre = matched['prespecified']
+    near = (matched.get('post_hoc_nearest') or {}).get('prespecified') or {}
+    keys = (('unseen_recall', 'Δ recall, unseen names'), ('unseen_precision', 'Δ precision, unseen names'),
+            ('unseen_f1', 'Δ F1, unseen names'), ('recall_out', 'Δ recall, unseen names not in the lexicon'),
+            ('in_minus_out', 'in − out'), ('bias_f1_change', "the bias's own F1 change"))
+    rows = []
+    for u, v in units.items():
+        a, b = v['between']
+        cells = [u, f"{number(a)} to {number(b)}, w = {v['w']:.2f}" if a != b else number(a)]
+        for key, _ in keys:
+            cell = number(pre[key]['per_unit'][u], True)
+            if v['flagged'] and near.get(key):
+                cell += f" ({number(near[key]['per_unit'][u], True)})"
+            cells.append(cell)
+        rows.append(cells)
+    rows.append(['mean [95% CI]', ''] + [interval(pre[k], 'mean_diff', signed=True) for k, _ in keys])
+    if near and all(k in near for k, _ in keys):
+        rows.append(['mean, the flagged at the nearest recall (post hoc)', '']
+                    + [interval(near[k], 'mean_diff', signed=True) for k, _ in keys])
+    out += ('\nTable 12, third part (pre-specified). Per subfield the grid values that bracket D* '
+            'with the weight w of the upper one, and the names minus the control at D* on the '
+            "unseen test names; a flagged subfield's post hoc nearest-recall value in "
+            'parentheses.\n\n' + markdown(['subfield', 'D* between'] + [n for _, n in keys], rows))
+    curves = (matched.get('post_hoc_curves') or {}).get('units')
+    if curves:
+        rows = []
+        for u, v in curves.items():
+            for label, key in (('held', 'recall_in'), ('not held', 'recall_out')):
+                values = [v['control'][g][key] for g in grid]
+                rows.append([u, label, number(v['names'][key])] + [number(x) for x in values]
+                            + [number(v['names'][key] - max(values), True)])
+        best = (matched.get('post_hoc_curves') or {}).get('names_minus_best') or {}
+        for label, key in (('held', 'recall_in'), ('not held', 'recall_out')):
+            if key in best:
+                rows.append(['mean [95% CI]', label, ''] + [''] * len(grid)
+                            + [interval(best[key], 'mean_diff', signed=True)
+                               + f", {best[key]['n_positive']}/{best[key]['n_units']} above 0"])
+        out += ("\nTable 12, fourth part (post hoc). The control's recall on the unseen test names "
+                'the lexicon holds (held) and on the others (not held), pooled over the seeds, at '
+                "every bias, beside the names'; the last column is the names' recall minus the "
+                "control's highest over the grid.\n\n"
+                + markdown(['subfield', 'unseen names', 'names'] + dcols
+                           + ['names − the control at its best bias'], rows))
+    return out
 
 
 def table10(data):
