@@ -20,11 +20,17 @@ change (the control at D*_u minus at 0); D*_u, w and the flags; the control's cu
 
 Post hoc (added after the result, 1 November): the protocol's "nearer end of G" for a flagged
 subfield assumed the control's recall to rise with the bias; in the three flagged subfields it
-peaks at D = 2.5 or 3 and falls after, so the end of G (5) puts the control 2.4 to 2.9 points of
+peaks at D = 2.5 or 3 and falls after, so the end of G (5) puts the control 1.7 to 2.9 points of
 recall below the names. post_hoc_nearest matches a flagged subfield instead at the grid value
 whose recall comes nearest the names' (match_nearest); the other subfields are unchanged.
 post_hoc_curves (also added after the result) gives, per subfield and bias, the control's pooled
-rates on the unseen test names, in and out of the lexicon, beside the pre-specified curve.
+rates on the unseen test names, in and out of the lexicon, beside the pre-specified curve. After
+paper A's round-11 review, also post hoc: post_hoc_decomposition splits 18.1 per subfield into the
+names' gain over MR6 at D = 0 on the held names and the bias's own effect on MR6's recall of them;
+post_hoc_types repeats the held / not-held split within entity-type groups (MAT, VALUE, the rest),
+since the lexicons are mostly MAT and VALUE names; post_hoc_sign_flip gives the exact sign-flip
+p-values of the two decisions; post_hoc_lexicon_types counts each rebuilt lexicon's names and
+corpus entries by type (counts only).
 
 Checks before any number is used: every control run at D = 0 equals its stored crf_mr6 run (F1,
 precision, recall, best epoch, training history, test predictions, and test_pred_bias at 0); the
@@ -43,6 +49,7 @@ import metrics
 import ner_lexicon_recall as lr
 import ner_mentions as nm
 from ner_baseline import entity_counts
+from ner_ensemble import tags_to_spans
 from ner_seedmeans import DECISION_OFFSETS
 
 OUTPUT = nm.RESULTS_DIR / 'ner_recall_matched.json'
@@ -51,6 +58,37 @@ CONTROL, NAMES, STORED = 'crf_mr6_bias', 'crf_mrm_topic6', 'crf_mr6'
 NAMES_PATTERN = lr.SETTINGS['mulms'][5]
 D0_FIELDS = ('f1', 'precision', 'recall', 'best_epoch', 'history', 'test_pred')
 DETAIL = ('recall_in', 'recall_out', 'unseen_recall', 'unseen_precision', 'unseen_f1')
+TYPE_GROUPS = ('MAT', 'VALUE', 'other')       # post hoc: MuLMS's two lexicon-heavy types and the rest
+
+
+def type_group(kind):
+    """The post hoc type group of an entity type: MAT, VALUE or other."""
+    return kind if kind in TYPE_GROUPS[:2] else 'other'
+
+
+def typed_counts(words, gold_tags, pred_tags, forms, lexicon):
+    """Post hoc: ('type_gold'|'type_correct', group, part) over a sentence's unseen gold entities,
+    the group by type_group, the part 'in' when the lexicon holds the (type, words), else 'out'."""
+    counts = Counter()
+    pred = set(tags_to_spans(pred_tags)[0])
+    for start, end, kind in set(tags_to_spans(gold_tags)[0]):
+        if nm.kind_of(words[start:end], kind, forms) != 'unseen':
+            continue
+        key = (type_group(kind), 'in' if (kind, tuple(words[start:end])) in lexicon else 'out')
+        counts[('type_gold',) + key] += 1
+        counts[('type_correct',) + key] += (start, end, kind) in pred
+    return counts
+
+
+def typed_recall(counts):
+    """Post hoc: {'<group>_<part>': recall in %} of a Counter's typed counts (parts with gold)."""
+    out = {}
+    for g in TYPE_GROUPS:
+        for part in ('in', 'out'):
+            gold = counts['type_gold', g, part]
+            if gold:
+                out[f'{g}_{part}'] = 100 * counts['type_correct', g, part] / gold
+    return out
 
 
 def run_counts(words_of, test, gold_tags, pred_tags, forms, lexicon):
@@ -63,6 +101,7 @@ def run_counts(words_of, test, gold_tags, pred_tags, forms, lexicon):
     counts = Counter({('all', 'correct'): correct, ('all', 'pred'): pred, ('all', 'gold'): gold})
     for i, g, p in zip(test, golds, preds, strict=True):
         counts.update(lr.sentence_counts(words_of(i), g, p, forms, lexicon))
+        counts.update(typed_counts(words_of(i), g, p, forms, lexicon))      # post hoc
     return counts
 
 
@@ -173,6 +212,10 @@ def unit_analysis(names_runs, control_runs, matcher=match):
                       for d in grid},
             'curve_detail': {f'{d:g}': {k: round(v, 2) for k, v in rates(pooled[d]).items()
                                         if k in DETAIL and v is not None} for d in grid},
+            '_typed': {'names': typed_recall(pooled_names), 'control': typed_recall(at),
+                       'control_at_0': typed_recall(pooled[0.0]),
+                       'gold': {f'{g}_{part}': pooled_names['type_gold', g, part]
+                                / len(names_runs) for g in TYPE_GROUPS for part in ('in', 'out')}},
             '_diffs': {'recall_in': names['recall_in'] - control['recall_in'],
                        'f1': sum(f1_names) / len(f1_names) - mean,
                        'precision': names['precision'] - control['precision'],
@@ -263,7 +306,7 @@ def analyse(directory=nm.RESULTS_DIR, names_dir=lr.NAMES_DIR, offsets=DECISION_O
                             'target_recall': nearest[u]['target_recall']} for u in flagged},
             **comparisons(nearest)}
     result['per_unit'] = {u: {k: v for k, v in units[u].items()
-                              if k not in ('_diffs', 'curve_detail')} for u in units}
+                              if k not in ('_diffs', 'curve_detail', '_typed')} for u in units}
     result['post_hoc_curves'] = {
         'note': "post hoc: the control's pooled rates on the unseen test names at every bias, "
                 'in and out of the lexicon (module docstring); names_minus_best: the names minus '
@@ -275,7 +318,61 @@ def analyse(directory=nm.RESULTS_DIR, names_dir=lr.NAMES_DIR, offsets=DECISION_O
                                           - max(c[key] for c in units[u]['curve_detail'].values())
                                           for u in units})
                              for key in ('recall_in', 'recall_out')}}
+    result.update(post_hoc_blocks(units, nearest if flagged else units, flagged, result, stores))
     return result
+
+
+def paired_where(values):
+    """paired() over the units that have a value (None dropped); None with fewer than 3."""
+    kept = {u: v for u, v in values.items() if v is not None}
+    return paired(kept) if len(kept) >= 3 else None
+
+
+def post_hoc_blocks(units, nearest, flagged, result, stores):
+    """The post hoc blocks added after paper A's round-11 review (module docstring)."""
+    from ner_robustness import sign_flip_p
+    matched = [u for u in units if u not in flagged]
+    first = {u: units[u]['names']['recall_in'] - units[u]['curve_detail']['0']['recall_in']
+             for u in units}
+    second = {u: units[u]['curve_detail']['0']['recall_in']
+              - units[u]['control_at_d_star']['recall_in'] for u in units}
+    decomposition = {
+        'note': "post hoc: 18.1 per subfield = the names' gain over MR6 at D = 0 on the held names "
+                "+ MR6's own loss on them from D = 0 to D*",
+        'names_minus_mr6_at_0': paired(first), 'mr6_at_0_minus_control_at_d_star': paired(second),
+        'matched_only': {'names_minus_mr6_at_0': paired({u: first[u] for u in matched}),
+                         'mr6_at_0_minus_control_at_d_star': paired({u: second[u] for u in matched})}
+        if len(matched) >= 2 else None}
+    keys = [f'{g}_{part}' for g in TYPE_GROUPS for part in ('in', 'out')]
+
+    def by_key(table, control):
+        return {k: paired_where({u: (table[u]['_typed']['names'][k]
+                                     - table[u]['_typed'][control][k])
+                                 if k in table[u]['_typed']['names'] else None for u in units})
+                for k in keys}
+    types = {'note': 'post hoc: recall on the unseen test names by type group (MAT, VALUE, other) '
+                     'and lexicon membership; the names minus the control at D*, at the nearest '
+                     'grid value for the flagged subfields, and minus MR6 at D = 0',
+             'gold_per_run': {u: {k: round(v, 1) for k, v in units[u]['_typed']['gold'].items()}
+                              for u in units},
+             'minus_control_at_d_star': by_key(units, 'control'),
+             'minus_control_nearest': by_key(nearest, 'control'),
+             'minus_mr6_at_0': by_key(units, 'control_at_0')}
+    flips = {key: sign_flip_p(list(result['decisions'][key]['per_unit'].values()))
+             for key in ('18.1', '18.2')}
+    lexicon_types = {}
+    for u in units:
+        if u in stores:
+            by = {}
+            for kind, _, count in stores[u]['names']:
+                entry = by.setdefault(kind, {'distinct': 0, 'entries': 0})
+                entry['distinct'] += 1
+                entry['entries'] += count
+            lexicon_types[u] = dict(sorted(by.items()))
+    return {'post_hoc_decomposition': decomposition, 'post_hoc_types': types,
+            'post_hoc_sign_flip': {'note': 'post hoc: exact two-sided sign-flip p over the '
+                                           'subfields', **flips},
+            'post_hoc_lexicon_types': lexicon_types}
 
 
 def main(argv=None):

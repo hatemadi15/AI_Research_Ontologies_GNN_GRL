@@ -605,6 +605,61 @@ def table12_curves(matched):
                 "control's highest over the grid.\n\n"
                 + markdown(['subfield', 'unseen names', 'names'] + dcols
                            + ['names − the control at its best bias'], rows))
+    return out + table12_post_hoc(matched)
+
+
+def table12_post_hoc(matched):
+    """Table 12's post hoc parts added after paper A's round-11 review: the decomposition of 18.1,
+    the held / not-held split within type groups, the sign-flip p-values and the rebuilt
+    lexicons' composition by type ('' without them)."""
+    out = ''
+    dec = matched.get('post_hoc_decomposition')
+    if dec:
+        rows = [['all 7 subfields', interval(dec['names_minus_mr6_at_0'], 'mean_diff', signed=True),
+                 interval(dec['mr6_at_0_minus_control_at_d_star'], 'mean_diff', signed=True)]]
+        m = dec.get('matched_only')
+        if m:
+            rows.append([f"the {m['names_minus_mr6_at_0']['n_units']} matched subfields",
+                         interval(m['names_minus_mr6_at_0'], 'mean_diff', signed=True),
+                         interval(m['mr6_at_0_minus_control_at_d_star'], 'mean_diff', signed=True)])
+        out += ("\nTable 12, fifth part (post hoc). 18.1 per subfield is the sum of the names' gain "
+                "over MR6 at D = 0 on the unseen names the lexicon holds and MR6's own loss on them "
+                'from D = 0 to D*.\n\n'
+                + markdown(['subfields', 'names − MR6 at D = 0', 'MR6 at D = 0 − the control at D*'],
+                           rows))
+    types = matched.get('post_hoc_types')
+    if types:
+        rows = []
+        for key in types['minus_control_at_d_star']:
+            group, part = key.rsplit('_', 1)
+            cells = [group, 'held' if part == 'in' else 'not held']
+            for block in ('minus_control_at_d_star', 'minus_control_nearest', 'minus_mr6_at_0'):
+                e = types[block].get(key)
+                cells.append('' if e is None else interval(e, 'mean_diff', signed=True)
+                             + f", {e['n_positive']}/{e['n_units']}")
+            gold = [v[key] for v in types['gold_per_run'].values()]
+            cells.append(f'{min(gold):.0f}–{max(gold):.0f}')
+            rows.append(cells)
+        out += ('\nTable 12, sixth part (post hoc). Recall on the unseen test names by type group and '
+                'lexicon membership: the names minus the control at D*, at the nearest grid value for '
+                'the flagged subfields, and minus MR6 at D = 0, paired over the subfields with the '
+                'subfields above 0; and the unseen test names per subfield in each cell.\n\n'
+                + markdown(['type', 'unseen names', 'names − control at D*',
+                            'the flagged at the nearest recall', 'names − MR6 at D = 0',
+                            'test names per subfield'], rows))
+    flips = matched.get('post_hoc_sign_flip')
+    if flips:
+        out += ('\nExact two-sided sign-flip p over the 7 subfields (post hoc): 18.1 '
+                f"{flips['18.1']}, 18.2 {flips['18.2']}.\n")
+    lex = matched.get('post_hoc_lexicon_types')
+    if lex:
+        kinds = sorted({k for v in lex.values() for k in v},
+                       key=lambda k: -sum(v.get(k, {}).get('distinct', 0) for v in lex.values()))
+        rows = [[u] + [f"{v[k]['distinct']:,} ({v[k]['entries']:,})" if k in v else ''
+                       for k in kinds] for u, v in lex.items()]
+        out += ('\nTable 12, seventh part. The rebuilt lexicons by type: distinct names and, in '
+                'parentheses, their entries (occurrences in the corpus, which set how often a name is '
+                'drawn).\n\n' + markdown(['subfield'] + kinds, rows))
     return out
 
 

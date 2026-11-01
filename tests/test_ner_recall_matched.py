@@ -93,3 +93,45 @@ def test_comparisons_and_d0_check():
     assert rm.d0_check(same, stored) == []
     other = dict(same, f1=50.1, test_pred_bias={'0': ['O O']})
     assert rm.d0_check(other, stored) == ['f1', 'test_pred_bias[0]']
+
+
+def test_typed_counts_split_unseen_names_by_type_group_and_lexicon():
+    """Post hoc: the unseen gold entities counted per type group (MAT, VALUE, other) and lexicon
+    membership, found or not."""
+    words = ['the', 'Pt', 'film', 'at', '10', 'mA']
+    gold = ['O', 'B-MAT', 'B-FORM', 'O', 'B-VALUE', 'I-VALUE']
+    pred = ['O', 'B-MAT', 'O', 'O', 'B-VALUE', 'O']
+    lexicon = {('MAT', ('Pt',)), ('VALUE', ('10', 'mA'))}
+    c = rm.typed_counts(words, gold, pred, {}, lexicon)
+    assert c['type_gold', 'MAT', 'in'] == 1 and c['type_correct', 'MAT', 'in'] == 1
+    assert c['type_gold', 'VALUE', 'in'] == 1 and c['type_correct', 'VALUE', 'in'] == 0
+    assert c['type_gold', 'other', 'out'] == 1 and c['type_correct', 'other', 'out'] == 0
+    assert rm.typed_recall(c) == {'MAT_in': 100.0, 'VALUE_in': 0.0, 'other_out': 0.0}
+    assert rm.type_group('PROPERTY') == 'other' and rm.type_group('VALUE') == 'VALUE'
+
+
+def test_post_hoc_blocks_decompose_and_split():
+    """Post hoc: 18.1 per subfield as the names' gain over MR6 at D = 0 plus MR6's loss to D*,
+    the typed comparisons, the sign-flip p-values and the lexicons' type counts."""
+    pytest.importorskip('scipy')
+
+    def unit(names_in, at0, at_star, typed_names, typed_control):
+        return {'names': {'recall_in': names_in}, 'curve_detail': {'0': {'recall_in': at0}},
+                'control_at_d_star': {'recall_in': at_star},
+                '_typed': {'names': typed_names, 'control': typed_control,
+                           'control_at_0': typed_control, 'gold': {'MAT_in': 10.0}}}
+    units = {u: unit(80.0 + k, 75.0, 70.0 + k, {'MAT_in': 90.0 + k}, {'MAT_in': 80.0})
+             for k, u in enumerate(('a', 'b', 'c'))}
+    result = {'decisions': {'18.1': {'per_unit': {'a': 10.0, 'b': 10.0, 'c': 10.0}},
+                            '18.2': {'per_unit': {'a': 1.0, 'b': -1.0, 'c': 2.0}}}}
+    stores = {'a': {'names': [['MAT', 'Pt', 5], ['MAT', 'Ni', 2], ['VALUE', '1 M', 1]]}}
+    out = rm.post_hoc_blocks(units, units, ['c'], result, stores)
+    dec = out['post_hoc_decomposition']
+    assert dec['names_minus_mr6_at_0']['mean_diff'] == 6.0          # 5, 6, 7
+    assert dec['mr6_at_0_minus_control_at_d_star']['mean_diff'] == 4.0   # 5, 4, 3
+    assert dec['matched_only']['names_minus_mr6_at_0']['n_units'] == 2
+    assert out['post_hoc_types']['minus_control_at_d_star']['MAT_in']['mean_diff'] == 11.0
+    assert out['post_hoc_types']['minus_control_at_d_star']['VALUE_out'] is None
+    assert out['post_hoc_sign_flip']['18.1'] == 0.25                 # 3 positive units: 2/8
+    assert out['post_hoc_lexicon_types']['a'] == {'MAT': {'distinct': 2, 'entries': 7},
+                                                  'VALUE': {'distinct': 1, 'entries': 1}}

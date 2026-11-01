@@ -6,7 +6,7 @@ Hatem Madi
 
 Supplementary Notes 1 to 10 give the protocol record, the hyperparameters,
 compute and repeats, the corpora, and the analyses the main text
-summarises; Tables S1 to S8 are numbered in order of appearance. Section,
+summarises; Tables S1 to S10 are numbered in order of appearance. Section,
 table and figure numbers without an S refer to the main text.
 
 ## Supplementary Note 1: the protocol record
@@ -35,7 +35,7 @@ and the amendments.
 | ablations (week 14) | 29 October, as above | 31 October | 31 October | — |
 | the lexicon-membership analysis (week 15; post hoc, no decision) | 31 October 16:13 (`2c60f33`): the rebuild, its checks and the reading fixed before the run | 31 October (`w15a`) | 31 October | — |
 | D9, D10 (week 17; follow-up) | 31 October 19:15 (`f39447c`), after D1 to D8 had been written up (the lexicon split's results arrived 26 minutes later), a pass expected to be unlikely; the code 19:41 (`013f9ac`) | 31 October 19:55 to 1 November 00:40 (`w17a`, `w17b`) | 1 November | — |
-| D11, D12 (week 18; follow-up) | 1 November 10:51 (`e02c3be`), at a referee's request, after D1 to D10 and the lexicon split were known; the names' side the stored decision runs of 24 October, only the control new; the code 10:58 (`7906996`) and the analysis 11:04 (`789f42e`), both before any run | 1 November 11:12 to 13:58 (`w18a`) | 1 November 14:06 (`13506a4`); the post hoc nearest-recall reading added after it, 14:16 (`ea8a92e`) | — |
+| D11, D12 (week 18; follow-up) | 1 November 10:51 (`e02c3be`), at the request of an internal review of the draft (main text, Ethics and broader impact), after D1 to D10 and the lexicon split were known; the names' side the stored decision runs of 24 October, only the control new; the code 10:58 (`7906996`) and the analysis 11:04 (`789f42e`), both before any run | 1 November 11:14 to 13:43 (`w18a`, pushed at 11:12, pulled at 13:58) | 1 November 14:06 (`13506a4`); the post hoc nearest-recall reading added after it, 14:16 (`ea8a92e`) | — |
 | companion, week 5: multi-task training against the CRF head on MaterioMiner's held-out papers, pre-specified without decision (fine-grained +3.72 [+0.57, +6.87]; multi-task training's own decision was on the random splits) | 15 October 15:50 (`6f2dc11`) | 15 October | 15 October 23:20 (`1b30d82`) | — |
 | companion, week 7 part 1: label propagation within a document, six decisions on saved predictions | 16 October 11:46 (`cc73d37`) | saved predictions | 16 October 11:53 (MaterioMiner, `93966bb`) and 13:54 (SOFC-Exp, `ceabb78`) | 11:57 (`e41aa44`): retyping made a decision on SOFC-Exp, after MaterioMiner's results and before SOFC-Exp's |
 | companion, week 7 part 2a: recall calibration, a bias on the CRF head's emissions chosen on validation folds; five decisions, none passing (fine-grained −0.59 [−1.75, +0.57], coarse-grained +0.17 [−0.14, +0.48], SOFC-Exp −0.21 [−0.58, +0.17] paired by seed) | 16 October 13:11 (`61c9520`) | 16 October (`w7a`) | 16 October 15:33 (`503f690`) | — |
@@ -45,7 +45,9 @@ and the amendments.
 | companion: seen and unseen test names and the decomposition of the recall gap (post hoc, on saved predictions; no protocol) | — | saved predictions | MaterioMiner 16 October 17:00 (`3c06c11`); MuLMS and SOFC-Exp added with their runs | — |
 
 **Times.** Protocol and result times are the commits' (UTC); push, pull
-and run times are the session notes'. When the pooled decision was
+and run times are the session notes' (week 18's run times are those its
+Kaggle job wrote in its manifest, by the machine's clock), and GitHub's
+records date only the pushes of commits. When the pooled decision was
 added at 09:14 on 20 October, the screen's first half was recorded (MR6
 and the gazetteer variants, at 08:11) and its second half, with MR6 +
 names, was not (13:35); the 18:42 amendment followed the spread between
@@ -63,15 +65,17 @@ protocol.
 (`protocol_pushes.py`), date each push independently of the commit
 times: the public event feed (`results/github_push_events.tsv`) and the
 repository's activity log (`results/github_push_activity.tsv`), which
-lists every push to every branch with the commits before and after it.
+lists every push to a branch with the commits before and after it,
+except merges made through pull requests.
 By the activity log every protocol commit of Table S1, from the companion
 study's of 15 October to the follow-up's of 1 November, reached GitHub 1
 to 7 seconds after its commit time (for example `40631ce` at 11:00:59
 on 18 October, `808ff4b` at 09:14:24 and `de62446` at 18:42:57 on 20
 October, `2886267` at 12:07:40 on 29 October, `f39447c` at 19:15:59 on 31
 October and `e02c3be` at 10:51:13 on 1 November). The event feed lacks
-some pushes and held none after 30 October 22:51 when last archived; it
-agrees with the activity log, within a second, on every push it has. The
+some pushes and held none after 30 October 22:51 when last archived; on
+every push both records hold it agrees with the activity log within two
+seconds, and within one on every protocol's push. The
 activity log's times for the pushes of 1 November between 08:00 and
 09:00 UTC, none of them a protocol's, read one hour late (the hour that
 US Pacific time repeats when daylight saving ends that day): the commits
@@ -130,7 +134,7 @@ moves by more than about 0.01 and no verdict changes.
 **Repeats.** From week 5 on (15 October, 16:00 UTC), every GPU session
 except two began by repeating an earlier run, and every repeat was
 identical: one batch of 15 October (`w5a`, run 16:05 to 22:10 UTC) ran
-none, and the follow-up's second session (`w17b`) instead reproduced the
+none, and the second session of the follow-up of 31 October (`w17b`) instead reproduced the
 stored multi-task runs' scores through its teachers. The week-4 sessions
 of 15 October, which wrote the CRF head's first GPU reference runs, began
 without a repeat after a smoke session that ran one CRF run three times,
@@ -217,7 +221,8 @@ names stays between 49.1 and 49.7.
 
 ## Supplementary Note 5: what the names do, in detail
 
-Everything in this Note is post hoc.
+Everything in this Note is post hoc, except the companion study's
+decisions quoted at its end.
 
 **Rates.** Over all ten seeds the names system makes, net of the
 predictions it drops, 474 more unseen-name predictions per run than MR6
@@ -338,7 +343,8 @@ CIs, and the units where the gain on the held names is the larger.
 | MaterioMiner coarse, 4 papers | MR3 − CRF head | −0.12 [−1.58, +1.34] | +2.32 [+0.88, +3.75] | −2.44 [−2.63, −2.24] | 0/4 |
 
 The recall-matched control of Supplementary Note 10, registered after
-this analysis, tests its reading directly. The companion study's earlier
+this analysis, tests one alternative to its reading, a uniform shift
+toward tagging more spans. The companion study's earlier
 recall calibration (Table S1, week 7 part 2a), a bias on the CRF head's
 emissions chosen on validation folds and not matched to the names, gave
 −0.59 [−1.75, +0.57] fine-grained and +0.17 [−0.14, +0.48]
@@ -476,8 +482,11 @@ other subfields' unlabeled sentences (four, none passing); and the two of
 20 October (09:14) on mention replacement without names on SOFC-Exp's
 folds (MR3, Section 5.5, and multi-task training with mention
 replacement, −0.11 [−0.69, +0.46]; both failing). The label-propagation
-rule's decisions (above) and the companion study's, all earlier, are
-not counted. Five passed: D3, D4 and D5 against the CRF head, D11 on
+rule's decisions are not counted, the rule being a post-processing rule
+on saved predictions rather than a use of names; four of them fall in
+the window (20 October, above), and with them the count is twenty-four,
+six passing (13.1a among them), about 0.6 expected by chance. The
+companion study's decisions, all earlier, are not counted either. Five passed: D3, D4 and D5 against the CRF head, D11 on
 recall, and mention replacement's votes against the CRF head's votes. Of
 the twelve of Table 2, the seven against a mention-replacement control
 or on the names' source are D2, D7, D8, D9, D10, D11 and D12; only D11
@@ -490,7 +499,7 @@ seeds each) and scored on its test articles: MR3 gained +0.50 [−0.47,
 +1.46] over the CRF head and did not pass. MR6 + names was not run at
 that size.
 
-## Supplementary Note 8: the follow-up in detail
+## Supplementary Note 8: the follow-up on the strongest system in detail
 
 **Design.** The control is the multi-task model (one encoder, a CRF head
 per granularity) with six-copy mention replacement; the names system adds
@@ -551,7 +560,10 @@ and its degrees of freedom (`ner_robustness.py`, `detectable`).
 
 **Table S7.** The difference each comparison could detect at 80% power
 and the two-sided 5% level, from its stored interval's half-width and
-degrees of freedom.
+degrees of freedom. These rest on the observed spread and are uncertain
+themselves: the 95% interval of a standard deviation runs from 0.57 to
+3.7 times its estimate with 3 degrees of freedom, 0.64 to 2.2 times with
+6 and 0.70 to 1.8 times with 10.
 
 | Comparison | CI half-width | df | detectable at 80% power |
 |---|---|---|---|
@@ -588,8 +600,8 @@ degrees of freedom.
 
 ## Supplementary Note 10: the recall-matched control in detail
 
-**Design.** Registered on 1 November at 10:51 (`e02c3be`), after a
-referee asked whether the names' recall gain on the unseen names their
+**Design.** Registered on 1 November at 10:51 (`e02c3be`), after an
+internal review of the draft asked whether the names' recall gain on the unseen names their
 lexicon holds (Section 5.4) is name knowledge or a generic shift toward
 tagging more spans. The control is MR6: its stored decision jobs (400
 pool sentences, six copies, seeds 300 to 900 over the seven subfields)
@@ -644,30 +656,108 @@ bias's own F1 change at D*, −2.75 [−5.77, +0.27]. Without the flagged
 subfields D11 is +6.05 [−3.33, +15.44], D12 −0.03 [−2.78, +2.72] and
 precision +0.56 [−6.74, +7.85].
 
-**Post hoc.** With the flagged subfields matched instead at the grid
-value of the nearest recall (2.5, 3 and 2.5; `match_nearest` in
-`ner_recall_matched.py`, added after the result), D11 is +8.63 [+3.35,
-+13.90], positive in every subfield, D12 +1.37 [−0.66, +3.41], precision
-+3.04 [−1.32, +7.41], recall on the unseen names the lexicon does not
-hold −2.07 [−3.68, −0.46] and on all unseen names +0.25 [−0.08, +0.58].
-At 80% power D11 detects 10.87 points (7.23 post hoc) and D12 5.55 (2.79
-post hoc; Table S7); the two-sided t p-values are 0.013 for D11 and
-0.096 for D12.
-
 **Cost.** The control's seven jobs took 31.9 to 39.4 minutes each on a
 T4, a training run and twelve decodes per subfield and seed, in one
 session of 151 minutes.
 
-**Table S8.** The recall-matched control's recall over all test entities
-(%), pooled over the decision seeds, at every bias D, beside the names'
-(MuLMS's seven held-out subfields; `docs/tables/table12_week18.md`).
+**Post hoc, after the result.** Four analyses were added after the
+result, the first on the day of the result and the others after an
+internal review of the draft asked for them; all are labelled post hoc
+in `ner_recall_matched.py` and its results file. (1) With the flagged
+subfields matched at the grid value of the nearest recall (2.5, 3 and
+2.5; `match_nearest`), D11 is +8.63 [+3.35, +13.90], positive in every
+subfield, D12 +1.37 [−0.66, +3.41], precision +3.04 [−1.32, +7.41],
+recall on the unseen names the lexicon does not hold −2.07 [−3.68,
+−0.46] and on all unseen names +0.25 [−0.08, +0.58]. (2) The rates of
+the control at every bias on the unseen names in and out of the lexicon
+(Table S8, Figure 4): MR6's recall on the held names is highest at D ≤
+0.5 in five of the seven subfields and falls as D grows, while its
+recall on the other unseen names rises; at whichever bias gives MR6 its
+highest recall on the held names, the names lead by +6.52 [+2.15,
++10.89], in every subfield, and on the other unseen names a bias
+overtakes them, −4.16 [−5.82, −2.50] (none of seven above 0). (3) The
+decomposition of D11: per subfield, the names' gain over MR6 at D = 0 on
+the held names (+7.29 [+3.27, +11.30], Table 5) plus MR6's own loss on
+them from D = 0 to D* (+3.96 [−1.06, +8.98]); on the four matched
+subfields the two parts are +5.92 [−1.10, +12.94] and +0.14 [−4.89,
++5.16], so there matching the recall leaves the gain where it was at D =
+0. (4) The split by type. Values and materials names are 83 to 99% of a
+subfield's distinct lexicon names and 83 to 99.6% of its entries (Table
+S10), and they are 60 to 99.6% of the unseen test names a lexicon holds
+but a minority of the others (41 to 76% of those are of other types), so
+a shift toward those two types could favour the held names without any
+name being learned. Within types (Table S9) the materials names the
+lexicon holds gain +12.02 [+3.70, +20.34] at D* (+9.87 [+3.57, +16.16]
+with the flagged subfields at the nearest recall), the other materials
+names −1.19 [−5.59, +3.21]; values held +9.43 [+0.02, +18.83], the other
+values +3.41 [−1.97, +8.80]; and unseen names of the other types not held
+−3.91 [−7.32, −0.51]. The pattern fits gains specific to the materials
+names the lexicon holds, with a smaller one on values and a shift away
+from the types it barely holds. The exact two-sided sign-flip p over the
+seven subfields is 0.016 for D11, the smallest seven units allow, and
+0.14 for D12; at 80% power D11 detects 10.87 points (12.27 without the
+flagged subfields, 7.23 post hoc) and D12 5.55 (3.60 and 2.79; Table
+S7); the two-sided t p-values are 0.013 for D11 and 0.096 for D12.
 
-| Subfield | names' recall | D = −2 | D = −1 | D = −0.5 | D = 0 | D = 0.5 | D = 1 | D = 1.5 | D = 2 | D = 2.5 | D = 3 | D = 4 | D = 5 |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| electrolysis | 60.13 | 54.35 | 56.44 | 57.37 | 58.17 | 58.78 | 59.20 | 59.46 | 59.61 | 59.66 | 59.59 | 58.81 | 57.22 |
-| graphene | 47.45 | 46.25 | 47.56 | 48.22 | 48.79 | 49.39 | 49.90 | 50.41 | 50.66 | 50.93 | 51.19 | 51.42 | 51.64 |
-| pemfc | 51.74 | 44.18 | 47.23 | 48.31 | 49.23 | 49.93 | 50.50 | 50.93 | 51.24 | 51.41 | 51.54 | 51.15 | 50.03 |
-| poly | 53.52 | 45.69 | 48.39 | 49.53 | 50.61 | 51.83 | 52.85 | 53.80 | 54.39 | 54.93 | 55.36 | 55.19 | 53.98 |
-| semi | 31.78 | 21.19 | 24.14 | 25.53 | 26.82 | 27.99 | 29.09 | 30.16 | 31.01 | 31.84 | 32.37 | 32.19 | 31.27 |
-| sofc | 50.36 | 40.22 | 43.79 | 45.26 | 46.55 | 47.71 | 48.59 | 49.29 | 49.85 | 49.93 | 49.87 | 49.54 | 47.57 |
-| steel | 56.37 | 49.78 | 51.99 | 52.92 | 53.83 | 54.57 | 55.30 | 55.87 | 56.46 | 57.00 | 57.46 | 58.08 | 58.00 |
+**Table S8.** The recall-matched control's rates at every bias D, pooled over the decision seeds, beside MR6 + names' (MuLMS's seven held-out subfields; `docs/tables/table12_week18.md`): recall, precision and F1 over all test entities (pre-specified), then recall on the unseen test names the lexicon holds and on the other unseen names (post hoc).
+
+| Subfield | rate | names | D = −2 | D = −1 | D = −0.5 | D = 0 | D = 0.5 | D = 1 | D = 1.5 | D = 2 | D = 2.5 | D = 3 | D = 4 | D = 5 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| electrolysis | recall | 60.13 | 54.35 | 56.44 | 57.37 | 58.17 | 58.78 | 59.20 | 59.46 | 59.61 | 59.66 | 59.59 | 58.81 | 57.22 |
+| electrolysis | precision | 56.40 | 61.91 | 59.89 | 59.04 | 58.08 | 57.18 | 56.14 | 55.04 | 53.88 | 52.66 | 51.44 | 48.86 | 46.13 |
+| electrolysis | F1 | 58.21 | 57.88 | 58.11 | 58.19 | 58.12 | 57.97 | 57.63 | 57.16 | 56.60 | 55.94 | 55.22 | 53.38 | 51.08 |
+| graphene | recall | 47.45 | 46.25 | 47.56 | 48.22 | 48.79 | 49.39 | 49.90 | 50.41 | 50.66 | 50.93 | 51.19 | 51.42 | 51.64 |
+| graphene | precision | 54.51 | 59.56 | 57.39 | 56.55 | 55.53 | 54.62 | 53.59 | 52.76 | 51.86 | 50.90 | 50.15 | 48.41 | 46.54 |
+| graphene | F1 | 50.74 | 52.07 | 52.01 | 52.06 | 51.94 | 51.87 | 51.68 | 51.56 | 51.26 | 50.92 | 50.66 | 49.87 | 48.96 |
+| pemfc | recall | 51.74 | 44.18 | 47.23 | 48.31 | 49.23 | 49.93 | 50.50 | 50.93 | 51.24 | 51.41 | 51.54 | 51.15 | 50.03 |
+| pemfc | precision | 54.95 | 59.94 | 58.04 | 56.80 | 55.46 | 54.24 | 53.08 | 51.92 | 50.77 | 49.63 | 48.44 | 46.14 | 43.91 |
+| pemfc | F1 | 53.30 | 50.87 | 52.08 | 52.21 | 52.16 | 51.99 | 51.76 | 51.42 | 51.00 | 50.50 | 49.94 | 48.51 | 46.77 |
+| poly | recall | 53.52 | 45.69 | 48.39 | 49.53 | 50.61 | 51.83 | 52.85 | 53.80 | 54.39 | 54.93 | 55.36 | 55.19 | 53.98 |
+| poly | precision | 45.22 | 58.40 | 55.36 | 53.65 | 52.02 | 50.57 | 48.98 | 47.29 | 45.66 | 44.03 | 42.49 | 39.29 | 36.46 |
+| poly | F1 | 49.02 | 51.27 | 51.64 | 51.51 | 51.31 | 51.19 | 50.84 | 50.34 | 49.64 | 48.88 | 48.08 | 45.90 | 43.52 |
+| semi | recall | 31.78 | 21.19 | 24.14 | 25.53 | 26.82 | 27.99 | 29.09 | 30.16 | 31.01 | 31.84 | 32.37 | 32.19 | 31.27 |
+| semi | precision | 50.85 | 62.73 | 58.48 | 56.21 | 54.23 | 52.03 | 49.89 | 47.86 | 45.77 | 43.83 | 41.90 | 37.50 | 33.73 |
+| semi | F1 | 39.11 | 31.68 | 34.17 | 35.11 | 35.89 | 36.40 | 36.75 | 37.00 | 36.97 | 36.88 | 36.52 | 34.64 | 32.45 |
+| sofc | recall | 50.36 | 40.22 | 43.79 | 45.26 | 46.55 | 47.71 | 48.59 | 49.29 | 49.85 | 49.93 | 49.87 | 49.54 | 47.57 |
+| sofc | precision | 60.82 | 63.37 | 61.02 | 59.77 | 58.50 | 57.28 | 56.12 | 54.89 | 53.56 | 52.00 | 50.42 | 47.45 | 43.89 |
+| sofc | F1 | 55.10 | 49.21 | 50.99 | 51.51 | 51.84 | 52.06 | 52.08 | 51.94 | 51.64 | 50.95 | 50.14 | 48.47 | 45.65 |
+| steel | recall | 56.37 | 49.78 | 51.99 | 52.92 | 53.83 | 54.57 | 55.30 | 55.87 | 56.46 | 57.00 | 57.46 | 58.08 | 58.00 |
+| steel | precision | 57.10 | 66.83 | 64.29 | 62.98 | 61.77 | 60.29 | 58.88 | 57.35 | 55.95 | 54.52 | 53.08 | 50.24 | 47.29 |
+| steel | F1 | 56.73 | 57.06 | 57.49 | 57.51 | 57.53 | 57.29 | 57.04 | 56.60 | 56.21 | 55.73 | 55.18 | 53.88 | 52.10 |
+| electrolysis | recall, held names (post hoc) | 90.02 | 82.34 | 83.17 | 83.54 | 83.62 | 83.44 | 83.10 | 82.62 | 81.91 | 81.26 | 80.60 | 78.65 | 76.73 |
+| electrolysis | recall, other unseen names (post hoc) | 38.23 | 33.14 | 36.19 | 37.61 | 38.84 | 39.97 | 40.96 | 41.66 | 42.25 | 42.80 | 43.19 | 43.12 | 42.01 |
+| graphene | recall, held names (post hoc) | 84.91 | 84.00 | 84.75 | 84.69 | 84.43 | 84.26 | 84.00 | 83.94 | 83.46 | 82.98 | 82.76 | 81.90 | 81.15 |
+| graphene | recall, other unseen names (post hoc) | 30.09 | 27.85 | 29.73 | 30.81 | 31.66 | 32.60 | 33.53 | 34.42 | 35.00 | 35.65 | 36.24 | 36.88 | 37.54 |
+| pemfc | recall, held names (post hoc) | 84.92 | 75.86 | 77.63 | 77.95 | 78.09 | 77.74 | 77.19 | 76.39 | 75.58 | 74.55 | 73.74 | 71.89 | 69.33 |
+| pemfc | recall, other unseen names (post hoc) | 38.19 | 31.47 | 34.86 | 36.18 | 37.26 | 38.27 | 39.16 | 39.92 | 40.51 | 41.03 | 41.43 | 41.42 | 40.71 |
+| poly | recall, held names (post hoc) | 71.22 | 61.57 | 64.51 | 65.47 | 66.58 | 67.65 | 68.65 | 69.56 | 69.83 | 70.02 | 70.07 | 69.41 | 67.52 |
+| poly | recall, other unseen names (post hoc) | 38.98 | 32.08 | 34.67 | 35.91 | 36.95 | 38.31 | 39.33 | 40.35 | 41.04 | 41.77 | 42.40 | 42.43 | 41.46 |
+| semi | recall, held names (post hoc) | 81.36 | 67.15 | 71.58 | 73.32 | 73.58 | 73.35 | 73.12 | 72.16 | 70.50 | 68.85 | 66.88 | 62.03 | 57.37 |
+| semi | recall, other unseen names (post hoc) | 26.87 | 16.35 | 19.22 | 20.63 | 22.02 | 23.29 | 24.52 | 25.76 | 26.78 | 27.75 | 28.49 | 28.59 | 27.93 |
+| sofc | recall, held names (post hoc) | 85.32 | 67.13 | 69.86 | 70.82 | 71.23 | 71.38 | 70.97 | 70.49 | 70.10 | 69.09 | 67.59 | 64.89 | 59.72 |
+| sofc | recall, other unseen names (post hoc) | 42.13 | 33.55 | 37.43 | 39.06 | 40.62 | 42.03 | 43.25 | 44.22 | 45.03 | 45.31 | 45.57 | 45.75 | 44.42 |
+| steel | recall, held names (post hoc) | 84.39 | 70.65 | 72.69 | 73.29 | 73.61 | 73.96 | 74.25 | 74.45 | 74.77 | 74.88 | 75.01 | 74.69 | 73.98 |
+| steel | recall, other unseen names (post hoc) | 43.70 | 39.06 | 41.14 | 42.04 | 43.02 | 43.85 | 44.72 | 45.32 | 45.97 | 46.61 | 47.18 | 48.19 | 48.40 |
+
+**Table S9.** Recall on the unseen test names by type group and lexicon membership (post hoc): the names minus the control at D*, with the flagged subfields at the nearest grid value instead, and minus MR6 at D = 0, paired over the seven subfields with the subfields above 0; the last column gives the unseen test names per subfield in each cell.
+
+| Type | unseen names | names − control at D* | the flagged at the nearest recall | names − MR6 at D = 0 | test names per subfield |
+|---|---|---|---|---|---|
+| MAT | held | +12.02 [+3.70, +20.34], 7/7 | +9.87 [+3.57, +16.16], 7/7 | +7.98 [+2.15, +13.82], 7/7 | 184–1022 |
+| MAT | not held | −1.19 [−5.59, +3.21], 4/7 | −1.58 [−5.61, +2.46], 2/7 | +0.89 [−3.48, +5.27], 5/7 | 129–2223 |
+| VALUE | held | +9.43 [+0.02, +18.83], 6/7 | +5.61 [+0.27, +10.94], 6/7 | +1.74 [−1.16, +4.65], 4/7 | 56–313 |
+| VALUE | not held | +3.41 [−1.97, +8.80], 4/7 | +1.14 [−2.30, +4.58], 3/7 | −0.23 [−3.00, +2.53], 3/7 | 106–681 |
+| other | held | +2.87 [−4.82, +10.55], 5/7 | +0.94 [−5.84, +7.72], 4/7 | +9.80 [+3.34, +16.25], 6/7 | 6–577 |
+| other | not held | −3.91 [−7.32, −0.51], 1/7 | −3.58 [−6.49, −0.67], 1/7 | +1.38 [−0.82, +3.58], 6/7 | 754–2516 |
+
+**Table S10.** The rebuilt lexicons of MuLMS's subfields by type: distinct names and, in parentheses, entries (occurrences in the corpus, which set how often a name is drawn; counts only, the names are not released).
+
+| Subfield | VALUE | MAT | PROPERTY | MEASUREMENT | INSTRUMENT | TECHNIQUE | FORM | DEV | SAMPLE | CITE |
+|---|---|---|---|---|---|---|---|---|---|---|
+| electrolysis | 7,168 (13,635) | 2,392 (29,748) | 506 (1,507) | 121 (676) |  | 70 (102) | 17 (405) | 15 (63) |  | 1 (1) |
+| graphene | 6,089 (11,328) | 1,553 (16,412) | 28 (46) | 72 (566) | 60 (60) | 2 (2) | 7 (36) |  | 2 (3) |  |
+| pemfc | 4,928 (9,062) | 357 (3,811) | 10 (11) | 3 (4) |  | 2 (2) | 3 (18) |  |  | 18 (19) |
+| poly | 7,478 (15,546) | 3,664 (26,517) | 1,359 (3,098) | 316 (3,528) | 236 (239) | 192 (386) | 84 (1,438) | 37 (80) | 29 (37) |  |
+| semi | 4,580 (7,429) | 132 (666) | 96 (116) | 20 (115) |  |  | 1 (1) |  |  | 1 (1) |
+| sofc | 4,011 (8,359) | 265 (5,167) | 38 (41) | 42 (153) | 3 (3) |  | 20 (678) |  |  | 1 (1) |
+| steel | 5,797 (12,164) | 1,492 (15,248) | 439 (791) | 224 (1,485) | 23 (24) | 35 (41) | 48 (571) | 3 (3) |  | 5 (5) |

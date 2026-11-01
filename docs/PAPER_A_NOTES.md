@@ -5,7 +5,7 @@ a reader of the repository needs beside it.
 
 **Tables and figures to generated files.** The paper is the main text
 (`docs/PAPER_A.md`) and the Supplementary Information
-(`docs/PAPER_A_SI.md`, Notes 1 to 10, Tables S1 to S8). Table 1 is written
+(`docs/PAPER_A_SI.md`, Notes 1 to 10, Tables S1 to S10). Table 1 is written
 by hand from the conversions in `src/graph/`; Table 2 to
 `docs/tables/table6_held_out_decisions.md` and `table2_decisions.md` (D9
 and D10 to `table11_week17.md`, D11 and D12 to `table12_week18.md`, whose
@@ -17,19 +17,24 @@ head); Table 5 to the paired-gains block of `table10_lexicon.md`, from
 rebuilt lexicons themselves are not committed); Table 6 to
 `table12_week18.md` (from `results/gpu/ner_recall_matched.json`,
 `ner_recall_matched.py`; the parenthesised values are its
-`post_hoc_nearest` block). Table S1 to the protocol
+`post_hoc_nearest` block, the held-name recalls its `post_hoc_curves`
+block, the last two rows its `post_hoc_decomposition` and
+`names_minus_best`). Table S1 to the protocol
 record in `docs/ROADMAP.md` §4 and `git log`; Table S2 to
 `table7_ablations.md`; Table S3 to `table10_lexicon.md`; Table S4 to
 `table8_types.md` (and `tableA2_types_fine.md` for MaterioMiner); Table
 S5 to the week-12 screen in `docs/ROADMAP.md`; Table S6 to
 `table11_week17.md`; Table S7 to `results/gpu/ner_robustness.json`
-(`detectable`); Table S8 to the second part of `table12_week18.md`. The
+(`detectable`); Tables S8, S9 and S10 to the second and fourth, sixth
+and seventh parts of `table12_week18.md`; Figure 4 is
+`docs/figures/fig10_recall_matched.png`. The
 push times of Supplementary Note 1 are `protocol_pushes.py`'s reading of
 `results/github_push_activity.tsv` and `results/github_push_events.tsv`. The MaterioMiner paired unseen-name intervals of
 Supplementary Note 5 are the `chain` block of
 `results/gpu/ner_mentions.json`. Figure 1 is
 `docs/figures/fig8_method.png`, Figure 2 `fig9_units.png`, Figure 3
-`fig7_names.png` (`src/graph/paper_figures.py`). The worked example's
+`fig7_names.png`, Figure 4 `fig10_recall_matched.png`
+(`src/graph/paper_figures.py`). The worked example's
 lexicon entries (Section 4) are the most frequent MAT and PROPERTY
 entries of the electrolysis subfield's rebuilt lexicon in
 `results/gpu_names/` (not committed); its MR6 replacement, Ni, is a MAT
@@ -49,11 +54,13 @@ needs cutting to 8 pages and anonymising.
 
 **Before submission (the author's items).**
 - The affiliation on the title page.
-- The venue's word and abstract limits (the abstract is about 220 words
-  since the week-18 result; it was 200).
-- Whether the title should carry the week-18 finding (for example "Names
-  mined from unlabeled papers are learned but not shown to improve data
-  augmentation ..."); the title as it stands is still accurate for F1.
+- The venue's word and abstract limits (the abstract is about 235 words
+  since the week-18 result and round 11; it was 200; the main text is
+  about 10,200 words to the Limitations, and the round-11 referee
+  advised 5,000 to 6,000 for an npj Article, moving detail to the SI).
+- The title: the round-11 referee advised keeping it (accurate for F1)
+  and not adding "are learned", which the matched control cannot show on
+  its own (Section 5.4).
 - The companion study (`docs/PAPER_B.md`) posted as a preprint or
   uploaded as a related manuscript, and cited by title where the text
   says "companion study".

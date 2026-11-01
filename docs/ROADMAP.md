@@ -5664,6 +5664,39 @@ twenty in Section 6, five passing), the Limitations, and the push times
 from GitHub's activity log (Supplementary Note 1). Round 11 reviews the
 result.
 
+*Paper A, review round 11 (1 November, afternoon).* Three fresh reviews
+of the week-18 revision, and a completeness audit after the author asked
+that the paper show everything. The number audit found no wrong number
+(every D11/D12 value, count, p-value and push time reproduced). The
+consistency check (1 blocking, 8 should-fix) and the journal referee
+(major revision, text only; blocking: the "learned those names" claim,
+the size of D11, the type confound, the abstract's caveat) agreed on the
+substance: "equal overall recall" holds in four of seven subfields, and
+the registered +11.24 is inflated in the three flagged ones, where the
+bias lowers MR6's recall on the very names measured. Applied: Table 2's
+note corrected (the three subfields never reach the names' recall); the
+claim reworded everywhere (abstract, Section 1, Box 1, Sections 5.4, 7
+and 9, Related work, Limitations) to "consistent with having learned
+names its training copies contain, chiefly materials names", with the
+caveats; "a referee" replaced by "an internal review of the draft";
+Section 6's six earlier decisions placed on both corpora and the
+label-propagation rule's four decisions of 20 October counted beside
+(twenty-four, six passing); the pre-specified three-corpus estimates of
+MR3 (+1.46 [+0.28, +2.64]) and multi-task MR3 (+2.93) and the
+mixed-corpus variant's comparisons added; post hoc, labelled
+(`ner_recall_matched.py`): D11's decomposition (+7.29 at D = 0 plus
+MR6's own loss +3.96 [−1.06, +8.98], +0.14 on the four matched
+subfields), the comparison with MR6 at its best bias for the held names
+(+6.52 [+2.15, +10.89], 7 of 7; other names −4.16), the split within
+types (materials names held +12.02 [+3.70, +20.34] against −1.19 not
+held), the sign-flip p (0.016 and 0.14) and the lexicons' type counts;
+Table 6 with the held-name recalls and two post hoc rows, Figure 4,
+Tables S8–S10. The completeness audit's list (macro and weighted F1 and
+the votes pre-specified but unprinted, the gate change of 18 October,
+the quota overrun of 20 October, failed sessions, unreported checks) is
+being added as a table of every comparison and a record of checks and
+deviations.
+
 ### Week 17 protocol: the harvested names on the strongest base (fixed before any run, 31 October, 19:10 UTC)
 
 *Why, and when.* The round-6 reviews of paper A (31 October) listed as a

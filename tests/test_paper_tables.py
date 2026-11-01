@@ -392,3 +392,25 @@ def test_table12_parts_from_the_curves():
     assert any(r.startswith('| mean [95% CI] | not held |') and r.endswith('2/2 above 0 |') for r in rows)
     assert pt.table12_curves({'per_unit': {'x': {}}}) == ''
 
+
+
+def test_table12_post_hoc_parts():
+    """Table 12's post hoc parts: the decomposition rows, the typed split with its unit counts,
+    the sign-flip p-values and the lexicons' type counts; '' without them."""
+    def e(mean, n=7, pos=7):
+        return {'mean_diff': mean, 'ci95': [mean - 1, mean + 1], 'n_units': n, 'n_positive': pos}
+    m = {'post_hoc_decomposition': {'names_minus_mr6_at_0': e(7.29),
+                                    'mr6_at_0_minus_control_at_d_star': e(3.96),
+                                    'matched_only': {'names_minus_mr6_at_0': e(5.92, 4, 4),
+                                                     'mr6_at_0_minus_control_at_d_star': e(0.14, 4, 1)}},
+         'post_hoc_types': {'minus_control_at_d_star': {'MAT_in': e(12.02)},
+                            'minus_control_nearest': {'MAT_in': e(9.87)},
+                            'minus_mr6_at_0': {'MAT_in': None},
+                            'gold_per_run': {'a': {'MAT_in': 184.0}, 'b': {'MAT_in': 1022.0}}},
+         'post_hoc_sign_flip': {'18.1': 0.0156, '18.2': 0.1406},
+         'post_hoc_lexicon_types': {'a': {'MAT': {'distinct': 2392, 'entries': 29748}}}}
+    text = pt.table12_post_hoc(m)
+    assert '| the 4 matched subfields | +5.92 [+4.92, +6.92] | +0.14 [−0.86, +1.14] |' in text
+    assert '| MAT | held | +12.02 [+11.02, +13.02], 7/7 | +9.87 [+8.87, +10.87], 7/7 |  | 184–1022 |' in text
+    assert '18.1 0.0156, 18.2 0.1406' in text and '| a | 2,392 (29,748) |' in text
+    assert pt.table12_post_hoc({}) == ''

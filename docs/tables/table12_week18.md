@@ -73,3 +73,35 @@ Table 12, fourth part (post hoc). The control's recall on the unseen test names 
 | steel | not held | 43.70 | 39.06 | 41.14 | 42.04 | 43.02 | 43.85 | 44.72 | 45.32 | 45.97 | 46.61 | 47.18 | 48.19 | 48.40 | −4.70 |
 | mean [95% CI] | held |  |  |  |  |  |  |  |  |  |  |  |  |  | +6.52 [+2.15, +10.89], 7/7 above 0 |
 | mean [95% CI] | not held |  |  |  |  |  |  |  |  |  |  |  |  |  | −4.16 [−5.82, −2.50], 0/7 above 0 |
+
+Table 12, fifth part (post hoc). 18.1 per subfield is the sum of the names' gain over MR6 at D = 0 on the unseen names the lexicon holds and MR6's own loss on them from D = 0 to D*.
+
+| subfields | names − MR6 at D = 0 | MR6 at D = 0 − the control at D* |
+|---|---|---|
+| all 7 subfields | +7.29 [+3.27, +11.30] | +3.96 [−1.06, +8.98] |
+| the 4 matched subfields | +5.92 [−1.10, +12.94] | +0.14 [−4.89, +5.16] |
+
+Table 12, sixth part (post hoc). Recall on the unseen test names by type group and lexicon membership: the names minus the control at D*, at the nearest grid value for the flagged subfields, and minus MR6 at D = 0, paired over the subfields with the subfields above 0; and the unseen test names per subfield in each cell.
+
+| type | unseen names | names − control at D* | the flagged at the nearest recall | names − MR6 at D = 0 | test names per subfield |
+|---|---|---|---|---|---|
+| MAT | held | +12.02 [+3.70, +20.34], 7/7 | +9.87 [+3.57, +16.16], 7/7 | +7.98 [+2.15, +13.82], 7/7 | 184–1022 |
+| MAT | not held | −1.19 [−5.59, +3.21], 4/7 | −1.58 [−5.61, +2.46], 2/7 | +0.89 [−3.48, +5.27], 5/7 | 129–2223 |
+| VALUE | held | +9.43 [+0.02, +18.83], 6/7 | +5.61 [+0.27, +10.94], 6/7 | +1.74 [−1.16, +4.65], 4/7 | 56–313 |
+| VALUE | not held | +3.41 [−1.97, +8.80], 4/7 | +1.14 [−2.30, +4.58], 3/7 | −0.23 [−3.00, +2.53], 3/7 | 106–681 |
+| other | held | +2.87 [−4.82, +10.55], 5/7 | +0.94 [−5.84, +7.72], 4/7 | +9.80 [+3.34, +16.25], 6/7 | 6–577 |
+| other | not held | −3.91 [−7.32, −0.51], 1/7 | −3.58 [−6.49, −0.67], 1/7 | +1.38 [−0.82, +3.58], 6/7 | 754–2516 |
+
+Exact two-sided sign-flip p over the 7 subfields (post hoc): 18.1 0.0156, 18.2 0.1406.
+
+Table 12, seventh part. The rebuilt lexicons by type: distinct names and, in parentheses, their entries (occurrences in the corpus, which set how often a name is drawn).
+
+| subfield | VALUE | MAT | PROPERTY | MEASUREMENT | INSTRUMENT | TECHNIQUE | FORM | DEV | SAMPLE | CITE |
+|---|---|---|---|---|---|---|---|---|---|---|
+| electrolysis | 7,168 (13,635) | 2,392 (29,748) | 506 (1,507) | 121 (676) |  | 70 (102) | 17 (405) | 15 (63) |  | 1 (1) |
+| graphene | 6,089 (11,328) | 1,553 (16,412) | 28 (46) | 72 (566) | 60 (60) | 2 (2) | 7 (36) |  | 2 (3) |  |
+| pemfc | 4,928 (9,062) | 357 (3,811) | 10 (11) | 3 (4) |  | 2 (2) | 3 (18) |  |  | 18 (19) |
+| poly | 7,478 (15,546) | 3,664 (26,517) | 1,359 (3,098) | 316 (3,528) | 236 (239) | 192 (386) | 84 (1,438) | 37 (80) | 29 (37) |  |
+| semi | 4,580 (7,429) | 132 (666) | 96 (116) | 20 (115) |  |  | 1 (1) |  |  | 1 (1) |
+| sofc | 4,011 (8,359) | 265 (5,167) | 38 (41) | 42 (153) | 3 (3) |  | 20 (678) |  |  | 1 (1) |
+| steel | 5,797 (12,164) | 1,492 (15,248) | 439 (791) | 224 (1,485) | 23 (24) | 35 (41) | 48 (571) | 3 (3) |  | 5 (5) |

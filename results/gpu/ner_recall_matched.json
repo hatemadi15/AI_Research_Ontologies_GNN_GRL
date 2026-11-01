@@ -2100,5 +2100,726 @@
     "above_0": false
    }
   }
+ },
+ "post_hoc_decomposition": {
+  "note": "post hoc: 18.1 per subfield = the names' gain over MR6 at D = 0 on the held names + MR6's own loss on them from D = 0 to D*",
+  "names_minus_mr6_at_0": {
+   "per_unit": {
+    "electrolysis": 6.4,
+    "graphene": 0.48,
+    "pemfc": 6.83,
+    "poly": 4.64,
+    "semi": 7.78,
+    "sofc": 14.09,
+    "steel": 10.78
+   },
+   "mean_diff": 7.29,
+   "ci95": [
+    3.27,
+    11.3
+   ],
+   "n_units": 7,
+   "n_positive": 7,
+   "above_0": true
+  },
+  "mr6_at_0_minus_control_at_d_star": {
+   "per_unit": {
+    "electrolysis": 6.89,
+    "graphene": -0.25,
+    "pemfc": 8.76,
+    "poly": -2.71,
+    "semi": 4.62,
+    "sofc": 11.51,
+    "steel": -1.11
+   },
+   "mean_diff": 3.96,
+   "ci95": [
+    -1.06,
+    8.98
+   ],
+   "n_units": 7,
+   "n_positive": 4,
+   "above_0": false
+  },
+  "matched_only": {
+   "names_minus_mr6_at_0": {
+    "per_unit": {
+     "graphene": 0.48,
+     "poly": 4.64,
+     "semi": 7.78,
+     "steel": 10.78
+    },
+    "mean_diff": 5.92,
+    "ci95": [
+     -1.1,
+     12.94
+    ],
+    "n_units": 4,
+    "n_positive": 4,
+    "above_0": false
+   },
+   "mr6_at_0_minus_control_at_d_star": {
+    "per_unit": {
+     "graphene": -0.25,
+     "poly": -2.71,
+     "semi": 4.62,
+     "steel": -1.11
+    },
+    "mean_diff": 0.14,
+    "ci95": [
+     -4.89,
+     5.16
+    ],
+    "n_units": 4,
+    "n_positive": 1,
+    "above_0": false
+   }
+  }
+ },
+ "post_hoc_types": {
+  "note": "post hoc: recall on the unseen test names by type group (MAT, VALUE, other) and lexicon membership; the names minus the control at D*, at the nearest grid value for the flagged subfields, and minus MR6 at D = 0",
+  "gold_per_run": {
+   "electrolysis": {
+    "MAT_in": 719.0,
+    "MAT_out": 448.0,
+    "VALUE_in": 248.0,
+    "VALUE_out": 288.0,
+    "other_in": 168.0,
+    "other_out": 1285.0
+   },
+   "graphene": {
+    "MAT_in": 194.0,
+    "MAT_out": 129.0,
+    "VALUE_in": 56.0,
+    "VALUE_out": 106.0,
+    "other_in": 16.0,
+    "other_out": 754.0
+   },
+   "pemfc": {
+    "MAT_in": 1022.0,
+    "MAT_out": 2223.0,
+    "VALUE_in": 313.0,
+    "VALUE_out": 681.0,
+    "other_in": 6.0,
+    "other_out": 2034.0
+   },
+   "poly": {
+    "MAT_in": 626.0,
+    "MAT_out": 714.0,
+    "VALUE_in": 247.0,
+    "VALUE_out": 504.0,
+    "other_in": 577.0,
+    "other_out": 1990.0
+   },
+   "semi": {
+    "MAT_in": 184.0,
+    "MAT_out": 1767.0,
+    "VALUE_in": 176.0,
+    "VALUE_out": 498.0,
+    "other_in": 11.0,
+    "other_out": 2516.0
+   },
+   "sofc": {
+    "MAT_in": 427.0,
+    "MAT_out": 1196.0,
+    "VALUE_in": 187.0,
+    "VALUE_out": 372.0,
+    "other_in": 41.0,
+    "other_out": 1364.0
+   },
+   "steel": {
+    "MAT_in": 606.0,
+    "MAT_out": 569.0,
+    "VALUE_in": 225.0,
+    "VALUE_out": 598.0,
+    "other_in": 203.0,
+    "other_out": 1842.0
+   }
+  },
+  "minus_control_at_d_star": {
+   "MAT_in": {
+    "per_unit": {
+     "electrolysis": 14.15,
+     "graphene": 0.28,
+     "pemfc": 18.24,
+     "poly": 1.19,
+     "semi": 12.88,
+     "sofc": 25.66,
+     "steel": 11.74
+    },
+    "mean_diff": 12.02,
+    "ci95": [
+     3.7,
+     20.34
+    ],
+    "n_units": 7,
+    "n_positive": 7,
+    "above_0": true
+   },
+   "MAT_out": {
+    "per_unit": {
+     "electrolysis": -10.01,
+     "graphene": 3.8,
+     "pemfc": 0.06,
+     "poly": -3.78,
+     "semi": 3.18,
+     "sofc": 0.85,
+     "steel": -2.45
+    },
+    "mean_diff": -1.19,
+    "ci95": [
+     -5.59,
+     3.21
+    ],
+    "n_units": 7,
+    "n_positive": 4,
+    "above_0": false
+   },
+   "VALUE_in": {
+    "per_unit": {
+     "electrolysis": 11.75,
+     "graphene": -0.74,
+     "pemfc": 7.3,
+     "poly": 0.67,
+     "semi": 13.39,
+     "sofc": 29.18,
+     "steel": 4.44
+    },
+    "mean_diff": 9.43,
+    "ci95": [
+     0.02,
+     18.83
+    ],
+    "n_units": 7,
+    "n_positive": 6,
+    "above_0": true
+   },
+   "VALUE_out": {
+    "per_unit": {
+     "electrolysis": 5.75,
+     "graphene": 3.03,
+     "pemfc": 5.39,
+     "poly": -2.63,
+     "semi": -0.45,
+     "sofc": 14.29,
+     "steel": -1.48
+    },
+    "mean_diff": 3.41,
+    "ci95": [
+     -1.97,
+     8.8
+    ],
+    "n_units": 7,
+    "n_positive": 4,
+    "above_0": false
+   },
+   "other_in": {
+    "per_unit": {
+     "electrolysis": 11.9,
+     "graphene": 2.9,
+     "pemfc": -4.76,
+     "poly": 3.28,
+     "semi": -11.25,
+     "sofc": 8.71,
+     "steel": 9.28
+    },
+    "mean_diff": 2.87,
+    "ci95": [
+     -4.82,
+     10.55
+    ],
+    "n_units": 7,
+    "n_positive": 5,
+    "above_0": false
+   },
+   "other_out": {
+    "per_unit": {
+     "electrolysis": -3.75,
+     "graphene": -0.39,
+     "pemfc": -7.99,
+     "poly": 0.29,
+     "semi": -3.69,
+     "sofc": -9.56,
+     "steel": -2.3
+    },
+    "mean_diff": -3.91,
+    "ci95": [
+     -7.32,
+     -0.51
+    ],
+    "n_units": 7,
+    "n_positive": 1,
+    "above_0": false
+   }
+  },
+  "minus_control_nearest": {
+   "MAT_in": {
+    "per_unit": {
+     "electrolysis": 10.29,
+     "graphene": 0.28,
+     "pemfc": 13.7,
+     "poly": 1.19,
+     "semi": 12.88,
+     "sofc": 19.0,
+     "steel": 11.74
+    },
+    "mean_diff": 9.87,
+    "ci95": [
+     3.57,
+     16.16
+    ],
+    "n_units": 7,
+    "n_positive": 7,
+    "above_0": true
+   },
+   "MAT_out": {
+    "per_unit": {
+     "electrolysis": -9.09,
+     "graphene": 3.8,
+     "pemfc": -0.79,
+     "poly": -3.78,
+     "semi": 3.18,
+     "sofc": -1.91,
+     "steel": -2.45
+    },
+    "mean_diff": -1.58,
+    "ci95": [
+     -5.61,
+     2.46
+    ],
+    "n_units": 7,
+    "n_positive": 2,
+    "above_0": false
+   },
+   "VALUE_in": {
+    "per_unit": {
+     "electrolysis": 4.49,
+     "graphene": -0.74,
+     "pemfc": 3.24,
+     "poly": 0.67,
+     "semi": 13.39,
+     "sofc": 13.75,
+     "steel": 4.44
+    },
+    "mean_diff": 5.61,
+    "ci95": [
+     0.27,
+     10.94
+    ],
+    "n_units": 7,
+    "n_positive": 6,
+    "above_0": true
+   },
+   "VALUE_out": {
+    "per_unit": {
+     "electrolysis": -1.09,
+     "graphene": 3.03,
+     "pemfc": 2.48,
+     "poly": -2.63,
+     "semi": -0.45,
+     "sofc": 8.14,
+     "steel": -1.48
+    },
+    "mean_diff": 1.14,
+    "ci95": [
+     -2.3,
+     4.58
+    ],
+    "n_units": 7,
+    "n_positive": 3,
+    "above_0": false
+   },
+   "other_in": {
+    "per_unit": {
+     "electrolysis": 8.5,
+     "graphene": 2.9,
+     "pemfc": -4.76,
+     "poly": 3.28,
+     "semi": -11.25,
+     "sofc": -1.39,
+     "steel": 9.28
+    },
+    "mean_diff": 0.94,
+    "ci95": [
+     -5.84,
+     7.72
+    ],
+    "n_units": 7,
+    "n_positive": 4,
+    "above_0": false
+   },
+   "other_out": {
+    "per_unit": {
+     "electrolysis": -3.78,
+     "graphene": -0.39,
+     "pemfc": -7.82,
+     "poly": 0.29,
+     "semi": -3.69,
+     "sofc": -7.38,
+     "steel": -2.3
+    },
+    "mean_diff": -3.58,
+    "ci95": [
+     -6.49,
+     -0.67
+    ],
+    "n_units": 7,
+    "n_positive": 1,
+    "above_0": false
+   }
+  },
+  "minus_mr6_at_0": {
+   "MAT_in": {
+    "per_unit": {
+     "electrolysis": 6.6,
+     "graphene": 0.66,
+     "pemfc": 9.25,
+     "poly": 0.64,
+     "semi": 7.84,
+     "sofc": 18.3,
+     "steel": 12.59
+    },
+    "mean_diff": 7.98,
+    "ci95": [
+     2.15,
+     13.82
+    ],
+    "n_units": 7,
+    "n_positive": 7,
+    "above_0": true
+   },
+   "MAT_out": {
+    "per_unit": {
+     "electrolysis": -5.36,
+     "graphene": 2.1,
+     "pemfc": 1.21,
+     "poly": -3.02,
+     "semi": 9.68,
+     "sofc": 1.62,
+     "steel": 0.03
+    },
+    "mean_diff": 0.89,
+    "ci95": [
+     -3.48,
+     5.27
+    ],
+    "n_units": 7,
+    "n_positive": 5,
+    "above_0": false
+   },
+   "VALUE_in": {
+    "per_unit": {
+     "electrolysis": 1.61,
+     "graphene": -0.77,
+     "pemfc": -0.91,
+     "poly": -0.64,
+     "semi": 7.22,
+     "sofc": 4.81,
+     "steel": 0.89
+    },
+    "mean_diff": 1.74,
+    "ci95": [
+     -1.16,
+     4.65
+    ],
+    "n_units": 7,
+    "n_positive": 4,
+    "above_0": false
+   },
+   "VALUE_out": {
+    "per_unit": {
+     "electrolysis": -2.08,
+     "graphene": 1.35,
+     "pemfc": 0.69,
+     "poly": -3.6,
+     "semi": 0.0,
+     "sofc": 5.03,
+     "steel": -3.03
+    },
+    "mean_diff": -0.23,
+    "ci95": [
+     -3.0,
+     2.53
+    ],
+    "n_units": 7,
+    "n_positive": 3,
+    "above_0": false
+   },
+   "other_in": {
+    "per_unit": {
+     "electrolysis": 12.59,
+     "graphene": 2.68,
+     "pemfc": -2.38,
+     "poly": 11.24,
+     "semi": 15.58,
+     "sofc": 12.54,
+     "steel": 16.33
+    },
+    "mean_diff": 9.8,
+    "ci95": [
+     3.34,
+     16.25
+    ],
+    "n_units": 7,
+    "n_positive": 6,
+    "above_0": true
+   },
+   "other_out": {
+    "per_unit": {
+     "electrolysis": 1.37,
+     "graphene": -2.61,
+     "pemfc": 0.69,
+     "poly": 5.26,
+     "semi": 2.42,
+     "sofc": 0.44,
+     "steel": 2.09
+    },
+    "mean_diff": 1.38,
+    "ci95": [
+     -0.82,
+     3.58
+    ],
+    "n_units": 7,
+    "n_positive": 6,
+    "above_0": false
+   }
+  }
+ },
+ "post_hoc_sign_flip": {
+  "note": "post hoc: exact two-sided sign-flip p over the subfields",
+  "18.1": 0.0156,
+  "18.2": 0.1406
+ },
+ "post_hoc_lexicon_types": {
+  "electrolysis": {
+   "CITE": {
+    "distinct": 1,
+    "entries": 1
+   },
+   "DEV": {
+    "distinct": 15,
+    "entries": 63
+   },
+   "FORM": {
+    "distinct": 17,
+    "entries": 405
+   },
+   "MAT": {
+    "distinct": 2392,
+    "entries": 29748
+   },
+   "MEASUREMENT": {
+    "distinct": 121,
+    "entries": 676
+   },
+   "PROPERTY": {
+    "distinct": 506,
+    "entries": 1507
+   },
+   "TECHNIQUE": {
+    "distinct": 70,
+    "entries": 102
+   },
+   "VALUE": {
+    "distinct": 7168,
+    "entries": 13635
+   }
+  },
+  "graphene": {
+   "FORM": {
+    "distinct": 7,
+    "entries": 36
+   },
+   "INSTRUMENT": {
+    "distinct": 60,
+    "entries": 60
+   },
+   "MAT": {
+    "distinct": 1553,
+    "entries": 16412
+   },
+   "MEASUREMENT": {
+    "distinct": 72,
+    "entries": 566
+   },
+   "PROPERTY": {
+    "distinct": 28,
+    "entries": 46
+   },
+   "SAMPLE": {
+    "distinct": 2,
+    "entries": 3
+   },
+   "TECHNIQUE": {
+    "distinct": 2,
+    "entries": 2
+   },
+   "VALUE": {
+    "distinct": 6089,
+    "entries": 11328
+   }
+  },
+  "pemfc": {
+   "CITE": {
+    "distinct": 18,
+    "entries": 19
+   },
+   "FORM": {
+    "distinct": 3,
+    "entries": 18
+   },
+   "MAT": {
+    "distinct": 357,
+    "entries": 3811
+   },
+   "MEASUREMENT": {
+    "distinct": 3,
+    "entries": 4
+   },
+   "PROPERTY": {
+    "distinct": 10,
+    "entries": 11
+   },
+   "TECHNIQUE": {
+    "distinct": 2,
+    "entries": 2
+   },
+   "VALUE": {
+    "distinct": 4928,
+    "entries": 9062
+   }
+  },
+  "poly": {
+   "DEV": {
+    "distinct": 37,
+    "entries": 80
+   },
+   "FORM": {
+    "distinct": 84,
+    "entries": 1438
+   },
+   "INSTRUMENT": {
+    "distinct": 236,
+    "entries": 239
+   },
+   "MAT": {
+    "distinct": 3664,
+    "entries": 26517
+   },
+   "MEASUREMENT": {
+    "distinct": 316,
+    "entries": 3528
+   },
+   "PROPERTY": {
+    "distinct": 1359,
+    "entries": 3098
+   },
+   "SAMPLE": {
+    "distinct": 29,
+    "entries": 37
+   },
+   "TECHNIQUE": {
+    "distinct": 192,
+    "entries": 386
+   },
+   "VALUE": {
+    "distinct": 7478,
+    "entries": 15546
+   }
+  },
+  "semi": {
+   "CITE": {
+    "distinct": 1,
+    "entries": 1
+   },
+   "FORM": {
+    "distinct": 1,
+    "entries": 1
+   },
+   "MAT": {
+    "distinct": 132,
+    "entries": 666
+   },
+   "MEASUREMENT": {
+    "distinct": 20,
+    "entries": 115
+   },
+   "PROPERTY": {
+    "distinct": 96,
+    "entries": 116
+   },
+   "VALUE": {
+    "distinct": 4580,
+    "entries": 7429
+   }
+  },
+  "sofc": {
+   "CITE": {
+    "distinct": 1,
+    "entries": 1
+   },
+   "FORM": {
+    "distinct": 20,
+    "entries": 678
+   },
+   "INSTRUMENT": {
+    "distinct": 3,
+    "entries": 3
+   },
+   "MAT": {
+    "distinct": 265,
+    "entries": 5167
+   },
+   "MEASUREMENT": {
+    "distinct": 42,
+    "entries": 153
+   },
+   "PROPERTY": {
+    "distinct": 38,
+    "entries": 41
+   },
+   "VALUE": {
+    "distinct": 4011,
+    "entries": 8359
+   }
+  },
+  "steel": {
+   "CITE": {
+    "distinct": 5,
+    "entries": 5
+   },
+   "DEV": {
+    "distinct": 3,
+    "entries": 3
+   },
+   "FORM": {
+    "distinct": 48,
+    "entries": 571
+   },
+   "INSTRUMENT": {
+    "distinct": 23,
+    "entries": 24
+   },
+   "MAT": {
+    "distinct": 1492,
+    "entries": 15248
+   },
+   "MEASUREMENT": {
+    "distinct": 224,
+    "entries": 1485
+   },
+   "PROPERTY": {
+    "distinct": 439,
+    "entries": 791
+   },
+   "TECHNIQUE": {
+    "distinct": 35,
+    "entries": 41
+   },
+   "VALUE": {
+    "distinct": 5797,
+    "entries": 12164
+   }
+  }
  }
 }
