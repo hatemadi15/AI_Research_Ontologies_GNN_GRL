@@ -32,9 +32,9 @@ The figures come from `python src/graph/paper_figures.py` (`docs/figures/`):
 ## What is left, and when (see also `docs/PAPER_A_NOTES.md`)
 
 The affiliation (American University of Beirut), the sole authorship and
-the cover letter are filled in. The AI assistant is noted once, unnamed,
-in the Methods (*Use of an AI assistant*), as the author asked; that
-note is what the journal's policy on AI requires.
+the cover letter are filled in. The AI assistant, Claude Code, is named
+once, in a short note in the Methods (*Use of an AI assistant*), as the
+author asked; that note is what the journal's policy on AI requires.
 
 **Before you submit**
 - Merge this work into `main`. The paper's repository link opens `main`,

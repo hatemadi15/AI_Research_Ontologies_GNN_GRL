@@ -1248,9 +1248,10 @@ predictions, and the scripts behind every number (Code availability).
 
 ### Use of an AI assistant
 
-An AI assistant was used, under the author's direction, to write the
-code, run the experiments, draft the text and review the drafts; the
-author took the study's decisions and is responsible for the content.
+An AI assistant, Claude Code (Anthropic), was used under the author's
+direction to write the code, run the experiments, draft the text and
+review the drafts; the author took the study's decisions and is
+responsible for the content.
 
 ### Relation to a companion study
 

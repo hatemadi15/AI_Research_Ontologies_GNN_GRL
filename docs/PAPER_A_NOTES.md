@@ -86,8 +86,9 @@ draft for the author.
 **Before submission (the author's items).** Done on 2 November with the
 author:
 - the affiliation (American University of Beirut, Beirut, Lebanon);
-- the AI assistant noted once, unnamed, in a short Methods note, at the
-  author's request. Every other mention was removed or rephrased:
+- the AI assistant named once, as Claude Code (Anthropic), in a short
+  Methods note, at the author's request. Every other mention was removed
+  or rephrased:
   - the review that asked for D11 and D12;
   - Author contributions;
   - Table S1;
