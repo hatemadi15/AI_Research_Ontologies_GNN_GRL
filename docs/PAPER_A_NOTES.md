@@ -111,8 +111,11 @@ Also done on 2 November:
   ontology-learning pipeline (the term graph and its GNN), which the
   paper does not use.
 
-What remains, with how to do it, is in `docs/submission/README.md`:
-- optional referees;
+Referees: none suggested (the author's call, 2 November). What remains,
+with how to do it, is in `docs/submission/README.md`:
+- the submission itself, asking for the 50% discount on the article
+  processing charge that Springer Nature gives corresponding authors in
+  Lebanon (requested at submission);
 - the DOI after acceptance.
 
 The items below record the earlier state.

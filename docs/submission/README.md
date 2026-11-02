@@ -45,20 +45,33 @@ on AI requires.
 - The ORCID iD, https://orcid.org/0009-0008-8515-6974, is on the cover
   letter.
 
-**In the submission system**
-- Give the ORCID iD when the system asks for the corresponding author's.
+**In the submission system** (checked against the journal's pages on
+2 November)
+- Start from the journal's *Submit manuscript* link,
+  https://submission.springernature.com/new-submission/41524/3, and
+  create a Springer Nature account if you have none.
+- Link the ORCID iD under *Personal Profile*, *Create/link an Open
+  Researcher Contributor ID (ORCID)*, by signing in to ORCID. The journal
+  needs it before the final version; it can be linked at any time
+  before acceptance.
 - Upload `PAPER_A.pdf`, which holds the text and figures, and
-  `PAPER_A_SI.pdf` as the Supplementary Information. Paste
-  `COVER_LETTER.md`.
-- The Reporting Summary: copy the answers from `REPORTING_SUMMARY.md`.
-- The editorial policy checklist: it confirms statements the paper
-  already makes (data and code availability, competing interests, the
-  use of AI).
-- Suggested and excluded referees are optional. If you suggest some,
-  candidates are authors of the corpora and baseline the paper uses
-  (MaterioMiner, MuLMS, SOFC-Exp, MatSciBERT) or of NER
-  data-augmentation studies (e.g. Dai and Adel). Check their current
-  affiliations and that none has a conflict of interest with you.
+  `PAPER_A_SI.pdf` as the Supplementary Information (the journal asks
+  for one merged PDF). Paste `COVER_LETTER.md`.
+- The form asks whether the work was discussed with one of the
+  journal's editors before submission; unless you contacted one, the
+  answer is no. No related manuscript is under consideration elsewhere
+  (the companion study is in preparation).
+- Ask for the 50% discount on the article processing charge. Lebanon is
+  on Springer Nature's list of lower-middle-income locations with a 50%
+  discount, which must be requested at submission. The charge, set at
+  acceptance, is £2,790 / $3,590 / €3,090 for a research article (plus
+  any local tax). AUB Libraries can say whether an institutional
+  agreement covers it.
+- Suggested and excluded referees: none (the author's call, 2 November).
+- The Reporting Summary and the Nature Portfolio editorial policy
+  checklist (the editors need the checklist before peer review): the
+  answers are in `REPORTING_SUMMARY.md` and the paper's statements (data
+  and code availability, competing interests, the use of AI).
 
 **After acceptance**
 - An archived copy with a DOI, which the Code availability statement
@@ -67,6 +80,7 @@ on AI requires.
   2. Make a GitHub release; Zenodo then assigns the DOI.
   3. Add the DOI to the statement.
 - The figure files, uploaded separately (300 dpi PNGs in `docs/figures`).
+- The article processing charge, less the discount if it was granted.
 
 **Optional**
 - Shortening the main text (about 7,300 words before the Methods; npj
