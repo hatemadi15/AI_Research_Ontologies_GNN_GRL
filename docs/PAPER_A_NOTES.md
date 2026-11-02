@@ -118,11 +118,13 @@ the files of `main` at `325019a`; the submission ID is in the author's
 confirmation email. The journal's page gives a median of 14 days to a
 first editorial decision and 136 days to acceptance. Next, with how to
 do each in `docs/submission/README.md`:
-- a preprint on arXiv, which the journal's preprint policy allows at any
-  time during review: the submitted PDF and its SI in one file, cs.CL
-  cross-listed to cond-mat.mtrl-sci, CC BY 4.0. Once it is announced,
-  the journal is told its DOI and licence, as the policy asks, and after
-  publication the arXiv entry gets the journal reference;
+- a preprint, which the journal's preprint policy allows at any time
+  during review. The author chose Springer Nature's In Review (a
+  Research Square preprint linked to the submission) over arXiv, whose
+  first submission asked for an endorsement; one preprint, not two,
+  keeps a single version to cite. In Review was declined at submission
+  and has no documented opt-in afterwards, so the author is asking the
+  editorial office to enable it. The arXiv steps stay below in case;
 - the plan is to keep `main` as submitted while the paper is under
   review, so that referees see the version the paper describes, and to
   record later work on the branch;
