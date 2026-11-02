@@ -52,11 +52,6 @@ seed variance, and the other additions tested. It has not been
 submitted elsewhere, and no other related manuscript is in press or
 under consideration elsewhere.
 
-**Use of AI.** I used an AI assistant, Claude (Anthropic), through its
-Claude Code tool, to draft the protocols, write the code, run the
-experiments and draft the text, as the Methods state. I took the study's
-decisions and take responsibility for the content.
-
 **Competing interests and funding.** I declare no competing interests.
 The study received no funding; the GPU compute was Kaggle's free tier.
 

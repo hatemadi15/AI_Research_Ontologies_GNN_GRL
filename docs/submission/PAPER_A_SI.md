@@ -36,7 +36,7 @@ and the amendments.
 | ablations (week 14) | 29 October, as above | 31 October | 31 October | — |
 | the lexicon-membership analysis (week 15; post hoc, no decision) | 31 October 16:13 (`2c60f33`): the rebuild, its checks and the reading fixed before the run | 31 October (`w15a`) | 31 October | — |
 | D9, D10 (week 17; follow-up) | 31 October 19:15 (`f39447c`), after D1 to D8 had been written up (the lexicon split's results arrived 26 minutes later), a pass expected to be unlikely; the code 19:41 (`013f9ac`) | 31 October 19:58 to 1 November 00:35 (the first jobs started at 19:58, `w17b`, and 19:59, `w17a`; `w17b` ended at 23:00) | 1 November | — |
-| D11, D12 (week 18; follow-up) | 1 November 10:51 (`e02c3be`), at the request of an internal review of the draft (main text, Methods, *Use of an AI assistant*), after D1 to D10 and the lexicon split were known; the names' side the stored decision runs of 24 October, only the control new; the code 10:58 (`7906996`) and the analysis 11:04 (`789f42e`), both before any run | 1 November 11:14 to 13:43 (`w18a`, pushed at 11:12, pulled at 13:58) | 1 November 14:06 (`13506a4`); the post hoc nearest-recall reading added after it, 14:16 (`ea8a92e`) | — |
+| D11, D12 (week 18; follow-up) | 1 November 10:51 (`e02c3be`), at the request of an internal review of the draft, after D1 to D10 and the lexicon split were known; the names' side the stored decision runs of 24 October, only the control new; the code 10:58 (`7906996`) and the analysis 11:04 (`789f42e`), both before any run | 1 November 11:14 to 13:43 (`w18a`, pushed at 11:12, pulled at 13:58) | 1 November 14:06 (`13506a4`); the post hoc nearest-recall reading added after it, 14:16 (`ea8a92e`) | — |
 | companion, week 5: multi-task training against the CRF head on MaterioMiner's held-out papers, pre-specified without decision (fine-grained +3.72 [+0.57, +6.87]; multi-task training's own decision was on the random splits); and self-training on the fatigue corpus against the CRF head there, a decision that failed (+1.74 [−1.16, +4.64] fine-grained, +1.56 [−0.88, +4.00] coarse-grained; its votes too), which the names route reports again as V6's analogue (Supplementary Note 12); both over 10 seeds whose first three, 0–200, were known from week 4 (15 October 12:02, `97b637f`) | 15 October 15:50 (`6f2dc11`) | 15 October | 15 October 23:20 (`1b30d82`) | — |
 | companion, week 7 part 1: label propagation within a document, six decisions on saved predictions | 16 October 11:46 (`cc73d37`) | saved predictions | 16 October 11:53 (MaterioMiner, `93966bb`) and 13:54 (SOFC-Exp, `ceabb78`) | 11:57 (`e41aa44`): retyping made a decision on SOFC-Exp, after MaterioMiner's results and before SOFC-Exp's |
 | companion, week 7 part 2a: recall calibration, a bias on the CRF head's emissions chosen on validation folds; five decisions, none passing (fine-grained −0.59 [−1.75, +0.57], coarse-grained +0.17 [−0.14, +0.48], SOFC-Exp −0.21 [−0.58, +0.17] paired by seed) | 16 October 13:11 (`61c9520`) | 16 October (`w7a`) | 16 October 15:33 (`503f690`) | — |
@@ -855,7 +855,7 @@ with a MuLMS sentence was dropped as well. For MuLMS, therefore, the exclusion "
 Amendment 1 was committed on 19 October at 17:15 (`77c37be`), before any
 run, adding V4 (`crf_mrm_topic6`) and V6 (`crf_st3_topic`) to the
 screen. Amendment 2, V7 (`crf_gzm_topic`), was proposed at 20:54
-(`48f37d3`) and recorded as not adopted and the user's call. It was
+(`48f37d3`) and recorded as not adopted and the author's call. It was
 adopted nine minutes later, at 21:03 (`8a18962`), before any run.
 Amendment 3, V8 (`crf_gzs_topic`), was committed on 20 October at 01:50
 (`47e2310`) on the CPU probe's first six subfields, graphene pending,
@@ -935,8 +935,8 @@ values of Table S11's rows 24 and 26, given per unit in Table S12).
 quota was checked against the job times: it needed about 8.1 hours and
 `w12c` 3.1, against 9.14 hours left in the week, and the notes expected
 Kaggle to stop a session when the quota ran out and keep none of its
-outputs. The user was asked to cancel version 8, and the plan, committed
-at 05:06 (`9e9d906`), split the names variants into `w12f` (V1 and V2),
+outputs. The plan, committed at 05:06 (`9e9d906`), asked for version 8
+to be canceled and split the names variants into `w12f` (V1 and V2),
 to run in its place, and `w12g` (V4 and V6), to run after the reset of
 24 October with the decision batch. At 08:10 the quota left 2.9 hours,
 the notes recorded that canceling no longer changed the plan, and
@@ -1120,8 +1120,8 @@ to 18).**
    minutes).
 3. 20 October, `w12e`, `ner-gpu-jobs-d` version 8 (pushed 05:03, bundle
    `3ac85a8`): the second push of `w12a`'s names jobs, made before the
-   quota was checked; the user was asked to cancel it, it was not
-   canceled, and it ended at 12:25 (441 minutes), found complete at
+   quota was checked; the plan of 05:06 asked for it to be canceled; it
+   was not, and it ended at 12:25 (441 minutes), found complete at
    13:23 at 46.23 of the week's 45 quota hours.
 4. 24 October, `w12b:mrm6`, `ner-gpu-jobs-d` version 9 (pushed 12:22):
    failed without a trace at 13:44 after 82 minutes, about 1.4 GPU hours

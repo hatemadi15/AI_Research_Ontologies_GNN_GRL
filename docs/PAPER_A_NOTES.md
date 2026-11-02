@@ -86,8 +86,14 @@ draft for the author.
 **Before submission (the author's items).** Done on 2 November with the
 author:
 - the affiliation (American University of Beirut, Beirut, Lebanon);
-- the AI assistant named (Claude, Anthropic, through Claude Code; no
-  model version is written into the repository);
+- the AI assistant noted once, unnamed, in a short Methods note, at the
+  author's request. Every other mention was removed or rephrased:
+  - the review that asked for D11 and D12;
+  - Author contributions;
+  - Table S1;
+  - "the user" in SI Notes 7 and 11, which now cite the plan's own
+    request;
+  - the cover letter's paragraph.
 - sole authorship in the Author contributions;
 - the cover letter completed;
 - the Reporting Summary drafted (`docs/submission/REPORTING_SUMMARY.md`);
