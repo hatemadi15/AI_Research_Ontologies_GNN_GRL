@@ -1,6 +1,6 @@
 # Harvesting names from unlabeled papers to augment materials named entity recognition on unseen documents
 
-Hatem Madi (affiliation to be added; hatem.madi15@gmail.com)
+Hatem Madi (American University of Beirut, Beirut, Lebanon; hatem.madi15@gmail.com)
 
 ## Abstract
 
@@ -1140,8 +1140,9 @@ earlier protocols, is labeled pre-specified or post hoc where it
 appears.
 
 **Runs.** Kaggle T4 GPUs with deterministic CUDA, one frozen commit per
-batch, a pinned image and pinned libraries; model snapshots pinned by
-commit. From 15 October 16:00 UTC every GPU session that completed, but
+batch, a pinned image and pinned libraries (PyTorch 2.11.0 with CUDA
+12.8 and Transformers 5.18.0, as every training run records); model
+snapshots pinned by commit. From 15 October 16:00 UTC every GPU session that completed, but
 two, began by repeating an earlier run, and every repeat was identical
 (the sessions that failed or hung left no record of their jobs); the
 training settings are under *Systems*, and the compute and the repeats
@@ -1427,8 +1428,8 @@ predictions, and the scripts behind every number (Code availability).
 
 ### Use of an AI assistant
 
-An AI assistant was used, under the
-author's direction, to draft the protocols, write the code, run the
+The author used an AI assistant, Claude (Anthropic), through its Claude
+Code tool, to draft the protocols, write the code, run the
 experiments, draft the text of every section from the results files and
 run adversarial internal reviews of the drafts, among them the review
 that asked for the recall-matched control (D11, D12). Every result in
@@ -1479,8 +1480,8 @@ that are not redistributed.
 ## Code availability
 
 The repository, github.com/hatemadi15/AI_Research_Ontologies_GNN_GRL
-(Apache 2.0; the commit this paper describes will be tagged, and an
-archived copy with a DOI deposited, at submission), holds the code, every
+(Apache 2.0; an archived copy of the version this paper describes, with
+a DOI, will be deposited on acceptance), holds the code, every
 protocol with its dates and amendments, the analyses behind every number,
 the generated tables and figures, and the Kaggle batch definitions that
 produced each results file.
@@ -1491,7 +1492,7 @@ The author thanks the creators of MaterioMiner, SOFC-Exp and MuLMS for releasing
 
 ## Author contributions
 
-H.M. conceived and directed the study, took its decisions and is responsible for its content.
+H.M., the sole author, conceived and directed the study, took its decisions and is responsible for its content; the AI assistant's part is described in the Methods (*Use of an AI assistant*).
 
 ## Competing interests
 

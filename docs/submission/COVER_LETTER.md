@@ -1,6 +1,4 @@
-# Cover letter (draft for the author; complete the bracketed items)
-
-[Date]
+# Cover letter
 
 Dear Editors of *npj Computational Materials*,
 
@@ -50,30 +48,20 @@ The paper suits *npj Computational Materials* for three reasons:
 **Related work.** A companion evaluation study from the same program
 (H. Madi, in preparation) shares this paper's data, baselines and
 protocol. It reports the gap between random splits and held-out documents,
-seed variance, and the other additions tested. [It has not been submitted
-elsewhere / It has been submitted to … and is uploaded as a related
-manuscript.] No other related manuscript is in press or under
-consideration elsewhere.
+seed variance, and the other additions tested. It has not been
+submitted elsewhere, and no other related manuscript is in press or
+under consideration elsewhere.
 
-**Use of AI.** An AI assistant was used, under my direction, to draft the
-protocols, write the code, run the experiments and draft the text, as the
-Methods state. I took the study's decisions and take responsibility for
-the content. [Name and version of the assistant.]
+**Use of AI.** I used an AI assistant, Claude (Anthropic), through its
+Claude Code tool, to draft the protocols, write the code, run the
+experiments and draft the text, as the Methods state. I took the study's
+decisions and take responsibility for the content.
 
 **Competing interests and funding.** I declare no competing interests.
 The study received no funding; the GPU compute was Kaggle's free tier.
 
-**Suggested referees.** [Three to five experts without a conflict of
-interest, with affiliations and e-mail addresses. Candidates to consider,
-after checking their current affiliations and any conflict: an author of
-MaterioMiner (Durmaz et al.), of MuLMS (Schrader et al.), of SOFC-Exp
-(Friedrich et al.) or of MatSciBERT (Gupta et al.), and authors of NER
-data-augmentation studies (e.g. Dai and Adel).]
-
-**Excluded referees.** [None / names and reasons.]
-
-**Corresponding author.** Hatem Madi, [affiliation], [postal address],
-hatem.madi15@gmail.com, [ORCID].
+**Corresponding author.** Hatem Madi, American University of Beirut,
+Beirut, Lebanon (hatem.madi15@gmail.com).
 
 Sincerely,
 

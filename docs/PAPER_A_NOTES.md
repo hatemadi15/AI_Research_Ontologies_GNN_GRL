@@ -83,8 +83,24 @@ legend and the tables at the end, `PAPER_A_SI.pdf`);
 `docs/submission/README.md` lists the files and `COVER_LETTER.md` is a
 draft for the author.
 
-**Before submission (the author's items).**
-- The affiliation on the title page.
+**Before submission (the author's items).** Done on 2 November with the
+author:
+- the affiliation (American University of Beirut, Beirut, Lebanon);
+- the AI assistant named (Claude, Anthropic, through Claude Code; no
+  model version is written into the repository);
+- sole authorship in the Author contributions;
+- the cover letter completed;
+- the Reporting Summary drafted (`docs/submission/REPORTING_SUMMARY.md`);
+- the Code availability statement promising the DOI on acceptance, not
+  at submission.
+
+What remains, with how to do it, is in `docs/submission/README.md`:
+- merge into `main`;
+- an ORCID iD;
+- optional referees;
+- the DOI after acceptance.
+
+The items below record the earlier state.
 - The venue's limits: npj Computational Materials sets no main-text word
   limit for an Article (its content-types page, read again on 1 November
   in round 15: title up to 15 words without punctuation, abstract up to
