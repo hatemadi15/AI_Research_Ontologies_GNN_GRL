@@ -111,11 +111,21 @@ Also done on 2 November:
   ontology-learning pipeline (the term graph and its GNN), which the
   paper does not use.
 
-Referees: none suggested (the author's call, 2 November). What remains,
-with how to do it, is in `docs/submission/README.md`:
-- the submission itself, asking for the 50% discount on the article
-  processing charge that Springer Nature gives corresponding authors in
-  Lebanon (requested at submission);
+Referees: none suggested (the author's call, 2 November).
+
+**Submitted** to npj Computational Materials on 2 November 2026, with
+the files of `main` at `325019a`; the submission ID is in the author's
+confirmation email. The journal's page gives a median of 14 days to a
+first editorial decision and 136 days to acceptance. Next, with how to
+do each in `docs/submission/README.md`:
+- a preprint on arXiv, which the journal's preprint policy allows at any
+  time during review: the submitted PDF and its SI in one file, cs.CL
+  cross-listed to cond-mat.mtrl-sci, CC BY 4.0. Once it is announced,
+  the journal is told its DOI and licence, as the policy asks, and after
+  publication the arXiv entry gets the journal reference;
+- the plan is to keep `main` as submitted while the paper is under
+  review, so that referees see the version the paper describes, and to
+  record later work on the branch;
 - the DOI after acceptance.
 
 The items below record the earlier state.

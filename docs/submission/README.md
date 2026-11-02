@@ -31,6 +31,11 @@ The figures come from `python src/graph/paper_figures.py` (`docs/figures/`):
 
 ## What is left, and when (see also `docs/PAPER_A_NOTES.md`)
 
+**Status: submitted on 2 November 2026** (the files of `main` at
+`325019a`). The steps below are kept as the record; still to come are
+the arXiv preprint (optional), the editors' decision and, after
+acceptance, the items at the end.
+
 The affiliation (American University of Beirut), the sole authorship, the
 ORCID iD and the cover letter are filled in. The AI assistant, Claude
 Code, is named once, in a short note in the Methods (*Use of an AI
@@ -72,6 +77,18 @@ on AI requires.
   checklist (the editors need the checklist before peer review): the
   answers are in `REPORTING_SUMMARY.md` and the paper's statements (data
   and code availability, competing interests, the use of AI).
+
+**A preprint on arXiv** (optional; the journal's preprint policy allows
+it at any time during review)
+- One PDF, the paper followed by its SI
+  (`pdfunite PAPER_A.pdf PAPER_A_SI.pdf PAPER_A_arXiv.pdf`), uploaded as
+  a PDF-only submission, which arXiv accepts because it is not made
+  with TeX.
+- Primary category cs.CL, cross-listed to cond-mat.mtrl-sci; licence
+  CC BY 4.0. A first submission may need an endorsement.
+- Once it is announced, tell the journal its DOI (10.48550/arXiv.<ID>)
+  and licence, as the preprint policy asks. After publication, add the
+  journal reference and DOI to the arXiv entry.
 
 **After acceptance**
 - An archived copy with a DOI, which the Code availability statement
