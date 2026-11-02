@@ -1,5 +1,16 @@
 # Ontology Learning on MaterioMiner (GNN + LLM)
 
+> **Here for the paper *Harvesting names from unlabeled papers to augment
+> materials named entity recognition on unseen documents*?** It is
+> [docs/PAPER_A.md](docs/PAPER_A.md) ("Paper A" in this repository), with
+> its Supplementary Information in [docs/PAPER_A_SI.md](docs/PAPER_A_SI.md)
+> and the submission PDFs in [docs/submission/](docs/submission/). Its
+> protocols, each committed before its runs, are in
+> [docs/ROADMAP.md](docs/ROADMAP.md) §4, and its results files are indexed
+> in [results/README.md](results/README.md). The ontology-learning pipeline
+> this README opens with (the term graph, the GNN, clustering, taxonomy and
+> typing) is earlier work that the paper does not use.
+
 A research pipeline that learns ontology structure from the **MaterioMiner**
 corpus: four materials-fatigue papers whose entities are annotated with the
 classes of the **Materials Mechanics Ontology (MMO)**. It builds a term

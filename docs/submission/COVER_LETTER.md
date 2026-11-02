@@ -56,7 +56,8 @@ under consideration elsewhere.
 The study received no funding; the GPU compute was Kaggle's free tier.
 
 **Corresponding author.** Hatem Madi, American University of Beirut,
-Beirut, Lebanon (hatem.madi15@gmail.com).
+Beirut, Lebanon (hatem.madi15@gmail.com; ORCID
+https://orcid.org/0009-0008-8515-6974).
 
 Sincerely,
 
