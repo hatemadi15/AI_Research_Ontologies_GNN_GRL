@@ -90,8 +90,8 @@ draft for the author.
   in round 15: title up to 15 words without punctuation, abstract up to
   150 words, 60 references "though not strictly enforced", legends up to
   350 words, panels labelled a), b), c), all methods in the main text).
-  The abstract is 143 words since round 15 (149 if hyphenated words count
-  twice); the main text is long (about 7,300 words without the Methods),
+  The abstract is 143 words since round 15 (150 if hyphenated words count
+  twice, since round 16 added "three-copy"); the main text is long (about 7,300 words without the Methods),
   and the round-11 referee advised 5,000 to 6,000, moving detail to the
   SI. The round-12 referee's list of what
   could move without loss: Section 3's clock times into a short table
@@ -252,3 +252,17 @@ vanishes; P values for every inference drawn from a non-decision interval;
 the votes, ablations and formulas defined in the Methods; American
 spelling; Nature-style journal abbreviations; a fuller cover letter.
 ROADMAP's two round-16 notes list every item.
+Round 17 (a number audit and a consistency check of `0a8a150`, both
+finding the builds reproducible) led to:
+- D5's tipping correlation corrected to 0.45. The bisection had run on
+  the rounded bound.
+- Every comparison fixed with part of its results known labeled so: the
+  13.3 and 13.4 pools, and the MuLMS comparisons over all ten seeds of
+  29 October.
+- P values at every remaining inference.
+- D5′ and the subfields' short names defined at first use.
+- SI Note 12 listing the post hoc readings of 1 November.
+- The last British spellings removed.
+- Three reference details fixed.
+
+ROADMAP's round-17 note lists every item.

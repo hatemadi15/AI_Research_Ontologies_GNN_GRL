@@ -47,7 +47,7 @@ The paper suits *npj Computational Materials* for three reasons:
    predictions, and the analyses behind every number. The runs are
    deterministic, and every repeated run was identical.
 
-**Related work.** A companion evaluation study from the same programme
+**Related work.** A companion evaluation study from the same program
 (H. Madi, in preparation) shares this paper's data, baselines and
 protocol. It reports the gap between random splits and held-out documents,
 seed variance, and the other additions tested. [It has not been submitted

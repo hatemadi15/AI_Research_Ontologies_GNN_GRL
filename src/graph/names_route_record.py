@@ -44,6 +44,13 @@ GRANULARITIES = ('fine', 'coarse')
 TEN = tuple(range(0, 1000, 100))          # the 10 seed offsets
 DECISION_SEEDS = TEN[3:]                  # 300 to 900, the seeds a screen did not see
 SCREEN_SEEDS = TEN[:3]                    # 0 to 200
+# round 17: a comparison fixed when part of its results were known says so in its status.
+# 13.3's pooled estimates (20 October 09:14): every unit's results but SOFC-Exp's folds were
+# committed (MuLMS's MR3 18 October 00:48, MaterioMiner's 17 October); 13.4's three-corpus
+# estimate (13:53) and week 14's MuLMS comparisons over all ten seeds (29 October): the
+# screen's seeds 0 to 200 of MR6 + names (13:35) and MR6 (08:11) were recorded on 20 October
+NEW_UNITS_13_3 = 'sofc_folds'
+SCREEN_KNOWN = f'when seeds {SCREEN_SEEDS[0]}–{SCREEN_SEEDS[-1]} were known from the screen'
 
 # a row's week: the protocol or amendment that named its comparison, with its commit (UTC)
 W10 = ('10', '17 October 20:21')
@@ -456,7 +463,8 @@ def corpus_label(corpus, n):
 def pooled_rows(entry, label, status, week):
     """The rows of a week13.pooled entry: the pooled comparison over its corpora's units
     (10-seed means), and its with_<corpus> extensions (SOFC-Exp's folds: 13.4's three-corpus
-    estimate, pre-specified; any other post hoc)."""
+    estimate, pre-specified when the screen's seeds of its MuLMS units were known; any other
+    post hoc)."""
     counts = [(c, v['n_units']) for c, v in entry['corpora'].items()]
     units = [u for v in entry['corpora'].values() for u in v.get('units', {})]
     rows = [row(week, pooled_label(counts), label, status, entry['minus_crf'], units=units)]
@@ -466,10 +474,21 @@ def pooled_rows(entry, label, status, week):
             more = [(c, v['n_units']) for c, v in ext['corpora'].items()]
             extra = list((ext.get(corpus) or {}).get('units', {}))
             folds_13_4 = corpus == 'sofc_folds'
+            mulms_units = dict(more).get('mulms')
+            known = f', {SCREEN_KNOWN} for its {mulms_units} MuLMS units' if mulms_units else ''
             rows.append(row(W13_4 if folds_13_4 else week, pooled_label(more), label,
-                            'pre-specified (13.4)' if folds_13_4 else 'post hoc',
+                            f'pre-specified (13.4){known}' if folds_13_4 else 'post hoc',
                             ext['minus_crf'], units=units + extra))
     return rows
+
+
+def known_13_3(entry):
+    """13.3's status for a pooled estimate: pre-specified, when the results of every unit but
+    SOFC-Exp's folds were known."""
+    counts = {c: v['n_units'] for c, v in entry['corpora'].items()}
+    n = sum(counts.values())
+    return (f'pre-specified (13.3), when {n - counts.get(NEW_UNITS_13_3, 0)} of its {n} '
+            "units' results were known")
 
 
 def robust_rows(robust, keys):
@@ -565,6 +584,8 @@ def week13(analysis, robust):
             continue
         if e.get('status') == 'decision':
             status = f"D5: {pooled_verdict(e)}"
+        elif status == 'pre-specified (13.3)':
+            status = known_13_3(e)
         rows += pooled_rows(e, label, status, W13)
     return rows + robust_rows(robust, ('names_vs_crf', 'names_vs_mr3', 'mr3_vs_crf'))
 
@@ -602,9 +623,12 @@ def week14(analysis, robust):
                         pooled['minus_control'], units=units))
     loses = {c: v.get('loses') for c, v in ((pooled or {}).get('corpora') or {}).items()}
 
+    def prespecified(corpus):
+        return f'pre-specified, {SCREEN_KNOWN}' if corpus == 'mulms ten' else 'pre-specified'
+
     def part_status(corpus):
         if corpus not in loses:
-            return 'pre-specified'
+            return prespecified(corpus)
         return ("D7's per-corpus condition: its interval "
                 + ('below 0' if loses[corpus] else 'not below 0'))
     parts = (('mulms', m.get('decision'), lambda n: mulms(n, DECISION_SEEDS)),
@@ -619,7 +643,7 @@ def week14(analysis, robust):
         if e and e.get('control'):
             c = e['control']
             rows += against_rows(W14, label(c['n_units']), c, 'MR6', ('crf', 'crf_mr'),
-                                 ('pre-specified', 'pre-specified'))
+                                 (prespecified(corpus),) * 2)
     mr6 = (analysis.get('week13') or {}).get('pooled', {}).get('crf_mr6')
     if mr6:
         rows += pooled_rows(mr6, 'MR6 − CRF head', 'post hoc', W14)

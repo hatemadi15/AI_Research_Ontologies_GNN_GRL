@@ -41,6 +41,7 @@ import statistics
 from ner_robustness import sign_flip_p
 
 ANALYSIS = 'ner_week5_seed_analysis.json'
+WEEK5 = 'ner_week5_comparisons.json'
 WEEK12 = 'ner_week12_comparisons.json'
 WEEK18 = 'ner_recall_matched.json'
 ROBUST = 'ner_robustness.json'
@@ -171,6 +172,23 @@ def pair_rho(a, b, rho=None):
     return rho.get('mulms', SHARED_POOL_RHO) if shared else 0.0
 
 
+def dependent_se(values, units, rho=None):
+    """Unrounded: the mean of `values`, the standard error of the mean when unit pairs are
+    correlated (pair_rho; see dependent_t), the sample variance and the pair correlations."""
+    n = len(values)
+    mean, s2 = statistics.fmean(values), statistics.variance(values)
+    rho = [pair_rho(units[i], units[j], rho) for i in range(n) for j in range(n) if i != j]
+    off = sum(rho)
+    return mean, math.sqrt(s2 / (1 - off / (n * (n - 1))) * (n + off) / n ** 2), s2, rho
+
+
+def dependent_lower(values, units, rho=None):
+    """The unrounded lower bound of dependent_t's 95% interval."""
+    from scipy import stats
+    mean, se, _, _ = dependent_se(values, units, rho)
+    return mean - float(stats.t.ppf(0.975, len(values) - 1)) * se
+
+
 def dependent_t(values, units, rho=None):
     """The t test of the mean of `values` when unit pairs are correlated (pair_rho): the
     variance of the mean S^2 / (1 - rho_bar) * (n + sum_ij rho_ij) / n^2 (sum over ordered pairs
@@ -178,10 +196,7 @@ def dependent_t(values, units, rho=None):
     the independent one and the number of correlated pairs."""
     from scipy import stats
     n = len(values)
-    mean, s2 = statistics.fmean(values), statistics.variance(values)
-    rho = [pair_rho(units[i], units[j], rho) for i in range(n) for j in range(n) if i != j]
-    off = sum(rho)
-    se = math.sqrt(s2 / (1 - off / (n * (n - 1))) * (n + off) / n ** 2)
+    mean, se, s2, rho = dependent_se(values, units, rho)
     t = mean / se
     half = float(stats.t.ppf(0.975, n - 1)) * se
     return {'mean_diff': round(mean, 2), 'ci95': [round(mean - half, 2), round(mean + half, 2)],
@@ -208,8 +223,9 @@ TIPPING = {'D3': 'materiominer', 'D4': 'materiominer', 'D5': 'materiominer',
 
 def tipping(rows, top=0.95, steps=60):
     """Post hoc: per passing decision, the correlation (of TIPPING's group; the others as in
-    pair_rho) at which its dependence-adjusted interval reaches 0, by bisection on [0, top]; 0
-    if it covers 0 without correlation, None if it stays above 0 up to `top`."""
+    pair_rho) at which its dependence-adjusted interval reaches 0, by bisection on [0, top] of
+    the unrounded lower bound (round 17: bisecting the rounded bound stopped where it read 0.00,
+    short of 0); 0 if it covers 0 without correlation, None if it stays above 0 up to `top`."""
     out = {}
     for r in rows:
         group = TIPPING.get(r['decision'])
@@ -218,7 +234,7 @@ def tipping(rows, top=0.95, steps=60):
         units = layout(r['n_units'])
 
         def lower(x):
-            return dependent_t(r['per_unit'], units, {group: x})['ci95'][0]
+            return dependent_lower(r['per_unit'], units, {group: x})
         if lower(0.0) <= 0:
             out[r['decision']] = {'group': group, 'rho': 0.0}
             continue
@@ -262,13 +278,18 @@ def p_of(entry, n=None):
     return round(float(2 * stats.t.sf(abs(mean / se), n - 1)), 4)
 
 
-def inferences(analysis, robust, matched, lexicon, mentions):
-    """Post hoc (round 16): the two-sided t test P values of the reported, non-decision
-    comparisons from which the paper draws an inference, each with its stored interval; the
-    unseen-name recall and precision on MuLMS (ner_mentions.json `chain`) store no per-unit
-    values, so theirs come from the interval and n = 7."""
+def inferences(analysis, robust, matched, lexicon, mentions, week12=None, week5=None):
+    """Post hoc (round 16; round 17 added the readings of week 18 from the nearest recall, the
+    best bias for the other unseen names and the types at D = 0, and, given the week-12 and
+    week-5 comparisons, the self-training votes against MR3's and multi-task training's gain on
+    MaterioMiner): the two-sided t test P values of the reported, non-decision comparisons from
+    which the paper draws an inference, each with its stored interval; the unseen-name recall
+    and precision on MuLMS (ner_mentions.json `chain`) store no per-unit values, so theirs come
+    from the interval and n = 7."""
     chain = mentions['chain']['mulms_leave_one_subfield_out']['crf_mrm_topic6']['decision']['unseen']
     split = lexicon['mulms']['comparisons']['names_vs_mr6']
+    nearest = matched['post_hoc_nearest']['decisions']
+    types = matched['post_hoc_types']['minus_mr6_at_0']
 
     def part(key):
         return {'mean_diff': split[key]['mean_diff'], 'ci95': split[key]['ci95'],
@@ -285,7 +306,22 @@ def inferences(analysis, robust, matched, lexicon, mentions):
         'held_in_minus_out': part('in_minus_out'),
         'held_names_vs_best_bias': matched['post_hoc_curves']['names_minus_best']['recall_in'],
         'other_unseen_at_matched_bias': matched['prespecified']['recall_out'],
+        'd11_flagged_at_nearest_recall': nearest['18.1'],
+        'd12_flagged_at_nearest_recall': nearest['18.2'],
+        'other_unseen_vs_their_best_bias': matched['post_hoc_curves']['names_minus_best']['recall_out'],
+        'held_materials_at_0': types['MAT_in'],
+        'other_materials_at_0': types['MAT_out'],
+        'held_values_at_0': types['VALUE_in'],
+        'held_other_types_at_0': types['other_in'],
+        'mt_mr3_vs_crf_materiominer_fine':
+            analysis['week13']['pooled']['crf_mt_mr']['corpora']['fine']['minus_crf'],
     }
+    if week12:
+        entries['st3_votes_vs_mr3_votes_coarse'] = week12[
+            'ner_results_coarse_leave_one_paper_out_crf_st3_ens3_vs_crf_mr_ens3']['micro']
+    if week5:
+        entries['mt_vs_crf_materiominer_fine'] = week5[
+            'ner_results_fine_leave_one_paper_out_crf_mt']['micro']
     out = {}
     for key, e in entries.items():
         n = len(e.get('per_run') or e.get('per_unit') or []) or 7
@@ -354,7 +390,8 @@ def main(argv=None):
     parser.add_argument('--out', default=None)
     args = parser.parse_args(argv)
     inputs = [load(os.path.join(args.results, name)) for name in (ANALYSIS, WEEK12, WEEK18, ROBUST)]
-    lexicon, mentions = (load(os.path.join(args.results, name)) for name in (LEXICON, MENTIONS))
+    lexicon, mentions, week5 = (load(os.path.join(args.results, name))
+                                for name in (LEXICON, MENTIONS, WEEK5))
     rows = decision_tests(*inputs)
     out = {'note': ('Reporting only, computed on 1 November 2026 for the journal: the decisions '
                     'were taken by the registered interval rule, which is a one-sided t test at '
@@ -383,7 +420,7 @@ def main(argv=None):
                                           "MuLMS's decision seeds (decision) and all ten (ten)"),
                                  'mr3_vs_crf': reported(inputs[3]),
                                  'inferences': inferences(inputs[0], inputs[3], inputs[2],
-                                                          lexicon, mentions),
+                                                          lexicon, mentions, inputs[1], week5),
                                  'mr3_materiominer_decision_seeds': mr3_materiominer(args.results),
                                  'mr3_materiominer_all_seeds': mr3_materiominer(
                                      args.results, range(0, 1000, 100)),

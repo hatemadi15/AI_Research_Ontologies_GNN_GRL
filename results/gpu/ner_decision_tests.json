@@ -706,7 +706,7 @@
    },
    "D5": {
     "group": "materiominer",
-    "rho": 0.44
+    "rho": 0.45
    },
    "D5'": {
     "group": "materiominer",
@@ -847,6 +847,96 @@
     ],
     "n_units": 7,
     "p_two_sided": 0.0168
+   },
+   "d11_flagged_at_nearest_recall": {
+    "mean_diff": 8.63,
+    "ci95": [
+     3.35,
+     13.9
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.0071
+   },
+   "d12_flagged_at_nearest_recall": {
+    "mean_diff": 1.37,
+    "ci95": [
+     -0.66,
+     3.41
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.1499
+   },
+   "other_unseen_vs_their_best_bias": {
+    "mean_diff": -4.16,
+    "ci95": [
+     -5.82,
+     -2.5
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.0009
+   },
+   "held_materials_at_0": {
+    "mean_diff": 7.98,
+    "ci95": [
+     2.15,
+     13.82
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.0155
+   },
+   "other_materials_at_0": {
+    "mean_diff": 0.89,
+    "ci95": [
+     -3.48,
+     5.27
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.635
+   },
+   "held_values_at_0": {
+    "mean_diff": 1.74,
+    "ci95": [
+     -1.16,
+     4.65
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.1921
+   },
+   "held_other_types_at_0": {
+    "mean_diff": 9.8,
+    "ci95": [
+     3.34,
+     16.25
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.0099
+   },
+   "mt_mr3_vs_crf_materiominer_fine": {
+    "mean_diff": 6.73,
+    "ci95": [
+     6.03,
+     7.43
+    ],
+    "n_units": 4,
+    "p_two_sided": 0.0001
+   },
+   "st3_votes_vs_mr3_votes_coarse": {
+    "mean_diff": -1.32,
+    "ci95": [
+     -1.85,
+     -0.8
+    ],
+    "n_units": 4,
+    "p_two_sided": 0.004
+   },
+   "mt_vs_crf_materiominer_fine": {
+    "mean_diff": 3.72,
+    "ci95": [
+     0.57,
+     6.87
+    ],
+    "n_units": 4,
+    "p_two_sided": 0.0331
    }
   },
   "mr3_materiominer_decision_seeds": {

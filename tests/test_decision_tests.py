@@ -126,11 +126,32 @@ def test_committed_tipping_inferences_and_readings():
                                                             for n in names)
     rows = dt.decision_tests(analysis, week12, matched, robust)
     tip = dt.tipping(rows)
-    assert {k: v['rho'] for k, v in tip.items()} == {'D3': 0.23, 'D4': 0.28, 'D5': 0.44,
+    assert {k: v['rho'] for k, v in tip.items()} == {'D3': 0.23, 'D4': 0.28, 'D5': 0.45,
                                                      "D5'": 0.54, 'D11': 0.53}
-    inf = dt.inferences(analysis, robust, matched, lexicon, mentions)
+    # round 17: the bisection runs on the unrounded bound, which changes sign within 0.005 of
+    # the reported correlation (D5's bound is +0.011 at 0.44, the rounded one's stopping point)
+    by = {r['decision']: r for r in rows}
+    for decision, e in tip.items():
+        r, group = by[decision], dt.TIPPING[decision]
+        units = dt.layout(r['n_units'])
+        assert dt.dependent_lower(r['per_unit'], units, {group: e['rho'] - 0.005}) > 0
+        assert dt.dependent_lower(r['per_unit'], units, {group: e['rho'] + 0.005}) < 0
+    assert dt.dependent_lower(by['D5']['per_unit'], dt.layout(11), {'materiominer': 0.44}) > 0.005
+    week5 = (dt.load(os.path.join(RESULTS, dt.WEEK5))
+             if os.path.exists(os.path.join(RESULTS, dt.WEEK5)) else None)
+    inf = dt.inferences(analysis, robust, matched, lexicon, mentions, week12, week5)
     assert inf['held_recall_names_vs_mr6']['p_two_sided'] == 0.0044
+    assert inf['st3_votes_vs_mr3_votes_coarse']['p_two_sided'] == 0.004
+    assert inf['mt_mr3_vs_crf_materiominer_fine']['p_two_sided'] == 0.0001
+    if week5:
+        assert inf['mt_vs_crf_materiominer_fine']['p_two_sided'] == 0.0331
     assert inf['mr3_vs_crf_16']['n_units'] == 16 and inf['mr3_vs_crf_16']['p_two_sided'] == 0.0184
+    assert {k: inf[k]['p_two_sided'] for k in (
+        'mr6_vs_crf_mulms_decision', 'd11_flagged_at_nearest_recall',
+        'other_unseen_vs_their_best_bias', 'held_materials_at_0', 'held_other_types_at_0')} == {
+        'mr6_vs_crf_mulms_decision': 0.0424, 'd11_flagged_at_nearest_recall': 0.0071,
+        'other_unseen_vs_their_best_bias': 0.0009, 'held_materials_at_0': 0.0155,
+        'held_other_types_at_0': 0.0099}
     if not os.path.exists(os.path.join(RESULTS, 'ner_results_fine_leave_one_paper_out_crf_mr_m300.json')):
         pytest.skip('run files not present')
     every = dt.mr3_materiominer(RESULTS, range(0, 1000, 100))

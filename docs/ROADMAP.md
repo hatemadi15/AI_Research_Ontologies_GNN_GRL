@@ -6068,6 +6068,64 @@ applied:
   - Releasing per-unit lexicon-membership flags, and the author's items
     (affiliation, AI assistant's name, DOI, companion preprint).
 
+*Paper A, review round 17 (2 November): a number audit and a consistency
+check of `0a8a150`.* Both found the builds reproducible: the figures,
+tables, decision tests, rendered copies and PDF text regenerate
+identically from the results. Every finding was checked against the
+record before it was applied:
+
+- **D5's tipping correlation is 0.45, not 0.44.** `tipping` bisected on
+  the lower bound as `dependent_t` rounds it, so it stopped where the
+  bound read 0.00, short of 0. It now bisects on the unrounded bound
+  (`dependent_lower`): D5's bound is +0.011 at 0.44 and crosses 0 at
+  0.448. D3 (0.23), D4 (0.28), D5′ (0.54) and D11 (0.53) are unchanged.
+  The round-16 note above keeps the old figure as it was written.
+- **Status labels that called partly known comparisons pre-specified**
+  (`names_route_record.py`, Table S11):
+  - MR3's 16-unit and multi-task MR3's 9-unit pools: "when 11 of its 16"
+    and "when 4 of its 9 units' results were known". The main text already
+    said so; the SI's labels had not followed.
+  - The names' 16-unit pool (13.4, 20 October 13:53): seeds 0–200 of its 7
+    MuLMS units were recorded at 13:35 (`5f844bd`).
+  - The MuLMS comparisons over all ten seeds pre-specified on 29 October
+    (rows 81, 86 and 87): seeds 0–200 were known from the screen, MR6's
+    since 08:11 (`cf77d6b`). The protocol (`2886267`) says so itself.
+  - The main text, Table 3's caption and the Introduction's definition of
+    pre-specified say the same.
+- **P values at every inference** (`inferences`, now 21 entries):
+  - MR6 over the CRF head on MuLMS's decision seeds, 0.042;
+  - D5 with the coarse-grained papers, 0.044;
+  - MR3 on MaterioMiner's seven decision seeds, 0.045 fine-grained and
+    0.10 coarse-grained;
+  - D11 and D12 with the flagged subfields at the nearest recall, 0.007
+    and 0.15;
+  - the other unseen names against MR6's best bias for them, 0.0009;
+  - at D = 0, by type: held materials names 0.015, other materials names
+    0.63, held values 0.19, held names of other types 0.010;
+  - the self-training votes against MR3's, coarse-grained, 0.004;
+  - multi-task training over the CRF head on MaterioMiner, fine-grained,
+    0.033, and with MR3, 8 × 10⁻⁵.
+
+  Three P values that the Results gave were added where the Discussion
+  repeats the inference (0.004, 0.011 and 0.017).
+- **Reading order.** D5′ is defined where readers first meet it. The
+  subfields' short names are spelled out at first use, with a pointer to
+  Table 1. In the Statistics, D5′'s parenthetical follows D5, and D11
+  carries its qualification. The correlation is "the held-out share of
+  the data", replacing "n_test/n", whose n meant two things.
+- **SI.** Note 12 now lists the post hoc readings of 1 November. The
+  24 October scenario's +2.67 [+0.09, +5.25] is said to equal the post
+  hoc estimate with the coarse-grained papers: D4's mean is the +1.77 it
+  assumed. Table S3 and Table 5 now describe F1 from counts the same way,
+  and the Table S11 legend defines the new labels.
+- **American spelling** where British forms had stayed: license(s),
+  program, gray, analyzes, equaled.
+- **References.** The Lison et al. entry gains its publisher. Loshchilov
+  and Hutter become "Proc. 7th International Conference on Learning
+  Representations (ICLR 2019)". The NSURL title's spaced hyphen becomes
+  an en dash.
+- **Not done:** the same author items and scope questions as round 16.
+
 ### Week 17 protocol: the harvested names on the strongest base (fixed before any run, 31 October, 19:10 UTC)
 
 *Why, and when.* The round-6 reviews of paper A (31 October) listed as a

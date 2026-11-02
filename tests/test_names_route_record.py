@@ -305,6 +305,8 @@ def test_week13_label_propagation_folds_and_the_pooled_estimates():
                              'coarse': {'units': {}}, 'minus_crf': _d(2.67, 0.09, 5.25)}),
             'crf_mr': _pooled('reported', (('mulms', SUBFIELDS), ('fine', PAPERS),
                                            ('sofc_folds', FOLDS)), 1.46, 0.28, 2.64),
+            'crf_mt_mr': _pooled('reported', (('fine', PAPERS), ('sofc_folds', FOLDS)),
+                                 2.93, 0.14, 5.72),
             'crf_mrs': _pooled('reported', (('mulms', SUBFIELDS), ('fine', PAPERS)), 2.39, 0.71, 4.06),
             'crf_mr6': _pooled('reported', (('mulms', SUBFIELDS), ('fine', PAPERS)), 2.56, 0.94, 4.18)}}}
     rows = nr.week13(analysis, None)
@@ -330,12 +332,19 @@ def test_week13_label_propagation_folds_and_the_pooled_estimates():
     eleven = 'pooled, 11 units: MuLMS 7 (0–900) + MaterioMiner fine 4'
     assert status[(eleven, 'MR6 + names − CRF head')] == (
         nr.W13, 'D5: passes (neither corpus below 0)')
+    # round 17: a pooled estimate fixed when part of its results were known says which
     assert status[('pooled, 16 units: MuLMS 7 (0–900) + MaterioMiner fine 4 + SOFC-Exp 5',
-                   'MR6 + names − CRF head')] == (nr.W13_4, 'pre-specified (13.4)')
+                   'MR6 + names − CRF head')] == (
+        nr.W13_4, 'pre-specified (13.4), when seeds 0–200 were known from the screen for its 7 '
+                  'MuLMS units')
     assert status[('pooled, 11 units: MuLMS 7 (0–900) + MaterioMiner coarse 4',
                    'MR6 + names − CRF head')][1] == 'post hoc'      # an extension 13.4 never named
     assert status[('pooled, 16 units: MuLMS 7 (0–900) + MaterioMiner fine 4 + SOFC-Exp 5',
-                   'MR3 − CRF head')][1] == 'pre-specified (13.3)'
+                   'MR3 − CRF head')][1] == \
+        "pre-specified (13.3), when 11 of its 16 units' results were known"
+    assert status[('pooled, 9 units: MaterioMiner fine 4 + SOFC-Exp 5',
+                   'multi-task + MR3 − CRF head')][1] == \
+        "pre-specified (13.3), when 4 of its 9 units' results were known"
     assert status[(eleven, "names from the other subfields' sentences (MuLMS) and the fatigue "
                            "corpus's (MaterioMiner) − CRF head")][1] == 'post hoc'
     assert not any(r['comparison'] == 'MR6 − CRF head' for r in rows)    # MR6's pooled: week 14
@@ -444,6 +453,19 @@ def test_week14_d7_its_parts_mr6_d8_the_mixed_corpus_and_the_ablations():
     assert len(rows[0]['units']) == 11 and rows[0]['votes'] == {}
     assert nr.cell(rows[1]['votes']['micro'], rows[1]['units']) == f'+0.35 [{M}1.67, +2.36], 7/7'
     assert nr.week14({}, None) == []
+
+
+def test_week14_mulms_ten_seed_rows_say_the_screen_seeds_were_known():
+    """Round 17: the MuLMS comparisons over all ten seeds were pre-specified on 29 October,
+    when the screen's seeds 0 to 200 of both MR6 + names and MR6 were recorded."""
+    ten = _against('crf_mrm_topic6', ('crf_mr6',), 7, SUBFIELDS, nr.TEN)
+    ten['control'] = _against('crf_mr6', ('crf', 'crf_mr'), 7, SUBFIELDS)
+    rows = nr.week14({'week14': {'copies': {'mulms': {'ten_seeds': ten}}}}, None)
+    known = 'pre-specified, when seeds 0–200 were known from the screen'
+    assert [(r['corpus'], r['comparison'], r['status']) for r in rows] == [
+        ('MuLMS, 7 subfields (seeds 0–900)', 'MR6 + names − MR6', known),
+        ('MuLMS, 7 subfields (seeds 0–900)', 'MR6 − CRF head', known),
+        ('MuLMS, 7 subfields (seeds 0–900)', 'MR6 − MR3', known)]
 
 
 def test_week17_d9_d10_and_the_reported_comparisons():

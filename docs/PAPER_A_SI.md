@@ -150,10 +150,10 @@ NUM 260, UNIT 91, RANGE 18.
 **The unlabeled corpora.** Their construction is in the Methods
 (*Systems*). Per corpus: 290–368 articles with text (292–370 selected),
 published between 1996 and 2026 (over 99% from 2009 on), 63–90% of them
-CC BY and 10–33% CC BY-NC or ND (0.3–4% without a licence field), the
+CC BY and 10–33% CC BY-NC or ND (0.3–4% without a license field), the
 largest journal holding 13–63% of the articles (MDPI Materials 52% of the
 steel corpus and 63% of the fatigue corpus). Each report records the
-query, the counts at every stage, the article identifiers with licences
+query, the counts at every stage, the article identifiers with licenses
 and the corpus's SHA-256; a rebuild that differs is detected by the hash.
 
 ## Supplementary Note 4: the lexicon's settings
@@ -385,8 +385,9 @@ recorded:
 - *Mention replacement alone* (week 10, 17 October 20:21): +2.10 [−0.31,
   +4.51] against the CRF head on MuLMS at 10 seeds, no; its votes against
   the CRF head's votes, +2.71 [+0.22, +5.20], pass. On MaterioMiner it had
-  passed at both granularities (+2.77 and +1.28; Table S1, week 7 part
-  2b).
+  passed at both granularities (+2.77 and +1.28, averaging in the three
+  seeds of its screen; on the other seven, post hoc, +2.57 [+0.10, +5.03]
+  and +1.73 [−0.63, +4.08]; Table S1, week 7 part 2b).
 - *Names from the other subfields' unlabeled sentences* (week 11, 18
   October 01:13): the
   three teachers tag the labeled subfields' sentences outside the pool,
@@ -796,7 +797,7 @@ the pushes, one `w11a` job (graphene) and one `w11b` job
 (coarse-grained, paper s11340) ran on the real data with a tiny random
 model on the CPU; in the `w11a` job the random model found no silver
 sentence and the teacher of seed 0 reproduced week 10's tiny-model CRF
-run on graphene (1.11), and the `w11b` job's 963 copies equalled those
+run on graphene (1.11), and the `w11b` job's 963 copies equaled those
 of week 7's mention-replacement run of seed 0 on that paper. On a tiny
 random model, every existing option that the week-11 change touched
 wrote byte-identical results files.
@@ -871,9 +872,9 @@ The protocol required, before any number was used, identical smoke
 repeats, each job's teachers equal to week 10's `crf_m0`, `_m100` and
 `_m200` on their subfield, the bundle's corpora matching the reports'
 SHA-256 (checked again by the runner), and every run recording
-`silver_filter` and `names`. Every teacher of every job equalled the
+`silver_filter` and `names`. Every teacher of every job equaled the
 stored CRF-head run of its seed in `w12c` (version 4), in `w12e` and in
-`w12b:mrm6`, and on MaterioMiner every teacher of `w12d:mrm6` equalled
+`w12b:mrm6`, and on MaterioMiner every teacher of `w12d:mrm6` equaled
 the stored week-5 run of its seed on its paper. From the resume fix on,
 every run recorded its own corpus's SHA-256. At the reset of 24 October
 the bundle's `BUNDLE.json` named `3ac85a8`, the SOFC corpus's SHA-256
@@ -1009,7 +1010,7 @@ minute `w13a` was pushed (version 5); its note is headed 12:30. `w13a`
 took 293.4 minutes and `w13c` 549.1, its multi-task jobs 77 to 120
 minutes each (mean 103) instead of the 75 estimated. In `w13b` (`ner-gpu-jobs-d`,
 version 13; pushed on 25 October at 01:01, done at 11:21 after 619.8
-minutes), in both lanes every fold's three teachers equalled the stored
+minutes), in both lanes every fold's three teachers equaled the stored
 week-8 CRF-head runs of their seeds, and the two lanes harvested the
 same silver mentions per fold (21,376–48,943, 4,835–9,290 distinct,
 20.3–33.4% of the fold's unseen test names). Lane 0's job took 615.2
@@ -1023,10 +1024,10 @@ after the reset of 31 October. With 6.5 of the week's 45 hours unused
 after `w14a` and both notebooks idle, `w14b` was pushed on 29 October at
 18:00 (`ner-gpu-jobs-d`, version 14) from the bundle of `8919928`, the
 notes recording a change of schedule only. It ran from 18:00 to 22:20
-(4.3 session hours). In `w14b` every lane's teachers equalled week 10's
+(4.3 session hours). In `w14b` every lane's teachers equaled week 10's
 on their subfield, and every run carried its mixed corpus's SHA-256 and
 the mention filter. In `w14c` (31 October, 00:14 to about 09:55, 9.7
-session hours) each variant's teachers equalled week 10's on their
+session hours) each variant's teachers equaled week 10's on their
 subfield, and every run carried its topic corpus's SHA-256, the mention
 filter and the setting it changed. The three new options defaulted to
 the earlier behavior byte for byte on the tiny model.
@@ -1066,7 +1067,7 @@ the topic adds are what the gain needs.
 run on paper s11340, was identical on both heads (54.05 fine-grained,
 62.29 coarse-grained, 887 augmented sentences, the same predictions), so
 the week-17 code had left the plain multi-task and mention-replacement
-paths as they were. Every names job's three teachers equalled the stored
+paths as they were. Every names job's three teachers equaled the stored
 `crf_mt` runs' test F1, validation F1 and best epoch on both heads. Two
 fixes were made before any week-17 number was read: `collect --merge`
 refused the files because each session's copy carried the means of its
@@ -1189,9 +1190,18 @@ which the protocol of 20 October (09:14) records (Methods, *Evaluation protocol*
 the same protocol's +2.34 [+0.94,
 +3.75] with the fine-grained papers, which row 75 gives as +2.35 from
 per-unit values rounded differently; the reading of 20 October (18:42),
-which put D5 at about [+0.1, +5.9] from the screen's values; and the two
+which put D5 at about [+0.1, +5.9] from the screen's values; the two
 scenarios of 24 October with an assumed MaterioMiner gain, +2.67 [+0.09,
-+5.25] and +2.49 [−0.13, +5.11] (Supplementary Note 11). The tables leave out
++5.25] and +2.49 [−0.13, +5.11] (Supplementary Note 11); and the post hoc
+readings computed on 1 November for reporting (`post_hoc_reported` of
+`ner_decision_tests.json`): D5 with MaterioMiner's coarse-grained papers
+(D4's per-unit values) in place of the fine-grained ones, +2.67 [+0.09,
++5.25] (P = 0.044), the same numbers as the first scenario, whose assumed
+gain, +1.77, D4's mean turned out to be; MR3 against the CRF head on
+MaterioMiner's seven seeds its screen did not use, +2.57 [+0.10, +5.03]
+fine-grained (P = 0.045) and +1.73 [−0.63, +4.08] coarse-grained (P =
+0.10); and the P values of the comparisons from which the main text
+draws an inference. The tables leave out
 the per-type analyses (Supplementary Note 6), the lexicon split
 (Supplementary Note 5), the multi-task names' recall and precision on the
 unseen test names against their control (pre-specified on 31 October,
@@ -1214,8 +1224,10 @@ hoc. An empty cell: the results do not hold that quantity, or, for the
 macro and weighted cells of the other pooled rows (70 to 73), it was not
 computed. A status such as 10.1 names a decision outside Table 2 by its
 week and number (10.1 is week 10's decision 1; 13.1a as its protocol
-names it; 13.1d names two decisions, one per granularity), and
-"pre-specified (13.3)" a comparison pre-specified with that decision.
+names it; 13.1d names two decisions, one per granularity),
+"pre-specified (13.3)" a comparison pre-specified with that decision, and
+a status with "when … were known" names the results already recorded
+when the comparison was fixed.
 
 | # | week (protocol, UTC) | corpus, units (MuLMS seeds) | comparison (system − reference) | status | Δ micro F1 [95% CI], units above 0 | Δ macro F1 [95% CI] | Δ weighted F1 [95% CI] | Δ strict IOB2 micro F1 [95% CI] | votes: Δ micro F1 [95% CI], units above 0 |
 |---|---|---|---|---|---|---|---|---|---|
@@ -1288,9 +1300,9 @@ names it; 13.1d names two decisions, one per granularity), and
 | 67 | 13 (amendment 13.4, 20 October 13:53) | SOFC-Exp, 5 folds | MR6 + names − CRF head | D6: no | −0.04 [−1.21, +1.14], 2/5 | −0.17 [−1.14, +0.81] | −0.04 [−1.12, +1.05] | −0.04 [−1.21, +1.14] |  |
 | 68 | 13 (amendment 13.4, 20 October 13:53) | SOFC-Exp, 5 folds | MR6 + names − MR3 | pre-specified | +0.45 [+0.04, +0.86], 5/5 | +0.33 [−0.07, +0.73] | +0.43 [+0.03, +0.82] | +0.45 [+0.04, +0.86] |  |
 | 69 | 13 (20 October 09:14) | pooled, 11 units: MuLMS 7 (0–900) + MaterioMiner fine 4 | MR6 + names − CRF head | D5: passes (neither corpus below 0) | +3.58 [+0.95, +6.21], 9/11 | +3.92 [+2.87, +4.98] | +4.56 [+2.24, +6.88] |  |  |
-| 70 | 13 (amendment 13.4, 20 October 13:53) | pooled, 16 units: MuLMS 7 (0–900) + MaterioMiner fine 4 + SOFC-Exp 5 | MR6 + names − CRF head | pre-specified (13.4) | +2.45 [+0.50, +4.40], 11/16 |  |  |  |  |
-| 71 | 13 (20 October 09:14) | pooled, 16 units: MuLMS 7 (0–900) + MaterioMiner fine 4 + SOFC-Exp 5 | MR3 − CRF head | pre-specified (13.3) | +1.46 [+0.28, +2.64], 11/16 |  |  |  |  |
-| 72 | 13 (20 October 09:14) | pooled, 9 units: MaterioMiner fine 4 + SOFC-Exp 5 | multi-task + MR3 − CRF head | pre-specified (13.3) | +2.93 [+0.14, +5.72], 5/9 |  |  |  |  |
+| 70 | 13 (amendment 13.4, 20 October 13:53) | pooled, 16 units: MuLMS 7 (0–900) + MaterioMiner fine 4 + SOFC-Exp 5 | MR6 + names − CRF head | pre-specified (13.4), when seeds 0–200 were known from the screen for its 7 MuLMS units | +2.45 [+0.50, +4.40], 11/16 |  |  |  |  |
+| 71 | 13 (20 October 09:14) | pooled, 16 units: MuLMS 7 (0–900) + MaterioMiner fine 4 + SOFC-Exp 5 | MR3 − CRF head | pre-specified (13.3), when 11 of its 16 units' results were known | +1.46 [+0.28, +2.64], 11/16 |  |  |  |  |
+| 72 | 13 (20 October 09:14) | pooled, 9 units: MaterioMiner fine 4 + SOFC-Exp 5 | multi-task + MR3 − CRF head | pre-specified (13.3), when 4 of its 9 units' results were known | +2.93 [+0.14, +5.72], 5/9 |  |  |  |  |
 | 73 | 13 (20 October 09:14) | pooled, 11 units: MuLMS 7 (0–900) + MaterioMiner fine 4 | names from the other subfields' sentences (MuLMS) and the fatigue corpus's (MaterioMiner) − CRF head | post hoc | +2.39 [+0.71, +4.06], 9/11 |  |  |  |  |
 | 74 | 13 (20 October 09:14) | pooled, 11 units: MuLMS 7 (0–900) + MaterioMiner fine 4 | MR6 + names − MR3 | post hoc | +1.23 [−0.22, +2.68], 8/11 | +1.73 [+0.84, +2.61] | +1.53 [+0.26, +2.81] |  |  |
 | 75 | 13 (20 October 09:14) | pooled, 11 units: MuLMS 7 (0–900) + MaterioMiner fine 4 | MR3 − CRF head | post hoc | +2.35 [+0.94, +3.75], 10/11 | +2.19 [+1.25, +3.14] | +3.02 [+1.58, +4.47] |  |  |
@@ -1299,13 +1311,13 @@ names it; 13.1d names two decisions, one per granularity), and
 | 78 | 13 (20 October 09:14) | pooled, 11 units: MuLMS 7 (300–900) + MaterioMiner fine 4 | MR3 − CRF head | post hoc | +2.46 [+1.00, +3.91], 11/11 | +2.56 [+1.56, +3.55] | +3.22 [+1.88, +4.57] |  |  |
 | 79 | 14 (29 October 12:07) | pooled, 11 units: MuLMS 7 (300–900) + MaterioMiner fine 4 | MR6 + names − MR6 | D7: no (neither corpus below 0) | +0.80 [−0.66, +2.26], 7/11 | +0.83 [−0.01, +1.67] | +0.89 [−0.40, +2.18] |  |  |
 | 80 | 14 (29 October 12:07) | MuLMS, 7 subfields (seeds 300–900) | MR6 + names − MR6 | D7's per-corpus condition: its interval not below 0 | +0.51 [−1.51, +2.53], 4/7 | +0.53 [−0.56, +1.62] | +0.84 [−1.04, +2.71] | +0.51 [−1.51, +2.53] | +0.35 [−1.67, +2.36], 3/7 |
-| 81 | 14 (29 October 12:07) | MuLMS, 7 subfields (seeds 0–900) | MR6 + names − MR6 | pre-specified | +0.85 [−1.46, +3.17], 3/7 | +0.98 [−0.36, +2.32] | +1.35 [−0.82, +3.51] | +0.85 [−1.46, +3.17] | +0.74 [−1.47, +2.95], 3/7 |
+| 81 | 14 (29 October 12:07) | MuLMS, 7 subfields (seeds 0–900) | MR6 + names − MR6 | pre-specified, when seeds 0–200 were known from the screen | +0.85 [−1.46, +3.17], 3/7 | +0.98 [−0.36, +2.32] | +1.35 [−0.82, +3.51] | +0.85 [−1.46, +3.17] | +0.74 [−1.47, +2.95], 3/7 |
 | 82 | 14 (29 October 12:07) | MaterioMiner fine, 4 papers | MR6 + names − MR6 | D7's per-corpus condition: its interval not below 0 | +1.29 [−2.51, +5.10], 3/4 | +1.36 [−0.80, +3.51] | +0.99 [−2.20, +4.18] | +1.29 [−2.51, +5.10] | +0.94 [−1.60, +3.49], 3/4 |
 | 83 | 14 (29 October 12:07) | MaterioMiner coarse, 4 papers | MR6 + names − MR6 | pre-specified | +0.70 [−1.60, +3.00], 3/4 | −0.43 [−3.87, +3.00] | +0.26 [−1.74, +2.25] | +0.70 [−1.60, +3.00] | +1.06 [−0.62, +2.74], 3/4 |
 | 84 | 14 (29 October 12:07) | MuLMS, 7 subfields (seeds 300–900) | MR6 − CRF head | pre-specified | +2.68 [+0.13, +5.23], 6/7 | +3.25 [+2.60, +3.90] | +3.33 [+1.02, +5.65] | +2.68 [+0.13, +5.23] | +2.88 [−0.03, +5.80], 6/7 |
 | 85 | 14 (29 October 12:07) | MuLMS, 7 subfields (seeds 300–900) | MR6 − MR3 | pre-specified | +0.41 [−0.35, +1.17], 5/7 | +0.56 [−0.40, +1.53] | +0.34 [−0.21, +0.88] | +0.41 [−0.35, +1.17] | +0.22 [−0.94, +1.38], 4/7 |
-| 86 | 14 (29 October 12:07) | MuLMS, 7 subfields (seeds 0–900) | MR6 − CRF head | pre-specified | +2.33 [−0.27, +4.92], 6/7 | +2.86 [+2.01, +3.71] | +2.96 [+0.65, +5.27] | +2.33 [−0.27, +4.92] | +2.54 [−0.39, +5.47], 6/7 |
-| 87 | 14 (29 October 12:07) | MuLMS, 7 subfields (seeds 0–900) | MR6 − MR3 | pre-specified | +0.23 [−0.39, +0.85], 5/7 | +0.74 [−0.07, +1.56] | +0.28 [−0.55, +1.10] | +0.23 [−0.39, +0.85] | −0.17 [−0.94, +0.59], 2/7 |
+| 86 | 14 (29 October 12:07) | MuLMS, 7 subfields (seeds 0–900) | MR6 − CRF head | pre-specified, when seeds 0–200 were known from the screen | +2.33 [−0.27, +4.92], 6/7 | +2.86 [+2.01, +3.71] | +2.96 [+0.65, +5.27] | +2.33 [−0.27, +4.92] | +2.54 [−0.39, +5.47], 6/7 |
+| 87 | 14 (29 October 12:07) | MuLMS, 7 subfields (seeds 0–900) | MR6 − MR3 | pre-specified, when seeds 0–200 were known from the screen | +0.23 [−0.39, +0.85], 5/7 | +0.74 [−0.07, +1.56] | +0.28 [−0.55, +1.10] | +0.23 [−0.39, +0.85] | −0.17 [−0.94, +0.59], 2/7 |
 | 88 | 14 (29 October 12:07) | MaterioMiner fine, 4 papers | MR6 − CRF head | pre-specified | +2.98 [+0.09, +5.86], 4/4 | +2.71 [−0.80, +6.22] | +4.01 [+1.37, +6.64] | +2.98 [+0.09, +5.86] | +4.05 [+1.84, +6.27], 4/4 |
 | 89 | 14 (29 October 12:07) | MaterioMiner fine, 4 papers | MR6 − MR3 | pre-specified | +0.20 [−1.47, +1.88], 3/4 | +0.37 [−2.17, +2.92] | +0.38 [−1.13, +1.90] | +0.20 [−1.47, +1.88] | +0.44 [−1.94, +2.82], 2/4 |
 | 90 | 14 (29 October 12:07) | MaterioMiner coarse, 4 papers | MR6 − CRF head | pre-specified | +1.07 [−1.82, +3.97], 3/4 | +2.83 [−0.65, +6.32] | +2.09 [−0.55, +4.74] | +1.07 [−1.82, +3.97] | +1.08 [−1.68, +3.84], 4/4 |
@@ -1738,8 +1750,8 @@ by the registered rule, the interval above 0 (for D5 and D7 with neither
 corpus's interval below 0), which is the one-sided test at 2.5%. The
 last column (post hoc) gives the interval and two-sided P value with the
 units correlated where their training sets share documents, at the
-correlation n_test/n that the corrected resampled t-test assumes, 1/K
-in a design of K folds: 1/4 between MaterioMiner's papers, 1/5 between SOFC-Exp's folds,
+correlation that the corrected resampled t-test assumes, the held-out
+share of the data, 1/K in a design of K folds: 1/4 between MaterioMiner's papers, 1/5 between SOFC-Exp's folds,
 1/4 between the 5 of 21 pairs of MuLMS subfields whose training pools
 share an article, none otherwise or across corpora; the variance of the
 mean of n units is then S²/(1 − ρ̄)·(n + Σρ)/n², Σρ over the n(n − 1)

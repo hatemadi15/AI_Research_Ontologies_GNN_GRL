@@ -476,7 +476,12 @@ results store none), the companion study's MR3 decisions on MaterioMiner
 on the seeds its screen did not use (`mr3_materiominer_decision_seeds`,
 with `mr3_materiominer_all_seeds` reproducing the decisions) and D5 with
 the coarse-grained papers (`d5_coarse`); `post_hoc_dependence.tipping`
-gives the correlation at which each pass's adjusted interval reaches 0.
+gives the correlation at which each pass's adjusted interval reaches 0
+(round 17: found on the unrounded lower bound, which moved D5's from 0.44
+to 0.45; `inferences` grew to 21 entries, adding week 18's readings, the
+types at D = 0, the self-training votes against MR3's and multi-task
+training's gains on MaterioMiner, the last from
+`ner_week5_comparisons.json`).
 Table 10
 (`table10_lexicon.md`, paper A's Table S3 and Table 5) adds, post hoc, F1
 on each lexicon part and the paired F1 gain on the held names, from
