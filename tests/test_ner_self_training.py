@@ -735,7 +735,7 @@ def test_augment_names_parser_checks(tmp_path, capsys):
             ([*base, '--augment-mentions', '3'], '--augment-mentions is not available with '
                                                 '--self-train'),
             (['--crf', '--multi-task', '--self-train', corpus, '--teachers', '3',
-              '--augment-mentions', '3', '--augment-names'], 'not available with --multi-task'),
+              '--augment-mentions', '3', '--augment-names'], 'needs --silver-mentions'),
             (['--leave-one-paper-out', '--crf', '--self-train', 'unused', '--teachers', '3',
               '--augment-mentions', '3', '--augment-names'], 'needs --teachers and --train-pool'),
             (['--granularity', 'mulms', '--leave-one-subfield-out', '--train-pool', '400',

@@ -191,12 +191,21 @@ Week 14 (the ablations that make the paper; ROADMAP §4, week 14):
           corpus of the held-out subfield (build_mixed_corpus.py, in the bundle as
           topic_mixed_<subfield>_sentences.txt; crf_mrm_mixed6_m<N>), seed offsets 300 to
           900, w12b's lanes (each trains the teachers and 3 or 4 of the students)
+  w15a    week 15: the lexicons of V4 (7 subfields) and of its MaterioMiner analogue (4
+          papers, both granularities) rebuilt by their teachers with no students
+          (--students 0 --save-names), for the recall split by lexicon membership
   w14c    14.3, V4's ablations at the screen's seed offsets 0 to 200 (ABLATIONS; reported):
           the CRF run of smoke4 again (smokeba), then per ablation one job per subfield, the
           jobs of an ablation in one lane: the corpus's first 10,000 and 20,000 sentences
           (crf_mrm_topic10k6, crf_mrm_topic20k6) and the threshold 0.7 (crf_mrm_topiclow6)
           in lane 0; 2 of 3 teachers (crf_mrm_topictwo6) and the silver share 0.5
           (crf_mrm_topiccap6) in lane 1
+
+Week 18 (the names against a recall-matched control; ROADMAP §4, week 18):
+  w18a    18.1 and 18.2: the CRF run of smoke4 again (smokebe), then MR6 on MuLMS's 7 held-out
+          subfields at seed offsets 300 to 900, w14a's jobs (one per offset over the subfields)
+          with --entity-bias over BIAS_GRID_W18 (crf_mr6_bias_m<N>), balanced over the lanes;
+          at bias 0 each run must equal its stored crf_mr6 run
 
 The TPU spike (docs/METHODS_PLAN.md §5; every batch named tpu... runs on the TPU v5e-8, one
 lane per chip, its jobs with --device xla, its results in results/tpu/, a family of their own):
@@ -293,6 +302,8 @@ COST = {'crf': 1.0, 'mt': 1.7, 'ls': 1.1, 'mt_ls': 1.8, 'st': 2.5, 'st3': 22.0,
         'mr6': 6.6}          # 6 copies: about 7 times
 # week 7, part 2a: the biases that --entity-bias decodes besides 0 (ROADMAP §4)
 BIAS_GRID = ('-1', '-0.5', '0.25', '0.5', '0.75', '1', '1.25', '1.5', '2', '2.5', '3')
+# week 18: the biases of the recall-matched control besides 0 (ROADMAP §4, week 18)
+BIAS_GRID_W18 = ('-2', '-1', '-0.5', '0.5', '1', '1.5', '2', '2.5', '3', '4', '5')
 # week 6: the options of each method on the held-out papers, and the stage-2 parts
 METHOD_FLAGS = {'deberta': ('--model', DEBERTA), 'ctx': ('--context', '64'),
                 'mr': ('--augment-mentions', '3')}
@@ -435,6 +446,69 @@ def topic_mulms_job(subfield, student_offsets, mentions=False, copies=3, names=T
     return job + (['--silver-mentions'] if mentions else []) + flags + list(extra)
 
 
+NAMES_FILE = 'ner_names_{granularity}_{protocol}_{variant}{suffix}.json'   # --save-names (week 15)
+NAMES_RESULTS = ROOT / 'results' / 'gpu_names'     # where collect_names puts them (git ignores it)
+
+
+def names_mulms_job(subfield):
+    """Week 15: V4's lexicon on one held-out subfield rebuilt by its teachers (the CRF head's
+    seeds 0, 100 and 200 on the fold's training sentences; the topic corpus, all of it; the
+    mention filter at 0.9), with no student trained (--students 0 --save-names): the file
+    ner_names_mulms_leave_one_subfield_out_crf_mrm_topic6_<subfield>.json holds the names
+    with their counts, the teachers' scores and the coverage counts (ROADMAP §4, week 15)."""
+    return ['--granularity', 'mulms', '--leave-one-subfield-out', '--train-pool',
+            str(MULMS_POOL), '--subfields', subfield, '--self-train',
+            TOPIC_CORPUS.format(topic=subfield), '--self-train-sample', '0', '--names-tag',
+            TOPIC_TAG, '--silver-mentions', '--crf', '--teachers', '3', '--students', '0',
+            '--augment-mentions', str(MR6_COPIES), '--augment-names', '--save-names',
+            NAMES_FILE.format(granularity='mulms', protocol='leave_one_subfield_out',
+                              variant=f'crf_mrm_{TOPIC_TAG}{MR6_COPIES}', suffix=f'_{subfield}'),
+            '--threads', str(THREADS)]
+
+
+def names_paper_job(granularity, paper):
+    """Week 15: the analogue's lexicon (crf_mrm6's teachers, the fatigue corpus) on one
+    held-out paper, no student: ner_names_<granularity>_leave_one_paper_out_crf_mrm6.json,
+    one file per granularity with a run per paper (the jobs of a granularity share a lane)."""
+    return ['--granularity', granularity, '--leave-one-paper-out', '--papers', paper,
+            '--self-train', CORPUS, '--self-train-sample', '0', '--silver-mentions', '--crf',
+            '--teachers', '3', '--students', '0', '--augment-mentions', str(MR6_COPIES),
+            '--augment-names', '--save-names',
+            NAMES_FILE.format(granularity=granularity, protocol='leave_one_paper_out',
+                              variant=f'crf_mrm{MR6_COPIES}', suffix=''),
+            '--threads', str(THREADS)]
+
+
+def mt_mr6_job(offset):
+    """Week 17: the multi-task model with MR6_COPIES copies of mention replacement and no
+    names (crf_mt_mr6_m<N>), the matched control, one job per seed offset over the 4 held-out
+    papers (both granularities from one model), as week 9's crf_mt_mr jobs."""
+    return ['--leave-one-paper-out', '--crf', '--multi-task', '--augment-mentions',
+            str(MR6_COPIES), '--tag', f'm{offset}',
+            *(('--seed-offset', str(offset)) if offset else ()), '--save-predictions',
+            '--threads', str(THREADS)]
+
+
+def mt_names_paper_job(paper, students=len(OFFSETS_PUBLISHED)):
+    """Week 17: crf_mt_mrm6 on one held-out paper: three multi-task teachers (seeds 0, 100,
+    200), the fatigue corpus tagged with both heads, the mention filter on both heads, and
+    `students` students (seed offsets 0, 100, ...), one results file per student offset and
+    granularity holding the paper's run."""
+    return ['--leave-one-paper-out', '--papers', paper, '--crf', '--multi-task', '--self-train',
+            CORPUS, '--self-train-sample', '0', '--silver-mentions', '--teachers', '3',
+            '--students', str(students), '--augment-mentions', str(MR6_COPIES),
+            '--augment-names', '--save-predictions', '--threads', str(THREADS)]
+
+
+def mt_mr_repeat(paper, tag):
+    """A repeat of week 9's crf_mt_mr run of seed 0 on one held-out paper (the stored
+    crf_mt_mr_m0 run), under a smoke tag: the multi-task mention-replacement path must give
+    the same scores after the week-17 code."""
+    return ['--leave-one-paper-out', '--papers', paper, '--crf', '--multi-task',
+            '--augment-mentions', '3', '--tag', tag, '--save-predictions', '--threads',
+            str(THREADS)]
+
+
 def mixed_job(subfield, student_offsets):
     """Week 14, 14.2: V4's job with the subfield's mixed corpus (build_mixed_corpus.py; in the
     bundle as topic_mixed_<subfield>_sentences.txt): crf_mrm_mixed6_m<N>."""
@@ -463,6 +537,14 @@ def mr6_mulms_job(offset):
             str(MULMS_POOL), '--crf', '--augment-mentions', str(MR6_COPIES), '--tag',
             f'm{offset}', *(('--seed-offset', str(offset)) if offset else ()),
             '--save-predictions', '--threads', str(THREADS)]
+
+
+def mr6_bias_mulms_job(offset):
+    """Week 18 on MuLMS: mr6_mulms_job with --entity-bias over BIAS_GRID_W18 (crf_mr6_bias_m<N>),
+    the recall-matched control; the bias acts only at decoding."""
+    job = mr6_mulms_job(offset)
+    at = job.index('--save-predictions')
+    return job[:at] + ['--entity-bias', *BIAS_GRID_W18] + job[at:]
 
 
 def week12_variant(name):
@@ -933,6 +1015,37 @@ def batch_lanes(name):
         lanes = [[ablation_job(tag, s, OFFSETS) for tag in tags for s in MULMS_SUBFIELD_NAMES]
                  for tags in ABLATION_LANES]
         return [[repeat + ['--tag', 'smokeba']] + lanes[0], lanes[1]]
+    if name == 'w15a':
+        # week 15: the lexicons of the names method rebuilt by their teachers, no students
+        # (ROADMAP §4, week 15 analysis note): lane 0, the repeat of the CRF run of smoke4
+        # (smokebb) then MuLMS's 7 subfields; lane 1, MaterioMiner's 4 papers at both
+        # granularities (one names file per granularity, so one lane)
+        return [[repeat + ['--tag', 'smokebb']] + [names_mulms_job(s) for s in MULMS_SUBFIELD_NAMES],
+                [names_paper_job(g, p) for g in GRANULARITIES for p in PAPERS]]
+    if name == 'w17a':
+        # week 17 (ROADMAP §4, the week-17 protocol): the names on the strongest base. Lane 0:
+        # the CRF repeat of smoke4 (smokebc), the repeat of crf_mt_mr's seed-0 run on paper
+        # s11340 (smokebd), then the names jobs of the first two papers (crf_mt_mrm6, 10
+        # students each); lane 1: the 10 control jobs (crf_mt_mr6, one per seed offset). The
+        # other two papers' names jobs are w17b (kernel c): they write the same student files,
+        # which collect --merge unites by run_id.
+        return [[repeat + ['--tag', 'smokebc'], mt_mr_repeat(PAPERS[0], 'smokebd'),
+                 mt_names_paper_job(PAPERS[0]), mt_names_paper_job(PAPERS[1])],
+                [mt_mr6_job(off) for off in OFFSETS_PUBLISHED]]
+    if name == 'w17b':
+        # week 17, the second session: the names jobs of the other two papers on one lane (they
+        # share their files); the other lane is empty
+        return [[mt_names_paper_job(PAPERS[2]), mt_names_paper_job(PAPERS[3])], []]
+    if name == 'w18a':
+        # week 18 (ROADMAP §4, the week-18 protocol): the recall-matched control. w14a's MR6
+        # jobs on MuLMS (crf_mr6_m<N>, seed offsets 300 to 900) again with --entity-bias over
+        # BIAS_GRID_W18 (crf_mr6_bias_m<N>; training untouched, so bias 0 must reproduce the
+        # stored runs); first the repeat of the CRF run of smoke4 (smokebe); the jobs balanced
+        # over the lanes as w14a's
+        jobs = [(COST['mulms'] * MULMS_SUBFIELDS * COST['mr6'], mr6_bias_mulms_job(off))
+                for off in OFFSETS_W5]
+        lanes = balance(jobs, loads=[COST['crf'], 0.0])
+        return [[repeat + ['--tag', 'smokebe']] + lanes[0], lanes[1]]
     if name == 'w14a':
         # week 14, 14.1: the 6-copy control without names (crf_mr6_m<N>) on MuLMS's held-out
         # subfields, seed offsets 300 to 900 (one job per offset over the 7 subfields), and
@@ -955,7 +1068,7 @@ BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'i
            'w7c', 'w7d', 'w7e', 'w8a', 'w8b', 'w9a', 'w9b', 'w10a', 'w11a', 'w11b', 'w12a', 'w12c',
            'w12e', 'w12f', 'w12g', 'w13a', 'w13b', 'w13c',
            *(f'w12b:{v}' for v in WEEK12_VARIANTS), *(f'w12d:{v}' for v in WEEK12_ANALOGUES),
-           'tpu-smoke1', 'tpu-smoke', 'w14a', 'w14b', 'w14c')
+           'tpu-smoke1', 'tpu-smoke', 'w14a', 'w14b', 'w14c', 'w15a', 'w17a', 'w17b', 'w18a')
 
 
 def batch_extras(name):
@@ -1175,7 +1288,7 @@ def environment_key(run):
     return None if env is None else tuple(env.get(k) for k in ENV_KEYS)
 
 
-def check_collect(new, old=None, environments=()):
+def check_collect(new, old=None, environments=(), merge=False):
     """Problems with copying a pulled results file (`new`) over `old` in results/gpu/.
 
     Every run needs an environment, all the same and the same as `environments` (those
@@ -1193,14 +1306,47 @@ def check_collect(new, old=None, environments=()):
     if old is not None:
         mine = {r.get('run_id'): r for r in runs}
         for r in old.get('runs', []):
-            if mine.get(r.get('run_id')) != r:
-                problems.append(f"run {r.get('run_id')} of the file in results/gpu is missing "
-                                f"or changed")
+            if r.get('run_id') in mine and mine[r.get('run_id')] != r:
+                problems.append(f"run {r.get('run_id')} of the file in results/gpu changed")
+            elif r.get('run_id') not in mine and not merge:
+                problems.append(f"run {r.get('run_id')} of the file in results/gpu is missing")
     return problems
 
 
-def collect(pulled, dest=GPU_RESULTS):
-    """Copy the non-smoke results files of a pulled output to `dest`; returns the names."""
+def merged(old, new):
+    """`new` with the runs of `old` that it lacks (two sessions that wrote the same file for
+    different units, week 17), old's first, and the summary and the run means recomputed
+    (summarize); the files must agree outside their runs and those aggregates."""
+    sys.path.insert(0, str(ROOT / 'src' / 'graph'))
+    from ner_baseline import summarize
+    aggregates = ('runs', 'summary', 'test_f1_mean', 'test_f1_std', 'test_f1_strict_mean')
+    strip = lambda f: {k: v for k, v in f.items() if k not in aggregates}  # noqa: E731
+    if strip(old) != strip(new):
+        raise ValueError('the files differ outside their runs and summary')
+    ids = {r.get('run_id') for r in new.get('runs', [])}
+    out = {**new, 'runs': [r for r in old.get('runs', []) if r.get('run_id') not in ids]
+           + list(new.get('runs', []))}
+    summarize(out)
+    return out
+
+
+def collect_names(pulled, dest=NAMES_RESULTS):
+    """Copy the rebuilt-lexicon files of a pulled output (ner_names_*.json, --save-names,
+    week 15) to `dest`, a directory git ignores: the harvested names are never committed;
+    ner_lexicon_recall.py reads them there. Returns the names copied."""
+    dest = Path(dest)
+    dest.mkdir(parents=True, exist_ok=True)
+    copied = []
+    for path in sorted(Path(pulled).rglob('ner_names_*.json')):
+        shutil.copy2(path, dest / path.name)
+        copied.append(path.name)
+    return copied
+
+
+def collect(pulled, dest=GPU_RESULTS, merge=False):
+    """Copy the non-smoke results files of a pulled output to `dest`; returns the names. With
+    `merge`, a file whose counterpart in `dest` holds runs it lacks is united with it
+    (merged) instead of refused: the week-17 sessions write one file for different papers."""
     sys.path.insert(0, str(ROOT / 'src' / 'graph'))
     from ner_baseline import parse_result_name
     dest = Path(dest)
@@ -1215,11 +1361,15 @@ def collect(pulled, dest=GPU_RESULTS):
         new = json.loads(path.read_text())
         target = dest / path.name
         old = json.loads(target.read_text()) if target.exists() else None
-        found = check_collect(new, old, environments)
+        found = check_collect(new, old, environments, merge)
         if found:
             problems[path.name] = found
             continue
-        shutil.copy2(path, target)
+        if merge and old is not None and {r.get('run_id') for r in old.get('runs', [])} - \
+                {r.get('run_id') for r in new.get('runs', [])}:
+            target.write_text(json.dumps(merged(old, new), indent=2))
+        else:
+            shutil.copy2(path, target)
         copied.append(path.name)
     return copied, problems
 
@@ -1327,12 +1477,15 @@ def cmd_pull(args):
 
 def cmd_collect(args):
     dest = Path(args.results_dir)
-    copied, problems = collect(args.pulled, dest)
+    copied, problems = collect(args.pulled, dest, merge=args.merge)
     for name in copied:
         print(f'  copied {name}')
     for name, found in problems.items():
         print(f"  NOT copied {name}: {'; '.join(found)}")
     print(f'{len(copied)} files copied to {dest}, {len(problems)} refused')
+    names = collect_names(args.pulled)
+    if names:
+        print(f'{len(names)} names files copied to {NAMES_RESULTS} (not committed)')
 
 
 def cmd_quota(args):
@@ -1363,6 +1516,9 @@ def main(argv=None):
     p.add_argument('pulled', help='a directory made by pull')
     p.add_argument('--results-dir', default=str(GPU_RESULTS), metavar='DIR',
                    help='where the files go (TPU batches: results/tpu)')
+    p.add_argument('--merge', action='store_true',
+                   help='unite a file with the runs its counterpart holds and it lacks (two '
+                        'sessions writing one file for different units, week 17)')
     p.set_defaults(func=cmd_collect)
     sub.add_parser('quota', help='weekly GPU quota').set_defaults(func=cmd_quota)
     args = parser.parse_args(argv)

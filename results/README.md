@@ -314,7 +314,7 @@ and `gpu/ner_matching.json` hold MuLMS's unseen names and looser matching
 (settings `mulms_leave_one_subfield_out` and `mulms_random_split_pool`). *Licence:*
 MuLMS is CC BY-SA 4.0 (Schrader et al., 2023), so every results file with
 `mulms` in its name, which holds MuLMS's tags (`test_gold`), is CC BY-SA 4.0
-as well, unlike the rest of the repository (Apache 2.0).
+as well, unlike the rest of the repository (Apache 2.0). Since 31 October it also holds `chain`: each system's paired per-unit differences of recall, precision and F1 on the unseen names against the system it builds on (MR3 against the CRF head, MR6 against MR3, the names and the mixed variant against MR6), on the seeds both have and, under `decision`, on the decision seeds (post hoc; paper A, Section 5.4), and every `methods` entry carries `recall` and `precision` beside its F1.
 
 Week 7, part 2e (SOFC-Exp's test articles cut into words as its training
 articles are; Kaggle session `w7e` of 17 October, `ner-gpu-jobs-d` version 3,
@@ -431,3 +431,138 @@ repeat identical, `check_w14c.py` all checks pass), the last after the reset of
 31 October; their analyses in `gpu/ner_week5_seed_analysis.json` (`week14`:
 `copies`, `topic`, `ablations`), Table 6 and Table 7
 (`docs/tables/table7_ablations.md`, the ablations against the method).
+`gpu/ner_robustness.json` (`ner_robustness.py`, 31 October, post hoc, for
+paper A's first review round; Table 9, `docs/tables/table9_robustness.md`)
+holds every comparison among the CRF head, mention replacement with 3 and
+6 copies and the names method over the 11 units of 13.2, with MuLMS's
+units as 10-seed means (as decided) and as means over seeds 300–900: the
+paired intervals, the units above 0, exact sign-flip permutation p-values,
+leave-one-unit-out intervals, the stratified mean, minimum detectable
+effects at 80% power (`detectable`, per comparison), the MaterioMiner
+grids at both granularities (the decisions' stored intervals), the
+per-subfield coverage–gain correlation with its partial correlations and
+the leave-two-out check, the stratified mean, and per system on MuLMS's
+decision seeds the runtime, the best epoch (a 0-based index in the run
+files, and the count of epochs up to it), the mean count of augmented
+sentences and, against the CRF head, the ratio of sentences per epoch
+and of updates up to the best epoch (`compute`; the names system's job
+costs under `job_costs`). `pooled_measures` (added 1 November, post hoc,
+for paper A's review round 12) recomputes the same pooled comparisons on
+both seed bases from the run files in micro, macro and weighted F1; its
+micro values equal `pooled`'s to within 0.01, and its macro and weighted
+values fill the pooled rows of Table 13 (Supplementary Table S11). In
+macro F1 the names against MR6 are +0.83 [−0.01, +1.67] on the decision
+seeds and +1.12 [+0.21, +2.03] on all ten.
+`gpu/ner_decision_tests.json` (`decision_tests.py`, 1 November, for the
+journal's reporting rules; Table 16, `docs/tables/table16_decision_tests.md`,
+paper A's Table S16 and Table 2's P column) gives, for each of paper A's
+twelve decisions and D5′, the one-sample t test of the per-unit
+differences the decision used (n, mean, SD, t, degrees of freedom, one-
+and two-sided P) with the exact sign-flip P, and checks that the
+recomputed interval equals the stored one (to 0.01) and that the one-sided
+P is below 0.025 exactly where the interval clears 0; it changes no
+decision. Each row also carries its verdict words (D5′ "above 0 (post
+hoc)", D11 "passes (as registered)"). Post hoc (round 15 of paper A's
+review): `post_hoc_dependence` repeats each test with the units correlated
+where their training sets share documents (1/4 between MaterioMiner's
+papers, 1/5 between SOFC-Exp's folds, 1/4 between the 5 MuLMS subfield
+pairs whose training pools share an article, `mulms_pools`), the
+correlation the corrected resampled t test assumes for k-fold designs;
+`post_hoc_reported` gives the t test of MR3 over the CRF head on the 11
+pooled units, both seed bases (P 0.0038 and 0.0040), and (round 16) the
+P values of the reported comparisons the paper draws inferences from
+(`inferences`; from per-unit values, or from the interval where the
+results store none), the companion study's MR3 decisions on MaterioMiner
+on the seeds its screen did not use (`mr3_materiominer_decision_seeds`,
+with `mr3_materiominer_all_seeds` reproducing the decisions) and D5 with
+the coarse-grained papers (`d5_coarse`); `post_hoc_dependence.tipping`
+gives the correlation at which each pass's adjusted interval reaches 0
+(round 17: found on the unrounded lower bound, which moved D5's from 0.44
+to 0.45; `inferences` grew to 21 entries, adding week 18's readings, the
+types at D = 0, the self-training votes against MR3's and multi-task
+training's gains on MaterioMiner, the last from
+`ner_week5_comparisons.json`; round 18 brought it to 41, adding the
+comparisons the paper reads as not shown and those outside its Table 2,
+F1 on the held names from `paper_tables.held_f1_gain`).
+Table 10
+(`table10_lexicon.md`, paper A's Table S3 and Table 5) adds, post hoc, F1
+on each lexicon part and the paired F1 gain on the held names, from
+`ner_lexicon_recall.json`'s pooled and per-unit recall and precision.
+`gpu/ner_week5_seed_analysis.json` adds `week14.types`, the per-type F1 of
+the names method and the 6-copy control against the CRF head on MuLMS's
+decision seeds and MaterioMiner's papers (Tables 8 and A2,
+`docs/tables/table8_types.md`, `tableA2_types_fine.md`).
+
+Week 15 (the week-15 analysis note, ROADMAP §4; post hoc, no decision):
+batch `w15a` rebuilds the lexicons of the names method with no students
+(`ner_baseline.py --students 0 --save-names`): V4's on MuLMS's 7 held-out
+subfields (the CRF head's teachers of seeds 0, 100 and 200, the topic corpus,
+the mention filter at 0.9) and its analogue's on MaterioMiner's 4 papers at
+both granularities (the fatigue corpus). The names files
+(`ner_names_<granularity>_<protocol>_<variant>[_<subfield>].json`: the names
+with their counts, the teachers' scores, the coverage counts) are pulled to
+`results/gpu_names/`, which git ignores (the harvested names are never
+committed). `gpu/ner_lexicon_recall.json` (`ner_lexicon_recall.py`) holds the
+aggregate analysis: per unit and system, recall on the unseen test names the
+lexicon holds and on those it does not, the unseen predictions' lexicon share
+and precision, the paired gains over MR6 and the CRF head on each part and
+their difference with 95% CIs, and the checks that the rebuilt teachers' F1
+and coverage counts equal the stored ones. Run record: `w15a` pushed to
+`ner-gpu-jobs-c` (version 9, bundle `2c60f33`) on 31 October at 16:30 UTC;
+pulled at 19:41 (16 jobs done; the smoke repeat identical); every unit's
+rebuilt teachers and coverage counts equal the stored runs'. Outcome (Table
+10, paper A's Table 5 and, in full, Supplementary Table S3): on MuLMS the names' recall gain over MR6 is +7.29
+[+3.27, +11.30] on the unseen names the lexicon holds and +1.12 [−0.78,
++3.02] on the others (difference +6.17 [+2.44, +9.90], 7 of 7 subfields):
+mixed on point estimates and name knowledge on intervals, the reading
+fixed in advance not saying which (paper A's round-9 revision, 1
+November); on MaterioMiner a generic shift on point estimates, and none of
+the three outcomes on intervals, within four papers' wide intervals
+(fine +4.33 [−5.33, +13.98], coarse −1.54 [−3.60, +0.51]); the wrong
+predictions the names add fall on both parts (two thirds on names the
+lexicon does not hold, 22% right).
+
+Week 17 (the week-17 protocol, ROADMAP §4; fixed 31 October 19:15 UTC
+before any run): the harvested names on the strongest MaterioMiner base,
+the multi-task model with 6-copy mention replacement: `crf_mt_mr6_m<N>`
+(the matched control) and `crf_mt_mrm6_m<N>` (three multi-task teachers,
+the fatigue corpus tagged with both heads, the mention filter on both
+heads, 10 students), 10 seeds on the 4 held-out papers, a fine and a
+coarse file per seed offset. Decisions 17.1 (fine) and 17.2 (coarse)
+against the control; the comparisons with `crf_mt_mr`, `crf_mt` and the
+CRF head reported (`ner_week5_seed_analysis.json`, `week17`). Run record:
+`w17a` pushed to `ner-gpu-jobs-d` (version 15, bundle `013f9ac`) at
+19:54:50 UTC and `w17b` to `ner-gpu-jobs-c` (version 10, the same bundle)
+at 19:54:53 UTC on 31 October; the two sessions write the student files
+for different papers, united by `kaggle_jobs.py collect --merge`. Outcome
+(1 November): 17.1 fine-grained +0.96 [−0.01, +1.92], no (every paper
+positive); 17.2 coarse-grained +0.85 [−0.72, +2.42], no; the names
+against multi-task + MR3 +0.76 [−0.15, +1.68] and +0.91 [−0.14, +1.97],
+the control against it −0.19 [−2.05, +1.67] and +0.06 [−0.74, +0.86];
+levels 53.95/52.99 and 61.25/60.40; the two-head filter's lexicons hold
+6.5–16.3% (fine) and 6.7–24.6% (coarse) of a paper's unseen test names
+(`docs/tables/table11_week17.md`; the unseen-name trade in
+`gpu/ner_mentions.json`, `chain`; the detectable differences in
+`gpu/ner_robustness.json`). The `w17a` session's repeats (`smokebc`,
+`smokebd`) identical to the stored runs (`w17b` ran none); the teachers equal the stored `crf_mt` runs.
+
+Week 18 (the week-18 protocol, ROADMAP §4; fixed 1 November 10:51 UTC
+before any run): the names against a recall-matched control on MuLMS's 7
+held-out subfields at the decision seeds 300 to 900. `crf_mr6_bias_m<N>`
+are the stored `crf_mr6` jobs run again with `--entity-bias` over the grid
+−2 to 5 (training untouched; the test predictions per bias in
+`test_pred_bias`), one file per seed offset holding the 7 subfields.
+`gpu/ner_recall_matched.json` (`ner_recall_matched.py`, committed before
+the result) holds the checks, per subfield the matched bias D* with its
+flag and the control's recall, precision and F1 at every bias, the
+decisions 18.1 (recall on the unseen names the lexicon holds) and 18.2
+(micro F1) with the pre-specified comparisons, the same without the
+flagged subfields (`without_flagged`), and a post hoc reading with the
+flagged subfields matched at the nearest recall (`post_hoc_nearest`,
+added after the result). Run record: `w18a` pushed to `ner-gpu-jobs-d`
+(version 16, bundle `7906996`) at 11:12:34 UTC on 1 November, pulled at
+13:58; `smokebe` identical to `smokebc`; at D = 0 all 49 runs equal their
+stored `crf_mr6` runs. Outcome: 18.1 +11.24 [+3.31, +19.18], passes;
+18.2 +3.26 [−0.79, +7.31], no; electrolysis, pemfc and sofc flagged
+(without them +6.05 [−3.33, +15.44] and −0.03 [−2.78, +2.72]; post hoc
++8.63 [+3.35, +13.90] and +1.37 [−0.66, +3.41]); `docs/tables/table12_week18.md`.

@@ -478,8 +478,11 @@ def test_check_collect():
     old = _gpu_file('seed0', 'seed1')
     assert kj.check_collect(_gpu_file('seed0', 'seed1', 'seed2'), old) == []
     assert kj.check_collect(_gpu_file('seed0'), old) == [
-        'run seed1 of the file in results/gpu is missing or changed']
-    assert kj.check_collect(_gpu_file('seed0', 'seed1', f1=71.0), old)[0].startswith('run seed0')
+        'run seed1 of the file in results/gpu is missing']
+    assert kj.check_collect(_gpu_file('seed0'), old, merge=True) == []       # week 17: united
+    changed = kj.check_collect(_gpu_file('seed0', 'seed1', f1=71.0), old)
+    assert changed[0].startswith('run seed0') and changed[0].endswith('changed')
+    assert kj.check_collect(_gpu_file('seed0', 'seed1', f1=71.0), old, merge=True) == changed
 
 
 def test_collect_copies_gpu_results_and_skips_smoke_tests(tmp_path):
@@ -1349,3 +1352,141 @@ def test_week14_mixed_corpus_and_ablation_batches(monkeypatch, tmp_path):
     assert spec['topic_corpora'] == {t: sha[t] for t in kj.MULMS_SUBFIELD_NAMES}
     assert {'w14b', 'w14c'} <= set(kj.BATCHES)
     assert kj.batch_spec('w12a')['topic_corpora'] == {t: sha[t] for t in kj.MULMS_SUBFIELD_NAMES}
+
+
+def test_week15_names_batch(monkeypatch, tmp_path):
+    """w15a (week 15): the lexicons rebuilt by their teachers with no students; lane 0 the smoke
+    repeat then MuLMS's 7 subfields, lane 1 MaterioMiner's 4 papers at both granularities; every
+    job carries --students 0 and --save-names with the names file of its variant; collect_names
+    copies the ner_names files of a pulled output to a directory of their own."""
+    with monkeypatch.context() as m:
+        m.setattr(nb.os.path, 'isfile', lambda path: True)    # the corpora are not here
+        lane0, lane1 = _parsed(kj.batch_lanes('w15a'))
+    assert lane0[0].tag == 'smokebb' and len(lane0) == 8 and len(lane1) == 8
+    for a in lane0[1:]:
+        assert a.students == 0 and a.teachers == 3 and a.silver_mentions and a.augment_names
+        assert a.augment_mentions == 6 and a.self_train_sample == 0 and a.names_tag == 'topic'
+        assert a.self_train == f'data/processed/corpus/topic_{a.subfields[0]}_sentences.txt'
+        assert a.save_names == f'ner_names_mulms_leave_one_subfield_out_crf_mrm_topic6_{a.subfields[0]}.json'
+        assert not hasattr(a, 'student_offsets') and not a.save_predictions
+    assert [a.subfields[0] for a in lane0[1:]] == list(kj.MULMS_SUBFIELD_NAMES)
+    assert [(a.granularity, a.papers[0]) for a in lane1] == [(g, p) for g in kj.GRANULARITIES
+                                                             for p in kj.PAPERS]
+    for a in lane1:
+        assert a.students == 0 and a.self_train == kj.CORPUS and a.augment_mentions == 6
+        assert a.save_names == f'ner_names_{a.granularity}_leave_one_paper_out_crf_mrm6.json'
+    assert nb.variant_name(lane0[1]) == 'crf_mrm_topic6' and nb.variant_name(lane1[0]) == 'crf_mrm6'
+    assert 'w15a' in kj.BATCHES
+    pulled = tmp_path / 'pulled' / 'processed' / 'ner'
+    pulled.mkdir(parents=True)
+    (pulled / 'ner_names_mulms_leave_one_subfield_out_crf_mrm_topic6_semi.json').write_text('{}')
+    (pulled / 'ner_results_mulms_leave_one_subfield_out_crf_m0.json').write_text('{}')
+    dest = tmp_path / 'names'
+    assert kj.collect_names(tmp_path / 'pulled', dest) == [
+        'ner_names_mulms_leave_one_subfield_out_crf_mrm_topic6_semi.json']
+    assert sorted(p.name for p in dest.iterdir()) == [
+        'ner_names_mulms_leave_one_subfield_out_crf_mrm_topic6_semi.json']
+
+
+def test_week17_batches_and_merge(tmp_path, monkeypatch):
+    """w17a: lane 0 the CRF repeat, the crf_mt_mr repeat on the first paper and the names jobs of
+    the first two papers (3 multi-task teachers, 10 students, 6 copies, the mention filter), lane
+    1 the 10 control jobs (crf_mt_mr6, one per seed offset); w17b the other two papers' names
+    jobs on one lane. collect --merge unites one file written by two sessions for different
+    papers and refuses a changed run."""
+    with monkeypatch.context() as m:
+        m.setattr(nb.os.path, 'isfile', lambda path: True)    # the corpus is not here
+        lane0, lane1 = _parsed(kj.batch_lanes('w17a'))
+    assert lane0[0].tag == 'smokebc' and lane0[1].tag == 'smokebd'
+    assert lane0[1].multi_task and lane0[1].augment_mentions == 3 and lane0[1].papers == [kj.PAPERS[0]]
+    for a, paper in zip(lane0[2:], kj.PAPERS[:2]):
+        assert a.multi_task and a.teachers == 3 and a.students == 10 and a.silver_mentions
+        assert a.augment_names and a.augment_mentions == 6 and a.self_train_sample == 0
+        assert a.papers == [paper] and a.save_predictions and a.self_train == kj.CORPUS
+    assert len(lane1) == 10
+    for a, off in zip(lane1, kj.OFFSETS_PUBLISHED):
+        assert a.multi_task and a.augment_mentions == 6 and a.tag == f'm{off}'
+        assert a.seed_offset == off and not hasattr(a, 'teachers')
+    lane0b, lane1b = kj.batch_lanes('w17b')
+    assert [j[j.index('--papers') + 1] for j in lane0b] == list(kj.PAPERS[2:]) and lane1b == []
+    # merge (the toy runs lack the fields the summary needs: summarize is stubbed)
+    monkeypatch.setattr(nb, 'summarize',
+                        lambda results: results.update({'summary': 'stub'}) or results)
+
+    def run(run_id, f1, env='T4'):
+        return {'run_id': run_id, 'f1': f1, 'seed': 0, 'environment': {'device': 'cuda',
+                'gpu': env, 'torch': '2', 'transformers': '4'}}
+    common = {'granularity': 'fine', 'protocol': 'leave_one_paper_out', 'variant': 'crf_mt_mrm6_m0',
+              'model': 'm', 'labels': ['A'], 'config': {'x': 1}}
+    dest = tmp_path / 'gpu'
+    dest.mkdir()
+    # each session's file carries the means of its own runs (test_f1_mean and the like,
+    # recomputed by summarize): they differ and are not a refusal
+    old = {**common, 'runs': [run('p1', 50.0), run('p2', 51.0)], 'test_f1_mean': 50.5,
+           'test_f1_std': 0.5, 'test_f1_strict_mean': 50.5}
+    (dest / 'ner_results_fine_leave_one_paper_out_crf_mt_mrm6_m0.json').write_text(json.dumps(old))
+    pulled = tmp_path / 'pulled'
+    pulled.mkdir()
+    new = {**common, 'runs': [run('p3', 52.0), run('p4', 53.0)], 'test_f1_mean': 52.5,
+           'test_f1_std': 0.5, 'test_f1_strict_mean': 52.5}
+    (pulled / 'ner_results_fine_leave_one_paper_out_crf_mt_mrm6_m0.json').write_text(json.dumps(new))
+    copied, problems = kj.collect(str(pulled), dest)
+    assert not copied and 'missing' in ' '.join(problems['ner_results_fine_leave_one_paper_out_crf_mt_mrm6_m0.json'])
+    copied, problems = kj.collect(str(pulled), dest, merge=True)
+    assert copied == ['ner_results_fine_leave_one_paper_out_crf_mt_mrm6_m0.json'] and not problems
+    got = json.loads((dest / 'ner_results_fine_leave_one_paper_out_crf_mt_mrm6_m0.json').read_text())
+    assert [r['run_id'] for r in got['runs']] == ['p1', 'p2', 'p3', 'p4'] and 'summary' in got
+    changed = {**common, 'runs': [run('p1', 49.0), run('p3', 52.0)]}
+    (pulled / 'ner_results_fine_leave_one_paper_out_crf_mt_mrm6_m0.json').write_text(json.dumps(changed))
+    copied, problems = kj.collect(str(pulled), dest, merge=True)
+    assert not copied and 'changed' in ' '.join(problems['ner_results_fine_leave_one_paper_out_crf_mt_mrm6_m0.json'])
+    # a difference outside the runs and their aggregates is refused
+    with pytest.raises(ValueError):
+        kj.merged({**old, 'config': {'x': 2}}, new)
+
+
+def test_merged_recomputes_the_run_means():
+    """The united file's test_f1_mean, test_f1_std and test_f1_strict_mean cover both sessions'
+    runs (the real summarize), old's runs first."""
+    def run(run_id, f1):
+        return {'run_id': run_id, 'f1': f1, 'f1_strict': f1,
+                'per_class': {'macro avg': {'f1-score': f1 / 100}, 'weighted avg': {'f1-score': f1 / 100}}}
+    old = {'config': {'x': 1}, 'runs': [run('p1', 50.0), run('p2', 52.0)], 'test_f1_mean': 51.0,
+           'test_f1_std': 1.0, 'test_f1_strict_mean': 51.0}
+    new = {'config': {'x': 1}, 'runs': [run('p3', 54.0), run('p4', 56.0)], 'test_f1_mean': 55.0,
+           'test_f1_std': 1.0, 'test_f1_strict_mean': 55.0}
+    got = kj.merged(old, new)
+    assert [r['run_id'] for r in got['runs']] == ['p1', 'p2', 'p3', 'p4']
+    assert (got['test_f1_mean'], got['test_f1_strict_mean'], got['summary']['n_runs']) == (53.0, 53.0, 4)
+    assert got['test_f1_std'] == round((5 ** 0.5), 2) and got['summary']['micro']['per_run'] == [50.0, 52.0, 54.0, 56.0]
+
+
+def test_week18_recall_matched_batch(monkeypatch):
+    """w18a (week 18): a repeat, then w14a's MR6 jobs on MuLMS (seed offsets 300 to 900) with
+    --entity-bias over BIAS_GRID_W18 and nothing else changed, so that bias 0 reproduces the
+    stored crf_mr6 runs; the 7 jobs balanced over the lanes; the variant crf_mr6_bias_m<N>."""
+    monkeypatch.setattr(nb.os.path, 'isfile', lambda path: True)    # the corpus is not here
+    monkeypatch.setattr(kj, 'corpus_sha256', lambda report=None: 'x' * 64)
+    monkeypatch.setattr(kj, 'mulms_files', lambda: {'a_01.conll': 'a' * 64})
+    lane0, lane1 = _parsed(kj.batch_lanes('w18a'))
+    assert lane0[0].tag == 'smokebe' and lane0[0].granularity == 'fine'
+    assert not _get(lane0[0], 'entity_bias')
+    jobs = lane0[1:] + lane1
+    assert len(jobs) == 7 and min(len(lane0) - 1, len(lane1)) >= 3
+    assert sorted(a.tag for a in jobs) == [f'm{off}' for off in range(300, 1000, 100)]
+    grid = [float(b) for b in kj.BIAS_GRID_W18]
+    assert len(set(grid)) == 11 and 0.0 not in grid and min(grid) == -2 and max(grid) == 5
+    for a in jobs:
+        assert a.granularity == 'mulms' and nb.protocol_name(a) == 'leave_one_subfield_out'
+        assert (a.train_pool, a.augment_mentions, a.crf, a.save_predictions) == (400, 6, True, True)
+        assert a.entity_bias == grid and nb.entity_biases(a) == sorted({0.0, *grid})
+        assert nb.variant_name(a) == f'crf_mr6_bias_{a.tag}'
+        assert _get(a, 'seed_offset', 0) == int(a.tag[1:])
+    # the same job as w14a's but for the biases: the training is the stored crf_mr6 run's
+    for off in range(300, 1000, 100):
+        with_bias = kj.mr6_bias_mulms_job(off)
+        at = with_bias.index('--entity-bias')
+        assert with_bias[:at] + with_bias[at + 1 + len(kj.BIAS_GRID_W18):] == kj.mr6_mulms_job(off)
+    assert 'w18a' in kj.BATCHES and kj.batch_name('w18a') == 'w18a'
+    spec = kj.batch_spec('w18a')
+    assert spec['mulms_files'] == {'a_01.conll': 'a' * 64} and 'topic_corpora' not in spec

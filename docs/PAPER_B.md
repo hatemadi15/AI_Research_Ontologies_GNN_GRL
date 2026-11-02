@@ -670,11 +670,14 @@ the mechanism, the ablations and the discussion are A's.
 | the names vs 6 copies without names, pooled (14.1) | 11 | +0.80 [−0.66, +2.26] | no |
 | the held-out topic's corpus vs a mixed corpus of six other topics, MuLMS (14.2) | 7 | −0.18 [−2.01, +1.65] | no |
 
-Eight decisions in weeks 12 to 14, three passing; the method the evidence
-supports is mention replacement with six copies whose pool also holds
-names harvested from any large materials corpus, with a pre-registered
-gain over the CRF head on held-out documents of two corpora and no gain
-where half the test names are seen (SOFC-Exp). The week-11 attempt failed
+Eight decisions in weeks 12 to 14, three passing, the three sharing one
+corpus's four papers. Paper A's reading, after its first review round
+(31 October; post hoc, its Table 3): the pre-registered pooled gain over
+the CRF head is mention replacement's, which gains +2.46 [+1.00, +3.91]
+on the same 11 units and seeds without any harvested name; the extra
+copies add +0.33 [−0.25, +0.92] and the names +0.80 [−0.66, +2.26],
+neither established in a design that detects about 2 points; and nothing
+helps where half the test names are seen (SOFC-Exp). The week-11 attempt failed
 because the sentence-level filter admitted 4.4% of a held-out subfield's
 unseen names from the other subfields' sentences and 2–9% of a held-out
 paper's from the fatigue corpus; a harvested lexicon applied as a
@@ -684,7 +687,7 @@ and hurts elsewhere (steel −10.0, graphene −5.1), −1.0 on average (C24).
 The method's five ablations at the screen's seeds (the corpus's first
 10,000 or 20,000 sentences, the threshold 0.7, 2 of 3 teachers, the names
 in half of the draws) lie within 0.2 points of it while the lexicon's
-coverage of the unseen names ranges from 16% to 32% (paper A, Table 2).
+coverage of the unseen names ranges from 16% to 32% (paper A, Supplementary Table S2).
 
 The document-level rule of Section 7.3, taken to held-out documents of
 the three corpora (C25): on the CRF head it passes on MuLMS's held-out

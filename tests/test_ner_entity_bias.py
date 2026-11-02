@@ -90,6 +90,17 @@ def test_parser_and_names(capsys):
         with pytest.raises(SystemExit):
             nb.parse_args(argv)
         assert error in capsys.readouterr().err
+    # week 18: the bias on MuLMS's held-out subfields (the recall-matched control), not on
+    # its random pool splits
+    mulms = nb.parse_args(['--granularity', 'mulms', '--leave-one-subfield-out', '--train-pool',
+                           '400', '--crf', '--augment-mentions', '6', '--entity-bias', '-2', '5',
+                           '--tag', 'm300', '--seed-offset', '300'])
+    assert nb.entity_biases(mulms) == [-2.0, 0.0, 5.0]
+    assert nb.variant_name(mulms) == 'crf_mr6_bias_m300'
+    with pytest.raises(SystemExit):
+        nb.parse_args(['--granularity', 'mulms', '--vary-split', '--train-pool', '400', '--crf',
+                       '--entity-bias', '1'])
+    assert 'not available with --granularity mulms' in capsys.readouterr().err
     # the existing options keep their stored configuration and protocol names
     plain = nb.parse_args(['--crf', '--leave-one-paper-out'])
     assert not {'entity_bias', 'leave_two_papers_out'} & set(vars(plain))

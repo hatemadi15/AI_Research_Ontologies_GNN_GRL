@@ -206,6 +206,9 @@ SCREEN_VARIANTS = ('crf_mrs_topic', 'crf_mrm_topic', 'crf_mr6', 'crf_mrm_topic6'
 WEEK14_WINNER = 'crf_mrm_topic6'
 WEEK14_ANALOGUE = 'crf_mrm6'
 COPIES_CONTROL = 'crf_mr6'
+WEEK17_NAMES = 'crf_mt_mrm6'        # week 17: the names on the multi-task model with 6 copies
+WEEK17_CONTROL = 'crf_mt_mr6'       # its matched control
+WEEK17_REFERENCES = ('crf_mt_mr', 'crf_mt', 'crf')   # reported: 3 copies, the multi-task model, the CRF head
 MIXED_VARIANT = 'crf_mrm_mixed6'
 ABLATION_VARIANTS = ('crf_mrm_topic10k6', 'crf_mrm_topic20k6', 'crf_mrm_topiclow6',
                      'crf_mrm_topictwo6', 'crf_mrm_topiccap6')
@@ -1012,6 +1015,32 @@ def copies(directory):
     return out
 
 
+def week17(directory):
+    """Week 17 (ROADMAP §4, the week-17 protocol): the names on the strongest base. Per
+    granularity on the 4 held-out papers over the 10 seeds: WEEK17_NAMES `against` the
+    matched control WEEK17_CONTROL (decisions 17.1 fine and 17.2 coarse, the week-6 rule:
+    `passes`), and both `against` WEEK17_REFERENCES (reported, under `names` and `control`);
+    `decision` names the decision. A granularity is present when every file is there."""
+    out = {}
+    for g, decision in zip(GRANULARITIES, ('17.1', '17.2')):
+        prefix = f'ner_results_{g}_{LOPO}_'
+        systems = (*WEEK17_REFERENCES, WEEK17_CONTROL, WEEK17_NAMES)
+        # the multi-task reference's seed-0 file carries no tag (seed_family, as ner_mentions)
+        files = {s: load_files(directory, [f'{prefix}{v}.json' for v in
+                                           seed_family(s, untagged_zero=s == 'crf_mt')])
+                 for s in systems}
+        if not all(files.values()):
+            continue
+        entry = against(files, WEEK17_NAMES, (WEEK17_CONTROL,))
+        entry.update({'decision': decision, 'seeds': list(WEEK5_OFFSETS),
+                      'passes': entry[f'minus_{WEEK17_CONTROL}']['micro']['ci95'][0] > 0,
+                      'names': against(files, WEEK17_NAMES, WEEK17_REFERENCES),
+                      'control': against({s: files[s] for s in (*WEEK17_REFERENCES, WEEK17_CONTROL)},
+                                         WEEK17_CONTROL, WEEK17_REFERENCES)})
+        out[g] = entry
+    return out
+
+
 def topic(directory):
     """Week 14, 14.2 (the topic part of week14): V4 with the subfield's own topic corpus
     (WEEK14_WINNER) against V4 with the mixed corpus of the six other topics (MIXED_VARIANT),
@@ -1067,11 +1096,42 @@ def ablations(directory):
     return out
 
 
+def week14_types(directory):
+    """Week 14 (the types part of week14): per entity type, the names method and the 6-copy
+    control against the CRF head (type_differences, most frequent type first): on MuLMS's
+    held-out subfields over the decision's seeds (DECISION_OFFSETS; WEEK14_WINNER and
+    COPIES_CONTROL against crf) and on MaterioMiner's held-out papers per granularity over
+    the 10 seeds (WEEK14_ANALOGUE and COPIES_CONTROL against crf); a part is present when
+    every file of the CRF head and of the system is there."""
+    def typed(files):
+        return files and all('per_class' in r for f in files for r in f['runs'])
+    out = {}
+    prefix = f'ner_results_mulms_{MULMS_PROTOCOLS[0]}_'
+    crf = load_files(directory, [f'{prefix}crf_m{off}.json' for off in DECISION_OFFSETS])
+    if typed(crf):
+        for system in (WEEK14_WINNER, COPIES_CONTROL):
+            files = load_files(directory, [f'{prefix}{system}_m{off}.json'
+                                           for off in DECISION_OFFSETS])
+            if typed(files):
+                out.setdefault('mulms', {})[system] = type_differences(files, crf)
+    for g in GRANULARITIES:
+        crf = load_files(directory, file_names(g, LOPO, 'crf', WEEK5_SYSTEMS))
+        if not typed(crf):
+            continue
+        for system in (WEEK14_ANALOGUE, COPIES_CONTROL):
+            files = load_files(directory, file_names(g, LOPO, system,
+                                                     {system: seed_family(system)}))
+            if typed(files):
+                out.setdefault(g, {})[system] = type_differences(files, crf)
+    return out
+
+
 def week14(directory):
-    """The week14 section (see the module docstring): copies (14.1), topic (14.2) and
-    ablations (14.3)."""
+    """The week14 section (see the module docstring): copies (14.1), topic (14.2),
+    ablations (14.3) and types (per entity type, the method and the control against the
+    CRF head)."""
     return {'copies': copies(directory), 'topic': topic(directory),
-            'ablations': ablations(directory)}
+            'ablations': ablations(directory), 'types': week14_types(directory)}
 
 
 def analyse(directory):
@@ -1099,6 +1159,7 @@ def analyse(directory):
     out['mulms'] = mulms(directory)
     out['week13'] = week13(directory, out['mulms'].get('week12'))
     out['week14'] = week14(directory)
+    out['week17'] = week17(directory)
     out['paper_count'] = paper_count(directory)
     out['paper_diversity'] = paper_diversity(directory)
     out['errors'] = {}

@@ -412,14 +412,15 @@ conditional sentence removed on 14 November.
 division below keeps every decision a result in one paper and a citation
 in the other.
 
-- *Paper A, the methods paper* (working title: "Mention replacement with
-  more copies and harvested names improves materials NER on unseen
-  documents"; it no longer names the topic). Its claims: C26 as stated
-  after week 14 (the pre-registered, pooled gain over the CRF head on
-  held-out documents of two corpora, +3.58 [+0.95, +6.21]; the names'
-  share beyond matched copies +0.8 [−0.7, +2.3], not established; no
-  difference detected between the topic's corpus and a mixed corpus of
-  other topics, −0.18 [−2.01, +1.65]); the ablations of 14.3 (reported);
+- *Paper A, the methods paper* (title since its first review round, 31
+  October: "Harvested names are not shown to add to mention replacement on held-out materials documents: a pre-registered test"; the 30 October working title credited the recipe's
+  gain to the names and was withdrawn). Its thesis: the pre-registered,
+  pooled gain over the CRF head on held-out documents of two corpora,
+  +3.58 [+0.95, +6.21] (C26), decomposes on the decision seeds into
+  mention replacement's +2.46 [+1.00, +3.91], the extra copies' +0.33
+  [−0.25, +0.92] and the names' +0.80 [−0.66, +2.26] (Table 9), of which
+  only the first is established; no difference detected between the
+  topic's corpus and a mixed corpus of other topics, −0.18 [−2.01, +1.65]; the ablations of 14.3 (reported);
   the SOFC-Exp boundary condition (13.4); the consistency rule as a
   second, smaller result (C25); the unseen-name mechanism (C17, C22, the
   recall-for-precision trade) as motivation and explanation; the
@@ -465,3 +466,40 @@ winner on the multi-task model, one corpus) stays an option.
   no more than 2 sessions).
 - Licences: the corpora's text and the names are never committed; reports
   with counts and SHA-256 are, and the corpora rebuild from the caches.
+
+### Week 17 (31 October, after six review rounds of paper A)
+
+The names on the strongest base: the round-6 reviews listed as untested the
+multi-task model with mention replacement, the strongest MaterioMiner
+system. Pre-registered in ROADMAP §4 ("Week 17 protocol") before any run:
+`crf_mt_mrm6` against the matched control `crf_mt_mr6` on the 4 held-out
+papers, 10 seeds, two decisions (fine, coarse), the rest reported. The
+prior is low (the names add nothing detectable to six-copy replacement on
+the single-task base, on these papers included); a pass is a pass on one
+corpus's four papers and is reported as such; a fail extends paper A's
+negative result to the strongest base. Paper A is updated either way
+(Section 5.2 or a 5.7, Table 2, Appendix A, the Limitations).
+
+*Outcome (1 November).* 17.1 fine-grained +0.96 [−0.01, +1.92] and 17.2
+coarse-grained +0.85 [−0.72, +2.42], both no; the names against multi-task
++ MR3 +0.76 [−0.15, +1.68] and +0.91 [−0.14, +1.97]; the two-head filter's
+lexicons hold 7–25% of a paper's unseen test names. The negative result
+extends to the strongest base (ROADMAP, the week-17 outcome; paper A,
+Section 5.7).
+
+### Week 18 (1 November, after nine review rounds of paper A)
+
+The names against a recall-matched control: the round-9 referee asked
+whether the names' recall gain on the unseen names their lexicon holds is
+name knowledge or a generic shift toward tagging more spans. Pre-registered
+in ROADMAP §4 ("Week 18 protocol") before any run: MR6 on MuLMS's held-out
+subfields decoded with a bias on every entity tag, matched per subfield to
+the names' recall; decisions 18.1 (recall on the held names) and 18.2
+(micro F1).
+
+*Outcome (1 November).* 18.1 +11.24 [+3.31, +19.18], passes; 18.2 +3.26
+[−0.79, +7.31], no. Three subfields could not be matched (the bias's
+recall peaks short of the names'); without them 18.1 is +6.05 [−3.33,
++15.44], all four positive, and matched post hoc at the nearest recall
++8.63 [+3.35, +13.90]. The names carry name knowledge that does not show
+in F1 (ROADMAP, the week-18 outcome; paper A, Section 5.4).

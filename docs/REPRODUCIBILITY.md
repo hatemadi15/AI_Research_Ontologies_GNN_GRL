@@ -40,8 +40,13 @@ its root.*
   `ner_week5_seed_analysis.json`, `ner_mentions.json`,
   `ner_week7_consistency.json` and the rest, as indexed in
   `results/README.md`) are committed beside the files they read.
-- **Tables and figures.** `docs/tables/table1–7` and
-  `docs/figures/fig1–7` are generated from `results/` by `paper_tables.py`
+- **Journal structure.** Paper A's sections map onto a journal's layout
+  as follows: Section 1 is the Introduction; Sections 5 and 6 the
+  Results; Sections 7 to 9 the Discussion; Sections 2 to 4 with the
+  appendices the Methods. Paper A's own tables 1–7 and figures 1–3 are
+  mapped to the generated files in the note at its end.
+- **Tables and figures.** `docs/tables/table1–9` and `tableA1–A2` and
+  `docs/figures/fig1–9` are generated from `results/` by `paper_tables.py`
   and `paper_figures.py`; no number in either paper is typed by hand
   (`report_results.py --check` fails the test suite when the README or the
   ROADMAP disagrees with the results).

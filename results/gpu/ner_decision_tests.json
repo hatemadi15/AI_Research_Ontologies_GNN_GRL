@@ -1,0 +1,1192 @@
+{
+ "note": "Reporting only, computed on 1 November 2026 for the journal: the decisions were taken by the registered interval rule, which is a one-sided t test at 2.5%; the P values are those of the same t tests on the same per-unit differences, with the exact two-sided sign-flip P beside them.",
+ "decisions": [
+  {
+   "n_units": 7,
+   "mean_diff": 3.19,
+   "sd": 4.67,
+   "t": 1.81,
+   "df": 6,
+   "p_one_sided": 0.0603,
+   "p_two_sided": 0.1207,
+   "ci95": [
+    -1.13,
+    7.51
+   ],
+   "decision": "D1",
+   "comparison": "MuLMS: MR6 + names vs CRF head",
+   "per_unit": [
+    2.52,
+    0.47,
+    3.43,
+    -2.35,
+    6.12,
+    11.86,
+    0.28
+   ],
+   "stored_ci95": [
+    -1.13,
+    7.51
+   ],
+   "stored_mean_diff": 3.19,
+   "sign_flip_p_two_sided": 0.0781,
+   "passes": false,
+   "verdict": "no",
+   "interval_matches": true,
+   "p_agrees": true
+  },
+  {
+   "n_units": 7,
+   "mean_diff": 0.92,
+   "sd": 2.76,
+   "t": 0.88,
+   "df": 6,
+   "p_one_sided": 0.2062,
+   "p_two_sided": 0.4125,
+   "ci95": [
+    -1.64,
+    3.48
+   ],
+   "decision": "D2",
+   "comparison": "MuLMS: MR6 + names vs MR3",
+   "per_unit": [
+    0.89,
+    -1.21,
+    1.04,
+    -3.02,
+    5.12,
+    3.62,
+    0.0
+   ],
+   "stored_ci95": [
+    -1.63,
+    3.48
+   ],
+   "stored_mean_diff": 0.92,
+   "sign_flip_p_two_sided": 0.4062,
+   "passes": false,
+   "verdict": "no",
+   "interval_matches": true,
+   "p_agrees": true
+  },
+  {
+   "n_units": 4,
+   "mean_diff": 4.27,
+   "sd": 1.81,
+   "t": 4.72,
+   "df": 3,
+   "p_one_sided": 0.009,
+   "p_two_sided": 0.018,
+   "ci95": [
+    1.39,
+    7.15
+   ],
+   "decision": "D3",
+   "comparison": "MaterioMiner fine: MR6 + names vs CRF head",
+   "per_unit": [
+    1.99,
+    5.67,
+    3.64,
+    5.78
+   ],
+   "stored_ci95": [
+    1.39,
+    7.15
+   ],
+   "stored_mean_diff": 4.27,
+   "sign_flip_p_two_sided": 0.125,
+   "passes": true,
+   "verdict": "passes",
+   "interval_matches": true,
+   "p_agrees": true
+  },
+  {
+   "n_units": 4,
+   "mean_diff": 1.77,
+   "sd": 0.69,
+   "t": 5.12,
+   "df": 3,
+   "p_one_sided": 0.0072,
+   "p_two_sided": 0.0144,
+   "ci95": [
+    0.67,
+    2.87
+   ],
+   "decision": "D4",
+   "comparison": "MaterioMiner coarse: MR6 + names vs CRF head",
+   "per_unit": [
+    1.74,
+    2.56,
+    0.88,
+    1.91
+   ],
+   "stored_ci95": [
+    0.67,
+    2.88
+   ],
+   "stored_mean_diff": 1.77,
+   "sign_flip_p_two_sided": 0.125,
+   "passes": true,
+   "verdict": "passes",
+   "interval_matches": true,
+   "p_agrees": true
+  },
+  {
+   "n_units": 11,
+   "mean_diff": 3.58,
+   "sd": 3.92,
+   "t": 3.03,
+   "df": 10,
+   "p_one_sided": 0.0063,
+   "p_two_sided": 0.0127,
+   "ci95": [
+    0.95,
+    6.21
+   ],
+   "decision": "D5",
+   "comparison": "pooled 11 units (MuLMS seeds 0\u2013900): MR6 + names vs CRF head",
+   "per_unit": [
+    2.39,
+    1.75,
+    2.94,
+    -2.76,
+    6.2,
+    12.16,
+    -0.4,
+    1.99,
+    5.67,
+    3.64,
+    5.78
+   ],
+   "stored_ci95": [
+    0.95,
+    6.21
+   ],
+   "stored_mean_diff": 3.58,
+   "sign_flip_p_two_sided": 0.0107,
+   "passes": true,
+   "verdict": "passes",
+   "interval_matches": true,
+   "p_agrees": true
+  },
+  {
+   "n_units": 11,
+   "mean_diff": 3.58,
+   "sd": 3.79,
+   "t": 3.14,
+   "df": 10,
+   "p_one_sided": 0.0053,
+   "p_two_sided": 0.0106,
+   "ci95": [
+    1.04,
+    6.13
+   ],
+   "decision": "D5'",
+   "comparison": "pooled 11 units (MuLMS seeds 300\u2013900, post hoc reading): MR6 + names vs CRF head",
+   "per_unit": [
+    2.52,
+    0.47,
+    3.43,
+    -2.35,
+    6.12,
+    11.86,
+    0.28,
+    1.99,
+    5.67,
+    3.64,
+    5.78
+   ],
+   "stored_ci95": [
+    1.04,
+    6.13
+   ],
+   "stored_mean_diff": 3.58,
+   "sign_flip_p_two_sided": 0.0068,
+   "passes": true,
+   "verdict": "above 0 (post hoc)",
+   "interval_matches": true,
+   "p_agrees": true
+  },
+  {
+   "n_units": 5,
+   "mean_diff": -0.03,
+   "sd": 0.94,
+   "t": -0.08,
+   "df": 4,
+   "p_one_sided": 0.5284,
+   "p_two_sided": 0.9432,
+   "ci95": [
+    -1.2,
+    1.14
+   ],
+   "decision": "D6",
+   "comparison": "SOFC-Exp folds: MR6 + names vs CRF head",
+   "per_unit": [
+    -0.25,
+    0.03,
+    -0.6,
+    -0.88,
+    1.54
+   ],
+   "stored_ci95": [
+    -1.21,
+    1.14
+   ],
+   "stored_mean_diff": -0.04,
+   "sign_flip_p_two_sided": 1.0,
+   "passes": false,
+   "verdict": "no",
+   "interval_matches": true,
+   "p_agrees": true
+  },
+  {
+   "n_units": 11,
+   "mean_diff": 0.8,
+   "sd": 2.17,
+   "t": 1.22,
+   "df": 10,
+   "p_one_sided": 0.1258,
+   "p_two_sided": 0.2517,
+   "ci95": [
+    -0.66,
+    2.26
+   ],
+   "decision": "D7",
+   "comparison": "pooled 11 units: MR6 + names vs MR6",
+   "per_unit": [
+    0.13,
+    -1.24,
+    1.16,
+    -2.28,
+    3.27,
+    3.32,
+    -0.77,
+    -2.08,
+    1.35,
+    3.28,
+    2.63
+   ],
+   "stored_ci95": [
+    -0.66,
+    2.26
+   ],
+   "stored_mean_diff": 0.8,
+   "sign_flip_p_two_sided": 0.2383,
+   "passes": false,
+   "verdict": "no",
+   "interval_matches": true,
+   "p_agrees": true
+  },
+  {
+   "n_units": 7,
+   "mean_diff": -0.18,
+   "sd": 1.98,
+   "t": -0.24,
+   "df": 6,
+   "p_one_sided": 0.5926,
+   "p_two_sided": 0.8148,
+   "ci95": [
+    -2.01,
+    1.65
+   ],
+   "decision": "D8",
+   "comparison": "MuLMS: own-topic vs mixed corpus",
+   "per_unit": [
+    0.49,
+    -0.26,
+    -0.63,
+    -2.53,
+    3.73,
+    -1.54,
+    -0.54
+   ],
+   "stored_ci95": [
+    -2.01,
+    1.65
+   ],
+   "stored_mean_diff": -0.18,
+   "sign_flip_p_two_sided": 0.7969,
+   "passes": false,
+   "verdict": "no",
+   "interval_matches": true,
+   "p_agrees": true
+  },
+  {
+   "n_units": 4,
+   "mean_diff": 0.95,
+   "sd": 0.61,
+   "t": 3.14,
+   "df": 3,
+   "p_one_sided": 0.0259,
+   "p_two_sided": 0.0517,
+   "ci95": [
+    -0.01,
+    1.92
+   ],
+   "decision": "D9",
+   "comparison": "MaterioMiner fine: multi-task + MR6 + names vs multi-task + MR6",
+   "per_unit": [
+    1.62,
+    0.9,
+    1.14,
+    0.16
+   ],
+   "stored_ci95": [
+    -0.01,
+    1.92
+   ],
+   "stored_mean_diff": 0.96,
+   "sign_flip_p_two_sided": 0.125,
+   "passes": false,
+   "verdict": "no",
+   "interval_matches": true,
+   "p_agrees": true
+  },
+  {
+   "n_units": 4,
+   "mean_diff": 0.85,
+   "sd": 0.99,
+   "t": 1.72,
+   "df": 3,
+   "p_one_sided": 0.0916,
+   "p_two_sided": 0.1833,
+   "ci95": [
+    -0.72,
+    2.42
+   ],
+   "decision": "D10",
+   "comparison": "MaterioMiner coarse: multi-task + MR6 + names vs multi-task + MR6",
+   "per_unit": [
+    -0.51,
+    1.73,
+    0.79,
+    1.39
+   ],
+   "stored_ci95": [
+    -0.72,
+    2.42
+   ],
+   "stored_mean_diff": 0.85,
+   "sign_flip_p_two_sided": 0.25,
+   "passes": false,
+   "verdict": "no",
+   "interval_matches": true,
+   "p_agrees": true
+  },
+  {
+   "n_units": 7,
+   "mean_diff": 11.24,
+   "sd": 8.58,
+   "t": 3.47,
+   "df": 6,
+   "p_one_sided": 0.0067,
+   "p_two_sided": 0.0133,
+   "ci95": [
+    3.31,
+    19.18
+   ],
+   "decision": "D11",
+   "comparison": "MuLMS: MR6 + names vs recall-matched MR6, recall on the unseen names the lexicon holds",
+   "per_unit": [
+    13.29,
+    0.22,
+    15.59,
+    1.93,
+    12.4,
+    25.61,
+    9.67
+   ],
+   "stored_ci95": [
+    3.31,
+    19.18
+   ],
+   "stored_mean_diff": 11.24,
+   "sign_flip_p_two_sided": 0.0156,
+   "passes": true,
+   "verdict": "passes (as registered)",
+   "interval_matches": true,
+   "p_agrees": true
+  },
+  {
+   "n_units": 7,
+   "mean_diff": 3.26,
+   "sd": 4.38,
+   "t": 1.97,
+   "df": 6,
+   "p_one_sided": 0.048,
+   "p_two_sided": 0.0961,
+   "ci95": [
+    -0.79,
+    7.31
+   ],
+   "decision": "D12",
+   "comparison": "MuLMS: MR6 + names vs recall-matched MR6, micro F1",
+   "per_unit": [
+    7.13,
+    -1.31,
+    6.43,
+    -1.48,
+    2.2,
+    9.39,
+    0.47
+   ],
+   "stored_ci95": [
+    -0.79,
+    7.31
+   ],
+   "stored_mean_diff": 3.26,
+   "sign_flip_p_two_sided": 0.1406,
+   "passes": false,
+   "verdict": "no",
+   "interval_matches": true,
+   "p_agrees": true
+  }
+ ],
+ "post_hoc_stratified": {
+  "note": "post hoc: each pooled decision with its two corpora weighted equally, the mean of the corpus means and its 95% Welch interval",
+  "decisions": {
+   "D5": {
+    "mean": 3.73,
+    "ci95": [
+     1.39,
+     6.07
+    ],
+    "df": 8.3
+   },
+   "D5'": {
+    "mean": 3.73,
+    "ci95": [
+     1.46,
+     6.0
+    ],
+    "df": 8.4
+   },
+   "D7": {
+    "mean": 0.9,
+    "ci95": [
+     -0.88,
+     2.69
+    ],
+    "df": 5.9
+   }
+  }
+ },
+ "post_hoc_dependence": {
+  "note": "post hoc (round 15): each decision with its units correlated where their training sets share documents, at the corrected resampled t test's 1/K (Nadeau and Bengio 2003): 1/4 between MaterioMiner's papers, 1/5 between SOFC-Exp's folds, 1/4 between MuLMS subfields whose pools share an article, 0 otherwise",
+  "rho": {
+   "materiominer": 0.25,
+   "sofc_exp": 0.2,
+   "mulms_shared_pool": 0.25
+  },
+  "mulms_pools": {
+   "electrolysis": [
+    "graphene_02",
+    "poly_11",
+    "sofc_01"
+   ],
+   "graphene": [
+    "steel_06",
+    "pemfc_02",
+    "steel_07"
+   ],
+   "pemfc": [
+    "oastm_02",
+    "poly_02"
+   ],
+   "poly": [
+    "graphene_02",
+    "oastm_06",
+    "pemfc_13"
+   ],
+   "semi": [
+    "poly_11",
+    "poly_09",
+    "poly_04"
+   ],
+   "sofc": [
+    "semi_05",
+    "poly_11"
+   ],
+   "steel": [
+    "sofc_04",
+    "pemfc_10",
+    "semi_05"
+   ]
+  },
+  "shared_pool_pairs": [
+   [
+    "electrolysis",
+    "poly",
+    [
+     "graphene_02"
+    ]
+   ],
+   [
+    "electrolysis",
+    "semi",
+    [
+     "poly_11"
+    ]
+   ],
+   [
+    "electrolysis",
+    "sofc",
+    [
+     "poly_11"
+    ]
+   ],
+   [
+    "semi",
+    "sofc",
+    [
+     "poly_11"
+    ]
+   ],
+   [
+    "sofc",
+    "steel",
+    [
+     "semi_05"
+    ]
+   ]
+  ],
+  "decisions": {
+   "D1": {
+    "mean_diff": 3.19,
+    "ci95": [
+     -2.0,
+     8.38
+    ],
+    "p_two_sided": 0.1831,
+    "se_ratio": 1.201,
+    "correlated_pairs": 5,
+    "above_0": false
+   },
+   "D2": {
+    "mean_diff": 0.92,
+    "ci95": [
+     -2.15,
+     3.99
+    ],
+    "p_two_sided": 0.4912,
+    "se_ratio": 1.201,
+    "correlated_pairs": 5,
+    "above_0": false
+   },
+   "D3": {
+    "mean_diff": 4.27,
+    "ci95": [
+     -0.13,
+     8.67
+    ],
+    "p_two_sided": 0.0538,
+    "se_ratio": 1.528,
+    "correlated_pairs": 6,
+    "above_0": false
+   },
+   "D4": {
+    "mean_diff": 1.77,
+    "ci95": [
+     0.09,
+     3.45
+    ],
+    "p_two_sided": 0.0439,
+    "se_ratio": 1.528,
+    "correlated_pairs": 6,
+    "above_0": true
+   },
+   "D5": {
+    "mean_diff": 3.58,
+    "ci95": [
+     0.27,
+     6.88
+    ],
+    "p_two_sided": 0.0366,
+    "se_ratio": 1.257,
+    "correlated_pairs": 11,
+    "above_0": true
+   },
+   "D5'": {
+    "mean_diff": 3.58,
+    "ci95": [
+     0.38,
+     6.78
+    ],
+    "p_two_sided": 0.0317,
+    "se_ratio": 1.257,
+    "correlated_pairs": 11,
+    "above_0": true
+   },
+   "D6": {
+    "mean_diff": -0.03,
+    "ci95": [
+     -1.79,
+     1.73
+    ],
+    "p_two_sided": 0.9621,
+    "se_ratio": 1.5,
+    "correlated_pairs": 10,
+    "above_0": false
+   },
+   "D7": {
+    "mean_diff": 0.8,
+    "ci95": [
+     -1.04,
+     2.63
+    ],
+    "p_two_sided": 0.3558,
+    "se_ratio": 1.257,
+    "correlated_pairs": 11,
+    "above_0": false
+   },
+   "D8": {
+    "mean_diff": -0.18,
+    "ci95": [
+     -2.38,
+     2.01
+    ],
+    "p_two_sided": 0.8453,
+    "se_ratio": 1.201,
+    "correlated_pairs": 5,
+    "above_0": false
+   },
+   "D9": {
+    "mean_diff": 0.95,
+    "ci95": [
+     -0.52,
+     2.43
+    ],
+    "p_two_sided": 0.1322,
+    "se_ratio": 1.528,
+    "correlated_pairs": 6,
+    "above_0": false
+   },
+   "D10": {
+    "mean_diff": 0.85,
+    "ci95": [
+     -1.55,
+     3.25
+    ],
+    "p_two_sided": 0.3413,
+    "se_ratio": 1.528,
+    "correlated_pairs": 6,
+    "above_0": false
+   },
+   "D11": {
+    "mean_diff": 11.24,
+    "ci95": [
+     1.71,
+     20.77
+    ],
+    "p_two_sided": 0.0278,
+    "se_ratio": 1.201,
+    "correlated_pairs": 5,
+    "above_0": true
+   },
+   "D12": {
+    "mean_diff": 3.26,
+    "ci95": [
+     -1.6,
+     8.12
+    ],
+    "p_two_sided": 0.1518,
+    "se_ratio": 1.201,
+    "correlated_pairs": 5,
+    "above_0": false
+   }
+  },
+  "tipping": {
+   "D3": {
+    "group": "materiominer",
+    "rho": 0.23
+   },
+   "D4": {
+    "group": "materiominer",
+    "rho": 0.28
+   },
+   "D5": {
+    "group": "materiominer",
+    "rho": 0.45
+   },
+   "D5'": {
+    "group": "materiominer",
+    "rho": 0.54
+   },
+   "D11": {
+    "group": "mulms",
+    "rho": 0.53
+   }
+  }
+ },
+ "post_hoc_reported": {
+  "note": "t tests of comparisons the paper quotes with a P value: MR3 minus the CRF head over the 11 pooled units, on MuLMS's decision seeds (decision) and all ten (ten)",
+  "mr3_vs_crf": {
+   "decision": {
+    "n_units": 11,
+    "mean_diff": 2.46,
+    "sd": 2.17,
+    "t": 3.75,
+    "df": 10,
+    "p_one_sided": 0.0019,
+    "p_two_sided": 0.0038,
+    "ci95": [
+     1.0,
+     3.91
+    ]
+   },
+   "ten": {
+    "n_units": 11,
+    "mean_diff": 2.35,
+    "sd": 2.09,
+    "t": 3.72,
+    "df": 10,
+    "p_one_sided": 0.002,
+    "p_two_sided": 0.004,
+    "ci95": [
+     0.94,
+     3.75
+    ]
+   }
+  },
+  "inferences": {
+   "mr3_vs_crf_11_decision": {
+    "mean_diff": 2.46,
+    "ci95": [
+     1.0,
+     3.91
+    ],
+    "n_units": 11,
+    "p_two_sided": 0.0038
+   },
+   "mr6_vs_mr3_11_decision": {
+    "mean_diff": 0.33,
+    "ci95": [
+     -0.25,
+     0.92
+    ],
+    "n_units": 11,
+    "p_two_sided": 0.2315
+   },
+   "mr3_vs_crf_16": {
+    "mean_diff": 1.46,
+    "ci95": [
+     0.28,
+     2.64
+    ],
+    "n_units": 16,
+    "p_two_sided": 0.0184
+   },
+   "mr6_vs_crf_mulms_decision": {
+    "mean_diff": 2.68,
+    "ci95": [
+     0.13,
+     5.23
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.0424
+   },
+   "sofc_names_vs_mr3": {
+    "mean_diff": 0.45,
+    "ci95": [
+     0.04,
+     0.86
+    ],
+    "n_units": 5,
+    "p_two_sided": 0.0384
+   },
+   "unseen_recall_names_vs_mr6": {
+    "mean_diff": 2.56,
+    "ci95": [
+     0.76,
+     4.36
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.0131
+   },
+   "unseen_precision_names_vs_mr6": {
+    "mean_diff": -2.22,
+    "ci95": [
+     -5.03,
+     0.6
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.1019
+   },
+   "held_recall_names_vs_mr6": {
+    "mean_diff": 7.29,
+    "ci95": [
+     3.27,
+     11.3
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.0044
+   },
+   "held_in_minus_out": {
+    "mean_diff": 6.17,
+    "ci95": [
+     2.44,
+     9.9
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.0067
+   },
+   "held_names_vs_best_bias": {
+    "mean_diff": 6.52,
+    "ci95": [
+     2.15,
+     10.89
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.0107
+   },
+   "other_unseen_at_matched_bias": {
+    "mean_diff": -1.73,
+    "ci95": [
+     -3.02,
+     -0.44
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.0168
+   },
+   "d11_flagged_at_nearest_recall": {
+    "mean_diff": 8.63,
+    "ci95": [
+     3.35,
+     13.9
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.0071
+   },
+   "d12_flagged_at_nearest_recall": {
+    "mean_diff": 1.37,
+    "ci95": [
+     -0.66,
+     3.41
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.1499
+   },
+   "other_unseen_vs_their_best_bias": {
+    "mean_diff": -4.16,
+    "ci95": [
+     -5.82,
+     -2.5
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.0009
+   },
+   "held_materials_at_0": {
+    "mean_diff": 7.98,
+    "ci95": [
+     2.15,
+     13.82
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.0155
+   },
+   "other_materials_at_0": {
+    "mean_diff": 0.89,
+    "ci95": [
+     -3.48,
+     5.27
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.635
+   },
+   "held_values_at_0": {
+    "mean_diff": 1.74,
+    "ci95": [
+     -1.16,
+     4.65
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.1921
+   },
+   "held_other_types_at_0": {
+    "mean_diff": 9.8,
+    "ci95": [
+     3.34,
+     16.25
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.0099
+   },
+   "mt_mr3_vs_crf_materiominer_fine": {
+    "mean_diff": 6.73,
+    "ci95": [
+     6.03,
+     7.43
+    ],
+    "n_units": 4,
+    "p_two_sided": 0.0001
+   },
+   "unseen_f1_names_vs_mr6": {
+    "mean_diff": 0.56,
+    "ci95": [
+     -1.44,
+     2.56
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.5188
+   },
+   "other_unseen_recall_names_vs_mr6": {
+    "mean_diff": 1.12,
+    "ci95": [
+     -0.78,
+     3.02
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.2005
+   },
+   "d11_without_flagged": {
+    "mean_diff": 6.05,
+    "ci95": [
+     -3.33,
+     15.44
+    ],
+    "n_units": 4,
+    "p_two_sided": 0.1324
+   },
+   "d12_without_flagged": {
+    "mean_diff": -0.03,
+    "ci95": [
+     -2.78,
+     2.72
+    ],
+    "n_units": 4,
+    "p_two_sided": 0.9745
+   },
+   "other_unseen_matched_without_flagged": {
+    "mean_diff": -0.88,
+    "ci95": [
+     -2.63,
+     0.87
+    ],
+    "n_units": 4,
+    "p_two_sided": 0.2083
+   },
+   "precision_at_matched_bias": {
+    "mean_diff": 5.78,
+    "ci95": [
+     -1.22,
+     12.79
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.09
+   },
+   "names_vs_mt_mr3_fine": {
+    "mean_diff": 0.76,
+    "ci95": [
+     -0.15,
+     1.68
+    ],
+    "n_units": 4,
+    "p_two_sided": 0.0766
+   },
+   "names_vs_mt_mr3_coarse": {
+    "mean_diff": 0.91,
+    "ci95": [
+     -0.14,
+     1.97
+    ],
+    "n_units": 4,
+    "p_two_sided": 0.0703
+   },
+   "names_vs_mr6_11_decision_macro": {
+    "mean_diff": 0.83,
+    "ci95": [
+     -0.01,
+     1.67
+    ],
+    "n_units": 11,
+    "p_two_sided": 0.0516
+   },
+   "names_vs_mr6_11_decision_weighted": {
+    "mean_diff": 0.89,
+    "ci95": [
+     -0.4,
+     2.18
+    ],
+    "n_units": 11,
+    "p_two_sided": 0.1542
+   },
+   "names_vs_mr3_11_decision_macro": {
+    "mean_diff": 1.33,
+    "ci95": [
+     0.29,
+     2.36
+    ],
+    "n_units": 11,
+    "p_two_sided": 0.0169
+   },
+   "names_vs_mr3_11_decision_weighted": {
+    "mean_diff": 1.25,
+    "ci95": [
+     -0.29,
+     2.78
+    ],
+    "n_units": 11,
+    "p_two_sided": 0.1006
+   },
+   "mixed_vs_crf_mulms": {
+    "mean_diff": 3.38,
+    "ci95": [
+     -0.89,
+     7.64
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.1007
+   },
+   "mr6_vs_crf_mulms_ten": {
+    "mean_diff": 2.33,
+    "ci95": [
+     -0.27,
+     4.92
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.0705
+   },
+   "mr3_vs_crf_sofc_folds_13_3a": {
+    "mean_diff": -0.48,
+    "ci95": [
+     -1.36,
+     0.39
+    ],
+    "n_units": 5,
+    "p_two_sided": 0.1985
+   },
+   "mr3_vs_crf_sofc_official_split_by_seed": {
+    "mean_diff": -0.29,
+    "ci95": [
+     -1.04,
+     0.47
+    ],
+    "n_units": 10,
+    "p_two_sided": 0.4114
+   },
+   "mr3_vs_crf_sofc_draws": {
+    "mean_diff": 0.5,
+    "ci95": [
+     -0.47,
+     1.46
+    ],
+    "n_units": 5,
+    "p_two_sided": 0.2262
+   },
+   "held_f1_names_vs_mr6": {
+    "mean_diff": 1.13,
+    "ci95": [
+     -1.85,
+     4.11
+    ],
+    "n_units": 7,
+    "p_two_sided": 0.3883
+   },
+   "st3_votes_vs_mr3_votes_coarse": {
+    "mean_diff": -1.32,
+    "ci95": [
+     -1.85,
+     -0.8
+    ],
+    "n_units": 4,
+    "p_two_sided": 0.004
+   },
+   "st3_vs_mr3_fine": {
+    "mean_diff": -1.03,
+    "ci95": [
+     -4.47,
+     2.41
+    ],
+    "n_units": 4,
+    "p_two_sided": 0.4121
+   },
+   "st3_vs_mr3_coarse": {
+    "mean_diff": 0.28,
+    "ci95": [
+     -1.46,
+     2.01
+    ],
+    "n_units": 4,
+    "p_two_sided": 0.6486
+   },
+   "mt_vs_crf_materiominer_fine": {
+    "mean_diff": 3.72,
+    "ci95": [
+     0.57,
+     6.87
+    ],
+    "n_units": 4,
+    "p_two_sided": 0.0331
+   }
+  },
+  "mr3_materiominer_decision_seeds": {
+   "fine": {
+    "n_units": 4,
+    "mean_diff": 2.57,
+    "sd": 1.55,
+    "t": 3.32,
+    "df": 3,
+    "p_one_sided": 0.0226,
+    "p_two_sided": 0.0452,
+    "ci95": [
+     0.1,
+     5.03
+    ]
+   },
+   "coarse": {
+    "n_units": 4,
+    "mean_diff": 1.73,
+    "sd": 1.48,
+    "t": 2.33,
+    "df": 3,
+    "p_one_sided": 0.0509,
+    "p_two_sided": 0.1017,
+    "ci95": [
+     -0.63,
+     4.08
+    ]
+   }
+  },
+  "mr3_materiominer_all_seeds": {
+   "fine": {
+    "n_units": 4,
+    "mean_diff": 2.77,
+    "sd": 0.79,
+    "t": 6.98,
+    "df": 3,
+    "p_one_sided": 0.003,
+    "p_two_sided": 0.006,
+    "ci95": [
+     1.51,
+     4.03
+    ]
+   },
+   "coarse": {
+    "n_units": 4,
+    "mean_diff": 1.28,
+    "sd": 0.77,
+    "t": 3.33,
+    "df": 3,
+    "p_one_sided": 0.0223,
+    "p_two_sided": 0.0446,
+    "ci95": [
+     0.06,
+     2.51
+    ]
+   }
+  },
+  "d5_coarse": {
+   "n_units": 11,
+   "mean_diff": 2.67,
+   "sd": 3.84,
+   "t": 2.31,
+   "df": 10,
+   "p_one_sided": 0.0218,
+   "p_two_sided": 0.0436,
+   "ci95": [
+    0.09,
+    5.25
+   ]
+  }
+ }
+}

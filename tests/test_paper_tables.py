@@ -1,6 +1,8 @@
 """The tables of the paper plan (paper_tables.py) from toy results files."""
 import json
 
+import pytest
+
 import paper_tables as pt
 
 
@@ -231,3 +233,256 @@ def test_table7_lists_the_ablations_against_the_method():
     assert ("| the method: 40,000 sentences, threshold 0.9, 3 of 3 teachers, a uniform pool | 2 "
             "| 300 | 22.0 | 52.09 |  | +1.45 [−1.35, +4.25] | +3.16 [−1.96, +8.28] |") in table
     assert pt.ablation_rows({}) == []
+
+
+def test_table8_per_type_and_table9_robustness(tmp_path):
+    """Table 8: per type, the CRF head, MR6 and the names method with the differences, per
+    part; Table 9: the pooled comparisons per basis with positives, the sign-flip p and the
+    leave-one-out minimum, then the MaterioMiner grids."""
+    types = {'mulms': {'crf_mrm_topic6': {'MAT': {'crf': 50.0, 'method': 53.0, 'diff': 3.0,
+                                                  'n_splits': 7, 'support_per_split': 1800.0}},
+                       'crf_mr6': {'MAT': {'crf': 50.0, 'method': 52.0, 'diff': 2.0,
+                                           'n_splits': 7, 'support_per_split': 1800.0}}}}
+    rows = pt.type_rows({'week14': {'types': types}}, 'mulms')
+    assert rows == [['MAT', 1800.0, 7, 50.0, 52.0, 53.0, 3.0, 1.0]]
+    table = pt.table8({'mulms': rows})
+    assert '| MAT | 1800.0 | 7 | 50.00 | 52.00 | 53.00 | +3.00 | +1.00 |' in table
+    assert pt.type_rows({}, 'mulms') == []
+    entry = {'mean_diff': 3.58, 'ci95': [0.95, 6.21], 'per_run': [1] * 11, 'n_positive': 9,
+             'n_units': 11, 'sign_flip_p': 0.0107,
+             'leave_one_out': {'min_lower': 0.44, 'all_above_zero': True, 'rows': []}}
+    robust = {'pooled': {'ten': {'names_vs_crf': entry, 'units': ['a'] * 11}},
+              'grids': {'fine': {'names_vs_crf': {'mean_diff': 4.27, 'ci95': [1.39, 7.15]}}}}
+    rows = pt.robustness_rows(robust)
+    assert rows[0][:2] == ['MuLMS seeds 0–900 (as decided)', 'MR6 + names − CRF head']
+    table = pt.table9(robust)
+    assert ('| MuLMS seeds 0–900 (as decided) | MR6 + names − CRF head | +3.58 [+0.95, +6.21] | 9/11 '
+            '| 0.0107 | +0.44 |') in table
+    assert '| MR6 + names − CRF head | +4.27 [+1.39, +7.15] |' in table
+    assert pt.robustness_rows({}) == []
+
+
+def test_table10_lexicon_membership():
+    """Table 10 lists per setting and system the recall in and out of the lexicon and the paired
+    gains, and names the units used and the excluded ones."""
+    unit = {'recall_in': 50.0, 'recall_out': 40.0, 'precision_in': 60.0, 'precision_out': None,
+            'gold_share_in': 25.0, 'pred_share_in': 30.0, 'gold': {'in': 1, 'out': 3},
+            'correct': {'in': 1, 'out': 1}, 'pred': {'in': 1, 'out': 0}, 'pred_correct': {'in': 1, 'out': 0}}
+    comp = {'per_unit': {}, 'gain_in': {'mean_diff': 5.0, 'ci95': [1.0, 9.0], 'n_units': 7, 'n_positive': 6},
+            'gain_out': {'mean_diff': 2.0, 'ci95': [-1.0, 5.0], 'n_units': 7, 'n_positive': 4},
+            'in_minus_out': {'mean_diff': 3.0, 'ci95': [0.5, 5.5], 'n_units': 7, 'n_positive': 6}}
+    data = {'mulms': {'systems': {'crf': 'CRF head', 'crf_mrm_topic6': 'MR6 + names'},
+                      'units': ['semi', 'sofc'], 'excluded': ['poly'],
+                      'pooled': {'crf': unit, 'crf_mrm_topic6': unit},
+                      'comparisons': {'names_vs_mr6': comp}}}
+    scores, comparisons = pt.lexicon_rows(data)
+    assert [s[1] for s in scores] == ['CRF head', 'MR6 + names']
+    assert comparisons[0][1] == 'MR6 + names − MR6'
+    text = pt.table10(data)
+    assert '| MuLMS, 7 held-out subfields (seeds 300–900) | CRF head | 25.0 | 50.0 | 40.0 | 30.0 | 60.0 |  |' in text
+    assert '+3.00 [+0.50, +5.50] | 6/7 |' in text and 'semi, sofc' in text and "['poly']" in text
+
+
+def test_table11_week17():
+    """Table 11: per granularity the names' and the control's rows with the decision's verdict
+    and the reported differences; empty rows without the week17 section."""
+    def spread(mean, lo, hi):
+        return {'micro': {'mean': mean, 'ci95': [lo, hi]}}
+
+    def diff(mean, lo, hi):
+        return {'micro': {'mean_diff': mean, 'ci95': [lo, hi]}}
+    e = {'decision': '17.1', 'passes': False, 'crf_mt_mrm6': spread(53.0, 48.0, 58.0),
+         'minus_crf_mt_mr6': diff(0.5, -1.0, 2.0),
+         'names': {'minus_crf_mt_mr': diff(1.0, -0.5, 2.5), 'minus_crf_mt': diff(4.0, 1.0, 7.0),
+                   'minus_crf': diff(7.7, 4.0, 11.4)},
+         'control': {'crf_mt_mr6': spread(52.5, 47.5, 57.5),
+                     'minus_crf_mt_mr': diff(0.5, -0.8, 1.8), 'minus_crf_mt': diff(3.5, 0.5, 6.5),
+                     'minus_crf': diff(7.2, 3.5, 10.9)}}
+    assert pt.week17_rows({}) == []
+    rows = pt.week17_rows({'week17': {'fine': e}})
+    text = pt.table11(rows)
+    assert text.startswith('Table 11.') and 'decision 17.1, no' in text
+    lines = [l for l in text.split('\n') if l.startswith('| fine')]
+    assert len(lines) == 2 and 'multi-task + MR6 + names' in lines[0] and 'the control' in lines[1]
+    assert '+0.50 [−1.00, +2.00]' in lines[0] and '+7.20 [+3.50, +10.90]' in lines[1]
+
+
+def _matched():
+    def paired(per_unit, mean, lo, hi, verdict=None):
+        out = {'per_unit': per_unit, 'mean_diff': mean, 'ci95': [lo, hi], 'n_units': 2,
+               'n_positive': 2, 'above_0': lo > 0}
+        return out | ({'verdict': verdict} if verdict else {})
+    keys = ('precision', 'unseen_recall', 'unseen_precision', 'unseen_f1', 'recall_out',
+            'in_minus_out', 'bias_f1_change')
+    return {'decisions': {'18.1': paired({'semi': 5.0, 'sofc': 3.0}, 4.0, 1.0, 7.0, 'passes'),
+                          '18.2': paired({'semi': 1.0, 'sofc': -0.4}, 0.3, -2.0, 2.6, 'no')},
+            'prespecified': {k: paired({'semi': 0.5, 'sofc': 0.1}, 0.3, -0.2, 0.8) for k in keys},
+            'per_unit': {'semi': {'target_recall': 31.8, 'control_recall_at_0': 26.8,
+                                  'd_star': 1.25, 'flagged': False},
+                         'sofc': {'target_recall': 50.4, 'control_recall_at_0': 46.5,
+                                  'd_star': 5.0, 'flagged': True}},
+            'checks': {'n_runs_checked': 49, 'd0_differences': {}}}
+
+
+def test_table12_week18():
+    """Table 12: per subfield the matching and the names minus the control at D*, then the two
+    decisions with their verdicts and the pre-specified comparisons."""
+    text = pt.table12(_matched())
+    assert text.startswith('Table 12.') and 'in minus out' in text
+    rows = [line for line in text.split('\n') if line.startswith('| ')]
+    assert rows[1].startswith('| semi | 31.80 | 26.80 | 1.25 | +5.00 | +1.00 | +0.50 |')
+    assert '5.00 (flagged)' in rows[2]
+    assert rows[3].startswith('| mean [95% CI], 2 subfields |')
+    assert '+4.00 [+1.00, +7.00] (18.1, passes)' in rows[3] and '(18.2, no)' in rows[3]
+    assert 'without the flagged' not in text and 'post hoc)' not in text    # no extra readings
+    m = _matched()
+    one = {'per_unit': {'semi': 5.0}, 'mean_diff': 5.0, 'ci95': [-1.0, 11.0], 'n_units': 1,
+           'n_positive': 1, 'above_0': False}
+    two = {'per_unit': {'semi': 0.5, 'sofc': 0.2}, 'mean_diff': 0.35, 'ci95': [-1.0, 1.7],
+           'n_units': 2, 'n_positive': 2, 'above_0': False}
+    m['without_flagged'] = {'flagged': ['sofc'], 'decisions': {'18.1': one, '18.2': one},
+                            'prespecified': {'precision': one}}
+    m['post_hoc_nearest'] = {'matched': {'sofc': {'d': 2.5, 'control_recall': 49.93,
+                                                  'target_recall': 50.36}},
+                             'decisions': {'18.1': two, '18.2': two},
+                             'prespecified': {'precision': two}}
+    for u, r0, r1 in (('semi', 26.8, 31.84), ('sofc', 46.5, 49.93)):
+        m['per_unit'][u]['curve'] = {'0': {'recall': r0, 'precision': 50.0, 'f1_pooled': 40.0},
+                                     '2.5': {'recall': r1, 'precision': 45.0, 'f1_pooled': 40.0}}
+        m['per_unit'][u]['names'] = {'recall': m['per_unit'][u]['target_recall'],
+                                     'precision': 50.0}
+        m['per_unit'][u]['between'] = [0.0, 2.5]
+        m['per_unit'][u]['w'] = 0.5
+    rows = [line for line in pt.table12(m).split('\n') if line.startswith('| ')]
+    assert '| 5.00 (flagged; 2.5 post hoc) | +3.00 (+0.20) |' in rows[2]
+    assert rows[4].startswith('| without the flagged subfields, 1 (pre-specified) |')
+    assert '+5.00 [−1.00, +11.00], 1/1 above 0' in rows[4]
+    assert rows[5].startswith('| the flagged subfields at the nearest recall, 2 (post hoc) |')
+    assert rows[6].startswith('| subfield | rate | names |')
+    assert rows[7] == '| semi | recall | 31.80 | 26.80 | 31.84 |'
+
+def test_table12_parts_from_the_curves():
+    """Table 12's second to fourth parts: the control's recall, precision and F1 at every bias
+    beside the names' (F1 from their pooled recall and precision), the bracket of D* and the
+    pre-specified comparisons per subfield, and the post hoc curves on the unseen names with
+    the names minus the control at its best bias."""
+    def paired(per_unit, mean=1.0):
+        return {'per_unit': per_unit, 'mean_diff': mean, 'ci95': [-1.0, 3.0], 'n_units': 2,
+                'n_positive': 2}
+    keys = ('unseen_recall', 'unseen_precision', 'unseen_f1', 'recall_out', 'in_minus_out',
+            'bias_f1_change', 'precision')
+    curve = {'0': {'recall': 40.0, 'precision': 60.0, 'f1_pooled': 48.0},
+             '5': {'recall': 45.0, 'precision': 50.0, 'f1_pooled': 47.37}}
+    m = {'per_unit': {'semi': {'names': {'recall': 50.0, 'precision': 50.0}, 'curve': curve,
+                               'between': [0.0, 5.0], 'w': 0.5, 'flagged': False},
+                      'sofc': {'names': {'recall': 60.0, 'precision': 40.0}, 'curve': curve,
+                               'between': [5.0, 5.0], 'w': 0.0, 'flagged': True}},
+         'prespecified': {k: paired({'semi': 2.0, 'sofc': -1.0}) for k in keys},
+         'post_hoc_nearest': {'prespecified': {k: paired({'semi': 2.0, 'sofc': 0.5}) for k in keys}},
+         'post_hoc_curves': {'units': {u: {'names': {'recall_in': 80.0, 'recall_out': 30.0},
+                                           'control': {'0': {'recall_in': 70.0, 'recall_out': 32.0},
+                                                       '5': {'recall_in': 60.0, 'recall_out': 35.0}}}
+                                       for u in ('semi', 'sofc')},
+                             'names_minus_best': {'recall_in': paired({'semi': 10.0, 'sofc': 10.0}, 10.0),
+                                                  'recall_out': paired({'semi': -5.0, 'sofc': -5.0}, -5.0)}}}
+    text = pt.table12_curves(m)
+    rows = [line for line in text.split('\n') if line.startswith('| ')]
+    assert '| sofc | F1 | 48.00 | 48.00 | 47.37 |' in rows      # 2 * 60 * 40 / 100 = 48
+    assert '| semi | 0.00 to 5.00, w = 0.50 | +2.00 |' in text
+    assert '| sofc | 5.00 | −1.00 (+0.50) |' in text
+    assert '| semi | held | 80.00 | 70.00 | 60.00 | +10.00 |' in rows
+    assert any(r.startswith('| mean [95% CI] | not held |') and r.endswith('2/2 above 0 |') for r in rows)
+    assert pt.table12_curves({'per_unit': {'x': {}}}) == ''
+
+
+
+def test_table12_post_hoc_parts():
+    """Table 12's post hoc parts: the decomposition rows, the typed split with its unit counts,
+    the sign-flip p-values and the lexicons' type counts; '' without them."""
+    def e(mean, n=7, pos=7):
+        return {'mean_diff': mean, 'ci95': [mean - 1, mean + 1], 'n_units': n, 'n_positive': pos}
+    m = {'post_hoc_decomposition': {'names_minus_mr6_at_0': e(7.29),
+                                    'mr6_at_0_minus_control_at_d_star': e(3.96),
+                                    'matched_only': {'names_minus_mr6_at_0': e(5.92, 4, 4),
+                                                     'mr6_at_0_minus_control_at_d_star': e(0.14, 4, 1)}},
+         'post_hoc_types': {'minus_control_at_d_star': {'MAT_in': e(12.02), 'other_in': e(2.87)},
+                            'minus_control_nearest': {'MAT_in': e(9.87), 'other_in': e(0.94)},
+                            'minus_mr6_at_0': {'MAT_in': None,
+                                               'other_in': {**e(9.8), 'per_unit': {'a': 10.0, 'b': 5.0}}},
+                            'gold_per_run': {'a': {'MAT_in': 184.0, 'other_in': 6.0},
+                                             'b': {'MAT_in': 1022.0, 'other_in': 577.0}}},
+         'post_hoc_sign_flip': {'18.1': 0.0156, '18.2': 0.1406},
+         'post_hoc_lexicon_types': {'a': {'MAT': {'distinct': 2392, 'entries': 29748}}}}
+    text = pt.table12_post_hoc(m)
+    assert '| the 4 matched subfields | +5.92 [+4.92, +6.92] | +0.14 [−0.86, +1.14] |' in text
+    assert '| MAT | held | +12.02 [+11.02, +13.02], 7/7 | +9.87 [+8.87, +10.87], 7/7 |  | 184–1022 |  |' in text
+    # 10% of 6 names and 5% of 577 names: about 29 more, all of the held part's recalled names
+    assert '| other | held | +2.87 [+1.87, +3.87], 7/7 | +0.94 [−0.06, +1.94], 7/7 | +9.80 [+8.80, +10.80], 7/7 | 6–577 | +29 (100%) |' in text
+    # a part with a cell that loses names gets counts without shares
+    lost = {'minus_mr6_at_0': {'MAT_out': {**e(1.0), 'per_unit': {'a': 10.0}},
+                               'VALUE_out': {**e(-1.0), 'per_unit': {'a': -10.0}}},
+            'gold_per_run': {'a': {'MAT_out': 100.0, 'VALUE_out': 20.0}}}
+    assert pt.extra_names(lost, 'MAT_out') == '+10' and pt.extra_names(lost, 'VALUE_out') == '−2'
+    assert '18.1 0.0156, 18.2 0.1406' in text and '| a | 2,392 (29,748) |' in text
+    assert pt.table12_post_hoc({}) == ''
+
+
+def test_table14_chain_and_table15_lexicon_units():
+    """Table 14: each system against the one it builds on, on the unseen and seen names and all
+    entities, with MuLMS's decision seeds too; Table 15: the lexicon split per unit."""
+    def q(m, r=1.0, p=-1.0):
+        return {'mean_diff': m, 'ci95': [m - 1, m + 1],
+                'recall': {'mean_diff': r, 'ci95': [r - 1, r + 1]},
+                'precision': {'mean_diff': p, 'ci95': [p - 1, p + 1]}}
+    mentions = {'chain': {'mulms_leave_one_subfield_out': {
+        'crf_mrm_topic6': {'reference': 'crf_mr6', 'unseen': q(0.93, 3.24, -2.23), 'seen': q(0.77),
+                           'all': q(0.85), 'decision': {'unseen': q(0.56, 2.56, -2.22)}},
+        'crf_mrm_mixed6': {'reference': 'crf_mr6', 'seeds': list(range(300, 1000, 100)),
+                           'all': q(0.70)}},
+        'fine_leave_one_paper_out': {'crf_mr': {'reference': 'crf', 'unseen': q(3.19),
+                                                'decision': {'unseen': q(9.9)}}}}}
+    text = pt.table14(mentions)
+    assert '| MuLMS, 7 subfields | MR6 + names − MR6 | all ten | unseen names | +0.93 [−0.07, +1.93] | +3.24 [+2.24, +4.24] | −2.23 [−3.23, −1.23] |' in text
+    assert '| MuLMS, 7 subfields | MR6 + names − MR6 | decision seeds (300–900) | unseen names | +0.56' in text
+    assert 'MR3 − CRF head | all ten | unseen names' in text and '+9.90' not in text   # no decision seeds off MuLMS
+    # a system run on the decision seeds alone is labelled by its own seeds
+    assert '| MR6 + names (mixed corpus) − MR6 | decision seeds (300–900) | all entities | +0.70' in text
+    assert 'mixed corpus) − MR6 | all ten' not in text
+    data = {'mulms': {'comparisons': {'names_vs_mr6': {'per_unit': {
+        'sofc': {'gain_in': 14.09, 'gain_out': 1.51, 'in_minus_out': 12.58}}}}},
+            'fine': {'comparisons': {'names_vs_mr6': {'per_unit': {
+                '10.1038_ncomms7164.conll': {'gain_in': 1.0, 'gain_out': -0.5, 'in_minus_out': 1.5}}}}}}
+    text = pt.table15(data)
+    assert '| MR6 + names − MR6 | sofc | +14.09 | +1.51 | +12.58 |' in text
+    assert '| ncomms7164 | +1.00 | −0.50 | +1.50 |' in text          # the short paper name
+
+
+def test_table10_f1_on_the_held_names():
+    """Table 10's F1 columns come from the pooled recall and precision of each part, and the
+    paired F1 gain on the held names from each unit's own recall and precision on them."""
+    pytest.importorskip('scipy')
+    assert pt.f1_of(50.0, 50.0) == 50.0 and pt.f1_of(None, 50.0) is None and pt.f1_of(0, 0) is None
+
+    def unit(r, p):
+        return {'recall_in': r, 'precision_in': p}
+    part = {'units': ['a', 'b', 'c'],
+            'per_unit': {'crf_mrm_topic6': {'a': unit(80, 60), 'b': unit(70, 70), 'c': unit(90, 50)},
+                         'crf_mr6': {'a': unit(70, 70), 'b': unit(60, 80), 'c': unit(80, 60)}}}
+    gain = pt.held_f1_gain(part, 'mulms', 'names_vs_mr6')
+    expected = [pt.f1_of(80, 60) - 70, 70 - pt.f1_of(60, 80), pt.f1_of(90, 50) - pt.f1_of(80, 60)]
+    assert gain['n_units'] == 3 and gain['mean_diff'] == round(sum(expected) / 3, 2)
+    assert pt.held_f1_gain(part, 'mulms', 'mr3_vs_crf') is None       # systems not present
+
+
+def test_table16_verdicts_and_dependence_column():
+    """Table 16 prints each decision's own verdict words and, when the results hold them, the
+    post hoc interval and P with the units correlated."""
+    row = {'decision': "D5'", 'comparison': 'pooled', 'n_units': 11, 'stored_mean_diff': 3.58,
+           'stored_ci95': [1.04, 6.13], 'sd': 3.79, 't': 3.14, 'df': 10, 'p_one_sided': 0.0053,
+           'p_two_sided': 0.0106, 'sign_flip_p_two_sided': 0.0068, 'passes': True,
+           'verdict': 'above 0 (post hoc)'}
+    tests = {'decisions': [row], 'post_hoc_dependence': {'decisions': {"D5'": {
+        'mean_diff': 3.58, 'ci95': [0.38, 6.78], 'p_two_sided': 0.0317}}}}
+    text = pt.table16(tests)
+    assert '| above 0 (post hoc) | [+0.38, +6.78], 0.032 |' in text
+    assert '| passes | |' not in pt.table16({'decisions': [dict(row, verdict=None, passes=False)]})

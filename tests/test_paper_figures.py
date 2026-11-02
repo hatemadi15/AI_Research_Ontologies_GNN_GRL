@@ -116,7 +116,8 @@ def test_figures_are_written(tmp_path):
             'MEC': {'f1': 80.0, 'support_per_split': 53.0}}}}}))
     out = tmp_path / 'figures'
     written = pf.main(['--results', str(results), '--out', str(out)])
-    assert written == ['fig1_random_vs_unseen.png', 'fig2_seeds.png', 'fig3_types.png']
+    assert written == ['fig1_random_vs_unseen.png', 'fig2_seeds.png', 'fig3_types.png',
+                       'fig8_method.png']        # figure 8 needs no results
     assert all((out / name).stat().st_size > 10000 for name in written)
 
 
@@ -236,11 +237,67 @@ def test_names_data_and_figure7(tmp_path):
     assert list(rows) == ['MuLMS, held-out subfields']       # no CRF head on the papers
     assert rows['MuLMS, held-out subfields'] == [
         ('crf', 'CRF head', 39.4, 55.8, 46.2, 70.0),
-        ('crf_mr6', '6 copies, no names', 43.7, 53.9, 48.3, 70.0),
-        ('crf_mrm_topic6', "6 copies + the topic corpus's names", 47.3, 50.9, 49.0, 71.2)]
+        ('crf_mr6', 'MR6 (6 copies, no names)', 43.7, 53.9, 48.3, 70.0),
+        ('crf_mrm_topic6', 'MR6 + names (topic corpus)', 47.3, 50.9, 49.0, 71.2)]
     assert pf.names_data({}) == {}
+    # one legend entry per marker: the names on both corpora share the red star
+    assert pf.names_legend({'crf', 'crf_mrm_topic6', 'crf_mrm6'}) == [
+        ('crf', 'CRF head'), ('crf_mrm_topic6', pf.NAMES_BOTH)]
+    assert pf.names_legend({'crf_mrm6'}) == [('crf_mrm6', 'MR6 + names (fatigue corpus)')]
+    # arrows join systems on the same seeds: the mixed corpus (seeds 300-900) has none to MR6
+    assert 'crf_mrm_mixed6' not in pf.NAMES_PARENT
     pytest.importorskip('matplotlib')
     import matplotlib
     matplotlib.use('Agg')
     pf.figure7(rows, tmp_path / 'fig7.png')
     assert (tmp_path / 'fig7.png').stat().st_size > 10000
+
+
+def test_unit_data_and_figure9(tmp_path):
+    """Figure 9: per held-out unit the names method's difference against the CRF head and
+    against MR6: MuLMS's subfields on the decision's seeds, MaterioMiner's papers (the CRF
+    head's difference summed from the two stored ones), SOFC-Exp's folds without a control;
+    nothing without the MuLMS decision part."""
+    def d(values):
+        return {'micro': {'mean_diff': sum(values) / len(values), 'ci95': [0, 0], 'per_run': values}}
+    analysis = {'week13': {'week12_winner': 'crf_mrm_topic6',
+                           'folds': {'crf_mrm6': {'units': {'fold0': 82.0, 'fold1': 83.0},
+                                                  'minus_crf': d([-0.2, 0.5])}}},
+                'mulms': {'week12': {'crf_mrm_topic6': {'decision': {
+                    'subfields': {'sofc': 55.0, 'steel': 56.0}, 'minus_crf': d([11.9, 0.3])}}}},
+                'week14': {'copies': {
+                    'mulms': {'decision': {'minus_crf_mr6': d([3.3, -0.8])}},
+                    'fine': {'units': {'10.1038_ncomms7164.conll': 49.4, '10.3390_met10111458.conll': 48.1},
+                             'minus_crf_mr6': d([1.35, 2.63]), 'control': {'minus_crf': d([4.32, 3.15])}}}}}
+    rows = pf.unit_data(analysis)
+    assert [r[1] for r in rows] == ['sofc', 'steel', 'ncomms7164', 'met10111458', 'fold0', 'fold1']
+    assert rows[0] == ('MuLMS subfield (seeds 300–900)', 'sofc', 11.9, 3.3)
+    assert rows[2][2] == pytest.approx(5.67) and rows[2][3] == 1.35
+    assert rows[4][3] is None
+    assert pf.unit_data({}) == []
+    pytest.importorskip('matplotlib')
+    import matplotlib
+    matplotlib.use('Agg')
+    pytest.importorskip('scipy')
+    pf.figure9(rows, tmp_path / 'fig9.png')
+    assert (tmp_path / 'fig9.png').stat().st_size > 10000
+
+
+def test_figure10_recall_matched(tmp_path):
+    """Figure 4 of paper A: one panel per subfield, the control's recall at every bias on all
+    test entities and on the unseen names the lexicon holds, written as a PNG."""
+    pytest.importorskip('matplotlib')
+    import matplotlib
+    matplotlib.use('Agg')
+    grid = ('-2', '0', '2.5', '5')
+    curve = {g: {'recall': 40.0 + float(g), 'precision': 50.0, 'f1_pooled': 45.0,
+                 'f1_seed_mean': 45.0} for g in grid}
+    matched = {'per_unit': {u: {'curve': curve, 'target_recall': 44.0, 'd_star': d,
+                                'flagged': flagged}
+                            for u, d, flagged in (('semi', 2.5, False), ('sofc', 5.0, True))},
+               'post_hoc_curves': {'units': {u: {'names': {'recall_in': 80.0},
+                                                 'control': {g: {'recall_in': 70.0} for g in grid}}
+                                             for u in ('semi', 'sofc')}}}
+    path = tmp_path / 'fig10.png'
+    pf.figure10(matched, str(path))
+    assert path.exists() and path.stat().st_size > 10_000

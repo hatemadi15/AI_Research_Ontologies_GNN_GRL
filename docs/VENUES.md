@@ -27,6 +27,17 @@ Discovery if the user's institution has an RSC agreement), and the
 Winter AI4MC abstract by 19 November if the user can be in Cambridge on
 3 December. AI4Mat 2027 is the fallback for the ML audience.
 
+Fit after paper A's first review round (31 October): the paper now
+reports that a names method's gain is its mention-replacement control's,
+a negative result under a pre-registered protocol with the robustness
+analysis that such a claim needs. That reads as an NLP methods-and-
+evaluation paper as much as a materials one, so ACL Rolling Review (the
+4 January 2027 cycle, Findings as the fallback) and, in short form, the
+Insights from Negative Results workshop are fits beside the journals
+above; Digital Discovery and npj Computational Materials remain possible
+with a cover letter that leads with the practical advice (use mention
+replacement on new documents) and the protocol.
+
 ## Paper B, the evaluation paper (NLP)
 
 | Venue | Type | Deadline | Fit | Notes |

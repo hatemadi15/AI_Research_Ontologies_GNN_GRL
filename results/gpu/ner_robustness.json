@@ -1,0 +1,1838 @@
+{
+ "pooled": {
+  "ten": {
+   "names_vs_crf": {
+    "mean_diff": 3.58,
+    "ci95": [
+     0.95,
+     6.21
+    ],
+    "per_run": [
+     2.39,
+     1.75,
+     2.94,
+     -2.76,
+     6.2,
+     12.16,
+     -0.4,
+     1.99,
+     5.67,
+     3.64,
+     5.78
+    ],
+    "n_positive": 9,
+    "sign_flip_p": 0.0107,
+    "n_units": 11,
+    "leave_one_out": {
+     "rows": [
+      {
+       "without": "electrolysis",
+       "mean_diff": 3.7,
+       "ci95": [
+        0.76,
+        6.64
+       ]
+      },
+      {
+       "without": "graphene",
+       "mean_diff": 3.76,
+       "ci95": [
+        0.84,
+        6.68
+       ]
+      },
+      {
+       "without": "pemfc",
+       "mean_diff": 3.64,
+       "ci95": [
+        0.69,
+        6.59
+       ]
+      },
+      {
+       "without": "poly",
+       "mean_diff": 4.21,
+       "ci95": [
+        1.72,
+        6.7
+       ]
+      },
+      {
+       "without": "semi",
+       "mean_diff": 3.32,
+       "ci95": [
+        0.44,
+        6.2
+       ]
+      },
+      {
+       "without": "sofc",
+       "mean_diff": 2.72,
+       "ci95": [
+        0.69,
+        4.75
+       ]
+      },
+      {
+       "without": "steel",
+       "mean_diff": 3.98,
+       "ci95": [
+        1.2,
+        6.76
+       ]
+      },
+      {
+       "without": "10.1007_s11340-021-00758-x.conll",
+       "mean_diff": 3.74,
+       "ci95": [
+        0.81,
+        6.66
+       ]
+      },
+      {
+       "without": "10.1038_ncomms7164.conll",
+       "mean_diff": 3.37,
+       "ci95": [
+        0.46,
+        6.28
+       ]
+      },
+      {
+       "without": "10.1038_s41467-020-19071-7.conll",
+       "mean_diff": 3.57,
+       "ci95": [
+        0.62,
+        6.53
+       ]
+      },
+      {
+       "without": "10.3390_met10111458.conll",
+       "mean_diff": 3.36,
+       "ci95": [
+        0.46,
+        6.26
+       ]
+      }
+     ],
+     "all_above_zero": true,
+     "min_lower": 0.44
+    }
+   },
+   "names_vs_mr3": {
+    "mean_diff": 1.23,
+    "ci95": [
+     -0.22,
+     2.68
+    ],
+    "per_run": [
+     0.96,
+     0.09,
+     0.65,
+     -2.03,
+     3.68,
+     4.76,
+     -0.55,
+     -1.49,
+     2.43,
+     1.95,
+     3.09
+    ],
+    "n_positive": 8,
+    "sign_flip_p": 0.0898,
+    "n_units": 11
+   },
+   "names_vs_mr6": {
+    "mean_diff": 1.02,
+    "ci95": [
+     -0.56,
+     2.59
+    ],
+    "per_run": [
+     -0.18,
+     -0.12,
+     0.21,
+     -1.68,
+     4.59,
+     4.2,
+     -1.03,
+     -2.08,
+     1.35,
+     3.28,
+     2.63
+    ],
+    "n_positive": 6,
+    "sign_flip_p": 0.1836,
+    "n_units": 11
+   },
+   "mr6_vs_crf": {
+    "mean_diff": 2.56,
+    "ci95": [
+     0.94,
+     4.18
+    ],
+    "per_run": [
+     2.57,
+     1.87,
+     2.73,
+     -1.08,
+     1.62,
+     7.96,
+     0.62,
+     4.07,
+     4.32,
+     0.36,
+     3.15
+    ],
+    "n_positive": 10,
+    "sign_flip_p": 0.0049,
+    "n_units": 11
+   },
+   "mr6_vs_mr3": {
+    "mean_diff": 0.22,
+    "ci95": [
+     -0.3,
+     0.74
+    ],
+    "per_run": [
+     1.15,
+     0.21,
+     0.45,
+     -0.35,
+     -0.91,
+     0.57,
+     0.47,
+     0.6,
+     1.08,
+     -1.33,
+     0.46
+    ],
+    "n_positive": 8,
+    "sign_flip_p": 0.3672,
+    "n_units": 11
+   },
+   "mr3_vs_crf": {
+    "mean_diff": 2.35,
+    "ci95": [
+     0.94,
+     3.75
+    ],
+    "per_run": [
+     1.42,
+     1.66,
+     2.28,
+     -0.73,
+     2.53,
+     7.39,
+     0.15,
+     3.48,
+     3.24,
+     1.69,
+     2.69
+    ],
+    "n_positive": 10,
+    "sign_flip_p": 0.0029,
+    "n_units": 11
+   },
+   "units": [
+    "electrolysis",
+    "graphene",
+    "pemfc",
+    "poly",
+    "semi",
+    "sofc",
+    "steel",
+    "10.1007_s11340-021-00758-x.conll",
+    "10.1038_ncomms7164.conll",
+    "10.1038_s41467-020-19071-7.conll",
+    "10.3390_met10111458.conll"
+   ],
+   "stratified_names_vs_crf": {
+    "corpus_means": {
+     "mulms": 3.18,
+     "materiominer": 4.27
+    },
+    "mean": 3.73
+   }
+  },
+  "decision": {
+   "names_vs_crf": {
+    "mean_diff": 3.58,
+    "ci95": [
+     1.04,
+     6.13
+    ],
+    "per_run": [
+     2.52,
+     0.47,
+     3.43,
+     -2.35,
+     6.12,
+     11.86,
+     0.28,
+     1.99,
+     5.67,
+     3.64,
+     5.78
+    ],
+    "n_positive": 10,
+    "sign_flip_p": 0.0068,
+    "n_units": 11,
+    "leave_one_out": {
+     "rows": [
+      {
+       "without": "electrolysis",
+       "mean_diff": 3.69,
+       "ci95": [
+        0.84,
+        6.53
+       ]
+      },
+      {
+       "without": "graphene",
+       "mean_diff": 3.89,
+       "ci95": [
+        1.14,
+        6.64
+       ]
+      },
+      {
+       "without": "pemfc",
+       "mean_diff": 3.6,
+       "ci95": [
+        0.74,
+        6.46
+       ]
+      },
+      {
+       "without": "poly",
+       "mean_diff": 4.18,
+       "ci95": [
+        1.73,
+        6.62
+       ]
+      },
+      {
+       "without": "semi",
+       "mean_diff": 3.33,
+       "ci95": [
+        0.54,
+        6.12
+       ]
+      },
+      {
+       "without": "sofc",
+       "mean_diff": 2.75,
+       "ci95": [
+        0.78,
+        4.73
+       ]
+      },
+      {
+       "without": "steel",
+       "mean_diff": 3.91,
+       "ci95": [
+        1.18,
+        6.65
+       ]
+      },
+      {
+       "without": "10.1007_s11340-021-00758-x.conll",
+       "mean_diff": 3.74,
+       "ci95": [
+        0.91,
+        6.57
+       ]
+      },
+      {
+       "without": "10.1038_ncomms7164.conll",
+       "mean_diff": 3.37,
+       "ci95": [
+        0.56,
+        6.18
+       ]
+      },
+      {
+       "without": "10.1038_s41467-020-19071-7.conll",
+       "mean_diff": 3.58,
+       "ci95": [
+        0.72,
+        6.43
+       ]
+      },
+      {
+       "without": "10.3390_met10111458.conll",
+       "mean_diff": 3.36,
+       "ci95": [
+        0.56,
+        6.17
+       ]
+      }
+     ],
+     "all_above_zero": true,
+     "min_lower": 0.54
+    }
+   },
+   "names_vs_mr3": {
+    "mean_diff": 1.13,
+    "ci95": [
+     -0.51,
+     2.76
+    ],
+    "per_run": [
+     0.89,
+     -1.21,
+     1.04,
+     -3.02,
+     5.12,
+     3.62,
+     0.0,
+     -1.49,
+     2.43,
+     1.95,
+     3.09
+    ],
+    "n_positive": 7,
+    "sign_flip_p": 0.1582,
+    "n_units": 11
+   },
+   "names_vs_mr6": {
+    "mean_diff": 0.8,
+    "ci95": [
+     -0.66,
+     2.26
+    ],
+    "per_run": [
+     0.13,
+     -1.24,
+     1.16,
+     -2.28,
+     3.27,
+     3.32,
+     -0.77,
+     -2.08,
+     1.35,
+     3.28,
+     2.63
+    ],
+    "n_positive": 7,
+    "sign_flip_p": 0.2383,
+    "n_units": 11
+   },
+   "mr6_vs_crf": {
+    "mean_diff": 2.79,
+    "ci95": [
+     1.2,
+     4.38
+    ],
+    "per_run": [
+     2.4,
+     1.71,
+     2.28,
+     -0.07,
+     2.86,
+     8.54,
+     1.05,
+     4.07,
+     4.32,
+     0.36,
+     3.15
+    ],
+    "n_positive": 10,
+    "sign_flip_p": 0.002,
+    "n_units": 11
+   },
+   "mr6_vs_mr3": {
+    "mean_diff": 0.33,
+    "ci95": [
+     -0.25,
+     0.92
+    ],
+    "per_run": [
+     0.77,
+     0.03,
+     -0.12,
+     -0.74,
+     1.85,
+     0.3,
+     0.77,
+     0.6,
+     1.08,
+     -1.33,
+     0.46
+    ],
+    "n_positive": 8,
+    "sign_flip_p": 0.2334,
+    "n_units": 11
+   },
+   "mr3_vs_crf": {
+    "mean_diff": 2.46,
+    "ci95": [
+     1.0,
+     3.91
+    ],
+    "per_run": [
+     1.63,
+     1.68,
+     2.4,
+     0.67,
+     1.01,
+     8.24,
+     0.28,
+     3.48,
+     3.24,
+     1.69,
+     2.69
+    ],
+    "n_positive": 11,
+    "sign_flip_p": 0.001,
+    "n_units": 11
+   },
+   "units": [
+    "electrolysis",
+    "graphene",
+    "pemfc",
+    "poly",
+    "semi",
+    "sofc",
+    "steel",
+    "10.1007_s11340-021-00758-x.conll",
+    "10.1038_ncomms7164.conll",
+    "10.1038_s41467-020-19071-7.conll",
+    "10.3390_met10111458.conll"
+   ],
+   "stratified_names_vs_crf": {
+    "corpus_means": {
+     "mulms": 3.19,
+     "materiominer": 4.27
+    },
+    "mean": 3.73
+   }
+  }
+ },
+ "grids": {
+  "fine": {
+   "names_vs_mr6": {
+    "mean_diff": 1.29,
+    "ci95": [
+     -2.51,
+     5.1
+    ],
+    "per_run": [
+     -2.08,
+     1.35,
+     3.28,
+     2.63
+    ],
+    "n_positive": 3
+   },
+   "mr6_vs_crf": {
+    "mean_diff": 2.98,
+    "ci95": [
+     0.09,
+     5.86
+    ],
+    "per_run": [
+     4.07,
+     4.32,
+     0.36,
+     3.15
+    ],
+    "n_positive": 4
+   },
+   "mr6_vs_mr3": {
+    "mean_diff": 0.2,
+    "ci95": [
+     -1.47,
+     1.88
+    ],
+    "per_run": [
+     0.6,
+     1.08,
+     -1.33,
+     0.46
+    ],
+    "n_positive": 3
+   },
+   "names_vs_crf": {
+    "mean_diff": 4.27,
+    "ci95": [
+     1.39,
+     7.15
+    ],
+    "per_run": [
+     1.99,
+     5.67,
+     3.64,
+     5.78
+    ],
+    "n_positive": 4
+   },
+   "names_vs_mr3": {
+    "mean_diff": 1.5,
+    "ci95": [
+     -1.76,
+     4.75
+    ],
+    "per_run": [
+     -1.49,
+     2.43,
+     1.95,
+     3.09
+    ],
+    "n_positive": 3
+   },
+   "mr3_vs_crf": {
+    "mean_diff": 2.77,
+    "ci95": [
+     1.51,
+     4.03
+    ],
+    "per_run": [
+     3.48,
+     3.24,
+     1.69,
+     2.69
+    ],
+    "n_positive": 4
+   }
+  },
+  "coarse": {
+   "names_vs_mr6": {
+    "mean_diff": 0.7,
+    "ci95": [
+     -1.6,
+     3.0
+    ],
+    "per_run": [
+     2.36,
+     -1.08,
+     0.37,
+     1.16
+    ],
+    "n_positive": 3
+   },
+   "mr6_vs_crf": {
+    "mean_diff": 1.07,
+    "ci95": [
+     -1.82,
+     3.97
+    ],
+    "per_run": [
+     -0.62,
+     3.65,
+     0.52,
+     0.74
+    ],
+    "n_positive": 3
+   },
+   "mr6_vs_mr3": {
+    "mean_diff": -0.21,
+    "ci95": [
+     -2.71,
+     2.29
+    ],
+    "per_run": [
+     -2.23,
+     1.55,
+     0.23,
+     -0.4
+    ],
+    "n_positive": 2
+   },
+   "names_vs_crf": {
+    "mean_diff": 1.77,
+    "ci95": [
+     0.67,
+     2.88
+    ],
+    "per_run": [
+     1.74,
+     2.56,
+     0.88,
+     1.91
+    ],
+    "n_positive": 4
+   },
+   "names_vs_mr3": {
+    "mean_diff": 0.49,
+    "ci95": [
+     0.06,
+     0.92
+    ],
+    "per_run": [
+     0.13,
+     0.47,
+     0.59,
+     0.77
+    ],
+    "n_positive": 4
+   },
+   "mr3_vs_crf": {
+    "mean_diff": 1.28,
+    "ci95": [
+     0.06,
+     2.51
+    ],
+    "per_run": [
+     1.61,
+     2.1,
+     0.29,
+     1.14
+    ],
+    "n_positive": 4
+   }
+  }
+ },
+ "coverage_gain": {
+  "subfields": [
+   "electrolysis",
+   "graphene",
+   "pemfc",
+   "poly",
+   "semi",
+   "sofc",
+   "steel"
+  ],
+  "coverage": [
+   0.358,
+   0.21,
+   0.213,
+   0.31,
+   0.072,
+   0.181,
+   0.255
+  ],
+  "names_minus_mr6": [
+   0.13,
+   -1.24,
+   1.16,
+   -2.28,
+   3.27,
+   3.32,
+   -0.77
+  ],
+  "names_minus_crf": [
+   2.52,
+   0.47,
+   3.43,
+   -2.35,
+   6.12,
+   11.86,
+   0.28
+  ],
+  "crf_f1": [
+   55.85,
+   49.95,
+   50.02,
+   51.99,
+   32.49,
+   43.48,
+   56.82
+  ],
+  "pearson": {
+   "coverage_vs_names_gain": -0.71,
+   "crf_f1_vs_names_gain": -0.76,
+   "crf_f1_vs_method_gain": -0.61,
+   "coverage_vs_crf_f1": 0.89
+  },
+  "partial": {
+   "coverage_vs_names_gain_given_crf_f1": -0.1,
+   "crf_f1_vs_names_gain_given_coverage": -0.4
+  },
+  "without_semi_sofc": {
+   "coverage_vs_names_gain": -0.19,
+   "crf_f1_vs_names_gain": -0.01
+  },
+  "spearman": {
+   "coverage_vs_names_gain": -0.61,
+   "crf_f1_vs_names_gain": -0.57
+  }
+ },
+ "detectable": {
+  "pooled ten: names_vs_crf": {
+   "half_width": 2.63,
+   "df": 10,
+   "mde_80": 3.67
+  },
+  "pooled ten: names_vs_mr3": {
+   "half_width": 1.45,
+   "df": 10,
+   "mde_80": 2.02
+  },
+  "pooled ten: names_vs_mr6": {
+   "half_width": 1.57,
+   "df": 10,
+   "mde_80": 2.2
+  },
+  "pooled ten: mr6_vs_crf": {
+   "half_width": 1.62,
+   "df": 10,
+   "mde_80": 2.26
+  },
+  "pooled ten: mr6_vs_mr3": {
+   "half_width": 0.52,
+   "df": 10,
+   "mde_80": 0.73
+  },
+  "pooled ten: mr3_vs_crf": {
+   "half_width": 1.41,
+   "df": 10,
+   "mde_80": 1.96
+  },
+  "pooled decision: names_vs_crf": {
+   "half_width": 2.54,
+   "df": 10,
+   "mde_80": 3.55
+  },
+  "pooled decision: names_vs_mr3": {
+   "half_width": 1.63,
+   "df": 10,
+   "mde_80": 2.28
+  },
+  "pooled decision: names_vs_mr6": {
+   "half_width": 1.46,
+   "df": 10,
+   "mde_80": 2.04
+  },
+  "pooled decision: mr6_vs_crf": {
+   "half_width": 1.59,
+   "df": 10,
+   "mde_80": 2.22
+  },
+  "pooled decision: mr6_vs_mr3": {
+   "half_width": 0.58,
+   "df": 10,
+   "mde_80": 0.82
+  },
+  "pooled decision: mr3_vs_crf": {
+   "half_width": 1.46,
+   "df": 10,
+   "mde_80": 2.03
+  },
+  "MaterioMiner fine: names_vs_mr6": {
+   "half_width": 3.8,
+   "df": 3,
+   "mde_80": 4.97
+  },
+  "MaterioMiner fine: mr6_vs_crf": {
+   "half_width": 2.89,
+   "df": 3,
+   "mde_80": 3.77
+  },
+  "MaterioMiner fine: mr6_vs_mr3": {
+   "half_width": 1.67,
+   "df": 3,
+   "mde_80": 2.19
+  },
+  "MaterioMiner fine: names_vs_crf": {
+   "half_width": 2.88,
+   "df": 3,
+   "mde_80": 3.77
+  },
+  "MaterioMiner fine: names_vs_mr3": {
+   "half_width": 3.25,
+   "df": 3,
+   "mde_80": 4.26
+  },
+  "MaterioMiner fine: mr3_vs_crf": {
+   "half_width": 1.26,
+   "df": 3,
+   "mde_80": 1.65
+  },
+  "MaterioMiner coarse: names_vs_mr6": {
+   "half_width": 2.3,
+   "df": 3,
+   "mde_80": 3.01
+  },
+  "MaterioMiner coarse: mr6_vs_crf": {
+   "half_width": 2.9,
+   "df": 3,
+   "mde_80": 3.79
+  },
+  "MaterioMiner coarse: mr6_vs_mr3": {
+   "half_width": 2.5,
+   "df": 3,
+   "mde_80": 3.27
+  },
+  "MaterioMiner coarse: names_vs_crf": {
+   "half_width": 1.1,
+   "df": 3,
+   "mde_80": 1.44
+  },
+  "MaterioMiner coarse: names_vs_mr3": {
+   "half_width": 0.43,
+   "df": 3,
+   "mde_80": 0.56
+  },
+  "MaterioMiner coarse: mr3_vs_crf": {
+   "half_width": 1.22,
+   "df": 3,
+   "mde_80": 1.6
+  },
+  "D1 MuLMS: names_vs_crf": {
+   "half_width": 4.32,
+   "df": 6,
+   "mde_80": 5.92
+  },
+  "D2 MuLMS: names_vs_mr3": {
+   "half_width": 2.55,
+   "df": 6,
+   "mde_80": 3.5
+  },
+  "D8 MuLMS: own_vs_mixed": {
+   "half_width": 1.83,
+   "df": 6,
+   "mde_80": 2.51
+  },
+  "D6 SOFC-Exp: names_vs_crf": {
+   "half_width": 1.17,
+   "df": 4,
+   "mde_80": 1.57
+  },
+  "MuLMS: names_vs_mr6": {
+   "half_width": 2.02,
+   "df": 6,
+   "mde_80": 2.77
+  },
+  "ablation crf_mrm_topic10k6: vs_method (3 seeds)": {
+   "half_width": 1.63,
+   "df": 6,
+   "mde_80": 2.23
+  },
+  "ablation crf_mrm_topic20k6: vs_method (3 seeds)": {
+   "half_width": 2.29,
+   "df": 6,
+   "mde_80": 3.14
+  },
+  "ablation crf_mrm_topiclow6: vs_method (3 seeds)": {
+   "half_width": 1.47,
+   "df": 6,
+   "mde_80": 2.01
+  },
+  "ablation crf_mrm_topictwo6: vs_method (3 seeds)": {
+   "half_width": 1.7,
+   "df": 6,
+   "mde_80": 2.32
+  },
+  "ablation crf_mrm_topiccap6: vs_method (3 seeds)": {
+   "half_width": 1.71,
+   "df": 6,
+   "mde_80": 2.35
+  },
+  "17.1 MaterioMiner fine: crf_mt_mrm6_vs_crf_mt_mr6": {
+   "half_width": 0.96,
+   "df": 3,
+   "mde_80": 1.26
+  },
+  "MaterioMiner fine: crf_mt_mrm6_vs_crf_mt_mr": {
+   "half_width": 0.91,
+   "df": 3,
+   "mde_80": 1.2
+  },
+  "17.2 MaterioMiner coarse: crf_mt_mrm6_vs_crf_mt_mr6": {
+   "half_width": 1.57,
+   "df": 3,
+   "mde_80": 2.05
+  },
+  "MaterioMiner coarse: crf_mt_mrm6_vs_crf_mt_mr": {
+   "half_width": 1.05,
+   "df": 3,
+   "mde_80": 1.38
+  },
+  "D11 MuLMS: recall_in_vs_recall_matched": {
+   "half_width": 7.93,
+   "df": 6,
+   "mde_80": 10.87
+  },
+  "D12 MuLMS: f1_vs_recall_matched": {
+   "half_width": 4.05,
+   "df": 6,
+   "mde_80": 5.55
+  },
+  "D11 MuLMS: recall_in_vs_recall_matched without the flagged subfields": {
+   "half_width": 9.38,
+   "df": 3,
+   "mde_80": 12.27
+  },
+  "D12 MuLMS: f1_vs_recall_matched without the flagged subfields": {
+   "half_width": 2.75,
+   "df": 3,
+   "mde_80": 3.6
+  },
+  "D11 MuLMS: recall_in_vs_recall_matched (post hoc, nearest recall)": {
+   "half_width": 5.28,
+   "df": 6,
+   "mde_80": 7.23
+  },
+  "D12 MuLMS: f1_vs_recall_matched (post hoc, nearest recall)": {
+   "half_width": 2.04,
+   "df": 6,
+   "mde_80": 2.79
+  }
+ },
+ "compute": {
+  "crf": {
+   "label": "CRF head",
+   "n_runs": 49,
+   "runtime_sec_mean": 96,
+   "runtime_sec_max": 163,
+   "best_epoch_mean": 7.1,
+   "epochs_to_best_mean": 8.1,
+   "n_augmented_mean": null
+  },
+  "crf_mr": {
+   "label": "MR3",
+   "n_runs": 49,
+   "runtime_sec_mean": 198,
+   "runtime_sec_max": 362,
+   "best_epoch_mean": 4.7,
+   "epochs_to_best_mean": 5.7,
+   "n_augmented_mean": 601,
+   "sentences_per_epoch_ratio": 2.77,
+   "updates_to_best_ratio": 1.96
+  },
+  "crf_mr6": {
+   "label": "MR6",
+   "n_runs": 49,
+   "runtime_sec_mean": 296,
+   "runtime_sec_max": 580,
+   "best_epoch_mean": 4.1,
+   "epochs_to_best_mean": 5.1,
+   "n_augmented_mean": 1203,
+   "sentences_per_epoch_ratio": 4.54,
+   "updates_to_best_ratio": 2.88
+  },
+  "crf_mrm_topic6": {
+   "label": "MR6 + names",
+   "n_runs": 49,
+   "runtime_sec_mean": 2109,
+   "runtime_sec_max": 2972,
+   "best_epoch_mean": 4.6,
+   "epochs_to_best_mean": 5.6,
+   "n_augmented_mean": 1209,
+   "n_jobs": 14,
+   "students_per_job": [
+    3,
+    4
+   ],
+   "job_sec_mean": 2099,
+   "per_student_sec_mean": 609,
+   "harvest_sec_mean": 1063,
+   "harvest_student_sec": 296,
+   "sentences_per_epoch_ratio": 4.56,
+   "updates_to_best_ratio": 3.14
+  }
+ },
+ "pooled_measures": {
+  "ten": {
+   "names_vs_crf": {
+    "micro": {
+     "mean_diff": 3.58,
+     "ci95": [
+      0.95,
+      6.21
+     ],
+     "per_run": [
+      2.39,
+      1.75,
+      2.94,
+      -2.76,
+      6.2,
+      12.16,
+      -0.4,
+      1.99,
+      5.67,
+      3.64,
+      5.78
+     ],
+     "n_positive": 9
+    },
+    "macro": {
+     "mean_diff": 3.92,
+     "ci95": [
+      2.87,
+      4.98
+     ],
+     "per_run": [
+      4.39,
+      4.29,
+      3.99,
+      1.47,
+      4.5,
+      6.67,
+      1.56,
+      4.7,
+      2.45,
+      3.81,
+      5.32
+     ],
+     "n_positive": 11
+    },
+    "weighted": {
+     "mean_diff": 4.56,
+     "ci95": [
+      2.24,
+      6.88
+     ],
+     "per_run": [
+      2.68,
+      2.55,
+      4.51,
+      -0.13,
+      7.15,
+      12.09,
+      1.29,
+      3.57,
+      5.36,
+      3.06,
+      8.01
+     ],
+     "n_positive": 10
+    }
+   },
+   "names_vs_mr3": {
+    "micro": {
+     "mean_diff": 1.23,
+     "ci95": [
+      -0.22,
+      2.68
+     ],
+     "per_run": [
+      0.96,
+      0.09,
+      0.66,
+      -2.03,
+      3.68,
+      4.76,
+      -0.55,
+      -1.49,
+      2.43,
+      1.95,
+      3.09
+     ],
+     "n_positive": 8
+    },
+    "macro": {
+     "mean_diff": 1.73,
+     "ci95": [
+      0.84,
+      2.61
+     ],
+     "per_run": [
+      2.77,
+      0.81,
+      1.34,
+      -0.44,
+      2.66,
+      3.67,
+      1.27,
+      0.93,
+      3.17,
+      0.22,
+      2.61
+     ],
+     "n_positive": 10
+    },
+    "weighted": {
+     "mean_diff": 1.53,
+     "ci95": [
+      0.26,
+      2.81
+     ],
+     "per_run": [
+      1.32,
+      -0.04,
+      1.27,
+      0.33,
+      3.79,
+      4.49,
+      0.21,
+      -1.52,
+      2.6,
+      0.65,
+      3.78
+     ],
+     "n_positive": 9
+    }
+   },
+   "names_vs_mr6": {
+    "micro": {
+     "mean_diff": 1.02,
+     "ci95": [
+      -0.56,
+      2.59
+     ],
+     "per_run": [
+      -0.18,
+      -0.12,
+      0.21,
+      -1.68,
+      4.59,
+      4.2,
+      -1.03,
+      -2.08,
+      1.35,
+      3.28,
+      2.63
+     ],
+     "n_positive": 6
+    },
+    "macro": {
+     "mean_diff": 1.12,
+     "ci95": [
+      0.21,
+      2.03
+     ],
+     "per_run": [
+      1.17,
+      -0.05,
+      0.98,
+      0.06,
+      2.15,
+      3.41,
+      -0.85,
+      -0.66,
+      2.12,
+      2.19,
+      1.77
+     ],
+     "n_positive": 8
+    },
+    "weighted": {
+     "mean_diff": 1.22,
+     "ci95": [
+      -0.21,
+      2.65
+     ],
+     "per_run": [
+      -0.21,
+      -0.11,
+      0.87,
+      0.21,
+      5.16,
+      4.21,
+      -0.7,
+      -1.71,
+      1.12,
+      1.45,
+      3.11
+     ],
+     "n_positive": 7
+    }
+   },
+   "mr6_vs_crf": {
+    "micro": {
+     "mean_diff": 2.56,
+     "ci95": [
+      0.94,
+      4.18
+     ],
+     "per_run": [
+      2.57,
+      1.87,
+      2.73,
+      -1.08,
+      1.62,
+      7.96,
+      0.62,
+      4.07,
+      4.32,
+      0.36,
+      3.15
+     ],
+     "n_positive": 10
+    },
+    "macro": {
+     "mean_diff": 2.81,
+     "ci95": [
+      1.87,
+      3.75
+     ],
+     "per_run": [
+      3.22,
+      4.34,
+      3.02,
+      1.42,
+      2.35,
+      3.26,
+      2.42,
+      5.35,
+      0.33,
+      1.62,
+      3.55
+     ],
+     "n_positive": 11
+    },
+    "weighted": {
+     "mean_diff": 3.34,
+     "ci95": [
+      1.86,
+      4.82
+     ],
+     "per_run": [
+      2.89,
+      2.66,
+      3.64,
+      -0.34,
+      1.99,
+      7.88,
+      1.99,
+      5.28,
+      4.24,
+      1.61,
+      4.9
+     ],
+     "n_positive": 10
+    }
+   },
+   "mr6_vs_mr3": {
+    "micro": {
+     "mean_diff": 0.22,
+     "ci95": [
+      -0.3,
+      0.74
+     ],
+     "per_run": [
+      1.15,
+      0.21,
+      0.45,
+      -0.35,
+      -0.91,
+      0.57,
+      0.47,
+      0.6,
+      1.08,
+      -1.33,
+      0.46
+     ],
+     "n_positive": 8
+    },
+    "macro": {
+     "mean_diff": 0.61,
+     "ci95": [
+      -0.15,
+      1.37
+     ],
+     "per_run": [
+      1.6,
+      0.86,
+      0.36,
+      -0.5,
+      0.51,
+      0.26,
+      2.12,
+      1.59,
+      1.05,
+      -1.98,
+      0.84
+     ],
+     "n_positive": 9
+    },
+    "weighted": {
+     "mean_diff": 0.32,
+     "ci95": [
+      -0.26,
+      0.9
+     ],
+     "per_run": [
+      1.53,
+      0.07,
+      0.4,
+      0.12,
+      -1.37,
+      0.28,
+      0.92,
+      0.2,
+      1.48,
+      -0.8,
+      0.67
+     ],
+     "n_positive": 9
+    }
+   },
+   "mr3_vs_crf": {
+    "micro": {
+     "mean_diff": 2.34,
+     "ci95": [
+      0.94,
+      3.75
+     ],
+     "per_run": [
+      1.42,
+      1.66,
+      2.28,
+      -0.73,
+      2.52,
+      7.39,
+      0.15,
+      3.47,
+      3.24,
+      1.69,
+      2.69
+     ],
+     "n_positive": 10
+    },
+    "macro": {
+     "mean_diff": 2.19,
+     "ci95": [
+      1.25,
+      3.14
+     ],
+     "per_run": [
+      1.62,
+      3.48,
+      2.65,
+      1.91,
+      1.84,
+      3.0,
+      0.3,
+      3.76,
+      -0.72,
+      3.59,
+      2.71
+     ],
+     "n_positive": 10
+    },
+    "weighted": {
+     "mean_diff": 3.02,
+     "ci95": [
+      1.58,
+      4.47
+     ],
+     "per_run": [
+      1.36,
+      2.59,
+      3.24,
+      -0.46,
+      3.37,
+      7.6,
+      1.08,
+      5.08,
+      2.76,
+      2.41,
+      4.23
+     ],
+     "n_positive": 10
+    }
+   },
+   "units": [
+    "electrolysis",
+    "graphene",
+    "pemfc",
+    "poly",
+    "semi",
+    "sofc",
+    "steel",
+    "10.1007_s11340-021-00758-x.conll",
+    "10.1038_ncomms7164.conll",
+    "10.1038_s41467-020-19071-7.conll",
+    "10.3390_met10111458.conll"
+   ]
+  },
+  "decision": {
+   "names_vs_crf": {
+    "micro": {
+     "mean_diff": 3.58,
+     "ci95": [
+      1.04,
+      6.13
+     ],
+     "per_run": [
+      2.52,
+      0.47,
+      3.43,
+      -2.35,
+      6.12,
+      11.86,
+      0.28,
+      1.99,
+      5.67,
+      3.64,
+      5.78
+     ],
+     "n_positive": 10
+    },
+    "macro": {
+     "mean_diff": 3.89,
+     "ci95": [
+      3.01,
+      4.76
+     ],
+     "per_run": [
+      4.25,
+      2.66,
+      4.34,
+      2.77,
+      4.54,
+      6.05,
+      1.88,
+      4.7,
+      2.45,
+      3.81,
+      5.32
+     ],
+     "n_positive": 11
+    },
+    "weighted": {
+     "mean_diff": 4.47,
+     "ci95": [
+      2.17,
+      6.77
+     ],
+     "per_run": [
+      2.92,
+      0.69,
+      4.78,
+      0.43,
+      7.06,
+      11.74,
+      1.57,
+      3.57,
+      5.36,
+      3.06,
+      8.01
+     ],
+     "n_positive": 11
+    }
+   },
+   "names_vs_mr3": {
+    "micro": {
+     "mean_diff": 1.13,
+     "ci95": [
+      -0.51,
+      2.76
+     ],
+     "per_run": [
+      0.89,
+      -1.21,
+      1.04,
+      -3.02,
+      5.12,
+      3.62,
+      0.0,
+      -1.49,
+      2.43,
+      1.95,
+      3.09
+     ],
+     "n_positive": 7
+    },
+    "macro": {
+     "mean_diff": 1.33,
+     "ci95": [
+      0.29,
+      2.36
+     ],
+     "per_run": [
+      1.85,
+      0.11,
+      0.89,
+      -1.71,
+      3.3,
+      2.63,
+      0.61,
+      0.93,
+      3.17,
+      0.22,
+      2.61
+     ],
+     "n_positive": 10
+    },
+    "weighted": {
+     "mean_diff": 1.25,
+     "ci95": [
+      -0.29,
+      2.78
+     ],
+     "per_run": [
+      0.9,
+      -1.65,
+      1.06,
+      -0.85,
+      5.23,
+      3.59,
+      -0.07,
+      -1.52,
+      2.6,
+      0.65,
+      3.78
+     ],
+     "n_positive": 7
+    }
+   },
+   "names_vs_mr6": {
+    "micro": {
+     "mean_diff": 0.8,
+     "ci95": [
+      -0.66,
+      2.26
+     ],
+     "per_run": [
+      0.13,
+      -1.24,
+      1.16,
+      -2.28,
+      3.27,
+      3.32,
+      -0.77,
+      -2.08,
+      1.35,
+      3.28,
+      2.63
+     ],
+     "n_positive": 7
+    },
+    "macro": {
+     "mean_diff": 0.83,
+     "ci95": [
+      -0.01,
+      1.67
+     ],
+     "per_run": [
+      1.33,
+      -1.31,
+      0.65,
+      -0.19,
+      1.62,
+      1.92,
+      -0.29,
+      -0.66,
+      2.12,
+      2.19,
+      1.77
+     ],
+     "n_positive": 7
+    },
+    "weighted": {
+     "mean_diff": 0.89,
+     "ci95": [
+      -0.4,
+      2.18
+     ],
+     "per_run": [
+      0.14,
+      -1.69,
+      1.19,
+      -0.38,
+      3.94,
+      3.09,
+      -0.44,
+      -1.71,
+      1.12,
+      1.45,
+      3.11
+     ],
+     "n_positive": 7
+    }
+   },
+   "mr6_vs_crf": {
+    "micro": {
+     "mean_diff": 2.79,
+     "ci95": [
+      1.2,
+      4.38
+     ],
+     "per_run": [
+      2.4,
+      1.71,
+      2.28,
+      -0.07,
+      2.86,
+      8.54,
+      1.05,
+      4.07,
+      4.32,
+      0.36,
+      3.15
+     ],
+     "n_positive": 10
+    },
+    "macro": {
+     "mean_diff": 3.06,
+     "ci95": [
+      2.15,
+      3.96
+     ],
+     "per_run": [
+      2.92,
+      3.97,
+      3.69,
+      2.96,
+      2.92,
+      4.13,
+      2.17,
+      5.35,
+      0.33,
+      1.62,
+      3.55
+     ],
+     "n_positive": 11
+    },
+    "weighted": {
+     "mean_diff": 3.58,
+     "ci95": [
+      2.12,
+      5.04
+     ],
+     "per_run": [
+      2.78,
+      2.38,
+      3.58,
+      0.81,
+      3.12,
+      8.65,
+      2.01,
+      5.28,
+      4.24,
+      1.61,
+      4.9
+     ],
+     "n_positive": 11
+    }
+   },
+   "mr6_vs_mr3": {
+    "micro": {
+     "mean_diff": 0.33,
+     "ci95": [
+      -0.25,
+      0.92
+     ],
+     "per_run": [
+      0.77,
+      0.03,
+      -0.12,
+      -0.74,
+      1.85,
+      0.3,
+      0.77,
+      0.6,
+      1.08,
+      -1.33,
+      0.46
+     ],
+     "n_positive": 8
+    },
+    "macro": {
+     "mean_diff": 0.5,
+     "ci95": [
+      -0.31,
+      1.3
+     ],
+     "per_run": [
+      0.52,
+      1.41,
+      0.24,
+      -1.51,
+      1.68,
+      0.71,
+      0.9,
+      1.59,
+      1.05,
+      -1.98,
+      0.84
+     ],
+     "n_positive": 9
+    },
+    "weighted": {
+     "mean_diff": 0.36,
+     "ci95": [
+      -0.11,
+      0.82
+     ],
+     "per_run": [
+      0.76,
+      0.04,
+      -0.13,
+      -0.47,
+      1.3,
+      0.5,
+      0.36,
+      0.2,
+      1.48,
+      -0.8,
+      0.67
+     ],
+     "n_positive": 8
+    }
+   },
+   "mr3_vs_crf": {
+    "micro": {
+     "mean_diff": 2.45,
+     "ci95": [
+      1.0,
+      3.91
+     ],
+     "per_run": [
+      1.63,
+      1.68,
+      2.39,
+      0.67,
+      1.0,
+      8.24,
+      0.28,
+      3.47,
+      3.24,
+      1.69,
+      2.69
+     ],
+     "n_positive": 11
+    },
+    "macro": {
+     "mean_diff": 2.56,
+     "ci95": [
+      1.56,
+      3.55
+     ],
+     "per_run": [
+      2.4,
+      2.55,
+      3.45,
+      4.47,
+      1.24,
+      3.42,
+      1.27,
+      3.76,
+      -0.72,
+      3.59,
+      2.71
+     ],
+     "n_positive": 10
+    },
+    "weighted": {
+     "mean_diff": 3.22,
+     "ci95": [
+      1.88,
+      4.57
+     ],
+     "per_run": [
+      2.02,
+      2.34,
+      3.71,
+      1.28,
+      1.83,
+      8.15,
+      1.65,
+      5.08,
+      2.76,
+      2.41,
+      4.23
+     ],
+     "n_positive": 11
+    }
+   },
+   "units": [
+    "electrolysis",
+    "graphene",
+    "pemfc",
+    "poly",
+    "semi",
+    "sofc",
+    "steel",
+    "10.1007_s11340-021-00758-x.conll",
+    "10.1038_ncomms7164.conll",
+    "10.1038_s41467-020-19071-7.conll",
+    "10.3390_met10111458.conll"
+   ]
+  }
+ }
+}

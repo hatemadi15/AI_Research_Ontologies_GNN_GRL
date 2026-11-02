@@ -41,11 +41,27 @@ No training: reads the 10-seed GPU results (results/gpu) and writes PNG files.
       recall-precision plane with iso-F1 curves: the CRF head, mention replacement with 3
       copies, 6 copies without names, and 6 copies with the harvested names (the topic
       corpus's and the mixed corpus's on MuLMS, the fatigue corpus's on MaterioMiner), each
-      joined to the system it adds to.
+      joined to the system it adds to on the same seeds (the mixed corpus, on seeds 300-900
+      only, is not joined to MR6's ten); the legend has one entry per marker.
+  fig8_method.png (paper A's method overview, no data): the pipeline as boxes and arrows:
+      three CRF teachers trained on the labeled sentences tag an unlabeled corpus; the
+      mentions all three tag alike and confidently form the lexicon; mention replacement
+      with six copies draws from the training mentions and the lexicon; the student trains
+      on the gold sentences and their copies and is tested on the held-out document.
+  fig9_units.png (paper A's main results figure; ner_week5_seed_analysis.json): per held-out
+      unit, the paired micro-F1 difference of MR6 with harvested names against the CRF head
+      and against MR6 without names: MuLMS's 7 subfields (seeds 300-900), MaterioMiner's 4
+      papers at both granularities (10 seeds) and SOFC-Exp's 5 article folds (against the
+      CRF head only), with the pooled 11-unit means and intervals of decision 13.2's units.
 A figure whose results are missing is skipped (and named on stdout).
 
 Usage:
   python src/graph/paper_figures.py [--results results/gpu] [--out docs/figures]
+  fig10_recall_matched.png (paper A's Figure 4; ner_recall_matched.json, week 18): per MuLMS
+      held-out subfield, the recall-matched control's recall at every bias D of the grid, on all
+      test entities (the matching, pre-specified) and on the unseen test names the lexicon holds
+      (post hoc), pooled over the decision seeds, with the names' values as dashed lines and the
+      matched bias D* marked (flagged where the grid cannot reach the names' recall).
 """
 
 import argparse
@@ -85,6 +101,7 @@ SHORT_PAPER = {'10.1007_s11340-021-00758-x': 's11340', '10.1038_ncomms7164': 'nc
 SCREEN_TRIPLE = (0, 1, 2)                 # seed offsets 0, 100 and 200 (the week-6 screen)
 # Figure 5: seen and unseen test entities (ner_mentions.py)
 MENTIONS = 'ner_mentions.json'
+MATCHED = 'ner_recall_matched.json'
 SCREEN_SEEDS = (0, 100, 200)
 MENTION_SETTINGS = {'fine_random_split_vary': 'fine, random splits',
                     'fine_published_split': 'fine, published split',
@@ -111,13 +128,25 @@ MENTION_METHODS = {'crf_mt': 'multi-task', 'crf_mt_ens3': 'multi-task vote',
 NAMES_SETTINGS = {'mulms_leave_one_subfield_out': 'MuLMS, held-out subfields',
                   'fine_leave_one_paper_out': 'MaterioMiner fine-grained, held-out papers',
                   'coarse_leave_one_paper_out': 'MaterioMiner coarse-grained, held-out papers'}
-NAMES_SYSTEMS = {'crf': 'CRF head', 'crf_mr': 'mention replacement, 3 copies',
-                 'crf_mr6': '6 copies, no names',
-                 'crf_mrm_topic6': "6 copies + the topic corpus's names",
-                 'crf_mrm6': "6 copies + the fatigue corpus's names",
-                 'crf_mrm_mixed6': "6 copies + a mixed corpus's names"}
+NAMES_SYSTEMS = {'crf': 'CRF head', 'crf_mr': 'MR3 (3 copies)',
+                 'crf_mr6': 'MR6 (6 copies, no names)',
+                 'crf_mrm_topic6': 'MR6 + names (topic corpus)',
+                 'crf_mrm6': 'MR6 + names (fatigue corpus)',
+                 'crf_mrm_mixed6': 'MR6 + names (mixed corpus)'}
+# the arrows join systems on the same seeds: the mixed corpus (seeds 300-900) has none to MR6 (0-900)
 NAMES_PARENT = {'crf_mr': 'crf', 'crf_mr6': 'crf_mr', 'crf_mrm_topic6': 'crf_mr6',
-                'crf_mrm6': 'crf_mr6', 'crf_mrm_mixed6': 'crf_mr6'}
+                'crf_mrm6': 'crf_mr6'}
+NAMES_BOTH = 'MR6 + names (MuLMS: topic corpus; MaterioMiner: fatigue corpus)'
+
+
+def names_legend(shown):
+    """[(system, label)] of Figure 7's legend for the systems shown, in NAMES_SYSTEMS order, one
+    entry per marker: the names on MuLMS (topic corpus) and on MaterioMiner (fatigue corpus)
+    share the red star and so one entry."""
+    both = {'crf_mrm_topic6', 'crf_mrm6'} <= set(shown)
+    return [(system, NAMES_BOTH if both and system == 'crf_mrm_topic6' else label)
+            for system, label in NAMES_SYSTEMS.items()
+            if system in shown and not (both and system == 'crf_mrm6')]
 
 
 def load(directory, names):
@@ -498,14 +527,21 @@ def names_data(mentions):
 def figure7(rows_by_setting, path):
     import matplotlib.pyplot as plt
     n = len(rows_by_setting)
-    fig, axes = plt.subplots(1, n, figsize=(5.4 * n, 5.0), squeeze=False)
+    if n == 3:                       # 7.2 inches wide: MuLMS on top, the two MaterioMiner panels below
+        fig = plt.figure(figsize=(7.2, 9.0))
+        grid = fig.add_gridspec(2, 2, height_ratios=[1.15, 1])
+        axes = [[fig.add_subplot(grid[0, :]), fig.add_subplot(grid[1, 0]), fig.add_subplot(grid[1, 1])]]
+    else:
+        fig, axes = plt.subplots(1, n, figsize=(min(7.2, 3.6 * n), 4.6), squeeze=False)
     styles = {'crf': ('o', 'black'), 'crf_mr': ('s', 'tab:blue'), 'crf_mr6': ('D', 'tab:cyan'),
               'crf_mrm_topic6': ('*', 'tab:red'), 'crf_mrm6': ('*', 'tab:red'),
               'crf_mrm_mixed6': ('P', 'tab:orange')}
-    for ax, (setting, rows) in zip(axes[0], rows_by_setting.items()):
+    iso_labels, point_labels = [], []
+    for k, (ax, (setting, rows)) in enumerate(zip(axes[0], rows_by_setting.items())):
+        narrow = n == 3 and k > 0          # the lower panels: half the width, labels to the left
         at = {system: (recall, precision) for system, _, recall, precision, *_ in rows}
         xs, ys = [r[2] for r in rows], [r[3] for r in rows]
-        x0, x1 = min(xs) - 3, max(xs) + 3
+        x0, x1 = min(xs) - 3.5, max(xs) + 3.5
         y0, y1 = min(ys) - 3, max(ys) + 3
         for f in range(10, 100, 2):                          # iso-F1 curves: P = fR / (2R - f)
             curve = [(r, f * r / (2 * r - f)) for r in
@@ -514,33 +550,298 @@ def figure7(rows_by_setting, path):
             if len(curve) > 1:
                 ax.plot(*zip(*curve), color='lightgrey', lw=0.7, zorder=1)
                 if curve[-1][0] >= x1 - (x1 - x0) / 100:      # the curve leaves on the right
-                    ax.annotate(f'F1 {f}', curve[-1], xytext=(2, 0), textcoords='offset points',
-                                fontsize=6, color='grey', va='center')
+                    iso_labels.append(ax.annotate(f'F1 {f}', curve[-1], xytext=(2, 0),
+                                                  textcoords='offset points', fontsize=6.5,
+                                                  color='grey', va='center'))
                 elif curve[0][0] <= x0 + (x1 - x0) / 100:    # it enters on the left
-                    ax.annotate(f'F1 {f}', curve[0], xytext=(2, 0), textcoords='offset points',
-                                fontsize=6, color='grey', va='center')
+                    iso_labels.append(ax.annotate(f'F1 {f}', curve[0], xytext=(2, 0),
+                                                  textcoords='offset points', fontsize=6.5,
+                                                  color='grey', va='center'))
                 else:                                        # it enters at the top
-                    ax.annotate(f'F1 {f}', curve[0], xytext=(0, 2), textcoords='offset points',
-                                fontsize=6, color='grey', ha='center', va='bottom')
+                    iso_labels.append(ax.annotate(f'F1 {f}', curve[0], xytext=(0, 2),
+                                                  textcoords='offset points', fontsize=6.5,
+                                                  color='grey', ha='center', va='bottom'))
         for system, label, recall, precision, f1, seen in rows:
             parent = NAMES_PARENT.get(system)
             if parent in at:
                 ax.annotate('', (recall, precision), at[parent],
-                            arrowprops={'arrowstyle': '->', 'color': 'grey', 'lw': 1},
-                            zorder=2)
+                            arrowprops={'arrowstyle': '->', 'color': 'grey', 'lw': 1,
+                                        'shrinkA': 6, 'shrinkB': 6}, zorder=2)
             marker, color = styles.get(system, ('o', 'tab:grey'))
             ax.plot(recall, precision, marker, color=color, ms=9 if marker == '*' else 6,
                     zorder=3)
-            text = f'{label}\nF1 {f1:.1f}' + (f' (seen {seen:.1f})' if seen is not None else '')
-            ax.annotate(text, (recall, precision), textcoords='offset points', fontsize=6.5,
-                        xytext=(6, -12) if system == 'crf_mr6' else (6, 2), zorder=4)
-        ax.set(xlim=(x0, x1 + 4), ylim=(y0, y1), xlabel='recall on the unseen test names (%)',
-               ylabel='precision on the unseen test names (%)', title=setting)
+            seen_text = f' (seen {seen:.1f})' if seen is not None else ''
+            text = f'F1 {f1:.2f}{seen_text}' if narrow else f'{label}\nF1 {f1:.2f}{seen_text}'
+            def near(other):
+                return other in at and abs(at[other][0] - recall) < 2.5 and abs(at[other][1] - precision) < 2.5
+            names_near = near('crf_mrm_topic6') or near('crf_mrm6')
+            if system == 'crf_mr6':              # below-right when the CRF head crowds it, else below-left
+                offset, align = ((7, -18), 'left') if near('crf') else ((-7, -14), 'right')
+            elif system == 'crf_mr':             # away from a names point to its upper right
+                offset, align = ((-7, 12), 'right') if names_near else ((7, 10), 'left')
+            elif system == 'crf':
+                offset, align = (-7, -14), 'right'
+            elif system in ('crf_mrm_topic6', 'crf_mrm6'):
+                offset, align = (7, 6), 'left'
+            elif system == 'crf_mrm_mixed6':
+                offset, align = (7, 14), 'left'
+            else:
+                offset, align = (7, -16), 'left'
+            leader = ({'arrowstyle': '-', 'color': '0.6', 'lw': 0.5, 'shrinkA': 0, 'shrinkB': 3}
+                      if narrow else None)
+            point_labels.append(ax.annotate(
+                text, (recall, precision), textcoords='offset points', fontsize=7, xytext=offset,
+                ha=align, zorder=4, arrowprops=leader,
+                bbox={'boxstyle': 'round,pad=0.12', 'fc': 'white', 'ec': 'none', 'alpha': 0.85}))
+        ax.set(xlim=(x0 - (5 if narrow else 2), x1 + 4), ylim=(y0 - 1, y1 + 1))
+        ax.set_title(setting, fontsize=9)
+        if n > 1:                        # panel letters, as the journal asks for multi-panel figures
+            ax.annotate('abcdefgh'[k] + ')', (0, 1), xycoords='axes fraction', xytext=(-30, 8),
+                        textcoords='offset points', fontsize=11, fontweight='bold',
+                        ha='left', va='bottom')
+        ax.set_xlabel('recall on the unseen test names (%)', fontsize=8)
+        ax.set_ylabel('precision on the unseen test names (%)', fontsize=8)
+        ax.tick_params(labelsize=8)
         ax.grid(alpha=0.3)
-    fig.tight_layout()
-    fig.savefig(path, dpi=160, bbox_inches='tight')
+    if n == 3:                       # the lower panels carry scores only: name the markers once
+        from matplotlib.lines import Line2D
+        shown = {system for rows in rows_by_setting.values() for system, *_ in rows}
+        handles = [Line2D([], [], linestyle='', marker=styles[system][0], color=styles[system][1],
+                          ms=8 if styles[system][0] == '*' else 6, label=label)
+                   for system, label in names_legend(shown)]
+        fig.legend(handles=handles, loc='lower center', ncol=3, fontsize=7, frameon=False,
+                   bbox_to_anchor=(0.5, -0.01))
+        fig.tight_layout(rect=(0, 0.03, 1, 1))
+    else:
+        fig.tight_layout()
+    fig.canvas.draw()                # hide an iso-F1 label that a point's label would cover
+    renderer = fig.canvas.get_renderer()
+    boxes = [t.get_window_extent(renderer) for t in point_labels]
+    for t in iso_labels:
+        if any(t.get_window_extent(renderer).overlaps(b) for b in boxes):
+            t.set_visible(False)
+    fig.savefig(path, dpi=300, bbox_inches='tight')
     plt.close(fig)
 
+
+def unit_data(analysis):
+    """[(group, unit, difference against the CRF head, difference against MR6 or None)] for
+    Figure 9: MuLMS's subfields on the decision's seeds (mulms.week12.<winner>.decision and
+    week14.copies.mulms.decision), MaterioMiner's papers per granularity over 10 seeds
+    (week14.copies.<granularity>: the analogue minus the control, and the control minus the
+    CRF head, summed for the CRF head), SOFC-Exp's folds (week13.folds.crf_mrm6; no control).
+    Empty without the MuLMS decision part."""
+    winner = analysis.get('week13', {}).get('week12_winner', 'crf_mrm_topic6')
+    w = analysis.get('mulms', {}).get('week12', {}).get(winner, {}).get('decision')
+    copies = analysis.get('week14', {}).get('copies', {})
+    c = copies.get('mulms', {}).get('decision')
+    if not w or not c:
+        return []
+    rows = []
+    units = list(w['subfields'])
+    crf = w['minus_crf']['micro']['per_run']
+    ctrl = c['minus_crf_mr6']['micro']['per_run']
+    rows += [('MuLMS subfield (seeds 300–900)', u, a, b) for u, a, b in zip(units, crf, ctrl)]
+    for g in ('fine', 'coarse'):
+        part = copies.get(g)
+        if not part:
+            continue
+        names = list(part['units'])
+        vs_ctrl = part['minus_crf_mr6']['micro']['per_run']
+        ctrl_vs_crf = part['control']['minus_crf']['micro']['per_run']
+        rows += [(f'MaterioMiner {g}-grained paper (10 seeds)', SHORT_PAPER.get(u.replace('.conll', ''), u),
+                  round(a + b, 2), a) for u, a, b in zip(names, vs_ctrl, ctrl_vs_crf)]
+    folds = analysis.get('week13', {}).get('folds', {}).get('crf_mrm6')
+    if folds:
+        rows += [('SOFC-Exp article fold (10 seeds)', u, d, None)
+                 for u, d in zip(folds['units'], folds['minus_crf']['micro']['per_run'])]
+    return rows
+
+
+def figure9(rows, path, registered=None):
+    """Paper A's Figure 2 (module docstring). registered: (mean, low, high) of D5 as decided
+    (MuLMS's units on all ten seeds), labelled beside the band of the units shown."""
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(figsize=(7.2, 7.2))
+    groups = []
+    for g, *_ in rows:
+        if g not in groups:
+            groups.append(g)
+    y = 0
+    ticks, labels, bands, labelled = [], [], [], False
+    pooled_rows = []                 # the y of the 11 units' rows (MuLMS and MaterioMiner fine)
+    for g in groups:
+        members = [r for r in rows if r[0] == g]
+        start = y                    # the group's header row, then its units
+        y += 1
+        for _, unit, vs_crf, vs_ctrl in members:
+            if g.startswith('MuLMS') or 'fine-grained' in g:
+                pooled_rows.append(y)
+            ax.plot(vs_crf, y, 'o', color='tab:red', ms=6, zorder=3,
+                    label=None if labelled else 'against the CRF head')
+            if vs_ctrl is not None:
+                ax.plot(vs_ctrl, y, 's', color='tab:blue', ms=5, zorder=3,
+                        label=None if labelled else 'against MR6 (6 copies, no names)')
+            labelled = True
+            ticks.append(y)
+            labels.append(unit)
+            y += 1
+        bands.append((g, start, y - 1))
+        y += 0.5
+    for g, start, end in bands:
+        shade = '#f2f2f2' if bands.index((g, start, end)) % 2 else 'white'
+        ax.axhspan(start - 0.5, end + 0.5, color=shade, zorder=0)
+        ax.text(0.01, start, g, fontsize=8.5, va='center', ha='left', style='italic', zorder=4,
+                transform=ax.get_yaxis_transform(), color='#333333',      # over the lines
+                bbox={'boxstyle': 'square,pad=0.15', 'fc': shade, 'ec': 'none'})
+    pooled = [r for r in rows if r[0].startswith('MuLMS') or 'fine-grained' in r[0]]
+    notes = []                       # the lower right's labels, top to bottom
+    if registered:
+        m, lo, hi = registered
+        notes.append(('tab:red', f'D5 vs CRF head as decided (MuLMS on all ten seeds): '
+                                 f'{m:+.2f} [{lo:+.2f}, {hi:+.2f}]'))
+    for values, color, label in (
+            (lambda rs: [r[2] for r in rs], 'tab:red',
+             'red band, D5\u2032 (the units shown; post hoc) vs CRF head'),
+            (lambda rs: [r[3] for r in rs], 'tab:blue', 'blue band, D7 vs MR6')):
+        v = values(pooled)
+        if len(v) == 11:
+            m, lo, hi = mean_ci(v)
+            top_y, bottom_y = min(pooled_rows) - 1.5, max(pooled_rows) + 0.5
+            ax.fill_betweenx([top_y, bottom_y], lo, hi, color=color, alpha=0.08, zorder=1, lw=0)
+            ax.vlines(m, top_y, bottom_y, color=color, lw=1, ls='--', zorder=2)
+            notes.append((color, f'{label}: {m:+.2f} [{lo:+.2f}, {hi:+.2f}]'))
+    for k, (color, text) in enumerate(notes):     # the empty lower right, clear of the rows
+        ax.text(0.99, 0.015 + 0.04 * (len(notes) - 1 - k), text.replace('-', '\u2212'),
+                fontsize=8.5, color=color, ha='right', va='bottom', transform=ax.transAxes,
+                zorder=5, bbox={'boxstyle': 'square,pad=0.15', 'fc': 'white', 'ec': 'none'})
+    ax.axvline(0, color='black', lw=0.8, zorder=2)
+    ax.set_yticks(ticks, labels, fontsize=9)
+    ax.set_ylim(-0.7, y + 2.4)              # room below the last row for the pooled labels
+    ax.invert_yaxis()
+    ax.set_xlabel('micro F1 of MR6 + harvested names minus the reference on the held-out unit '
+                  '(percentage points)', fontsize=9)
+    ax.tick_params(axis='x', labelsize=9)
+    ax.grid(alpha=0.3, axis='x')
+    ax.legend(fontsize=9, loc='upper center', bbox_to_anchor=(0.5, -0.07), ncol=2, frameon=False)
+    fig.tight_layout()
+    fig.savefig(path, dpi=300, bbox_inches='tight')
+    plt.close(fig)
+
+
+def figure10(matched, path):
+    """Paper A's Figure 4 (module docstring): small multiples, one panel per subfield."""
+    import matplotlib.pyplot as plt
+    from matplotlib.lines import Line2D
+    units = matched['per_unit']
+    curves = matched['post_hoc_curves']['units']
+    fig, axes = plt.subplots(2, 4, figsize=(9.6, 5.0))
+    for k, (ax, (u, v)) in enumerate(zip(axes.flat, units.items())):
+        ax.annotate('abcdefgh'[k] + ')', (0, 1), xycoords='axes fraction', xytext=(-22, 6),
+                    textcoords='offset points', fontsize=10, fontweight='bold',
+                    ha='left', va='bottom')
+        grid = [float(g) for g in v['curve']]
+        overall = [v['curve'][g]['recall'] for g in v['curve']]
+        held = [curves[u]['control'][g]['recall_in'] for g in v['curve']]
+        ax.plot(grid, held, '-o', color='tab:red', lw=1.5, ms=3.5, zorder=3)
+        ax.plot(grid, overall, '-o', color='tab:blue', lw=1.5, ms=3.5, zorder=3)
+        ax.axhline(curves[u]['names']['recall_in'], color='tab:red', lw=1.2, ls='--', zorder=2)
+        ax.axhline(v['target_recall'], color='tab:blue', lw=1.2, ls='--', zorder=2)
+        ax.axvline(v['d_star'], color='#555555', lw=0.9, ls=':', zorder=1)
+        ax.text(v['d_star'], 0.03, ' D*', transform=ax.get_xaxis_transform(), fontsize=7.5,
+                color='#333333', ha='left' if v['d_star'] < 4 else 'right', va='bottom')
+        values = overall + held + [curves[u]['names']['recall_in'], v['target_recall']]
+        pad = 0.08 * (max(values) - min(values))
+        ax.set_ylim(min(values) - pad, max(values) + pad)
+        ax.set_title(u + (' (flagged)' if v['flagged'] else ''), fontsize=9)
+        ax.set_xticks([-2, 0, 2, 4], ['\u22122', '0', '2', '4'], fontsize=7.5)
+        ax.tick_params(axis='y', labelsize=7.5)
+        ax.grid(alpha=0.3)
+    for ax in axes[1, :]:
+        ax.set_xlabel('bias D on every entity tag', fontsize=8)
+    for ax in axes[:, 0]:
+        ax.set_ylabel('recall (%)', fontsize=8)
+    legend = axes.flat[len(units)] if len(units) < axes.size else None
+    if legend is not None:
+        legend.axis('off')
+        handles = [Line2D([], [], color='tab:blue', marker='o', ms=3.5, lw=1.5,
+                          label='MR6 under the bias:\nall test entities'),
+                   Line2D([], [], color='tab:blue', ls='--', lw=1.2,
+                          label='MR6 + names: all test entities\n(the matching target)'),
+                   Line2D([], [], color='tab:red', marker='o', ms=3.5, lw=1.5,
+                          label='MR6 under the bias: unseen\nnames the lexicon holds'),
+                   Line2D([], [], color='tab:red', ls='--', lw=1.2,
+                          label='MR6 + names: unseen\nnames the lexicon holds'),
+                   Line2D([], [], color='#555555', ls=':', lw=0.9, label='matched bias D*')]
+        legend.legend(handles=handles, loc='center', fontsize=7.5, frameon=False)
+    fig.tight_layout()
+    fig.savefig(path, dpi=300, bbox_inches='tight')
+    plt.close(fig)
+
+
+def figure8(path):
+    """Paper A's method overview: boxes and arrows, no data; 7.2 inches wide (a journal's
+    double column) with 7.5-point type."""
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import FancyBboxPatch
+    fig, ax = plt.subplots(figsize=(7.2, 5.6))
+    ax.set(xlim=(-0.1, 14.6), ylim=(0, 11.2))
+    ax.axis('off')
+    top, bottom, h = 7.4, 1.4, 3.2
+    boxes = {  # name: (x, y, w, h, text, face)
+        'gold': (0.2, top, 2.6, h, 'Labeled\ntraining sentences\n(3 papers; 340\nMuLMS sentences;\nor 36 SOFC-Exp\narticles)',
+                 '#dbe9f6'),
+        'teachers': (3.1, top, 2.6, h, '3 CRF teachers\ntrained on them\n(seeds 0, 100\nand 200: the\nreference\'s runs)',
+                     '#dbe9f6'),
+        'corpus': (6.0, top, 2.6, h, 'Unlabeled corpus\nthe teachers tag:\n40,000 sentences\n(the held-out\ntopic, or a mix\nof others)',
+                   '#fff2cc'),
+        'filter': (8.9, top, 2.6, h, 'Mention filter:\nall 3 teachers\nagree on span\nand type, every\nmarginal \u2265 0.9',
+                   '#fff2cc'),
+        'lexicon': (11.8, top, 2.6, h, 'Lexicon:\n4k to 13k names\nper MuLMS subfield', '#fff2cc'),
+        'pool': (1.5, bottom, 3.6, h, 'Replacement pool\ntraining mentions\n(601 to 1,309)\n+ the lexicon\n(at least 92% of entries)',
+                 '#e2f0d9'),
+        'mr': (5.7, bottom, 3.6, h, 'Mention replacement\n6 copies per sentence;\neach mention swapped\n(p = 0.5) for a\nsame-type name',
+               '#e2f0d9'),
+        'student': (9.9, bottom, 3.6, h, 'Student\nMatSciBERT + CRF,\nthe reference\'s recipe\nand seed; tested on\nthe held-out document',
+                    '#e2f0d9')}
+    for x, y, w, hh, text, face in boxes.values():
+        ax.add_patch(FancyBboxPatch((x, y), w, hh, boxstyle='round,pad=0.02,rounding_size=0.15',
+                                    facecolor=face, edgecolor='#555555', lw=0.8))
+        ax.text(x + w / 2, y + hh / 2, text, ha='center', va='center', fontsize=7.2, linespacing=1.25)
+
+    def arrow(a, b, text=None):
+        xa, ya, wa, ha = boxes[a][:4]
+        xb, yb, wb, hb = boxes[b][:4]
+        start, end = (xa + wa, ya + ha / 2), (xb, yb + hb / 2)
+        ax.annotate('', end, start, arrowprops={'arrowstyle': '->', 'color': '#333333', 'lw': 1,
+                                                 'shrinkA': 1, 'shrinkB': 1})
+        if text:
+            ax.text((start[0] + end[0]) / 2, ya + ha + 0.2, text, ha='center', va='bottom',
+                    fontsize=7, color='#333333')
+    arrow('gold', 'teachers')
+    arrow('teachers', 'corpus')
+    arrow('corpus', 'filter')
+    arrow('filter', 'lexicon')
+    arrow('pool', 'mr')
+    arrow('mr', 'student')
+    # the lexicon's names and the training mentions feed the pool: down, across above the
+    # lower row, then down into the pool
+    pool_top, rail = boxes['pool'][1] + boxes['pool'][3], bottom + h + 0.7
+    head = {'arrowstyle': '->', 'color': '#333333', 'lw': 1, 'shrinkA': 0, 'shrinkB': 1}
+    for x_from, y_from, x_to in ((boxes['lexicon'][0] + 0.6, boxes['lexicon'][1],
+                                  boxes['pool'][0] + boxes['pool'][2] - 0.6),
+                                 (boxes['gold'][0] + 0.5, boxes['gold'][1], boxes['pool'][0] + 0.6)):
+        ax.plot([x_from, x_from, x_to], [y_from, rail, rail], color='#333333', lw=1,
+                solid_joinstyle='miter')
+        ax.annotate('', (x_to, pool_top), (x_to, rail), arrowprops=head)
+    ax.text(0.9, 6.1, 'training mentions', fontsize=7, color='#333333')
+    ax.text(8.6, rail + 0.15, 'harvested names', fontsize=7, color='#333333', ha='center')
+    ax.text(0.2, 0.15, 'No teacher-labeled sentence is trained on: the gold contexts stay, only the names change. Without the '
+            'lexicon the student is\nmention replacement with 6 copies (the control); with 3 copies and no lexicon, '
+            'MR3 (mention replacement at a fixed setting).', fontsize=7, color='#333333',
+            va='bottom', linespacing=1.3)
+    fig.savefig(path, dpi=300, bbox_inches='tight')
+    plt.close(fig)
 
 def gain_data(directory, analysis):
     """{granularity: [(label, mean, CI low, CI high, kind)]} for Figure 6, kind 'ten' (10
@@ -663,6 +964,23 @@ def main(argv=None):
         written.append('fig7_names.png')
     else:
         print('fig7: no unseen-name scores of the names method')
+    figure8(os.path.join(args.out, 'fig8_method.png'))
+    written.append('fig8_method.png')
+    units = unit_data(analysis)
+    if units:
+        winner = analysis.get('week13', {}).get('week12_winner', 'crf_mrm_topic6')
+        d5 = analysis.get('week13', {}).get('pooled', {}).get(winner, {}).get('minus_crf')
+        figure9(units, os.path.join(args.out, 'fig9_units.png'),
+                registered=(d5['mean_diff'], *d5['ci95']) if d5 else None)
+        written.append('fig9_units.png')
+    else:
+        print('fig9: no per-unit comparisons of the names method')
+    matched = (load(args.results, [MATCHED]) or [{}])[0]
+    if matched.get('per_unit') and matched.get('post_hoc_curves'):
+        figure10(matched, os.path.join(args.out, 'fig10_recall_matched.png'))
+        written.append('fig10_recall_matched.png')
+    else:
+        print('fig10: no recall-matched control')
     print(f"wrote {', '.join(written) or 'nothing'} to {args.out}")
     return written
 

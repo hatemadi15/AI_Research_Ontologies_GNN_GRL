@@ -145,12 +145,43 @@ def test_paired_comparison_per_kind():
     method = [{'p1': counts(3), 'p2': counts(4)}, {'p1': counts(3), 'p2': counts(2)}]
     reference = [{'p1': counts(2), 'p2': counts(2)}, {'p1': counts(2), 'p2': counts(2)}]
     out = nm.paired(method, reference)
-    assert out['seen'] == {'method': 100.0, 'reference': 100.0, 'mean_diff': 0.0,
-                           'ci95': [0.0, 0.0], 'n_pairs': 2}
+    f1 = {k: out['seen'][k] for k in ('method', 'reference', 'mean_diff', 'ci95', 'n_pairs')}
+    assert f1 == {'method': 100.0, 'reference': 100.0, 'mean_diff': 0.0, 'ci95': [0.0, 0.0],
+                  'n_pairs': 2}
+    assert out['seen']['recall'] == {'method': 100.0, 'reference': 100.0, 'mean_diff': 0.0,
+                                     'ci95': [0.0, 0.0]}
     # unseen F1: p1 75 and 75 against 50; p2 100 and 50 against 50 -> +25 per paper
     assert (out['unseen']['method'], out['unseen']['reference'],
             out['unseen']['mean_diff'], out['unseen']['ci95']) == (75.0, 50.0, 25.0,
                                                                    [25.0, 25.0])
+    # with pred = gold = 4, recall and precision move together with F1
+    assert out['unseen']['recall']['mean_diff'] == 25.0
+    assert out['unseen']['precision'] == out['unseen']['recall']
+
+
+def test_chain_comparisons_pair_each_system_with_its_parent():
+    pytest.importorskip('scipy')
+
+    def counts(found):
+        return Counter({('gold', 'unseen'): 4, ('pred', 'unseen'): 4,
+                        ('correct', 'unseen'): found})
+
+    def member(found):
+        return {'u1': counts(found), 'u2': counts(found)}
+    systems = {'crf': [member(2)] * 10, 'crf_mr': [member(3)] * 10, 'crf_mr6': [member(3)] * 10,
+               'crf_mrm_topic6': [member(4)] * 10, 'crf_mrm_mixed6': [member(4)] * 7}
+    offsets = {'crf': nm.WEEK5_OFFSETS, 'crf_mr': nm.WEEK5_OFFSETS,
+               'crf_mr6': nm.WEEK5_OFFSETS, 'crf_mrm_topic6': nm.WEEK5_OFFSETS,
+               'crf_mrm_mixed6': nm.DECISION_OFFSETS}
+    out = nm.chain_comparisons(systems, offsets)
+    assert out['crf_mr']['reference'] == 'crf'
+    assert out['crf_mr']['unseen']['recall']['mean_diff'] == 25.0
+    assert out['crf_mr6']['unseen']['mean_diff'] == 0.0           # 6 copies against 3: equal here
+    assert out['crf_mrm_topic6']['decision']['seeds'] == list(nm.DECISION_OFFSETS)
+    assert out['crf_mrm_topic6']['decision']['unseen']['recall']['mean_diff'] == 25.0
+    assert out['crf_mrm_mixed6']['seeds'] == list(nm.DECISION_OFFSETS)
+    assert 'decision' not in out['crf_mrm_mixed6']                # already the decision seeds
+    assert 'crf_mrm6' not in out                                  # no such system here
 
 
 def test_recall_gap_with_the_other_protocols_mix():

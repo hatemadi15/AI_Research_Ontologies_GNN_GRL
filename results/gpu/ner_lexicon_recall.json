@@ -1,0 +1,2963 @@
+{
+ "mulms": {
+  "granularity": "mulms",
+  "protocol": "leave_one_subfield_out",
+  "seeds": [
+   300,
+   400,
+   500,
+   600,
+   700,
+   800,
+   900
+  ],
+  "systems": {
+   "crf": "CRF head",
+   "crf_mr": "MR3",
+   "crf_mr6": "MR6",
+   "crf_mrm_topic6": "MR6 + names",
+   "crf_mrm_mixed6": "MR6 + names (mixed corpus)"
+  },
+  "units": [
+   "electrolysis",
+   "graphene",
+   "pemfc",
+   "poly",
+   "semi",
+   "sofc",
+   "steel"
+  ],
+  "excluded": [],
+  "checks": {
+   "electrolysis": {
+    "teachers": true,
+    "coverage": true,
+    "runs_checked": 7,
+    "rebuilt_teachers_f1": [
+     58.33,
+     55.73,
+     54.55
+    ],
+    "n_distinct": 10290
+   },
+   "graphene": {
+    "teachers": true,
+    "coverage": true,
+    "runs_checked": 7,
+    "rebuilt_teachers_f1": [
+     45.42,
+     52.53,
+     49.66
+    ],
+    "n_distinct": 7813
+   },
+   "pemfc": {
+    "teachers": true,
+    "coverage": true,
+    "runs_checked": 7,
+    "rebuilt_teachers_f1": [
+     46.28,
+     51.71,
+     53.11
+    ],
+    "n_distinct": 5321
+   },
+   "poly": {
+    "teachers": true,
+    "coverage": true,
+    "runs_checked": 7,
+    "rebuilt_teachers_f1": [
+     53.06,
+     54.27,
+     53.08
+    ],
+    "n_distinct": 13395
+   },
+   "semi": {
+    "teachers": true,
+    "coverage": true,
+    "runs_checked": 7,
+    "rebuilt_teachers_f1": [
+     32.99,
+     30.17,
+     31.4
+    ],
+    "n_distinct": 4830
+   },
+   "sofc": {
+    "teachers": true,
+    "coverage": true,
+    "runs_checked": 7,
+    "rebuilt_teachers_f1": [
+     42.61,
+     46.19,
+     43.66
+    ],
+    "n_distinct": 4380
+   },
+   "steel": {
+    "teachers": true,
+    "coverage": true,
+    "runs_checked": 7,
+    "rebuilt_teachers_f1": [
+     56.95,
+     57.64,
+     58.25
+    ],
+    "n_distinct": 8066
+   }
+  },
+  "pooled": {
+   "crf": {
+    "recall_in": 71.84,
+    "recall_out": 29.73,
+    "precision_in": 74.31,
+    "precision_out": 47.65,
+    "gold_share_in": 22.23,
+    "pred_share_in": 30.68,
+    "gold": {
+     "in": 43764,
+     "out": 153146
+    },
+    "correct": {
+     "in": 31438,
+     "out": 45534
+    },
+    "pred": {
+     "in": 42305,
+     "out": 95566
+    },
+    "pred_correct": {
+     "in": 31438,
+     "out": 45534
+    }
+   },
+   "crf_mr": {
+    "recall_in": 75.57,
+    "recall_out": 34.06,
+    "precision_in": 74.08,
+    "precision_out": 46.26,
+    "gold_share_in": 22.23,
+    "pred_share_in": 28.36,
+    "gold": {
+     "in": 43764,
+     "out": 153146
+    },
+    "correct": {
+     "in": 33073,
+     "out": 52168
+    },
+    "pred": {
+     "in": 44647,
+     "out": 112763
+    },
+    "pred_correct": {
+     "in": 33073,
+     "out": 52168
+    }
+   },
+   "crf_mr6": {
+    "recall_in": 74.97,
+    "recall_out": 35.02,
+    "precision_in": 74.71,
+    "precision_out": 46.39,
+    "gold_share_in": 22.23,
+    "pred_share_in": 27.53,
+    "gold": {
+     "in": 43764,
+     "out": 153146
+    },
+    "correct": {
+     "in": 32809,
+     "out": 53634
+    },
+    "pred": {
+     "in": 43918,
+     "out": 115623
+    },
+    "pred_correct": {
+     "in": 32809,
+     "out": 53634
+    }
+   },
+   "crf_mrm_topic6": {
+    "recall_in": 82.41,
+    "recall_out": 36.76,
+    "precision_in": 69.02,
+    "precision_out": 44.03,
+    "gold_share_in": 22.23,
+    "pred_share_in": 29.02,
+    "gold": {
+     "in": 43764,
+     "out": 153146
+    },
+    "correct": {
+     "in": 36066,
+     "out": 56289
+    },
+    "pred": {
+     "in": 52254,
+     "out": 127829
+    },
+    "pred_correct": {
+     "in": 36066,
+     "out": 56289
+    }
+   },
+   "crf_mrm_mixed6": {
+    "recall_in": 81.6,
+    "recall_out": 36.68,
+    "precision_in": 70.66,
+    "precision_out": 44.97,
+    "gold_share_in": 22.23,
+    "pred_share_in": 28.81,
+    "gold": {
+     "in": 43764,
+     "out": 153146
+    },
+    "correct": {
+     "in": 35711,
+     "out": 56172
+    },
+    "pred": {
+     "in": 50536,
+     "out": 124905
+    },
+    "pred_correct": {
+     "in": 35711,
+     "out": 56172
+    }
+   }
+  },
+  "per_unit": {
+   "crf": {
+    "electrolysis": {
+     "recall_in": 79.22,
+     "recall_out": 35.19,
+     "precision_in": 74.82,
+     "precision_out": 41.4,
+     "gold_share_in": 35.96,
+     "pred_share_in": 41.16,
+     "gold": {
+      "in": 7945,
+      "out": 14147
+     },
+     "correct": {
+      "in": 6294,
+      "out": 4979
+     },
+     "pred": {
+      "in": 8412,
+      "out": 12027
+     },
+     "pred_correct": {
+      "in": 6294,
+      "out": 4979
+     }
+    },
+    "graphene": {
+     "recall_in": 83.73,
+     "recall_out": 27.89,
+     "precision_in": 83.46,
+     "precision_out": 37.88,
+     "gold_share_in": 21.2,
+     "pred_share_in": 26.82,
+     "gold": {
+      "in": 1862,
+      "out": 6923
+     },
+     "correct": {
+      "in": 1559,
+      "out": 1931
+     },
+     "pred": {
+      "in": 1868,
+      "out": 5098
+     },
+     "pred_correct": {
+      "in": 1559,
+      "out": 1931
+     }
+    },
+    "pemfc": {
+     "recall_in": 76.69,
+     "recall_out": 30.67,
+     "precision_in": 81.22,
+     "precision_out": 48.49,
+     "gold_share_in": 21.36,
+     "pred_share_in": 28.85,
+     "gold": {
+      "in": 9387,
+      "out": 34566
+     },
+     "correct": {
+      "in": 7199,
+      "out": 10600
+     },
+     "pred": {
+      "in": 8864,
+      "out": 21861
+     },
+     "pred_correct": {
+      "in": 7199,
+      "out": 10600
+     }
+    },
+    "poly": {
+     "recall_in": 62.77,
+     "recall_out": 33.79,
+     "precision_in": 62.6,
+     "precision_out": 45.68,
+     "gold_share_in": 31.13,
+     "pred_share_in": 38.0,
+     "gold": {
+      "in": 10150,
+      "out": 22456
+     },
+     "correct": {
+      "in": 6371,
+      "out": 7587
+     },
+     "pred": {
+      "in": 10178,
+      "out": 16608
+     },
+     "pred_correct": {
+      "in": 6371,
+      "out": 7587
+     }
+    },
+    "semi": {
+     "recall_in": 67.0,
+     "recall_out": 19.46,
+     "precision_in": 82.74,
+     "precision_out": 47.82,
+     "gold_share_in": 7.2,
+     "pred_share_in": 13.37,
+     "gold": {
+      "in": 2597,
+      "out": 33467
+     },
+     "correct": {
+      "in": 1740,
+      "out": 6513
+     },
+     "pred": {
+      "in": 2103,
+      "out": 13621
+     },
+     "pred_correct": {
+      "in": 1740,
+      "out": 6513
+     }
+    },
+    "sofc": {
+     "recall_in": 64.65,
+     "recall_out": 27.83,
+     "precision_in": 78.62,
+     "precision_out": 49.93,
+     "gold_share_in": 18.26,
+     "pred_share_in": 24.79,
+     "gold": {
+      "in": 4585,
+      "out": 20524
+     },
+     "correct": {
+      "in": 2964,
+      "out": 5712
+     },
+     "pred": {
+      "in": 3770,
+      "out": 11439
+     },
+     "pred_correct": {
+      "in": 2964,
+      "out": 5712
+     }
+    },
+    "steel": {
+     "recall_in": 73.38,
+     "recall_out": 38.99,
+     "precision_in": 74.7,
+     "precision_out": 55.07,
+     "gold_share_in": 25.58,
+     "pred_share_in": 32.29,
+     "gold": {
+      "in": 7238,
+      "out": 21063
+     },
+     "correct": {
+      "in": 5311,
+      "out": 8212
+     },
+     "pred": {
+      "in": 7110,
+      "out": 14912
+     },
+     "pred_correct": {
+      "in": 5311,
+      "out": 8212
+     }
+    }
+   },
+   "crf_mr": {
+    "electrolysis": {
+     "recall_in": 82.24,
+     "recall_out": 39.0,
+     "precision_in": 73.69,
+     "precision_out": 41.36,
+     "gold_share_in": 35.96,
+     "pred_share_in": 39.93,
+     "gold": {
+      "in": 7945,
+      "out": 14147
+     },
+     "correct": {
+      "in": 6534,
+      "out": 5517
+     },
+     "pred": {
+      "in": 8867,
+      "out": 13340
+     },
+     "pred_correct": {
+      "in": 6534,
+      "out": 5517
+     }
+    },
+    "graphene": {
+     "recall_in": 82.98,
+     "recall_out": 30.19,
+     "precision_in": 82.8,
+     "precision_out": 41.48,
+     "gold_share_in": 21.2,
+     "pred_share_in": 27.02,
+     "gold": {
+      "in": 1862,
+      "out": 6923
+     },
+     "correct": {
+      "in": 1545,
+      "out": 2090
+     },
+     "pred": {
+      "in": 1866,
+      "out": 5039
+     },
+     "pred_correct": {
+      "in": 1545,
+      "out": 2090
+     }
+    },
+    "pemfc": {
+     "recall_in": 80.7,
+     "recall_out": 37.09,
+     "precision_in": 83.14,
+     "precision_out": 44.21,
+     "gold_share_in": 21.36,
+     "pred_share_in": 23.91,
+     "gold": {
+      "in": 9387,
+      "out": 34566
+     },
+     "correct": {
+      "in": 7575,
+      "out": 12820
+     },
+     "pred": {
+      "in": 9111,
+      "out": 28995
+     },
+     "pred_correct": {
+      "in": 7575,
+      "out": 12820
+     }
+    },
+    "poly": {
+     "recall_in": 65.68,
+     "recall_out": 35.17,
+     "precision_in": 61.12,
+     "precision_out": 45.94,
+     "gold_share_in": 31.13,
+     "pred_share_in": 38.82,
+     "gold": {
+      "in": 10150,
+      "out": 22456
+     },
+     "correct": {
+      "in": 6667,
+      "out": 7897
+     },
+     "pred": {
+      "in": 10908,
+      "out": 17191
+     },
+     "pred_correct": {
+      "in": 6667,
+      "out": 7897
+     }
+    },
+    "semi": {
+     "recall_in": 70.89,
+     "recall_out": 20.86,
+     "precision_in": 86.68,
+     "precision_out": 44.53,
+     "gold_share_in": 7.2,
+     "pred_share_in": 11.93,
+     "gold": {
+      "in": 2597,
+      "out": 33467
+     },
+     "correct": {
+      "in": 1841,
+      "out": 6980
+     },
+     "pred": {
+      "in": 2124,
+      "out": 15674
+     },
+     "pred_correct": {
+      "in": 1841,
+      "out": 6980
+     }
+    },
+    "sofc": {
+     "recall_in": 72.96,
+     "recall_out": 39.26,
+     "precision_in": 80.41,
+     "precision_out": 53.4,
+     "gold_share_in": 18.26,
+     "pred_share_in": 21.61,
+     "gold": {
+      "in": 4585,
+      "out": 20524
+     },
+     "correct": {
+      "in": 3345,
+      "out": 8057
+     },
+     "pred": {
+      "in": 4160,
+      "out": 15089
+     },
+     "pred_correct": {
+      "in": 3345,
+      "out": 8057
+     }
+    },
+    "steel": {
+     "recall_in": 76.9,
+     "recall_out": 41.81,
+     "precision_in": 73.13,
+     "precision_out": 50.51,
+     "gold_share_in": 25.58,
+     "pred_share_in": 30.39,
+     "gold": {
+      "in": 7238,
+      "out": 21063
+     },
+     "correct": {
+      "in": 5566,
+      "out": 8807
+     },
+     "pred": {
+      "in": 7611,
+      "out": 17435
+     },
+     "pred_correct": {
+      "in": 5566,
+      "out": 8807
+     }
+    }
+   },
+   "crf_mr6": {
+    "electrolysis": {
+     "recall_in": 83.62,
+     "recall_out": 38.84,
+     "precision_in": 74.77,
+     "precision_out": 42.37,
+     "gold_share_in": 35.96,
+     "pred_share_in": 40.66,
+     "gold": {
+      "in": 7945,
+      "out": 14147
+     },
+     "correct": {
+      "in": 6644,
+      "out": 5495
+     },
+     "pred": {
+      "in": 8886,
+      "out": 12970
+     },
+     "pred_correct": {
+      "in": 6644,
+      "out": 5495
+     }
+    },
+    "graphene": {
+     "recall_in": 84.43,
+     "recall_out": 31.66,
+     "precision_in": 81.79,
+     "precision_out": 39.69,
+     "gold_share_in": 21.2,
+     "pred_share_in": 25.82,
+     "gold": {
+      "in": 1862,
+      "out": 6923
+     },
+     "correct": {
+      "in": 1572,
+      "out": 2192
+     },
+     "pred": {
+      "in": 1922,
+      "out": 5523
+     },
+     "pred_correct": {
+      "in": 1572,
+      "out": 2192
+     }
+    },
+    "pemfc": {
+     "recall_in": 78.09,
+     "recall_out": 37.26,
+     "precision_in": 83.62,
+     "precision_out": 44.32,
+     "gold_share_in": 21.36,
+     "pred_share_in": 23.18,
+     "gold": {
+      "in": 9387,
+      "out": 34566
+     },
+     "correct": {
+      "in": 7330,
+      "out": 12880
+     },
+     "pred": {
+      "in": 8766,
+      "out": 29059
+     },
+     "pred_correct": {
+      "in": 7330,
+      "out": 12880
+     }
+    },
+    "poly": {
+     "recall_in": 66.58,
+     "recall_out": 36.95,
+     "precision_in": 61.31,
+     "precision_out": 41.67,
+     "gold_share_in": 31.13,
+     "pred_share_in": 35.63,
+     "gold": {
+      "in": 10150,
+      "out": 22456
+     },
+     "correct": {
+      "in": 6758,
+      "out": 8298
+     },
+     "pred": {
+      "in": 11022,
+      "out": 19912
+     },
+     "pred_correct": {
+      "in": 6758,
+      "out": 8298
+     }
+    },
+    "semi": {
+     "recall_in": 73.58,
+     "recall_out": 22.02,
+     "precision_in": 85.93,
+     "precision_out": 48.29,
+     "gold_share_in": 7.2,
+     "pred_share_in": 12.72,
+     "gold": {
+      "in": 2597,
+      "out": 33467
+     },
+     "correct": {
+      "in": 1911,
+      "out": 7370
+     },
+     "pred": {
+      "in": 2224,
+      "out": 15261
+     },
+     "pred_correct": {
+      "in": 1911,
+      "out": 7370
+     }
+    },
+    "sofc": {
+     "recall_in": 71.23,
+     "recall_out": 40.62,
+     "precision_in": 81.12,
+     "precision_out": 53.3,
+     "gold_share_in": 18.26,
+     "pred_share_in": 20.47,
+     "gold": {
+      "in": 4585,
+      "out": 20524
+     },
+     "correct": {
+      "in": 3266,
+      "out": 8337
+     },
+     "pred": {
+      "in": 4026,
+      "out": 15641
+     },
+     "pred_correct": {
+      "in": 3266,
+      "out": 8337
+     }
+    },
+    "steel": {
+     "recall_in": 73.61,
+     "recall_out": 43.02,
+     "precision_in": 75.34,
+     "precision_out": 52.51,
+     "gold_share_in": 25.58,
+     "pred_share_in": 29.07,
+     "gold": {
+      "in": 7238,
+      "out": 21063
+     },
+     "correct": {
+      "in": 5328,
+      "out": 9062
+     },
+     "pred": {
+      "in": 7072,
+      "out": 17257
+     },
+     "pred_correct": {
+      "in": 5328,
+      "out": 9062
+     }
+    }
+   },
+   "crf_mrm_topic6": {
+    "electrolysis": {
+     "recall_in": 90.02,
+     "recall_out": 38.23,
+     "precision_in": 67.4,
+     "precision_out": 42.6,
+     "gold_share_in": 35.96,
+     "pred_share_in": 45.53,
+     "gold": {
+      "in": 7945,
+      "out": 14147
+     },
+     "correct": {
+      "in": 7152,
+      "out": 5408
+     },
+     "pred": {
+      "in": 10612,
+      "out": 12694
+     },
+     "pred_correct": {
+      "in": 7152,
+      "out": 5408
+     }
+    },
+    "graphene": {
+     "recall_in": 84.91,
+     "recall_out": 30.09,
+     "precision_in": 79.93,
+     "precision_out": 38.21,
+     "gold_share_in": 21.2,
+     "pred_share_in": 26.63,
+     "gold": {
+      "in": 1862,
+      "out": 6923
+     },
+     "correct": {
+      "in": 1581,
+      "out": 2083
+     },
+     "pred": {
+      "in": 1978,
+      "out": 5451
+     },
+     "pred_correct": {
+      "in": 1581,
+      "out": 2083
+     }
+    },
+    "pemfc": {
+     "recall_in": 84.92,
+     "recall_out": 38.19,
+     "precision_in": 81.67,
+     "precision_out": 43.28,
+     "gold_share_in": 21.36,
+     "pred_share_in": 24.24,
+     "gold": {
+      "in": 9387,
+      "out": 34566
+     },
+     "correct": {
+      "in": 7971,
+      "out": 13200
+     },
+     "pred": {
+      "in": 9760,
+      "out": 30498
+     },
+     "pred_correct": {
+      "in": 7971,
+      "out": 13200
+     }
+    },
+    "poly": {
+     "recall_in": 71.22,
+     "recall_out": 38.98,
+     "precision_in": 52.91,
+     "precision_out": 35.86,
+     "gold_share_in": 31.13,
+     "pred_share_in": 35.88,
+     "gold": {
+      "in": 10150,
+      "out": 22456
+     },
+     "correct": {
+      "in": 7229,
+      "out": 8753
+     },
+     "pred": {
+      "in": 13663,
+      "out": 24412
+     },
+     "pred_correct": {
+      "in": 7229,
+      "out": 8753
+     }
+    },
+    "semi": {
+     "recall_in": 81.36,
+     "recall_out": 26.87,
+     "precision_in": 83.32,
+     "precision_out": 45.36,
+     "gold_share_in": 7.2,
+     "pred_share_in": 11.34,
+     "gold": {
+      "in": 2597,
+      "out": 33467
+     },
+     "correct": {
+      "in": 2113,
+      "out": 8994
+     },
+     "pred": {
+      "in": 2536,
+      "out": 19826
+     },
+     "pred_correct": {
+      "in": 2113,
+      "out": 8994
+     }
+    },
+    "sofc": {
+     "recall_in": 85.32,
+     "recall_out": 42.13,
+     "precision_in": 78.98,
+     "precision_out": 55.9,
+     "gold_share_in": 18.26,
+     "pred_share_in": 24.26,
+     "gold": {
+      "in": 4585,
+      "out": 20524
+     },
+     "correct": {
+      "in": 3912,
+      "out": 8646
+     },
+     "pred": {
+      "in": 4953,
+      "out": 15466
+     },
+     "pred_correct": {
+      "in": 3912,
+      "out": 8646
+     }
+    },
+    "steel": {
+     "recall_in": 84.39,
+     "recall_out": 43.7,
+     "precision_in": 69.79,
+     "precision_out": 47.25,
+     "gold_share_in": 25.58,
+     "pred_share_in": 31.0,
+     "gold": {
+      "in": 7238,
+      "out": 21063
+     },
+     "correct": {
+      "in": 6108,
+      "out": 9205
+     },
+     "pred": {
+      "in": 8752,
+      "out": 19482
+     },
+     "pred_correct": {
+      "in": 6108,
+      "out": 9205
+     }
+    }
+   },
+   "crf_mrm_mixed6": {
+    "electrolysis": {
+     "recall_in": 89.79,
+     "recall_out": 36.83,
+     "precision_in": 66.3,
+     "precision_out": 41.62,
+     "gold_share_in": 35.96,
+     "pred_share_in": 46.22,
+     "gold": {
+      "in": 7945,
+      "out": 14147
+     },
+     "correct": {
+      "in": 7134,
+      "out": 5210
+     },
+     "pred": {
+      "in": 10760,
+      "out": 12518
+     },
+     "pred_correct": {
+      "in": 7134,
+      "out": 5210
+     }
+    },
+    "graphene": {
+     "recall_in": 83.62,
+     "recall_out": 30.41,
+     "precision_in": 80.8,
+     "precision_out": 38.2,
+     "gold_share_in": 21.2,
+     "pred_share_in": 25.91,
+     "gold": {
+      "in": 1862,
+      "out": 6923
+     },
+     "correct": {
+      "in": 1557,
+      "out": 2105
+     },
+     "pred": {
+      "in": 1927,
+      "out": 5510
+     },
+     "pred_correct": {
+      "in": 1557,
+      "out": 2105
+     }
+    },
+    "pemfc": {
+     "recall_in": 85.3,
+     "recall_out": 38.65,
+     "precision_in": 82.43,
+     "precision_out": 43.82,
+     "gold_share_in": 21.36,
+     "pred_share_in": 24.16,
+     "gold": {
+      "in": 9387,
+      "out": 34566
+     },
+     "correct": {
+      "in": 8007,
+      "out": 13361
+     },
+     "pred": {
+      "in": 9714,
+      "out": 30492
+     },
+     "pred_correct": {
+      "in": 8007,
+      "out": 13361
+     }
+    },
+    "poly": {
+     "recall_in": 71.11,
+     "recall_out": 39.57,
+     "precision_in": 57.35,
+     "precision_out": 40.29,
+     "gold_share_in": 31.13,
+     "pred_share_in": 36.33,
+     "gold": {
+      "in": 10150,
+      "out": 22456
+     },
+     "correct": {
+      "in": 7218,
+      "out": 8885
+     },
+     "pred": {
+      "in": 12586,
+      "out": 22055
+     },
+     "pred_correct": {
+      "in": 7218,
+      "out": 8885
+     }
+    },
+    "semi": {
+     "recall_in": 77.01,
+     "recall_out": 22.88,
+     "precision_in": 84.28,
+     "precision_out": 43.16,
+     "gold_share_in": 7.2,
+     "pred_share_in": 11.8,
+     "gold": {
+      "in": 2597,
+      "out": 33467
+     },
+     "correct": {
+      "in": 2000,
+      "out": 7656
+     },
+     "pred": {
+      "in": 2373,
+      "out": 17737
+     },
+     "pred_correct": {
+      "in": 2000,
+      "out": 7656
+     }
+    },
+    "sofc": {
+     "recall_in": 87.63,
+     "recall_out": 46.38,
+     "precision_in": 78.02,
+     "precision_out": 54.74,
+     "gold_share_in": 18.26,
+     "pred_share_in": 22.85,
+     "gold": {
+      "in": 4585,
+      "out": 20524
+     },
+     "correct": {
+      "in": 4018,
+      "out": 9520
+     },
+     "pred": {
+      "in": 5150,
+      "out": 17390
+     },
+     "pred_correct": {
+      "in": 4018,
+      "out": 9520
+     }
+    },
+    "steel": {
+     "recall_in": 79.81,
+     "recall_out": 44.79,
+     "precision_in": 71.98,
+     "precision_out": 49.13,
+     "gold_share_in": 25.58,
+     "pred_share_in": 29.48,
+     "gold": {
+      "in": 7238,
+      "out": 21063
+     },
+     "correct": {
+      "in": 5777,
+      "out": 9435
+     },
+     "pred": {
+      "in": 8026,
+      "out": 19203
+     },
+     "pred_correct": {
+      "in": 5777,
+      "out": 9435
+     }
+    }
+   }
+  },
+  "comparisons": {
+   "names_vs_mr6": {
+    "per_unit": {
+     "electrolysis": {
+      "gain_in": 6.4,
+      "gain_out": -0.61,
+      "in_minus_out": 7.01
+     },
+     "graphene": {
+      "gain_in": 0.48,
+      "gain_out": -1.57,
+      "in_minus_out": 2.05
+     },
+     "pemfc": {
+      "gain_in": 6.83,
+      "gain_out": 0.93,
+      "in_minus_out": 5.9
+     },
+     "poly": {
+      "gain_in": 4.64,
+      "gain_out": 2.03,
+      "in_minus_out": 2.61
+     },
+     "semi": {
+      "gain_in": 7.78,
+      "gain_out": 4.85,
+      "in_minus_out": 2.93
+     },
+     "sofc": {
+      "gain_in": 14.09,
+      "gain_out": 1.51,
+      "in_minus_out": 12.58
+     },
+     "steel": {
+      "gain_in": 10.78,
+      "gain_out": 0.68,
+      "in_minus_out": 10.1
+     }
+    },
+    "gain_in": {
+     "mean_diff": 7.29,
+     "ci95": [
+      3.27,
+      11.3
+     ],
+     "n_units": 7,
+     "n_positive": 7
+    },
+    "gain_out": {
+     "mean_diff": 1.12,
+     "ci95": [
+      -0.78,
+      3.02
+     ],
+     "n_units": 7,
+     "n_positive": 5
+    },
+    "in_minus_out": {
+     "mean_diff": 6.17,
+     "ci95": [
+      2.44,
+      9.9
+     ],
+     "n_units": 7,
+     "n_positive": 7
+    }
+   },
+   "names_vs_crf": {
+    "per_unit": {
+     "electrolysis": {
+      "gain_in": 10.8,
+      "gain_out": 3.04,
+      "in_minus_out": 7.76
+     },
+     "graphene": {
+      "gain_in": 1.18,
+      "gain_out": 2.2,
+      "in_minus_out": -1.02
+     },
+     "pemfc": {
+      "gain_in": 8.23,
+      "gain_out": 7.52,
+      "in_minus_out": 0.71
+     },
+     "poly": {
+      "gain_in": 8.45,
+      "gain_out": 5.19,
+      "in_minus_out": 3.26
+     },
+     "semi": {
+      "gain_in": 14.36,
+      "gain_out": 7.41,
+      "in_minus_out": 6.95
+     },
+     "sofc": {
+      "gain_in": 20.67,
+      "gain_out": 14.3,
+      "in_minus_out": 6.37
+     },
+     "steel": {
+      "gain_in": 11.01,
+      "gain_out": 4.71,
+      "in_minus_out": 6.3
+     }
+    },
+    "gain_in": {
+     "mean_diff": 10.67,
+     "ci95": [
+      5.14,
+      16.2
+     ],
+     "n_units": 7,
+     "n_positive": 7
+    },
+    "gain_out": {
+     "mean_diff": 6.34,
+     "ci95": [
+      2.6,
+      10.07
+     ],
+     "n_units": 7,
+     "n_positive": 7
+    },
+    "in_minus_out": {
+     "mean_diff": 4.33,
+     "ci95": [
+      1.18,
+      7.48
+     ],
+     "n_units": 7,
+     "n_positive": 6
+    }
+   },
+   "mr6_vs_crf": {
+    "per_unit": {
+     "electrolysis": {
+      "gain_in": 4.4,
+      "gain_out": 3.65,
+      "in_minus_out": 0.75
+     },
+     "graphene": {
+      "gain_in": 0.7,
+      "gain_out": 3.77,
+      "in_minus_out": -3.07
+     },
+     "pemfc": {
+      "gain_in": 1.4,
+      "gain_out": 6.59,
+      "in_minus_out": -5.19
+     },
+     "poly": {
+      "gain_in": 3.81,
+      "gain_out": 3.16,
+      "in_minus_out": 0.65
+     },
+     "semi": {
+      "gain_in": 6.58,
+      "gain_out": 2.56,
+      "in_minus_out": 4.02
+     },
+     "sofc": {
+      "gain_in": 6.58,
+      "gain_out": 12.79,
+      "in_minus_out": -6.21
+     },
+     "steel": {
+      "gain_in": 0.23,
+      "gain_out": 4.03,
+      "in_minus_out": -3.8
+     }
+    },
+    "gain_in": {
+     "mean_diff": 3.39,
+     "ci95": [
+      0.92,
+      5.85
+     ],
+     "n_units": 7,
+     "n_positive": 7
+    },
+    "gain_out": {
+     "mean_diff": 5.22,
+     "ci95": [
+      1.92,
+      8.52
+     ],
+     "n_units": 7,
+     "n_positive": 7
+    },
+    "in_minus_out": {
+     "mean_diff": -1.84,
+     "ci95": [
+      -5.27,
+      1.6
+     ],
+     "n_units": 7,
+     "n_positive": 3
+    }
+   },
+   "mr3_vs_crf": {
+    "per_unit": {
+     "electrolysis": {
+      "gain_in": 3.02,
+      "gain_out": 3.81,
+      "in_minus_out": -0.79
+     },
+     "graphene": {
+      "gain_in": -0.75,
+      "gain_out": 2.3,
+      "in_minus_out": -3.05
+     },
+     "pemfc": {
+      "gain_in": 4.01,
+      "gain_out": 6.42,
+      "in_minus_out": -2.41
+     },
+     "poly": {
+      "gain_in": 2.91,
+      "gain_out": 1.38,
+      "in_minus_out": 1.53
+     },
+     "semi": {
+      "gain_in": 3.89,
+      "gain_out": 1.4,
+      "in_minus_out": 2.49
+     },
+     "sofc": {
+      "gain_in": 8.31,
+      "gain_out": 11.43,
+      "in_minus_out": -3.12
+     },
+     "steel": {
+      "gain_in": 3.52,
+      "gain_out": 2.82,
+      "in_minus_out": 0.7
+     }
+    },
+    "gain_in": {
+     "mean_diff": 3.56,
+     "ci95": [
+      1.11,
+      6.01
+     ],
+     "n_units": 7,
+     "n_positive": 6
+    },
+    "gain_out": {
+     "mean_diff": 4.22,
+     "ci95": [
+      0.87,
+      7.57
+     ],
+     "n_units": 7,
+     "n_positive": 7
+    },
+    "in_minus_out": {
+     "mean_diff": -0.66,
+     "ci95": [
+      -2.78,
+      1.45
+     ],
+     "n_units": 7,
+     "n_positive": 3
+    }
+   },
+   "mixed_vs_mr6": {
+    "per_unit": {
+     "electrolysis": {
+      "gain_in": 6.17,
+      "gain_out": -2.01,
+      "in_minus_out": 8.18
+     },
+     "graphene": {
+      "gain_in": -0.81,
+      "gain_out": -1.25,
+      "in_minus_out": 0.44
+     },
+     "pemfc": {
+      "gain_in": 7.21,
+      "gain_out": 1.39,
+      "in_minus_out": 5.82
+     },
+     "poly": {
+      "gain_in": 4.53,
+      "gain_out": 2.62,
+      "in_minus_out": 1.91
+     },
+     "semi": {
+      "gain_in": 3.43,
+      "gain_out": 0.86,
+      "in_minus_out": 2.57
+     },
+     "sofc": {
+      "gain_in": 16.4,
+      "gain_out": 5.76,
+      "in_minus_out": 10.64
+     },
+     "steel": {
+      "gain_in": 6.2,
+      "gain_out": 1.77,
+      "in_minus_out": 4.43
+     }
+    },
+    "gain_in": {
+     "mean_diff": 6.16,
+     "ci95": [
+      1.32,
+      11.01
+     ],
+     "n_units": 7,
+     "n_positive": 6
+    },
+    "gain_out": {
+     "mean_diff": 1.31,
+     "ci95": [
+      -1.07,
+      3.68
+     ],
+     "n_units": 7,
+     "n_positive": 5
+    },
+    "in_minus_out": {
+     "mean_diff": 4.86,
+     "ci95": [
+      1.5,
+      8.21
+     ],
+     "n_units": 7,
+     "n_positive": 7
+    }
+   }
+  }
+ },
+ "fine": {
+  "granularity": "fine",
+  "protocol": "leave_one_paper_out",
+  "seeds": [
+   0,
+   100,
+   200,
+   300,
+   400,
+   500,
+   600,
+   700,
+   800,
+   900
+  ],
+  "systems": {
+   "crf": "CRF head",
+   "crf_mr": "MR3",
+   "crf_mr6": "MR6",
+   "crf_mrm6": "MR6 + names"
+  },
+  "units": [
+   "10.1007_s11340-021-00758-x.conll",
+   "10.1038_ncomms7164.conll",
+   "10.1038_s41467-020-19071-7.conll",
+   "10.3390_met10111458.conll"
+  ],
+  "excluded": [],
+  "checks": {
+   "10.1007_s11340-021-00758-x.conll": {
+    "teachers": true,
+    "coverage": true,
+    "runs_checked": 10,
+    "rebuilt_teachers_f1": [
+     48.78,
+     52.71,
+     51.13
+    ],
+    "n_distinct": 6840
+   },
+   "10.1038_ncomms7164.conll": {
+    "teachers": true,
+    "coverage": true,
+    "runs_checked": 10,
+    "rebuilt_teachers_f1": [
+     45.47,
+     38.97,
+     42.92
+    ],
+    "n_distinct": 5648
+   },
+   "10.1038_s41467-020-19071-7.conll": {
+    "teachers": true,
+    "coverage": true,
+    "runs_checked": 10,
+    "rebuilt_teachers_f1": [
+     49.86,
+     49.51,
+     47.23
+    ],
+    "n_distinct": 4559
+   },
+   "10.3390_met10111458.conll": {
+    "teachers": true,
+    "coverage": true,
+    "runs_checked": 10,
+    "rebuilt_teachers_f1": [
+     45.78,
+     44.23,
+     39.94
+    ],
+    "n_distinct": 5774
+   }
+  },
+  "pooled": {
+   "crf": {
+    "recall_in": 73.96,
+    "recall_out": 30.76,
+    "precision_in": 81.33,
+    "precision_out": 46.37,
+    "gold_share_in": 9.82,
+    "pred_share_in": 12.99,
+    "gold": {
+     "in": 1060,
+     "out": 9730
+    },
+    "correct": {
+     "in": 784,
+     "out": 2993
+    },
+    "pred": {
+     "in": 964,
+     "out": 6455
+    },
+    "pred_correct": {
+     "in": 784,
+     "out": 2993
+    }
+   },
+   "crf_mr": {
+    "recall_in": 83.11,
+    "recall_out": 34.04,
+    "precision_in": 82.72,
+    "precision_out": 46.34,
+    "gold_share_in": 9.82,
+    "pred_share_in": 12.97,
+    "gold": {
+     "in": 1060,
+     "out": 9730
+    },
+    "correct": {
+     "in": 881,
+     "out": 3312
+    },
+    "pred": {
+     "in": 1065,
+     "out": 7147
+    },
+    "pred_correct": {
+     "in": 881,
+     "out": 3312
+    }
+   },
+   "crf_mr6": {
+    "recall_in": 82.55,
+    "recall_out": 35.02,
+    "precision_in": 81.4,
+    "precision_out": 44.65,
+    "gold_share_in": 9.82,
+    "pred_share_in": 12.35,
+    "gold": {
+     "in": 1060,
+     "out": 9730
+    },
+    "correct": {
+     "in": 875,
+     "out": 3407
+    },
+    "pred": {
+     "in": 1075,
+     "out": 7631
+    },
+    "pred_correct": {
+     "in": 875,
+     "out": 3407
+    }
+   },
+   "crf_mrm6": {
+    "recall_in": 86.6,
+    "recall_out": 36.1,
+    "precision_in": 81.17,
+    "precision_out": 48.82,
+    "gold_share_in": 9.82,
+    "pred_share_in": 13.58,
+    "gold": {
+     "in": 1060,
+     "out": 9730
+    },
+    "correct": {
+     "in": 918,
+     "out": 3513
+    },
+    "pred": {
+     "in": 1131,
+     "out": 7196
+    },
+    "pred_correct": {
+     "in": 918,
+     "out": 3513
+    }
+   }
+  },
+  "per_unit": {
+   "crf": {
+    "10.1007_s11340-021-00758-x.conll": {
+     "recall_in": 100.0,
+     "recall_out": 31.43,
+     "precision_in": 88.89,
+     "precision_out": 33.64,
+     "gold_share_in": 18.6,
+     "pred_share_in": 21.58,
+     "gold": {
+      "in": 80,
+      "out": 350
+     },
+     "correct": {
+      "in": 80,
+      "out": 110
+     },
+     "pred": {
+      "in": 90,
+      "out": 327
+     },
+     "pred_correct": {
+      "in": 80,
+      "out": 110
+     }
+    },
+    "10.1038_ncomms7164.conll": {
+     "recall_in": 40.87,
+     "recall_out": 31.82,
+     "precision_in": 83.93,
+     "precision_out": 48.0,
+     "gold_share_in": 11.27,
+     "pred_share_in": 8.54,
+     "gold": {
+      "in": 230,
+      "out": 1810
+     },
+     "correct": {
+      "in": 94,
+      "out": 576
+     },
+     "pred": {
+      "in": 112,
+      "out": 1200
+     },
+     "pred_correct": {
+      "in": 94,
+      "out": 576
+     }
+    },
+    "10.1038_s41467-020-19071-7.conll": {
+     "recall_in": 83.18,
+     "recall_out": 35.34,
+     "precision_in": 79.57,
+     "precision_out": 47.23,
+     "gold_share_in": 8.63,
+     "pred_share_in": 11.65,
+     "gold": {
+      "in": 440,
+      "out": 4660
+     },
+     "correct": {
+      "in": 366,
+      "out": 1647
+     },
+     "pred": {
+      "in": 460,
+      "out": 3487
+     },
+     "pred_correct": {
+      "in": 366,
+      "out": 1647
+     }
+    },
+    "10.3390_met10111458.conll": {
+     "recall_in": 78.71,
+     "recall_out": 22.68,
+     "precision_in": 80.79,
+     "precision_out": 45.8,
+     "gold_share_in": 9.63,
+     "pred_share_in": 17.33,
+     "gold": {
+      "in": 310,
+      "out": 2910
+     },
+     "correct": {
+      "in": 244,
+      "out": 660
+     },
+     "pred": {
+      "in": 302,
+      "out": 1441
+     },
+     "pred_correct": {
+      "in": 244,
+      "out": 660
+     }
+    }
+   },
+   "crf_mr": {
+    "10.1007_s11340-021-00758-x.conll": {
+     "recall_in": 100.0,
+     "recall_out": 39.43,
+     "precision_in": 82.47,
+     "precision_out": 38.12,
+     "gold_share_in": 18.6,
+     "pred_share_in": 21.13,
+     "gold": {
+      "in": 80,
+      "out": 350
+     },
+     "correct": {
+      "in": 80,
+      "out": 138
+     },
+     "pred": {
+      "in": 97,
+      "out": 362
+     },
+     "pred_correct": {
+      "in": 80,
+      "out": 138
+     }
+    },
+    "10.1038_ncomms7164.conll": {
+     "recall_in": 62.17,
+     "recall_out": 33.43,
+     "precision_in": 88.82,
+     "precision_out": 47.64,
+     "gold_share_in": 11.27,
+     "pred_share_in": 11.25,
+     "gold": {
+      "in": 230,
+      "out": 1810
+     },
+     "correct": {
+      "in": 143,
+      "out": 605
+     },
+     "pred": {
+      "in": 161,
+      "out": 1270
+     },
+     "pred_correct": {
+      "in": 143,
+      "out": 605
+     }
+    },
+    "10.1038_s41467-020-19071-7.conll": {
+     "recall_in": 87.27,
+     "recall_out": 38.58,
+     "precision_in": 79.83,
+     "precision_out": 47.29,
+     "gold_share_in": 8.63,
+     "pred_share_in": 11.23,
+     "gold": {
+      "in": 440,
+      "out": 4660
+     },
+     "correct": {
+      "in": 384,
+      "out": 1798
+     },
+     "pred": {
+      "in": 481,
+      "out": 3802
+     },
+     "pred_correct": {
+      "in": 384,
+      "out": 1798
+     }
+    },
+    "10.3390_met10111458.conll": {
+     "recall_in": 88.39,
+     "recall_out": 26.49,
+     "precision_in": 84.05,
+     "precision_out": 45.01,
+     "gold_share_in": 9.63,
+     "pred_share_in": 15.99,
+     "gold": {
+      "in": 310,
+      "out": 2910
+     },
+     "correct": {
+      "in": 274,
+      "out": 771
+     },
+     "pred": {
+      "in": 326,
+      "out": 1713
+     },
+     "pred_correct": {
+      "in": 274,
+      "out": 771
+     }
+    }
+   },
+   "crf_mr6": {
+    "10.1007_s11340-021-00758-x.conll": {
+     "recall_in": 98.75,
+     "recall_out": 41.43,
+     "precision_in": 78.22,
+     "precision_out": 40.06,
+     "gold_share_in": 18.6,
+     "pred_share_in": 21.81,
+     "gold": {
+      "in": 80,
+      "out": 350
+     },
+     "correct": {
+      "in": 79,
+      "out": 145
+     },
+     "pred": {
+      "in": 101,
+      "out": 362
+     },
+     "pred_correct": {
+      "in": 79,
+      "out": 145
+     }
+    },
+    "10.1038_ncomms7164.conll": {
+     "recall_in": 62.61,
+     "recall_out": 36.85,
+     "precision_in": 88.89,
+     "precision_out": 48.58,
+     "gold_share_in": 11.27,
+     "pred_share_in": 10.55,
+     "gold": {
+      "in": 230,
+      "out": 1810
+     },
+     "correct": {
+      "in": 144,
+      "out": 667
+     },
+     "pred": {
+      "in": 162,
+      "out": 1373
+     },
+     "pred_correct": {
+      "in": 144,
+      "out": 667
+     }
+    },
+    "10.1038_s41467-020-19071-7.conll": {
+     "recall_in": 86.59,
+     "recall_out": 38.84,
+     "precision_in": 77.28,
+     "precision_out": 43.52,
+     "gold_share_in": 8.63,
+     "pred_share_in": 10.6,
+     "gold": {
+      "in": 440,
+      "out": 4660
+     },
+     "correct": {
+      "in": 381,
+      "out": 1810
+     },
+     "pred": {
+      "in": 493,
+      "out": 4159
+     },
+     "pred_correct": {
+      "in": 381,
+      "out": 1810
+     }
+    },
+    "10.3390_met10111458.conll": {
+     "recall_in": 87.42,
+     "recall_out": 26.98,
+     "precision_in": 84.95,
+     "precision_out": 45.19,
+     "gold_share_in": 9.63,
+     "pred_share_in": 15.52,
+     "gold": {
+      "in": 310,
+      "out": 2910
+     },
+     "correct": {
+      "in": 271,
+      "out": 785
+     },
+     "pred": {
+      "in": 319,
+      "out": 1737
+     },
+     "pred_correct": {
+      "in": 271,
+      "out": 785
+     }
+    }
+   },
+   "crf_mrm6": {
+    "10.1007_s11340-021-00758-x.conll": {
+     "recall_in": 100.0,
+     "recall_out": 38.29,
+     "precision_in": 73.39,
+     "precision_out": 36.41,
+     "gold_share_in": 18.6,
+     "pred_share_in": 22.85,
+     "gold": {
+      "in": 80,
+      "out": 350
+     },
+     "correct": {
+      "in": 80,
+      "out": 134
+     },
+     "pred": {
+      "in": 109,
+      "out": 368
+     },
+     "pred_correct": {
+      "in": 80,
+      "out": 134
+     }
+    },
+    "10.1038_ncomms7164.conll": {
+     "recall_in": 76.09,
+     "recall_out": 37.46,
+     "precision_in": 91.62,
+     "precision_out": 47.18,
+     "gold_share_in": 11.27,
+     "pred_share_in": 11.73,
+     "gold": {
+      "in": 230,
+      "out": 1810
+     },
+     "correct": {
+      "in": 175,
+      "out": 678
+     },
+     "pred": {
+      "in": 191,
+      "out": 1437
+     },
+     "pred_correct": {
+      "in": 175,
+      "out": 678
+     }
+    },
+    "10.1038_s41467-020-19071-7.conll": {
+     "recall_in": 86.14,
+     "recall_out": 38.76,
+     "precision_in": 77.66,
+     "precision_out": 51.99,
+     "gold_share_in": 8.63,
+     "pred_share_in": 12.32,
+     "gold": {
+      "in": 440,
+      "out": 4660
+     },
+     "correct": {
+      "in": 379,
+      "out": 1806
+     },
+     "pred": {
+      "in": 488,
+      "out": 3474
+     },
+     "pred_correct": {
+      "in": 379,
+      "out": 1806
+     }
+    },
+    "10.3390_met10111458.conll": {
+     "recall_in": 91.61,
+     "recall_out": 30.76,
+     "precision_in": 82.8,
+     "precision_out": 46.69,
+     "gold_share_in": 9.63,
+     "pred_share_in": 15.18,
+     "gold": {
+      "in": 310,
+      "out": 2910
+     },
+     "correct": {
+      "in": 284,
+      "out": 895
+     },
+     "pred": {
+      "in": 343,
+      "out": 1917
+     },
+     "pred_correct": {
+      "in": 284,
+      "out": 895
+     }
+    }
+   }
+  },
+  "comparisons": {
+   "names_vs_mr6": {
+    "per_unit": {
+     "10.1007_s11340-021-00758-x.conll": {
+      "gain_in": 1.25,
+      "gain_out": -3.14,
+      "in_minus_out": 4.39
+     },
+     "10.1038_ncomms7164.conll": {
+      "gain_in": 13.48,
+      "gain_out": 0.61,
+      "in_minus_out": 12.87
+     },
+     "10.1038_s41467-020-19071-7.conll": {
+      "gain_in": -0.45,
+      "gain_out": -0.08,
+      "in_minus_out": -0.37
+     },
+     "10.3390_met10111458.conll": {
+      "gain_in": 4.19,
+      "gain_out": 3.78,
+      "in_minus_out": 0.41
+     }
+    },
+    "gain_in": {
+     "mean_diff": 4.62,
+     "ci95": [
+      -5.27,
+      14.5
+     ],
+     "n_units": 4,
+     "n_positive": 3
+    },
+    "gain_out": {
+     "mean_diff": 0.29,
+     "ci95": [
+      -4.23,
+      4.81
+     ],
+     "n_units": 4,
+     "n_positive": 2
+    },
+    "in_minus_out": {
+     "mean_diff": 4.33,
+     "ci95": [
+      -5.33,
+      13.98
+     ],
+     "n_units": 4,
+     "n_positive": 3
+    }
+   },
+   "names_vs_crf": {
+    "per_unit": {
+     "10.1007_s11340-021-00758-x.conll": {
+      "gain_in": 0.0,
+      "gain_out": 6.86,
+      "in_minus_out": -6.86
+     },
+     "10.1038_ncomms7164.conll": {
+      "gain_in": 35.22,
+      "gain_out": 5.64,
+      "in_minus_out": 29.58
+     },
+     "10.1038_s41467-020-19071-7.conll": {
+      "gain_in": 2.96,
+      "gain_out": 3.42,
+      "in_minus_out": -0.46
+     },
+     "10.3390_met10111458.conll": {
+      "gain_in": 12.9,
+      "gain_out": 8.08,
+      "in_minus_out": 4.82
+     }
+    },
+    "gain_in": {
+     "mean_diff": 12.77,
+     "ci95": [
+      -12.61,
+      38.15
+     ],
+     "n_units": 4,
+     "n_positive": 3
+    },
+    "gain_out": {
+     "mean_diff": 6.0,
+     "ci95": [
+      2.84,
+      9.16
+     ],
+     "n_units": 4,
+     "n_positive": 4
+    },
+    "in_minus_out": {
+     "mean_diff": 6.77,
+     "ci95": [
+      -18.59,
+      32.13
+     ],
+     "n_units": 4,
+     "n_positive": 2
+    }
+   },
+   "mr6_vs_crf": {
+    "per_unit": {
+     "10.1007_s11340-021-00758-x.conll": {
+      "gain_in": -1.25,
+      "gain_out": 10.0,
+      "in_minus_out": -11.25
+     },
+     "10.1038_ncomms7164.conll": {
+      "gain_in": 21.74,
+      "gain_out": 5.03,
+      "in_minus_out": 16.71
+     },
+     "10.1038_s41467-020-19071-7.conll": {
+      "gain_in": 3.41,
+      "gain_out": 3.5,
+      "in_minus_out": -0.09
+     },
+     "10.3390_met10111458.conll": {
+      "gain_in": 8.71,
+      "gain_out": 4.3,
+      "in_minus_out": 4.41
+     }
+    },
+    "gain_in": {
+     "mean_diff": 8.15,
+     "ci95": [
+      -7.65,
+      23.95
+     ],
+     "n_units": 4,
+     "n_positive": 3
+    },
+    "gain_out": {
+     "mean_diff": 5.71,
+     "ci95": [
+      1.05,
+      10.37
+     ],
+     "n_units": 4,
+     "n_positive": 4
+    },
+    "in_minus_out": {
+     "mean_diff": 2.44,
+     "ci95": [
+      -15.96,
+      20.85
+     ],
+     "n_units": 4,
+     "n_positive": 2
+    }
+   },
+   "mr3_vs_crf": {
+    "per_unit": {
+     "10.1007_s11340-021-00758-x.conll": {
+      "gain_in": 0.0,
+      "gain_out": 8.0,
+      "in_minus_out": -8.0
+     },
+     "10.1038_ncomms7164.conll": {
+      "gain_in": 21.3,
+      "gain_out": 1.61,
+      "in_minus_out": 19.69
+     },
+     "10.1038_s41467-020-19071-7.conll": {
+      "gain_in": 4.09,
+      "gain_out": 3.24,
+      "in_minus_out": 0.85
+     },
+     "10.3390_met10111458.conll": {
+      "gain_in": 9.68,
+      "gain_out": 3.81,
+      "in_minus_out": 5.87
+     }
+    },
+    "gain_in": {
+     "mean_diff": 8.77,
+     "ci95": [
+      -5.95,
+      23.49
+     ],
+     "n_units": 4,
+     "n_positive": 3
+    },
+    "gain_out": {
+     "mean_diff": 4.17,
+     "ci95": [
+      -0.17,
+      8.5
+     ],
+     "n_units": 4,
+     "n_positive": 4
+    },
+    "in_minus_out": {
+     "mean_diff": 4.6,
+     "ci95": [
+      -13.82,
+      23.03
+     ],
+     "n_units": 4,
+     "n_positive": 3
+    }
+   }
+  }
+ },
+ "coarse": {
+  "granularity": "coarse",
+  "protocol": "leave_one_paper_out",
+  "seeds": [
+   0,
+   100,
+   200,
+   300,
+   400,
+   500,
+   600,
+   700,
+   800,
+   900
+  ],
+  "systems": {
+   "crf": "CRF head",
+   "crf_mr": "MR3",
+   "crf_mr6": "MR6",
+   "crf_mrm6": "MR6 + names"
+  },
+  "units": [
+   "10.1007_s11340-021-00758-x.conll",
+   "10.1038_ncomms7164.conll",
+   "10.1038_s41467-020-19071-7.conll",
+   "10.3390_met10111458.conll"
+  ],
+  "excluded": [],
+  "checks": {
+   "10.1007_s11340-021-00758-x.conll": {
+    "teachers": true,
+    "coverage": true,
+    "runs_checked": 10,
+    "rebuilt_teachers_f1": [
+     62.22,
+     64.09,
+     58.92
+    ],
+    "n_distinct": 18889
+   },
+   "10.1038_ncomms7164.conll": {
+    "teachers": true,
+    "coverage": true,
+    "runs_checked": 10,
+    "rebuilt_teachers_f1": [
+     63.37,
+     62.34,
+     65.76
+    ],
+    "n_distinct": 9518
+   },
+   "10.1038_s41467-020-19071-7.conll": {
+    "teachers": true,
+    "coverage": true,
+    "runs_checked": 10,
+    "rebuilt_teachers_f1": [
+     55.39,
+     56.59,
+     52.0
+    ],
+    "n_distinct": 9696
+   },
+   "10.3390_met10111458.conll": {
+    "teachers": true,
+    "coverage": true,
+    "runs_checked": 10,
+    "rebuilt_teachers_f1": [
+     55.75,
+     56.94,
+     57.87
+    ],
+    "n_distinct": 12994
+   }
+  },
+  "pooled": {
+   "crf": {
+    "recall_in": 79.62,
+    "recall_out": 45.36,
+    "precision_in": 82.24,
+    "precision_out": 45.45,
+    "gold_share_in": 18.16,
+    "pred_share_in": 17.71,
+    "gold": {
+     "in": 3140,
+     "out": 14150
+    },
+    "correct": {
+     "in": 2500,
+     "out": 6419
+    },
+    "pred": {
+     "in": 3040,
+     "out": 14122
+    },
+    "pred_correct": {
+     "in": 2500,
+     "out": 6419
+    }
+   },
+   "crf_mr": {
+    "recall_in": 79.14,
+    "recall_out": 47.24,
+    "precision_in": 82.83,
+    "precision_out": 46.56,
+    "gold_share_in": 18.16,
+    "pred_share_in": 17.29,
+    "gold": {
+     "in": 3140,
+     "out": 14150
+    },
+    "correct": {
+     "in": 2485,
+     "out": 6684
+    },
+    "pred": {
+     "in": 3000,
+     "out": 14355
+    },
+    "pred_correct": {
+     "in": 2485,
+     "out": 6684
+    }
+   },
+   "crf_mr6": {
+    "recall_in": 80.54,
+    "recall_out": 46.85,
+    "precision_in": 81.45,
+    "precision_out": 46.14,
+    "gold_share_in": 18.16,
+    "pred_share_in": 17.77,
+    "gold": {
+     "in": 3140,
+     "out": 14150
+    },
+    "correct": {
+     "in": 2529,
+     "out": 6629
+    },
+    "pred": {
+     "in": 3105,
+     "out": 14366
+    },
+    "pred_correct": {
+     "in": 2529,
+     "out": 6629
+    }
+   },
+   "crf_mrm6": {
+    "recall_in": 80.73,
+    "recall_out": 48.33,
+    "precision_in": 82.44,
+    "precision_out": 47.05,
+    "gold_share_in": 18.16,
+    "pred_share_in": 17.46,
+    "gold": {
+     "in": 3140,
+     "out": 14150
+    },
+    "correct": {
+     "in": 2535,
+     "out": 6839
+    },
+    "pred": {
+     "in": 3075,
+     "out": 14537
+    },
+    "pred_correct": {
+     "in": 2535,
+     "out": 6839
+    }
+   }
+  },
+  "per_unit": {
+   "crf": {
+    "10.1007_s11340-021-00758-x.conll": {
+     "recall_in": 87.31,
+     "recall_out": 46.73,
+     "precision_in": 70.94,
+     "precision_out": 50.0,
+     "gold_share_in": 20.47,
+     "pred_share_in": 25.32,
+     "gold": {
+      "in": 260,
+      "out": 1010
+     },
+     "correct": {
+      "in": 227,
+      "out": 472
+     },
+     "pred": {
+      "in": 320,
+      "out": 944
+     },
+     "pred_correct": {
+      "in": 227,
+      "out": 472
+     }
+    },
+    "10.1038_ncomms7164.conll": {
+     "recall_in": 76.12,
+     "recall_out": 53.97,
+     "precision_in": 89.45,
+     "precision_out": 51.03,
+     "gold_share_in": 16.55,
+     "pred_share_in": 13.77,
+     "gold": {
+      "in": 490,
+      "out": 2470
+     },
+     "correct": {
+      "in": 373,
+      "out": 1333
+     },
+     "pred": {
+      "in": 417,
+      "out": 2612
+     },
+     "pred_correct": {
+      "in": 373,
+      "out": 1333
+     }
+    },
+    "10.1038_s41467-020-19071-7.conll": {
+     "recall_in": 80.67,
+     "recall_out": 44.41,
+     "precision_in": 81.22,
+     "precision_out": 44.0,
+     "gold_share_in": 14.99,
+     "pred_share_in": 14.78,
+     "gold": {
+      "in": 1190,
+      "out": 6750
+     },
+     "correct": {
+      "in": 960,
+      "out": 2998
+     },
+     "pred": {
+      "in": 1182,
+      "out": 6814
+     },
+     "pred_correct": {
+      "in": 960,
+      "out": 2998
+     }
+    },
+    "10.3390_met10111458.conll": {
+     "recall_in": 78.33,
+     "recall_out": 41.22,
+     "precision_in": 83.85,
+     "precision_out": 43.07,
+     "gold_share_in": 23.44,
+     "pred_share_in": 23.0,
+     "gold": {
+      "in": 1200,
+      "out": 3920
+     },
+     "correct": {
+      "in": 940,
+      "out": 1616
+     },
+     "pred": {
+      "in": 1121,
+      "out": 3752
+     },
+     "pred_correct": {
+      "in": 940,
+      "out": 1616
+     }
+    }
+   },
+   "crf_mr": {
+    "10.1007_s11340-021-00758-x.conll": {
+     "recall_in": 87.69,
+     "recall_out": 49.7,
+     "precision_in": 73.55,
+     "precision_out": 51.22,
+     "gold_share_in": 20.47,
+     "pred_share_in": 24.03,
+     "gold": {
+      "in": 260,
+      "out": 1010
+     },
+     "correct": {
+      "in": 228,
+      "out": 502
+     },
+     "pred": {
+      "in": 310,
+      "out": 980
+     },
+     "pred_correct": {
+      "in": 228,
+      "out": 502
+     }
+    },
+    "10.1038_ncomms7164.conll": {
+     "recall_in": 76.94,
+     "recall_out": 57.09,
+     "precision_in": 92.4,
+     "precision_out": 53.94,
+     "gold_share_in": 16.55,
+     "pred_share_in": 13.5,
+     "gold": {
+      "in": 490,
+      "out": 2470
+     },
+     "correct": {
+      "in": 377,
+      "out": 1410
+     },
+     "pred": {
+      "in": 408,
+      "out": 2614
+     },
+     "pred_correct": {
+      "in": 377,
+      "out": 1410
+     }
+    },
+    "10.1038_s41467-020-19071-7.conll": {
+     "recall_in": 79.41,
+     "recall_out": 45.6,
+     "precision_in": 80.49,
+     "precision_out": 44.4,
+     "gold_share_in": 14.99,
+     "pred_share_in": 14.48,
+     "gold": {
+      "in": 1190,
+      "out": 6750
+     },
+     "correct": {
+      "in": 945,
+      "out": 3078
+     },
+     "pred": {
+      "in": 1174,
+      "out": 6932
+     },
+     "pred_correct": {
+      "in": 945,
+      "out": 3078
+     }
+    },
+    "10.3390_met10111458.conll": {
+     "recall_in": 77.92,
+     "recall_out": 43.21,
+     "precision_in": 84.39,
+     "precision_out": 44.24,
+     "gold_share_in": 23.44,
+     "pred_share_in": 22.44,
+     "gold": {
+      "in": 1200,
+      "out": 3920
+     },
+     "correct": {
+      "in": 935,
+      "out": 1694
+     },
+     "pred": {
+      "in": 1108,
+      "out": 3829
+     },
+     "pred_correct": {
+      "in": 935,
+      "out": 1694
+     }
+    }
+   },
+   "crf_mr6": {
+    "10.1007_s11340-021-00758-x.conll": {
+     "recall_in": 86.92,
+     "recall_out": 47.72,
+     "precision_in": 69.11,
+     "precision_out": 47.16,
+     "gold_share_in": 20.47,
+     "pred_share_in": 24.24,
+     "gold": {
+      "in": 260,
+      "out": 1010
+     },
+     "correct": {
+      "in": 226,
+      "out": 482
+     },
+     "pred": {
+      "in": 327,
+      "out": 1022
+     },
+     "pred_correct": {
+      "in": 226,
+      "out": 482
+     }
+    },
+    "10.1038_ncomms7164.conll": {
+     "recall_in": 79.59,
+     "recall_out": 57.61,
+     "precision_in": 91.98,
+     "precision_out": 55.43,
+     "gold_share_in": 16.55,
+     "pred_share_in": 14.18,
+     "gold": {
+      "in": 490,
+      "out": 2470
+     },
+     "correct": {
+      "in": 390,
+      "out": 1423
+     },
+     "pred": {
+      "in": 424,
+      "out": 2567
+     },
+     "pred_correct": {
+      "in": 390,
+      "out": 1423
+     }
+    },
+    "10.1038_s41467-020-19071-7.conll": {
+     "recall_in": 80.67,
+     "recall_out": 45.21,
+     "precision_in": 79.47,
+     "precision_out": 44.4,
+     "gold_share_in": 14.99,
+     "pred_share_in": 14.95,
+     "gold": {
+      "in": 1190,
+      "out": 6750
+     },
+     "correct": {
+      "in": 960,
+      "out": 3052
+     },
+     "pred": {
+      "in": 1208,
+      "out": 6874
+     },
+     "pred_correct": {
+      "in": 960,
+      "out": 3052
+     }
+    },
+    "10.3390_met10111458.conll": {
+     "recall_in": 79.42,
+     "recall_out": 42.65,
+     "precision_in": 83.16,
+     "precision_out": 42.84,
+     "gold_share_in": 23.44,
+     "pred_share_in": 22.7,
+     "gold": {
+      "in": 1200,
+      "out": 3920
+     },
+     "correct": {
+      "in": 953,
+      "out": 1672
+     },
+     "pred": {
+      "in": 1146,
+      "out": 3903
+     },
+     "pred_correct": {
+      "in": 953,
+      "out": 1672
+     }
+    }
+   },
+   "crf_mrm6": {
+    "10.1007_s11340-021-00758-x.conll": {
+     "recall_in": 88.46,
+     "recall_out": 52.57,
+     "precision_in": 75.16,
+     "precision_out": 50.72,
+     "gold_share_in": 20.47,
+     "pred_share_in": 22.62,
+     "gold": {
+      "in": 260,
+      "out": 1010
+     },
+     "correct": {
+      "in": 230,
+      "out": 531
+     },
+     "pred": {
+      "in": 306,
+      "out": 1047
+     },
+     "pred_correct": {
+      "in": 230,
+      "out": 531
+     }
+    },
+    "10.1038_ncomms7164.conll": {
+     "recall_in": 79.18,
+     "recall_out": 57.45,
+     "precision_in": 92.38,
+     "precision_out": 54.02,
+     "gold_share_in": 16.55,
+     "pred_share_in": 13.78,
+     "gold": {
+      "in": 490,
+      "out": 2470
+     },
+     "correct": {
+      "in": 388,
+      "out": 1419
+     },
+     "pred": {
+      "in": 420,
+      "out": 2627
+     },
+     "pred_correct": {
+      "in": 388,
+      "out": 1419
+     }
+    },
+    "10.1038_s41467-020-19071-7.conll": {
+     "recall_in": 81.34,
+     "recall_out": 46.96,
+     "precision_in": 80.6,
+     "precision_out": 45.11,
+     "gold_share_in": 14.99,
+     "pred_share_in": 14.59,
+     "gold": {
+      "in": 1190,
+      "out": 6750
+     },
+     "correct": {
+      "in": 968,
+      "out": 3170
+     },
+     "pred": {
+      "in": 1201,
+      "out": 7028
+     },
+     "pred_correct": {
+      "in": 968,
+      "out": 3170
+     }
+    },
+    "10.3390_met10111458.conll": {
+     "recall_in": 79.08,
+     "recall_out": 43.85,
+     "precision_in": 82.67,
+     "precision_out": 44.82,
+     "gold_share_in": 23.44,
+     "pred_share_in": 23.04,
+     "gold": {
+      "in": 1200,
+      "out": 3920
+     },
+     "correct": {
+      "in": 949,
+      "out": 1719
+     },
+     "pred": {
+      "in": 1148,
+      "out": 3835
+     },
+     "pred_correct": {
+      "in": 949,
+      "out": 1719
+     }
+    }
+   }
+  },
+  "comparisons": {
+   "names_vs_mr6": {
+    "per_unit": {
+     "10.1007_s11340-021-00758-x.conll": {
+      "gain_in": 1.54,
+      "gain_out": 4.85,
+      "in_minus_out": -3.31
+     },
+     "10.1038_ncomms7164.conll": {
+      "gain_in": -0.41,
+      "gain_out": -0.16,
+      "in_minus_out": -0.25
+     },
+     "10.1038_s41467-020-19071-7.conll": {
+      "gain_in": 0.67,
+      "gain_out": 1.75,
+      "in_minus_out": -1.08
+     },
+     "10.3390_met10111458.conll": {
+      "gain_in": -0.34,
+      "gain_out": 1.2,
+      "in_minus_out": -1.54
+     }
+    },
+    "gain_in": {
+     "mean_diff": 0.36,
+     "ci95": [
+      -1.11,
+      1.84
+     ],
+     "n_units": 4,
+     "n_positive": 2
+    },
+    "gain_out": {
+     "mean_diff": 1.91,
+     "ci95": [
+      -1.46,
+      5.28
+     ],
+     "n_units": 4,
+     "n_positive": 3
+    },
+    "in_minus_out": {
+     "mean_diff": -1.54,
+     "ci95": [
+      -3.6,
+      0.51
+     ],
+     "n_units": 4,
+     "n_positive": 0
+    }
+   },
+   "names_vs_crf": {
+    "per_unit": {
+     "10.1007_s11340-021-00758-x.conll": {
+      "gain_in": 1.15,
+      "gain_out": 5.84,
+      "in_minus_out": -4.69
+     },
+     "10.1038_ncomms7164.conll": {
+      "gain_in": 3.06,
+      "gain_out": 3.48,
+      "in_minus_out": -0.42
+     },
+     "10.1038_s41467-020-19071-7.conll": {
+      "gain_in": 0.67,
+      "gain_out": 2.55,
+      "in_minus_out": -1.88
+     },
+     "10.3390_met10111458.conll": {
+      "gain_in": 0.75,
+      "gain_out": 2.63,
+      "in_minus_out": -1.88
+     }
+    },
+    "gain_in": {
+     "mean_diff": 1.41,
+     "ci95": [
+      -0.38,
+      3.19
+     ],
+     "n_units": 4,
+     "n_positive": 4
+    },
+    "gain_out": {
+     "mean_diff": 3.62,
+     "ci95": [
+      1.18,
+      6.07
+     ],
+     "n_units": 4,
+     "n_positive": 4
+    },
+    "in_minus_out": {
+     "mean_diff": -2.22,
+     "ci95": [
+      -5.06,
+      0.62
+     ],
+     "n_units": 4,
+     "n_positive": 0
+    }
+   },
+   "mr6_vs_crf": {
+    "per_unit": {
+     "10.1007_s11340-021-00758-x.conll": {
+      "gain_in": -0.39,
+      "gain_out": 0.99,
+      "in_minus_out": -1.38
+     },
+     "10.1038_ncomms7164.conll": {
+      "gain_in": 3.47,
+      "gain_out": 3.64,
+      "in_minus_out": -0.17
+     },
+     "10.1038_s41467-020-19071-7.conll": {
+      "gain_in": 0.0,
+      "gain_out": 0.8,
+      "in_minus_out": -0.8
+     },
+     "10.3390_met10111458.conll": {
+      "gain_in": 1.09,
+      "gain_out": 1.43,
+      "in_minus_out": -0.34
+     }
+    },
+    "gain_in": {
+     "mean_diff": 1.04,
+     "ci95": [
+      -1.72,
+      3.8
+     ],
+     "n_units": 4,
+     "n_positive": 2
+    },
+    "gain_out": {
+     "mean_diff": 1.72,
+     "ci95": [
+      -0.37,
+      3.8
+     ],
+     "n_units": 4,
+     "n_positive": 4
+    },
+    "in_minus_out": {
+     "mean_diff": -0.67,
+     "ci95": [
+      -1.53,
+      0.19
+     ],
+     "n_units": 4,
+     "n_positive": 0
+    }
+   },
+   "mr3_vs_crf": {
+    "per_unit": {
+     "10.1007_s11340-021-00758-x.conll": {
+      "gain_in": 0.38,
+      "gain_out": 2.97,
+      "in_minus_out": -2.59
+     },
+     "10.1038_ncomms7164.conll": {
+      "gain_in": 0.82,
+      "gain_out": 3.12,
+      "in_minus_out": -2.3
+     },
+     "10.1038_s41467-020-19071-7.conll": {
+      "gain_in": -1.26,
+      "gain_out": 1.19,
+      "in_minus_out": -2.45
+     },
+     "10.3390_met10111458.conll": {
+      "gain_in": -0.41,
+      "gain_out": 1.99,
+      "in_minus_out": -2.4
+     }
+    },
+    "gain_in": {
+     "mean_diff": -0.12,
+     "ci95": [
+      -1.58,
+      1.34
+     ],
+     "n_units": 4,
+     "n_positive": 2
+    },
+    "gain_out": {
+     "mean_diff": 2.32,
+     "ci95": [
+      0.88,
+      3.75
+     ],
+     "n_units": 4,
+     "n_positive": 4
+    },
+    "in_minus_out": {
+     "mean_diff": -2.44,
+     "ci95": [
+      -2.63,
+      -2.24
+     ],
+     "n_units": 4,
+     "n_positive": 0
+    }
+   }
+  }
+ }
+}

@@ -1028,8 +1028,10 @@ chance at class level. For a Task C-style result:
 | 12 | Protocol committed before any run: mention replacement whose replacement pool holds the names that 3 CRF teachers find in a corpus of the held-out subfield's own topic (40,000 open-access sentences per subfield, `build_topic_corpus.py`; phase 0's gate: they hold 55–81% of the unseen test names), on MuLMS's 7 held-out subfields; a 3-seed screen of seven variants (`w12a`: silver sentences `crf_mrs_topic`, silver mentions `crf_mrm_topic`, the same with 6 copies `crf_mrm_topic6`, 6 copies without names `crf_mr6`, self-training on the topic corpus `crf_st3_topic`; `w12c`: the silver mentions or sentences as a gazetteer match feature, `crf_gzm_topic` and `crf_gzs_topic`; amendments 1–3), then the 7-seed decision for the screen's winner on seeds the screen did not see (`w12b:<variant>`); protocol below, plan in `docs/METHODS_PLAN.md` | Screen: the variant with the largest mean gain over mention replacement goes on if it is above 0. Decision 1: it improves on the CRF head (paired by subfield); decision 2: on mention replacement. A methods claim needs decision 1 on MuLMS and the winner's MaterioMiner analogue passing against the CRF head. Screen done (20 October; 3 seeds, 7 subfields; outcome below): V4 `crf_mrm_topic6`, the mention-level filter with 6 copies, 52.09, +1.45 [−1.35, +4.25] over mention replacement and +3.16 [−1.96, +8.28] over the CRF head, is the winner (V2 +0.97, V1 +0.80, V6 +0.16; V3, V7 and V8 below mention replacement). Decision done (24 October, seeds 300–900): +3.19 [−1.13, +7.51] against the CRF head and +0.92 [−1.63, +3.48] against mention replacement, neither passes (the screen's +3.16 held; the 7-subfield test lacks the power for V4's spread). The MaterioMiner analogue (25 October, `crf_mrm6`, 10 seeds) passes against the CRF head at both granularities: +4.27 [+1.39, +7.15] fine-grained and +1.77 [+0.67, +2.88] coarse-grained; with MuLMS it carries 13.2's pooled decision (week 13) |
 | 13 | Protocol committed before any run (20 October, on the user's directive to push for a methods paper; the plan's stop rule of a third protocol on MuLMS lifted, the count reported): 13.1 the document consistency rule of week 7 on MuLMS's saved 10-seed predictions (no training; amended the same day with SOFC-Exp's article folds, reported, and mention replacement on MaterioMiner, decisions); 13.2 a pooled decision over MuLMS's 7 subfields and MaterioMiner's 4 papers for the week-12 winner; 13.3 mention replacement with and without multi-task training on SOFC-Exp's 5 article folds, 10 seeds (`w13a`); 13.4 (amendment, conditional on a pass of week 12's decision 1 or of 13.2) the screen's winner on SOFC-Exp's folds (`w13b`); protocol below | Revised methods criterion: a pre-registered pass on held-out documents of two corpora, or the pooled decision over two or more corpora with no corpus losing; claims scoped to what passed. 13.1 done: on the CRF head the rule passes on MuLMS (13.1a, +0.82 [+0.18, +1.46], every subfield gaining), its second corpus after coarse-grained MaterioMiner (week 7, +0.12), and loses on SOFC-Exp's folds (13.1c, −0.44 [−0.72, −0.16]); it adds nothing to mention replacement (13.1b +0.57 [−0.12, +1.25]; 13.1d +0.19 [−0.34, +0.73] fine-grained, +0.11 [−0.08, +0.31] coarse-grained): a scoped claim of two corpora, under a point, with a boundary condition. 13.3a done (24 October): mention replacement on SOFC-Exp's folds −0.48 [−1.36, +0.39], no (pooled over three corpora, reported: +1.46 [+0.28, +2.64]); 13.2 done (25 October): V4 pooled over MuLMS's 7 subfields and MaterioMiner's 4 papers +3.58 [+0.95, +6.21] against the CRF head, no corpus losing: passes, the methods claim of two corpora (not over plain mention replacement: +1.23 [−0.22, +2.68], post hoc); 13.3b done (25 October): mention replacement on the multi-task model on SOFC-Exp's folds −0.11 [−0.69, +0.46], no; 13.4 done (25 October): V4's analogue on SOFC-Exp's folds with the SOFC corpus −0.04 [−1.21, +1.14], no (+0.45 [+0.04, +0.86] over plain mention replacement, reported; three corpora pooled +2.45 [+0.50, +4.40], reported). Week 13: 8 decisions, 2 pass (13.1a, 13.2); the methods claim of two corpora (C26) stands, SOFC-Exp its boundary |
 | 14 | Protocol committed before any run (29 October): the ablations that make the paper, `docs/METHODS_PLAN.md` §4C. 14.1 the names against matched copies: the 6-copy control without names `crf_mr6` on MuLMS's 7 held-out subfields (seeds 300–900) and MaterioMiner's 4 held-out papers (10 seeds, both granularities; `w14a`, this week's remaining quota), a pooled decision over the 11 units as 13.2; 14.2 the topic's role: V4 with a mixed corpus of the six other topics (40,000 sentences; `build_mixed_corpus.py`, `crf_mrm_mixed6`, seeds 300–900; `w14b`, after the reset), paired by subfield against V4 with the subfield's own corpus; 14.3 reported ablations at the screen's seeds (corpus size 10,000 and 20,000, threshold 0.7, 2-of-3 teachers, silver share 0.5; `w14c`); protocol below | 14.1 done (29 October): +0.80 [−0.66, +2.26] pooled over the 11 units, no (MuLMS +0.51, MaterioMiner fine-grained +1.29; no corpus losing); the 6-copy control alone gains +2.56 [+0.94, +4.18] over the CRF head (reported), so most of V4's gain is mention replacement with more copies and the names' share is not established. 14.2 done (29 October): −0.18 [−2.01, +1.65], no; V4 with a mixed corpus of the six other topics does as well (+3.38 [−0.89, +7.64] over the CRF head, +0.70 [−1.19, +2.58] over the copy control, reported), so the names' source does not matter either. The criteria as fixed: 14.1, V4 improves on the matched copies pooled over MuLMS and MaterioMiner with no corpus losing (then C26 gains "over mention replacement with the same copies"); 14.2: the subfield's own corpus beats the mixed one (then the claim keeps the topic; else a corpus of other topics does as well, reported). 14.3 done (31 October; reported, 3 seeds, Table 7): the five ablations lie within 0.2 points of the method (−0.16 to +0.11 against it, every interval covering 0) while the lexicon ranges from 19,171 to 78,604 distinct names and from 16.4% to 31.5% of the unseen test names; a quarter of the corpus with the strictest filter does as well as the rest |
-| 15 | Write-up (decided 30 October: two papers, `docs/METHODS_PLAN.md` §7), after `w14c`'s reported ablations at the reset of 31 October: paper A, the methods paper (`docs/PAPER_A.md`): abstract, introduction, method, experiments (Table 6, the ablations), the unseen-name mechanism figure, limitations, related work. Done 30 October: a first complete draft (every section but 4.3, the ablations) and a second pass the same day, every number of Sections 1 to 6 checked against the results files (three wordings corrected) and the mechanism figure drawn (`docs/figures/fig7_names.png`, Figure 7 of `docs/PAPER.md`) | A complete draft of paper A by 7 November |
+| 15 | Write-up (decided 30 October: two papers, `docs/METHODS_PLAN.md` §7), after `w14c`'s reported ablations at the reset of 31 October: paper A, the methods paper (`docs/PAPER_A.md`): abstract, introduction, method, experiments (Table 6, the ablations), the unseen-name mechanism figure, limitations, related work. Done 30 October: a first complete draft (every section but 4.3, the ablations) and a second pass the same day, every number of Sections 1 to 6 checked against the results files (three wordings corrected) and the mechanism figure drawn (`docs/figures/fig7_names.png`, Figure 7 of `docs/PAPER.md`). Review round 1 (31 October; three independent adversarial reviews of the 30 October draft): the headline could not be the names' (14.1), the draft was not self-contained, and it omitted the criterion revision of 20 October, the two seed bases of 13.2, the lifted stop rule and the timing of the week-14 protocol; rewritten the same day under the title "Harvested names are not shown to add to mention replacement on held-out materials documents: a pre-registered test", with the decomposition on one seed basis, a post hoc robustness analysis (`ner_robustness.py`, Table 9), per-unit and per-type results (Figure 9, Tables 8 and A2), the protocol record and a full related-work section. Round 2 (31 October, evening; three reviews of the rewrite): the account of the criterion revision corrected to the record (the directive, the half-screen, the control known to meet the new criterion), a confounded correlation claim withdrawn, the mechanism scoped per corpus, the title softened to "are not shown to add", detectable differences per comparison (Appendix E), the MuLMS pool described as about two articles, statements and captions added, 16 number mismatches fixed; the lexicon-membership analysis planned. Round 3 (31 October, night; three reviews of the round-2 text): the week-13 amendment record corrected to two commits (13:53, D6 added conditional on D1; 18:42, widened and un-gated), "before its runs" made "before its results" where one protocol followed its first push, the cost restated per student (6 to 14 times the CRF head, not 22: a names run stores its job's time), the confound paragraph rewritten on the degrees of freedom with a false "every pooled measure" sentence removed, Table 3 given both seed bases and the MaterioMiner grid, Table 6 printed, terms glossed for a materials reader, the code and data availability statements written with the repository's address, five verified references added, the figures re-rendered at print size. Round 4 (31 October, late night; three reviews of the round-3 text): the week-13 amendment record as three states (the analogue un-gated at 09:14, gated on D1 at 13:53 and restored at 18:42, the gating recorded as a mistake), the abstract's double-rounded intervals quoted at two decimals, the compute ratios recomputed from the mean augmentation count and epoch counts (2.0/2.9/3.1 updates, `ner_robustness.py`), D3 and D4 marked pre-registered in Table 3, SOFC-Exp's regime stated (36 training articles), the practitioner advice rewritten around MR3 with the names priced against it and the absolute levels, the unseen definition completed, Table 1 slimmed, six verified references added, Figures 1 and 3 redrawn. Round 5 (31 October, late night; three reviews of the round-4 text): MR3 no longer called "the published method" (its 3 copies and p = 0.5 are this project's fixed setting; Dai and Adel tune both), Table 3's provenance completed (the week-7 MR3 decisions, the week-14 reported MR6 comparisons), MR6's MuLMS level corrected (51.2, not MR3's 50.8), the Bonferroni reading added (none of the three passes survives 0.05/8), the third week-13 amendment (09:25, the consistency rule) recorded, the abstract's causal clause softened with the gap decomposition (the name mix is about half of MaterioMiner's recall gap, a third of MuLMS's), the companion study's calibrated-bias control cited with the names' marginal precision (30% of the added unseen-name predictions right), captions for every table, Appendix E at two decimals, reproducibility details (the tie rule, the optimiser settings, the sentence splitter); Round 6 (31 October, late night; three reviews of the round-5 text): MR6's own MuLMS gain over the CRF head stated (+2.68 [+0.13, +5.23], reported in week 14), the recall–precision trade given paired per-subfield intervals (names − MR6 on the decision seeds: recall +2.56 [+0.76, +4.36], precision −2.22 [−5.03, +0.60]; `ner_mentions.py` `chain`), Table 3's provenance completed (the week-12 reported comparisons), D3 and D4 given their week-12 row in Appendix A, the protocol text's written times disclosed against the commit times, D8's contrast framed (the mixed corpus holds most of the same names), the net marginal rate worded as such, the order dependence of the recall-gap decomposition stated, an untuned-settings limitation, Riloff and Jones (1999) added; a focused final round follows after the lexicon analysis (notes below) | A complete draft of paper A by 7 November |
 | 16 | Paper B, the evaluation paper, from `docs/PAPER_DRAFT.md` §2–5, 7 and 8 with the method sections cut to summaries citing A; both titles and abstracts fixed; the reproducibility appendices and the code release. Begun 30 October on the user's go-ahead: a first complete draft (`docs/PAPER_B.md`: the gap and its anatomy, seeds and votes, every addition tested with the count of 86 pre-registered decisions and 18 passes, data against method, seven lessons); its length waits on the venue. Also 30 October: the reproducibility appendix and code-release checklist for both papers (`docs/REPRODUCIBILITY.md`) and three title candidates per paper (`docs/PAPER.md`) | Both drafts complete by 14 November; the venues and the authors' confirmation email are the user's |
+| 17 | The harvested names on the strongest MaterioMiner base (ordered 31 October after six review rounds of paper A; protocol fixed 19:10 UTC, before any run, below): the multi-task model with 6-copy mention replacement, with (`crf_mt_mrm6`) and without (`crf_mt_mr6`) the fatigue corpus's names, 10 seeds on the 4 held-out papers; decisions 17.1 (fine) and 17.2 (coarse) against the matched control; batches `w17a` (kernel d) and `w17b` (kernel c) | 17.1 done (1 November): +0.96 [−0.01, +1.92] fine-grained, no (every paper positive, 0.16 to 1.62); 17.2 done: +0.85 [−0.72, +2.42] coarse-grained, no. Reported: the names against multi-task + MR3 +0.76 [−0.15, +1.68] and +0.91 [−0.14, +1.97], the control against it −0.19 [−2.05, +1.67] and +0.06 [−0.74, +0.86]; the two-head filter's lexicons hold 7–16% (fine) and 7–25% (coarse) of a paper's unseen test names. The negative result extends to the strongest base; paper A updated (outcome below) |
+| 18 | The names against a recall-matched control (approved 1 November after the round-9 referee of paper A asked for it; protocol fixed before any run, below): MR6 on MuLMS's 7 held-out subfields at the decision seeds 300 to 900, the stored `crf_mr6` jobs again with a bias added to every entity tag at decoding (`crf_mr6_bias`), matched per subfield to the names' recall; decisions 18.1 (D11, recall on the unseen names the lexicon holds) and 18.2 (D12, micro F1) at matched recall; batch `w18a` | Done (1 November): 18.1 +11.24 [+3.31, +19.18], passes (7 of 7 subfields positive); 18.2 +3.26 [−0.79, +7.31], no. In three subfields (electrolysis, pemfc, sofc) no bias on the grid reaches the names' recall and the protocol matched them at D = 5; without them (pre-specified) 18.1 +6.05 [−3.33, +15.44] (4 of 4 positive) and 18.2 −0.03 [−2.78, +2.72]; matched post hoc at the control's nearest recall, +8.63 [+3.35, +13.90] and +1.37 [−0.66, +3.41]. At matched overall recall the names find more of the names their lexicon holds and fewer of the others (−1.73 [−3.02, −0.44], pre-specified); their F1 is not shown to beat the bias. The names route's decisions become twelve, four passing; paper A updated (outcome below) |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -5051,3 +5053,1382 @@ half of the draws 46.2% at 53.7, F1 49.7) and the larger ones more at
 lower precision (threshold 0.7 48.8% at 49.5, F1 49.1; 2 of 3 teachers
 48.3% at 50.6, F1 49.5). More names buy recall and cost precision in the
 same measure.
+
+*Paper A, adversarial review round 1 (31 October, afternoon).* Three
+independent reviews of the 30 October draft (`docs/PAPER_A.md` at
+e2409d0) converged on five blocking findings: (1) the title and abstract
+credited the pooled gain to the harvested names, which 14.1 does not
+support; (2) the draft cited this file for its data and protocol instead
+of stating them; (3) it did not disclose the 20 October criterion
+revision, the two seed bases of 13.2 (the protocol named the decision
+batch, the analysis took the 10-seed means), the lifted stop rule or the
+timing of the week-14 protocol (committed two minutes after `w14a` was
+pushed, five hours before its results); (4) the decomposition mixed seed
+bases (+2.35 on ten seeds beside +0.80 on seven); (5) null results were
+worded as equivalences. Twelve smaller audit mismatches were listed
+(training mentions per fold, the pool share, reported labels, the SOFC
+corpus's exclusions, Figure 1's lexicon range). Done the same day: the
+manuscript rewritten around what the evidence supports (the title above;
+the decomposition on the decision seeds, MR3 − CRF +2.46 [+1.00, +3.91],
+MR6 − MR3 +0.33 [−0.25, +0.92], names − MR6 +0.80 [−0.66, +2.26]);
+`ner_robustness.py` (new; `results/gpu/ner_robustness.json`, Table 9):
+every comparison among the four systems on both seed bases, exact
+sign-flip permutation p-values (names − CRF 0.007 on the decision seeds,
+0.011 on the 10-seed means), leave-one-unit-out intervals (lowest lower
+bound +0.54 and +0.44), the stratified mean (3.73), minimum detectable
+effects at 80% power (2.0 pooled, 2.8 on MuLMS alone, 2.0–3.2 for the
+3-seed readings), the coverage–gain correlation (Pearson −0.71) and the
+baseline–gain correlation (−0.76); `ner_seed_analysis.py` gains the
+per-type part of week 14 (Tables 8 and A2); Figure 9 (per unit) added and
+Figure 8's lexicon range corrected to 4k–13k names; the robustness grid
+now reports the decisions' stored intervals rather than recomputing them
+from rounded per-unit means. Every number of the new draft was checked
+against the results files and the generated tables (436 distinct numbers;
+the few found nowhere else, the DOIs, the p-values, the commit hashes and
+the run times, checked by hand), and the corpus provenance recomputed
+from the hit records (articles of 1976–2026, over 99% from 2009 on;
+63–90% CC BY). Round 2 follows.
+
+*Paper A, adversarial review round 2 (31 October, evening).* Three
+reviews of the rewritten draft (an NLP reviewer, a materials-journal
+referee, a number-and-citation audit), every finding verified against the
+record before acting. Verified: (1) Section 3 misdescribed the criterion
+revision: it was made at 09:14 on the directive, after the screen's first
+half (08:11) and before the recipe's screen result (13:35), and the
+protocol itself computed that plain mention replacement already met the
+new pooled criterion (+2.34 [+0.94, +3.75]); the "underpowered" reasoning
+belongs to the 14:00–14:30 amendments (committed 18:42); (2) the claim
+that the names' gain tracks the baseline's weakness rather than the
+lexicon's coverage was confounded (r(coverage, CRF F1) = 0.89; partial
+correlations −0.10 and −0.40; both correlations vanish without semi and
+sofc); (3) the recall-for-precision trade holds on MuLMS and is reversed
+on MaterioMiner; (4) "add little" overreached, the names' upper bound
+(+2.3) being as large as mention replacement's whole gain; (5) the
+detectable difference is comparison-specific (2.0 for the names against
+MR6 pooled, 3.6 against the CRF head pooled, 5.9 for D1); (6) the overlap
+statement ("in no result") was false; (7) "every comparison was fixed in
+a protocol" was false and the MR3 pooled gain is post hoc; (8) the MuLMS
+pool is about two articles per fold; (9) sixteen number mismatches (the
+corpora's years 1996–2026, 66% seen recall, [−0.2, 0.9], 290–368
+articles, 0.3–4% without a licence, 22 times the cost, 2.8–4.6 times the
+sentences, 27–50 minutes, 50–62% coverage, SOEC only in the MuLMS corpus,
+the per-type pattern holding on 9 of 12 MuLMS types and 13 of 16
+coarse-grained ones, V7 not significantly below MR3). Done the same
+evening: the title "Harvested names are not shown to add to mention
+replacement on held-out materials documents: a pre-registered test";
+Section 3 rewritten to the record; the abstract and introduction without
+the mechanism claims; Section 5.4 with the confound (partial correlations
+and the leave-two-out check added to `ner_robustness.json`); Section 5.6
+with the counts; the post hoc label on the MR3 gain everywhere; the terms
+defined (decision, reported, post hoc, screen, vote, analogue); the data
+table with the pool's construction, the short names, MuLMS's revision and
+876 of 9,466 sentences; figure captions; author, contribution,
+competing-interest and funding statements; the overlap statement listing
+the shared results; Appendix E, the detectable difference of every
+comparison (`ner_robustness.py`, `detectable`, with the stratified mean);
+the tables renumbered 1–7; Figure 1's pool text, Figure 2's legend and
+Figure 3's labels fixed; fu2020rethinking and ghaddar2021context added to
+the bibliography after verification. Planned next: the recall split by
+lexicon membership (the seven lexicons rebuilt, one teacher pass per
+corpus, under a protocol note) and round 3.
+
+*Paper A, adversarial review round 3 (31 October, night).* Three reviews
+of the round-2 text. Verified and fixed: (1) the week-13 amendment record:
+`5f7f827` (13:53, eighteen minutes after the screen chose the recipe)
+added 13.4 conditional on decision 1 with the analogue still gated, and
+`de62446` (18:42) widened the condition to D1 or 13.2 and un-gated the
+analogue; the paper had folded both into one 18:42 amendment; the week-12
+protocol's first commit is `40631ce` (11:00), `bd20cec` (11:05) its
+refinement; (2) "fixed before its runs" contradicted the week-14 record
+(the protocol two minutes after its first push): now "before its
+results, all but one before its runs"; (3) the cost: a names run's stored
+runtime is its job's, shared by the job's 3 or 4 students (14 jobs, 2,099
+s on average), so per student the names cost 609 s, 6.4 times the CRF
+head's 96 s, the harvest alone about 1,063 s, eleven CRF runs, and a
+single student charged with the harvest about 14 times; "22 times" was
+the whole job against one run (`ner_robustness.py`, `job_costs`);
+(4) Section 5.4: "a mixed corpus ... scores at least as well on every
+pooled measure" was false (recall 46.7 against 47.3), the leave-two-out
+numbers were raw correlations presented beside the partials, and the
+conclusion now rests on 4 degrees of freedom; (5) the abstract's
+practical advice scoped to the regime tested, "established" dropped for
+the post hoc MR3 estimate, D5′ marked post hoc in Table 2, the mixed
+variant's comparisons marked reported, "at most 2.3 points" made "the
+interval's upper bound"; (6) the per-type sentence: MR6 had not gained on
+MAT; (7) Table 3 now carries both seed bases and the MaterioMiner grid,
+Table 6 is printed, inline file paths dropped; (8) glosses for F1,
+precision, recall, model seeds, IOB2, gazetteer, self-training and the
+marginal; "the author's own decision" for the criterion revision; the
+probe's CPU lexicons noted as different from the runs' (9–34% against
+7–36% per subfield); (9) code and data availability split, with the
+repository's address and the licence shares; (10) the related work:
+Dai and Adel's four augmentations and corpora, Song et al.'s result as
+our reading, Wu et al. as cross-lingual, with shang2018autoner,
+ding2020daga, lin2020rigorous, agarwal2020entityswitched and
+kim2022biomedical added after verification; (11) nits: 43.1, [−0.3,
+0.9], 10–33%, "3.5 to 3.7", +2.34/+2.35 by rounding, 1.8/2.6/2.9 updates,
+"at least 85%" of the pool, the 14-interval count dropped, PAPER_B's
+cross-reference. Figures 1–3 re-rendered at 300 dpi with larger fonts,
+Figure 2's band labels separated, Figure 3's labels placed per system
+and its caption corrected (the arrows chain the systems). Not done: an
+LLM baseline (budget), the recall-matched decoding control, a mixed model;
+the lexicon-membership analysis runs next (batch w15a).
+
+*Paper A, adversarial review round 4 (31 October, late night).* Three
+reviews of the round-3 text (a materials referee, an NLP reviewer, a
+number audit). Verified against the record and fixed: (1) the week-13
+amendment record had two states where the commits show three: `808ff4b`
+(09:14) ran the MaterioMiner analogue whenever the screen had a winner,
+`5f7f827` (13:53) gated it on decision 1 and added 13.4 conditional on
+decision 1, `de62446` (18:42) restored the morning's condition, calling
+the gating a mistake, and widened 13.4; Section 3 and Appendix A now say
+so, with the times marked UTC; (2) the abstract's intervals were rounded
+twice ([1.0, 6.2] from [0.95, 6.21], whose lower bound is 0.9467; [−0.3,
+0.9] from [−0.25, +0.92], −0.2499): quoted at two decimals; (3) the
+compute paragraph: `ner_robustness.py` had taken the first run's
+`n_augmented` for the system (597/1,218/1,180) where the decision-seed
+means are 601/1,203/1,209, and `best_epoch` is a 0-based index, so the
+epochs to the best are 5.7/5.1/5.6 against the CRF head's 8.1 and the
+update ratios 2.0/2.9/3.1 (were 1.8/2.6/2.9); the script now stores
+`n_augmented_mean`, `epochs_to_best_mean`, `sentences_per_epoch_ratio`
+and `updates_to_best_ratio`, with a test; (4) Section 5.2 called every
+row of Table 3 but D5 and D7 post hoc; the MaterioMiner block's D3 and
+D4 rows are pre-registered; (5) "so that the three corpora test the same
+regime" was false for SOFC-Exp (36 training articles): MuLMS tests
+MaterioMiner's regime, SOFC-Exp does not; (6) the practitioner paragraph
+now recommends MR3 with its status (pre-registered and passed on
+MaterioMiner, above 0 post hoc over the 11 units, failed on MuLMS alone),
+prices the names against MR3 (3 times its training time shared over a
+job's students, 7 times charged to one) and gives the absolute levels
+(48.5, 50.8, 51.7; recall 50%); (7) the definition of an unseen name
+completed (entities annotated only under another type, 0.0–2.1%, count
+as neither), Table 5 given the decision-seed rates of the own-corpus
+rows (46.9/51.3/49.0 against the mixed corpus's 46.7/52.4/49.35), the
+seeds sentence corrected (the mixed variant 7 seeds, the ablations 3),
+"the recipe" defined as MR6 + names, the orphan "On the decision seeds:"
+removed, "the filter, not the corpus, was the bottleneck" made the
+route's reading at the time, which Section 5.3 does not bear out,
+"compatible with differences of up to about 2.5 points" replaced by the
+interval (−2.0 to +1.7) and the detectable 2.5, "which is what Section
+5.2 predicts" made "consistent with", the 2-of-3-teachers ablation
+described as raising both recall and precision (48.3% at 50.6 against
+48.1% at 50.0; the text had it lowering precision), the probe's mean
+coverage stated as higher than the runs' (25% against 23%), D5/D5′
+explained under Table 2, Table 1's DOIs and type counts moved to a note,
+glosses for Viterbi, iso-F1 curves and the mixed model, Figure 3's
+caption explaining its labels, the availability statement saying how the
+lexicons are rebuilt (`--students 0 --save-names`) and why they are not
+released, "two review rounds" made four, a Limitations bullet on the
+reference not being the strongest MaterioMiner base; (8) six references
+verified and added: card2020power, chen2020lada, taille2020contextualized,
+mysore2019materials, dagdelen2024structured, polak2024extracting; (9)
+Figure 1 redrawn with the feeding arrows routed above the lower row and
+five-line box texts, Figure 3's MaterioMiner panels labelled with scores
+only (the markers are the MuLMS panel's). The audit found every other
+number consistent with the files (Table 3's 24 cells, Appendix E's 17
+rows, Tables 2 and 4–7, the cost, the corpora reports, the amendment
+commits). Not done: an LLM baseline, the recall-matched control, a mixed
+model; the lexicon analysis (w15a) was still queued on Kaggle at 16:58.
+
+*Paper A, adversarial review round 5 (31 October, late night).* Three
+reviews of the round-4 text (a materials referee, an NLP reviewer, a
+number audit); every finding verified against the files or the git
+record before the fix. (1) "Mention replacement as published" and "the
+published method" for MR3 misattributed a project-fixed setting: the
+week-7 protocol fixed 3 copies and p = 0.5 untuned where Dai and Adel
+tune both (1, 3, 6 or 10 copies; p from 0.1 to 0.7); now "mention
+replacement with three copies", in the text and Figure 1's note. (2)
+Table 3's provenance: the MaterioMiner MR3 − CRF head rows are the
+week-7 pre-registered decisions (`table2_decisions.md`), and MR6 − CRF
+head and MR6 − MR3 on both corpora were reported comparisons of the
+week-14 protocol (`2886267`); the paper had called everything but D3,
+D4, D5 and D7 post hoc; the Section 3 sentence "every comparison not in
+Table 2 is reported or post hoc" scoped to the names route, and
+decision 13.3a labelled where quoted. (3) Section 7's "MR6 50.8" was
+MR3's 7-seed mean; MR6's is 51.22 (`ner_week5_seed_analysis.json`,
+week14.copies.mulms.decision.control). (4) Multiplicity: the decision
+rule has no correction; under 0.05/8 none of the three passes holds
+(two-sided t p-values 0.013 for D5, 0.011 for D5′, 0.018 for D3, 0.015
+for D4, from the per-unit differences; the sign-flip values 0.011/0.007)
+while MR3 − CRF head pooled (p = 0.004 on either basis) would; said in
+5.1 and the Limitations. (5) A third week-13 amendment, `e94f352` at
+09:25 (13.1c reported and 13.1d's two MaterioMiner decisions added
+after 13.1a and 13.1b were known; computed at 09:47, `aca3a4f`, from
+saved predictions): recorded in Section 3, Appendix A and Appendix D.
+(6) The abstract's "because 81% ... are names absent" and Section 1's
+"the gap is mostly names" overstated the companion study's
+decomposition (`ner_mentions.json` gap: the held-out mix of names
+accounts for 48% of MaterioMiner's fine-grained recall gap, 58%
+coarse-grained, 35% of MuLMS's): "in part because" and the split
+stated. (7) The companion study's recall-calibrated bias (C15: −0.59
+[−1.75, +0.57] fine, +0.17 [−0.14, +0.48] coarse, −0.21 [−0.58, +0.17]
+SOFC-Exp; the added entities right 19–22% of the time) is cited as the
+nearest evidence on the decoding-bias reading, with the names' own
+marginal precision from `ner_mentions.json`: of the unseen-name
+predictions MR6 + names adds over MR6, 474 per run, 143 are right (30%;
+MR3 over the CRF head 43%, MR6 over MR3 33%, the mixed corpus 37%). (8)
+Appendix B's epoch parentheticals (7.1/4.7/4.1, the 0-based indices)
+made counts (8.1/5.7/5.1); the SOFC corpus's 36% fold coverage marked
+as measured before the runs and recorded in the protocol (`5f7f827`;
+not in a results file); the seen-other share "of a test set" made "of
+a corpus's test entities (up to 4.5% of one paper's)"; the harvested
+share of the pool "at least about 85%" made "at least 92%" (per unit,
+pemfc 12,927 of 14,051; training mentions 601–1,309 recomputed from the
+pool splits); Appendix E's detectable column printed at two decimals
+(the stored values; 2.35 had been rounded again to 2.4). (9) The
+conclusion's "where the baseline is weakest" dropped (Section 5.4
+cannot separate it from coverage); the SOFC-Exp advice names the
+three confounded differences; "does as well as" made "is not
+distinguishable from"; the two seed bases of the recall–precision trade
+quoted (3.6 for 3.0 on 70 runs; 3.0 for 2.9 on the decision seeds); the
+mixed corpus compared on the same seeds (46.7 against 46.9). (10)
+Reproducibility: the fine-grained class rule (the 27 with most entities,
+ties by token count then name, the 27th and 28th tied at 24, the rest
+O), the optimiser settings fixed in code (CRF layer 5e-3 without decay,
+encoder decay 0.01, warm-up 10%, clipping 1.0, dropout 0.1, 512
+sub-words), the sentence splitter and word tokenizer; captions for
+Tables 1–5 and 7; "weeks" explained as the project's stages; "decision
+seeds" defined; glosses for student and gold; "the two decisions that
+isolate the names' contribution" made "the decisions on the names'
+increment and on their source"; the screen and the decisions sharing
+the same seven subfields noted in the Limitations and Appendix A;
+taille2020contextualized completed (LNCS 12036, 383–391, DOI). (11)
+Figures: Figure 3's labels on white patches, the lower panels given a
+legend, Figure 1's filter box text within its border. Checked and
+consistent by the audit: every table, Appendix E, the cost and compute
+figures, the lexicon counts, the corpora reports, the dates and hashes,
+all 48 citation keys, the figures' numbers. Not done: an LLM baseline,
+the recall-matched control, a mixed model; the lexicon analysis (w15a)
+pending on Kaggle.
+
+*Paper A, adversarial review round 6 (31 October, late night).* Three
+reviews of the round-5 text; each finding verified against the files or
+the git record. (1) The copies control's own MuLMS result was missing: MR6
+gains +2.68 [+0.13, +5.23] over the CRF head on the decision seeds
+(+2.33 [−0.27, +4.92] on 10 seeds) and +0.41 [−0.35, +1.17] over MR3
+(`ner_week5_seed_analysis.json`, week14.copies.mulms.decision.control;
+reported comparisons of the week-14 protocol): stated in Sections 1, 5.1
+and 5.2. (2) The recall–precision trade had no interval: `ner_mentions.py`
+now pairs each system with the one it builds on (`chain`; recall,
+precision and F1 on the unseen names per unit, on the common seeds and
+on the decision seeds, with a test): names − MR6 on MuLMS, decision
+seeds, recall +2.56 [+0.76, +4.36], precision −2.22 [−5.03, +0.60], F1 +0.56 [−1.44, +2.56]; over 10 seeds recall +3.24 [+1.36, +5.13],
+precision −2.23 [−4.84, +0.38]; MaterioMiner fine recall +0.86 [−3.38, +5.10], coarse
++1.60 [−1.37, +4.57]; quoted in Sections 5.4 and 7 and the Limitations.
+(3) Table 3's provenance: MR6 + names − MR3 on MaterioMiner was reported
+in the week-12 protocol (`ce0f592`, 20 October 00:51: "the decision
+against the CRF head per granularity and the reported comparisons
+against mention replacement and the votes") and MR6 + names − MR6 per
+granularity and on the 10-seed basis in the week-14 protocol
+(`2886267`); only MR3 − CRF head and MR6 + names − MR3 pooled are post
+hoc. (4) Appendix A attributed D3 and D4 to `808ff4b`; they were defined
+in week 12 (`40631ce`, gated on D1; `ce0f592`); a week-12 row added with
+the gate's three states. (5) The protocol text's own written times
+postdate their commits (e94f352 09:25 carries 09:50 and 09:55; aca3a4f
+09:47 carries 10:40; 5f7f827 13:53 carries 14:00; de62446 18:42 carries
+14:00 and 14:30): Section 3 now says commit times are used throughout
+and how the written ones differ. (6) Section 1 claimed the MuLMS
+decisions never used the screen's seeds; D5 as executed did: corrected.
+(7) "The names add 474 predictions, 143 right (30%)" were differences of
+pooled counts, not a set of predictions: worded as net additions, and
+the comparison with the companion study's 19–22% bounded accordingly.
+(8) D8's contrast: the mixed corpus holds most of the names the topic
+corpus holds (49–70% against 55–81%; ROADMAP 14.2 "the mixed corpora
+hold most of what the topic corpora hold"), so the source decision tests
+the topic's marginal names; said in 5.3, the abstract and Section 1.
+(9) The recall-gap decomposition is order-dependent (48/58/35% at the
+held-out rates, 40/49/34% at the random splits'; `ner_mentions.json`
+gap): both given. (10) Table 4's pool label (85%) made 92%; "weeks 10 to
+14 ran from 17 to 29 October" made the protocols' dates with the runs
+ending 31 October; "revised after four rounds" made six; D4's p from
+the per-unit differences (0.014); the per-student cost's basis; the
+SOFC-Exp corpus query ("solid oxide", "SOFC", "SOFCs"); MuLMS pools of
+two or three articles (recomputed: 3 in 5 folds, 2 in 2; poly_11 in
+three pools); captions for the Appendix A and E tables; an
+untuned-settings Limitations bullet; the abstract's "names absent from
+the training sentences" made "names the training sentences never
+annotate", "mostly seen" made "half", the conclusion's "most of a new
+paper's entity names" made "half or more"; Riloff and Jones (1999, AAAI,
+474–479) cited for bootstrapped dictionaries ("at least since"). (11)
+Figures: iso-F1 labels that a point label covers are hidden, the lower
+panels' labels get leader lines, Figure 1's filter box text fits. The
+audit found every other number consistent (Tables 1–7, Appendix E, the
+compute and cost figures, the corpora, the dates and hashes, all 49
+citation keys, the figures). Not done: an LLM baseline, the
+recall-matched control, a mixed model; the lexicon analysis (w15a) was
+RUNNING on Kaggle at 17:51 UTC.
+
+### Week 15 analysis note: recall by lexicon membership (post hoc; fixed before its run, 31 October, evening)
+
+*Question.* Paper A's Section 5.4 cannot say whether the harvested names
+help the tagger with the names the lexicon holds (name knowledge) or shift
+it toward tagging more spans (a generic bias): the lexicons were not stored
+with the runs. The reviews of 31 October asked for the direct analysis.
+
+*Rebuild.* Batch `w15a` (`kaggle_jobs.py`, kernel c): the seven MuLMS
+lexicons of V4 (`crf_mrm_topic6`: the CRF head's teachers of seeds 0, 100
+and 200 on the fold's 340 training sentences, the subfield's topic corpus,
+all 40,000 sentences, the mention filter at 0.9, all three teachers
+agreeing) and the eight of its MaterioMiner analogue (`crf_mrm6`, the
+fatigue corpus, one per paper and granularity), each by a run with no
+students (`--students 0 --save-names`, new): the names with their counts,
+the teachers' scores and the coverage counts go to
+`ner_names_<granularity>_<protocol>_<variant>[_<subfield>].json`, pulled to
+`results/gpu_names/` (git-ignored: the harvested names are never
+committed). Lane 0: the smoke repeat (`smokebb`, the CRF run of smoke4,
+must be identical) then the 7 subfields; lane 1: the 8 papers. About 15
+teacher-and-tagging jobs, 2 to 5 session hours of the 35.3 left this week.
+
+*Checks before any number is used.* Per unit, the rebuilt teachers' test F1
+must equal the stored teachers' (`self_training.teachers` of the names runs
+at every seed), and the rebuilt lexicon's coverage counts (`n_mentions`,
+`n_distinct`, `n_test_unseen`, `n_test_unseen_in_silver`) must equal the
+stored `self_training.names` of those runs; a unit that differs is reported
+and left out.
+
+*Analysis* (`ner_lexicon_recall.py`, from the saved test predictions; MuLMS
+at the decision seeds 300–900, MaterioMiner at seeds 0–900): for the CRF
+head, MR3, MR6 and MR6 + names (and the mixed-corpus variant on MuLMS),
+recall on the unseen test names that the unit's lexicon holds and on those
+it does not, pooled over seeds and units and per unit; the names' gain over
+MR6 on each part and the difference of the two gains, paired over the 7
+subfields (and the 4 papers per granularity) with 95% Student-t intervals;
+the same against the CRF head and for MR6 against the CRF head; and, among
+predicted entities whose name is unseen, the share that are lexicon names
+and their precision, per system. Output: `results/gpu/ner_lexicon_recall.json`
+(aggregate counts only), a table in paper A.
+
+*Reading, fixed in advance.* Name knowledge: the names' recall gain over
+MR6 is larger on the unseen names the lexicon holds than on those it does
+not, the paired interval of the difference above 0. A generic shift: the
+two gains are alike, the interval covering 0 with both gains positive.
+Mixed: the interval above 0 but the gain on the names not held also above
+0. No decision is taken; the result is reported with its intervals in
+paper A's Section 5.4 and Discussion, labelled post hoc. Nothing else about
+the paper's claims changes with the outcome: the names' share of the F1
+gain stays +0.80 [−0.66, +2.26] either way.
+
+*Session notes, 31 October, 16:30 UTC.* The note and the code committed
+(`2c60f33`, 16:13) before any run; the bundle built from that commit and
+uploaded as `ner-gpu-bundle-3`'s new version (16:14–16:28, two 429 retries
+on the version call); `w15a` pushed to `ner-gpu-jobs-c` (version 9) at
+16:30 UTC: lane 0 the smoke repeat `smokebb` and the 7 MuLMS names jobs,
+lane 1 the 8 MaterioMiner names jobs. Quota before the push: 35.3 of 45
+hours. The outputs are pulled with `kaggle_jobs.py pull` and `collect`,
+which puts the names files in `results/gpu_names/` (ignored) and nothing
+in `results/gpu/` (no students ran); then `ner_lexicon_recall.py`.
+
+
+*Outcome (31 October, 19:41–19:55 UTC).* `w15a` finished (16 jobs, all
+done, 16–18 minutes each; the smoke repeat `smokebb` identical to the
+stored seed-0 run, F1 77.95 and the same predictions); pulled at 19:41,
+nine names files collected to `results/gpu_names/` (seven MuLMS, two
+MaterioMiner, one per granularity holding the four papers). Checks: in
+every unit the rebuilt teachers' test F1 equal the stored runs' (7 or 10
+runs checked per unit) and the coverage counts equal the stored
+`self_training.names`; no unit excluded. Analysis
+(`results/gpu/ner_lexicon_recall.json`, Table 10 of `paper_tables.py`,
+paper A's Table 8): on MuLMS the lexicon holds 22.2% of a subfield's
+unseen test names; recall on those, MR6 + names 82.4% against MR6's 75.0%
+(+7.29 [+3.27, +11.30] paired over the 7 subfields), on the others 36.8%
+against 35.0% (+1.12 [−0.78, +3.02]); the difference of the gains +6.17
+[+2.44, +9.90], in > out in 7 of 7 subfields: the reading fixed in advance
+is **name knowledge**. The copies show no split (MR6 − CRF head −1.84
+[−5.27, +1.60]; MR3 − CRF head −0.66 [−2.78, +1.45]); the mixed corpus's
+names behave like the topic's (+4.86 [+1.50, +8.21]); precision on the
+predictions of held names falls 74.7 → 69.0 with the names. MaterioMiner
+(4 papers): both gains positive with the interval covering 0 (fine +4.62
+and +0.29, difference +4.33 [−5.33, +13.98], 3 of 4 papers; coarse +0.36
+and +1.91, −1.54 [−3.60, +0.51]): by the rule's letter a generic shift,
+within intervals too wide to tell the readings apart (a post hoc caveat
+the paper states). The precision side: the names add 8,336 predictions of
+held names (39% right) and 12,206 of others (22% right), two thirds of the
+added wrong ones being names the lexicon does not hold; precision falls
+74.7 → 69.0 and 46.4 → 44.0. A focused review of the addition (31 October,
+20:10) caught the first draft's "the other four fifths are untouched",
+the missing rule verdict for MaterioMiner and the unstated mixed case;
+fixed. As fixed, no decision changes: the names'
+share of F1 stays +0.80 [−0.66, +2.26]; paper A's Sections 1, 5.4, 7, 9,
+the abstract, the Limitations and Appendix A carry the result.
+
+*Week 17, session notes (31 October, 19:54 UTC).* The protocol
+(`f39447c`, 19:15) and the code (`013f9ac`, 19:40; the full suite green,
+a CPU smoke of the multi-task names path end to end) committed; the
+bundle of `013f9ac` uploaded (19:41–19:54); `w17a` pushed to
+`ner-gpu-jobs-d` (version 15) at 19:54:50 and `w17b` to `ner-gpu-jobs-c`
+(version 10) at 19:54:53 UTC, after `w15a` was pulled. Quota before the
+pushes: 33.4 of 45 hours; the two sessions are expected to take about 6
+and 5.6 hours. The first check-in is at 22:56 UTC.
+
+*Week 17, session notes (1 November, 00:30 UTC).* `w17b` (kernel c)
+finished at about 22:58 UTC: its two names jobs took 82.7 and 99.3 minutes
+(teachers, the two-head tagging of 40,000 sentences and 10 students each),
+far under the 2.8 hours estimated; pulled at 00:30, 20 student files
+(crf_mt_mrm6, 10 offsets, both granularities, each holding the two papers
+s41467 and met10111458) collected. The teachers of both jobs equal the
+stored `crf_mt` runs' test F1 on both heads at every seed. The multi-task
+mention filter admits somewhat fewer names than the single-task one, because
+a mention needs the fine head's entity at exactly the coarse span with both
+heads' marginals at 0.9: fine 10.1038_s41467-020-1 8,867 mentions, 3,746 distinct, 6.5% of the unseen test names; fine 10.3390_met10111458. 14,850 mentions, 4,621 distinct, 7.6% of the unseen test names; coarse 10.1038_s41467-020-1 16,455 mentions, 6,180 distinct, 11.6% of the unseen test names; coarse 10.3390_met10111458. 17,722 mentions, 5,840 distinct, 6.7% of the unseen test names
+(the single-task fatigue lexicons of D3 and D4 held 8.4–18.6% of a paper's
+unseen fine-grained names and 15.5–23.3% of its coarse-grained ones; the
+49–65% first written here was the corpus's coverage, corrected on 1
+November).
+No number is read before `w17a` (kernel d, still running at 00:31) is in.
+
+*Outcome (1 November, 01:31–02:15 UTC).* `w17a` finished at about 00:40
+UTC (14 jobs, all done, 280.6 session minutes: the smoke repeats 1.2 and
+5.3 minutes, the names jobs of papers s11340 and ncomms7164 122.9 and 94.6
+minutes, the 10 control jobs 20.3 to 33.1 minutes each); pulled at 01:31.
+Checks: `smokebc` identical to the stored seed-0 CRF run (F1 77.95, the
+same predictions) and `smokebd` identical to the stored seed-0 `crf_mt_mr`
+run of paper s11340 on both heads (54.05 fine-grained, 62.29
+coarse-grained, 887 augmented sentences, the same predictions), so the
+week-17 code leaves the plain multi-task and mention-replacement paths as
+they were; every names job's three teachers equal the stored `crf_mt`
+runs' test F1, validation F1 and best epoch on both heads; the merge
+united the two sessions' student files (four papers per file, the
+committed `w17b` runs unchanged). Two fixes before any week-17 number was
+read: `collect --merge` refused the files because each session's copy
+carries the means of its own runs (`test_f1_mean` and the like, now
+recomputed with the summary), and `week17` looked for the multi-task
+reference's seed-0 file under a tag it does not carry (`crf_mt.json`; now
+`seed_family`, as `ner_mentions`), so its section came out empty on the
+first run. Decisions (the week-6 rule over the 4 papers of 10-seed means):
+**17.1 fine-grained, +0.96 [−0.01, +1.92], no** (every paper positive,
+0.16 to 1.62; two-sided t p = 0.052); **17.2 coarse-grained, +0.85 [−0.72,
++2.42], no** (three papers positive). Reported: the names 53.95 against
+the control's 52.99 fine-grained, 61.25 against 60.40 coarse-grained; the
+names against multi-task + MR3 +0.76 [−0.15, +1.68] and +0.91 [−0.14,
++1.97], the control against it −0.19 [−2.05, +1.67] and +0.06 [−0.74,
++0.86] (three more copies add nothing on this base); the names against the
+multi-task model +3.77 [+1.34, +6.21] and +3.21 [+0.46, +5.96], against
+the CRF head +7.49 [+5.96, +9.02] and +2.65 [−0.09, +5.38]; the votes over
+the seed triples, the names against the control +0.19 [−2.28, +2.66] and
++0.63 [−1.65, +2.91]; the unseen-name trade (`ner_mentions.py`, `chain`):
+on this base the names raise both recall and precision on the unseen test
+names, fine-grained +0.58 [−2.93, +4.09] recall and +0.82 [−3.39, +5.03]
+precision, coarse-grained +1.45 [−0.69, +3.58] and +0.97 [−1.09, +3.03],
+none established. The two-head filter admits somewhat fewer names than the
+single-task one: 16,455 to 42,066 entries per paper (3,746 to 6,587
+distinct fine-typed names, 5,840 to 12,645 distinct coarse-typed, against
+14,213 to 22,775 fine-typed and 33,084 to 66,273 coarse-typed entries for
+the single-task lexicons of D3 and D4), holding 6.5 to 16.3% of a paper's
+unseen fine-grained test names and 6.7 to 24.6% of its coarse-grained
+ones, against 8.4 to 18.6% and 15.5 to 23.3% for the single-task lexicons
+(lower in 7 of the 8 paper–granularity cells). Cost: a names job 82.5 to 122.7 minutes (mean 99.7: three
+teachers, their tagging of 40,000 sentences with two heads, 10 students),
+10.0 minutes per student against the control's 6.9 and the CRF head's
+1.1 (fine-grained) to 1.3 (coarse-grained) on these papers. The
+detectable differences were 1.3 points fine-grained, tighter than the 3.4
+to 3.8 expected because the four papers' differences lie close together
+(0.16 to 1.62, SD 0.6), and 2.1 coarse-grained, within the 1.4 to 2.4
+expected (paper A, Appendix E; the reason first written here, that the
+papers agree in sign, was wrong and corrected on 1 November). So the negative
+result extends to the strongest base, with the caveat that this base's
+filter's lexicons hold fewer unseen names (pooled 7.5% against 9.6%
+fine-grained, 12.1% against 18.3% coarse-grained), though whether that
+lowered the increment is not known; no decision changes, and the names
+route's eight decisions become ten, three passing. Paper A updated on 1
+November (a Section 5.7 with its own table, Table 2's two post-review
+rows, Appendices A, B and E, the Limitations, the decision counts; its
+tables renumbered in order of appearance: the lexicon split is now Table
+6, the per-type table 7, the strongest base 8 and the week-12 screen 9)
+and sent to a final review round.
+
+*Paper A, review round 7 (1 November, after the update above).* Three
+reviews of the updated draft: a number audit (5 blocking, 7 should-fix:
+the stale chance count of 8 decisions, the week-17 unseen-name trade
+mislabelled post hoc instead of reported, the wrong reason for D9's
+narrow interval, best epochs counted from 0, the code commit at 19:41
+not 19:40), a journal referee (major revision: length, an abstract over
+200 words that did not mark D7 as the pre-registered test or the
+criterion as adopted mid-study, internal vocabulary, the follow-up read
+as journal peer review) and a consistency check (a reversed sign for
+D8 in Section 1, the Bonferroni reading of a post hoc comparison, the
+seed bases of the decomposition, intervals read as no effect). Every
+finding was a wording or labelling fix; no number in a results file and
+no verdict changed. Revised the same day: a 199-word abstract and a
+title naming named-entity recognition; Section 1 rewritten with every
+term defined at first use; Section 3's disclosure shortened with the
+minute-level record moved to Appendix A; "the recipe" renamed MR6 +
+names throughout; the week-17 experiment labelled a follow-up (the
+internal reviews are named as the AI assistant's in the Ethics
+statement); Section 5.7 rewritten (the sign-flip floor of 0.125 for four
+units, the coverage drop pooled, whether it lowered the increment not
+known, the post hoc seen-name increment, the cost per student shared and
+charged to one); the count stated over eighteen decisions (adding
+13.3a and 13.3b, 0.45 expected by chance); Section 5.6's table moved to
+Appendix F (tables now 1–8 in order, then A1, E1, F1: the lexicon split
+6, the follow-up 7, the screen 8); Figures 1–3 fixed (the legend in the
+paper's system names, a clipped box, bands only across the 11 units);
+ChemDataExtractor and Bouthillier et al. cited; the draft notes moved to
+`docs/PAPER_A_NOTES.md`. A further round reviews the revision.
+
+*Paper A, review round 8 (1 November).* Three fresh reviews of the
+round-7 revision: a number audit (3 blocking: the follow-up described as
+registered after "the results above" although the week-15 lexicon split
+arrived 26 minutes after its protocol; "every test was fixed" where only
+decisions were; the CRF head called "the reference of every decision";
+7 should-fix, among them the inclusion rule of the eighteen decisions, D6
+missing from Appendix E, and the two counting rules behind 9.6% and 9.8%),
+a journal referee (major revision again, for length: Sections 1–9 at
+about 11,100 words) and a consistency check (1 blocking: the abstract's
+2.46 read as six-copy mention replacement; 11 should-fix, among them the
+lexicon-split rule read two ways, "the gain is confined to that fifth"
+contradicted by its own counts, and the deleted disclosure that the 18
+October protocol gated D3 and D4 on D1). No number in a results file and
+no verdict changed. Revised the same day by restructuring: a main text
+(`docs/PAPER_A.md`, Sections 1–9 about 8,700 words with tables, the
+narrative sections about 6,200 if Sections 2–4 serve as Methods) and a
+Supplementary Information file (`docs/PAPER_A_SI.md`, Notes 1–9, Tables
+S1–S6: the protocol record, compute and repeats, the corpora, the
+settings ablations, the names' mechanism in full, per type, the earlier
+protocols and the screen, the follow-up's details, detectable
+differences); protocols cited by date rather than week; "reported"
+renamed "pre-specified"; a worked example with the electrolysis
+lexicon's most frequent entries; eight verified references added
+(Europe PMC, seqeval, co- and tri-training, Olivetti et al., Kononova et
+al., Tshitoyan et al., Lison et al.); D6 added to the detectable
+differences (`ner_robustness.py`). One correction to this record: the
+14.1 outcome above calls the pooled control gain over the CRF head
+(+2.56 [+0.94, +4.18]) reported, but the week-14 protocol reported the
+control per corpus only, so the pooled figure is post hoc (paper A,
+Section 5.2). A further round reviews the restructure.
+
+*Paper A, review round 9 (1 November).* Three reviews of the
+restructure: a number audit (no interval or table cell wrong; 2
+blocking: the MaterioMiner comparison of MR6 + names against MR3 dated
+18 October, though the 20 October 00:51 batches (`ce0f592`) added it,
+and the eighteen decisions scoped "17 to 31 October", which would take
+in week 9's seven decisions of 17 October 07:28; 7 should-fix, among them
+the worked example's MR6 replacement Pd, absent from the electrolysis
+fold's training sentences, and Section 1 summing terms from two seed
+bases), a journal referee (minor revision; blocking: the abstract's
+"Mention replacement, not the names, carries the gain", which reads an
+interval as no effect, the unpublished companion study carrying four
+claims, and the affiliation, archive and AI statement; should-fix: the
+post hoc recall finding stated without its precision, about 1,800 words
+of cuts, terms used before their definition, the rule classing predicted
+spans unstated, Table 3's provenance in prose) and a consistency check
+(2 blocking: the abstract sentence above, and the lexicon split's
+reading rule misquoted as "clears 0"; 9 should-fix, among them the gate
+on D3 and D4 last lifted at 18:42, after the screen had chosen MR6 +
+names, the four-unit sign-flip floor under D3 and D4, and SOFC-Exp's
+lexicon coverage, which is no lower than the other corpora's). No number
+in a results file and no verdict changed. One correction to this record:
+the week-15 outcome above reads MuLMS as name knowledge on intervals and
+MaterioMiner as a generic shift on point estimates; the rule does not say
+which, and read one way throughout it gives mixed and a generic shift, or
+name knowledge and none (paper A, Section 5.4 and Supplementary Note 5;
+C28 and the results index corrected). Revised the same day: a new title
+and the abstract's last sentence ("Most of the gain is mention
+replacement's; the names' share is not established"), the post hoc
+recall finding taken out of the abstract rather than backed by a
+recall-matched control; Box 1 with the terms; Section 3's disclosure cut
+to its facts with the gate's times; Table 3 with a status column; the
+follow-up's table and filter, the reading rule, the training-size
+subsample, Table 1's notes and the earlier protocols moved to the
+Supplementary Information (now Tables S1–S7, the companion study's
+protocols added to S1); Figure 3 with one legend entry per marker and no
+arrow between points on different seeds (`paper_figures.py`). A further
+round reviews the revision.
+
+*Paper A, review round 10 (1 November).* Three fresh reviews of the
+round-9 revision: a number audit, a journal referee recommending minor
+revision, and a consistency check. Applied in part before the week-18
+runs (`e1cde40`): the abstract's MR3 interval on D5's seed basis (2.35
+[0.94, 3.75]); Box 1's teachers (trained on the training sentences
+paired with a held-out unit, never on the unit) and its paired and
+pooled terms made exact; Section 3's second and third disclosures
+restated with their times (D5 as executed averages in screen seeds whose
+runs were under way at 09:14; D7 and D8's protocol five hours before
+that batch's first result, after MR6 + names' own results on the same
+units); Table 3's statuses (MR6 − MR3 and MR6 − CRF head pre-specified
+per corpus on 29 October, MaterioMiner names − MR3 on 20 October at
+00:51, MR3 − CRF head the companion's decisions of 16 October 14:39);
+MR6's MuLMS gain over the CRF head given on the decision seeds with the
+all-seed reading; the SOFC-Exp paragraph exact about what is not shown;
+the practitioner advice scoped to encoder taggers; the AI-use and
+author-contribution statements; the companion protocols' rows of Table
+S1 corrected (times, commits, the week-8 part 1 row added). After the
+week-18 result: the abstract's last sentence ("Only mention
+replacement's part of the gain is established (post hoc); the names' is
+not"), the Conclusion pooled with its intervals, Section 6 cut to its
+count with the detail in Supplementary Note 7, and Section 5.4's
+reading-rule discussion cut to its verdicts with the detail in
+Supplementary Note 5. The week-18 result entered as D11 and D12 (Table
+2), Section 5.4's recall-matched control with Table 6, Supplementary
+Note 10 with Table S8, the counts (twelve decisions, four passing;
+twenty in Section 6, five passing), the Limitations, and the push times
+from GitHub's activity log (Supplementary Note 1). Round 11 reviews the
+result.
+
+*Paper A, review round 11 (1 November, afternoon).* Three fresh reviews
+of the week-18 revision, and a completeness audit after the author asked
+that the paper show everything. The number audit found no wrong number
+(every D11/D12 value, count, p-value and push time reproduced). The
+consistency check (1 blocking, 8 should-fix) and the journal referee
+(major revision, text only; blocking: the "learned those names" claim,
+the size of D11, the type confound, the abstract's caveat) agreed on the
+substance: "equal overall recall" holds in four of seven subfields, and
+the registered +11.24 is inflated in the three flagged ones, where the
+bias lowers MR6's recall on the very names measured. Applied: Table 2's
+note corrected (the three subfields never reach the names' recall); the
+claim reworded everywhere (abstract, Section 1, Box 1, Sections 5.4, 7
+and 9, Related work, Limitations) to "consistent with having learned
+names its training copies contain, chiefly materials names", with the
+caveats; "a referee" replaced by "an internal review of the draft";
+Section 6's six earlier decisions placed on both corpora and the
+label-propagation rule's four decisions of 20 October counted beside
+(twenty-four, six passing); the pre-specified three-corpus estimates of
+MR3 (+1.46 [+0.28, +2.64]) and multi-task MR3 (+2.93) and the
+mixed-corpus variant's comparisons added; post hoc, labelled
+(`ner_recall_matched.py`): D11's decomposition (+7.29 at D = 0 plus
+MR6's own loss +3.96 [−1.06, +8.98], +0.14 on the four matched
+subfields), the comparison with MR6 at its best bias for the held names
+(+6.52 [+2.15, +10.89], 7 of 7; other names −4.16), the split within
+types (materials names held +12.02 [+3.70, +20.34] against −1.19 not
+held), the sign-flip p (0.016 and 0.14) and the lexicons' type counts;
+Table 6 with the held-name recalls and two post hoc rows, Figure 4,
+Tables S8–S10. The completeness audit's list (macro and weighted F1 and
+the votes pre-specified but unprinted, the gate change of 18 October,
+the quota overrun of 20 October, failed sessions, unreported checks) is
+being added as a table of every comparison and a record of checks and
+deviations.
+
+*Paper A, review round 12 (1 November, evening).* Three fresh reviews of
+the completeness revision (Supplementary Notes 11 to 13, Tables S11 to
+S15). The referee recommended minor revision, text only, and found no
+number wrong; the number audit (4 blocking, 5 should-fix) and the
+consistency check (15 should-fix) found wording, labels and three
+wrong times. Checked and applied:
+- *The 20 October timings (Section 3, Limitations).* The amendment of
+  18:42, which lifted the gate on the analogue again ("13.2 needs the
+  analogue whatever decision 1 says"), was written with the screen's
+  choice of V4 in hand, beside a power reading that put D5 at about
+  [+0.1, +5.9]; the plan's odds of a methods paper had fallen to about
+  0.2 at 08:13. Both are now in the main text. The first `w12a`
+  session's pulled files (`data/processed/kaggle/ner-gpu-jobs-d/20261020T050256`,
+  not committed) were compared today with the `w12e` reruns and the
+  committed files: all twelve electrolysis runs of V1, V2, V4 and V6 are
+  identical in every field but the run time and environment, predictions
+  included (V4's gain there +2.06 against MR6's +2.97); whether their
+  scores were read on 20 October is not recorded.
+- *Session times from the manifests.* The first `w12a` session ended at
+  04:53 (pulled 05:03), `w12e` at 12:25 (441 minutes; found complete at
+  13:23), `w12d:mrm6` at 00:48 (pulled 00:56) and `w13b` at 11:21; the
+  SI had given the times the notes were written. No before/after order
+  changes. Every completed GPU session after 15 October 16:00 but `w5a`
+  and `w17b` began with a repeat; the sessions without a manifest are the
+  failed or hung ones.
+- *Macro F1, pooled (post hoc, new).* `ner_robustness.py` now recomputes
+  the 11-unit pooled comparisons from the run files in micro, macro and
+  weighted F1 (`pooled_measures`; micro equal to `pooled` within 0.01),
+  and Table 13 carries them. The names against MR6 in macro F1 are +0.83
+  [−0.01, +1.67] on the decision seeds and +1.12 [+0.21, +2.03] on all
+  ten (which include the screen's selection seeds); against MR3 +1.33
+  [+0.29, +2.36] and +1.73 [+0.84, +2.61]. The referee's proposed "no
+  measure shows the names' increment" is therefore not used; Sections 1,
+  5.1 and 9 report the pooled macro readings.
+- *Mechanism wording.* The split within types is read at D = 0 (held
+  materials names +7.98 [+2.15, +13.82] against +0.89; values held
+  +1.74; other types held +9.80 from small cells); of the held names
+  recalled beyond MR6, 68% are materials names (Table 12's sixth part,
+  new column). "Names its training copies contain" is dropped (never
+  measured); the Conclusion's D11 sentence names MuLMS and the three
+  unmatched subfields; D11's outcome is described as chosen after the
+  lexicon split.
+- *Labels and records.* Table 14's mixed-corpus rows labelled by their
+  own seeds (300–900); Table 6's D = 0 row's F1 as D7's MuLMS part; D8's
+  fixed reading checked against its condition (point estimate only) and
+  the amendment of 12:32; the SI's Note 10 type shares (the other unseen
+  names are 24 to 59% materials and values, a majority in pemfc and
+  sofc), Note 12's exceptions (D11 decides on recall) and numbers not in
+  the tables, Note 7's count order, the companion's self-training in
+  Table S1 and the Ethics overlap, the MuLMS identifier coverage (16 of
+  50), the 45% of added correct predictions outside the lexicon, 64% for
+  electrolysis's materials entries.
+The main text is about 10,800 words to the Limitations; the referee's
+list of what to move to the SI is an author item (`docs/PAPER_A_NOTES.md`).
+
+*Paper A, review round 13 (1 November, night).* A referee (major
+revision of the presentation, not the substance: every decision,
+interval, p-value and count reproduced) and a number audit (every
+round-12 number reproduced; one wrong statement, five imprecise). Checked
+and applied: the secondary measures given on the decision seeds in macro
+and weighted F1 (names − MR6 +0.83 [−0.01, +1.67] and +0.89 [−0.40,
++2.18]), the all-ten readings and the pooled macro gain over MR3 (+1.33
+[+0.29, +2.36]) in Section 5.1, and "in micro F1" where it qualifies;
+D11 everywhere with its four-subfield reading (+6.05 [−3.33, +15.44]),
+the other unseen names' loss scoped (−0.88 [−2.63, +0.87] on the four
+matched, `without_flagged.prespecified.recall_out`); Section 3's 20
+October account as a dated list, restoring the 18 October gate (the
+week-12 protocol of 11:00 replaced week 11's MaterioMiner gate saying
+`w11b` could not run before 24 October; it ran on 19 October and its
+failure was recorded at 00:44 on 20 October, before the screen), the
+13:35 reading (D1 at about 0.5) and D6's condition widened at 18:42; D9
+and D10's control trained in the same batch; the first screen session's
+runs differ from their reruns only in run time and the per-run corpus
+hash (the manifest's hash is the same); session ends from the manifests
+(`w11a` 04:42, the screen's resume-check failures 03:03 to 03:51,
+`w17a` 00:35); the abstract cut to 150 words, npj Computational
+Materials' limit (its content-types page, read today: no main-text word
+or display-item limit, title at most 15 words without punctuation, at
+most 60 references); BERT and AdamW cited and a duplicate entry removed;
+Table 12's sixth part gives shares only for a part whose cells all add
+names. The venue's section structure and title are author items. The
+round's consistency check (no blocking finding; it read the files before
+these edits, and half its items were already fixed) added: protocols
+cited by date in Section 3's list, the symbol D defined in Box 1, the
+counting rule of Section 5.6's lexicon shares, the five sessions that
+hung on 17 October beside Note 11's list, the SI's tables cited in
+order, the plan labels 13.1a, 13.2, 13.4 and 14.2 mapped, 5 × 10⁻⁵ for
+5e-5, Table S13's pre-specified rows, the notebooks named for "kernel
+c/d", the 340 of the 400 pool sentences that train, and C26 and C30 of
+`docs/PAPER.md` worded as the paper now reads.
+
+*Paper A in npj Computational Materials' format (1 November, late).* The
+author chose the venue and asked for a positive title, then for the
+headline to stay positive. The paper now has npj's sections; the title
+reads "Harvesting names from unlabeled papers to augment materials named
+entity recognition on unseen documents" (14 words). The journal's
+submission guidelines, read the same evening, added:
+- a Statistics and reproducibility subsection;
+- each decision's P value (`decision_tests.py`, Table 2's column and
+  Table S16, from the same per-unit differences, reporting only);
+- tables at the end of the submission copy;
+- no Supplementary Methods (the training settings, the corpus
+  construction and the control's design moved into the Methods);
+- figure legends with titles and lettered panels;
+- the back matter in the journal's forms;
+- `paper_render.py`, which writes `docs/submission/` with Nature-style
+  numbered references (60).
+
+*Paper A, review round 14 (1 November, night).* Three reviews of the
+round-13 text (`a127165`): a referee (minor revision; every recomputed
+number correct), a number audit (two times wrong by the manifests) and a
+consistency check (one blocking item). Each finding was checked against
+the record, then applied to the npj text:
+
+- **Abstract.** Rewritten to lead with what passed: the pooled +3.58, and
+  every MaterioMiner paper at both granularities. It keeps the
+  registered criterion in full (gains on MuLMS and MaterioMiner, not met;
+  the round-13 cut had dropped MaterioMiner), the pooled criterion's
+  mid-study adoption, the names' F1 increment over MR6 (not established)
+  and, post hoc, their recall on the held names, above MR6 at any bias.
+- **Introduction.** The contribution statement no longer credits D11
+  with the post hoc best-bias result, and "a negative result" is gone.
+- **D11.** Stated with its four-subfield reading wherever it appears.
+  Table 2's verdict now reads "passes (as registered)"; its note has the
+  flagged-subfield readings and D5's caveat.
+- **Secondary measures.** Macro and weighted F1 given together, with the
+  votes of every decision (Table S11's cells, checked).
+- **Pooled decisions.** The corpus-weighted Welch check:
+  - D5: +3.73 [+1.39, +6.07]
+  - D5′: [+1.46, +6.00]
+  - D7: +0.90 [−0.88, +2.69]
+
+  These are in `post_hoc_stratified` of `ner_decision_tests.json`.
+- **Record of 20 October.** The 05:03 request to cancel the batch; the
+  long sentence split; each gate named.
+- **Methods.** The pool's 92% sentence corrected, since draws are within
+  type and the lexicon is chiefly MAT and VALUE. D* is now stated as
+  chosen on the test set by design.
+- **Advice to practitioners.** Scoped to documents whose names are
+  mostly unseen in training, beside MR3's pre-specified 16-unit +1.46
+  [+0.28, +2.64].
+- **AI-use statement.** Names the author's decisions.
+- **Times from the manifests.** The screen's resume failures ended at
+  03:50, not 03:51 as the round-13 note above says. The multi-task jobs of
+  `w13c` took 77 to 120 minutes (mean 103), not about 112.
+- **Supplementary Information.** Fixed its draft-history wording, the
+  citation order of its tables, the Kaggle notebook gloss, two companion
+  protocols' dates, and the short paper names in Table S14.
+- **Figures.** Figures 3 and 4 have lettered panels; Figure 2's band is
+  labelled as D5 on the decision seeds.
+
+*Paper A, review round 15 (1 November, night).* Three reviews of the npj
+text (`800a85a`): a referee (major revision: the headline credits the
+names with mention replacement's gain, and the units are treated as
+independent), a number audit (no blocking item; eight wording errors)
+and a consistency check (one blocking item, the affiliation, the
+author's). No number in the paper was wrong. Each finding was checked
+against the record, then applied, keeping the headline positive as the
+author asked:
+
+- **Abstract** (143 words). It keeps the gain over the baseline first,
+  then gives mention replacement's own +2.35 [+0.94, +3.75] (post hoc),
+  says the tests were pre-registered and calls the first criterion "the
+  original" (the pooled one was registered too, at 09:14 on 20 October).
+  It states the recall finding with D11, as the week-18 protocol fixed
+  ("paper A's abstract may state the recall finding with this
+  decision"), with the precision cost and D11's qualification. The
+  claim that every MaterioMiner paper gains is gone from the abstract:
+  MR3 does the same (fine +3.48, +3.24, +1.69, +2.69; coarse +1.61,
+  +2.10, +0.29, +1.14; checked from the run files).
+- **F1 on the held names** (post hoc): MR6 74.8, MR6 + names 75.1 pooled;
+  paired +1.13 [−1.84, +4.11]. It is now in Tables 5 and S3
+  (`paper_tables.held_f1_gain`) and beside every statement of the recall
+  gain, in the Introduction and the Discussion.
+- **Introduction and Discussion.** The contribution statement no longer
+  carries results or says "each comparison fixed before its new runs";
+  the results list is prose; "names" is defined at first use, values
+  included. The Discussion's opening no longer credits the names with
+  the gain: mention replacement with the names improves on MaterioMiner
+  and pooled, not on MuLMS alone. The advice "worth their cost where those
+  names matter more than F1" became what the names give (82.4% against
+  75.0% recall on the held names, 61% of their extra predictions of them
+  wrong, three to seven times an MR3 run), with the untested dictionary
+  rule.
+- **Statistics.** Rewritten: the design items npj asks for (how the
+  units and seeds were fixed, no exclusions, the seeds as randomization,
+  no blinding); the pooled decisions' second condition; D11's unit
+  values, pooled rates with the control interpolated at a D* chosen on the
+  test set; the exceptions to the t intervals; and the units' dependence.
+  Any two MaterioMiner training sets share two of three papers, any two
+  SOFC-Exp folds 27 of 36 articles, and 5 of 21 MuLMS pairs share an
+  article of their pools (`decision_tests.MULMS_POOLS`, checked against
+  `subfield_folds`). As a post hoc sensitivity analysis, with the
+  corrected resampled t test's correlation 1/K for such pairs (Nadeau and
+  Bengio 2003):
+  - D3: +4.27 [−0.13, +8.67], P = 0.054
+  - D4: [+0.09, +3.45]
+  - D5: [+0.27, +6.88]
+  - D11: [+1.71, +20.77]
+
+  No failing decision clears 0. The registered verdicts stand. This is
+  `post_hoc_dependence` in `ner_decision_tests.json` and Table S16's last
+  column.
+- **Methods.** The two-head filter, multi-task training, the sentence
+  filter, self-training, the gazetteer feature, the dictionary rule and
+  label propagation are now defined in the Methods, since npj allows no
+  Supplementary Methods. The pool sentence no longer says other types
+  are replaced mostly by training mentions (false in electrolysis, poly
+  and steel). The 512-sub-word sentence says no input was cut (the code
+  never truncates).
+- **Registration disclosure.** D7, D8, D11 and D12's references were the
+  new runs, not stored ones. The plan of 05:06 moved V4 and V6 after the
+  reset and V1 and V2 to a smaller batch. The names system's screen
+  result was "recorded" after 09:14, its electrolysis runs pulled at
+  05:03. The half-known decisions are defined under the Terms.
+- **Provenance.** The SOFC corpus's 36% coverage of the folds' unseen
+  names (27–43% per fold) is recorded only in the protocol of 13:53 on 20
+  October; `sofc_folds_coverage.py` was never committed, and the paper now
+  says so.
+- **Verdicts.** D5′ reads "above 0 (post hoc)" and D11 "passes (as
+  registered)" in Table S16 (`decision_tests.VERDICTS`). D11 is
+  qualified in Table 6, the Results, Table S11 and SI Note 7, and 13.1c
+  is labelled "reported, not a decision".
+- **Secondary measures.** Weighted F1 is given beside macro F1
+  everywhere. The sentence "on MuLMS alone the secondary measures give
+  the micro picture" is scoped to the names' own references. MR3's P of
+  0.004 is named as a t test and computed in `post_hoc_reported`.
+- **Format.**
+  - Citations are Nature-style superscripts, so brackets mean
+    intervals only.
+  - References were completed from their DOIs: pages and DOIs for six,
+    CrossNER's author corrected, Cai et al.'s published title, and
+    Torres et al. as its 2026 journal version.
+  - seqeval is cited in the text as a website, as npj asks, which frees
+    the place for Nadeau and Bengio (60 references).
+  - The SI has no empty references section.
+  - Data availability gives the datasets' locations.
+  - Author contributions no longer describe the AI assistant's work,
+    which stays in the Methods.
+  - Panels are labelled a), b), c), as npj asks.
+  - Figure 1 carries no author-year citation.
+  - Figure 2 gives the registered D5 beside the D5′ band, with the axis
+    unit, and Figure 3's legend gives the runs per point.
+- **Supplementary Information.**
+  - Times: Table S1's D5 row has each decision's own record time; the
+    resume failures run to 03:34 and 03:50; the D9 and D10 jobs started
+    at 19:58 and 19:59; and the multi-task jobs' 82.5 to 122.7 minutes
+    now name their source.
+  - Wording: "MaterioMiner's size" became its entity count, "solid
+    oxide cells" became fuel cells, and two typos were fixed.
+  - Note 10 quotes the week-18 rule on the abstract.
+  - Notes 11 to 13 name what they leave out.
+- **Not done, the author's.**
+  - The affiliation, the AI assistant's name and version, and what the
+    author verified personally.
+  - The tag and DOI.
+  - The title. The referee proposed a neutral and a mention-replacement
+    title; the author's positive title stays.
+  - Releasing per-unit lexicon-membership flags so that D11 can be
+    checked without a rebuild. This would release part of the lexicons,
+    which the repository does not hold.
+
+*Paper A, review round 16, part 1 (1 November, night): the number
+audit of `7395d9e`.* No blocking item; every decision, interval, P value,
+count and time it recomputed matches the record, including an
+independent reimplementation of the dependence analysis (the MuLMS pools
+rebuilt from `subfield_folds`). Applied:
+
+- **Abstract** (144 words). D7's 0.80 now names its seed basis, "on seeds
+  unused in selection", since the abstract's other two numbers are on all
+  ten seeds. Two words were cut to keep it under 150.
+- **The dictionary rule.** The Discussion said the probe scored the rule
+  "in F1 only". The probe files (`results/silver_lexicons/`) hold recall
+  and precision per seed: the rule raised recall over all test entities
+  in every subfield (+1.4 to +11.2) and cut precision by 2.8 to 24.2. What
+  was not scored is recall on the held names. The Discussion and SI Note
+  7 now say so.
+- **Reference.** `fu2020rethinking` has three authors on the AAAI
+  version's DOI metadata and article page; the arXiv version adds a fourth.
+- **F1 on the held names** is now computed from the counts, 2 correct /
+  (gold + predicted) (`paper_tables.part_f1`), not from two-decimal
+  rates. Five cells moved by 0.01. MuLMS names − MR6 now reads +1.13
+  [−1.85, +4.11]; round 15's note above gives −1.84.
+- **Smaller fixes.**
+  - The variance formula's Σρ is over ordered pairs, and the correlation
+    is stated as n_test/n (1/K in a K-fold design).
+  - D5′ is shown in the dependence check.
+  - "About as many entities" replaces "as many entities".
+  - SOFC-Exp's source commit (bbf75fd) is named, its converted files
+    included.
+  - Table S16's seed ranges take en dashes.
+  - The cover letter says many held-out names are unseen, not all.
+
+*Paper A, review round 16, part 2 (1 November, night): the referee and
+the consistency check of `7395d9e`.* The referee recommended major revision. It
+found every recomputed number and every status label but one correct, and
+the headline accurate. The consistency check found no number disagreeing
+between places. Each finding was checked against the record, then
+applied:
+
+- **MR3's 16-unit pool.** It is no longer labelled pre-specified. When
+  the 09:14 protocol fixed it, the results of 11 of its 16 units were
+  known: MuLMS MR3 at 18 October 00:48 (`c2ca3f6`) and MaterioMiner MR3
+  at 17 October 06:59 (`db7c78d`). For multi-task MR3, 4 of its 9 units
+  were known (`81134b7`). The text now states this, with P = 0.018.
+- **The companion study's MR3 decisions on MaterioMiner.** They averaged
+  in the three screen seeds that gated stage 2 (week 7 part 2b). On seeds
+  300–900 alone (post hoc, `mr3_materiominer_decision_seeds`):
+  - fine-grained +2.57 [+0.10, +5.03];
+  - coarse-grained +1.73 [−0.63, +4.08].
+
+  The advice now gives this reading. The all-seed decisions reproduce
+  exactly.
+- **Where the dependence check's passes vanish** (`tipping`):
+  - D4 at a correlation of 0.28 between papers;
+  - D5 at 0.44, with the MuLMS pairs held at 1/4;
+  - D11 at 0.53 between MuLMS subfields that share a training article.
+
+  These are in the Statistics and the Discussion. The variance formula is
+  now in the Methods.
+- **P values for the inferences** drawn from non-decision intervals
+  (`inferences`):
+  - MR3's three-term decomposition: 0.004, 0.23 and 0.25;
+  - the unseen-name recall gain, 0.013, against 0.10 for the precision
+    loss;
+  - in − out, 0.007;
+  - the held-name recall gain, 0.004;
+  - the best-bias lead, 0.011;
+  - the other unseen names at the matched bias, 0.017;
+  - SOFC-Exp's names over MR3, 0.038.
+
+  The Estimates paragraph states the rule. The detectable-difference
+  formula is in the Methods.
+- **Methods.**
+  - The votes defined, as the code forms them: the triples 0–200,
+    300–500 and 600–800, seed 900 never voting.
+  - The ablations defined. The "first" 10,000 or 20,000 sentences are
+    the first of one seeded shuffle, a random sample, as the protocol of
+    29 October says.
+  - "Pre-specified", O and the D3/D4 gate defined at first use; NER
+    spelled out.
+- **Labels and wording.**
+  - D11 qualified in the dependence sentences.
+  - D5′ marked as a reading, not a decision, in Tables 2 and S16.
+  - The 05:06 plan's smaller batch "to be pushed, which never was"
+    (`w12f`, SI Note 11).
+  - D5 with the coarse-grained papers, +2.67 [+0.09, +5.25] (post hoc,
+    `d5_coarse`, as ROADMAP 13.2 records), among the robustness checks.
+  - The companion gap given at both granularities (28–31 and 17–20).
+  - Mention replacement's swap probability given in the Introduction.
+- **Abstract** (143 words): "three-copy mention replacement alone".
+- **Legends** define their systems.
+- **Spelling** is American throughout, and "t-test" is used consistently.
+- **References** take Nature-style journal abbreviations ("Proc." for
+  proceedings).
+- **PDF.** The "Figure legends" heading starts its page with Figure 1, a
+  table's second part is captioned "(continued)", and captions stay with
+  their tables.
+- **Cover letter.** It carries the abstract's qualifications, and "I
+  adopted" replaces "we adopted".
+- **Not done.**
+  - Renumbering the SI by first citation in the main text. The notes and
+    tables are in order within the SI; this is a question for the
+    editorial office.
+  - Shortening the main text, the referee's readability advice; npj sets
+    no limit.
+  - The referee's alternative abstract, which drops "On MuLMS" and the
+    seed basis.
+  - Releasing per-unit lexicon-membership flags, and the author's items
+    (affiliation, AI assistant's name, DOI, companion preprint).
+
+*Paper A, review round 17 (2 November): a number audit and a consistency
+check of `0a8a150`.* Both found the builds reproducible: the figures,
+tables, decision tests, rendered copies and PDF text regenerate
+identically from the results. Every finding was checked against the
+record before it was applied:
+
+- **D5's tipping correlation is 0.45, not 0.44.** `tipping` bisected on
+  the lower bound as `dependent_t` rounds it, so it stopped where the
+  bound read 0.00, short of 0. It now bisects on the unrounded bound
+  (`dependent_lower`): D5's bound is +0.011 at 0.44 and crosses 0 at
+  0.448. D3 (0.23), D4 (0.28), D5′ (0.54) and D11 (0.53) are unchanged.
+  The round-16 note above keeps the old figure as it was written.
+- **Status labels that called partly known comparisons pre-specified**
+  (`names_route_record.py`, Table S11):
+  - MR3's 16-unit and multi-task MR3's 9-unit pools: "when 11 of its 16"
+    and "when 4 of its 9 units' results were known". The main text already
+    said so; the SI's labels had not followed.
+  - The names' 16-unit pool (13.4, 20 October 13:53): seeds 0–200 of its 7
+    MuLMS units were recorded at 13:35 (`5f844bd`).
+  - The MuLMS comparisons over all ten seeds pre-specified on 29 October
+    (rows 81, 86 and 87): seeds 0–200 were known from the screen, MR6's
+    since 08:11 (`cf77d6b`). The protocol (`2886267`) says so itself.
+  - The main text, Table 3's caption and the Introduction's definition of
+    pre-specified say the same.
+- **P values at every inference** (`inferences`, now 21 entries):
+  - MR6 over the CRF head on MuLMS's decision seeds, 0.042;
+  - D5 with the coarse-grained papers, 0.044;
+  - MR3 on MaterioMiner's seven decision seeds, 0.045 fine-grained and
+    0.10 coarse-grained;
+  - D11 and D12 with the flagged subfields at the nearest recall, 0.007
+    and 0.15;
+  - the other unseen names against MR6's best bias for them, 0.0009;
+  - at D = 0, by type: held materials names 0.015, other materials names
+    0.63, held values 0.19, held names of other types 0.010;
+  - the self-training votes against MR3's, coarse-grained, 0.004;
+  - multi-task training over the CRF head on MaterioMiner, fine-grained,
+    0.033, and with MR3, 8 × 10⁻⁵.
+
+  Three P values that the Results gave were added where the Discussion
+  repeats the inference (0.004, 0.011 and 0.017).
+- **Reading order.** D5′ is defined where readers first meet it. The
+  subfields' short names are spelled out at first use, with a pointer to
+  Table 1. In the Statistics, D5′'s parenthetical follows D5, and D11
+  carries its qualification. The correlation is "the held-out share of
+  the data", replacing "n_test/n", whose n meant two things.
+- **SI.** Note 12 now lists the post hoc readings of 1 November. The
+  24 October scenario's +2.67 [+0.09, +5.25] is said to equal the post
+  hoc estimate with the coarse-grained papers: D4's mean is the +1.77 it
+  assumed. Table S3 and Table 5 now describe F1 from counts the same way,
+  and the Table S11 legend defines the new labels.
+- **American spelling** where British forms had stayed: license(s),
+  program, gray, analyzes, equaled.
+- **References.** The Lison et al. entry gains its publisher. Loshchilov
+  and Hutter become "Proc. 7th International Conference on Learning
+  Representations (ICLR 2019)". The NSURL title's spaced hyphen becomes
+  an en dash.
+- **Not done:** the same author items and scope questions as round 16.
+
+*Paper A, review round 18 (2 November): a verification of `7f2491d`.*
+Every number round 17 added reproduces, and the status labels agree with
+the commit times. The full test suite passed (669 tests). Each finding
+was checked against the record before it was applied:
+
+- **The companion's week-5 comparisons included known seeds.** Week 5's
+  protocol (15 October 15:50, `6f2dc11`) kept week 4's runs of seeds
+  0–200 (12:02, `97b637f`). So multi-task training's +3.72 over the CRF
+  head and the self-training decision were fixed with 3 of their 10
+  seeds known. The Methods, Table S1 and Table S11 (rows 41 and 42) now
+  say so. The +6.73 of multi-task MR3 is clean: its first results
+  (17 October 18:50) followed its protocol (07:28).
+- **"Computed on 1 November"** becomes "1 and 2 November" for the
+  inference P values, in the Methods and in SI Note 12.
+- **MR6 over the CRF head on MuLMS.** The partly-known label now covers
+  only the all-ten-seed reading (+2.33, P = 0.071). The decision-seed
+  reading (+2.68, P = 0.042) was fixed before its runs. "Screen" is
+  defined there, where readers first meet it.
+- **P values for the inferences of "not shown" and the comparisons
+  outside Table 2** (`inferences`, now 41 entries):
+  - F1 on the held names, 0.39;
+  - D11 and D12 without the flagged subfields, 0.13 and 0.97;
+  - the other unseen names on the four matched subfields, 0.21;
+  - the other unseen names against MR6 as trained, 0.20;
+  - precision at the matched bias, 0.090;
+  - the net unseen-name F1, 0.52;
+  - the names over multi-task MR3, 0.077 and 0.070;
+  - self-training against MR3, 0.41 and 0.65;
+  - the names over MR3 in macro and weighted F1, 0.017 and 0.10;
+  - the names over MR6 in macro and weighted F1, 0.052 and 0.15;
+  - the mixed-corpus variant over the CRF head, 0.10;
+  - MR6 on all ten seeds, 0.071;
+  - MR3 on SOFC-Exp: 0.20 (13.3a), 0.41 on the official split, 0.23
+    trained on more articles.
+
+  The dependence-adjusted intervals carry their P values: D4 0.044, D5
+  0.037, D5′ 0.032 and D11 0.028.
+- **Smaller edits.**
+  - The terms' definition of pre-specified carries the new convention.
+  - "sofc by 11.86, poly lose 2.35", as Table S12 prints them; 2.4 had
+    rounded a rounded value.
+  - The MR3 decision-seed reading is reordered for reading.
+  - "2 × correct/(gold + predicted)" is now the one notation.
+
+### Week 17 protocol: the harvested names on the strongest base (fixed before any run, 31 October, 19:10 UTC)
+
+*Why, and when.* The round-6 reviews of paper A (31 October) listed as a
+limitation that the names were never run on the strongest MaterioMiner
+base, the multi-task model with mention replacement (`crf_mt_mr`, week 9:
++3.01 [+0.42, +5.60] fine-grained and +2.30 [+0.49, +4.10] coarse-grained
+over the multi-task model, +6.73 [+6.03, +7.43] fine-grained over the CRF
+head). The author ordered the experiment the same evening, after six
+review rounds and with the paper's negative headline written; it is
+pre-registered here before any run and will be labelled in the paper as a
+post-review protocol (week 17; week 16 is paper B's write-up). Its prior,
+stated now: low. The names add +0.80 [−0.66, +2.26] to six-copy mention
+replacement on 11 units and +1.29 [−2.51, +5.10] / +0.70 [−1.60, +3.00] on
+these four papers; a stronger base of the same kind is not expected to
+change that. A pass would be a pass on one corpus's four papers.
+
+*Systems (MaterioMiner, the 4 held-out papers, both granularities from one
+model).*
+- `crf_mt_mr6`: the multi-task model (one MatSciBERT encoder, a CRF head per
+  granularity) with mention replacement at 6 copies and no harvested names:
+  the matched control. 10 model seeds (offsets 0 to 900), one job per
+  offset over the 4 papers, as week 9's `crf_mt_mr` jobs.
+- `crf_mt_mrm6`: the same with the harvested names in the replacement pool.
+  Teachers: three multi-task models of seeds 0, 100 and 200 trained on the
+  held-out paper's training sentences (the `crf_mt` reference's own runs;
+  their test F1 per head must equal the stored `crf_mt_m0/m100/m200` runs of
+  that paper, the week-15 check). Each teacher tags the whole fatigue
+  corpus (40,000 sentences, `data/processed/corpus/fatigue_sentences.txt`,
+  SHA-256 checked) with both heads. A mention is admitted when all three
+  teachers tag the same coarse-grained span and type, and the same
+  fine-grained type at exactly that span (a fine-grained entity with that
+  span, or none), with every marginal of the span at 0.9 or more under each
+  teacher on the coarse head and, where a fine type is tagged, on the fine
+  head. Names are keyed by (coarse type, fine type or none), the pool key
+  of multi-task mention replacement, one entry per occurrence (uniform over
+  entries, as in V4); the training mentions join the pool as before. Ten
+  students (offsets 0 to 900) per paper, each `train_multitask` on the gold
+  sentences plus 6 copies (p = 0.5), the reference's recipe and seed; no
+  silver sentence is trained on. One job per held-out paper (teachers,
+  tagging and the 10 students; the file per student offset holds the
+  paper's run).
+- Everything else as the week-14 protocol: the week-6 rule (the 95%
+  Student-t interval of the mean paired difference over the 4 papers of the
+  10-seed means, above 0), micro F1, saved predictions, deterministic CUDA,
+  a frozen commit per batch.
+
+*Decisions.*
+- 17.1 fine-grained: `crf_mt_mrm6` minus `crf_mt_mr6` over the 4 papers.
+- 17.2 coarse-grained: the same at the coarse level.
+- Reported, no decision: `crf_mt_mrm6` and `crf_mt_mr6` against `crf_mt_mr`
+  (what 3 more copies do on this base, and the names' whole increment over
+  the week-9 system), against `crf_mt` and against the CRF head; the votes
+  over the seed triples; the recall–precision trade on the unseen test
+  names (`ner_mentions.py`, `chain`); the lexicons' coverage of the unseen
+  test names and sizes; the cost per student and per job. Expected
+  detectable differences at 80% power, from the week-9 and week-13
+  intervals on these papers: about 3.4 to 3.8 points fine-grained and 1.4
+  to 2.4 coarse-grained.
+- What a pass means: on the strongest base the names add on MaterioMiner's
+  four papers at that granularity (a pre-registered pass, post review; one
+  corpus); paper A's Limitations bullet "the reference is not the strongest
+  base" is replaced by the result and Section 5.2 gains the comparison. A
+  fail extends the negative result to the strongest base. Either way the
+  decision is reported with its number, and the eight decisions of the
+  names route become ten.
+
+*Runs.* Two Kaggle sessions, both from the bundle of the code commit that
+follows this protocol (the code adds the names to multi-task mention
+replacement and the mention filter to the multi-task teachers; the plain
+multi-task and mention-replacement paths stay byte-identical, checked by a
+repeat). Batch `w17a` (kernel d, now): lane 0, the CRF repeat of smoke4
+(`smokebc`), a repeat of week 9's `crf_mt_mr` run of seed 0 on paper
+s11340 (`smokebd`; fine 54.05) and the names jobs of papers s11340 and
+ncomms7164; lane 1, the 10 control jobs. Batch `w17b` (kernel c, once
+`w15a` is pulled): lane 0, the names jobs of papers s41467 and
+met10111458. The two sessions write the same student files for different
+papers; `collect` merges runs by run_id when the shared runs are identical
+(a small extension, tested). About 17 GPU hours of the 33 left this week
+(two sessions of about 6 hours); the harvest, three teachers tagging
+40,000 sentences with two heads each, is about 80 minutes of a names job's
+2.8 hours.
+
+*Analysis, fixed now.* `ner_seed_analysis.py` gains `week17`: per
+granularity, `crf_mt_mrm6` against `crf_mt_mr6` (the decision), and both
+against `crf_mt_mr`, `crf_mt` and `crf`, with the votes; `report_results.py`
+a week-17 bullet; `paper_tables.py` a table of the four systems per
+granularity; `ner_mentions.py` the two new families and chain pairs. Paper
+A: a Section 5.7 (or a paragraph in 5.2), Table 2 extended by two rows
+labelled "post review", Appendix A a row, the Limitations bullet replaced,
+the abstract's and conclusion's counts updated (ten decisions). Nothing
+already decided is re-decided; D3 to D7 keep their verdicts.
+
+### Week 18 protocol: the names against a recall-matched control (fixed before any run, 1 November, 10:51 UTC)
+
+*Why, and when.* Paper A's round-9 referee (1 November) asked for a
+recall-matched control if the post hoc recall finding is to stay in the
+abstract: on MuLMS's held-out subfields, at the decision seeds, MR6 +
+names (`crf_mrm_topic6`) recalls 82.4% of the unseen test names its
+lexicon holds against MR6's 75.0% (+7.29 [+3.27, +11.30] paired over the
+7 subfields), while precision on those names falls from 74.7% to 69.0%
+(week 15). The question is whether that is name knowledge or a generic
+shift toward tagging more spans, which any bias on the emissions would
+also give. The author approved the run on 1 November. It is registered
+after D1 to D10 and the week-15 analysis were known, and half of each
+comparison is known: the names' side is the stored decision runs
+(results since 24 October); only the control is new. The paper will label
+it a follow-up, as week 17.
+
+*Systems (MuLMS, the 7 held-out subfields, the decision seeds 300 to
+900).*
+- `crf_mr6_bias`: MR6, the stored `crf_mr6_m<N>` jobs of week 14
+  (`mr6_mulms_job`: 400 pool sentences, 6 copies, one job per seed offset
+  over the 7 subfields, saved predictions) run again with `--entity-bias`
+  over the grid G = {−2, −1, −0.5, 0, 0.5, 1, 1.5, 2, 2.5, 3, 4, 5}: each
+  bias D is added to the emission of every tag but O at decoding (week 7's
+  recall calibration), training untouched; the test predictions are saved
+  per bias. At D = 0 every run must equal its stored `crf_mr6` run.
+- `crf_mrm_topic6`: the stored decision runs, unchanged.
+
+*Matching, per subfield u.* R_n(u) is the names' recall over all test
+entities, pooled over the 7 seeds (correct entities summed over the seeds,
+divided by gold entities summed). R_c(u, D) is the control's pooled
+recall at bias D. D*_u is the first crossing of R_n(u) by R_c(u, ·) going
+from D = 0 toward R_n(u) along G (upward if R_n(u) > R_c(u, 0), downward
+otherwise), by linear interpolation between the two grid values D_a and D_b
+that bracket it, with weight w such that R_n(u) = (1 − w) R_c(u, D_a) +
+w R_c(u, D_b). Every quantity of the control at D*_u is the same
+interpolation of its grid values: counts pooled over the seeds for pooled
+rates, and each run's micro F1 for the seed mean. A subfield whose R_n(u)
+lies outside the control's range over G is matched at the nearer end of G
+and flagged; it stays in the decisions, and the decisions are also
+reported without flagged subfields.
+
+*Decisions* (the rule of the week-6 protocol: the 95% Student-t interval
+of the mean paired difference over the 7 subfields, 6 degrees of freedom,
+above 0).
+- 18.1 (D11 in paper A): recall on the unseen test names the lexicon holds
+  (week 15's split: a test entity is unseen by `ner_mentions.kind_of`, in
+  the lexicon when the subfield's rebuilt lexicon in `results/gpu_names/`
+  holds its type and words), pooled over the seeds: MR6 + names minus MR6
+  at D*_u.
+- 18.2 (D12): micro F1, the mean over the seeds: MR6 + names minus MR6 at
+  D*_u.
+- Pre-specified, no decision, at D*_u and paired over the subfields:
+  precision on all test entities (pooled); recall, precision and F1 on the
+  unseen test names (pooled); recall on the unseen names the lexicon does
+  not hold, and the difference of the two parts' differences (in − out);
+  the bias's own F1 change, MR6 at D*_u minus MR6 at 0; D*_u and the flags
+  per subfield; per subfield the control's pooled recall, precision and F1
+  at every D of G.
+- What the outcomes mean, fixed now. 18.1 passes: at the same overall
+  recall the names find more of the names their lexicon holds than a
+  generic bias does, so their recall gain there is not a generic shift;
+  paper A's abstract may state the recall finding with this decision. 18.1
+  fails: that is not shown, and the finding stays out of the abstract.
+  18.2 passes: the names' extra recall costs less precision than a generic
+  bias's (it does not reverse D7: at its own operating point MR6 is not
+  shown to be beaten). 18.2 fails: the names are not shown to beat a
+  recall-matched bias in F1. Each verdict is reported with its number; the
+  names route's decisions become twelve, the count of paper A's Section 6
+  twenty (0.3 and 0.5 passes expected by chance).
+- Expected. 18.2: the names' F1 over MR6 at D = 0 on these units is +0.51
+  [−1.51, +2.53] (standard deviation 2.18 over the subfields, a detectable
+  difference near 2.8 points); on MaterioMiner the week-7 bias from 0 to 1
+  cost the CRF head about 0.2 F1 for 2 points of recall, so 18.2 is
+  expected near +0.7 to +1.3, a pass unlikely. 18.1: the names' pooled
+  recall over MR6 at D = 0 differs by −1.4 to +5.0 points per subfield
+  (graphene the one below); how much a bias that matches it raises the
+  held names' recall is the question, and no number is predicted.
+
+*Checks before any number is read.* (1) The session's repeat of smoke4's
+CRF run is identical. (2) At D = 0 every run equals its stored `crf_mr6`
+run: F1, precision, recall, best epoch, training history and test
+predictions. A run that differs is reported, and the control is then read
+from the new runs at every D, the names' side unchanged. (3) The lexicons
+are the rebuilt ones of week 15, whose checks passed on 31 October.
+
+*Runs.* One Kaggle session, batch `w18a`, from the bundle of the code
+commit that follows this protocol: lane 0, the CRF repeat of smoke4
+(`smokebe`) and then the jobs of the seed offsets, balanced over the two
+lanes as `w14a`'s MuLMS jobs were. About 49 MR6 runs at 296 s each plus the
+decodes: about 4.3 lane hours, 2.5 hours of one session, of the 25.1 left
+this week. The code allows `--entity-bias` with `--granularity mulms
+--leave-one-subfield-out` (week 7 decoded only MaterioMiner and SOFC-Exp);
+training is untouched, which the D = 0 check confirms.
+
+*Analysis, fixed now.* A new `ner_recall_matched.py` reads the 7 control
+files, the stored names and MR6 files and the rebuilt lexicons, runs the
+checks, and writes `results/gpu/ner_recall_matched.json` (aggregate counts
+and scores only, no names). Paper A: Table 2 gains D11 and D12 as
+follow-up rows; Section 5.4 the result; the abstract by the readings
+above; Sections 1, 3 and 6 and the Supplementary Information their counts
+and a note; `report_results.py` a week-18 bullet. Nothing already decided
+is re-decided.
+
+*Week 18, session notes (1 November, 11:20 UTC).* The protocol
+(`e02c3be`, 10:51) and the code (`7906996`, 10:58; the full suite green)
+committed; the analysis `ner_recall_matched.py` committed at 11:04
+(`789f42e`) before any result, tested and dry-run end to end on the stored
+files with a fake bias field; Table 12 and the README bullet committed
+before any result as well. The bundle of `7906996` uploaded to
+`ner-gpu-bundle-3` (10:58–11:12); `w18a` pushed to `ner-gpu-jobs-d`
+(version 16) at 11:12:34 UTC, lane 0 the CRF repeat `smokebe` and three of
+the seven seed offsets, lane 1 the other four. Quota before the push:
+25.1 of 45 hours. Expected about 2.5 hours. Meanwhile paper A's round-10
+reviews (a number audit, a referee recommending minor revision, a
+consistency check) were applied in part (`e1cde40`); the rest waits for the
+week-18 result.
+
+*Outcome (1 November, 13:58–14:40 UTC).* `w18a` finished before 13:58
+UTC (8 jobs, all done, 150.7 session minutes: the smoke repeat 1.3
+minutes and the seven MR6 jobs 31.9 to 39.4 minutes each, the twelve
+decodes included); pulled at 13:58; quota after it 22.6 of 45 hours. Checks, before any number was
+read: (1) `smokebe` identical to `smokebc` (F1 77.95, no field differs);
+(2) at D = 0 all 49 runs equal their stored `crf_mr6` runs in F1,
+precision, recall, best epoch, training history and test predictions, so
+the control is the stored MR6 and only the decoding differs; (3) the
+lexicons are week 15's rebuilt ones, whose checks pass again. The
+analysis as committed before the result (`789f42e`) gave, and the results
+commit (`13506a4`) records:
+**18.1 (D11), recall on the unseen test names the lexicon holds, +11.24
+[+3.31, +19.18], passes** (all 7 subfields positive: electrolysis
++13.29, graphene +0.22, pemfc +15.59, poly +1.93, semi +12.40, sofc
++25.61, steel +9.67); **18.2 (D12), micro F1, +3.26 [−0.79, +7.31], no**
+(5 of 7 positive). Pre-specified at D*: precision +5.78 [−1.22, +12.79];
+on the unseen names recall +1.12 [+0.09, +2.15], precision +6.17 [−1.27,
++13.61], F1 +3.54 [−0.58, +7.67]; recall on the unseen names the lexicon
+does not hold −1.73 [−3.02, −0.44] (one subfield positive); in − out
++12.98 [+4.18, +21.77]; the bias's own F1 change −2.75 [−5.77, +0.27].
+D* is −1.08 (graphene, where the names' recall is below MR6's), 1.35
+(poly), 1.92 (steel) and 2.47 (semi). Three subfields are flagged:
+in electrolysis, pemfc and sofc the control's pooled recall rises to a
+peak at D = 2.5 or 3 (59.66, 51.54, 49.93), short of the names' (60.13,
+51.74, 50.36), and falls after (57.22, 50.03, 47.57 at D = 5): beyond the
+peak the bias still adds predictions (about 9% more in electrolysis from
+2.5 to 5) but fewer of them match a gold entity exactly. The protocol's
+"nearer end of G" assumed recall to rise with D and matched them at D =
+5, where the control is 1.7 to 2.9 points of recall below the names and
+5.3 to 7.0 points of F1 below its own F1 at D = 0, which inflates both
+decisions there. As the
+protocol fixed, they stay in the decisions, and without them
+(pre-specified): 18.1 +6.05 [−3.33, +15.44], 4 of 4 positive (3 degrees
+of freedom); 18.2 −0.03 [−2.78, +2.72]. Post hoc (`match_nearest`, added
+after the result and labelled so in the code and the JSON's
+`post_hoc_nearest`), the flagged subfields matched instead at the grid
+value of the nearest recall (2.5, 3 and 2.5): 18.1 +8.63 [+3.35, +13.90],
+7 of 7 positive; 18.2 +1.37 [−0.66, +3.41]; recall on the names the
+lexicon does not hold −2.07 [−3.68, −0.46]. Against the expectation:
+18.2 was expected near +0.7 to +1.3; the four matched subfields give
+−0.03 and the post hoc reading +1.37, and the +3.26 comes from the three
+flagged subfields at D = 5. Readings, as fixed in the protocol: 18.1 passes, so at the
+same overall recall the names find more of the names their lexicon holds
+than a generic bias does, and their recall gain there is not a generic
+shift; paper A's abstract may state the recall finding with this decision,
+and it states it with the flagged subfields' caveat. 18.2 fails: the names
+are not shown to beat a recall-matched bias in F1. At matched overall
+recall the names trade recall on the names they do not hold for recall on
+those they hold, with their recall on all unseen names barely higher
+(+1.12; +0.25 [−0.08, +0.58] post hoc): name knowledge that does not show
+in F1. The names route's decisions become twelve, four passing (D3, D4,
+D5, D11); the count of paper A's Section 6 twenty, five passing (0.3 and
+0.5 passes expected by chance). Nothing already decided is re-decided.
