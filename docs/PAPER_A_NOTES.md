@@ -266,3 +266,13 @@ finding the builds reproducible) led to:
 - Three reference details fixed.
 
 ROADMAP's round-17 note lists every item.
+Round 18 (a verification of `7f2491d`: every new number reproduced) led to:
+- the companion's week-5 comparisons labeled as fixed with seeds 0–200
+  known;
+- "computed on 1 and 2 November";
+- the partly-known label on MR6's MuLMS comparison limited to its
+  all-seed reading, and "screen" defined there;
+- P values at every "not shown" and at the comparisons outside Table 2
+  (`inferences`, 41 entries), and at the dependence-adjusted passes.
+
+ROADMAP's round-18 note lists every item.

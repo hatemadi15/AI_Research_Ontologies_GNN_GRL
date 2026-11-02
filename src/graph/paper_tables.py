@@ -853,7 +853,7 @@ def held_f1_gain(part, setting, key):
     mean = statistics.fmean(diffs)
     half = float(stats.t.ppf(0.975, n - 1)) * statistics.stdev(diffs) / n ** 0.5
     return {'mean_diff': round(mean, 2), 'ci95': [round(mean - half, 2), round(mean + half, 2)],
-            'n_units': n}
+            'n_units': n, 'per_unit': diffs}
 
 
 def table10(data):

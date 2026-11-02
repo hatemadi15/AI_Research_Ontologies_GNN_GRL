@@ -247,7 +247,8 @@ def test_week12_the_screen_the_decisions_and_the_analogues():
     assert got[12][::3] == (nr.W12_ANALOGUE, 'pre-specified')
     v6 = [g for g in got if "V6's analogue" in g[2]]
     assert [g[3] for g in v6] == [
-        "reported again; the companion study's week-5 decision (15 October): no; votes: no",
+        "reported again; the companion study's week-5 decision (15 October; seeds 0–200 "
+        "known): no; votes: no",
         'post hoc']
     # MR6's rows of the week-12 file are week 14's; random splits and MR6 at seeds 300-900 out
     assert not any(g[2].startswith('MR6 − ') or g[2].startswith('MR6 (V3)') and '300' in g[1]

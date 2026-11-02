@@ -131,7 +131,7 @@ and the amendments.</p>
 <td>—</td>
 </tr>
 <tr>
-<td>companion, week 5: multi-task training against the CRF head on MaterioMiner's held-out papers, pre-specified without decision (fine-grained +3.72 [+0.57, +6.87]; multi-task training's own decision was on the random splits); and self-training on the fatigue corpus against the CRF head there, a decision that failed (+1.74 [−1.16, +4.64] fine-grained, +1.56 [−0.88, +4.00] coarse-grained; its votes too), which the names route reports again as V6's analogue (Supplementary Note 12)</td>
+<td>companion, week 5: multi-task training against the CRF head on MaterioMiner's held-out papers, pre-specified without decision (fine-grained +3.72 [+0.57, +6.87]; multi-task training's own decision was on the random splits); and self-training on the fatigue corpus against the CRF head there, a decision that failed (+1.74 [−1.16, +4.64] fine-grained, +1.56 [−0.88, +4.00] coarse-grained; its votes too), which the names route reports again as V6's analogue (Supplementary Note 12); both over 10 seeds whose first three, 0–200, were known from week 4 (15 October 12:02, <code>97b637f</code>)</td>
 <td>15 October 15:50 (<code>6f2dc11</code>)</td>
 <td>15 October</td>
 <td>15 October 23:20 (<code>1b30d82</code>)</td>
@@ -467,7 +467,7 @@ corpus's lexicon, the one rebuilt). Levels: per system, the share
 of the unseen test names the lexicon holds (pooled over seeds and units),
 recall on those and on the others, the share of the unseen-name
 predictions that are lexicon names, and precision and F1 on each part
-(F1 from the pooled counts, 2 correct / (gold + predicted)). Paired gains: per comparison,
+(F1 from the pooled counts, 2 × correct/(gold + predicted)). Paired gains: per comparison,
 the recall gain on the held names and on the others, the difference of
 the two gains, paired over the units with 95% CIs, the units where the
 gain on the held names is the larger, and the F1 gain on the held names,
@@ -2730,7 +2730,7 @@ per-unit values rounded differently; the reading of 20 October (18:42),
 which put D5 at about [+0.1, +5.9] from the screen's values; the two
 scenarios of 24 October with an assumed MaterioMiner gain, +2.67 [+0.09,
 +5.25] and +2.49 [−0.13, +5.11] (Supplementary Note 11); and the post hoc
-readings computed on 1 November for reporting (<code>post_hoc_reported</code> of
+readings computed on 1 and 2 November for reporting (<code>post_hoc_reported</code> of
 <code>ner_decision_tests.json</code>): D5 with MaterioMiner's coarse-grained papers
 (D4's per-unit values) in place of the fine-grained ones, +2.67 [+0.09,
 +5.25] (P = 0.044), the same numbers as the first scenario, whose assumed
@@ -2763,8 +2763,8 @@ computed. A status such as 10.1 names a decision outside Table 2 by its
 week and number (10.1 is week 10's decision 1; 13.1a as its protocol
 names it; 13.1d names two decisions, one per granularity),
 &quot;pre-specified (13.3)&quot; a comparison pre-specified with that decision, and
-a status with &quot;when … were known&quot; names the results already recorded
-when the comparison was fixed.</p>
+a status that says which units or seeds were known names the results
+already recorded when the comparison was fixed.</p>
 <table>
 <thead>
 <tr>
@@ -3266,7 +3266,7 @@ when the comparison was fixed.</p>
 <td>12 (the analogue batches, 20 October 00:51)</td>
 <td>MaterioMiner fine, 4 papers</td>
 <td>self-training on the fatigue corpus's silver sentences (V6's analogue) − CRF head</td>
-<td>reported again; the companion study's week-5 decision (15 October): no; votes: no</td>
+<td>reported again; the companion study's week-5 decision (15 October; seeds 0–200 known): no; votes: no</td>
 <td>+1.74 [−1.16, +4.64], 3/4</td>
 <td>+1.90 [−1.11, +4.90]</td>
 <td>+1.07 [−1.38, +3.52]</td>
@@ -3278,7 +3278,7 @@ when the comparison was fixed.</p>
 <td>12 (the analogue batches, 20 October 00:51)</td>
 <td>MaterioMiner coarse, 4 papers</td>
 <td>self-training on the fatigue corpus's silver sentences (V6's analogue) − CRF head</td>
-<td>reported again; the companion study's week-5 decision (15 October): no; votes: no</td>
+<td>reported again; the companion study's week-5 decision (15 October; seeds 0–200 known): no; votes: no</td>
 <td>+1.56 [−0.88, +4.00], 3/4</td>
 <td>+1.55 [−0.79, +3.89]</td>
 <td>+1.57 [−0.90, +4.04]</td>

@@ -481,7 +481,9 @@ gives the correlation at which each pass's adjusted interval reaches 0
 to 0.45; `inferences` grew to 21 entries, adding week 18's readings, the
 types at D = 0, the self-training votes against MR3's and multi-task
 training's gains on MaterioMiner, the last from
-`ner_week5_comparisons.json`).
+`ner_week5_comparisons.json`; round 18 brought it to 41, adding the
+comparisons the paper reads as not shown and those outside its Table 2,
+F1 on the held names from `paper_tables.held_f1_gain`).
 Table 10
 (`table10_lexicon.md`, paper A's Table S3 and Table 5) adds, post hoc, F1
 on each lexicon part and the paired F1 gain on the held names, from

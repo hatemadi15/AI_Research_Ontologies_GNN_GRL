@@ -282,10 +282,11 @@ def inferences(analysis, robust, matched, lexicon, mentions, week12=None, week5=
     """Post hoc (round 16; round 17 added the readings of week 18 from the nearest recall, the
     best bias for the other unseen names and the types at D = 0, and, given the week-12 and
     week-5 comparisons, the self-training votes against MR3's and multi-task training's gain on
-    MaterioMiner): the two-sided t test P values of the reported, non-decision comparisons from
-    which the paper draws an inference, each with its stored interval; the unseen-name recall
-    and precision on MuLMS (ner_mentions.json `chain`) store no per-unit values, so theirs come
-    from the interval and n = 7."""
+    MaterioMiner; round 18 the comparisons the text reads as not shown, and those outside
+    Table 2 that it reads either way): the two-sided t test P values of the reported,
+    non-decision comparisons from which the paper draws an inference, each with its stored
+    interval; the unseen-name recall, precision and F1 on MuLMS (ner_mentions.json `chain`)
+    store no per-unit values, so theirs come from the interval and n = 7."""
     chain = mentions['chain']['mulms_leave_one_subfield_out']['crf_mrm_topic6']['decision']['unseen']
     split = lexicon['mulms']['comparisons']['names_vs_mr6']
     nearest = matched['post_hoc_nearest']['decisions']
@@ -315,10 +316,38 @@ def inferences(analysis, robust, matched, lexicon, mentions, week12=None, week5=
         'held_other_types_at_0': types['other_in'],
         'mt_mr3_vs_crf_materiominer_fine':
             analysis['week13']['pooled']['crf_mt_mr']['corpora']['fine']['minus_crf'],
+        # round 18
+        'unseen_f1_names_vs_mr6': chain,
+        'other_unseen_recall_names_vs_mr6': part('gain_out'),
+        'd11_without_flagged': matched['without_flagged']['decisions']['18.1'],
+        'd12_without_flagged': matched['without_flagged']['decisions']['18.2'],
+        'other_unseen_matched_without_flagged': matched['without_flagged']['prespecified']['recall_out'],
+        'precision_at_matched_bias': matched['prespecified']['precision'],
+        'names_vs_mt_mr3_fine': analysis['week17']['fine']['names']['minus_crf_mt_mr']['micro'],
+        'names_vs_mt_mr3_coarse': analysis['week17']['coarse']['names']['minus_crf_mt_mr']['micro'],
+        'names_vs_mr6_11_decision_macro': robust['pooled_measures']['decision']['names_vs_mr6']['macro'],
+        'names_vs_mr6_11_decision_weighted':
+            robust['pooled_measures']['decision']['names_vs_mr6']['weighted'],
+        'names_vs_mr3_11_decision_macro': robust['pooled_measures']['decision']['names_vs_mr3']['macro'],
+        'names_vs_mr3_11_decision_weighted':
+            robust['pooled_measures']['decision']['names_vs_mr3']['weighted'],
+        'mixed_vs_crf_mulms': analysis['week14']['topic']['decision']['mixed']['minus_crf']['micro'],
+        'mr6_vs_crf_mulms_ten': analysis['week14']['copies']['mulms']['ten_seeds']['control']['minus_crf']['micro'],
+        'mr3_vs_crf_sofc_folds_13_3a': analysis['week13']['folds']['crf_mr']['minus_crf']['micro'],
+        'mr3_vs_crf_sofc_official_split_by_seed':
+            analysis['published_split']['sofc']['methods']['crf_mr']['minus_crf']['micro'],
+        'mr3_vs_crf_sofc_draws': analysis['sofc_draws']['crf_mr_minus_crf']['micro'],
     }
+    from paper_tables import held_f1_gain
+    held_f1 = held_f1_gain(lexicon['mulms'], 'mulms', 'names_vs_mr6')
+    if held_f1:
+        entries['held_f1_names_vs_mr6'] = held_f1
     if week12:
         entries['st3_votes_vs_mr3_votes_coarse'] = week12[
             'ner_results_coarse_leave_one_paper_out_crf_st3_ens3_vs_crf_mr_ens3']['micro']
+        for g in ('fine', 'coarse'):
+            entries[f'st3_vs_mr3_{g}'] = week12[
+                f'ner_results_{g}_leave_one_paper_out_crf_st3_vs_crf_mr']['micro']
     if week5:
         entries['mt_vs_crf_materiominer_fine'] = week5[
             'ner_results_fine_leave_one_paper_out_crf_mt']['micro']

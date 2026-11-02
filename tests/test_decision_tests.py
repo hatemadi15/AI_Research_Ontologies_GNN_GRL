@@ -142,6 +142,14 @@ def test_committed_tipping_inferences_and_readings():
     inf = dt.inferences(analysis, robust, matched, lexicon, mentions, week12, week5)
     assert inf['held_recall_names_vs_mr6']['p_two_sided'] == 0.0044
     assert inf['st3_votes_vs_mr3_votes_coarse']['p_two_sided'] == 0.004
+    # round 18: the comparisons the text reads as not shown, and those outside Table 2
+    assert {k: inf[k]['p_two_sided'] for k in (
+        'held_f1_names_vs_mr6', 'd11_without_flagged', 'other_unseen_matched_without_flagged',
+        'names_vs_mr3_11_decision_macro', 'mr3_vs_crf_sofc_folds_13_3a', 'st3_vs_mr3_coarse')} == {
+        'held_f1_names_vs_mr6': 0.3883, 'd11_without_flagged': 0.1324,
+        'other_unseen_matched_without_flagged': 0.2083, 'names_vs_mr3_11_decision_macro': 0.0169,
+        'mr3_vs_crf_sofc_folds_13_3a': 0.1985, 'st3_vs_mr3_coarse': 0.6486}
+    assert inf['held_f1_names_vs_mr6']['ci95'] == [-1.85, 4.11]
     assert inf['mt_mr3_vs_crf_materiominer_fine']['p_two_sided'] == 0.0001
     if week5:
         assert inf['mt_vs_crf_materiominer_fine']['p_two_sided'] == 0.0331

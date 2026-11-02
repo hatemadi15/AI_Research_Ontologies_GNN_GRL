@@ -427,8 +427,10 @@ def week12(analysis, comparisons):
         e = find(comparisons, g, 'crf_st3', 'crf')
         if e:
             votes = find(comparisons, g, 'crf_st3_ens3', 'crf_ens3')
-            status = ('reported again; the companion study\'s week-5 decision (15 October): '
-                      + verdict(above_0(e['micro'])))
+            # round 18: week 5 (protocol 15 October 15:50) kept week 4's runs of seeds 0 to 200
+            # (12:02 that day), so its 10-seed decisions were fixed with those seeds known
+            status = ('reported again; the companion study\'s week-5 decision (15 October; '
+                      'seeds 0–200 known): ' + verdict(above_0(e['micro'])))
             if votes:
                 status += f"; votes: {verdict(above_0(votes['micro']))}"
             rows.append(paper_row(W12_ANALOGUE, g, e, f'{V6_ANALOGUE} − CRF head', status, votes))

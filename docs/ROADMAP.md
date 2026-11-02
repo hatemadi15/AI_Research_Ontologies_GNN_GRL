@@ -6126,6 +6126,50 @@ record before it was applied:
   an en dash.
 - **Not done:** the same author items and scope questions as round 16.
 
+*Paper A, review round 18 (2 November): a verification of `7f2491d`.*
+Every number round 17 added reproduces, and the status labels agree with
+the commit times. The full test suite passed (669 tests). Each finding
+was checked against the record before it was applied:
+
+- **The companion's week-5 comparisons included known seeds.** Week 5's
+  protocol (15 October 15:50, `6f2dc11`) kept week 4's runs of seeds
+  0–200 (12:02, `97b637f`). So multi-task training's +3.72 over the CRF
+  head and the self-training decision were fixed with 3 of their 10
+  seeds known. The Methods, Table S1 and Table S11 (rows 41 and 42) now
+  say so. The +6.73 of multi-task MR3 is clean: its first results
+  (17 October 18:50) followed its protocol (07:28).
+- **"Computed on 1 November"** becomes "1 and 2 November" for the
+  inference P values, in the Methods and in SI Note 12.
+- **MR6 over the CRF head on MuLMS.** The partly-known label now covers
+  only the all-ten-seed reading (+2.33, P = 0.071). The decision-seed
+  reading (+2.68, P = 0.042) was fixed before its runs. "Screen" is
+  defined there, where readers first meet it.
+- **P values for the inferences of "not shown" and the comparisons
+  outside Table 2** (`inferences`, now 41 entries):
+  - F1 on the held names, 0.39;
+  - D11 and D12 without the flagged subfields, 0.13 and 0.97;
+  - the other unseen names on the four matched subfields, 0.21;
+  - the other unseen names against MR6 as trained, 0.20;
+  - precision at the matched bias, 0.090;
+  - the net unseen-name F1, 0.52;
+  - the names over multi-task MR3, 0.077 and 0.070;
+  - self-training against MR3, 0.41 and 0.65;
+  - the names over MR3 in macro and weighted F1, 0.017 and 0.10;
+  - the names over MR6 in macro and weighted F1, 0.052 and 0.15;
+  - the mixed-corpus variant over the CRF head, 0.10;
+  - MR6 on all ten seeds, 0.071;
+  - MR3 on SOFC-Exp: 0.20 (13.3a), 0.41 on the official split, 0.23
+    trained on more articles.
+
+  The dependence-adjusted intervals carry their P values: D4 0.044, D5
+  0.037, D5′ 0.032 and D11 0.028.
+- **Smaller edits.**
+  - The terms' definition of pre-specified carries the new convention.
+  - "sofc by 11.86, poly lose 2.35", as Table S12 prints them; 2.4 had
+    rounded a rounded value.
+  - The MR3 decision-seed reading is reordered for reading.
+  - "2 × correct/(gold + predicted)" is now the one notation.
+
 ### Week 17 protocol: the harvested names on the strongest base (fixed before any run, 31 October, 19:10 UTC)
 
 *Why, and when.* The round-6 reviews of paper A (31 October) listed as a

@@ -37,7 +37,7 @@ and the amendments.
 | the lexicon-membership analysis (week 15; post hoc, no decision) | 31 October 16:13 (`2c60f33`): the rebuild, its checks and the reading fixed before the run | 31 October (`w15a`) | 31 October | — |
 | D9, D10 (week 17; follow-up) | 31 October 19:15 (`f39447c`), after D1 to D8 had been written up (the lexicon split's results arrived 26 minutes later), a pass expected to be unlikely; the code 19:41 (`013f9ac`) | 31 October 19:58 to 1 November 00:35 (the first jobs started at 19:58, `w17b`, and 19:59, `w17a`; `w17b` ended at 23:00) | 1 November | — |
 | D11, D12 (week 18; follow-up) | 1 November 10:51 (`e02c3be`), at the request of an internal review of the draft (main text, Methods, *Use of an AI assistant*), after D1 to D10 and the lexicon split were known; the names' side the stored decision runs of 24 October, only the control new; the code 10:58 (`7906996`) and the analysis 11:04 (`789f42e`), both before any run | 1 November 11:14 to 13:43 (`w18a`, pushed at 11:12, pulled at 13:58) | 1 November 14:06 (`13506a4`); the post hoc nearest-recall reading added after it, 14:16 (`ea8a92e`) | — |
-| companion, week 5: multi-task training against the CRF head on MaterioMiner's held-out papers, pre-specified without decision (fine-grained +3.72 [+0.57, +6.87]; multi-task training's own decision was on the random splits); and self-training on the fatigue corpus against the CRF head there, a decision that failed (+1.74 [−1.16, +4.64] fine-grained, +1.56 [−0.88, +4.00] coarse-grained; its votes too), which the names route reports again as V6's analogue (Supplementary Note 12) | 15 October 15:50 (`6f2dc11`) | 15 October | 15 October 23:20 (`1b30d82`) | — |
+| companion, week 5: multi-task training against the CRF head on MaterioMiner's held-out papers, pre-specified without decision (fine-grained +3.72 [+0.57, +6.87]; multi-task training's own decision was on the random splits); and self-training on the fatigue corpus against the CRF head there, a decision that failed (+1.74 [−1.16, +4.64] fine-grained, +1.56 [−0.88, +4.00] coarse-grained; its votes too), which the names route reports again as V6's analogue (Supplementary Note 12); both over 10 seeds whose first three, 0–200, were known from week 4 (15 October 12:02, `97b637f`) | 15 October 15:50 (`6f2dc11`) | 15 October | 15 October 23:20 (`1b30d82`) | — |
 | companion, week 7 part 1: label propagation within a document, six decisions on saved predictions | 16 October 11:46 (`cc73d37`) | saved predictions | 16 October 11:53 (MaterioMiner, `93966bb`) and 13:54 (SOFC-Exp, `ceabb78`) | 11:57 (`e41aa44`): retyping made a decision on SOFC-Exp, after MaterioMiner's results and before SOFC-Exp's |
 | companion, week 7 part 2a: recall calibration, a bias on the CRF head's emissions chosen on validation folds; five decisions, none passing (fine-grained −0.59 [−1.75, +0.57], coarse-grained +0.17 [−0.14, +0.48], SOFC-Exp −0.21 [−0.58, +0.17] paired by seed) | 16 October 13:11 (`61c9520`) | 16 October (`w7a`) | 16 October 15:33 (`503f690`) | — |
 | companion, week 7 part 2b: MR3 against the CRF head on MaterioMiner's held-out papers, both passing (+2.77 [+1.51, +4.03] fine-grained, +1.28 [+0.06, +2.51] coarse-grained), and on SOFC-Exp's official split, failing (−0.29 [−1.04, +0.47] paired by seed) | 16 October 14:39 (`494cac1`): a 3-seed screen, then 10 seeds | 17 October (`w7c` 03:42–04:15, `w7d` 04:19–06:47) | 17 October 06:59 (`db7c78d`; the screen at 04:19, `7d55340`) | — |
@@ -286,7 +286,7 @@ corpus's lexicon, the one rebuilt). Levels: per system, the share
 of the unseen test names the lexicon holds (pooled over seeds and units),
 recall on those and on the others, the share of the unseen-name
 predictions that are lexicon names, and precision and F1 on each part
-(F1 from the pooled counts, 2 correct / (gold + predicted)). Paired gains: per comparison,
+(F1 from the pooled counts, 2 × correct/(gold + predicted)). Paired gains: per comparison,
 the recall gain on the held names and on the others, the difference of
 the two gains, paired over the units with 95% CIs, the units where the
 gain on the held names is the larger, and the F1 gain on the held names,
@@ -1193,7 +1193,7 @@ per-unit values rounded differently; the reading of 20 October (18:42),
 which put D5 at about [+0.1, +5.9] from the screen's values; the two
 scenarios of 24 October with an assumed MaterioMiner gain, +2.67 [+0.09,
 +5.25] and +2.49 [−0.13, +5.11] (Supplementary Note 11); and the post hoc
-readings computed on 1 November for reporting (`post_hoc_reported` of
+readings computed on 1 and 2 November for reporting (`post_hoc_reported` of
 `ner_decision_tests.json`): D5 with MaterioMiner's coarse-grained papers
 (D4's per-unit values) in place of the fine-grained ones, +2.67 [+0.09,
 +5.25] (P = 0.044), the same numbers as the first scenario, whose assumed
@@ -1226,8 +1226,8 @@ computed. A status such as 10.1 names a decision outside Table 2 by its
 week and number (10.1 is week 10's decision 1; 13.1a as its protocol
 names it; 13.1d names two decisions, one per granularity),
 "pre-specified (13.3)" a comparison pre-specified with that decision, and
-a status with "when … were known" names the results already recorded
-when the comparison was fixed.
+a status that says which units or seeds were known names the results
+already recorded when the comparison was fixed.
 
 | # | week (protocol, UTC) | corpus, units (MuLMS seeds) | comparison (system − reference) | status | Δ micro F1 [95% CI], units above 0 | Δ macro F1 [95% CI] | Δ weighted F1 [95% CI] | Δ strict IOB2 micro F1 [95% CI] | votes: Δ micro F1 [95% CI], units above 0 |
 |---|---|---|---|---|---|---|---|---|---|
@@ -1271,8 +1271,8 @@ when the comparison was fixed.
 | 38 | 12 (18 October 11:00) | MaterioMiner coarse, 4 papers | MR6 + names − CRF head | D4: passes | +1.77 [+0.67, +2.88], 4/4 | +2.40 [+0.81, +3.99] | +2.35 [+1.03, +3.67] | +1.77 [+0.67, +2.88] | +2.14 [+0.23, +4.05], 4/4 |
 | 39 | 12 (the analogue batches, 20 October 00:51) | MaterioMiner fine, 4 papers | MR6 + names − MR3 | pre-specified | +1.50 [−1.76, +4.75], 3/4 | +1.73 [−0.47, +3.94] | +1.38 [−2.32, +5.07] | +1.50 [−1.76, +4.75] | +1.38 [−1.73, +4.49], 3/4 |
 | 40 | 12 (the analogue batches, 20 October 00:51) | MaterioMiner coarse, 4 papers | MR6 + names − MR3 | pre-specified | +0.49 [+0.06, +0.92], 4/4 | −0.39 [−2.14, +1.36] | +0.49 [−0.03, +1.02] | +0.49 [+0.06, +0.92] | −0.12 [−1.65, +1.42], 2/4 |
-| 41 | 12 (the analogue batches, 20 October 00:51) | MaterioMiner fine, 4 papers | self-training on the fatigue corpus's silver sentences (V6's analogue) − CRF head | reported again; the companion study's week-5 decision (15 October): no; votes: no | +1.74 [−1.16, +4.64], 3/4 | +1.90 [−1.11, +4.90] | +1.07 [−1.38, +3.52] | +1.74 [−1.16, +4.64] | +1.12 [−2.71, +4.96], 3/4 |
-| 42 | 12 (the analogue batches, 20 October 00:51) | MaterioMiner coarse, 4 papers | self-training on the fatigue corpus's silver sentences (V6's analogue) − CRF head | reported again; the companion study's week-5 decision (15 October): no; votes: no | +1.56 [−0.88, +4.00], 3/4 | +1.55 [−0.79, +3.89] | +1.57 [−0.90, +4.04] | +1.56 [−0.88, +4.00] | +0.93 [−1.66, +3.53], 3/4 |
+| 41 | 12 (the analogue batches, 20 October 00:51) | MaterioMiner fine, 4 papers | self-training on the fatigue corpus's silver sentences (V6's analogue) − CRF head | reported again; the companion study's week-5 decision (15 October; seeds 0–200 known): no; votes: no | +1.74 [−1.16, +4.64], 3/4 | +1.90 [−1.11, +4.90] | +1.07 [−1.38, +3.52] | +1.74 [−1.16, +4.64] | +1.12 [−2.71, +4.96], 3/4 |
+| 42 | 12 (the analogue batches, 20 October 00:51) | MaterioMiner coarse, 4 papers | self-training on the fatigue corpus's silver sentences (V6's analogue) − CRF head | reported again; the companion study's week-5 decision (15 October; seeds 0–200 known): no; votes: no | +1.56 [−0.88, +4.00], 3/4 | +1.55 [−0.79, +3.89] | +1.57 [−0.90, +4.04] | +1.56 [−0.88, +4.00] | +0.93 [−1.66, +3.53], 3/4 |
 | 43 | 12 (the analogue batches, 20 October 00:51) | MaterioMiner fine, 4 papers | self-training on the fatigue corpus's silver sentences (V6's analogue) − MR3 | post hoc | −1.03 [−4.47, +2.41], 2/4 | −0.44 [−1.66, +0.78] | −2.55 [−4.65, −0.46] | −1.03 [−4.47, +2.41] | −2.49 [−5.74, +0.76], 0/4 |
 | 44 | 12 (the analogue batches, 20 October 00:51) | MaterioMiner coarse, 4 papers | self-training on the fatigue corpus's silver sentences (V6's analogue) − MR3 | post hoc | +0.28 [−1.46, +2.01], 2/4 | −1.24 [−3.08, +0.60] | −0.29 [−1.39, +0.82] | +0.28 [−1.46, +2.01] | −1.32 [−1.85, −0.80], 0/4 |
 | 45 | 13 (20 October 09:14) | MuLMS, 7 subfields (seeds 0–900) | CRF head + label propagation − CRF head | decision 13.1a: passes | +0.82 [+0.18, +1.46], 7/7 | +0.31 [+0.18, +0.44] | +0.95 [+0.30, +1.60] | +0.82 [+0.18, +1.46] |  |
