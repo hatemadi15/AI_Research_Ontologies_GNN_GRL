@@ -101,9 +101,17 @@ author:
 - the Code availability statement promising the DOI on acceptance, not
   at submission.
 
+Also done on 2 November:
+- the merge into `main` (pull request #16, merged as `28effc9`), so the
+  paper's repository link opens the submission version;
+- the ORCID iD (https://orcid.org/0009-0008-8515-6974) on the cover
+  letter, to be given in the submission system too;
+- a pointer at the top of the README for the paper's readers. The
+  repository's name and the README's opening describe the earlier
+  ontology-learning pipeline (the term graph and its GNN), which the
+  paper does not use.
+
 What remains, with how to do it, is in `docs/submission/README.md`:
-- merge into `main`;
-- an ORCID iD;
 - optional referees;
 - the DOI after acceptance.
 

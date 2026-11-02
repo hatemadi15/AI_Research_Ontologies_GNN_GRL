@@ -31,19 +31,22 @@ The figures come from `python src/graph/paper_figures.py` (`docs/figures/`):
 
 ## What is left, and when (see also `docs/PAPER_A_NOTES.md`)
 
-The affiliation (American University of Beirut), the sole authorship and
-the cover letter are filled in. The AI assistant, Claude Code, is named
-once, in a short note in the Methods (*Use of an AI assistant*), as the
-author asked; that note is what the journal's policy on AI requires.
+The affiliation (American University of Beirut), the sole authorship, the
+ORCID iD and the cover letter are filled in. The AI assistant, Claude
+Code, is named once, in a short note in the Methods (*Use of an AI
+assistant*), as the author asked; that note is what the journal's policy
+on AI requires.
 
-**Before you submit**
-- Merge this work into `main`. The paper's repository link opens `main`,
-  which still holds an early draft until the branch is merged by a pull
-  request.
-- An ORCID iD (free at orcid.org), which the submission system asks of
-  the corresponding author.
+**Done before submission (2 November)**
+- The work is merged into `main` as `28effc9` (pull request #16), so the
+  paper's repository link opens the submission version. The repository's
+  README opens with a pointer to the paper's files, for readers who
+  follow that link.
+- The ORCID iD, https://orcid.org/0009-0008-8515-6974, is on the cover
+  letter.
 
 **In the submission system**
+- Give the ORCID iD when the system asks for the corresponding author's.
 - Upload `PAPER_A.pdf`, which holds the text and figures, and
   `PAPER_A_SI.pdf` as the Supplementary Information. Paste
   `COVER_LETTER.md`.
