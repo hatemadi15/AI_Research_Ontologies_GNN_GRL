@@ -209,10 +209,11 @@ def test_multitask_mention_filter_needs_both_heads_to_agree():
     assert nb.silver_mention_names_multitask([], [], 0.9) == []
 
 
-def test_multitask_names_parser_and_variant(capsys):
+def test_multitask_names_parser_and_variant(capsys, monkeypatch):
     """--augment-names with --multi-task needs --silver-mentions; the week-17 variants are
     crf_mt_mr6 (the control) and crf_mt_mrm6 (the names); --save-names and the feature,
     agreement and share options are single-task only."""
+    monkeypatch.setattr(nb.os.path, 'isfile', lambda path: True)    # the corpus is not here
     control = nb.parse_args(['--leave-one-paper-out', '--crf', '--multi-task',
                              '--augment-mentions', '6', '--tag', 'm100', '--seed-offset', '100'])
     assert nb.variant_name(control) == 'crf_mt_mr6_m100'

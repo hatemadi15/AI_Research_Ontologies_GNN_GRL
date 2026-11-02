@@ -1359,7 +1359,9 @@ def test_week15_names_batch(monkeypatch, tmp_path):
     repeat then MuLMS's 7 subfields, lane 1 MaterioMiner's 4 papers at both granularities; every
     job carries --students 0 and --save-names with the names file of its variant; collect_names
     copies the ner_names files of a pulled output to a directory of their own."""
-    lane0, lane1 = _parsed(kj.batch_lanes('w15a'))
+    with monkeypatch.context() as m:
+        m.setattr(nb.os.path, 'isfile', lambda path: True)    # the corpora are not here
+        lane0, lane1 = _parsed(kj.batch_lanes('w15a'))
     assert lane0[0].tag == 'smokebb' and len(lane0) == 8 and len(lane1) == 8
     for a in lane0[1:]:
         assert a.students == 0 and a.teachers == 3 and a.silver_mentions and a.augment_names
@@ -1392,7 +1394,9 @@ def test_week17_batches_and_merge(tmp_path, monkeypatch):
     1 the 10 control jobs (crf_mt_mr6, one per seed offset); w17b the other two papers' names
     jobs on one lane. collect --merge unites one file written by two sessions for different
     papers and refuses a changed run."""
-    lane0, lane1 = _parsed(kj.batch_lanes('w17a'))
+    with monkeypatch.context() as m:
+        m.setattr(nb.os.path, 'isfile', lambda path: True)    # the corpus is not here
+        lane0, lane1 = _parsed(kj.batch_lanes('w17a'))
     assert lane0[0].tag == 'smokebc' and lane0[1].tag == 'smokebd'
     assert lane0[1].multi_task and lane0[1].augment_mentions == 3 and lane0[1].papers == [kj.PAPERS[0]]
     for a, paper in zip(lane0[2:], kj.PAPERS[:2]):
