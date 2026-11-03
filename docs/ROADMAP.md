@@ -6828,7 +6828,7 @@ decisions were never re-run" changes with the result.
 - **The push.** Batch `w20a` (42 jobs, 21 per lane) was pushed on 3
   November at 08:38 UTC, from the bundle of `393b482` (kernel version 20).
 
-### Week 21 protocol: a free generalist NER baseline (GLiNER), fixed before any run (3 November, 10:00 UTC)
+### Week 21 protocol: a free generalist NER baseline (GLiNER), fixed before any run (3 November, 09:39 UTC, the commit's time)
 
 *Why, and when.*
 - Paper B's round-1 referee (R11) asked for an LLM or generalist-NER
