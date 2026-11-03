@@ -20,6 +20,18 @@ minus out), with 95% Student-t intervals (metrics.mean_ci).
 Checks before any number is used: per unit, the rebuilt teachers' test F1 must equal the
 stored teachers' of the names runs at every seed, and the rebuilt coverage counts the stored
 ones (`self_training.names`); a unit that differs is listed in `checks` and left out.
+
+--week19 (ROADMAP §4, the week-19 protocol, Phase 1; reported, no verdict): the same split for
+week 19's arms, each by its own lexicon (the distinct (type, words) of its --names-file in
+data/processed/week19/, git-ignored), on each corpus's units and seeds: per arm, the arm and the
+6-copy control (crf_mr6) on the unseen test names in and out of the arm's lexicon, the arm's
+recall gains over the control on both parts (compare), the unseen names' recall and precision
+of every system unsplit, the graph arm minus the vote arm on those, paired over the units, and
+per unit the expected share of the replacement draws that are names: the pool of a type holds
+the training mentions and then the names, and every training mention is a draw with the same
+chance, so the share is the sum over types of g * n / (g + n) over the sum of g, with g a
+type's training mentions and n its names entries. Output: results/week19/ner_lexicon_recall_w19.json,
+aggregate counts only.
 """
 import argparse
 import json
@@ -31,6 +43,8 @@ import metrics
 import ner_mentions as nm
 from ner_ensemble import tags_to_spans
 from ner_seedmeans import DECISION_OFFSETS, LOPO, WEEK5_OFFSETS
+
+ROOT = Path(__file__).resolve().parents[2]
 
 NAMES_DIR = Path(__file__).resolve().parents[2] / 'results' / 'gpu_names'
 OUTPUT = nm.RESULTS_DIR / 'ner_lexicon_recall.json'
@@ -205,12 +219,136 @@ def analyse(directory=nm.RESULTS_DIR, names_dir=NAMES_DIR):
     return {k: v for k, v in out.items() if v is not None}
 
 
+# week 19 (--week19): per corpus the granularity, protocol, seeds and the 6-copy control; per
+# arm its --names-file letter and its system
+WEEK19_DIR = ROOT / 'data' / 'processed' / 'week19'
+WEEK19_OUTPUT = ROOT / 'results' / 'week19' / 'ner_lexicon_recall_w19.json'
+WEEK19_SETTINGS = {'mulms': ('mulms', nm.SUBFIELDS, DECISION_OFFSETS),
+                   'fine': ('fine', LOPO, WEEK5_OFFSETS)}
+WEEK19_CONTROL = 'crf_mr6'
+WEEK19_ARMS = {'g': 'crf_mrg6', 'v': 'crf_mrv6'}
+
+
+def names_lexicons(path):
+    """{run_id: (lexicon {(type, words)}, Counter of the entries' types)} of a --names-file."""
+    with open(path) as f:
+        store = json.load(f)
+    out = {}
+    for run_id, record in store['runs'].items():
+        entries = [(kind, tuple(words.split(' '))) for kind, words in record['names']]
+        out[run_id] = ({e for e in entries}, Counter(kind for kind, _ in entries))
+    return out
+
+
+def names_share(training_types, names_types):
+    """The expected share of mention replacement's draws that are names (module docstring):
+    training_types and names_types Counters of a unit's training mentions and names entries."""
+    total = sum(training_types.values())
+    if not total:
+        return None
+    drawn = sum(g * names_types[k] / (g + names_types[k]) for k, g in training_types.items())
+    return round(100 * drawn / total, 2)
+
+
+def training_types(files, data, granularity):
+    """{run_id: Counter of the types of its training mentions} from a family's first file."""
+    out = {}
+    for run in files[0]['runs']:
+        run_data, train, _ = nm.run_split(files[0], run, data, granularity)
+        out[run['run_id']] = Counter(kind for i in train
+                                     for _, _, kind in tags_to_spans(run_data[i][1])[0])
+    return out
+
+
+def unseen_rates(counts):
+    """Recall and precision on all the unseen test names (in and out together), percentages."""
+    gold = sum(counts['gold', p] for p in PARTS)
+    pred = sum(counts['pred', p] for p in PARTS)
+    return {'recall': round(100 * sum(counts['correct', p] for p in PARTS) / gold, 2)
+            if gold else None,
+            'precision': round(100 * sum(counts['pred_correct', p] for p in PARTS) / pred, 2)
+            if pred else None}
+
+
+def paired(method, reference, units, key):
+    """The method minus the reference on unseen_rates[key], paired over the units."""
+    values = [unseen_rates(method[u])[key] - unseen_rates(reference[u])[key] for u in units
+              if None not in (unseen_rates(method[u])[key], unseen_rates(reference[u])[key])]
+    if not values:
+        return None
+    ci = metrics.mean_ci(values)
+    return {'mean_diff': round(ci['mean'], 2), 'ci95': [round(x, 2) for x in ci['ci']],
+            'n_units': len(values), 'n_positive': sum(v > 0 for v in values)}
+
+
+def analyse_week19(directory=nm.RESULTS_DIR, week19_dir=WEEK19_DIR):
+    """--week19 (module docstring): {corpus: ...} for the corpora whose names files and arm
+    files are all there; {} before Phase 1."""
+    out = {}
+    for name, (granularity, protocol, offsets) in WEEK19_SETTINGS.items():
+        paths = {a: Path(week19_dir) / f'names_{name}_{a}.json' for a in WEEK19_ARMS}
+        systems = (WEEK19_CONTROL, *WEEK19_ARMS.values())
+        files = {s: nm.family_files(directory, granularity, protocol, s, offsets) for s in systems}
+        if not all(p.exists() for p in paths.values()) or not all(files.values()):
+            continue
+        data = nm.corpus(granularity)
+        lexicons = {a: names_lexicons(p) for a, p in paths.items()}
+        types = training_types(files[WEEK19_CONTROL], data, granularity)
+        units = sorted(set(types).intersection(*lexicons.values()))
+        entry = {'granularity': granularity, 'protocol': protocol, 'seeds': list(offsets),
+                 'units': units, 'arms': {}}
+        counts = {}
+        for arm, system in WEEK19_ARMS.items():
+            lex = {u: lexicons[arm][u][0] for u in units}
+            counts[arm] = {s: system_units(files[s], data, granularity, lex)
+                           for s in (WEEK19_CONTROL, system)}
+            entry['arms'][system] = {
+                'lexicon': {u: {'n_distinct': len(lex[u]),
+                                'n_entries': sum(lexicons[arm][u][1].values())} for u in units},
+                'names_share': {u: names_share(types[u], lexicons[arm][u][1]) for u in units},
+                'pooled': {s: unit_scores(sum((c[u] for u in units), Counter()))
+                           for s, c in counts[arm].items()},
+                'per_unit': {s: {u: unit_scores(c[u]) for u in units}
+                             for s, c in counts[arm].items()},
+                'minus_control': compare(counts[arm][system], counts[arm][WEEK19_CONTROL], units)}
+        # the unsplit unseen-name rates do not depend on the lexicon: any arm's counts serve
+        g, v = (counts[a][WEEK19_ARMS[a]] for a in ('g', 'v'))
+        control = counts['g'][WEEK19_CONTROL]
+        entry['unseen'] = {s: {u: unseen_rates(c[u]) for u in units}
+                           for s, c in ((WEEK19_CONTROL, control), (WEEK19_ARMS['g'], g),
+                                        (WEEK19_ARMS['v'], v))}
+        entry['graph_minus_vote'] = {k: paired(g, v, units, k) for k in ('recall', 'precision')}
+        entry['graph_minus_control'] = {k: paired(g, control, units, k)
+                                        for k in ('recall', 'precision')}
+        entry['vote_minus_control'] = {k: paired(v, control, units, k)
+                                       for k in ('recall', 'precision')}
+        out[name] = entry
+    return out
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
     parser.add_argument('--results', default=str(nm.RESULTS_DIR))
     parser.add_argument('--names', default=str(NAMES_DIR))
-    parser.add_argument('--out', default=str(OUTPUT))
+    parser.add_argument('--out', default=None)
+    parser.add_argument('--week19', action='store_true',
+                        help="week 19's arms by their own lexicons (data/processed/week19)")
     args = parser.parse_args(argv)
+    if args.week19:
+        out = analyse_week19(args.results)
+        if not out:
+            raise SystemExit('no week-19 arms with their names files yet (Phase 1, batch w19b)')
+        path = Path(args.out or WEEK19_OUTPUT)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(out, indent=1))
+        for name, part in out.items():
+            for k, d in part['graph_minus_vote'].items():
+                if d:
+                    print(f"{name}: graph minus vote, unseen-name {k} {d['mean_diff']:+.2f} "
+                          f"{d['ci95']}")
+        print(f'Saved {path}')
+        return
+    args.out = args.out or str(OUTPUT)
     out = analyse(args.results, args.names)
     if not out:
         raise SystemExit(f'no names files in {args.names} (kaggle_jobs.py collect after w15a)')

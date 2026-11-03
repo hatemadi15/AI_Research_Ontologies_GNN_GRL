@@ -209,6 +209,27 @@ COPIES_CONTROL = 'crf_mr6'
 WEEK17_NAMES = 'crf_mt_mrm6'        # week 17: the names on the multi-task model with 6 copies
 WEEK17_CONTROL = 'crf_mt_mr6'       # its matched control
 WEEK17_REFERENCES = ('crf_mt_mr', 'crf_mt', 'crf')   # reported: 3 copies, the multi-task model, the CRF head
+# week 19 (ROADMAP §4, the week-19 protocol, Phase 1): paper A's recipe (6 copies) with the
+# names of a --names-file, the graph lexicon (crf_mrg6) and the size-matched vote lexicon
+# (crf_mrv6), against the 6-copy control without names; crf_mrf6 replays paper A's lexicon
+# rebuilt from the candidate dump and must equal the stored names run (the replay check)
+WEEK19_GRAPH = 'crf_mrg6'
+WEEK19_VOTE = 'crf_mrv6'
+WEEK19_REPLAY = 'crf_mrf6'
+WEEK19_VARIANTS = (WEEK19_GRAPH, WEEK19_VOTE, WEEK19_REPLAY)
+WEEK18_VARIANTS = ('crf_mr6_bias',)     # week 18's control, decoded at a bias (ner_bias.py)
+# per corpus: the results-file prefix, the seeds and paper A's names run ('names' below)
+WEEK19_CORPORA = {'mulms': (f'mulms_{MULMS_PROTOCOLS[0]}', DECISION_OFFSETS, WEEK14_WINNER),
+                  'fine': (f'fine_{LOPO}', WEEK5_OFFSETS, WEEK14_ANALOGUE)}
+WEEK19_DECISIONS = {'G1': (WEEK19_GRAPH, COPIES_CONTROL), 'G2': (WEEK19_GRAPH, WEEK19_VOTE)}
+WEEK19_REPORTED = {'vote_minus_control': (WEEK19_VOTE, COPIES_CONTROL),
+                   'graph_minus_names': (WEEK19_GRAPH, 'names'),
+                   'vote_minus_names': (WEEK19_VOTE, 'names')}
+WEEK19_REPLAY_RUN = ('mulms', 'sofc', 300)    # crf_mrf6_m300 against crf_mrm_topic6_m300
+# what a replay may differ in: the machine's record, the timing, the teachers it did not
+# train and the file it read
+REPLAY_IGNORED = ('environment', 'runtime_sec', 'self_training', 'self_train_sha256',
+                  'names_file')
 MIXED_VARIANT = 'crf_mrm_mixed6'
 ABLATION_VARIANTS = ('crf_mrm_topic10k6', 'crf_mrm_topic20k6', 'crf_mrm_topiclow6',
                      'crf_mrm_topictwo6', 'crf_mrm_topiccap6')
@@ -733,12 +754,14 @@ def week12_variants(directory):
     decisions 1 and 2 for the screen's winner, week12_winner, reported for any other
     variant with those seeds, such as week 14's copy control) and ten_seeds (WEEK5_OFFSETS,
     no decision), each present when the variant and both references have every file of its
-    offsets. Week 14's variants (WEEK14_VARIANTS) are not week-12 variants."""
+    offsets. Week 14's, 18's and 19's variants (WEEK14_VARIANTS, WEEK18_VARIANTS,
+    WEEK19_VARIANTS) are not week-12 variants."""
     prefix = f'ner_results_mulms_{MULMS_PROTOCOLS[0]}_'
     variants = set()
     for path in sorted(Path(directory).glob(f'{prefix}crf_*_m*.json')):
         variant, _, offset = path.name[len(prefix):-len('.json')].rpartition('_m')
-        if (variant not in ('crf', 'crf_mr', 'crf_mrs') and variant not in WEEK14_VARIANTS
+        if (variant not in ('crf', 'crf_mr', 'crf_mrs')
+                and variant not in WEEK14_VARIANTS + WEEK18_VARIANTS + WEEK19_VARIANTS
                 and offset.isdigit() and variant.rpartition('_')[2] not in ('dc', 'dcr')):
             variants.add(variant)
     out = {}
@@ -1041,6 +1064,99 @@ def week17(directory):
     return out
 
 
+def replay_check(directory):
+    """Week 19's replay check: the run of WEEK19_REPLAY_RUN in the replay file (crf_mrf6,
+    paper A's lexicon rebuilt from the candidate dump and read through --names-file) against
+    the same run of the stored names run. `equal`: both runs, without REPLAY_IGNORED,
+    serialise to the same bytes (scores, history, predictions, n_augmented); `differ` names
+    the fields that do not match; `coverage_equal`: the replay's name coverage equals the
+    stored one. None until both files are there."""
+    corpus, unit, offset = WEEK19_REPLAY_RUN
+    prefix, _, stored_system = WEEK19_CORPORA[corpus]
+    replay = load_files(directory, [f'ner_results_{prefix}_{WEEK19_REPLAY}_m{offset}.json'])
+    stored = load_files(directory, [f'ner_results_{prefix}_{stored_system}_m{offset}.json'])
+    if not replay or not stored:
+        return None
+    a, b = ({r['run_id']: r for r in f[0]['runs']}.get(unit) for f in (replay, stored))
+    out = {'unit': unit, 'seed': offset, 'stored': f'{stored_system}_m{offset}'}
+    if a is None or b is None:
+        return {**out, 'equal': False, 'missing': [n for n, r in (('replay', a), ('stored', b))
+                                                    if r is None]}
+
+    def kept(run):
+        return json.dumps({k: v for k, v in run.items() if k not in REPLAY_IGNORED},
+                          sort_keys=True)
+    out['equal'] = kept(a) == kept(b)
+    out['differ'] = sorted(k for k in set(a) | set(b)
+                           if k not in REPLAY_IGNORED and a.get(k) != b.get(k))
+    out['coverage_equal'] = ((a.get('names_file') or {}).get('coverage')
+                             == (b.get('self_training') or {}).get('names'))
+    out['names_file_sha256'] = (a.get('names_file') or {}).get('sha256')
+    return out
+
+
+def augmentation(files):
+    """The copies of a family's runs: the mean of n_augmented over its runs and per unit,
+    and the SHA-256 of the --names-file its runs read (week 19's arms; none otherwise)."""
+    runs = [r for f in files for r in f['runs']]
+    per_unit = {}
+    for r in runs:
+        per_unit.setdefault(r['run_id'], []).append(r.get('n_augmented'))
+    known = [n for n in (r.get('n_augmented') for r in runs) if n is not None]
+    return {'n_augmented_mean': round(statistics.fmean(known), 1) if known else None,
+            'per_unit': {u: (round(statistics.fmean(v), 1) if None not in v else None)
+                         for u, v in per_unit.items()},
+            'names_file_sha256': sorted({r['names_file']['sha256'] for r in runs
+                                         if 'names_file' in r})}
+
+
+def week19(directory):
+    """Week 19 (ROADMAP §4, the week-19 protocol), Phase 1. replay: replay_check. Per corpus
+    of WEEK19_CORPORA (MuLMS's 7 held-out subfields at the decision seeds 300 to 900,
+    MaterioMiner's 4 papers fine-grained at seeds 0 to 900), when every file is there: the
+    graph arm `against` the control, the vote arm and paper A's names, the vote arm
+    `against` the control and the names (under `vote_arm`), each family's `augmentation`.
+    pooled, when both corpora are there: over the 11 units, each the mean of its seeds, the
+    paired differences of WEEK19_DECISIONS (G1 the graph arm minus the 6-copy control, G2
+    minus the vote arm; `passes`: the 95% Student-t CI of the micro-F1 difference above 0)
+    and of WEEK19_REPORTED (no verdict), per F1 average and per corpus. {} without files."""
+    out, scores = {}, {}
+    replay = replay_check(directory)
+    if replay is not None:
+        out['replay'] = replay
+    for corpus, (prefix, offsets, names) in WEEK19_CORPORA.items():
+        systems = (COPIES_CONTROL, names, WEEK19_VOTE, WEEK19_GRAPH)
+        files = {s: load_files(directory, [f'ner_results_{prefix}_{s}_m{off}.json'
+                                           for off in offsets]) for s in systems}
+        if not all(files.values()):
+            continue
+        entry = against(files, WEEK19_GRAPH, (COPIES_CONTROL, WEEK19_VOTE, names))
+        entry.update({'seeds': list(offsets), 'names': names,
+                      'vote_arm': against(files, WEEK19_VOTE, (COPIES_CONTROL, names)),
+                      'augmentation': {s: augmentation(files[s]) for s in systems}})
+        out.setdefault('corpora', {})[corpus] = entry
+        scores[corpus] = {('names' if s == names else s): system_scores(f)
+                          for s, f in files.items()}
+    if set(scores) != set(WEEK19_CORPORA):
+        return out
+    pooled = {}
+    for key, (system, reference) in {**WEEK19_DECISIONS, **WEEK19_REPORTED}.items():
+        diffs = {c: {u: {avg: sc[system][u][avg] - sc[reference][u][avg] for avg in F1_AVERAGES}
+                     for u in sc[system] if u in sc[reference]} for c, sc in scores.items()}
+        units = [d for c in diffs for d in diffs[c].values()]
+        entry = {'system': system, 'reference': reference, 'n_units': len(units),
+                 **{avg: spread([d[avg] for d in units], 'mean_diff') for avg in F1_AVERAGES},
+                 'per_corpus': {c: {'n_units': len(d),
+                                    'micro': spread([v['micro'] for v in d.values()],
+                                                    'mean_diff')}
+                                for c, d in diffs.items()}}
+        if key in WEEK19_DECISIONS:
+            entry.update({'decision': key, 'passes': entry['micro']['ci95'][0] > 0})
+        pooled[key] = entry
+    out['pooled'] = pooled
+    return out
+
+
 def topic(directory):
     """Week 14, 14.2 (the topic part of week14): V4 with the subfield's own topic corpus
     (WEEK14_WINNER) against V4 with the mixed corpus of the six other topics (MIXED_VARIANT),
@@ -1160,6 +1276,9 @@ def analyse(directory):
     out['week13'] = week13(directory, out['mulms'].get('week12'))
     out['week14'] = week14(directory)
     out['week17'] = week17(directory)
+    w19 = week19(directory)
+    if w19:                                   # absent until week 19's Phase 1 files exist
+        out['week19'] = w19
     out['paper_count'] = paper_count(directory)
     out['paper_diversity'] = paper_diversity(directory)
     out['errors'] = {}
@@ -1324,6 +1443,17 @@ def main(argv=None):
         for method, types in methods.items():
             print(f"  {method}, {g}-grained, per type (minus the CRF head): "
                   + ', '.join(f"{t} {row['diff']:+.2f}" for t, row in types.items()))
+    w19 = result.get('week19', {})
+    if 'replay' in w19:
+        r = w19['replay']
+        print(f"  week 19, the replay check ({r['unit']}, seed {r['seed']}, against "
+              f"{r['stored']}): {'identical' if r['equal'] else 'DIFFERS'}"
+              f"{'' if r['equal'] else ' in ' + ', '.join(r.get('differ') or r['missing'])}")
+    for key, e in w19.get('pooled', {}).items():
+        d = e['micro']
+        verdict = f" ({'passes' if e['passes'] else 'no'})" if 'decision' in e else ' (reported)'
+        print(f"  week 19, {e.get('decision', key)}: {e['system']} minus {e['reference']} over "
+              f"{e['n_units']} units: {d['mean_diff']:+.2f} {d['ci95']}{verdict}")
     out = args.out or os.path.join(args.results, OUT_NAME)
     with open(out, 'w') as f:
         json.dump(result, f, indent=2)

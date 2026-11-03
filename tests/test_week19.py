@@ -10,6 +10,7 @@ import pytest
 import graph_names as gn
 import kaggle_jobs as kj
 import ner_baseline as nb
+import ner_seed_analysis as sa
 from test_ner_self_training import RESULT_KEYS, _corpus, _load
 from test_ner_self_training import tiny_model, tiny_run  # noqa: F401  (fixtures)
 
@@ -198,6 +199,10 @@ def test_the_replay_of_a_harvested_lexicon_reproduces_the_names_run(tiny_run,  #
     replay = res['runs'][0]
     keys = (*RESULT_KEYS, 'test_pred', 'n_augmented')
     assert {k: replay[k] for k in keys} == {k: names_run[k] for k in keys}
+    # the replay check of ner_seed_analysis.py compares every other field as well
+    kept = [{k: v for k, v in r.items() if k not in sa.REPLAY_IGNORED}
+            for r in (replay, names_run)]
+    assert kept[0] == kept[1]
     sha = hashlib.sha256(path.read_bytes()).hexdigest()
     assert replay['names_file']['sha256'] == res['config']['names_file_sha256'] == sha
     assert replay['names_file']['coverage'] == names_run['self_training']['names']

@@ -812,3 +812,94 @@ def test_week17_names_on_the_strongest_base(tmp_path):
     assert e['control']['minus_crf_mt_mr']['micro']['per_run'] == [0.5] * 4
     assert e['control']['minus_crf_mt']['micro']['per_run'] == [3.5] * 4
     assert 'votes' not in e
+
+
+SUBFIELDS = ['electrolysis', 'graphene', 'pemfc', 'poly', 'semi', 'sofc', 'steel']
+
+
+def _week19_files(directory, prefix, system, units, offsets, score, extra=None):
+    """One results file per seed offset; score(offset index, unit index) gives micro F1."""
+    for j, off in enumerate(offsets):
+        runs = [{**_run(u, score(j, k)), **(extra(u) if extra else {})}
+                for k, u in enumerate(units)]
+        (directory / f'ner_results_{prefix}_{system}_m{off}.json').write_text(
+            json.dumps({'runs': runs}))
+
+
+def test_week19_decisions_pool_both_corpora_and_report_the_rest(tmp_path):
+    """Week 19, Phase 1: per corpus the graph arm against the control, the vote arm and
+    paper A's names; pooled over the 11 units G1 (graph minus the 6-copy control) and G2
+    (graph minus vote) with their verdicts, and the reported differences; absent until the
+    files are there; the week-19 arms are no week-12 variants."""
+    pytest.importorskip('scipy')
+    mulms, fine = 'mulms_leave_one_subfield_out', 'fine_leave_one_paper_out'
+    papers = ['p1', 'p2', 'p3', 'p4']
+    assert sa.week19(tmp_path) == {}
+    swing = {'crf_mrv6': lambda k: 3.0 if k % 2 == 0 else -3.0}        # G2 spreads, G1 does not
+
+    def family(prefix, units, offsets, system, base):
+        wobble = swing.get(system, lambda k: 0.0)
+        extra = ((lambda u: {'n_augmented': 100, 'names_file': {'sha256': f'sha-{system}'}})
+                 if system in sa.WEEK19_VARIANTS else (lambda u: {'n_augmented': 90}))
+        _week19_files(tmp_path, prefix, system, units, offsets,
+                      lambda j, k: base + k + j / 10 + wobble(k), extra)
+    for system, base in (('crf', 47), ('crf_mr', 49), ('crf_mr6', 50), ('crf_mrm_topic6', 51),
+                         ('crf_mrv6', 51.5), ('crf_mrg6', 52.5)):
+        family(mulms, SUBFIELDS, range(300, 1000, 100), system, base)
+    out = sa.week19(tmp_path)
+    assert list(out) == ['corpora'] and list(out['corpora']) == ['mulms']   # no pooled yet
+    e = out['corpora']['mulms']
+    assert e['seeds'] == list(range(300, 1000, 100)) and e['names'] == 'crf_mrm_topic6'
+    assert e['minus_crf_mr6']['micro']['per_run'] == [2.5] * 7
+    assert e['minus_crf_mrm_topic6']['micro']['per_run'] == [1.5] * 7
+    assert e['vote_arm']['minus_crf_mr6']['micro']['mean_diff'] == round(1.5 + 3 / 7, 2)
+    aug = e['augmentation']
+    assert aug['crf_mrg6']['n_augmented_mean'] == 100.0 and aug['crf_mr6']['n_augmented_mean'] == 90
+    assert aug['crf_mrg6']['names_file_sha256'] == ['sha-crf_mrg6']
+    assert aug['crf_mr6']['names_file_sha256'] == []
+    assert not {'crf_mrg6', 'crf_mrv6'} & set(sa.week12_variants(tmp_path))
+    for system, base in (('crf_mr6', 40), ('crf_mrm6', 41), ('crf_mrv6', 41.5),
+                         ('crf_mrg6', 42.5)):
+        family(fine, papers, range(0, 1000, 100), system, base)
+    pooled = sa.week19(tmp_path)['pooled']
+    g1, g2 = pooled['G1'], pooled['G2']
+    assert (g1['decision'], g1['system'], g1['reference'], g1['n_units']) == (
+        'G1', 'crf_mrg6', 'crf_mr6', 11)
+    assert g1['micro']['per_run'] == [2.5] * 11 and g1['passes']
+    assert g1['per_corpus'] == {'mulms': {'n_units': 7, 'micro': g1['per_corpus']['mulms']['micro']},
+                                'fine': {'n_units': 4, 'micro': g1['per_corpus']['fine']['micro']}}
+    # G2: the vote arm's swing makes the differences -2 and +4, 6 and 5 of them: no pass
+    assert sorted(g2['micro']['per_run']) == [-2.0] * 6 + [4.0] * 5 and not g2['passes']
+    assert g2['micro']['ci95'][0] < 0 < g2['micro']['ci95'][1]
+    assert 'decision' not in pooled['vote_minus_control'] and 'passes' not in pooled[
+        'vote_minus_control']
+    assert pooled['graph_minus_names']['micro']['per_run'] == [1.5] * 11
+    assert pooled['graph_minus_names']['reference'] == 'names'
+    assert set(pooled['G1']) >= {'micro', 'macro', 'weighted', 'micro_strict'}
+
+
+def test_week19_replay_check(tmp_path):
+    """The replay check: the replay's sofc run at seed 300 equals the stored names run's
+    without the machine's record, the timing, the teachers and the file it read; a changed
+    prediction is named."""
+    prefix = 'mulms_leave_one_subfield_out'
+    stored = {**_run('sofc', 55.47), 'test_pred': ['B-MAT O'], 'n_augmented': 1180,
+              'history': [1, 2], 'runtime_sec': 1806.1, 'environment': {'gpu': 'T4'},
+              'self_train_sha256': 'abc', 'self_training': {'names': {'n_distinct': 3}}}
+    (tmp_path / f'ner_results_{prefix}_crf_mrm_topic6_m300.json').write_text(
+        json.dumps({'runs': [{**_run('poly', 48.75)}, stored]}))
+    assert sa.replay_check(tmp_path) is None
+    replay = {k: v for k, v in stored.items() if k not in ('self_train_sha256', 'self_training')}
+    replay.update({'runtime_sec': 12.0, 'names_file': {'sha256': 'f' * 64, 'arm': 'f',
+                                                       'coverage': {'n_distinct': 3}}})
+    path = tmp_path / f'ner_results_{prefix}_crf_mrf6_m300.json'
+    path.write_text(json.dumps({'runs': [replay]}))
+    out = sa.replay_check(tmp_path)
+    assert out == {'unit': 'sofc', 'seed': 300, 'stored': 'crf_mrm_topic6_m300', 'equal': True,
+                   'differ': [], 'coverage_equal': True, 'names_file_sha256': 'f' * 64}
+    assert sa.week19(tmp_path) == {'replay': out}
+    path.write_text(json.dumps({'runs': [{**replay, 'test_pred': ['O O']}]}))
+    out = sa.replay_check(tmp_path)
+    assert not out['equal'] and out['differ'] == ['test_pred']
+    path.write_text(json.dumps({'runs': [{**replay, 'run_id': 'poly'}]}))
+    assert sa.replay_check(tmp_path)['missing'] == ['replay']
