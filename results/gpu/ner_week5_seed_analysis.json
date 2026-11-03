@@ -29799,6 +29799,992 @@
       }
     }
   },
+  "week20": {
+    "repeats": {
+      "smokebi": {
+        "repeat": "ner_results_mulms_leave_one_subfield_out_crf_smokebi.json",
+        "stored": "ner_results_mulms_leave_one_subfield_out_crf_m0.json",
+        "n_runs": 7,
+        "equal": true,
+        "environment_equal": true,
+        "differ": [],
+        "runs_differ": [],
+        "missing": []
+      },
+      "smokebj": {
+        "repeat": "ner_results_coarse_leave_one_paper_out_crf_p3n2_smokebj.json",
+        "stored": "ner_results_coarse_leave_one_paper_out_crf_p3n2_m0.json",
+        "n_runs": 12,
+        "equal": true,
+        "environment_equal": true,
+        "differ": [],
+        "runs_differ": [],
+        "missing": []
+      },
+      "smokebk": {
+        "repeat": "ner_results_coarse_leave_two_papers_out_crf_bias_smokebk.json",
+        "stored": "ner_results_coarse_leave_two_papers_out_crf_bias_m0.json",
+        "n_runs": 6,
+        "equal": true,
+        "environment_equal": true,
+        "differ": [],
+        "runs_differ": [],
+        "missing": []
+      },
+      "status": {
+        "checked": true,
+        "unchecked": [],
+        "environment_differs": false,
+        "differs": false
+      }
+    },
+    "spool": {
+      "crf_spool": {
+        "micro": {
+          "mean": 58.17,
+          "ci95": [
+            54.67,
+            61.67
+          ],
+          "per_run": [
+            61.62,
+            53.56,
+            59.37,
+            52.93,
+            57.29,
+            62.73,
+            59.7
+          ]
+        },
+        "micro_strict": {
+          "mean": 58.17,
+          "ci95": [
+            54.67,
+            61.67
+          ],
+          "per_run": [
+            61.62,
+            53.56,
+            59.37,
+            52.93,
+            57.29,
+            62.73,
+            59.7
+          ]
+        },
+        "macro": {
+          "mean": 37.68,
+          "ci95": [
+            35.91,
+            39.44
+          ],
+          "per_run": [
+            40.52,
+            36.01,
+            39.1,
+            35.1,
+            36.42,
+            38.14,
+            38.46
+          ]
+        },
+        "weighted": {
+          "mean": 56.26,
+          "ci95": [
+            51.53,
+            60.99
+          ],
+          "per_run": [
+            60.27,
+            49.42,
+            58.49,
+            49.94,
+            54.39,
+            62.48,
+            58.84
+          ]
+        }
+      },
+      "crf": {
+        "micro": {
+          "mean": 48.66,
+          "ci95": [
+            40.91,
+            56.4
+          ],
+          "per_run": [
+            55.85,
+            49.95,
+            50.02,
+            51.99,
+            32.49,
+            43.48,
+            56.82
+          ]
+        },
+        "micro_strict": {
+          "mean": 48.66,
+          "ci95": [
+            40.91,
+            56.4
+          ],
+          "per_run": [
+            55.85,
+            49.95,
+            50.02,
+            51.99,
+            32.49,
+            43.48,
+            56.82
+          ]
+        },
+        "macro": {
+          "mean": 29.22,
+          "ci95": [
+            23.36,
+            35.09
+          ],
+          "per_run": [
+            35.64,
+            28.77,
+            27.65,
+            36.2,
+            19.27,
+            23.58,
+            33.45
+          ]
+        },
+        "weighted": {
+          "mean": 45.81,
+          "ci95": [
+            37.5,
+            54.12
+          ],
+          "per_run": [
+            54.58,
+            44.79,
+            48.91,
+            49.31,
+            28.28,
+            41.39,
+            53.43
+          ]
+        }
+      },
+      "minus_crf": {
+        "micro": {
+          "mean_diff": 9.51,
+          "ci95": [
+            1.12,
+            17.91
+          ],
+          "per_run": [
+            5.77,
+            3.61,
+            9.35,
+            0.94,
+            24.8,
+            19.24,
+            2.88
+          ]
+        },
+        "micro_strict": {
+          "mean_diff": 9.51,
+          "ci95": [
+            1.12,
+            17.91
+          ],
+          "per_run": [
+            5.77,
+            3.61,
+            9.35,
+            0.94,
+            24.8,
+            19.24,
+            2.88
+          ]
+        },
+        "macro": {
+          "mean_diff": 8.45,
+          "ci95": [
+            2.61,
+            14.29
+          ],
+          "per_run": [
+            4.87,
+            7.24,
+            11.45,
+            -1.1,
+            17.15,
+            14.55,
+            5.01
+          ]
+        },
+        "weighted": {
+          "mean_diff": 10.45,
+          "ci95": [
+            1.7,
+            19.2
+          ],
+          "per_run": [
+            5.69,
+            4.62,
+            9.58,
+            0.63,
+            26.1,
+            21.09,
+            5.41
+          ]
+        }
+      },
+      "decision": "20.1",
+      "seeds": [
+        0,
+        100,
+        200,
+        300,
+        400,
+        500,
+        600,
+        700,
+        800,
+        900
+      ],
+      "n_subfields": 7,
+      "passes": true,
+      "decided": true,
+      "subfields": {
+        "electrolysis": {
+          "crf_spool": {
+            "micro": 61.62,
+            "macro": 40.52
+          },
+          "crf": {
+            "micro": 55.85,
+            "macro": 35.64
+          }
+        },
+        "graphene": {
+          "crf_spool": {
+            "micro": 53.56,
+            "macro": 36.01
+          },
+          "crf": {
+            "micro": 49.95,
+            "macro": 28.77
+          }
+        },
+        "pemfc": {
+          "crf_spool": {
+            "micro": 59.37,
+            "macro": 39.1
+          },
+          "crf": {
+            "micro": 50.02,
+            "macro": 27.65
+          }
+        },
+        "poly": {
+          "crf_spool": {
+            "micro": 52.93,
+            "macro": 35.1
+          },
+          "crf": {
+            "micro": 51.99,
+            "macro": 36.2
+          }
+        },
+        "semi": {
+          "crf_spool": {
+            "micro": 57.29,
+            "macro": 36.42
+          },
+          "crf": {
+            "micro": 32.49,
+            "macro": 19.27
+          }
+        },
+        "sofc": {
+          "crf_spool": {
+            "micro": 62.73,
+            "macro": 38.14
+          },
+          "crf": {
+            "micro": 43.48,
+            "macro": 23.58
+          }
+        },
+        "steel": {
+          "crf_spool": {
+            "micro": 59.7,
+            "macro": 38.46
+          },
+          "crf": {
+            "micro": 56.82,
+            "macro": 33.45
+          }
+        }
+      },
+      "validation": {
+        "crf_spool": {
+          "best_epoch": 7.24,
+          "val_f1": 70.37,
+          "units": {
+            "electrolysis": {
+              "best_epoch": 7.2,
+              "val_f1": 67.8
+            },
+            "graphene": {
+              "best_epoch": 7.9,
+              "val_f1": 74.53
+            },
+            "pemfc": {
+              "best_epoch": 8.5,
+              "val_f1": 65.92
+            },
+            "poly": {
+              "best_epoch": 6.1,
+              "val_f1": 74.47
+            },
+            "semi": {
+              "best_epoch": 6.6,
+              "val_f1": 72.6
+            },
+            "sofc": {
+              "best_epoch": 7.8,
+              "val_f1": 71.46
+            },
+            "steel": {
+              "best_epoch": 6.6,
+              "val_f1": 65.81
+            }
+          }
+        },
+        "crf": {
+          "best_epoch": 7.06,
+          "val_f1": 76.89,
+          "units": {
+            "electrolysis": {
+              "best_epoch": 7.9,
+              "val_f1": 72.75
+            },
+            "graphene": {
+              "best_epoch": 6.5,
+              "val_f1": 82.91
+            },
+            "pemfc": {
+              "best_epoch": 4.8,
+              "val_f1": 77.1
+            },
+            "poly": {
+              "best_epoch": 8.7,
+              "val_f1": 77.56
+            },
+            "semi": {
+              "best_epoch": 7.5,
+              "val_f1": 78.36
+            },
+            "sofc": {
+              "best_epoch": 6.7,
+              "val_f1": 69.01
+            },
+            "steel": {
+              "best_epoch": 7.3,
+              "val_f1": 80.56
+            }
+          }
+        }
+      },
+      "pools": {
+        "electrolysis": {
+          "n_documents": 46,
+          "n_subfields": 6
+        },
+        "graphene": {
+          "n_documents": 48,
+          "n_subfields": 6
+        },
+        "pemfc": {
+          "n_documents": 42,
+          "n_subfields": 6
+        },
+        "poly": {
+          "n_documents": 39,
+          "n_subfields": 6
+        },
+        "semi": {
+          "n_documents": 39,
+          "n_subfields": 6
+        },
+        "sofc": {
+          "n_documents": 46,
+          "n_subfields": 6
+        },
+        "steel": {
+          "n_documents": 40,
+          "n_subfields": 6
+        }
+      },
+      "remaining": {
+        "micro": {
+          "mean_diff": 7.55,
+          "ci95": [
+            4.05,
+            11.05
+          ],
+          "df": 6.2,
+          "n": [
+            5,
+            7
+          ]
+        },
+        "micro_strict": {
+          "mean_diff": 7.55,
+          "ci95": [
+            4.05,
+            11.05
+          ],
+          "df": 6.2,
+          "n": [
+            5,
+            7
+          ]
+        },
+        "macro": {
+          "mean_diff": 6.6,
+          "ci95": [
+            4.21,
+            8.99
+          ],
+          "df": 9.3,
+          "n": [
+            5,
+            7
+          ]
+        },
+        "weighted": {
+          "mean_diff": 8.29,
+          "ci95": [
+            3.57,
+            13.02
+          ],
+          "df": 6.1,
+          "n": [
+            5,
+            7
+          ]
+        }
+      },
+      "gap": {
+        "micro": {
+          "mean_diff": 17.06,
+          "ci95": [
+            9.31,
+            24.81
+          ],
+          "df": 6.0,
+          "n": [
+            5,
+            7
+          ]
+        },
+        "micro_strict": {
+          "mean_diff": 17.06,
+          "ci95": [
+            9.31,
+            24.81
+          ],
+          "df": 6.0,
+          "n": [
+            5,
+            7
+          ]
+        },
+        "macro": {
+          "mean_diff": 15.05,
+          "ci95": [
+            9.13,
+            20.98
+          ],
+          "df": 7.2,
+          "n": [
+            5,
+            7
+          ]
+        },
+        "weighted": {
+          "mean_diff": 18.74,
+          "ci95": [
+            10.43,
+            27.05
+          ],
+          "df": 6.0,
+          "n": [
+            5,
+            7
+          ]
+        }
+      },
+      "dependence": {
+        "shared_articles": {
+          "mean_diff": 9.51,
+          "ci95": [
+            -0.57,
+            19.6
+          ],
+          "p_two_sided": 0.0605,
+          "se_ratio": 1.201,
+          "correlated_pairs": 5,
+          "above_0": false
+        },
+        "every_pair": {
+          "mean_diff": 9.51,
+          "ci95": [
+            -5.82,
+            24.84
+          ],
+          "p_two_sided": 0.1798,
+          "se_ratio": 1.826,
+          "correlated_pairs": 21,
+          "above_0": false
+        }
+      }
+    },
+    "diversity": {
+      "decision": {
+        "fine": {
+          "decision": "20.2",
+          "seeds": [
+            300,
+            400,
+            500,
+            600,
+            700,
+            800,
+            900
+          ],
+          "papers": {
+            "10.1007_s11340-021-00758-x.conll": {
+              "two": 48.01,
+              "three_at_two": 49.43,
+              "three": 51.06
+            },
+            "10.1038_ncomms7164.conll": {
+              "two": 33.48,
+              "three_at_two": 37.48,
+              "three": 44.29
+            },
+            "10.1038_s41467-020-19071-7.conll": {
+              "two": 32.3,
+              "three_at_two": 37.92,
+              "three": 48.67
+            },
+            "10.3390_met10111458.conll": {
+              "two": 31.29,
+              "three_at_two": 36.39,
+              "three": 41.95
+            }
+          },
+          "two": {
+            "mean": 36.27,
+            "ci95": [
+              23.74,
+              48.81
+            ],
+            "per_run": [
+              48.01,
+              33.48,
+              32.3,
+              31.29
+            ]
+          },
+          "three_at_two": {
+            "mean": 40.3,
+            "ci95": [
+              30.57,
+              50.04
+            ],
+            "per_run": [
+              49.43,
+              37.48,
+              37.92,
+              36.39
+            ]
+          },
+          "three": {
+            "mean": 46.49,
+            "ci95": [
+              39.93,
+              53.05
+            ],
+            "per_run": [
+              51.06,
+              44.29,
+              48.67,
+              41.95
+            ]
+          },
+          "diversity": {
+            "mean_diff": 4.03,
+            "ci95": [
+              1.06,
+              7.0
+            ],
+            "per_run": [
+              1.42,
+              4.0,
+              5.62,
+              5.09
+            ],
+            "passes": true
+          },
+          "size": {
+            "mean_diff": 6.19,
+            "ci95": [
+              0.21,
+              12.17
+            ],
+            "per_run": [
+              1.63,
+              6.81,
+              10.75,
+              5.56
+            ]
+          },
+          "passes": true,
+          "dependence": {
+            "mean_diff": 4.03,
+            "ci95": [
+              -0.51,
+              8.57
+            ],
+            "p_two_sided": 0.0664,
+            "se_ratio": 1.528,
+            "correlated_pairs": 6,
+            "above_0": false
+          }
+        },
+        "coarse": {
+          "decision": "20.3",
+          "seeds": [
+            300,
+            400,
+            500,
+            600,
+            700,
+            800,
+            900
+          ],
+          "papers": {
+            "10.1007_s11340-021-00758-x.conll": {
+              "two": 51.72,
+              "three_at_two": 55.06,
+              "three": 59.64
+            },
+            "10.1038_ncomms7164.conll": {
+              "two": 56.32,
+              "three_at_two": 57.96,
+              "three": 62.0
+            },
+            "10.1038_s41467-020-19071-7.conll": {
+              "two": 45.71,
+              "three_at_two": 50.31,
+              "three": 55.97
+            },
+            "10.3390_met10111458.conll": {
+              "two": 45.02,
+              "three_at_two": 49.52,
+              "three": 55.67
+            }
+          },
+          "two": {
+            "mean": 49.69,
+            "ci95": [
+              41.19,
+              58.2
+            ],
+            "per_run": [
+              51.72,
+              56.32,
+              45.71,
+              45.02
+            ]
+          },
+          "three_at_two": {
+            "mean": 53.21,
+            "ci95": [
+              46.85,
+              59.57
+            ],
+            "per_run": [
+              55.06,
+              57.96,
+              50.31,
+              49.52
+            ]
+          },
+          "three": {
+            "mean": 58.32,
+            "ci95": [
+              53.47,
+              63.16
+            ],
+            "per_run": [
+              59.64,
+              62.0,
+              55.97,
+              55.67
+            ]
+          },
+          "diversity": {
+            "mean_diff": 3.52,
+            "ci95": [
+              1.32,
+              5.72
+            ],
+            "per_run": [
+              3.34,
+              1.63,
+              4.6,
+              4.5
+            ],
+            "passes": true
+          },
+          "size": {
+            "mean_diff": 5.1,
+            "ci95": [
+              3.57,
+              6.64
+            ],
+            "per_run": [
+              4.58,
+              4.04,
+              5.66,
+              6.14
+            ]
+          },
+          "passes": true,
+          "dependence": {
+            "mean_diff": 3.52,
+            "ci95": [
+              0.16,
+              6.88
+            ],
+            "p_two_sided": 0.0447,
+            "se_ratio": 1.528,
+            "correlated_pairs": 6,
+            "above_0": true
+          }
+        }
+      },
+      "ten_seeds": {
+        "fine": {
+          "seeds": [
+            0,
+            100,
+            200,
+            300,
+            400,
+            500,
+            600,
+            700,
+            800,
+            900
+          ],
+          "papers": {
+            "10.1007_s11340-021-00758-x.conll": {
+              "two": 47.9,
+              "three_at_two": 49.24,
+              "three": 51.0
+            },
+            "10.1038_ncomms7164.conll": {
+              "two": 34.38,
+              "three_at_two": 37.35,
+              "three": 43.74
+            },
+            "10.1038_s41467-020-19071-7.conll": {
+              "two": 34.15,
+              "three_at_two": 38.38,
+              "three": 48.73
+            },
+            "10.3390_met10111458.conll": {
+              "two": 31.95,
+              "three_at_two": 36.12,
+              "three": 42.36
+            }
+          },
+          "two": {
+            "mean": 37.1,
+            "ci95": [
+              25.51,
+              48.69
+            ],
+            "per_run": [
+              47.9,
+              34.38,
+              34.15,
+              31.95
+            ]
+          },
+          "three_at_two": {
+            "mean": 40.27,
+            "ci95": [
+              30.65,
+              49.89
+            ],
+            "per_run": [
+              49.24,
+              37.35,
+              38.38,
+              36.12
+            ]
+          },
+          "three": {
+            "mean": 46.46,
+            "ci95": [
+              39.96,
+              52.95
+            ],
+            "per_run": [
+              51.0,
+              43.74,
+              48.73,
+              42.36
+            ]
+          },
+          "diversity": {
+            "mean_diff": 3.18,
+            "ci95": [
+              1.02,
+              5.33
+            ],
+            "per_run": [
+              1.34,
+              2.97,
+              4.23,
+              4.17
+            ],
+            "above_0": true
+          },
+          "size": {
+            "mean_diff": 6.18,
+            "ci95": [
+              0.6,
+              11.76
+            ],
+            "per_run": [
+              1.76,
+              6.38,
+              10.35,
+              6.24
+            ]
+          }
+        },
+        "coarse": {
+          "seeds": [
+            0,
+            100,
+            200,
+            300,
+            400,
+            500,
+            600,
+            700,
+            800,
+            900
+          ],
+          "papers": {
+            "10.1007_s11340-021-00758-x.conll": {
+              "two": 52.48,
+              "three_at_two": 55.64,
+              "three": 60.27
+            },
+            "10.1038_ncomms7164.conll": {
+              "two": 56.24,
+              "three_at_two": 58.14,
+              "three": 62.54
+            },
+            "10.1038_s41467-020-19071-7.conll": {
+              "two": 45.78,
+              "three_at_two": 50.16,
+              "three": 55.58
+            },
+            "10.3390_met10111458.conll": {
+              "two": 45.09,
+              "three_at_two": 49.81,
+              "three": 56.02
+            }
+          },
+          "two": {
+            "mean": 49.9,
+            "ci95": [
+              41.33,
+              58.47
+            ],
+            "per_run": [
+              52.48,
+              56.24,
+              45.78,
+              45.09
+            ]
+          },
+          "three_at_two": {
+            "mean": 53.44,
+            "ci95": [
+              46.89,
+              59.99
+            ],
+            "per_run": [
+              55.64,
+              58.14,
+              50.16,
+              49.81
+            ]
+          },
+          "three": {
+            "mean": 58.6,
+            "ci95": [
+              53.24,
+              63.97
+            ],
+            "per_run": [
+              60.27,
+              62.54,
+              55.58,
+              56.02
+            ]
+          },
+          "diversity": {
+            "mean_diff": 3.54,
+            "ci95": [
+              1.5,
+              5.58
+            ],
+            "per_run": [
+              3.15,
+              1.9,
+              4.38,
+              4.72
+            ],
+            "above_0": true
+          },
+          "size": {
+            "mean_diff": 5.17,
+            "ci95": [
+              3.86,
+              6.47
+            ],
+            "per_run": [
+              4.63,
+              4.41,
+              5.42,
+              6.21
+            ]
+          }
+        }
+      }
+    }
+  },
   "paper_count": {
     "fine": {
       "papers": {

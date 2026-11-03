@@ -1156,7 +1156,7 @@ def ner_notes(res):
     return (note + sofc_note(analysis) + mulms_note(analysis) + week13_note(analysis)
             + week14_note(analysis) + week17_note(analysis)
             + week18_note(res.get(GPU_PREFIX + WEEK18_FILE) or {})
-            + week19_note(res.get(WEEK19_FILE) or {}))
+            + week19_note(res.get(WEEK19_FILE) or {}) + week20_note(analysis))
 
 
 WEEK13_CORPORA = {'mulms': "MuLMS's 7 held-out subfields",
@@ -1343,6 +1343,34 @@ def week19_note(probe):
             f"points over the vote and +{margins['coverage_vs_mlp']:g} over the MLP, its "
             f"wrong-type rate at most +{margins['wrong_type_vs_vote']:g} over the vote's) "
             f"{verdict}.\n")
+
+
+
+def week20_note(analysis):
+    """The week-20 bullet (ROADMAP §4, the week-20 protocol) from the week-5 analyses file ('' without
+    its week20 section's decisions): 20.1, MuLMS's held-out pool drawn by sentence against the
+    stored article pool, with the remaining part of the gap; 20.2 and 20.3, a third paper at equal
+    size on the fresh seeds 300 to 900; whether the repeats hold."""
+    w = analysis.get('week20') or {}
+    spool, div = w.get('spool') or {}, (w.get('diversity') or {}).get('decision') or {}
+    if not spool.get('minus_crf') or not div:
+        return ''
+    word = {True: 'passes', False: 'no'}
+    status = (w.get('repeats') or {}).get('status') or {}
+    held = 'the repeats hold' if status.get('checked') and not status.get('differs') else \
+        'the repeats are not all checked or equal'
+    parts = [f"20.1 (MuLMS's 400-sentence pool drawn by sentence from all other subfields' "
+             f"articles against the stored pool of 2-3 articles, 7 held-out subfields, 10 seeds) "
+             f"{delta_cell(spool['minus_crf']['micro'])}, {word[spool['passes']]}; the remaining "
+             f"part, random-split pool minus sentence pool, {delta_cell(spool['remaining']['micro'])}"
+             f" (Welch) of the {spool['gap']['micro']['mean_diff']:.2f}-point gap"]
+    for g, label in (('fine', 'fine'), ('coarse', 'coarse')):
+        e = div.get(g)
+        if e:
+            parts.append(f"{e['decision']} (a third paper at equal size, {label}-grained, seeds "
+                         f"300-900) {delta_cell(e['diversity'])}, {word[e['passes']]}")
+    return ("* NER week 20 (two controls for paper B's first referee): " + '; '.join(parts)
+            + f"; {held}.\n")
 
 
 def week18_readings(matched):

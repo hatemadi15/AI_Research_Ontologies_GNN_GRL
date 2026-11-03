@@ -582,6 +582,27 @@ the stored ones on every unit. Outcome: the gate fails (G 16.78%, V 24.86%,
 M 18.80% coverage; wrong-type 4.65% against 10.14%), so Phase 1 (`w19b`) was
 not run.
 
+Week 20 (the week-20 protocol, ROADMAP §4; fixed 3 November 07:00 UTC before
+any run): two controls for paper B's first referee. In `gpu/`:
+- `crf_spool_m<N>`: MuLMS's held-out subfields with the 400-sentence pool
+  drawn by sentence (`--pool-by-sentence`), seeds 0-900;
+- `crf_p3n2_m<N>` and `crf_bias_m<N>` at seed offsets 300-900: week 8's
+  two sides, three papers at the size of two and the two papers alone
+  (the inner folds read at D = 0).
+
+The analysis is the `week20` section of `gpu/ner_week5_seed_analysis.json`
+(repeats, `spool`, `diversity`), and the `spool` section of
+`gpu/ner_mentions.json` gives seen and unseen recall. `gpu_repeats/` holds
+the versioned repeat files that the analysis reads by default: `smokebi`,
+`smokebj` and `smokebk`, each identical to its stored run but for
+`runtime_sec`. Run record: `w20a` from the bundle of `393b482` (kernel
+version 20), pushed 08:38 UTC and completed 12:25 UTC; `smokebh` is
+identical to `smokebf`. Outcome:
+- 20.1: +9.51 [+1.12, +17.91], passes; the remaining gap is +7.55 (Welch
+  [+4.05, +11.05]);
+- 20.2: +4.03 [+1.06, +7.00], passes;
+- 20.3: +3.52 [+1.32, +5.72], passes.
+
 Paper B's post hoc checks (review round 1, 3 November; none decides
 anything): `gpu/paper_b_checks.json` (`paper_b_checks.py`) enumerates the
 111 pre-registered decisions with their per-unit differences. It checks

@@ -1916,3 +1916,21 @@ def test_week18_note():
     assert ('; without the flagged subfields (pre-specified): 18.1 +5.00 [-1.00, +11.00] '
             '(1/1 above 0), 18.2 +5.00 [-1.00, +11.00]; the flagged subfields matched') in note
     assert note.endswith("(post hoc): 18.1 +5.00 [-1.00, +11.00] (1/1 above 0), 18.2 +5.00 [-1.00, +11.00]\n")
+
+
+def test_week20_note():
+    import report_results as rr
+    assert rr.week20_note({}) == '' and rr.week20_note({'week20': {'spool': {}}}) == ''
+    d = lambda m, lo, hi: {'mean_diff': m, 'ci95': [lo, hi]}
+    analysis = {'week20': {
+        'repeats': {'status': {'checked': True, 'differs': False}},
+        'spool': {'minus_crf': {'micro': d(9.51, 1.12, 17.91)}, 'passes': True,
+                  'remaining': {'micro': d(7.55, 4.05, 11.05)}, 'gap': {'micro': d(17.06, 9.31, 24.81)}},
+        'diversity': {'decision': {
+            'fine': {'decision': '20.2', 'diversity': d(4.03, 1.06, 7.0), 'passes': True},
+            'coarse': {'decision': '20.3', 'diversity': d(3.52, -0.1, 5.72), 'passes': False}}}}}
+    note = rr.week20_note(analysis)
+    assert note.startswith('* NER week 20') and note.endswith('the repeats hold.\n')
+    assert '+9.51 [+1.12, +17.91], passes' in note and '+7.55 [+4.05, +11.05] (Welch) of the 17.06' in note
+    assert '20.2 (a third paper at equal size, fine-grained, seeds 300-900) +4.03 [+1.06, +7.00], passes' in note
+    assert '20.3' in note and '+3.52 [-0.10, +5.72], no' in note

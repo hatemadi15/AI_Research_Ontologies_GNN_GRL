@@ -1,6 +1,6 @@
 # Week 20 plan (3 November 2026): two controls paper B's first referee asked for
 
-*Status: checked before any run by an independent referee (a Fable-model
+*Status: run and decided on 3 November: 20.1, 20.2 and 20.3 pass (`docs/ROADMAP.md` §4, the week-20 outcome). Checked before any run by an independent referee (a Fable-model
 referee, 3 November): "approve with required changes", with nine required
 items and seven suggestions. Every factual claim it made was checked
 against the files, and its required items are applied below, as are six

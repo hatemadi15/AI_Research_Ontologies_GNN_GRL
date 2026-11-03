@@ -32,13 +32,14 @@ with fine-tuned encoder taggers, under protocols committed before their
 results, with 7 or 10 model seeds per unit and paired intervals over
 held-out documents. A held-out paper costs 28 to 31 F1 points
 fine-grained on MaterioMiner (17 to 20 coarse-grained), and a held-out
-MuLMS subfield 17, though its models also train on fewer articles; on
+MuLMS subfield 17, of which 9.5 return when its training sentences come
+from all the other subfields' articles rather than two or three; on
 SOFC-Exp, whose articles share one topic, the 3.5 points are not
 established. The loss is mostly names: 81% of a new MaterioMiner paper's
 entities and 88% of a new MuLMS subfield's are names no training sentence
-annotates, and the model finds about a third of them. Of 111
+annotates, and the model finds about a third of them. Of 114
 pre-registered decisions on the additions a practitioner would reach for,
-24 pass, where about 3 would by chance. Mention replacement passes on
+27 pass, where about 3 would by chance. Mention replacement passes on
 MaterioMiner's held-out papers, multi-task training on its random splits,
 and seed votes add 0.8 to 2.5 points wherever measured. Label semantics,
 self-training, document context and recall calibration are not shown to
@@ -93,7 +94,8 @@ two probes without decisions trained on CPUs (Section 7.6).
 
 The results are these. The published numbers reproduce (Section 5.1). A
 held-out document costs 28 to 31 F1 points fine-grained on MaterioMiner
-and 17 on MuLMS, whose held-out models also train on fewer articles; on
+and 17 on MuLMS, of which 9.5 return when the held-out models' training
+sentences come from all the other subfields' articles (Section 5.2); on
 SOFC-Exp the 3.5 points are not established (Welch interval [−0.90,
 +7.86]). The gap is largest where held-out documents add the most names
 that training has not seen, an ordering over four settings rather than a
@@ -117,11 +119,11 @@ MuLMS's held-out subfields); document-level label propagation passes on
 MuLMS and coarse-grained on MaterioMiner by under a point; harvested
 names pass on MaterioMiner and, under a pooled criterion adopted
 mid-study, pooled with MuLMS, without being shown to add to mention
-replacement; the rest are not shown to help. 111 pre-registered
-decisions, 24 passing, are counted in Section 7.7. A third annotated paper
+replacement; the rest are not shown to help. 114 pre-registered
+decisions, 27 passing, are counted in Section 7.7. A third annotated paper
 adds as much on top of two papers as the best method adds on top of three
-(exploratory); at equal sentence counts it keeps a sixth of its gain
-fine-grained and two fifths coarse-grained (3 seeds), and the rest is its
+(exploratory); at equal sentence counts it keeps about two fifths of its
+gain at both levels (re-decided on 7 fresh seeds), and the rest is its
 sentences (Section 8).
 Section 9 draws the lessons for anyone evaluating an extractor that will
 meet new documents.
@@ -332,11 +334,26 @@ the models train on 340 sentences, about MaterioMiner's training size:
 for a held-out subfield, from two or three whole articles of the others;
 for a random split, from all 50 articles. The gap below therefore mixes
 the change of topic with fewer training documents at equal size (Section
-3; week 20 separates them). The CRF head scores 65.72 [65.25,
+3; week 20 separates them, below). The CRF head scores 65.72 [65.25,
 66.19] over 5 random splits of that size and 48.66 [40.91, 56.40] over
 the 7 held-out subfields (10 seeds each; Figure 1, fourth panel): a gap
 of 17.06 points (Welch 95% interval [+9.31, +24.81]; post hoc). Per
 subfield it scores 32.49 (semi) to 56.82 (steel).
+
+Week 20 split the gap (decision 20.1). The same 400 pool sentences per
+held-out subfield, drawn by sentence from all the other subfields'
+articles (39 to 48 articles from all six) instead of two or three whole
+articles, raise the CRF head to 58.17 [54.67, 61.67]: +9.51 [+1.12,
++17.91] over the article pool, paired over the 7 subfields (10 seeds),
+with every subfield gaining (+0.94 to +24.80). With the post hoc
+allowance for pools that share articles, the interval is [−0.57,
++19.60]. The sentence pool also differs in its subfields (all six
+against one to three) and its validation sentences. It lowers the share
+of unseen test names from 88% to 75% and raises recall on unseen names
+from 39.4 to 52.6. The remaining 7.55 points (Welch [+4.05, +11.05])
+set an unseen subfield's documents against seen documents' sentences:
+topic shift and document novelty together, with the test sets'
+composition, not separated here.
 88% of a held-out subfield's test names are unseen, 57% on random
 splits.
 
@@ -876,17 +893,18 @@ A's 31.5% and 22.2%.)
 
 ### 7.7 The count
 
-Through week 19 the programme took 111 pre-registered decisions (weeks 2
-to 18; weeks 15, 16 and 19 took none, and week 1's comparisons (class
+Through week 20 the programme took 114 pre-registered decisions (weeks 2
+to 20; weeks 15, 16 and 19 took none, and week 1's comparisons (class
 weights and the CRF head) are left out, since they have no protocol in `docs/ROADMAP.md` §4), 15
 three-seed screens (Table 2; paper A, Supplementary Table S5) and week
-19's lexicon screen, which failed (Section 7.6). 24
-decisions pass, where about 2.8 would if nothing worked. By design: 6
+19's lexicon screen, which failed (Section 7.6). 27
+decisions pass, where about 2.9 would if nothing worked. By design: 6
 with one run per split (week 2), none passing; 24 with 3 seeds, 6
 passing, namely the 22 of weeks 3 and 4 (4 passing, none of which
 survived its 10-seed re-run) and week 8's 2 on a third paper at equal
-size (both passing, never re-run); 81 with 7 or 10 seeds, 18 passing (75
-with 10 seeds, 5 on MuLMS's 7 decision seeds, D7 on both). By addition,
+size (both passing, re-run in week 20); 84 with 7 or 10 seeds, 21
+passing (76 with 10 seeds, 7 with 7 seeds: 5 on MuLMS's 7 decision seeds
+and week 20's 2 on a third paper; D7 on both). By addition,
 with 7 or 10 seeds (8 of them on MaterioMiner's random splits):
 
 | Addition | Decisions | Pass | Where it holds |
@@ -900,6 +918,7 @@ with 7 or 10 seeds (8 of them on MaterioMiner's random splits):
 | document-level label propagation | 10: 6 on MaterioMiner, 2 on MuLMS, 2 on SOFC-Exp | 2 | MuLMS and coarse-grained MaterioMiner; loses on SOFC-Exp |
 | label semantics, self-training, document context, multi-task self-training, recall calibration, coarse-to-fine completion | 28 (6, 6, 5, 4, 5 and 2), 2 of them on SOFC-Exp | 0 | nowhere; DeBERTa-v3-large stopped at its screen, and its SOFC-Exp decision did not run |
 | SOFC-Exp's test articles cut as its training articles are (a measurement) | 2 | 2 | — |
+| MuLMS's pool drawn by sentence, and a third paper at equal size on fresh seeds (measurements, week 20) | 3 | 3 | MuLMS; MaterioMiner at both levels |
 
 With 3 seeds, label semantics passes 2 of 8 decisions (4 of them on the
 multi-task model), self-training 1 of 6, multi-task training 1 of 4, the
@@ -907,8 +926,10 @@ mixed-backbone vote 0 of 2, in-domain pre-training 0 of 2 and a third
 paper at equal size 2 of 2; with one run per split, week 2's multi-task
 training, domain-adaptive pre-training and seed vote pass none of 6.
 
-Three post hoc readings qualify the 24 passes (review round 1;
-`paper_b_checks.py`); none changes a verdict.
+Three post hoc readings qualify the 24 passes of weeks 2 to 18 (review
+round 1; `paper_b_checks.py`); none changes a verdict. Week 20's three
+passes carry the dependence reading fixed in their protocol: the
+coarse-grained third paper keeps its margin, the other two lose it.
 - **Shared training documents.** Paper A's model of the units'
   dependence (Section 10: a correlation of 1/4 between MaterioMiner's
   papers, 1/5 between SOFC-Exp's folds, 1/4 between MuLMS subfields whose
@@ -955,10 +976,18 @@ every paper gains, from +3.2 to +11.6. A third paper also brings more
 sentences. A pre-registered run separates the two by training on three
 papers cut to the size of two. At the same number of sentences, the third
 paper adds +1.18 [+0.22, +2.15] fine-grained (39.02 to 40.20) and +3.59
-[+1.59, +5.58] coarse-grained (50.37 to 53.96), and every paper gains. Its
-own sentences add +6.17 [+1.10, +11.24] and +5.31 [+4.13, +6.50].
-By point estimate, diversity is thus about a sixth of the gain fine-grained and two fifths
-coarse-grained.
+[+1.59, +5.58] coarse-grained (50.37 to 53.96) on week 8's 3 seeds, and
+every paper gains. Its own sentences add +6.17 [+1.10, +11.24] and +5.31
+[+4.13, +6.50]. Week 20 re-decided both on seeds 300–900, which week 8
+had not seen (decisions 20.2 and 20.3). At equal size the third paper
+adds +4.03 [+1.06, +7.00] fine-grained (36.27 to 40.30) and +3.52 [+1.32,
++5.72] coarse-grained (49.69 to 53.21), again on every paper, and its
+own sentences +6.19 [+0.21, +12.17] and +5.10 [+3.57, +6.64]. With the
+post hoc allowance for shared papers, the fine-grained interval reaches
+−0.51 and the coarse-grained one keeps its margin ([+0.16, +6.88]). By
+point estimate, diversity is about two fifths of the gain at both levels
+on the fresh seeds (a sixth fine-grained on week 8's 3); over all 10
+seeds it adds +3.18 [+1.02, +5.33] and +3.54 [+1.50, +5.58].
 
 A third paper matches the largest method gains measured on unseen papers
 (mention replacement on the multi-task model, +6.73 fine-grained; with six
@@ -998,8 +1027,8 @@ their increment over mention replacement is not established.
    machine changed. A 3-seed
    screen is a way to choose what to run, on seeds the decision will not
    use, never a result (this programme's weeks 6 and 7 and paper A's D5
-   still decided on all ten seeds, and week 8's two 3-seed decisions were
-   never re-run).
+   still decided on all ten seeds, and week 8's two 3-seed decisions
+   passed again on 7 fresh seeds in week 20).
 4. **Take the vote.** Three seeds' majority adds 1.3 to 2.5 points on
    MaterioMiner and MuLMS and 0.8 to 2.4 on SOFC-Exp (reported, not
    decided), at the cost of three trainings.
@@ -1008,12 +1037,12 @@ their increment over mention replacement is not established.
    were not shown to gain on SOFC-Exp, whose held-out articles bring
    fewer new names and whose baseline leaves less headroom; which of the
    two blocks them is not known, so check both before adopting a method.
-6. **Pre-register and count.** Of 111 decisions, 24 pass; a paper that
-   reported the 24 alone would read as a different programme. The count
+6. **Pre-register and count.** Of 114 decisions, 27 pass; a paper that
+   reported the 27 alone would read as a different programme. The count
    is part of the result.
 7. **Annotate new documents.** A third paper adds 7 to 9 points on a new
    paper, as much as the best method; at equal sentence counts it still
-   adds 1.2 and 3.6 points (3 seeds), but most of its gain is its
+   adds 4.0 and 3.5 points (7 fresh seeds), but most of its gain is its
    sentences.
 
 ## 10 Limitations
@@ -1057,9 +1086,9 @@ their increment over mention replacement is not established.
   chose differently, which no model trained on the other papers can
   learn. The decisions use strict F1 for comparability; the looser
   criteria are reported, not decided on.
-- **The count is of this programme's choices.** The 111 decisions test
+- **The count is of this programme's choices.** The 114 decisions test
   the additions we chose, in the order we chose them, with amendments
-  marked; another programme would test others. About 2.8 would pass by
+  marked; another programme would test others. About 2.9 would pass by
   chance whatever their dependence, which only makes chance passes come
   together. The votes share their members, the pooled decisions share
   units with the per-corpus ones, and the units share training documents
