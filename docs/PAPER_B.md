@@ -3,14 +3,15 @@
 *The first draft of 30 October (begun ahead of week 16 on the author's
 go-ahead; `docs/METHODS_PLAN.md` §7), brought up to date on 3 November
 with the record through week 18 by an audit against the results files
-and the submitted paper A. It is the evaluation paper of the two decided
+and the submitted paper A, then with week 19's screen (Section 7.6). It
+is the evaluation paper of the two decided
 on 30 October: the gap between random sentence splits and held-out
 documents and its anatomy, seeds and votes, the reproduction, data against
 method, and the pre-registered tests of the popular additions with their
 counts. The names method is paper A's (`docs/PAPER_A.md`); every result of
 A appears here as one summary row and a citation. The text is cut from
 `docs/PAPER_DRAFT.md`, whose numbers come from the committed results
-through the claims table of `docs/PAPER.md` (C1–C26, C28–C30); a number
+through the claims table of `docs/PAPER.md` (C1–C26, C28–C31); a number
 in square brackets is a 95% Student-t confidence interval of a mean
 paired difference over the units named. References are keys of
 `docs/references.bib`. The length is open until the venue is chosen: an
@@ -692,7 +693,7 @@ so the combination is a result
 for training sets of a few papers with two type levels. There it gains
 about as much as a third annotated paper (+7.36, Section 8).
 
-### 7.6 Names from unlabeled text, and label propagation: paper A's results in summary (C23–C26, C25, C28–C30)
+### 7.6 Names from unlabeled text, and label propagation: paper A's results in summary, and a graph screen (C23–C26, C25, C28–C31)
 
 Paper A asks whether the names a new document brings can be given to the
 tagger without annotation: three CRF teachers tag a large unlabeled
@@ -757,6 +758,30 @@ The method's five ablations at the screen's seeds (the corpus's first
 in half of the draws) lie within 0.2 points of it while the lexicon's
 coverage of the unseen names ranges from 16% to 32% (paper A, Supplementary Table S2).
 
+After paper A's submission, week 19 asked whether graph learning chooses
+better names, under a protocol fixed before any run (C31). A relational
+graph network (R-GCN; schlichtkrull2018modeling) over every name the
+three teachers tag in the unlabeled corpora, with relations for sentence
+co-occurrence, character similarity and a shared head word and with the
+teachers' vote among its node features, ranked the names for a lexicon
+of new names as large as the teachers' vote admits at threshold 0.7 (3
+of 3), against that vote and against the same network without the graph
+(an MLP). A test-set gate decided whether the F1 decisions would run: over
+D7's 11 units the graph's lexicon had to hold 5 points more of the unseen
+test names than the vote and 2 more than the MLP, at a wrong-type rate
+(the share of the unseen test names whose words it holds that it holds
+only under another type) at most 5 points above the vote's. It holds
+16.8% of the unseen test names on average, the vote 24.9% and the MLP
+18.8%; it is below the vote in all 11 units, at a lower wrong-type rate
+(4.7% against 10.1%). The gate failed and the decisions did not run; the screen
+enters Section 7.7's count as one negative screen. At equal lexicon size
+the teachers' vote chose more of the unseen names than either learned
+ranker. (The probe's lexicons keep one type per name and leave out every
+name a training sentence annotates; on MuLMS, pooled, its vote holds
+30.3% of the unseen test names at 0.7 and 22.0% at 0.9, a little below
+paper A's 31.5% and 22.2%, which count a test name whenever its type and
+words are among the lexicon's entries.)
+
 The document-level rule of Section 7.3, taken to held-out documents of
 the three corpora (C25): on the CRF head it passes on MuLMS's held-out
 subfields, +0.82 [+0.18, +1.46] (49.47 against 48.66; every subfield
@@ -773,10 +798,11 @@ explained by its convention on repeated mentions.
 
 ### 7.7 The count
 
-Through week 18 the programme took 111 pre-registered decisions (weeks 2
-to 18; weeks 15 and 16 took none, and week 1's four comparisons are left
-out, since they have no protocol in `docs/ROADMAP.md` §4) and 15
-three-seed screens (Table 2; paper A, Supplementary Table S5). 24
+Through week 19 the programme took 111 pre-registered decisions (weeks 2
+to 18; weeks 15, 16 and 19 took none, and week 1's four comparisons are
+left out, since they have no protocol in `docs/ROADMAP.md` §4), 15
+three-seed screens (Table 2; paper A, Supplementary Table S5) and week
+19's lexicon screen, which failed (Section 7.6). 24
 decisions pass, where about 2.8 would if nothing worked. By design: 6
 with one run per split (week 2), none passing; 24 with 3 seeds, 6
 passing, namely the 22 of weeks 3 and 4 (4 passing, none of which
@@ -989,7 +1015,8 @@ The repository holds the protocols with their dates and amendments
 environment and, from week 4 on, its saved test predictions (`results/`,
 `results/gpu/`), the analyses behind every number
 (`src/graph/ner_seedmeans.py`, `ner_seed_analysis.py`,
-`ner_mentions.py`, `ner_consistency.py`), the generated tables and figures
+`ner_mentions.py`, `ner_consistency.py`; week 19's screen,
+`graph_names.py`), the generated tables and figures
 (`docs/tables/`, `docs/figures/`; `paper_tables.py`, `paper_figures.py`),
 the corpus conversions (`sofc_exp.py`, `mulms.py`) and the Kaggle batches
 that produced each file (`src/graph/kaggle_jobs.py`). Runs used Kaggle T4
