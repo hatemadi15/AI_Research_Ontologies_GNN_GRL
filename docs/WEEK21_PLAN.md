@@ -84,8 +84,12 @@ after `w20a`) or after the 7 November reset.
   - lessons (9), related work, and limitations.
 - **Appendix,** within TACL's caps: 5.1, 7.1–7.6, week 19's screen, and
   the protocol table.
-- **Anonymized:** repository paths, kernel names and commit hashes go to
-  an anonymous mirror; paper A is cited in the third person; week numbers
-  become stage numbers defined in Setup.
+- **Anonymized** (corrected 3 November: TACL allows no supplementary
+  material and no links to it, so there is no mirror; ROADMAP §4, week
+  21):
+  - no repository paths, kernel names or commit hashes;
+  - the release is stated in anonymous terms;
+  - paper A is cited in the third person;
+  - week numbers become stage numbers defined in Setup.
 - **Target:** 1 December, or 1 January if weeks 20 and 21 and the review
   rounds need it.

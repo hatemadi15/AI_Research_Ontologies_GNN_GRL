@@ -7068,8 +7068,16 @@ decisions were never re-run" changes with the result.
 
 *TACL (paper B), for later.* The paper goes to 10 pages, references
 uncounted, with appendices after them within TACL's caps (as last read: up
-to 5 pages and 3 pages for two kinds of content). It is anonymized under
-ACL's policy, keeping the commit history: authorship is rewritten by
-mailmap, and the push log's account, the Kaggle names and
-`docs/submission/` are scrubbed, with a hash map kept for the camera-ready.
-It keeps a word budget per section: about 6,000 words with the figures.
+to 5 pages and 3 pages for two kinds of content). It keeps a word budget
+per section: about 6,000 words with the figures.
+- **Corrected 3 November, from TACL's submission page.** TACL allows no
+  supplementary material, and no links to it, anonymized or not. So there
+  is no anonymous mirror, and the history is not rewritten. The paper
+  says in anonymous terms that the code, protocols and run files will be
+  released, gives no link, cites paper A in the third person, and names
+  no repository path, kernel or commit.
+- **Still to check.** The appendix page's caps
+  (`transacl.org/index.php/tacl/announcement/view/105`, which returned
+  HTTP 502 on 3 November) are re-read before the restructure.
+- **Before submission.** The PDF's document properties carry no name, and
+  a preprint, if posted, is disclosed to the editor.
