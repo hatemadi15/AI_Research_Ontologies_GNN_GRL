@@ -38,6 +38,8 @@ import hashlib
 import json
 import math
 import random
+import sys
+import time
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -598,8 +600,12 @@ def run_probe(dump_dir=DUMP_DIR, names_dir=NAMES_DIR, write_names=False):
         for unit in sorted(dumps):
             record = dumps[unit]
             train_s, unseen = parts[unit]
+            started = time.time()
             report, lexicons, votes = probe_unit(record['spans'], record['labels'], train_s,
                                                  unseen)
+            # progress only: the unit, its graph's size and the time (no name, no test number)
+            print(f"{setting}:{unit}: {report['nodes']} nodes, "
+                  f"{time.time() - started:.0f} s", file=sys.stderr, flush=True)
             report['teachers'] = record.get('teachers')
             # the checks: V at 0.9, 3 of 3 from the dump against the same job's names and
             # against week 15's rebuild (deterministic teachers give the same names)
