@@ -1042,6 +1042,7 @@ chance at class level. For a Task C-style result:
 | 17 | The harvested names on the strongest MaterioMiner base (ordered 31 October after six review rounds of paper A; protocol fixed 19:10 UTC, before any run, below): the multi-task model with 6-copy mention replacement, with (`crf_mt_mrm6`) and without (`crf_mt_mr6`) the fatigue corpus's names, 10 seeds on the 4 held-out papers; decisions 17.1 (fine) and 17.2 (coarse) against the matched control; batches `w17a` (kernel d) and `w17b` (kernel c) | 17.1 done (1 November): +0.96 [−0.01, +1.92] fine-grained, no (every paper positive, 0.16 to 1.62); 17.2 done: +0.85 [−0.72, +2.42] coarse-grained, no. Reported: the names against multi-task + MR3 +0.76 [−0.15, +1.68] and +0.91 [−0.14, +1.97], the control against it −0.19 [−2.05, +1.67] and +0.06 [−0.74, +0.86]; the two-head filter's lexicons hold 7–16% (fine) and 7–25% (coarse) of a paper's unseen test names. The negative result extends to the strongest base; paper A updated (outcome below) |
 | 18 | The names against a recall-matched control (approved 1 November after the round-9 referee of paper A asked for it; protocol fixed before any run, below): MR6 on MuLMS's 7 held-out subfields at the decision seeds 300 to 900, the stored `crf_mr6` jobs again with a bias added to every entity tag at decoding (`crf_mr6_bias`), matched per subfield to the names' recall; decisions 18.1 (D11, recall on the unseen names the lexicon holds) and 18.2 (D12, micro F1) at matched recall; batch `w18a` | Done (1 November): 18.1 +11.24 [+3.31, +19.18], passes (7 of 7 subfields positive); 18.2 +3.26 [−0.79, +7.31], no. In three subfields (electrolysis, pemfc, sofc) no bias on the grid reaches the names' recall and the protocol matched them at D = 5; without them (pre-specified) 18.1 +6.05 [−3.33, +15.44] (4 of 4 positive) and 18.2 −0.03 [−2.78, +2.72]; matched post hoc at the control's nearest recall, +8.63 [+3.35, +13.90] and +1.37 [−0.66, +3.41]. At matched overall recall the names find more of the names their lexicon holds and fewer of the others (−1.73 [−3.02, −0.44], pre-specified); their F1 is not shown to beat the bias. The names route's decisions become twelve, four passing; paper A updated (outcome below) |
 | 19 | Graph-propagated names at matched lexicon size (after paper A's submission on 2 November, on the author's request to explore graph representation learning, the plan checked by an independent referee before any run; `docs/WEEK19_PLAN.md`; protocol below): a relational GNN over every name the teachers tag, against the teachers' vote at a lowered threshold and the same model without the graph, at equal lexicon size; a probe with a test-set gate, then, if it passes, decisions G1 and G2 over the 11 units of D7. Paper B brought to a submittable state alongside (track B) | Done (3 November): the gate fails, so G1 and G2 are not run. At matched size (N primary, means over the 11 units) the R-GCN's lexicon holds 16.78% of the unseen test mentions, the vote's 24.86% and the graph-removed MLP's 18.80% (+5 over the vote and +2 over the MLP needed); its wrong-type rate, 4.65% against the vote's 10.14%, passes. The graph ranker is below the vote in all 11 units. Graph propagation does not rescue the names route at matched size; one negative lexicon screen in paper B's count (outcome below) |
+| 20 | Two controls paper B's first referee asked for (3 November; the plan `docs/WEEK20_PLAN.md` checked by an independent referee before any run; protocol below): 20a, MuLMS's held-out subfields with a 400-sentence pool drawn by sentence from all other subfields' articles (`crf_spool`) against the stored pool of 2–3 articles (decision 20.1); 20b, week 8's diversity decisions on 7 fresh seeds (20.2, 20.3); batch `w20a` | Decisions by the usual rule; the checks first (the stored sides repeated on the current code) |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -6648,3 +6649,159 @@ plus the three relations, is below the MLP in coverage and in
 teacher-seen accuracy, so the relations as built did not help. Whether
 the heterophilous co-occurrence relation (0.27, as the ontology graph's
 co-occurrence edges were for type, P3) is the reason was not tested.
+
+### Week 20 protocol: two controls for paper B's first referee (fixed before any run, 3 November, 07:00 UTC)
+
+*Why, and when.*
+- Paper B's first review round (3 November, on `44f9677`;
+  `docs/PAPER_B_NOTES.md`) found two confounds in its headline claims that
+  only new runs resolve:
+  - MuLMS's 17-point gap compares a held-out subfield's training pool of
+    2–3 articles (the last cut to its first sentences) from 1–3 subfields
+    with a random-split pool drawn from 49–50 of the 50 articles;
+  - week 8's diversity decisions, which head one of paper B's abstract's
+    lessons, rest on 3 seeds.
+- The plan (`docs/WEEK20_PLAN.md`) was checked before any run by an
+  independent referee (a Fable-model referee: "approve with required
+  changes"). Its nine required items and six of its seven suggestions are
+  applied here.
+- Registered after these were known: week 10's per-subfield article-pool
+  scores; its unseen-name shares (88% held out, 57% on random splits);
+  week 8's 3-seed decisions. Not known: the sentence-pool side, and seeds
+  300–900 of both of week 20b's families.
+
+*Week 20a: MuLMS's gap at equal size, by article or by sentence.*
+- **`--pool-by-sentence`.** It is valid only with `--leave-one-subfield-out
+  --train-pool N`.
+  - Fold i's pool comes from the sentences of the documents outside the
+    held-out subfield, in corpus order. They are shuffled with
+    `random.Random(split_seed + i)`, and the first N form the pool.
+  - The pool's split into training and validation (15%, shuffled with
+    `random.Random(split_seed)`) and the test set (the held-out
+    subfield's documents) are as before.
+  - With the flag, the results file's `config` records `pool_by_sentence`,
+    and each fold records its pool's numbers of documents and subfields.
+    Without it, every existing option writes byte-identical files (the
+    tiny-model check).
+- **Structural numbers before any run** (training side only; no label
+  read). Each sentence pool draws on 39–48 documents of all six other
+  subfields, from electrolysis to steel: 46, 48, 42, 39, 39, 46 and 40. The
+  article pools draw on 2–3 documents of 1–3 subfields.
+- **Runs.** The CRF head on the 7 held-out subfields, split seed 0, seed
+  offsets 0–900, with predictions: family `crf_spool_m<N>`, 70 runs.
+- **Decision 20.1.**
+  - The measure: micro F1 of `crf_spool` minus the stored `crf` (the
+    article pool) on `mulms_leave_one_subfield_out`. Each unit is the mean
+    of its 10 seeds, paired over the 7 subfields.
+  - It passes if the 95% Student-t interval of the mean difference lies
+    above 0. The article-pool side is stored, so half of the comparison is
+    known.
+  - The detectable difference at 80% power is about 3.3 points, from week
+    10's paired differences on these units (`crf_mr` − `crf`, sd 2.60). A
+    pool change may vary across subfields more than that proxy. A null
+    reads "not shown within about 3.3 points".
+- **What else differs between the two pools** (disclosed):
+  - The subfield diversity: 1–3 subfields against all six, so 20.1
+    measures document and subfield diversity together.
+  - The validation sentences: 60 from 2–3 articles, or from about 40.
+    Validation only picks the epoch; `best_epoch` and `val_f1` are
+    reported per side.
+  - Which names training has seen: both pools' unseen shares are
+    reported.
+- **Reported, no decision:**
+  - The remaining part: the random-split pool (`mulms_random_split_pool`,
+    seeds 0–900, stored) minus the sentence pool. It is a difference of two
+    independent means, with its Welch 95% interval, which is new code and
+    is given for the 17-point gap too. It sets an unseen subfield's
+    documents against seen documents' sentences: topic shift and document
+    novelty together, with the test sets' composition, not separated
+    here.
+  - Per subfield: both sides, and macro F1.
+  - Recall on seen and unseen test names (week 10's split,
+    `ner_mentions.kind_of`), with each pool's unseen share.
+- **The post hoc dependence reading, fixed now:**
+  `decision_tests.dependent_t` with `layout(7)`, which correlates pairs
+  whose article pools share an article at 1/4. A second reading sets every
+  pair at 1/4, since every two sentence pools share documents.
+- **What each outcome means for paper B:**
+  - Passes: paper B states its 17 points as including document diversity
+    at equal size, gives the measured part, and §5.2 splits the gap.
+  - Fails: paper B keeps the 17 points, says that they compare a pool of
+    2–3 articles with one of about 50, and says that diversity at equal
+    size is not shown to account for them within about 3.3 points.
+
+*Week 20b: week 8's diversity decisions on 7 fresh seeds.*
+- **Runs.** Week 8 part 2's two sides, at seed offsets 300–900 and both
+  granularities: 252 runs on at most 301 training sentences.
+  - Three papers at the size of two: `--two-paper-size`, `crf_p3n2`, 12
+    folds per seed.
+  - The two papers alone: the inner folds, `--leave-two-papers-out --crf
+    --entity-bias` with week 7's grid (`crf_bias`), read at D = 0, 6 folds
+    per seed.
+  - The size comparison needs the CRF head on all three papers, which is
+    stored at seeds 0–900.
+- **Decisions 20.2 (fine-grained) and 20.3 (coarse-grained).**
+  - Diversity as in week 8: F1 on P with three papers at the size of two,
+    minus F1 with the two papers alone. Each side is the mean over P's 3
+    pairs and the 7 seeds 300–900, paired over the 4 held-out papers.
+  - The rule as before. The seed base follows week 12, which decided
+    MuLMS on seeds the screen had not seen.
+  - They re-decide week 8's two decisions, whose 3-seed originals stay in
+    the count as week 8's.
+  - The detectable differences at 80% power are about 1.3 and 2.6 points,
+    from week 8's per-paper spread (sd 0.60 and 1.25). That spread includes
+    3 seeds' noise, so these figures are conservative.
+- **Reported, no decision:**
+  - The 10-seed reading (seeds 0–900, the first three known since week
+    8). It cannot alter 20.2 or 20.3, or paper B's abstract.
+  - Size, on the same seeds.
+  - The post hoc dependence reading, with MaterioMiner's 1/4.
+- **What each outcome means for paper B:**
+  - Both pass: the lesson stands on fresh seeds.
+  - Only the coarse-grained one passes: the abstract states the lesson at
+    that level.
+  - Neither passes: the lesson leaves the abstract, and §8 reports week
+    8's decisions with their re-test.
+
+*Checks before any number is read.*
+1. `smokebh`, the CRF run of smoke4 again, must be identical to `smokebf`
+   in every field and the environment. `smokebg` belonged to the retired
+   batch `w19b`.
+2. **20.1's stored side on the current code.** The CRF head on the 7
+   held-out subfields at seed offset 0 (tag `smokebi`) must equal the
+   stored `mulms_leave_one_subfield_out_crf_m0`:
+   - in every run field but `runtime_sec`: F1, precision, recall, best
+     epoch, history and test predictions;
+   - and in the environment.
+3. **20b's code path.** Coarse-grained, at seed offset 0, compared with the
+   stored files in the same way:
+   - `crf_p3n2` (tag `smokebj`) must equal the stored `crf_p3n2_m0`;
+   - the `crf_bias` inner folds (tag `smokebk`) must equal the stored
+     `leave_two_papers_out_crf_bias_m0`.
+4. **The comparison** is the week-20 section of `ner_seed_analysis.py`:
+   every run field but `runtime_sec`, and the environment.
+   - A differing environment is reported, and it stops any comparison with
+     stored runs (week 4's rule).
+   - A repeat that differs is reported. Then 20b's 10-seed readings are
+     not reported, and 20.1 is not decided until the difference is
+     explained.
+
+*Analysis, fixed before any result.*
+- The week-20 section of `ner_seed_analysis.py` (`repeats`, `spool`,
+  `diversity`), dry-run on stored files with a fake family before any
+  result.
+- `crf_spool` is excluded from `week12_variants` (`WEEK20_VARIANTS`) and
+  added to the plain variants. The stored analysis must reproduce
+  unchanged.
+- `ner_mentions.run_split` rebuilds the sentence pool from the config,
+  tested against each fold's recorded document count.
+- `paper_diversity` takes the seed set.
+
+*Runs and budget.* One Kaggle session, batch `w20a`, on two lanes, from the
+bundle of the commit that adds the code. About 1 GPU hour for 20a, 2.1 for
+20b and 0.5 for the checks: about 3.6 of the 20.26 left this week (reset 7
+November 00:00 UTC).
+
+*Count.* Three decisions, 20.1 to 20.3, enter paper B's count, whatever
+their outcome. Week 8's two stay as taken. Paper B's "week 8's two 3-seed
+decisions were never re-run" changes with the result.

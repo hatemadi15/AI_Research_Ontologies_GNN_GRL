@@ -1,0 +1,64 @@
+# Paper B: notes on the draft (not part of the submission)
+
+## Review round 1 (3 November 2026, on `44f9677`)
+
+Three reviewers ran independently:
+- a referee, who recommended major revision;
+- a number audit: about 965 items checked, 12 mismatches, none blocking;
+  every verdict and the count reproduce;
+- a consistency check against the submitted paper A (`325019a`), the
+  record and the paper itself: 3 blocking items, 12 should-fix and 18
+  minor.
+
+Every finding was checked against the files before it was acted on.
+Labels below: R = referee, A = audit, C = consistency.
+
+**Verified and decisive.**
+- **R2.** The abstract's lesson "the four comparisons of weeks 3 and 4 that
+  passed with 3 seeds all failed with 10" changed hardware as well as
+  seeds. Three of the four were CPU runs, and on the GPU the same seeds 0,
+  100 and 200 already fail:
+
+  | Comparison | CPU, seeds 0–200 | GPU, seeds 0–200 |
+  |---|---|---|
+  | label semantics, coarse | +1.17 [+0.94, +1.41] | +0.07 [−2.47, +2.61] |
+  | multi-task, coarse, random splits | +0.75 [+0.10, +1.39] | −0.08 [−1.71, +1.55] |
+  | label-semantics vote | +1.63 [+0.11, +3.16] | +0.40 [−1.36, +2.16] |
+
+  Only self-training (GPU, week 4) failed because seeds were added. The
+  lesson is reworded: a 3-seed interval is too narrow for run-to-run
+  variation, and both seeds and hardware show it.
+- **R1.** The model for units that share training documents (paper A's,
+  `decision_tests.dependent_t`) widens a MaterioMiner interval by ×1.528.
+  Applied to paper B's own passes, it removes the margin of several of
+  them. Post hoc, and reported beside every verdict.
+- **R5.** A held-out MuLMS subfield's pool is 2–3 whole articles
+  (`subfield_folds`), while the random-split pool draws from all ~50
+  articles (`pool_split`). The 17-point gap therefore mixes topic shift
+  with document diversity at equal size.
+
+**Dispositions.**
+- **Post hoc reanalysis of released runs**
+  (`src/graph/paper_b_checks.py`, `results/gpu/paper_b_checks.json`):
+  - R1: dependence-adjusted intervals, with Nadeau and Bengio's correction
+    on random splits;
+  - R4: Benjamini–Hochberg over the 111 decisions, and Holm within each
+    family;
+  - R2: the hardware re-decisions, and the matched CPU–GPU runs;
+  - R9: the detectable difference of every decision;
+  - R3: unseen against seen gains;
+  - R6: an interval for every gap.
+- **New runs, week 20** (`docs/WEEK20_PLAN.md`, checked by an independent
+  referee before any run):
+  - R5: the MuLMS pool drawn by sentence (decision 20.1);
+  - R10: week 8's diversity decisions on seeds 300–900 (20.2, 20.3).
+- **Text:**
+  - all of A1–A10 and C1–C33;
+  - R2, R3, R6–R10, R12–R15, R17 and R19;
+  - R18 in part: the definitions, and seed-only intervals marked;
+  - R14 goes to the Limitations.
+- **The author's choice:**
+  - R11's LLM or generalist-NER baseline. Meanwhile the abstract is scoped
+    to fine-tuned taggers, and the related work is extended.
+  - R13's adjudication of 200 errors. Meanwhile the wording is softened.
+  - R16's page plan, which depends on the venue (TACL or ARR).
