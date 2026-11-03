@@ -6805,3 +6805,25 @@ November 00:00 UTC).
 *Count.* Three decisions, 20.1 to 20.3, enter paper B's count, whatever
 their outcome. Week 8's two stay as taken. Paper B's "week 8's two 3-seed
 decisions were never re-run" changes with the result.
+
+*Runs.*
+- **The code with its tests, 3 November: `393b482`.** It holds:
+  - `--pool-by-sentence`;
+  - `ner_mentions.run_split` rebuilding the sentence pool, checked
+    against each run's pool record;
+  - batch `w20a`;
+  - the week-20 section of `ner_seed_analysis.py`. Its repeats are read
+    by default from `results/gpu_repeats`, the versioned copies of the
+    repeat files to be made after the pull, so the analysis reproduces
+    without the pulled output.
+- **Checks before the push:**
+  - 11 new tests, among them a dry run on stored files with fake families
+    and the real pools' document counts;
+  - 45 option configurations byte-identical on the tiny model;
+  - both stored analyses reproduce unchanged;
+  - 721 tests pass.
+- **One parser rule beyond the protocol.** `--pool-by-sentence` refuses
+  the other training options, as `--two-paper-size` does, so that no
+  other run can write `crf_spool`'s files.
+- **The push.** Batch `w20a` (42 jobs, 21 per lane) was pushed on 3
+  November at 08:38 UTC, from the bundle of `393b482` (kernel version 20).

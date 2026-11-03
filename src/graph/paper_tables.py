@@ -947,7 +947,7 @@ def table4(mentions, matching):
     header = ['setting', 'unseen names (%)', 'recall, seen', 'recall, unseen',
               *(f'F1, {c}' for c in CRITERIA)]
     return ('Table 4. The CRF head (10 model seeds): the share of gold test entities whose '
-            'words are no entity of their type in the training sentences, recall on seen and '
+            'words are no entity, of any type, in the training sentences, recall on seen and '
             'unseen names (pooled), and F1 under the matching criteria of SemEval-2013 Task '
             '9.1 (mean over splits, papers, subfields or seeds).\n\n'
             + markdown(header, rows))
