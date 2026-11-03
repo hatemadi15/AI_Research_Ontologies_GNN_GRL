@@ -9,8 +9,11 @@ span positions and a fixed mention order, the vote arm against MR6
 reported, the type, tie and edge rules written out, and a guard against
 saturated vote features). The GPU study's protocol goes into
 `docs/ROADMAP.md` §4 as the week-19 protocol, committed before any run.
-Nothing here has been run. The first draft is in this file's history
-(`440beed`).*
+The first draft is in this file's history (`440beed`). Outcome, 3
+November: batch `w19a` and the probe ran, and the probe's gate failed
+(at matched size the graph ranker's lexicon holds 16.78% of the unseen
+test names, the vote's 24.86% and the MLP's 18.80%), so Phase 1 was not
+run; ROADMAP §4, the week-19 outcome.*
 
 ## 1. Where things stand
 

@@ -31,6 +31,7 @@ and rates only) and, if asked, the lexicon files for --names-file (names_files; 
 Usage:
   python src/graph/graph_names.py                  # the probe over the units with a dump
   python src/graph/graph_names.py --names-files    # also write the Phase-1 lexicon files
+  python src/graph/graph_names.py --summary        # means and pooled rates of the stored probe
 """
 import argparse
 import gzip
@@ -468,6 +469,36 @@ def gate(units):
             'passes': all(parts.values()) if None not in parts.values() else None}
 
 
+def summary(units):
+    """Item 5's rates over the units, read from a probe file's per-unit counts: per size and
+    ranker the means over units (the gate's) and the pooled rates (counts summed over units),
+    the ceiling likewise, and, descriptive, G's coverage minus V's and M's per unit. Added on
+    3 November after the gate was read (the probe's file holds the counts, not these sums);
+    it decides nothing."""
+    def mean(vals):
+        vals = [v for v in vals if v is not None]
+        return round(sum(vals) / len(vals), 2) if vals else None
+    out = {}
+    for size in ('primary', 'secondary'):
+        rankers = {}
+        for name in next(iter(units.values()))[size]:
+            rows = [u[size][name] for u in units.values()]
+            pooled = {k: sum(r[k] for r in rows) for k in ('unseen', 'covered', 'held', 'wrong')}
+            rankers[name] = {'mean_coverage': mean([r['coverage'] for r in rows]),
+                             'mean_wrong_type': mean([r['wrong_type'] for r in rows]),
+                             'pooled': {**pooled, **rates(pooled)}}
+        diffs = {other: {unit: round(u[size]['G']['coverage'] - u[size][other]['coverage'], 2)
+                         for unit, u in units.items()}
+                 for other in ('V', 'M')}
+        out[size] = {'rankers': rankers, 'G_minus': diffs}
+    unseen = [u['primary']['V']['unseen'] for u in units.values()]
+    out['ceiling'] = {'mean': mean([100 * u['ceiling'] / n if n else None
+                                    for u, n in zip(units.values(), unseen)]),
+                      'pooled': (round(100 * sum(u['ceiling'] for u in units.values())
+                                       / sum(unseen), 2) if sum(unseen) else None)}
+    return out
+
+
 def probe_unit(spans, labels, train_sentences, unseen):
     """Everything the probe reports for one unit, and its lexicons {(ranker, size): lexicon}."""
     train_types, _ = training_types(train_sentences)
@@ -641,7 +672,15 @@ def main(argv=None):
     parser.add_argument('--names-files', action='store_true',
                         help="also write the Phase-1 lexicon files (local; never versioned)")
     parser.add_argument('--output', default=str(OUTPUT))
+    parser.add_argument('--summary', nargs='?', const=str(OUTPUT), default=None,
+                        metavar='PROBE_JSON',
+                        help="print item 5's means and pooled rates from a probe file's counts "
+                             "(default: the stored probe) and stop; nothing is retrained")
     args = parser.parse_args(argv)
+    if args.summary:
+        stored = json.loads(Path(args.summary).read_text())
+        print(json.dumps(summary(stored['units']), indent=1))
+        return
     out = run_probe(Path(args.dumps), write_names=args.names_files)
     Path(args.output).parent.mkdir(parents=True, exist_ok=True)
     Path(args.output).write_text(json.dumps(out, indent=1) + '\n')

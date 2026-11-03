@@ -1285,7 +1285,8 @@ def is_gpu_runs_file(path):
 
 def build_bundle(commit, out_dir, root=ROOT, results_dir=GPU_RESULTS, corpus=None,
                  expected_sha256=None, wheels=(), sofc_corpus=None, sofc_report=None,
-                 mulms_report=None, mulms_dir=None, topic_reports=None, topic_dir=None):
+                 mulms_report=None, mulms_dir=None, topic_reports=None, topic_dir=None,
+                 week19_dir=None):
     """Write the bundle files to out_dir (emptied first); returns BUNDLE.json's content.
 
     code.tar.gz is `git archive` of `commit` (the frozen code, tracked files only); the
@@ -1299,7 +1300,9 @@ def build_bundle(commit, out_dir, root=ROOT, results_dir=GPU_RESULTS, corpus=Non
     SHA-256 (BUNDLE.json's mulms_files, else None). Every topic corpus with a report under
     topic_reports (default TOPIC_REPORTS; build_topic_corpus.py), read from topic_dir (default
     root's TOPIC_CORPUS_DIR), goes in as topic_<topic>_sentences.txt with its recorded SHA-256
-    (BUNDLE.json's topic_corpora, else None).
+    (BUNDLE.json's topic_corpora, else None). graph_names.py's lexicon files in week19_dir
+    (default root's WEEK19_DIR) go in as week19__<name> (BUNDLE.json's week19_names, their
+    SHA-256, when there are any).
     """
     out_dir = Path(out_dir)
     if out_dir.exists():
@@ -1351,7 +1354,8 @@ def build_bundle(commit, out_dir, root=ROOT, results_dir=GPU_RESULTS, corpus=Non
                              f'{corpus_sha256(report)}')
         shutil.copy2(path, out_dir / f'topic_{topic}_sentences.txt')
     week19 = {}               # week 19: graph_names.py's lexicon files, when there are any
-    for path in sorted((Path(root) / WEEK19_DIR).glob('names_*.json')):
+    week19_dir = Path(week19_dir) if week19_dir is not None else Path(root) / WEEK19_DIR
+    for path in sorted(week19_dir.glob('names_*.json')):
         week19[path.name] = file_sha256(path)
         shutil.copy2(path, out_dir / f'{WEEK19_PREFIX}{path.name}')
     results = sorted(p.name for p in Path(results_dir).glob('ner_results_*.json')

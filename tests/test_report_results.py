@@ -1870,6 +1870,33 @@ def test_week14_bullet(tmp_path):
     assert bullet.endswith('.')
 
 
+def test_week19_note():
+    """The week-19 bullet: the units whose checks all hold, the gate's means and its verdict with
+    the parts that fail; '' without the probe's gate."""
+    assert rr.week19_note({}) == '' and rr.week19_note({'gate': None}) == ''
+    ok = {'teachers': {'equal': True}, 'dump_vs_w19a_names': {'equal': True},
+          'dump_vs_week15_names': {'equal': True}}
+    probe = {'units': {'a': {'checks': ok}, 'b': {'checks': {**ok, 'dump_vs_w19a_names': None}}},
+             'gate': {'n_units': 2,
+                      'means': {'coverage_G': 16.78, 'coverage_V': 24.86, 'coverage_M': 18.8,
+                                'wrong_type_G': 4.65, 'wrong_type_V': 10.14},
+                      'margins': {'coverage_vs_vote': 5.0, 'coverage_vs_mlp': 2.0,
+                                  'wrong_type_vs_vote': 5.0},
+                      'parts': {'coverage_vs_vote': False, 'coverage_vs_mlp': False,
+                                'wrong_type_vs_vote': True},
+                      'passes': False}}
+    note = rr.week19_note(probe)
+    assert note.startswith('* NER week 19') and note.endswith('.\n')
+    assert 'On 1 of 2 units the rebuilt teachers and names equal' in note
+    assert 'the graph 16.78%, the vote 24.86%, the MLP 18.80%' in note
+    assert "wrong-type rate 4.65% against the vote's 10.14%" in note
+    assert ('(the graph +5 points over the vote and +2 over the MLP, its wrong-type rate at most '
+            "+5 over the vote's) fails (coverage against the vote and coverage against the MLP), "
+            'so the decisions G1 and G2 were not run.') in note
+    probe['gate'].update(passes=True, parts=dict.fromkeys(probe['gate']['parts'], True))
+    assert rr.week19_note(probe).endswith("over the vote's) passes.\n")
+
+
 def test_week18_note():
     """The week-18 bullet: the D = 0 check, the matched biases with the flagged subfields, both
     decisions with their verdicts and the pre-specified comparisons; '' without the file."""

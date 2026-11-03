@@ -329,6 +329,32 @@ def test_the_gate_needs_all_three_parts():
     assert gn.gate({'a': unit(None, 30, 35, None, 18)})['passes'] is None
 
 
+def test_summary_gives_the_means_and_the_pooled_rates_from_the_counts(tmp_path, capsys):
+    def row(unseen, covered, held):
+        counts = {'unseen': unseen, 'covered': covered, 'held': held, 'wrong': held - covered}
+        return {**counts, **gn.rates(counts), 'size': 5}
+
+    def unit(unseen, g, v, m, ceiling):
+        size = {'G': row(unseen, *g), 'V': row(unseen, *v), 'M': row(unseen, *m)}
+        return {'primary': size, 'secondary': size, 'ceiling': ceiling}
+    # a: G 10/100 (2 wrong of 12 held), V 30/100, M 20/100; b: G 30/50, V 20/50, M 30/50
+    units = {'a': unit(100, (10, 12), (30, 40), (20, 20), 60),
+             'b': unit(50, (30, 30), (20, 25), (30, 31), 40)}
+    s = gn.summary(units)
+    g = s['primary']['rankers']['G']
+    assert g['mean_coverage'] == 35.0                       # (10 + 60) / 2
+    assert g['pooled']['covered'] == 40 and g['pooled']['coverage'] == 26.67   # 40 / 150
+    # the mean of the units' rounded rates (16.67 and 0), as the gate's; pooled 2 / 42
+    assert g['mean_wrong_type'] == 8.34 and g['pooled']['wrong_type'] == 4.76
+    assert s['primary']['G_minus'] == {'V': {'a': -20.0, 'b': 20.0},
+                                       'M': {'a': -10.0, 'b': 0.0}}
+    assert s['ceiling'] == {'mean': 70.0, 'pooled': 66.67}   # (60 + 80) / 2; 100 / 150
+    path = tmp_path / 'probe.json'
+    path.write_text(json.dumps({'units': units}))
+    gn.main(['--summary', str(path)])
+    assert json.loads(capsys.readouterr().out) == s
+
+
 def test_rankers_are_deterministic_and_train_with_and_without_the_vote():
     pytest.importorskip('torch')
     graph = gn.build_graph(_toy_dump(), LABELS, TRAIN)

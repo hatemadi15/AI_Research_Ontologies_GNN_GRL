@@ -979,6 +979,15 @@ Next:
    Compare co-occurrence windows: sentence, paragraph, document.
 3. **Pre-train contrastively** (GraphCL/DGI), then fine-tune for typing.
 
+Week 19 (3 November) took graph learning to the NER names route instead: a
+relational GNN (R-GCN over sentence co-occurrence, character kNN and
+shared-head relations) ranking every name the NER teachers tag in the
+unlabelled corpora, against the teachers' vote at equal lexicon size. Its
+test-set gate failed (coverage of the unseen test names 16.78% against the
+vote's 24.86% and the graph-removed MLP's 18.80%; §4, the week-19 outcome),
+so its decisions were not run. Item 1 above (track G0 of
+`docs/WEEK19_PLAN.md`) waits until paper B is submitted.
+
 ### P4: Taxonomy discovery (class level)
 The current term-level taxonomy (most similar more-general term plus Hearst
 patterns) is not designed to recover MMO `subClassOf`, and it scores near
@@ -1032,7 +1041,7 @@ chance at class level. For a Task C-style result:
 | 16 | Paper B, the evaluation paper, from `docs/PAPER_DRAFT.md` §2–5, 7 and 8 with the method sections cut to summaries citing A; both titles and abstracts fixed; the reproducibility appendices and the code release. Begun 30 October on the user's go-ahead: a first complete draft (`docs/PAPER_B.md`: the gap and its anatomy, seeds and votes, every addition tested with the count of 86 pre-registered decisions and 18 passes, data against method, seven lessons); its length waits on the venue. Also 30 October: the reproducibility appendix and code-release checklist for both papers (`docs/REPRODUCIBILITY.md`) and three title candidates per paper (`docs/PAPER.md`) | Both drafts complete by 14 November; the venues and the authors' confirmation email are the user's |
 | 17 | The harvested names on the strongest MaterioMiner base (ordered 31 October after six review rounds of paper A; protocol fixed 19:10 UTC, before any run, below): the multi-task model with 6-copy mention replacement, with (`crf_mt_mrm6`) and without (`crf_mt_mr6`) the fatigue corpus's names, 10 seeds on the 4 held-out papers; decisions 17.1 (fine) and 17.2 (coarse) against the matched control; batches `w17a` (kernel d) and `w17b` (kernel c) | 17.1 done (1 November): +0.96 [−0.01, +1.92] fine-grained, no (every paper positive, 0.16 to 1.62); 17.2 done: +0.85 [−0.72, +2.42] coarse-grained, no. Reported: the names against multi-task + MR3 +0.76 [−0.15, +1.68] and +0.91 [−0.14, +1.97], the control against it −0.19 [−2.05, +1.67] and +0.06 [−0.74, +0.86]; the two-head filter's lexicons hold 7–16% (fine) and 7–25% (coarse) of a paper's unseen test names. The negative result extends to the strongest base; paper A updated (outcome below) |
 | 18 | The names against a recall-matched control (approved 1 November after the round-9 referee of paper A asked for it; protocol fixed before any run, below): MR6 on MuLMS's 7 held-out subfields at the decision seeds 300 to 900, the stored `crf_mr6` jobs again with a bias added to every entity tag at decoding (`crf_mr6_bias`), matched per subfield to the names' recall; decisions 18.1 (D11, recall on the unseen names the lexicon holds) and 18.2 (D12, micro F1) at matched recall; batch `w18a` | Done (1 November): 18.1 +11.24 [+3.31, +19.18], passes (7 of 7 subfields positive); 18.2 +3.26 [−0.79, +7.31], no. In three subfields (electrolysis, pemfc, sofc) no bias on the grid reaches the names' recall and the protocol matched them at D = 5; without them (pre-specified) 18.1 +6.05 [−3.33, +15.44] (4 of 4 positive) and 18.2 −0.03 [−2.78, +2.72]; matched post hoc at the control's nearest recall, +8.63 [+3.35, +13.90] and +1.37 [−0.66, +3.41]. At matched overall recall the names find more of the names their lexicon holds and fewer of the others (−1.73 [−3.02, −0.44], pre-specified); their F1 is not shown to beat the bias. The names route's decisions become twelve, four passing; paper A updated (outcome below) |
-| 19 | Graph-propagated names at matched lexicon size (after paper A's submission on 2 November, on the author's request to explore graph representation learning, the plan checked by an independent referee before any run; `docs/WEEK19_PLAN.md`; protocol below): a relational GNN over every name the teachers tag, against the teachers' vote at a lowered threshold and the same model without the graph, at equal lexicon size; a probe with a test-set gate, then, if it passes, decisions G1 and G2 over the 11 units of D7. Paper B brought to a submittable state alongside (track B) | Gate: graph coverage of unseen test names +5 points over the vote and +2 over the graph-removed model, wrong-type rate at most +5; G1 and G2 by the usual rule |
+| 19 | Graph-propagated names at matched lexicon size (after paper A's submission on 2 November, on the author's request to explore graph representation learning, the plan checked by an independent referee before any run; `docs/WEEK19_PLAN.md`; protocol below): a relational GNN over every name the teachers tag, against the teachers' vote at a lowered threshold and the same model without the graph, at equal lexicon size; a probe with a test-set gate, then, if it passes, decisions G1 and G2 over the 11 units of D7. Paper B brought to a submittable state alongside (track B) | Done (3 November): the gate fails, so G1 and G2 are not run. At matched size (N primary, means over the 11 units) the R-GCN's lexicon holds 16.78% of the unseen test mentions, the vote's 24.86% and the graph-removed MLP's 18.80% (+5 over the vote and +2 over the MLP needed); its wrong-type rate, 4.65% against the vote's 10.14%, passes. The graph ranker is below the vote in all 11 units. Graph propagation does not rescue the names route at matched size; one negative lexicon screen in paper B's count (outcome below) |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -6595,3 +6604,47 @@ paper's core). G1 only: graph-chosen names help, not more than as many
 voted names. Neither, or a failed gate: graph propagation does not rescue
 the names route at matched size. Every outcome enters paper B's count
 (G1 and G2 as decisions; a failed gate as one lexicon screen).
+
+*Outcome (3 November, 05:42 UTC): the gate fails, and Phase 1 does not
+run.* The probe ran on the CPU from 03:54 to 05:42 UTC (`267730f`; 396
+to 1,032 s per unit) and wrote `results/week19/graph_names_probe.json`
+(counts and rates only) and the Phase-1 lexicon files (git-ignored, now
+unused). Checks, all passing on the 11 units before the gate was read:
+the rebuilt teachers' test F1 equal those stored with each of the unit's
+names runs (7 per subfield, 10 per paper); V at 0.9, 3 of 3, rebuilt
+from the dump equals both `w19a`'s names file and week 15's in every
+(type, name) count (8,328 to 50,869 mentions per unit). The graphs:
+27,557 to 54,152 nodes, 82 to 253 of them labelled; homophily on
+labelled pairs, means over the units, 0.27 for co-occurrence (0.11 to
+0.44), 0.88 for the character kNN and 0.87 for a shared head; N primary
+6,947 to 16,998 new names, N secondary 4,338 to 13,190. **The gate, means
+over the 11 units at N primary: coverage of the unseen test mentions G
+16.78%, V (0.7, 3 of 3) 24.86%, M 18.80%, so G − V = −8.08 (+5 needed)
+and G − M = −2.02 (+2 needed), both failing; wrong-type rate G 4.65%
+against V's 10.14% (at most V + 5 needed), passing. The gate fails.**
+G's coverage is below V's in all 11 units (−3.5 to −14.9 points) and
+below M's in 9 (above it in steel, +0.7, and in met10111458, +1.2).
+Reported beside the gate (item 5; the pooled rates are summed from the
+file's per-unit counts by `graph_names.py --summary`, added after the
+gate was read): pooled coverage V 29.59%, M 22.84%, G 20.04%, LP 25.29%,
+and without the vote block M 19.06% and G 17.28%; pooled wrong-type rates
+13.10%, 8.97%, 7.31%, 25.08%, 21.20% and 30.01%. At N secondary (V at
+0.9, 3 of 3) the means are G 12.99%, V 18.77% and M 15.17% (G below V in
+10 of 11 units), with wrong-type rates 3.77%, 4.39% and 4.52%. The
+ceiling: on average 44.93% of a unit's unseen test mentions (51.54%
+pooled) are a candidate that some teacher tags with their type.
+Teacher-seen accuracy (5-fold, on the labelled nodes): M 0.850, G 0.833
+on average (G above M in 2 units). Read as fixed: graph propagation does
+not rescue the names route at matched size. At equal lexicon size the
+vote at 0.7 holds the most unseen test names, and neither learned ranker
+chooses better ones. Batch `w19b` is not pushed, no Phase-1 run is made,
+and week 19 needs nothing from the 7 November reset. One negative lexicon
+screen enters paper B's count (not a decision). Descriptive and post hoc,
+not tested: the learned rankers buy their lower wrong-type rates (M
+5.77%, G 4.65%, V 10.14%) with lower coverage; without the vote block
+their wrong-type rates rise to 16.06% and 18.36%, so the teachers' vote
+carries most of the type information; the R-GCN, on the MLP's features
+plus the three relations, is below the MLP in coverage and in
+teacher-seen accuracy, so the relations as built did not help. Whether
+the heterophilous co-occurrence relation (0.27, as the ontology graph's
+co-occurrence edges were for type, P3) is the reason was not tested.

@@ -1155,7 +1155,8 @@ def ner_notes(res):
                                    week='12', names=WEEK7_SYSTEM_NAMES)
     return (note + sofc_note(analysis) + mulms_note(analysis) + week13_note(analysis)
             + week14_note(analysis) + week17_note(analysis)
-            + week18_note(res.get(GPU_PREFIX + WEEK18_FILE) or {}))
+            + week18_note(res.get(GPU_PREFIX + WEEK18_FILE) or {})
+            + week19_note(res.get(WEEK19_FILE) or {}))
 
 
 WEEK13_CORPORA = {'mulms': "MuLMS's 7 held-out subfields",
@@ -1306,6 +1307,42 @@ def week18_note(matched):
             f"{delta_cell(pre['recall_out'])}, in minus out {delta_cell(pre['in_minus_out'])}, and "
             f"the bias's own F1 change {delta_cell(pre['bias_f1_change'])}{week18_readings(matched)}"
             "\n")
+
+
+WEEK19_FILE = 'week19/graph_names_probe.json'
+WEEK19_GATE_PARTS = {'coverage_vs_vote': 'coverage against the vote',
+                     'coverage_vs_mlp': 'coverage against the MLP',
+                     'wrong_type_vs_vote': 'the wrong-type rate'}
+
+
+def week19_note(probe):
+    """The week-19 bullet (ROADMAP §4, the week-19 protocol) from graph_names_probe.json ('' without
+    its gate): a relational graph network ranking every name the teachers tag, against their vote
+    at 0.7, 3 of 3, and the same model without the graph, at the vote's lexicon size; the units
+    whose checks all hold, the gate's means over the units and its verdict (a test-set screen
+    that decides only whether the decisions G1 and G2 run)."""
+    gate = probe.get('gate')
+    if not gate:
+        return ''
+    units = probe.get('units') or {}
+    checked = sum(all(c is not None and c.get('equal') for c in u.get('checks', {}).values())
+                  for u in units.values())
+    m, margins = gate['means'], gate['margins']
+    failing = [WEEK19_GATE_PARTS[k] for k, v in gate['parts'].items() if v is False]
+    verdict = ('passes' if gate['passes'] else
+               f"fails ({' and '.join(failing)}), so the decisions G1 and G2 were not run")
+    return ("* NER week 19 (graph-propagated names at matched lexicon size: an R-GCN over every "
+            "name the three teachers tag in the unlabelled corpora, against the teachers' vote at "
+            "threshold 0.7, 3 of 3, and the same model without the graph, an MLP, each a lexicon "
+            f"of the vote's size; {gate['n_units']} held-out units; a test-set screen, no "
+            f"decision). On {checked} of {len(units)} units the rebuilt teachers and names equal "
+            "the stored ones. Coverage of the unseen test mentions, means over the units: the "
+            f"graph {m['coverage_G']:.2f}%, the vote {m['coverage_V']:.2f}%, the MLP "
+            f"{m['coverage_M']:.2f}%; wrong-type rate {m['wrong_type_G']:.2f}% against the "
+            f"vote's {m['wrong_type_V']:.2f}%. The gate (the graph +{margins['coverage_vs_vote']:g} "
+            f"points over the vote and +{margins['coverage_vs_mlp']:g} over the MLP, its "
+            f"wrong-type rate at most +{margins['wrong_type_vs_vote']:g} over the vote's) "
+            f"{verdict}.\n")
 
 
 def week18_readings(matched):

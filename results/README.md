@@ -566,3 +566,18 @@ stored `crf_mr6` runs. Outcome: 18.1 +11.24 [+3.31, +19.18], passes;
 18.2 +3.26 [−0.79, +7.31], no; electrolysis, pemfc and sofc flagged
 (without them +6.05 [−3.33, +15.44] and −0.03 [−2.78, +2.72]; post hoc
 +8.63 [+3.35, +13.90] and +1.37 [−0.66, +3.41]); `docs/tables/table12_week18.md`.
+
+Week 19 (the week-19 protocol, ROADMAP §4; fixed 3 November 00:32 UTC
+before any run): graph-propagated names at matched lexicon size on the 11
+units of D7. `week19/graph_names_probe.json` (`graph_names.py`, the probe;
+counts and rates only) holds per unit the graph's size and homophily, the
+vote grid, the ceiling, every ranker's coverage and wrong-type rate at both
+sizes, the teachers and the checks, then the gate and the SHA-256 of the
+Phase-1 lexicon files (git-ignored, like the candidate dumps of batch `w19a`
+in `data/processed/week19/`); `graph_names.py --summary` prints the means and
+pooled rates from its counts. Run record: `w19a` from the bundle of
+`c449864` (kernel version 19), pushed 01:25 UTC and completed 03:51 UTC;
+`smokebf` identical to `smokebe`; the teachers and the rebuilt names equal
+the stored ones on every unit. Outcome: the gate fails (G 16.78%, V 24.86%,
+M 18.80% coverage; wrong-type 4.65% against 10.14%), so Phase 1 (`w19b`) was
+not run.

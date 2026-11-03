@@ -1,0 +1,3115 @@
+{
+ "protocol": "ROADMAP \u00a74, week 19 (fixed 3 November 2026, 00:32 UTC)",
+ "units": {
+  "mulms:electrolysis": {
+   "nodes": 54152,
+   "labelled": 236,
+   "new": 53916,
+   "types": [
+    "CITE",
+    "DEV",
+    "FORM",
+    "INSTRUMENT",
+    "MAT",
+    "MEASUREMENT",
+    "NUM",
+    "PROPERTY",
+    "RANGE",
+    "SAMPLE",
+    "TECHNIQUE",
+    "UNIT",
+    "VALUE"
+   ],
+   "homophily": {
+    "cooccurrence": {
+     "labelled_edges": 97,
+     "same_type": 0.2577
+    },
+    "knn": {
+     "labelled_edges": 34,
+     "same_type": 0.8235
+    },
+    "head": {
+     "labelled_edges": 14,
+     "same_type": 0.9286
+    }
+   },
+   "edges": {
+    "cooccurrence": 388437,
+    "knn": 419149
+   },
+   "head_groups": 4241,
+   "sizes": {
+    "primary": 14935,
+    "secondary": 10164
+   },
+   "teacher_seen_accuracy": {
+    "M": 0.8517,
+    "G": 0.8559
+   },
+   "vote_grid": {
+    "0.5_1": {
+     "size": 43318,
+     "unseen": 3172,
+     "covered": 1809,
+     "held": 2082,
+     "wrong": 273
+    },
+    "0.5_2": {
+     "size": 27086,
+     "unseen": 3172,
+     "covered": 1663,
+     "held": 1918,
+     "wrong": 255
+    },
+    "0.5_3": {
+     "size": 18428,
+     "unseen": 3172,
+     "covered": 1462,
+     "held": 1741,
+     "wrong": 279
+    },
+    "0.7_1": {
+     "size": 32964,
+     "unseen": 3172,
+     "covered": 1702,
+     "held": 1959,
+     "wrong": 257
+    },
+    "0.7_2": {
+     "size": 21585,
+     "unseen": 3172,
+     "covered": 1555,
+     "held": 1804,
+     "wrong": 249
+    },
+    "0.7_3": {
+     "size": 14935,
+     "unseen": 3172,
+     "covered": 1315,
+     "held": 1514,
+     "wrong": 199
+    },
+    "0.9_1": {
+     "size": 21976,
+     "unseen": 3172,
+     "covered": 1588,
+     "held": 1794,
+     "wrong": 206
+    },
+    "0.9_2": {
+     "size": 15019,
+     "unseen": 3172,
+     "covered": 1272,
+     "held": 1432,
+     "wrong": 160
+    },
+    "0.9_3": {
+     "size": 10164,
+     "unseen": 3172,
+     "covered": 1135,
+     "held": 1227,
+     "wrong": 92
+    }
+   },
+   "ceiling": 1998,
+   "primary": {
+    "V": {
+     "unseen": 3172,
+     "covered": 1315,
+     "held": 1514,
+     "wrong": 199,
+     "coverage": 41.46,
+     "wrong_type": 13.14,
+     "size": 14935
+    },
+    "M": {
+     "unseen": 3172,
+     "covered": 1096,
+     "held": 1175,
+     "wrong": 79,
+     "coverage": 34.55,
+     "wrong_type": 6.72,
+     "size": 14935
+    },
+    "G": {
+     "unseen": 3172,
+     "covered": 968,
+     "held": 1017,
+     "wrong": 49,
+     "coverage": 30.52,
+     "wrong_type": 4.82,
+     "size": 14935
+    },
+    "M_novote": {
+     "unseen": 3172,
+     "covered": 923,
+     "held": 1099,
+     "wrong": 176,
+     "coverage": 29.1,
+     "wrong_type": 16.01,
+     "size": 14935
+    },
+    "G_novote": {
+     "unseen": 3172,
+     "covered": 894,
+     "held": 1073,
+     "wrong": 179,
+     "coverage": 28.18,
+     "wrong_type": 16.68,
+     "size": 14935
+    },
+    "LP": {
+     "unseen": 3172,
+     "covered": 845,
+     "held": 1255,
+     "wrong": 410,
+     "coverage": 26.64,
+     "wrong_type": 32.67,
+     "size": 14935
+    }
+   },
+   "secondary": {
+    "V": {
+     "unseen": 3172,
+     "covered": 1135,
+     "held": 1227,
+     "wrong": 92,
+     "coverage": 35.78,
+     "wrong_type": 7.5,
+     "size": 10164
+    },
+    "M": {
+     "unseen": 3172,
+     "covered": 943,
+     "held": 988,
+     "wrong": 45,
+     "coverage": 29.73,
+     "wrong_type": 4.55,
+     "size": 10164
+    },
+    "G": {
+     "unseen": 3172,
+     "covered": 778,
+     "held": 787,
+     "wrong": 9,
+     "coverage": 24.53,
+     "wrong_type": 1.14,
+     "size": 10164
+    },
+    "M_novote": {
+     "unseen": 3172,
+     "covered": 819,
+     "held": 959,
+     "wrong": 140,
+     "coverage": 25.82,
+     "wrong_type": 14.6,
+     "size": 10164
+    },
+    "G_novote": {
+     "unseen": 3172,
+     "covered": 769,
+     "held": 880,
+     "wrong": 111,
+     "coverage": 24.24,
+     "wrong_type": 12.61,
+     "size": 10164
+    },
+    "LP": {
+     "unseen": 3172,
+     "covered": 519,
+     "held": 873,
+     "wrong": 354,
+     "coverage": 16.36,
+     "wrong_type": 40.55,
+     "size": 10164
+    }
+   },
+   "teachers": [
+    {
+     "seed": 0,
+     "val_f1": 75.08,
+     "test_f1": 58.33,
+     "test_f1_strict": 58.33,
+     "test_macro_f1": 37.37,
+     "best_epoch": 9,
+     "n_silver_alone": 5031
+    },
+    {
+     "seed": 100,
+     "val_f1": 72.38,
+     "test_f1": 55.73,
+     "test_f1_strict": 55.73,
+     "test_macro_f1": 34.23,
+     "best_epoch": 5,
+     "n_silver_alone": 1562
+    },
+    {
+     "seed": 200,
+     "val_f1": 73.29,
+     "test_f1": 54.55,
+     "test_f1_strict": 54.55,
+     "test_macro_f1": 35.25,
+     "best_epoch": 6,
+     "n_silver_alone": 2838
+    }
+   ],
+   "checks": {
+    "teachers": {
+     "equal": true,
+     "runs_checked": 7,
+     "rebuilt_teachers_f1": [
+      58.33,
+      55.73,
+      54.55
+     ]
+    },
+    "dump_vs_w19a_names": {
+     "equal": true,
+     "n_rebuilt": 46137,
+     "n_stored": 46137
+    },
+    "dump_vs_week15_names": {
+     "equal": true,
+     "n_rebuilt": 46137,
+     "n_stored": 46137
+    }
+   }
+  },
+  "mulms:graphene": {
+   "nodes": 40397,
+   "labelled": 221,
+   "new": 40176,
+   "types": [
+    "CITE",
+    "DEV",
+    "FORM",
+    "INSTRUMENT",
+    "MAT",
+    "MEASUREMENT",
+    "NUM",
+    "PROPERTY",
+    "RANGE",
+    "SAMPLE",
+    "TECHNIQUE",
+    "UNIT",
+    "VALUE"
+   ],
+   "homophily": {
+    "cooccurrence": {
+     "labelled_edges": 103,
+     "same_type": 0.3398
+    },
+    "knn": {
+     "labelled_edges": 44,
+     "same_type": 0.9091
+    },
+    "head": {
+     "labelled_edges": 34,
+     "same_type": 1.0
+    }
+   },
+   "edges": {
+    "cooccurrence": 235064,
+    "knn": 318653
+   },
+   "head_groups": 3512,
+   "sizes": {
+    "primary": 11858,
+    "secondary": 7697
+   },
+   "teacher_seen_accuracy": {
+    "M": 0.8416,
+    "G": 0.8326
+   },
+   "vote_grid": {
+    "0.5_1": {
+     "size": 31610,
+     "unseen": 1264,
+     "covered": 495,
+     "held": 601,
+     "wrong": 106
+    },
+    "0.5_2": {
+     "size": 20276,
+     "unseen": 1264,
+     "covered": 404,
+     "held": 518,
+     "wrong": 114
+    },
+    "0.5_3": {
+     "size": 14588,
+     "unseen": 1264,
+     "covered": 345,
+     "held": 437,
+     "wrong": 92
+    },
+    "0.7_1": {
+     "size": 24686,
+     "unseen": 1264,
+     "covered": 460,
+     "held": 559,
+     "wrong": 99
+    },
+    "0.7_2": {
+     "size": 16492,
+     "unseen": 1264,
+     "covered": 373,
+     "held": 473,
+     "wrong": 100
+    },
+    "0.7_3": {
+     "size": 11858,
+     "unseen": 1264,
+     "covered": 327,
+     "held": 402,
+     "wrong": 75
+    },
+    "0.9_1": {
+     "size": 16390,
+     "unseen": 1264,
+     "covered": 367,
+     "held": 467,
+     "wrong": 100
+    },
+    "0.9_2": {
+     "size": 11277,
+     "unseen": 1264,
+     "covered": 317,
+     "held": 346,
+     "wrong": 29
+    },
+    "0.9_3": {
+     "size": 7697,
+     "unseen": 1264,
+     "covered": 266,
+     "held": 281,
+     "wrong": 15
+    }
+   },
+   "ceiling": 595,
+   "primary": {
+    "V": {
+     "unseen": 1264,
+     "covered": 327,
+     "held": 402,
+     "wrong": 75,
+     "coverage": 25.87,
+     "wrong_type": 18.66,
+     "size": 11858
+    },
+    "M": {
+     "unseen": 1264,
+     "covered": 259,
+     "held": 285,
+     "wrong": 26,
+     "coverage": 20.49,
+     "wrong_type": 9.12,
+     "size": 11858
+    },
+    "G": {
+     "unseen": 1264,
+     "covered": 251,
+     "held": 285,
+     "wrong": 34,
+     "coverage": 19.86,
+     "wrong_type": 11.93,
+     "size": 11858
+    },
+    "M_novote": {
+     "unseen": 1264,
+     "covered": 246,
+     "held": 333,
+     "wrong": 87,
+     "coverage": 19.46,
+     "wrong_type": 26.13,
+     "size": 11858
+    },
+    "G_novote": {
+     "unseen": 1264,
+     "covered": 241,
+     "held": 291,
+     "wrong": 50,
+     "coverage": 19.07,
+     "wrong_type": 17.18,
+     "size": 11858
+    },
+    "LP": {
+     "unseen": 1264,
+     "covered": 264,
+     "held": 392,
+     "wrong": 128,
+     "coverage": 20.89,
+     "wrong_type": 32.65,
+     "size": 11858
+    }
+   },
+   "secondary": {
+    "V": {
+     "unseen": 1264,
+     "covered": 266,
+     "held": 281,
+     "wrong": 15,
+     "coverage": 21.04,
+     "wrong_type": 5.34,
+     "size": 7697
+    },
+    "M": {
+     "unseen": 1264,
+     "covered": 227,
+     "held": 239,
+     "wrong": 12,
+     "coverage": 17.96,
+     "wrong_type": 5.02,
+     "size": 7697
+    },
+    "G": {
+     "unseen": 1264,
+     "covered": 183,
+     "held": 196,
+     "wrong": 13,
+     "coverage": 14.48,
+     "wrong_type": 6.63,
+     "size": 7697
+    },
+    "M_novote": {
+     "unseen": 1264,
+     "covered": 200,
+     "held": 253,
+     "wrong": 53,
+     "coverage": 15.82,
+     "wrong_type": 20.95,
+     "size": 7697
+    },
+    "G_novote": {
+     "unseen": 1264,
+     "covered": 197,
+     "held": 220,
+     "wrong": 23,
+     "coverage": 15.59,
+     "wrong_type": 10.45,
+     "size": 7697
+    },
+    "LP": {
+     "unseen": 1264,
+     "covered": 205,
+     "held": 308,
+     "wrong": 103,
+     "coverage": 16.22,
+     "wrong_type": 33.44,
+     "size": 7697
+    }
+   },
+   "teachers": [
+    {
+     "seed": 0,
+     "val_f1": 84.35,
+     "test_f1": 45.42,
+     "test_f1_strict": 45.42,
+     "test_macro_f1": 24.81,
+     "best_epoch": 5,
+     "n_silver_alone": 3329
+    },
+    {
+     "seed": 100,
+     "val_f1": 83.82,
+     "test_f1": 52.53,
+     "test_f1_strict": 52.53,
+     "test_macro_f1": 30.47,
+     "best_epoch": 5,
+     "n_silver_alone": 2064
+    },
+    {
+     "seed": 200,
+     "val_f1": 82.8,
+     "test_f1": 49.66,
+     "test_f1_strict": 49.66,
+     "test_macro_f1": 24.91,
+     "best_epoch": 4,
+     "n_silver_alone": 1570
+    }
+   ],
+   "checks": {
+    "teachers": {
+     "equal": true,
+     "runs_checked": 7,
+     "rebuilt_teachers_f1": [
+      45.42,
+      52.53,
+      49.66
+     ]
+    },
+    "dump_vs_w19a_names": {
+     "equal": true,
+     "n_rebuilt": 28453,
+     "n_stored": 28453
+    },
+    "dump_vs_week15_names": {
+     "equal": true,
+     "n_rebuilt": 28453,
+     "n_stored": 28453
+    }
+   }
+  },
+  "mulms:pemfc": {
+   "nodes": 33794,
+   "labelled": 190,
+   "new": 33604,
+   "types": [
+    "CITE",
+    "DEV",
+    "FORM",
+    "INSTRUMENT",
+    "MAT",
+    "MEASUREMENT",
+    "NUM",
+    "PROPERTY",
+    "RANGE",
+    "SAMPLE",
+    "TECHNIQUE",
+    "UNIT",
+    "VALUE"
+   ],
+   "homophily": {
+    "cooccurrence": {
+     "labelled_edges": 74,
+     "same_type": 0.3784
+    },
+    "knn": {
+     "labelled_edges": 40,
+     "same_type": 0.8
+    },
+    "head": {
+     "labelled_edges": 17,
+     "same_type": 0.8235
+    }
+   },
+   "edges": {
+    "cooccurrence": 179066,
+    "knn": 263839
+   },
+   "head_groups": 2867,
+   "sizes": {
+    "primary": 8707,
+    "secondary": 5264
+   },
+   "teacher_seen_accuracy": {
+    "M": 0.8316,
+    "G": 0.8211
+   },
+   "vote_grid": {
+    "0.5_1": {
+     "size": 26563,
+     "unseen": 6286,
+     "covered": 2754,
+     "held": 3831,
+     "wrong": 1077
+    },
+    "0.5_2": {
+     "size": 17150,
+     "unseen": 6286,
+     "covered": 2653,
+     "held": 3535,
+     "wrong": 882
+    },
+    "0.5_3": {
+     "size": 11544,
+     "unseen": 6286,
+     "covered": 2355,
+     "held": 2934,
+     "wrong": 579
+    },
+    "0.7_1": {
+     "size": 20274,
+     "unseen": 6286,
+     "covered": 2659,
+     "held": 3636,
+     "wrong": 977
+    },
+    "0.7_2": {
+     "size": 13315,
+     "unseen": 6286,
+     "covered": 2434,
+     "held": 3171,
+     "wrong": 737
+    },
+    "0.7_3": {
+     "size": 8707,
+     "unseen": 6286,
+     "covered": 1984,
+     "held": 2337,
+     "wrong": 353
+    },
+    "0.9_1": {
+     "size": 13300,
+     "unseen": 6286,
+     "covered": 2605,
+     "held": 2824,
+     "wrong": 219
+    },
+    "0.9_2": {
+     "size": 8659,
+     "unseen": 6286,
+     "covered": 1915,
+     "held": 2030,
+     "wrong": 115
+    },
+    "0.9_3": {
+     "size": 5264,
+     "unseen": 6286,
+     "covered": 1341,
+     "held": 1349,
+     "wrong": 8
+    }
+   },
+   "ceiling": 3536,
+   "primary": {
+    "V": {
+     "unseen": 6286,
+     "covered": 1984,
+     "held": 2337,
+     "wrong": 353,
+     "coverage": 31.56,
+     "wrong_type": 15.1,
+     "size": 8707
+    },
+    "M": {
+     "unseen": 6286,
+     "covered": 1479,
+     "held": 1673,
+     "wrong": 194,
+     "coverage": 23.53,
+     "wrong_type": 11.6,
+     "size": 8707
+    },
+    "G": {
+     "unseen": 6286,
+     "covered": 1049,
+     "held": 1111,
+     "wrong": 62,
+     "coverage": 16.69,
+     "wrong_type": 5.58,
+     "size": 8707
+    },
+    "M_novote": {
+     "unseen": 6286,
+     "covered": 957,
+     "held": 1170,
+     "wrong": 213,
+     "coverage": 15.22,
+     "wrong_type": 18.21,
+     "size": 8707
+    },
+    "G_novote": {
+     "unseen": 6286,
+     "covered": 600,
+     "held": 1417,
+     "wrong": 817,
+     "coverage": 9.55,
+     "wrong_type": 57.66,
+     "size": 8707
+    },
+    "LP": {
+     "unseen": 6286,
+     "covered": 2304,
+     "held": 2647,
+     "wrong": 343,
+     "coverage": 36.65,
+     "wrong_type": 12.96,
+     "size": 8707
+    }
+   },
+   "secondary": {
+    "V": {
+     "unseen": 6286,
+     "covered": 1341,
+     "held": 1349,
+     "wrong": 8,
+     "coverage": 21.33,
+     "wrong_type": 0.59,
+     "size": 5264
+    },
+    "M": {
+     "unseen": 6286,
+     "covered": 1247,
+     "held": 1369,
+     "wrong": 122,
+     "coverage": 19.84,
+     "wrong_type": 8.91,
+     "size": 5264
+    },
+    "G": {
+     "unseen": 6286,
+     "covered": 845,
+     "held": 894,
+     "wrong": 49,
+     "coverage": 13.44,
+     "wrong_type": 5.48,
+     "size": 5264
+    },
+    "M_novote": {
+     "unseen": 6286,
+     "covered": 555,
+     "held": 688,
+     "wrong": 133,
+     "coverage": 8.83,
+     "wrong_type": 19.33,
+     "size": 5264
+    },
+    "G_novote": {
+     "unseen": 6286,
+     "covered": 392,
+     "held": 865,
+     "wrong": 473,
+     "coverage": 6.24,
+     "wrong_type": 54.68,
+     "size": 5264
+    },
+    "LP": {
+     "unseen": 6286,
+     "covered": 1967,
+     "held": 2098,
+     "wrong": 131,
+     "coverage": 31.29,
+     "wrong_type": 6.24,
+     "size": 5264
+    }
+   },
+   "teachers": [
+    {
+     "seed": 0,
+     "val_f1": 75.71,
+     "test_f1": 46.28,
+     "test_f1_strict": 46.28,
+     "test_macro_f1": 23.71,
+     "best_epoch": 2,
+     "n_silver_alone": 271
+    },
+    {
+     "seed": 100,
+     "val_f1": 78.49,
+     "test_f1": 51.71,
+     "test_f1_strict": 51.71,
+     "test_macro_f1": 32.17,
+     "best_epoch": 5,
+     "n_silver_alone": 1860
+    },
+    {
+     "seed": 200,
+     "val_f1": 78.87,
+     "test_f1": 53.11,
+     "test_f1_strict": 53.11,
+     "test_macro_f1": 29.49,
+     "best_epoch": 5,
+     "n_silver_alone": 2665
+    }
+   ],
+   "checks": {
+    "teachers": {
+     "equal": true,
+     "runs_checked": 7,
+     "rebuilt_teachers_f1": [
+      46.28,
+      51.71,
+      53.11
+     ]
+    },
+    "dump_vs_w19a_names": {
+     "equal": true,
+     "n_rebuilt": 12927,
+     "n_stored": 12927
+    },
+    "dump_vs_week15_names": {
+     "equal": true,
+     "n_rebuilt": 12927,
+     "n_stored": 12927
+    }
+   }
+  },
+  "mulms:poly": {
+   "nodes": 45679,
+   "labelled": 250,
+   "new": 45429,
+   "types": [
+    "CITE",
+    "DEV",
+    "FORM",
+    "INSTRUMENT",
+    "MAT",
+    "MEASUREMENT",
+    "NUM",
+    "PROPERTY",
+    "RANGE",
+    "SAMPLE",
+    "TECHNIQUE",
+    "UNIT",
+    "VALUE"
+   ],
+   "homophily": {
+    "cooccurrence": {
+     "labelled_edges": 117,
+     "same_type": 0.2821
+    },
+    "knn": {
+     "labelled_edges": 41,
+     "same_type": 0.8537
+    },
+    "head": {
+     "labelled_edges": 15,
+     "same_type": 0.9333
+    }
+   },
+   "edges": {
+    "cooccurrence": 255319,
+    "knn": 359098
+   },
+   "head_groups": 4037,
+   "sizes": {
+    "primary": 16998,
+    "secondary": 13190
+   },
+   "teacher_seen_accuracy": {
+    "M": 0.88,
+    "G": 0.848
+   },
+   "vote_grid": {
+    "0.5_1": {
+     "size": 40742,
+     "unseen": 4689,
+     "covered": 2124,
+     "held": 2751,
+     "wrong": 627
+    },
+    "0.5_2": {
+     "size": 26834,
+     "unseen": 4689,
+     "covered": 2034,
+     "held": 2543,
+     "wrong": 509
+    },
+    "0.5_3": {
+     "size": 19346,
+     "unseen": 4689,
+     "covered": 1899,
+     "held": 2309,
+     "wrong": 410
+    },
+    "0.7_1": {
+     "size": 34831,
+     "unseen": 4689,
+     "covered": 2100,
+     "held": 2641,
+     "wrong": 541
+    },
+    "0.7_2": {
+     "size": 23276,
+     "unseen": 4689,
+     "covered": 1938,
+     "held": 2437,
+     "wrong": 499
+    },
+    "0.7_3": {
+     "size": 16998,
+     "unseen": 4689,
+     "covered": 1753,
+     "held": 2212,
+     "wrong": 459
+    },
+    "0.9_1": {
+     "size": 26760,
+     "unseen": 4689,
+     "covered": 1987,
+     "held": 2504,
+     "wrong": 517
+    },
+    "0.9_2": {
+     "size": 18399,
+     "unseen": 4689,
+     "covered": 1722,
+     "held": 2182,
+     "wrong": 460
+    },
+    "0.9_3": {
+     "size": 13190,
+     "unseen": 4689,
+     "covered": 1428,
+     "held": 1827,
+     "wrong": 399
+    }
+   },
+   "ceiling": 2546,
+   "primary": {
+    "V": {
+     "unseen": 4689,
+     "covered": 1753,
+     "held": 2212,
+     "wrong": 459,
+     "coverage": 37.39,
+     "wrong_type": 20.75,
+     "size": 16998
+    },
+    "M": {
+     "unseen": 4689,
+     "covered": 1157,
+     "held": 1212,
+     "wrong": 55,
+     "coverage": 24.67,
+     "wrong_type": 4.54,
+     "size": 16998
+    },
+    "G": {
+     "unseen": 4689,
+     "covered": 1083,
+     "held": 1109,
+     "wrong": 26,
+     "coverage": 23.1,
+     "wrong_type": 2.34,
+     "size": 16998
+    },
+    "M_novote": {
+     "unseen": 4689,
+     "covered": 1071,
+     "held": 1369,
+     "wrong": 298,
+     "coverage": 22.84,
+     "wrong_type": 21.77,
+     "size": 16998
+    },
+    "G_novote": {
+     "unseen": 4689,
+     "covered": 1206,
+     "held": 1477,
+     "wrong": 271,
+     "coverage": 25.72,
+     "wrong_type": 18.35,
+     "size": 16998
+    },
+    "LP": {
+     "unseen": 4689,
+     "covered": 1228,
+     "held": 1897,
+     "wrong": 669,
+     "coverage": 26.19,
+     "wrong_type": 35.27,
+     "size": 16998
+    }
+   },
+   "secondary": {
+    "V": {
+     "unseen": 4689,
+     "covered": 1428,
+     "held": 1827,
+     "wrong": 399,
+     "coverage": 30.45,
+     "wrong_type": 21.84,
+     "size": 13190
+    },
+    "M": {
+     "unseen": 4689,
+     "covered": 1010,
+     "held": 1027,
+     "wrong": 17,
+     "coverage": 21.54,
+     "wrong_type": 1.66,
+     "size": 13190
+    },
+    "G": {
+     "unseen": 4689,
+     "covered": 976,
+     "held": 997,
+     "wrong": 21,
+     "coverage": 20.81,
+     "wrong_type": 2.11,
+     "size": 13190
+    },
+    "M_novote": {
+     "unseen": 4689,
+     "covered": 819,
+     "held": 1035,
+     "wrong": 216,
+     "coverage": 17.47,
+     "wrong_type": 20.87,
+     "size": 13190
+    },
+    "G_novote": {
+     "unseen": 4689,
+     "covered": 1072,
+     "held": 1272,
+     "wrong": 200,
+     "coverage": 22.86,
+     "wrong_type": 15.72,
+     "size": 13190
+    },
+    "LP": {
+     "unseen": 4689,
+     "covered": 988,
+     "held": 1498,
+     "wrong": 510,
+     "coverage": 21.07,
+     "wrong_type": 34.05,
+     "size": 13190
+    }
+   },
+   "teachers": [
+    {
+     "seed": 0,
+     "val_f1": 79.3,
+     "test_f1": 53.06,
+     "test_f1_strict": 53.06,
+     "test_macro_f1": 40.28,
+     "best_epoch": 9,
+     "n_silver_alone": 3032
+    },
+    {
+     "seed": 100,
+     "val_f1": 78.36,
+     "test_f1": 54.27,
+     "test_f1_strict": 54.27,
+     "test_macro_f1": 41.51,
+     "best_epoch": 15,
+     "n_silver_alone": 8828
+    },
+    {
+     "seed": 200,
+     "val_f1": 77.83,
+     "test_f1": 53.08,
+     "test_f1_strict": 53.08,
+     "test_macro_f1": 41.08,
+     "best_epoch": 13,
+     "n_silver_alone": 7628
+    }
+   ],
+   "checks": {
+    "teachers": {
+     "equal": true,
+     "runs_checked": 7,
+     "rebuilt_teachers_f1": [
+      53.06,
+      54.27,
+      53.08
+     ]
+    },
+    "dump_vs_w19a_names": {
+     "equal": true,
+     "n_rebuilt": 50869,
+     "n_stored": 50869
+    },
+    "dump_vs_week15_names": {
+     "equal": true,
+     "n_rebuilt": 50869,
+     "n_stored": 50869
+    }
+   }
+  },
+  "mulms:semi": {
+   "nodes": 30382,
+   "labelled": 82,
+   "new": 30300,
+   "types": [
+    "CITE",
+    "DEV",
+    "FORM",
+    "INSTRUMENT",
+    "MAT",
+    "MEASUREMENT",
+    "NUM",
+    "PROPERTY",
+    "RANGE",
+    "SAMPLE",
+    "TECHNIQUE",
+    "UNIT",
+    "VALUE"
+   ],
+   "homophily": {
+    "cooccurrence": {
+     "labelled_edges": 13,
+     "same_type": 0.3077
+    },
+    "knn": {
+     "labelled_edges": 20,
+     "same_type": 1.0
+    },
+    "head": {
+     "labelled_edges": 10,
+     "same_type": 1.0
+    }
+   },
+   "edges": {
+    "cooccurrence": 111616,
+    "knn": 239513
+   },
+   "head_groups": 2885,
+   "sizes": {
+    "primary": 6947,
+    "secondary": 4798
+   },
+   "teacher_seen_accuracy": {
+    "M": 0.9146,
+    "G": 0.8415
+   },
+   "vote_grid": {
+    "0.5_1": {
+     "size": 22515,
+     "unseen": 5157,
+     "covered": 1707,
+     "held": 2156,
+     "wrong": 449
+    },
+    "0.5_2": {
+     "size": 13653,
+     "unseen": 5157,
+     "covered": 1244,
+     "held": 1600,
+     "wrong": 356
+    },
+    "0.5_3": {
+     "size": 8652,
+     "unseen": 5157,
+     "covered": 961,
+     "held": 1082,
+     "wrong": 121
+    },
+    "0.7_1": {
+     "size": 16862,
+     "unseen": 5157,
+     "covered": 1438,
+     "held": 1806,
+     "wrong": 368
+    },
+    "0.7_2": {
+     "size": 10582,
+     "unseen": 5157,
+     "covered": 1055,
+     "held": 1217,
+     "wrong": 162
+    },
+    "0.7_3": {
+     "size": 6947,
+     "unseen": 5157,
+     "covered": 625,
+     "held": 687,
+     "wrong": 62
+    },
+    "0.9_1": {
+     "size": 10715,
+     "unseen": 5157,
+     "covered": 1047,
+     "held": 1224,
+     "wrong": 177
+    },
+    "0.9_2": {
+     "size": 7144,
+     "unseen": 5157,
+     "covered": 540,
+     "held": 579,
+     "wrong": 39
+    },
+    "0.9_3": {
+     "size": 4798,
+     "unseen": 5157,
+     "covered": 371,
+     "held": 374,
+     "wrong": 3
+    }
+   },
+   "ceiling": 2035,
+   "primary": {
+    "V": {
+     "unseen": 5157,
+     "covered": 625,
+     "held": 687,
+     "wrong": 62,
+     "coverage": 12.12,
+     "wrong_type": 9.02,
+     "size": 6947
+    },
+    "M": {
+     "unseen": 5157,
+     "covered": 403,
+     "held": 453,
+     "wrong": 50,
+     "coverage": 7.81,
+     "wrong_type": 11.04,
+     "size": 6947
+    },
+    "G": {
+     "unseen": 5157,
+     "covered": 353,
+     "held": 365,
+     "wrong": 12,
+     "coverage": 6.85,
+     "wrong_type": 3.29,
+     "size": 6947
+    },
+    "M_novote": {
+     "unseen": 5157,
+     "covered": 445,
+     "held": 710,
+     "wrong": 265,
+     "coverage": 8.63,
+     "wrong_type": 37.32,
+     "size": 6947
+    },
+    "G_novote": {
+     "unseen": 5157,
+     "covered": 461,
+     "held": 546,
+     "wrong": 85,
+     "coverage": 8.94,
+     "wrong_type": 15.57,
+     "size": 6947
+    },
+    "LP": {
+     "unseen": 5157,
+     "covered": 501,
+     "held": 846,
+     "wrong": 345,
+     "coverage": 9.71,
+     "wrong_type": 40.78,
+     "size": 6947
+    }
+   },
+   "secondary": {
+    "V": {
+     "unseen": 5157,
+     "covered": 371,
+     "held": 374,
+     "wrong": 3,
+     "coverage": 7.19,
+     "wrong_type": 0.8,
+     "size": 4798
+    },
+    "M": {
+     "unseen": 5157,
+     "covered": 256,
+     "held": 281,
+     "wrong": 25,
+     "coverage": 4.96,
+     "wrong_type": 8.9,
+     "size": 4798
+    },
+    "G": {
+     "unseen": 5157,
+     "covered": 250,
+     "held": 253,
+     "wrong": 3,
+     "coverage": 4.85,
+     "wrong_type": 1.19,
+     "size": 4798
+    },
+    "M_novote": {
+     "unseen": 5157,
+     "covered": 337,
+     "held": 372,
+     "wrong": 35,
+     "coverage": 6.53,
+     "wrong_type": 9.41,
+     "size": 4798
+    },
+    "G_novote": {
+     "unseen": 5157,
+     "covered": 280,
+     "held": 307,
+     "wrong": 27,
+     "coverage": 5.43,
+     "wrong_type": 8.79,
+     "size": 4798
+    },
+    "LP": {
+     "unseen": 5157,
+     "covered": 441,
+     "held": 548,
+     "wrong": 107,
+     "coverage": 8.55,
+     "wrong_type": 19.53,
+     "size": 4798
+    }
+   },
+   "teachers": [
+    {
+     "seed": 0,
+     "val_f1": 80.57,
+     "test_f1": 32.99,
+     "test_f1_strict": 32.99,
+     "test_macro_f1": 20.98,
+     "best_epoch": 8,
+     "n_silver_alone": 1150
+    },
+    {
+     "seed": 100,
+     "val_f1": 79.19,
+     "test_f1": 30.17,
+     "test_f1_strict": 30.17,
+     "test_macro_f1": 17.04,
+     "best_epoch": 7,
+     "n_silver_alone": 1247
+    },
+    {
+     "seed": 200,
+     "val_f1": 79.21,
+     "test_f1": 31.4,
+     "test_f1_strict": 31.4,
+     "test_macro_f1": 19.41,
+     "best_epoch": 7,
+     "n_silver_alone": 675
+    }
+   ],
+   "checks": {
+    "teachers": {
+     "equal": true,
+     "runs_checked": 7,
+     "rebuilt_teachers_f1": [
+      32.99,
+      30.17,
+      31.4
+     ]
+    },
+    "dump_vs_w19a_names": {
+     "equal": true,
+     "n_rebuilt": 8328,
+     "n_stored": 8328
+    },
+    "dump_vs_week15_names": {
+     "equal": true,
+     "n_rebuilt": 8328,
+     "n_stored": 8328
+    }
+   }
+  },
+  "mulms:sofc": {
+   "nodes": 29484,
+   "labelled": 110,
+   "new": 29374,
+   "types": [
+    "CITE",
+    "DEV",
+    "FORM",
+    "INSTRUMENT",
+    "MAT",
+    "MEASUREMENT",
+    "NUM",
+    "PROPERTY",
+    "RANGE",
+    "SAMPLE",
+    "TECHNIQUE",
+    "UNIT",
+    "VALUE"
+   ],
+   "homophily": {
+    "cooccurrence": {
+     "labelled_edges": 35,
+     "same_type": 0.3143
+    },
+    "knn": {
+     "labelled_edges": 20,
+     "same_type": 0.85
+    },
+    "head": {
+     "labelled_edges": 10,
+     "same_type": 1.0
+    }
+   },
+   "edges": {
+    "cooccurrence": 153883,
+    "knn": 227481
+   },
+   "head_groups": 2373,
+   "sizes": {
+    "primary": 6985,
+    "secondary": 4338
+   },
+   "teacher_seen_accuracy": {
+    "M": 0.8273,
+    "G": 0.7909
+   },
+   "vote_grid": {
+    "0.5_1": {
+     "size": 21833,
+     "unseen": 3618,
+     "covered": 1799,
+     "held": 2345,
+     "wrong": 546
+    },
+    "0.5_2": {
+     "size": 13603,
+     "unseen": 3618,
+     "covered": 1712,
+     "held": 1995,
+     "wrong": 283
+    },
+    "0.5_3": {
+     "size": 9309,
+     "unseen": 3618,
+     "covered": 1588,
+     "held": 1699,
+     "wrong": 111
+    },
+    "0.7_1": {
+     "size": 16115,
+     "unseen": 3618,
+     "covered": 1669,
+     "held": 2173,
+     "wrong": 504
+    },
+    "0.7_2": {
+     "size": 10094,
+     "unseen": 3618,
+     "covered": 1579,
+     "held": 1716,
+     "wrong": 137
+    },
+    "0.7_3": {
+     "size": 6985,
+     "unseen": 3618,
+     "covered": 1280,
+     "held": 1336,
+     "wrong": 56
+    },
+    "0.9_1": {
+     "size": 9612,
+     "unseen": 3618,
+     "covered": 1238,
+     "held": 1605,
+     "wrong": 367
+    },
+    "0.9_2": {
+     "size": 6235,
+     "unseen": 3618,
+     "covered": 1035,
+     "held": 1052,
+     "wrong": 17
+    },
+    "0.9_3": {
+     "size": 4338,
+     "unseen": 3618,
+     "covered": 655,
+     "held": 655,
+     "wrong": 0
+    }
+   },
+   "ceiling": 2285,
+   "primary": {
+    "V": {
+     "unseen": 3618,
+     "covered": 1280,
+     "held": 1336,
+     "wrong": 56,
+     "coverage": 35.38,
+     "wrong_type": 4.19,
+     "size": 6985
+    },
+    "M": {
+     "unseen": 3618,
+     "covered": 1304,
+     "held": 1463,
+     "wrong": 159,
+     "coverage": 36.04,
+     "wrong_type": 10.87,
+     "size": 6985
+    },
+    "G": {
+     "unseen": 3618,
+     "covered": 1155,
+     "held": 1326,
+     "wrong": 171,
+     "coverage": 31.92,
+     "wrong_type": 12.9,
+     "size": 6985
+    },
+    "M_novote": {
+     "unseen": 3618,
+     "covered": 986,
+     "held": 1293,
+     "wrong": 307,
+     "coverage": 27.25,
+     "wrong_type": 23.74,
+     "size": 6985
+    },
+    "G_novote": {
+     "unseen": 3618,
+     "covered": 702,
+     "held": 1334,
+     "wrong": 632,
+     "coverage": 19.4,
+     "wrong_type": 47.38,
+     "size": 6985
+    },
+    "LP": {
+     "unseen": 3618,
+     "covered": 1354,
+     "held": 1671,
+     "wrong": 317,
+     "coverage": 37.42,
+     "wrong_type": 18.97,
+     "size": 6985
+    }
+   },
+   "secondary": {
+    "V": {
+     "unseen": 3618,
+     "covered": 655,
+     "held": 655,
+     "wrong": 0,
+     "coverage": 18.1,
+     "wrong_type": 0.0,
+     "size": 4338
+    },
+    "M": {
+     "unseen": 3618,
+     "covered": 1040,
+     "held": 1183,
+     "wrong": 143,
+     "coverage": 28.75,
+     "wrong_type": 12.09,
+     "size": 4338
+    },
+    "G": {
+     "unseen": 3618,
+     "covered": 697,
+     "held": 843,
+     "wrong": 146,
+     "coverage": 19.26,
+     "wrong_type": 17.32,
+     "size": 4338
+    },
+    "M_novote": {
+     "unseen": 3618,
+     "covered": 754,
+     "held": 895,
+     "wrong": 141,
+     "coverage": 20.84,
+     "wrong_type": 15.75,
+     "size": 4338
+    },
+    "G_novote": {
+     "unseen": 3618,
+     "covered": 585,
+     "held": 1046,
+     "wrong": 461,
+     "coverage": 16.17,
+     "wrong_type": 44.07,
+     "size": 4338
+    },
+    "LP": {
+     "unseen": 3618,
+     "covered": 848,
+     "held": 1056,
+     "wrong": 208,
+     "coverage": 23.44,
+     "wrong_type": 19.7,
+     "size": 4338
+    }
+   },
+   "teachers": [
+    {
+     "seed": 0,
+     "val_f1": 66.05,
+     "test_f1": 42.61,
+     "test_f1_strict": 42.61,
+     "test_macro_f1": 23.37,
+     "best_epoch": 6,
+     "n_silver_alone": 1448
+    },
+    {
+     "seed": 100,
+     "val_f1": 71.57,
+     "test_f1": 46.19,
+     "test_f1_strict": 46.19,
+     "test_macro_f1": 22.69,
+     "best_epoch": 6,
+     "n_silver_alone": 1202
+    },
+    {
+     "seed": 200,
+     "val_f1": 71.56,
+     "test_f1": 43.66,
+     "test_f1_strict": 43.66,
+     "test_macro_f1": 26.47,
+     "best_epoch": 8,
+     "n_silver_alone": 2691
+    }
+   ],
+   "checks": {
+    "teachers": {
+     "equal": true,
+     "runs_checked": 7,
+     "rebuilt_teachers_f1": [
+      42.61,
+      46.19,
+      43.66
+     ]
+    },
+    "dump_vs_w19a_names": {
+     "equal": true,
+     "n_rebuilt": 14402,
+     "n_stored": 14402
+    },
+    "dump_vs_week15_names": {
+     "equal": true,
+     "n_rebuilt": 14402,
+     "n_stored": 14402
+    }
+   }
+  },
+  "mulms:steel": {
+   "nodes": 32345,
+   "labelled": 251,
+   "new": 32094,
+   "types": [
+    "CITE",
+    "DEV",
+    "FORM",
+    "INSTRUMENT",
+    "MAT",
+    "MEASUREMENT",
+    "NUM",
+    "PROPERTY",
+    "RANGE",
+    "SAMPLE",
+    "TECHNIQUE",
+    "UNIT",
+    "VALUE"
+   ],
+   "homophily": {
+    "cooccurrence": {
+     "labelled_edges": 97,
+     "same_type": 0.4433
+    },
+    "knn": {
+     "labelled_edges": 69,
+     "same_type": 0.8986
+    },
+    "head": {
+     "labelled_edges": 38,
+     "same_type": 0.9474
+    }
+   },
+   "edges": {
+    "cooccurrence": 159943,
+    "knn": 254902
+   },
+   "head_groups": 2941,
+   "sizes": {
+    "primary": 10367,
+    "secondary": 7916
+   },
+   "teacher_seen_accuracy": {
+    "M": 0.8446,
+    "G": 0.8725
+   },
+   "vote_grid": {
+    "0.5_1": {
+     "size": 27057,
+     "unseen": 4075,
+     "covered": 1645,
+     "held": 1813,
+     "wrong": 168
+    },
+    "0.5_2": {
+     "size": 17543,
+     "unseen": 4075,
+     "covered": 1521,
+     "held": 1654,
+     "wrong": 133
+    },
+    "0.5_3": {
+     "size": 12190,
+     "unseen": 4075,
+     "covered": 1359,
+     "held": 1463,
+     "wrong": 104
+    },
+    "0.7_1": {
+     "size": 21646,
+     "unseen": 4075,
+     "covered": 1571,
+     "held": 1725,
+     "wrong": 154
+    },
+    "0.7_2": {
+     "size": 14657,
+     "unseen": 4075,
+     "covered": 1429,
+     "held": 1576,
+     "wrong": 147
+    },
+    "0.7_3": {
+     "size": 10367,
+     "unseen": 4075,
+     "covered": 1269,
+     "held": 1365,
+     "wrong": 96
+    },
+    "0.9_1": {
+     "size": 15305,
+     "unseen": 4075,
+     "covered": 1439,
+     "held": 1551,
+     "wrong": 112
+    },
+    "0.9_2": {
+     "size": 10844,
+     "unseen": 4075,
+     "covered": 1218,
+     "held": 1307,
+     "wrong": 89
+    },
+    "0.9_3": {
+     "size": 7916,
+     "unseen": 4075,
+     "covered": 1034,
+     "held": 1111,
+     "wrong": 77
+    }
+   },
+   "ceiling": 1797,
+   "primary": {
+    "V": {
+     "unseen": 4075,
+     "covered": 1269,
+     "held": 1365,
+     "wrong": 96,
+     "coverage": 31.14,
+     "wrong_type": 7.03,
+     "size": 10367
+    },
+    "M": {
+     "unseen": 4075,
+     "covered": 930,
+     "held": 1028,
+     "wrong": 98,
+     "coverage": 22.82,
+     "wrong_type": 9.53,
+     "size": 10367
+    },
+    "G": {
+     "unseen": 4075,
+     "covered": 958,
+     "held": 1068,
+     "wrong": 110,
+     "coverage": 23.51,
+     "wrong_type": 10.3,
+     "size": 10367
+    },
+    "M_novote": {
+     "unseen": 4075,
+     "covered": 863,
+     "held": 1018,
+     "wrong": 155,
+     "coverage": 21.18,
+     "wrong_type": 15.23,
+     "size": 10367
+    },
+    "G_novote": {
+     "unseen": 4075,
+     "covered": 870,
+     "held": 1007,
+     "wrong": 137,
+     "coverage": 21.35,
+     "wrong_type": 13.6,
+     "size": 10367
+    },
+    "LP": {
+     "unseen": 4075,
+     "covered": 836,
+     "held": 1021,
+     "wrong": 185,
+     "coverage": 20.52,
+     "wrong_type": 18.12,
+     "size": 10367
+    }
+   },
+   "secondary": {
+    "V": {
+     "unseen": 4075,
+     "covered": 1034,
+     "held": 1111,
+     "wrong": 77,
+     "coverage": 25.37,
+     "wrong_type": 6.93,
+     "size": 7916
+    },
+    "M": {
+     "unseen": 4075,
+     "covered": 831,
+     "held": 909,
+     "wrong": 78,
+     "coverage": 20.39,
+     "wrong_type": 8.58,
+     "size": 7916
+    },
+    "G": {
+     "unseen": 4075,
+     "covered": 841,
+     "held": 910,
+     "wrong": 69,
+     "coverage": 20.64,
+     "wrong_type": 7.58,
+     "size": 7916
+    },
+    "M_novote": {
+     "unseen": 4075,
+     "covered": 766,
+     "held": 869,
+     "wrong": 103,
+     "coverage": 18.8,
+     "wrong_type": 11.85,
+     "size": 7916
+    },
+    "G_novote": {
+     "unseen": 4075,
+     "covered": 808,
+     "held": 937,
+     "wrong": 129,
+     "coverage": 19.83,
+     "wrong_type": 13.77,
+     "size": 7916
+    },
+    "LP": {
+     "unseen": 4075,
+     "covered": 684,
+     "held": 851,
+     "wrong": 167,
+     "coverage": 16.79,
+     "wrong_type": 19.62,
+     "size": 7916
+    }
+   },
+   "teachers": [
+    {
+     "seed": 0,
+     "val_f1": 80.56,
+     "test_f1": 56.95,
+     "test_f1_strict": 56.95,
+     "test_macro_f1": 35.52,
+     "best_epoch": 5,
+     "n_silver_alone": 2510
+    },
+    {
+     "seed": 100,
+     "val_f1": 80.57,
+     "test_f1": 57.64,
+     "test_f1_strict": 57.64,
+     "test_macro_f1": 33.0,
+     "best_epoch": 9,
+     "n_silver_alone": 6840
+    },
+    {
+     "seed": 200,
+     "val_f1": 78.89,
+     "test_f1": 58.25,
+     "test_f1_strict": 58.25,
+     "test_macro_f1": 33.12,
+     "best_epoch": 8,
+     "n_silver_alone": 4872
+    }
+   ],
+   "checks": {
+    "teachers": {
+     "equal": true,
+     "runs_checked": 7,
+     "rebuilt_teachers_f1": [
+      56.95,
+      57.64,
+      58.25
+     ]
+    },
+    "dump_vs_w19a_names": {
+     "equal": true,
+     "n_rebuilt": 30332,
+     "n_stored": 30332
+    },
+    "dump_vs_week15_names": {
+     "equal": true,
+     "n_rebuilt": 30332,
+     "n_stored": 30332
+    }
+   }
+  },
+  "fine:10.1007_s11340-021-00758-x.conll": {
+   "nodes": 38219,
+   "labelled": 253,
+   "new": 37966,
+   "types": [
+    "Alloy",
+    "Crack",
+    "CrackInitation",
+    "DataSet",
+    "FatigueLifetime",
+    "FatigueTest",
+    "FatigueTestSpecimen",
+    "GrainBoundary",
+    "LoadingType",
+    "Location",
+    "MaterialClass",
+    "MechanicalProperty",
+    "MechanicalTestDataSet",
+    "MechanicalTreatment",
+    "Mechanism",
+    "Microstructure",
+    "MicrostructureEntity",
+    "StateDescriptor",
+    "StrainRate",
+    "StressAmplitude",
+    "TensileUltimateStrength",
+    "TensileYieldStrength",
+    "TestSpecimen",
+    "TestingMachine",
+    "TestingMedium",
+    "TwinBoundary",
+    "Value"
+   ],
+   "homophily": {
+    "cooccurrence": {
+     "labelled_edges": 200,
+     "same_type": 0.16
+    },
+    "knn": {
+     "labelled_edges": 56,
+     "same_type": 0.8929
+    },
+    "head": {
+     "labelled_edges": 89,
+     "same_type": 0.7079
+    }
+   },
+   "edges": {
+    "cooccurrence": 153426,
+    "knn": 300362
+   },
+   "head_groups": 2975,
+   "sizes": {
+    "primary": 9330,
+    "secondary": 6684
+   },
+   "teacher_seen_accuracy": {
+    "M": 0.8498,
+    "G": 0.8419
+   },
+   "vote_grid": {
+    "0.5_1": {
+     "size": 27408,
+     "unseen": 43,
+     "covered": 12,
+     "held": 13,
+     "wrong": 1
+    },
+    "0.5_2": {
+     "size": 16328,
+     "unseen": 43,
+     "covered": 11,
+     "held": 11,
+     "wrong": 0
+    },
+    "0.5_3": {
+     "size": 11046,
+     "unseen": 43,
+     "covered": 10,
+     "held": 10,
+     "wrong": 0
+    },
+    "0.7_1": {
+     "size": 21304,
+     "unseen": 43,
+     "covered": 11,
+     "held": 12,
+     "wrong": 1
+    },
+    "0.7_2": {
+     "size": 13267,
+     "unseen": 43,
+     "covered": 10,
+     "held": 10,
+     "wrong": 0
+    },
+    "0.7_3": {
+     "size": 9330,
+     "unseen": 43,
+     "covered": 9,
+     "held": 9,
+     "wrong": 0
+    },
+    "0.9_1": {
+     "size": 14576,
+     "unseen": 43,
+     "covered": 10,
+     "held": 11,
+     "wrong": 1
+    },
+    "0.9_2": {
+     "size": 9739,
+     "unseen": 43,
+     "covered": 10,
+     "held": 10,
+     "wrong": 0
+    },
+    "0.9_3": {
+     "size": 6684,
+     "unseen": 43,
+     "covered": 8,
+     "held": 8,
+     "wrong": 0
+    }
+   },
+   "ceiling": 14,
+   "primary": {
+    "V": {
+     "unseen": 43,
+     "covered": 9,
+     "held": 9,
+     "wrong": 0,
+     "coverage": 20.93,
+     "wrong_type": 0.0,
+     "size": 9330
+    },
+    "M": {
+     "unseen": 43,
+     "covered": 7,
+     "held": 7,
+     "wrong": 0,
+     "coverage": 16.28,
+     "wrong_type": 0.0,
+     "size": 9330
+    },
+    "G": {
+     "unseen": 43,
+     "covered": 6,
+     "held": 6,
+     "wrong": 0,
+     "coverage": 13.95,
+     "wrong_type": 0.0,
+     "size": 9330
+    },
+    "M_novote": {
+     "unseen": 43,
+     "covered": 7,
+     "held": 7,
+     "wrong": 0,
+     "coverage": 16.28,
+     "wrong_type": 0.0,
+     "size": 9330
+    },
+    "G_novote": {
+     "unseen": 43,
+     "covered": 7,
+     "held": 7,
+     "wrong": 0,
+     "coverage": 16.28,
+     "wrong_type": 0.0,
+     "size": 9330
+    },
+    "LP": {
+     "unseen": 43,
+     "covered": 6,
+     "held": 6,
+     "wrong": 0,
+     "coverage": 13.95,
+     "wrong_type": 0.0,
+     "size": 9330
+    }
+   },
+   "secondary": {
+    "V": {
+     "unseen": 43,
+     "covered": 8,
+     "held": 8,
+     "wrong": 0,
+     "coverage": 18.6,
+     "wrong_type": 0.0,
+     "size": 6684
+    },
+    "M": {
+     "unseen": 43,
+     "covered": 4,
+     "held": 4,
+     "wrong": 0,
+     "coverage": 9.3,
+     "wrong_type": 0.0,
+     "size": 6684
+    },
+    "G": {
+     "unseen": 43,
+     "covered": 5,
+     "held": 5,
+     "wrong": 0,
+     "coverage": 11.63,
+     "wrong_type": 0.0,
+     "size": 6684
+    },
+    "M_novote": {
+     "unseen": 43,
+     "covered": 6,
+     "held": 6,
+     "wrong": 0,
+     "coverage": 13.95,
+     "wrong_type": 0.0,
+     "size": 6684
+    },
+    "G_novote": {
+     "unseen": 43,
+     "covered": 7,
+     "held": 7,
+     "wrong": 0,
+     "coverage": 16.28,
+     "wrong_type": 0.0,
+     "size": 6684
+    },
+    "LP": {
+     "unseen": 43,
+     "covered": 3,
+     "held": 3,
+     "wrong": 0,
+     "coverage": 6.98,
+     "wrong_type": 0.0,
+     "size": 6684
+    }
+   },
+   "teachers": [
+    {
+     "seed": 0,
+     "val_f1": 83.71,
+     "test_f1": 48.78,
+     "test_f1_strict": 48.78,
+     "test_macro_f1": 36.03,
+     "best_epoch": 10,
+     "n_silver_alone": 5724
+    },
+    {
+     "seed": 100,
+     "val_f1": 84.13,
+     "test_f1": 52.71,
+     "test_f1_strict": 52.71,
+     "test_macro_f1": 44.16,
+     "best_epoch": 12,
+     "n_silver_alone": 6389
+    },
+    {
+     "seed": 200,
+     "val_f1": 82.86,
+     "test_f1": 51.13,
+     "test_f1_strict": 51.13,
+     "test_macro_f1": 38.7,
+     "best_epoch": 6,
+     "n_silver_alone": 1176
+    }
+   ],
+   "checks": {
+    "teachers": {
+     "equal": true,
+     "runs_checked": 10,
+     "rebuilt_teachers_f1": [
+      48.78,
+      52.71,
+      51.13
+     ]
+    },
+    "dump_vs_w19a_names": {
+     "equal": true,
+     "n_rebuilt": 22775,
+     "n_stored": 22775
+    },
+    "dump_vs_week15_names": {
+     "equal": true,
+     "n_rebuilt": 22775,
+     "n_stored": 22775
+    }
+   }
+  },
+  "fine:10.1038_ncomms7164.conll": {
+   "nodes": 31372,
+   "labelled": 216,
+   "new": 31156,
+   "types": [
+    "Alloy",
+    "Crack",
+    "CrackInitation",
+    "DataSet",
+    "FatigueLifetime",
+    "FatigueTest",
+    "FatigueTestSpecimen",
+    "GrainBoundary",
+    "LoadingType",
+    "Location",
+    "MaterialClass",
+    "MechanicalProperty",
+    "MechanicalTestDataSet",
+    "MechanicalTreatment",
+    "Mechanism",
+    "Microstructure",
+    "MicrostructureEntity",
+    "StateDescriptor",
+    "StrainRate",
+    "StressAmplitude",
+    "TensileUltimateStrength",
+    "TensileYieldStrength",
+    "TestSpecimen",
+    "TestingMachine",
+    "TestingMedium",
+    "TwinBoundary",
+    "Value"
+   ],
+   "homophily": {
+    "cooccurrence": {
+     "labelled_edges": 161,
+     "same_type": 0.1056
+    },
+    "knn": {
+     "labelled_edges": 51,
+     "same_type": 0.8235
+    },
+    "head": {
+     "labelled_edges": 92,
+     "same_type": 0.7283
+    }
+   },
+   "edges": {
+    "cooccurrence": 121636,
+    "knn": 246060
+   },
+   "head_groups": 2393,
+   "sizes": {
+    "primary": 8422,
+    "secondary": 5514
+   },
+   "teacher_seen_accuracy": {
+    "M": 0.8148,
+    "G": 0.7917
+   },
+   "vote_grid": {
+    "0.5_1": {
+     "size": 25101,
+     "unseen": 216,
+     "covered": 57,
+     "held": 65,
+     "wrong": 8
+    },
+    "0.5_2": {
+     "size": 15823,
+     "unseen": 216,
+     "covered": 52,
+     "held": 62,
+     "wrong": 10
+    },
+    "0.5_3": {
+     "size": 10379,
+     "unseen": 216,
+     "covered": 38,
+     "held": 45,
+     "wrong": 7
+    },
+    "0.7_1": {
+     "size": 20594,
+     "unseen": 216,
+     "covered": 55,
+     "held": 65,
+     "wrong": 10
+    },
+    "0.7_2": {
+     "size": 13168,
+     "unseen": 216,
+     "covered": 52,
+     "held": 60,
+     "wrong": 8
+    },
+    "0.7_3": {
+     "size": 8422,
+     "unseen": 216,
+     "covered": 30,
+     "held": 34,
+     "wrong": 4
+    },
+    "0.9_1": {
+     "size": 14916,
+     "unseen": 216,
+     "covered": 53,
+     "held": 60,
+     "wrong": 7
+    },
+    "0.9_2": {
+     "size": 9825,
+     "unseen": 216,
+     "covered": 36,
+     "held": 40,
+     "wrong": 4
+    },
+    "0.9_3": {
+     "size": 5514,
+     "unseen": 216,
+     "covered": 23,
+     "held": 23,
+     "wrong": 0
+    }
+   },
+   "ceiling": 74,
+   "primary": {
+    "V": {
+     "unseen": 216,
+     "covered": 30,
+     "held": 34,
+     "wrong": 4,
+     "coverage": 13.89,
+     "wrong_type": 11.76,
+     "size": 8422
+    },
+    "M": {
+     "unseen": 216,
+     "covered": 17,
+     "held": 17,
+     "wrong": 0,
+     "coverage": 7.87,
+     "wrong_type": 0.0,
+     "size": 8422
+    },
+    "G": {
+     "unseen": 216,
+     "covered": 14,
+     "held": 14,
+     "wrong": 0,
+     "coverage": 6.48,
+     "wrong_type": 0.0,
+     "size": 8422
+    },
+    "M_novote": {
+     "unseen": 216,
+     "covered": 25,
+     "held": 26,
+     "wrong": 1,
+     "coverage": 11.57,
+     "wrong_type": 3.85,
+     "size": 8422
+    },
+    "G_novote": {
+     "unseen": 216,
+     "covered": 23,
+     "held": 24,
+     "wrong": 1,
+     "coverage": 10.65,
+     "wrong_type": 4.17,
+     "size": 8422
+    },
+    "LP": {
+     "unseen": 216,
+     "covered": 27,
+     "held": 30,
+     "wrong": 3,
+     "coverage": 12.5,
+     "wrong_type": 10.0,
+     "size": 8422
+    }
+   },
+   "secondary": {
+    "V": {
+     "unseen": 216,
+     "covered": 23,
+     "held": 23,
+     "wrong": 0,
+     "coverage": 10.65,
+     "wrong_type": 0.0,
+     "size": 5514
+    },
+    "M": {
+     "unseen": 216,
+     "covered": 9,
+     "held": 9,
+     "wrong": 0,
+     "coverage": 4.17,
+     "wrong_type": 0.0,
+     "size": 5514
+    },
+    "G": {
+     "unseen": 216,
+     "covered": 10,
+     "held": 10,
+     "wrong": 0,
+     "coverage": 4.63,
+     "wrong_type": 0.0,
+     "size": 5514
+    },
+    "M_novote": {
+     "unseen": 216,
+     "covered": 19,
+     "held": 20,
+     "wrong": 1,
+     "coverage": 8.8,
+     "wrong_type": 5.0,
+     "size": 5514
+    },
+    "G_novote": {
+     "unseen": 216,
+     "covered": 18,
+     "held": 19,
+     "wrong": 1,
+     "coverage": 8.33,
+     "wrong_type": 5.26,
+     "size": 5514
+    },
+    "LP": {
+     "unseen": 216,
+     "covered": 22,
+     "held": 25,
+     "wrong": 3,
+     "coverage": 10.19,
+     "wrong_type": 12.0,
+     "size": 5514
+    }
+   },
+   "teachers": [
+    {
+     "seed": 0,
+     "val_f1": 80.34,
+     "test_f1": 45.47,
+     "test_f1_strict": 45.47,
+     "test_macro_f1": 35.24,
+     "best_epoch": 13,
+     "n_silver_alone": 7130
+    },
+    {
+     "seed": 100,
+     "val_f1": 78.29,
+     "test_f1": 38.97,
+     "test_f1_strict": 38.97,
+     "test_macro_f1": 32.51,
+     "best_epoch": 6,
+     "n_silver_alone": 1694
+    },
+    {
+     "seed": 200,
+     "val_f1": 80.11,
+     "test_f1": 42.92,
+     "test_f1_strict": 42.92,
+     "test_macro_f1": 29.73,
+     "best_epoch": 15,
+     "n_silver_alone": 7261
+    }
+   ],
+   "checks": {
+    "teachers": {
+     "equal": true,
+     "runs_checked": 10,
+     "rebuilt_teachers_f1": [
+      45.47,
+      38.97,
+      42.92
+     ]
+    },
+    "dump_vs_w19a_names": {
+     "equal": true,
+     "n_rebuilt": 19621,
+     "n_stored": 19621
+    },
+    "dump_vs_week15_names": {
+     "equal": true,
+     "n_rebuilt": 19621,
+     "n_stored": 19621
+    }
+   }
+  },
+  "fine:10.1038_s41467-020-19071-7.conll": {
+   "nodes": 34087,
+   "labelled": 161,
+   "new": 33926,
+   "types": [
+    "Alloy",
+    "Crack",
+    "CrackInitation",
+    "DataSet",
+    "FatigueLifetime",
+    "FatigueTest",
+    "FatigueTestSpecimen",
+    "GrainBoundary",
+    "LoadingType",
+    "Location",
+    "MaterialClass",
+    "MechanicalProperty",
+    "MechanicalTestDataSet",
+    "MechanicalTreatment",
+    "Mechanism",
+    "Microstructure",
+    "MicrostructureEntity",
+    "StateDescriptor",
+    "StrainRate",
+    "StressAmplitude",
+    "TensileUltimateStrength",
+    "TensileYieldStrength",
+    "TestSpecimen",
+    "TestingMachine",
+    "TestingMedium",
+    "TwinBoundary",
+    "Value"
+   ],
+   "homophily": {
+    "cooccurrence": {
+     "labelled_edges": 97,
+     "same_type": 0.1959
+    },
+    "knn": {
+     "labelled_edges": 27,
+     "same_type": 1.0
+    },
+    "head": {
+     "labelled_edges": 39,
+     "same_type": 0.8718
+    }
+   },
+   "edges": {
+    "cooccurrence": 130528,
+    "knn": 266873
+   },
+   "head_groups": 2676,
+   "sizes": {
+    "primary": 6952,
+    "secondary": 4470
+   },
+   "teacher_seen_accuracy": {
+    "M": 0.8447,
+    "G": 0.8447
+   },
+   "vote_grid": {
+    "0.5_1": {
+     "size": 21333,
+     "unseen": 521,
+     "covered": 119,
+     "held": 185,
+     "wrong": 66
+    },
+    "0.5_2": {
+     "size": 13203,
+     "unseen": 521,
+     "covered": 109,
+     "held": 125,
+     "wrong": 16
+    },
+    "0.5_3": {
+     "size": 8913,
+     "unseen": 521,
+     "covered": 77,
+     "held": 86,
+     "wrong": 9
+    },
+    "0.7_1": {
+     "size": 15808,
+     "unseen": 521,
+     "covered": 108,
+     "held": 128,
+     "wrong": 20
+    },
+    "0.7_2": {
+     "size": 10127,
+     "unseen": 521,
+     "covered": 79,
+     "held": 92,
+     "wrong": 13
+    },
+    "0.7_3": {
+     "size": 6952,
+     "unseen": 521,
+     "covered": 52,
+     "held": 53,
+     "wrong": 1
+    },
+    "0.9_1": {
+     "size": 9928,
+     "unseen": 521,
+     "covered": 62,
+     "held": 70,
+     "wrong": 8
+    },
+    "0.9_2": {
+     "size": 6692,
+     "unseen": 521,
+     "covered": 48,
+     "held": 49,
+     "wrong": 1
+    },
+    "0.9_3": {
+     "size": 4470,
+     "unseen": 521,
+     "covered": 44,
+     "held": 45,
+     "wrong": 1
+    }
+   },
+   "ceiling": 157,
+   "primary": {
+    "V": {
+     "unseen": 521,
+     "covered": 52,
+     "held": 53,
+     "wrong": 1,
+     "coverage": 9.98,
+     "wrong_type": 1.89,
+     "size": 6952
+    },
+    "M": {
+     "unseen": 521,
+     "covered": 38,
+     "held": 38,
+     "wrong": 0,
+     "coverage": 7.29,
+     "wrong_type": 0.0,
+     "size": 6952
+    },
+    "G": {
+     "unseen": 521,
+     "covered": 26,
+     "held": 26,
+     "wrong": 0,
+     "coverage": 4.99,
+     "wrong_type": 0.0,
+     "size": 6952
+    },
+    "M_novote": {
+     "unseen": 521,
+     "covered": 53,
+     "held": 54,
+     "wrong": 1,
+     "coverage": 10.17,
+     "wrong_type": 1.85,
+     "size": 6952
+    },
+    "G_novote": {
+     "unseen": 521,
+     "covered": 39,
+     "held": 40,
+     "wrong": 1,
+     "coverage": 7.49,
+     "wrong_type": 2.5,
+     "size": 6952
+    },
+    "LP": {
+     "unseen": 521,
+     "covered": 38,
+     "held": 117,
+     "wrong": 79,
+     "coverage": 7.29,
+     "wrong_type": 67.52,
+     "size": 6952
+    }
+   },
+   "secondary": {
+    "V": {
+     "unseen": 521,
+     "covered": 44,
+     "held": 45,
+     "wrong": 1,
+     "coverage": 8.45,
+     "wrong_type": 2.22,
+     "size": 4470
+    },
+    "M": {
+     "unseen": 521,
+     "covered": 34,
+     "held": 34,
+     "wrong": 0,
+     "coverage": 6.53,
+     "wrong_type": 0.0,
+     "size": 4470
+    },
+    "G": {
+     "unseen": 521,
+     "covered": 21,
+     "held": 21,
+     "wrong": 0,
+     "coverage": 4.03,
+     "wrong_type": 0.0,
+     "size": 4470
+    },
+    "M_novote": {
+     "unseen": 521,
+     "covered": 31,
+     "held": 32,
+     "wrong": 1,
+     "coverage": 5.95,
+     "wrong_type": 3.12,
+     "size": 4470
+    },
+    "G_novote": {
+     "unseen": 521,
+     "covered": 23,
+     "held": 23,
+     "wrong": 0,
+     "coverage": 4.41,
+     "wrong_type": 0.0,
+     "size": 4470
+    },
+    "LP": {
+     "unseen": 521,
+     "covered": 20,
+     "held": 95,
+     "wrong": 75,
+     "coverage": 3.84,
+     "wrong_type": 78.95,
+     "size": 4470
+    }
+   },
+   "teachers": [
+    {
+     "seed": 0,
+     "val_f1": 76.15,
+     "test_f1": 49.86,
+     "test_f1_strict": 49.86,
+     "test_macro_f1": 36.88,
+     "best_epoch": 7,
+     "n_silver_alone": 1273
+    },
+    {
+     "seed": 100,
+     "val_f1": 79.28,
+     "test_f1": 49.51,
+     "test_f1_strict": 49.51,
+     "test_macro_f1": 37.34,
+     "best_epoch": 10,
+     "n_silver_alone": 2551
+    },
+    {
+     "seed": 200,
+     "val_f1": 80.0,
+     "test_f1": 47.23,
+     "test_f1_strict": 47.23,
+     "test_macro_f1": 40.1,
+     "best_epoch": 8,
+     "n_silver_alone": 1402
+    }
+   ],
+   "checks": {
+    "teachers": {
+     "equal": true,
+     "runs_checked": 10,
+     "rebuilt_teachers_f1": [
+      49.86,
+      49.51,
+      47.23
+     ]
+    },
+    "dump_vs_w19a_names": {
+     "equal": true,
+     "n_rebuilt": 14213,
+     "n_stored": 14213
+    },
+    "dump_vs_week15_names": {
+     "equal": true,
+     "n_rebuilt": 14213,
+     "n_stored": 14213
+    }
+   }
+  },
+  "fine:10.3390_met10111458.conll": {
+   "nodes": 27557,
+   "labelled": 191,
+   "new": 27366,
+   "types": [
+    "Alloy",
+    "Crack",
+    "CrackInitation",
+    "DataSet",
+    "FatigueLifetime",
+    "FatigueTest",
+    "FatigueTestSpecimen",
+    "GrainBoundary",
+    "LoadingType",
+    "Location",
+    "MaterialClass",
+    "MechanicalProperty",
+    "MechanicalTestDataSet",
+    "MechanicalTreatment",
+    "Mechanism",
+    "Microstructure",
+    "MicrostructureEntity",
+    "StateDescriptor",
+    "StrainRate",
+    "StressAmplitude",
+    "TensileUltimateStrength",
+    "TensileYieldStrength",
+    "TestSpecimen",
+    "TestingMachine",
+    "TestingMedium",
+    "TwinBoundary",
+    "Value"
+   ],
+   "homophily": {
+    "cooccurrence": {
+     "labelled_edges": 141,
+     "same_type": 0.1986
+    },
+    "knn": {
+     "labelled_edges": 34,
+     "same_type": 0.8529
+    },
+    "head": {
+     "labelled_edges": 40,
+     "same_type": 0.675
+    }
+   },
+   "edges": {
+    "cooccurrence": 102426,
+    "knn": 216072
+   },
+   "head_groups": 1988,
+   "sizes": {
+    "primary": 7739,
+    "secondary": 5648
+   },
+   "teacher_seen_accuracy": {
+    "M": 0.8482,
+    "G": 0.822
+   },
+   "vote_grid": {
+    "0.5_1": {
+     "size": 20407,
+     "unseen": 327,
+     "covered": 80,
+     "held": 112,
+     "wrong": 32
+    },
+    "0.5_2": {
+     "size": 13385,
+     "unseen": 327,
+     "covered": 72,
+     "held": 92,
+     "wrong": 20
+    },
+    "0.5_3": {
+     "size": 9309,
+     "unseen": 327,
+     "covered": 52,
+     "held": 89,
+     "wrong": 37
+    },
+    "0.7_1": {
+     "size": 16098,
+     "unseen": 327,
+     "covered": 78,
+     "held": 104,
+     "wrong": 26
+    },
+    "0.7_2": {
+     "size": 10881,
+     "unseen": 327,
+     "covered": 69,
+     "held": 84,
+     "wrong": 15
+    },
+    "0.7_3": {
+     "size": 7739,
+     "unseen": 327,
+     "covered": 45,
+     "held": 50,
+     "wrong": 5
+    },
+    "0.9_1": {
+     "size": 10778,
+     "unseen": 327,
+     "covered": 45,
+     "held": 47,
+     "wrong": 2
+    },
+    "0.9_2": {
+     "size": 7618,
+     "unseen": 327,
+     "covered": 36,
+     "held": 37,
+     "wrong": 1
+    },
+    "0.9_3": {
+     "size": 5648,
+     "unseen": 327,
+     "covered": 31,
+     "held": 32,
+     "wrong": 1
+    }
+   },
+   "ceiling": 98,
+   "primary": {
+    "V": {
+     "unseen": 327,
+     "covered": 45,
+     "held": 50,
+     "wrong": 5,
+     "coverage": 13.76,
+     "wrong_type": 10.0,
+     "size": 7739
+    },
+    "M": {
+     "unseen": 327,
+     "covered": 18,
+     "held": 18,
+     "wrong": 0,
+     "coverage": 5.5,
+     "wrong_type": 0.0,
+     "size": 7739
+    },
+    "G": {
+     "unseen": 327,
+     "covered": 22,
+     "held": 22,
+     "wrong": 0,
+     "coverage": 6.73,
+     "wrong_type": 0.0,
+     "size": 7739
+    },
+    "M_novote": {
+     "unseen": 327,
+     "covered": 21,
+     "held": 24,
+     "wrong": 3,
+     "coverage": 6.42,
+     "wrong_type": 12.5,
+     "size": 7739
+    },
+    "G_novote": {
+     "unseen": 327,
+     "covered": 31,
+     "held": 34,
+     "wrong": 3,
+     "coverage": 9.48,
+     "wrong_type": 8.82,
+     "size": 7739
+    },
+    "LP": {
+     "unseen": 327,
+     "covered": 25,
+     "held": 33,
+     "wrong": 8,
+     "coverage": 7.65,
+     "wrong_type": 24.24,
+     "size": 7739
+    }
+   },
+   "secondary": {
+    "V": {
+     "unseen": 327,
+     "covered": 31,
+     "held": 32,
+     "wrong": 1,
+     "coverage": 9.48,
+     "wrong_type": 3.12,
+     "size": 5648
+    },
+    "M": {
+     "unseen": 327,
+     "covered": 12,
+     "held": 12,
+     "wrong": 0,
+     "coverage": 3.67,
+     "wrong_type": 0.0,
+     "size": 5648
+    },
+    "G": {
+     "unseen": 327,
+     "covered": 15,
+     "held": 15,
+     "wrong": 0,
+     "coverage": 4.59,
+     "wrong_type": 0.0,
+     "size": 5648
+    },
+    "M_novote": {
+     "unseen": 327,
+     "covered": 10,
+     "held": 12,
+     "wrong": 2,
+     "coverage": 3.06,
+     "wrong_type": 16.67,
+     "size": 5648
+    },
+    "G_novote": {
+     "unseen": 327,
+     "covered": 19,
+     "held": 20,
+     "wrong": 1,
+     "coverage": 5.81,
+     "wrong_type": 5.0,
+     "size": 5648
+    },
+    "LP": {
+     "unseen": 327,
+     "covered": 24,
+     "held": 28,
+     "wrong": 4,
+     "coverage": 7.34,
+     "wrong_type": 14.29,
+     "size": 5648
+    }
+   },
+   "teachers": [
+    {
+     "seed": 0,
+     "val_f1": 81.04,
+     "test_f1": 45.78,
+     "test_f1_strict": 45.78,
+     "test_macro_f1": 37.8,
+     "best_epoch": 11,
+     "n_silver_alone": 3790
+    },
+    {
+     "seed": 100,
+     "val_f1": 76.52,
+     "test_f1": 44.23,
+     "test_f1_strict": 44.23,
+     "test_macro_f1": 36.11,
+     "best_epoch": 9,
+     "n_silver_alone": 3267
+    },
+    {
+     "seed": 200,
+     "val_f1": 76.87,
+     "test_f1": 39.94,
+     "test_f1_strict": 39.94,
+     "test_macro_f1": 35.15,
+     "best_epoch": 8,
+     "n_silver_alone": 2000
+    }
+   ],
+   "checks": {
+    "teachers": {
+     "equal": true,
+     "runs_checked": 10,
+     "rebuilt_teachers_f1": [
+      45.78,
+      44.23,
+      39.94
+     ]
+    },
+    "dump_vs_w19a_names": {
+     "equal": true,
+     "n_rebuilt": 18916,
+     "n_stored": 18916
+    },
+    "dump_vs_week15_names": {
+     "equal": true,
+     "n_rebuilt": 18916,
+     "n_stored": 18916
+    }
+   }
+  }
+ },
+ "gate": {
+  "n_units": 11,
+  "means": {
+   "coverage_G": 16.78,
+   "coverage_V": 24.86,
+   "coverage_M": 18.8,
+   "wrong_type_G": 4.65,
+   "wrong_type_V": 10.14
+  },
+  "margins": {
+   "coverage_vs_vote": 5.0,
+   "coverage_vs_mlp": 2.0,
+   "wrong_type_vs_vote": 5.0
+  },
+  "parts": {
+   "coverage_vs_vote": false,
+   "coverage_vs_mlp": false,
+   "wrong_type_vs_vote": true
+  },
+  "passes": false
+ },
+ "names_files_sha256": {
+  "names_fine_f.json": "e8c052a0b4e684e8b864497c1b575a1c29201c8483dc391d4b0615b7c67f079c",
+  "names_fine_g.json": "72bc27f3e2c664d89a4cd6157a5b6b634865f9f0c001a745013fb39d9e082e71",
+  "names_fine_v.json": "3a09244987fbf5e8d9442f757fa8762a782a0b369db90eaabf1f3d1e2d6a5a24",
+  "names_mulms_f.json": "c0542f074a4189e5db6239c0e36620e18106c2eed88ad8c01f1617a8158fa293",
+  "names_mulms_g.json": "cb9ff5e55e128699612dede9cf0068fee03c124e2d8c22e18fcf7ea4bb391788",
+  "names_mulms_v.json": "dcca00834c213511e6240e9e9ec00b01a2cc8be23147f2518a813477cbd04ca2"
+ }
+}

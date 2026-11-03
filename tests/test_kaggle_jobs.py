@@ -441,12 +441,29 @@ def test_build_bundle(tmp_path):
                            expected_sha256=kj.file_sha256(corpus), wheels=[wheel],
                            sofc_report=tmp_path / 'no_sofc_corpus.json',
                            mulms_report=tmp_path / 'no_mulms.json',
-                           topic_reports=tmp_path / 'no_topics')
+                           topic_reports=tmp_path / 'no_topics',
+                           week19_dir=tmp_path / 'no_week19')
     assert sorted(p.name for p in out.iterdir()) == [
         'BUNDLE.json', 'code.tar.gz', 'fatigue_sentences.txt',
         'gpu__ner_results_fine_random_split_vary_crf_m0.json', 'seqeval-1.2.2-py3-none-any.whl']
     assert info['wheels'] == ['seqeval-1.2.2-py3-none-any.whl']
     assert json.loads((out / 'BUNDLE.json').read_text()) == info
+    assert 'week19_names' not in info
+    # week 19's lexicon files (graph_names.py --names-files) go in with their SHA-256
+    week19 = tmp_path / 'week19'
+    week19.mkdir()
+    (week19 / 'names_mulms_g.json').write_text('{"runs": {}}')
+    (week19 / 'ner_candidates_mulms_x.json.gz').write_bytes(b'not a lexicon file')
+    info = kj.build_bundle('HEAD', out, results_dir=results, corpus=corpus,
+                           expected_sha256=kj.file_sha256(corpus), wheels=[wheel],
+                           sofc_report=tmp_path / 'no_sofc_corpus.json',
+                           mulms_report=tmp_path / 'no_mulms.json',
+                           topic_reports=tmp_path / 'no_topics', week19_dir=week19)
+    assert info['week19_names'] == {'names_mulms_g.json':
+                                    kj.file_sha256(week19 / 'names_mulms_g.json')}
+    assert (out / 'week19__names_mulms_g.json').read_bytes() == \
+        (week19 / 'names_mulms_g.json').read_bytes()
+    assert not list(out.glob('*candidates*'))
     assert len(info['commit']) == 40
     assert info['results'] == ['ner_results_fine_random_split_vary_crf_m0.json']
     with tarfile.open(out / 'code.tar.gz') as tar:
