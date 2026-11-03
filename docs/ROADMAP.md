@@ -7044,6 +7044,28 @@ decisions were never re-run" changes with the result.
   fake families before any result. Both stored analyses must reproduce
   unchanged.
 
+*Runs.*
+- **The code, 3 November: `ea8ac82`** (`gliner_baseline.py`, batches
+  `w21s` and `w21a`, the week-21 analysis sections, 19 tests).
+- **`w21s`.** Pushed at 12:26 UTC from the bundle of `ea8ac82` (kernel
+  version 21); it completed at 12:52 UTC, with every job done (setup 7.7
+  min, total 22 min).
+  - `smokebl` is identical to `smokebh`, environment included.
+  - `smokebm` is identical to the paper-1 run of `gliner_ft_m0` in every
+    field but `runtime_sec`.
+  - The splits (test positions, gold tags, sentence counts) and the
+    environment equal the stored CRF runs' on all 4 runs.
+  - Timed fine-tuning runs: 8.0 min (MaterioMiner paper 1, 18 epochs),
+    5.0 (MuLMS electrolysis, 16) and 5.8 (SOFC-Exp fold 0, 8). Zero-shot
+    took 0.2 min.
+  - No result is read before `w21a`.
+- **`w21a`** projects to about 10 hours on two lanes, more than 9, so it
+  is planned over two sessions as fixed above. The first session runs
+  until the batch deadline. Then its results are collected, a new bundle
+  is made, and the batch is pushed again; finished runs are skipped. The
+  4 runs of `w21s` are in `results/gpu/` and the bundle, so `w21a`
+  resumes them.
+
 *TACL (paper B), for later.* The paper goes to 10 pages, references
 uncounted, with appendices after them within TACL's caps (as last read: up
 to 5 pages and 3 pages for two kinds of content). It is anonymized under
