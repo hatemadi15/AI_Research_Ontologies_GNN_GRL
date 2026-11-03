@@ -1032,6 +1032,7 @@ chance at class level. For a Task C-style result:
 | 16 | Paper B, the evaluation paper, from `docs/PAPER_DRAFT.md` §2–5, 7 and 8 with the method sections cut to summaries citing A; both titles and abstracts fixed; the reproducibility appendices and the code release. Begun 30 October on the user's go-ahead: a first complete draft (`docs/PAPER_B.md`: the gap and its anatomy, seeds and votes, every addition tested with the count of 86 pre-registered decisions and 18 passes, data against method, seven lessons); its length waits on the venue. Also 30 October: the reproducibility appendix and code-release checklist for both papers (`docs/REPRODUCIBILITY.md`) and three title candidates per paper (`docs/PAPER.md`) | Both drafts complete by 14 November; the venues and the authors' confirmation email are the user's |
 | 17 | The harvested names on the strongest MaterioMiner base (ordered 31 October after six review rounds of paper A; protocol fixed 19:10 UTC, before any run, below): the multi-task model with 6-copy mention replacement, with (`crf_mt_mrm6`) and without (`crf_mt_mr6`) the fatigue corpus's names, 10 seeds on the 4 held-out papers; decisions 17.1 (fine) and 17.2 (coarse) against the matched control; batches `w17a` (kernel d) and `w17b` (kernel c) | 17.1 done (1 November): +0.96 [−0.01, +1.92] fine-grained, no (every paper positive, 0.16 to 1.62); 17.2 done: +0.85 [−0.72, +2.42] coarse-grained, no. Reported: the names against multi-task + MR3 +0.76 [−0.15, +1.68] and +0.91 [−0.14, +1.97], the control against it −0.19 [−2.05, +1.67] and +0.06 [−0.74, +0.86]; the two-head filter's lexicons hold 7–16% (fine) and 7–25% (coarse) of a paper's unseen test names. The negative result extends to the strongest base; paper A updated (outcome below) |
 | 18 | The names against a recall-matched control (approved 1 November after the round-9 referee of paper A asked for it; protocol fixed before any run, below): MR6 on MuLMS's 7 held-out subfields at the decision seeds 300 to 900, the stored `crf_mr6` jobs again with a bias added to every entity tag at decoding (`crf_mr6_bias`), matched per subfield to the names' recall; decisions 18.1 (D11, recall on the unseen names the lexicon holds) and 18.2 (D12, micro F1) at matched recall; batch `w18a` | Done (1 November): 18.1 +11.24 [+3.31, +19.18], passes (7 of 7 subfields positive); 18.2 +3.26 [−0.79, +7.31], no. In three subfields (electrolysis, pemfc, sofc) no bias on the grid reaches the names' recall and the protocol matched them at D = 5; without them (pre-specified) 18.1 +6.05 [−3.33, +15.44] (4 of 4 positive) and 18.2 −0.03 [−2.78, +2.72]; matched post hoc at the control's nearest recall, +8.63 [+3.35, +13.90] and +1.37 [−0.66, +3.41]. At matched overall recall the names find more of the names their lexicon holds and fewer of the others (−1.73 [−3.02, −0.44], pre-specified); their F1 is not shown to beat the bias. The names route's decisions become twelve, four passing; paper A updated (outcome below) |
+| 19 | Graph-propagated names at matched lexicon size (after paper A's submission on 2 November, on the author's request to explore graph representation learning, the plan checked by an independent referee before any run; `docs/WEEK19_PLAN.md`; protocol below): a relational GNN over every name the teachers tag, against the teachers' vote at a lowered threshold and the same model without the graph, at equal lexicon size; a probe with a test-set gate, then, if it passes, decisions G1 and G2 over the 11 units of D7. Paper B brought to a submittable state alongside (track B) | Gate: graph coverage of unseen test names +5 points over the vote and +2 over the graph-removed model, wrong-type rate at most +5; G1 and G2 by the usual rule |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -6432,3 +6433,122 @@ those they hold, with their recall on all unseen names barely higher
 in F1. The names route's decisions become twelve, four passing (D3, D4,
 D5, D11); the count of paper A's Section 6 twenty, five passing (0.3 and
 0.5 passes expected by chance). Nothing already decided is re-decided.
+
+
+### Week 19 protocol: graph-propagated names at matched lexicon size (fixed before any run, 3 November, 00:32 UTC)
+
+*Why, and when.* After paper A's submission (2 November) the author asked
+for the next step to explore graph representation learning, with the
+plan checked by an independent referee (a Fable-model referee, 3
+November: "approve with required changes", then, re-checked, four
+refinements; every claim it made about the code and data was verified
+against the files). The full plan, with its reasons, is
+`docs/WEEK19_PLAN.md`; this section is the binding protocol. Paper A's
+bottleneck: its lexicon holds 7–36% of a held-out unit's unseen test
+names while the corpora hold 55–81%, and a lower threshold alone raises
+the coverage (0.7: 31.5% against 22.2%) without changing F1. Registered
+after D1 to D12 were known; the controls (`crf_mr6`, `crf_mrm_topic6`,
+`crf_mrm6`) are stored, so half of each reported comparison is known; the
+new arms are not.
+
+*Units, seeds and stored runs.* D7's: MuLMS's 7 held-out subfields
+(week 10's fold: 400 pool sentences, split seed 0; seed offsets 300 to
+900) and MaterioMiner's 4 held-out papers, fine-grained (offsets 0 to
+900); each subfield's own topic corpus and the fatigue corpus, 40,000
+sentences each. Stored: `crf_mr6` on both corpora, `crf_mrm_topic6`
+(MuLMS) and `crf_mrm6` (MaterioMiner fine), all with predictions.
+
+*Phase 0a, the harvest (batch `w19a`).* Per unit a `--students 0` job of
+week 15's (`names_mulms_job`, `names_paper_job` at fine granularity) with
+`--save-candidates`: paper A's three CRF teachers (seed offsets 0, 100,
+200 on the unit's training sentences, deterministic CUDA) tag the corpus.
+The dump holds, per sentence index of the fit sample and per span in the
+union of the teachers' Viterbi entity spans (sorted by start and end): its
+start, end and words; per teacher the type of its Viterbi span exactly
+there (or none) with that span's least path marginal (an exact float),
+and the scores of its two most probable other types, per type T the least
+over the span of the marginal of B-T at the start and I-T after it, from
+each word's 4 most probable labels (a label outside them counts 0). First
+the repeat of the CRF run of smoke4 (`smokebf`). Checks before the probe:
+the teachers' test F1 equal the stored `crf_m0/m100/m200` runs; the
+names rebuilt by `--save-names` equal `results/gpu_names/`'s counts; V at
+0.9, 3 of 3, rebuilt from the dump, equals them too. The dumps hold
+corpus text and are never versioned.
+
+*Phase 0b, the probe (`src/graph/graph_names.py`, CPU; no decision).* Per
+unit:
+1. Nodes: the distinct surface forms of the dump's spans; labelled
+   nodes, the training names among them with their gold type (the
+   majority type; ties by the type's name). Features: per type, the share
+   of the node's spans (over mentions and teachers) tagged with it and the
+   mean of its span scores (the vote block); log frequency; the character
+   3–5-gram TF-IDF vector reduced to 128 dimensions by truncated SVD
+   (seed 0).
+2. Edges, one relation per kind: sentence co-occurrence (positive PMI, the
+   20 strongest per node); the 10 nearest neighbours by cosine on the
+   reduced character vectors; a shared head word (the last word; heads of
+   at most 200 nodes). The two selections are symmetrised. Homophily per
+   relation on labelled pairs is reported.
+3. Rankers: V, the vote, the lexicons of the grid (threshold 0.5, 0.7,
+   0.9) × (1, 2, 3 of 3 teachers), `silver_mention_names`'s semantics, a
+   name with several passing types given its most frequent (ties by type
+   name); M, a 2-layer MLP on the features; G, a 2-layer R-GCN over the
+   three relations (mean aggregation per relation); LP, label propagation
+   on the union graph (reported only). M and G: hidden 128, dropout 0.3,
+   Adam lr 0.01, weight decay 5e-4, 100 full-batch epochs, seed 0, the
+   vote block dropped out at 0.5 during training; M and G without the vote
+   block reported beside them; their 5-fold accuracy on labelled nodes
+   reported as "teacher-seen", no threshold set from it. A name's type
+   under M, G and LP: the most probable among the types some teacher tags
+   it with somewhere (at any marginal), ties by type name.
+4. Size matching: each ranker's lexicon is its N top-ranked new names
+   (no training name; one type each; ranked by that type's probability,
+   ties by the words). N primary: V's new names at 0.7, 3 of 3; N
+   secondary: at 0.9, 3 of 3. A lexicon file, the same for every arm: one
+   entry (type, words) per corpus mention of an admitted name at which some
+   teacher's span there has the admitted type (any marginal), in corpus
+   order (sentence index, then start and end); its SHA-256 recorded.
+5. Per unit and ranker at both sizes: coverage of the unit's unseen test
+   mentions (type and words in the lexicon); wrong-type rate (unseen test
+   mentions whose words the lexicon holds under another type only, over
+   those whose words it holds at all); the candidate set's coverage (the
+   ceiling); pooled rates beside the means over units.
+6. **Gate, a test-set screen** (it reads held-out test names and sets no
+   threshold, only whether Phase 1 runs). At N primary, means over the 11
+   units: coverage(G) ≥ coverage(V 0.7, 3 of 3) + 5 points, coverage(G) ≥
+   coverage(M) + 2 points, and wrong-type rate(G) ≤ wrong-type rate(V 0.7,
+   3 of 3) + 5 points. A failed gate stops the study; it is reported as
+   one negative lexicon screen, not a decision.
+
+*Phase 1, the decisions (only if the gate passes; after the 7 November
+reset; batch `w19b`).* Arms with paper A's recipe exactly (gold sentences
+plus 6 copies, p = 0.5, the decision seeds, saved predictions), names
+from a new `--names-file` (its SHA-256 in every results file):
+`crf_mrg6` (G's lexicon at N primary) and `crf_mrv6` (V at 0.7, 3 of 3).
+First the replay check: `--names-file` with V at 0.9, 3 of 3, every name,
+in `silver_mention_names`'s exact sequence (sentence index, then sorted
+start, end, type) must reproduce one stored `crf_mrm_topic6` run
+byte-identically, predictions included; a mismatch stops Phase 1 until
+it is explained.
+- **G1**: `crf_mrg6` minus `crf_mr6`, pooled over the 11 units (each the
+  mean of its seeds).
+- **G2**: `crf_mrg6` minus `crf_mrv6`, pooled over the 11 units.
+- Rule: the 95% Student-t CI of the mean paired micro-F1 difference above
+  0. Reported, no verdict: `crf_mrv6` minus `crf_mr6`; per corpus; both
+  arms against paper A's names; recall and precision on the unseen test
+  names (week 15's split by lexicon membership); `n_augmented` and the
+  names' share of draws per arm.
+- Power: D7's sd over the 11 units is 2.17, so about 2.9 points are
+  detectable; G2's effect is expected under a point. A null reads "not
+  shown within about 3 points".
+
+*Budget.* `w19a`: 11 harvest jobs of about 20 minutes, under 4 of the
+22.6 GPU hours left this week. `w19b`: about 5.5 GPU hours per arm and
+the check, about 12 of the 45 after the reset.
+
+*What each outcome means.* G1 and G2 pass: graph learning improves the
+names route beyond what more names give (paper B reports it; a third
+paper's core). G1 only: graph-chosen names help, not more than as many
+voted names. Neither, or a failed gate: graph propagation does not rescue
+the names route at matched size. Every outcome enters paper B's count
+(G1 and G2 as decisions; a failed gate as one lexicon screen).

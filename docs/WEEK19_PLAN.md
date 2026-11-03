@@ -3,7 +3,11 @@
 *Status: revised after an independent review (a Fable-model referee, 3
 November; verdict "approve with required changes", items 1–2 blocking;
 every claim it made about the code and data was checked against the
-files before this revision). The GPU study's protocol goes into
+files before this revision), then re-checked by the same referee
+("approve with required changes": four refinements, applied below:
+span positions and a fixed mention order, the vote arm against MR6
+reported, the type, tie and edge rules written out, and a guard against
+saturated vote features). The GPU study's protocol goes into
 `docs/ROADMAP.md` §4 as the week-19 protocol, committed before any run.
 Nothing here has been run. The first draft is in this file's history
 (`440beed`).*
@@ -66,11 +70,13 @@ exist for all 11 units at these seeds with predictions:
 trained on the unit's training sentences, deterministic CUDA) tag the
 corpus. `--save-names` rebuilds paper A's lexicon; new
 `--save-candidates FILE` dumps, for every span any teacher tags as an
-entity: its words and sentence index and, per teacher, the type it tags
-there (or none) and, from the full CRF marginals (`WordCRF.marginals`;
-`teacher_tags` keeps only the Viterbi tag's today), the span's score for
-that teacher's two most probable types, the least over the span of the
-B- marginal at its first word and the I- marginals after it. Checks: the
+entity: its sentence index, its position (start, end) and its words and,
+per teacher, the type it tags there (or none) with its least path
+marginal over the span (an exact float), and, from the full CRF
+marginals (`WordCRF.marginals`; `teacher_tags` keeps only the Viterbi
+tag's today), the span's scores for that teacher's two most probable
+other types, each the least over the span of the B- marginal at its
+first word and the I- marginals after it. Checks: the
 rebuilt teachers' test F1 equal the stored `crf_m0/m100/m200` runs, and
 the rebuilt lexicon counts equal `results/gpu_names/` (week 15's checks).
 The dumps hold corpus text and stay local (never versioned). Budget:
@@ -88,7 +94,9 @@ Per unit:
 2. Edges, kept apart by type: sentence co-occurrence (positive PMI, the
    20 strongest per node); the 10 nearest neighbours by character n-gram
    cosine; a shared head word (heads held by at most 200 nodes). The
-   homophily of each edge type on labelled pairs is reported.
+   top-20 and nearest-neighbour selections are symmetrised (an edge is
+   kept if either end selects it). The homophily of each edge type on
+   labelled pairs is reported.
 3. Rankers of (name, type), over unlabelled nodes, each type restricted
    to names at least one teacher tags with it somewhere:
    - **V**, the vote: the lexicons of the (marginal threshold 0.5, 0.7,
@@ -101,16 +109,27 @@ Per unit:
      labels;
    - **LP**, label propagation on the union graph (reported only).
    M and G use fixed hyperparameters (hidden 128, dropout 0.3, Adam lr
-   0.01, weight decay 5e-4, 200 epochs, seed 0); their 5-fold accuracy
+   0.01, weight decay 5e-4, 100 full-batch epochs, seed 0). The labelled
+   nodes' vote features are saturated (the teachers trained on those
+   names), so the models could learn to copy the vote: during training
+   the vote block of the features is dropped out at 0.5, and M and G
+   without vote features are reported beside them. Their 5-fold accuracy
    on the labelled nodes is reported as a diagnostic labelled
-   "teacher-seen" (the teachers trained on those names), and no
-   threshold is set from it.
+   "teacher-seen", and no threshold is set from it.
+   A name's type: the ranker's most probable type among those some
+   teacher tags the name with somewhere (at any marginal), ties broken by
+   the type's name; V gives a name with several passing types its most
+   frequent one, ties the same way.
 4. Size matching instead of a threshold: each ranker's lexicon is its
-   top N new names (names that are no training name), one type per name
-   (its most probable). N primary: the number of new names in V at 0.7,
-   3 of 3; N secondary: at 0.9, 3 of 3 (paper A's setting). A name's
-   count, in every lexicon alike: the corpus mentions at which at least
-   one teacher tags it with the admitted type.
+   top N new names (names that are no training name), one type per name,
+   ranked by the probability of that type (ties by the words). N primary:
+   the number of new names in V at 0.7, 3 of 3; N secondary: at 0.9,
+   3 of 3 (paper A's setting). A lexicon file, the same for every arm: one
+   entry (type, words) per corpus mention of an admitted name at which at
+   least one teacher's span there has the admitted type (at any
+   marginal), in corpus order (sentence index, then start and end); its
+   SHA-256 covers the order, which mention replacement's draws depend
+   on.
 5. Per unit and ranker, at both sizes: coverage of the unit's unseen test
    mentions (type and words in the lexicon); the wrong-type rate (unseen
    test mentions whose words the lexicon holds under another type only,
@@ -134,14 +153,18 @@ the same size).
   the mean of its seeds).
 - **G2**: `crf_mrg6` minus `crf_mrv6`, pooled over the 11 units.
 - Rule: a 95% Student-t CI of the mean paired micro-F1 difference above 0,
-  as always. Reported, no verdict: per corpus; both arms against paper A's
-  names; recall and precision on the unseen test names (week 15's split
-  by lexicon membership); `n_augmented` and the names' share of draws per
+  as always. Reported, no verdict: `crf_mrv6` minus `crf_mr6` (does a
+  larger vote lexicon help at the decision seeds, where the ablation's 3
+  seeds could not tell); per corpus; both arms against paper A's names;
+  recall and precision on the unseen test names (week 15's split by
+  lexicon membership); `n_augmented` and the names' share of draws per
   arm.
 - Equality checks before any decision: `--names-file` replaying paper A's
-  rebuilt lexicon, in `silver_mention_names`'s order (mention
-  replacement draws by `rng.choice`, so order matters), reproduces one
-  stored `crf_mrm_topic6` run byte-identically, predictions included.
+  lexicon rebuilt from the dump (V at 0.9, 3 of 3, every name, in
+  `silver_mention_names`'s exact sequence: sentence index, then sorted
+  (start, end, type); mention replacement draws by `rng.choice`, so order
+  matters) reproduces one stored `crf_mrm_topic6` run byte-identically,
+  predictions included.
 - Power, stated now: D7's sd over the 11 units is 2.17, so a difference of
   about 2.9 points is detectable; G2's expected effect is under a point
   (the names' whole increment over MR6 is +0.80). A null reads "not shown
