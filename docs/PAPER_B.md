@@ -316,7 +316,10 @@ panel): a gap of 3.48 points, against 28–31 on MaterioMiner, but not
 established (Welch 95% interval [−0.90, +7.86]; post hoc). A held-out
 SOFC-Exp article brings fewer new names (46% of its test names are
 unseen, 30% on random splits; 81% on a held-out MaterioMiner paper,
-fine-grained), and the CRF head finds 80% of them. About two of the three
+fine-grained), and the CRF head finds 80% of them. Names here include
+numbers: VALUE is a third of SOFC-Exp's fold mentions, and without it
+37% of the rest are unseen, while MaterioMiner's share barely moves
+without its Value type (80%; post hoc). About two of the three
 and a half points are boundaries: under any overlap the gap is 1.35.
 Which articles are held out matters as much as the protocol: the folds
 range from 79.77 to 88.76. The share of new names does not explain this
@@ -540,9 +543,11 @@ three CPU passes the re-test changed the machine as well as the seeds:
 recomputed from the GPU runs of the same seeds 0, 100 and 200 (post hoc),
 they already fail, +0.07 [−2.47, +2.61], −0.08 [−1.71, +1.55] and +0.40
 [−1.36, +2.16]. Only self-training failed because seeds were added, its
-mean rising from +1.07 to +1.74 while its interval widened. A 3-seed
-interval on one machine thus misses run-to-run variation that another
-machine, or more seeds, exposes. The week-6 screen
+mean rising from +1.07 to +1.74 while its interval widened. The same
+configuration and seed differ between the two machines by a median of
+1.43 F1 points over 186 matched runs, and no pair is identical (post
+hoc). A 3-seed interval on one machine thus misses run-to-run variation
+that another machine, or more seeds, exposes. The week-6 screen
 showed it prospectively: document context passed the 3-seed screen with
 +2.66 [+0.91, +4.40] fine-grained, and on the 7 seeds the screen did not
 use it gains +0.49 [−3.10, +4.07] (post hoc), one paper going from +4.29
