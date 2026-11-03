@@ -6542,6 +6542,22 @@ it is explained.
   detectable; G2's effect is expected under a point. A null reads "not
   shown within about 3 points".
 
+*Runs.* The code with its tests, 3 November: `c449864` (the candidate
+dump, `--names-file`, `graph_names.py`, batch `w19a`; 22 tests, among
+them the vote rebuilt from the dump equal to `silver_mention_names` at
+every threshold and agreement, order included, and a local replay: a
+names run's lexicon rebuilt from its dump and loaded through
+`--names-file` reproduces its student exactly, predictions included);
+`81a5a3f` (the teachers check); `34328e0` (Phase 1's batch `w19b` and
+the lexicon files in the bundle). A development dry run on the graphene
+subfield's CPU-teacher caches, before any GPU run, printed structural
+numbers only (no test name was read): the rebuilt vote equal to
+`silver_mention_names` on 179,294 spans; a graph of 48,090 nodes (222
+labelled, 13 types) built in 65 s; homophily on labelled pairs 0.42
+(co-occurrence), 0.86 (character kNN), 1.0 (shared head, 34 pairs); one
+R-GCN training 163 s on the CPU. Batch `w19a` pushed 3 November, 01:25
+UTC, from the bundle of `c449864` (kernel version 19).
+
 *Budget.* `w19a`: 11 harvest jobs of about 20 minutes, under 4 of the
 22.6 GPU hours left this week. `w19b`: about 5.5 GPU hours per arm and
 the check, about 12 of the 45 after the reset.
