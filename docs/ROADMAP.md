@@ -7059,7 +7059,7 @@ decisions were never re-run" changes with the result.
     5.0 (MuLMS electrolysis, 16) and 5.8 (SOFC-Exp fold 0, 8). Zero-shot
     took 0.2 min.
   - No result is read before `w21a`.
-- **`w21a`** projects to about 10 hours on two lanes, more than 9, so it
+- **`w21a`** (pushed 13:16 UTC from the bundle of `c8df5c4`, kernel version 22) projects to about 10 hours on two lanes, more than 9, so it
   is planned over two sessions as fixed above. The first session runs
   until the batch deadline. Then its results are collected, a new bundle
   is made, and the batch is pushed again; finished runs are skipped. The
@@ -7076,8 +7076,16 @@ per section: about 6,000 words with the figures.
   says in anonymous terms that the code, protocols and run files will be
   released, gives no link, cites paper A in the third person, and names
   no repository path, kernel or commit.
-- **Still to check.** The appendix page's caps
-  (`transacl.org/index.php/tacl/announcement/view/105`, which returned
-  HTTP 502 on 3 November) are re-read before the restructure.
+- **Appendices, re-read 3 November** (`transacl.org/index.php/tacl/announcement/view/105`):
+  - the main text has 10 content pages, and appendices come after the
+    references;
+  - category 1, replication material (preprocessing, parameters,
+    pseudocode, guidelines, URLs), takes up to 5 pages;
+  - category 2, complementary tables and figures that the main text
+    cites, takes up to 3 pages;
+  - no free text is allowed beyond category-1 detail;
+  - appendices are not reviewed.
+  - So §7.1–7.6's narratives cannot move there as text: they become
+    tables, or a short main-text summary.
 - **Before submission.** The PDF's document properties carry no name, and
   a preprint, if posted, is disclosed to the editor.
