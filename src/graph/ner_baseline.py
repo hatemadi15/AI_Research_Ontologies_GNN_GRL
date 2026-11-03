@@ -179,6 +179,8 @@ Usage:
 """
 
 import argparse
+import gzip
+import hashlib
 import itertools
 import json
 import os
@@ -1048,12 +1050,14 @@ def fit_sample(tokenizer, sample, max_length):
     return kept, len(sample) - len(kept)
 
 
-def teacher_tags(tagger, sentences, batch_size, device):
+def teacher_tags(tagger, sentences, batch_size, device, topk=0):
     """Viterbi tags of word lists by a trained CRF tagger, with their CRF marginals.
 
     tagger: model, crf, tokenizer, label2id and id2label (train_one with keep_tagger).
     Returns [(tags, marginals)] in the order of `sentences`; marginals[t] is the
-    probability of tags[t] at word t.
+    probability of tags[t] at word t. With topk (--save-candidates, week 19) each item also
+    holds every word's topk most probable labels under the CRF: (tags, marginals, (ids,
+    probabilities)), two (words, topk) arrays, int16 label ids and float32 marginals.
     """
     import torch
     model, crf = tagger.model, tagger.crf
@@ -1070,9 +1074,16 @@ def teacher_tags(tagger, sentences, batch_size, device):
             if widths:
                 emissions, word_mask = emissions.cpu(), word_mask.cpu()
             marginals = crf.marginals(emissions, word_mask)
+            if topk:
+                top_p, top_i = marginals.topk(min(topk, marginals.size(-1)), dim=-1)
+                top_p, top_i = top_p.cpu().numpy(), top_i.cpu().numpy()
             for row, (i, path) in enumerate(zip(idx, crf.decode(emissions, word_mask))):
-                out[i] = ([tagger.id2label[p] for p in path],
-                          [float(marginals[row, t, p]) for t, p in enumerate(path)])
+                item = ([tagger.id2label[p] for p in path],
+                        [float(marginals[row, t, p]) for t, p in enumerate(path)])
+                if topk:
+                    n = len(path)
+                    item += ((top_i[row, :n].astype('int16'), top_p[row, :n].astype('float32')),)
+                out[i] = item
     return out
 
 
@@ -1390,6 +1401,88 @@ def silver_mention_names(sentences, votes, threshold=None, agree=None):
     return names
 
 
+CANDIDATE_TOPK = 4        # --save-candidates: the labels kept per word (week 19)
+CANDIDATE_OTHERS = 2      # and the other types scored per span and teacher
+
+
+def span_type_scores(top, start, end, id2label):
+    """{type: score} of the span [start, end) under one teacher, from its words' most
+    probable labels (teacher_tags with topk): for each type T whose B-T is among the first
+    word's labels, the least over the span of the marginal of B-T at the first word and of
+    I-T at each later one, a label outside a word's kept labels counting 0 (week 19)."""
+    ids, probs = top
+
+    def prob(t, label):
+        for j, p in zip(ids[t], probs[t]):
+            if id2label[int(j)] == label:
+                return float(p)
+        return 0.0
+
+    out = {}
+    for j in ids[start]:
+        label = id2label[int(j)]
+        if label.startswith('B-'):
+            kind = label[2:]
+            out[kind] = min([prob(start, label)]
+                            + [prob(t, f'I-{kind}') for t in range(start + 1, end)])
+    return out
+
+
+def candidate_spans(sentences, teacher_votes, id2label, others=CANDIDATE_OTHERS):
+    """Week 19's candidate dump (--save-candidates): for every sentence of the fit sample,
+    every span in the union of the teachers' Viterbi entity spans, sorted by start and end,
+    as [sentence index, start, end, words, per teacher [type, least, scores]]: the type of
+    that teacher's Viterbi span exactly there (None if it has none), that span's least path
+    marginal (the number silver_mention_names compares with the threshold; None without a
+    span) and [[type, score], ...] of the `others` best other types by span_type_scores
+    (ties by type name). teacher_votes: per teacher, teacher_tags(..., topk) in sentence
+    order. V at any threshold and agreement rebuilds exactly from it."""
+    out = []
+    for i, words in enumerate(sentences):
+        votes = [teacher[i] for teacher in teacher_votes]
+        tagged = [{(s, e): kind for s, e, kind in entity_spans(tags)} for tags, _, _ in votes]
+        for s, e in sorted(set().union(*tagged)):
+            row = []
+            for (tags, marginals, top), spans in zip(votes, tagged):
+                kind = spans.get((s, e))
+                scores = span_type_scores(top, s, e, id2label)
+                best = sorted(((t, sc) for t, sc in scores.items() if t != kind),
+                              key=lambda x: (-x[1], x[0]))[:others]
+                row.append([kind, min(marginals[s:e]) if kind is not None else None,
+                            [[t, round(sc, 6)] for t, sc in best]])
+            out.append([i, s, e, list(words[s:e]), row])
+    return out
+
+
+def load_candidates_store(path):
+    """The --save-candidates file (gzip JSON, resumable by run_id), or a new one."""
+    if path and os.path.exists(path):
+        with gzip.open(path, 'rt', encoding='utf-8') as f:
+            return json.load(f)
+    return {'runs': {}}
+
+
+def save_candidates_store(path, store):
+    with gzip.open(path, 'wt', encoding='utf-8') as f:
+        json.dump(store, f)
+
+
+def load_names_file(path):
+    """--names-file (week 19): {'runs': {run_id: {'names': [[type, words], ...]}}, ...}, the
+    entries in the order mention replacement's pool takes them (its draws depend on it), the
+    words space-joined; returns (store, SHA-256 of the file)."""
+    with open(path, 'rb') as f:
+        raw = f.read()
+    return json.loads(raw.decode('utf-8')), hashlib.sha256(raw).hexdigest()
+
+
+def names_of_run(store, run_id):
+    """The (type, words) mentions of a --names-file for one run_id, in the file's order."""
+    if run_id not in store['runs']:
+        raise SystemExit(f'--names-file: no names for run {run_id}')
+    return [(kind, tuple(words.split(' '))) for kind, words in store['runs'][run_id]['names']]
+
+
 def silver_mention_names_multitask(sentences, votes, threshold=None):
     """((coarse type, fine type or None), words) of the mentions that multi-task teachers
     agree on (week 17, the pool key of mention_replacements_multitask), in order: a span
@@ -1530,6 +1623,8 @@ def train_with_teachers(seed, offsets, train, val, test, labels, args, device, s
     agree = getattr(args, 'teachers_agree', None)
     share = getattr(args, 'names_share', None)
     teachers, tagged, sentences, n_skipped = [], [], None, 0
+    dump = harvest is not None and bool(getattr(args, 'save_candidates', None))   # week 19
+    full, id2label = [], None
     for offset in offsets:
         record, tagger = train_one(seed + offset, train, val, test, labels, teacher_args,
                                    device, keep_tagger=True)
@@ -1537,9 +1632,13 @@ def train_with_teachers(seed, offsets, train, val, test, labels, args, device, s
             sentences, n_skipped = fit_sample(tagger.tokenizer, sample,
                                               tagger.model.config.max_position_embeddings)
         keep = getattr(args, 'silver_mentions', False)      # per-word marginals for the names
-        out = [(tuple(tags), min(marginals), tuple(marginals) if keep else None)
-               for tags, marginals in teacher_tags(tagger, sentences, args.batch_size, device)]
-        del tagger
+        votes = teacher_tags(tagger, sentences, args.batch_size, device,
+                             topk=CANDIDATE_TOPK if dump else 0)
+        out = [(tuple(v[0]), min(v[1]), tuple(v[1]) if keep else None) for v in votes]
+        if dump:
+            full.append(votes)
+            id2label = dict(tagger.id2label)
+        del tagger, votes
         if str(device).startswith('cuda'):
             import torch
             torch.cuda.empty_cache()
@@ -1569,6 +1668,12 @@ def train_with_teachers(seed, offsets, train, val, test, labels, args, device, s
         harvest.update(harvest_record(teachers, names, coverage, len(sample), n_skipped,
                                       n_agreed, len(silver), threshold, agree,
                                       getattr(args, 'silver_mentions', False)))
+    if dump:
+        harvest['candidates'] = {
+            'labels': [id2label[j] for j in sorted(id2label)], 'n_sentences': len(sentences),
+            'teacher_seeds': [seed + off for off in offsets],
+            'spans': candidate_spans(sentences, full, id2label)}
+        del full
     students = {}
     for offset in offsets if student_offsets is None else student_offsets:
         if names is None:
@@ -2167,6 +2272,8 @@ def variant_name(args):
             name = 'crf_mt_ctx' if multi_task else 'crf_ctx'
         if getattr(args, 'augment_mentions', 0):
             name = 'crf_mt_mr' if multi_task else 'crf_mr'
+            if getattr(args, 'names_file', None):
+                name = f'crf_mr{args.names_arm}'           # crf_mrg6, crf_mrv6 (week 19)
         feature = getattr(args, 'names_feature', False)
         if getattr(args, 'augment_names', False) or feature:
             letter = 'm' if getattr(args, 'silver_mentions', False) else 's'
@@ -2724,7 +2831,7 @@ def stored_config(args):
     """The arguments saved as `config` (the granularity is a field of its own)."""
     return {k: v for k, v in vars(args).items()
             if k not in ('granularity', 'compare', 'overwrite', 'papers', 'student_offsets',
-                         'subfields', 'save_names')}
+                         'subfields', 'save_names', 'save_candidates')}
 
 
 def torch_device(args):
@@ -2845,6 +2952,8 @@ def run(args):
     # every results file is checked before any training, so a run never stops halfway
     check_results_files(args, [(results_path(out_dir, g, args), tasks[g][1])
                                for g in granularities], corpus.get('self_train_sha256'))
+    names_file, names_sha = ((load_names_file(args.names_file))
+                             if getattr(args, 'names_file', None) else (None, None))
     device = torch_device(args)
     environment = run_environment(device)
     os.makedirs(out_dir, exist_ok=True)
@@ -2866,6 +2975,8 @@ def run(args):
                 labels, descriptions[granularity])
         if self_train:
             results['config'].update(corpus)
+        if names_file is not None:
+            results['config']['names_file_sha256'] = names_sha
         done = {r.get('run_id') for r in results['runs']}
 
         offset = f", seed offset {args.seed_offset}" if args.seed_offset else ''
@@ -2905,14 +3016,19 @@ def run(args):
                 contexts = ({name: part_contexts(data, part, texts)
                              for name, part in (('train', tr), ('val', va), ('test', te))}
                             if getattr(args, 'context', 0) else None)
+                # --names-file (week 19): the file's names join the pool, in its order
+                names = names_of_run(names_file, run_id) if names_file is not None else ()
                 augmented = (mention_replacements([(w, t) for w, t, _ in train],
-                                                  args.augment_mentions, seed)
+                                                  args.augment_mentions, seed, names=names)
                              if getattr(args, 'augment_mentions', 0) else None)
                 res = train_one(seed, train, val, test, labels, args, device, test_index=te,
                                 descriptions=descriptions[granularity], contexts=contexts,
                                 augmented=augmented)
                 if augmented is not None:
                     res['n_augmented'] = len(augmented)
+                if names_file is not None:
+                    res['names_file'] = {'sha256': names_sha, 'arm': args.names_arm,
+                                         'coverage': name_coverage(names, train, test)}
             res['run_id'] = run_id
             res['runtime_sec'] = round(time.time() - start, 1)
             if environment:
@@ -3069,6 +3185,9 @@ def run_teachers(args, out_dir):
     save_names = getattr(args, 'save_names', None)         # week 15: the lexicon rebuilt
     names_path = os.path.join(out_dir, save_names) if save_names else None
     names_store = load_names_store(names_path) if names_path else None
+    save_candidates = getattr(args, 'save_candidates', None)      # week 19: the dump
+    candidates_path = os.path.join(out_dir, save_candidates) if save_candidates else None
+    candidates_store = load_candidates_store(candidates_path) if candidates_path else None
     views = {off: SimpleNamespace(**{**vars(args), 'tag': f'm{off}', 'seed_offset': off})
              for off in student_offsets}
     for view in views.values():
@@ -3121,6 +3240,8 @@ def run_teachers(args, out_dir):
         for run_id, tr, va, te in folds:
             students_done = run_id in done or not student_offsets
             names_done = names_store is None or run_id in names_store['runs']
+            if candidates_store is not None and run_id not in candidates_store['runs']:
+                names_done = False          # week 19: the dump is written with the names
             if students_done and names_done:
                 print(f"  {run_id}: already done, skipping")
                 continue
@@ -3137,6 +3258,18 @@ def run_teachers(args, out_dir):
                                           else sample, test_index=te, student_offsets=missing,
                                           harvest=harvest)
             runtime = round(time.time() - start, 1)
+            candidates = harvest.pop('candidates', None) if harvest is not None else None
+            if candidates is not None:
+                candidates_store['runs'][run_id] = {
+                    **candidates, 'teachers': harvest.get('teachers'), 'runtime_sec': runtime,
+                    'granularity': granularity, 'protocol': protocol,
+                    'self_train_sha256': corpus['self_train_sha256'],
+                    **({'environment': environment} if environment else {})}
+                candidates_store.update({'corpus': corpus['self_train'], 'model': args.model,
+                                         'topk': CANDIDATE_TOPK, 'others': CANDIDATE_OTHERS})
+                save_candidates_store(candidates_path, candidates_store)
+                print(f"  {run_id}: {len(candidates['spans'])} candidate spans saved to "
+                      f"{candidates_path}", flush=True)
             if harvest is not None and harvest.get('names') is not None:
                 names_store['runs'][run_id] = {
                     **harvest, 'runtime_sec': runtime, 'granularity': granularity,
@@ -3450,6 +3583,24 @@ def parse_args(argv=None):
                              "teachers' scores and the coverage counts to <out-dir>/FILE, "
                              'resumable by run_id; with --students 0 no student is trained '
                              '(ROADMAP §4, week 15)')
+    parser.add_argument('--save-candidates', type=str, default=argparse.SUPPRESS,
+                        metavar='FILE',
+                        help='with --save-names: also write, per run, every span any teacher '
+                             'tags as an entity in the corpus, with each teacher\'s type, its '
+                             'least marginal there and its two best other types '
+                             '(candidate_spans), to <out-dir>/FILE (gzip JSON, resumable by '
+                             'run_id; it holds corpus text, so it is never versioned; ROADMAP '
+                             '§4, week 19)')
+    parser.add_argument('--names-file', type=str, default=argparse.SUPPRESS, metavar='FILE',
+                        help='with --augment-mentions and --names-arm: the names of mention '
+                             "replacement's pool from FILE ({'runs': {run_id: {'names': "
+                             "[[type, words], ...]}}}, in its order), no teachers; the file's "
+                             'SHA-256 is recorded (variant crf_mr<arm><copies>; ROADMAP §4, '
+                             'week 19)')
+    parser.add_argument('--names-arm', type=str, default=argparse.SUPPRESS, metavar='LETTER',
+                        help="with --names-file: the arm's letter in the variant name (g: the "
+                             'graph lexicon, v: the vote lexicon, f: a replay of a harvested '
+                             'one)')
     parser.add_argument('--retokenized-test', action='store_true', default=argparse.SUPPRESS,
                         help="with --granularity sofc --published-split and a --tag: SOFC-Exp's "
                              "test articles cut into words by ChemDataExtractor's tokenizer, "
@@ -3670,6 +3821,30 @@ def parse_args(argv=None):
         if args.students < args.teachers and (args.students or not hasattr(args, 'save_names')):
             parser.error('--students: at least as many as --teachers (every teacher seed '
                          'trains a student), or 0 with --save-names')
+    if hasattr(args, 'save_candidates'):
+        if not hasattr(args, 'save_names'):
+            parser.error('--save-candidates needs --save-names (the dump is written with the '
+                         'names, week 19)')
+        if getattr(args, 'multi_task', False):
+            parser.error('--save-candidates is not available with --multi-task')
+    if hasattr(args, 'names_arm') and not hasattr(args, 'names_file'):
+        parser.error('--names-arm needs --names-file')
+    if hasattr(args, 'names_file'):
+        if not hasattr(args, 'names_arm'):
+            parser.error('--names-file needs --names-arm (its letter in the variant name)')
+        if not re.fullmatch(r'[a-z]', args.names_arm) or args.names_arm in 'ms':
+            parser.error('--names-arm: one lowercase letter other than m and s (crf_mrm and '
+                         'crf_mrs are the harvested-names variants)')
+        if not (args.crf and hasattr(args, 'augment_mentions')):
+            parser.error('--names-file needs --crf and --augment-mentions (its names join the '
+                         "replacement pool)")
+        for option in ('self_train', 'teachers', 'augment_names', 'names_feature', 'multi_task',
+                       'label_semantics', 'context', 'entity_bias'):
+            if getattr(args, option, None) not in (None, False):
+                parser.error(f"--names-file is not available with "
+                             f"--{option.replace('_', '-')}")
+        if not os.path.isfile(args.names_file):
+            parser.error(f'--names-file: no such file: {args.names_file}')
     if hasattr(args, 'retokenized_test'):
         if args.granularity != 'sofc' or not getattr(args, 'published_split', False):
             parser.error('--retokenized-test is for --granularity sofc --published-split')

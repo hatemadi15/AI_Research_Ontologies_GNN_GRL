@@ -207,6 +207,13 @@ Week 18 (the names against a recall-matched control; ROADMAP §4, week 18):
           with --entity-bias over BIAS_GRID_W18 (crf_mr6_bias_m<N>), balanced over the lanes;
           at bias 0 each run must equal its stored crf_mr6 run
 
+Week 19 (graph-propagated names; ROADMAP §4, week 19):
+  w19a    Phase 0's harvest: week 15's teacher jobs (no students) with --save-candidates, the
+          dump of every span the teachers tag (ner_candidates_*.json.gz, never committed),
+          their names files suffixed _w19 (so week 15's stay for the check): lane 0, the CRF
+          run of smoke4 again (smokebf) then MuLMS's 7 subfields; lane 1, MaterioMiner's 4
+          papers, fine-grained (one dump and one names file for the four)
+
 The TPU spike (docs/METHODS_PLAN.md §5; every batch named tpu... runs on the TPU v5e-8, one
 lane per chip, its jobs with --device xla, its results in results/tpu/, a family of their own):
   tpu-smoke1  one fine-grained CRF job (the 4 held-out papers, seed 0) on one chip (crf_tpu1):
@@ -477,6 +484,29 @@ def names_paper_job(granularity, paper):
             NAMES_FILE.format(granularity=granularity, protocol='leave_one_paper_out',
                               variant=f'crf_mrm{MR6_COPIES}', suffix=''),
             '--threads', str(THREADS)]
+
+
+CANDIDATES_FILE = 'ner_candidates_{setting}.json.gz'     # --save-candidates (week 19)
+W19_SUFFIX = '_w19'
+
+
+def w19_harvest_mulms_job(subfield):
+    """Week 19, Phase 0: names_mulms_job with --save-candidates (the subfield's dump) and
+    its names file suffixed _w19 (ROADMAP §4, week 19)."""
+    job = names_mulms_job(subfield)
+    i = job.index('--save-names') + 1
+    job[i] = job[i].replace('.json', f'{W19_SUFFIX}.json')
+    return job + ['--save-candidates', CANDIDATES_FILE.format(setting=f'mulms_{subfield}')]
+
+
+def w19_harvest_paper_job(paper):
+    """Week 19, Phase 0: names_paper_job at fine granularity with --save-candidates (one
+    dump and one names file for the 4 papers, so the jobs share a lane)."""
+    job = names_paper_job('fine', paper)
+    i = job.index('--save-names') + 1
+    job[i] = job[i].replace('.json', f'{W19_SUFFIX}.json')
+    return job + ['--save-candidates',
+                  CANDIDATES_FILE.format(setting='fine_leave_one_paper_out')]
 
 
 def mt_mr6_job(offset):
@@ -1046,6 +1076,13 @@ def batch_lanes(name):
                 for off in OFFSETS_W5]
         lanes = balance(jobs, loads=[COST['crf'], 0.0])
         return [[repeat + ['--tag', 'smokebe']] + lanes[0], lanes[1]]
+    if name == 'w19a':
+        # week 19, Phase 0 (ROADMAP §4, the week-19 protocol): the harvest with the candidate
+        # dumps, no students; lane 0 the repeat of the CRF run of smoke4 (smokebf) and
+        # MuLMS's 7 subfields, lane 1 MaterioMiner's 4 papers (fine-grained)
+        return [[repeat + ['--tag', 'smokebf']] + [w19_harvest_mulms_job(s)
+                                                  for s in MULMS_SUBFIELD_NAMES],
+                [w19_harvest_paper_job(p) for p in PAPERS]]
     if name == 'w14a':
         # week 14, 14.1: the 6-copy control without names (crf_mr6_m<N>) on MuLMS's held-out
         # subfields, seed offsets 300 to 900 (one job per offset over the 7 subfields), and
@@ -1068,7 +1105,8 @@ BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'i
            'w7c', 'w7d', 'w7e', 'w8a', 'w8b', 'w9a', 'w9b', 'w10a', 'w11a', 'w11b', 'w12a', 'w12c',
            'w12e', 'w12f', 'w12g', 'w13a', 'w13b', 'w13c',
            *(f'w12b:{v}' for v in WEEK12_VARIANTS), *(f'w12d:{v}' for v in WEEK12_ANALOGUES),
-           'tpu-smoke1', 'tpu-smoke', 'w14a', 'w14b', 'w14c', 'w15a', 'w17a', 'w17b', 'w18a')
+           'tpu-smoke1', 'tpu-smoke', 'w14a', 'w14b', 'w14c', 'w15a', 'w17a', 'w17b', 'w18a',
+           'w19a')
 
 
 def batch_extras(name):
@@ -1330,16 +1368,22 @@ def merged(old, new):
     return out
 
 
-def collect_names(pulled, dest=NAMES_RESULTS):
+CANDIDATES_DEST = ROOT / 'data' / 'processed' / 'week19'   # the dumps (git ignores it)
+
+
+def collect_names(pulled, dest=NAMES_RESULTS, candidates_dest=CANDIDATES_DEST):
     """Copy the rebuilt-lexicon files of a pulled output (ner_names_*.json, --save-names,
     week 15) to `dest`, a directory git ignores: the harvested names are never committed;
-    ner_lexicon_recall.py reads them there. Returns the names copied."""
-    dest = Path(dest)
-    dest.mkdir(parents=True, exist_ok=True)
+    ner_lexicon_recall.py reads them there. Week 19's candidate dumps
+    (ner_candidates_*.json.gz, --save-candidates) go to `candidates_dest`, ignored too, where
+    graph_names.py reads them. Returns the names copied."""
     copied = []
-    for path in sorted(Path(pulled).rglob('ner_names_*.json')):
-        shutil.copy2(path, dest / path.name)
-        copied.append(path.name)
+    for pattern, target in (('ner_names_*.json', Path(dest)),
+                            ('ner_candidates_*.json.gz', Path(candidates_dest))):
+        for path in sorted(Path(pulled).rglob(pattern)):
+            target.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(path, target / path.name)
+            copied.append(path.name)
     return copied
 
 
