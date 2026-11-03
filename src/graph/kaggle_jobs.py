@@ -213,6 +213,13 @@ Week 19 (graph-propagated names; ROADMAP §4, week 19):
           their names files suffixed _w19 (so week 15's stay for the check): lane 0, the CRF
           run of smoke4 again (smokebf) then MuLMS's 7 subfields; lane 1, MaterioMiner's 4
           papers, fine-grained (one dump and one names file for the four)
+  w19b    Phase 1 (only if the probe's gate passes; after the 7 November reset): first the CRF
+          run of smoke4 again (smokebg) and the replay check, MR6 with paper A's lexicon rebuilt
+          from the dump (names_mulms_f.json; crf_mrf6_m300 on the sofc subfield), which must
+          reproduce the stored crf_mrm_topic6_m300 run; then the arms crf_mrg6 (the graph
+          lexicon) and crf_mrv6 (the size-matched vote lexicon) through --names-file, MuLMS
+          at seed offsets 300 to 900 (one job per offset over the 7 subfields) and
+          MaterioMiner fine at 0 to 900 (one job per offset over the 4 papers), balanced
 
 The TPU spike (docs/METHODS_PLAN.md §5; every batch named tpu... runs on the TPU v5e-8, one
 lane per chip, its jobs with --device xla, its results in results/tpu/, a family of their own):
@@ -507,6 +514,33 @@ def w19_harvest_paper_job(paper):
     job[i] = job[i].replace('.json', f'{W19_SUFFIX}.json')
     return job + ['--save-candidates',
                   CANDIDATES_FILE.format(setting='fine_leave_one_paper_out')]
+
+
+WEEK19_DIR = 'data/processed/week19'      # the lexicon files of graph_names.py (git-ignored)
+WEEK19_PREFIX = 'week19__'                 # their bundle names (as in run_jobs.py)
+W19_ARMS = ('g', 'v')                      # the graph lexicon and the size-matched vote lexicon
+
+
+def w19_names_file(setting, arm):
+    return f'{WEEK19_DIR}/names_{setting}_{arm}.json'
+
+
+def w19_mulms_job(arm, offset, subfields=None):
+    """Week 19, Phase 1: MR6 on MuLMS's held-out subfields with an arm's lexicon (crf_mr<arm>6_m<N>),
+    mr6_mulms_job's recipe with --names-file."""
+    job = mr6_mulms_job(offset)
+    at = job.index('--tag')
+    extra = ['--subfields', *subfields] if subfields else []
+    return (job[:at] + extra + ['--names-file', w19_names_file('mulms', arm), '--names-arm', arm]
+            + job[at:])
+
+
+def w19_paper_job(arm, offset):
+    """Week 19, Phase 1: MR6 on MaterioMiner's 4 held-out papers, fine-grained, with an arm's
+    lexicon (crf_mr<arm>6_m<N>), w14a's crf_mr6 job with --names-file."""
+    return job('fine', 'leave_one_paper_out', '--augment-mentions', str(MR6_COPIES),
+               '--names-file', w19_names_file('fine', arm), '--names-arm', arm,
+               offset=offset, tag=f'm{offset}')
 
 
 def mt_mr6_job(offset):
@@ -1083,6 +1117,17 @@ def batch_lanes(name):
         return [[repeat + ['--tag', 'smokebf']] + [w19_harvest_mulms_job(s)
                                                   for s in MULMS_SUBFIELD_NAMES],
                 [w19_harvest_paper_job(p) for p in PAPERS]]
+    if name == 'w19b':
+        # week 19, Phase 1 (ROADMAP §4, the week-19 protocol): the repeat of the CRF run of
+        # smoke4 (smokebg) and the replay check (paper A's lexicon rebuilt from the dump, on
+        # the sofc subfield at offset 300) first, then both arms at the decision seeds
+        jobs = ([(COST['mulms'] * MULMS_SUBFIELDS * COST['mr6'], w19_mulms_job(a, off))
+                 for a in W19_ARMS for off in OFFSETS_W5]
+                + [(RUNS['leave_one_paper_out'] * COST['mr6'], w19_paper_job(a, off))
+                   for a in W19_ARMS for off in OFFSETS + OFFSETS_W5])
+        lanes = balance(jobs, loads=[COST['crf'] + COST['mulms'] * COST['mr6'], 0.0])
+        return [[repeat + ['--tag', 'smokebg'], w19_mulms_job('f', 300, ['sofc'])] + lanes[0],
+                lanes[1]]
     if name == 'w14a':
         # week 14, 14.1: the 6-copy control without names (crf_mr6_m<N>) on MuLMS's held-out
         # subfields, seed offsets 300 to 900 (one job per offset over the 7 subfields), and
@@ -1106,7 +1151,7 @@ BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'i
            'w12e', 'w12f', 'w12g', 'w13a', 'w13b', 'w13c',
            *(f'w12b:{v}' for v in WEEK12_VARIANTS), *(f'w12d:{v}' for v in WEEK12_ANALOGUES),
            'tpu-smoke1', 'tpu-smoke', 'w14a', 'w14b', 'w14c', 'w15a', 'w17a', 'w17b', 'w18a',
-           'w19a')
+           'w19a', 'w19b')
 
 
 def batch_extras(name):
@@ -1151,6 +1196,10 @@ def batch_spec(name):
                      if (m := TOPIC_CORPUS_RE.fullmatch(arg))})
     if topics:
         spec['topic_corpora'] = {t: corpus_sha256(TOPIC_REPORTS / f'{t}.json') for t in topics}
+    names = sorted({job[i + 1] for lane in lanes for job in lane for i in range(len(job) - 1)
+                    if job[i] == '--names-file'})
+    if names:                 # week 19: the lexicon files, each with its SHA-256
+        spec['week19_names'] = {Path(n).name: file_sha256(ROOT / n) for n in names}
     if is_tpu_batch(name):
         # TPU results are a family of their own: no GPU results file is restored (it would
         # only cost setup time; a run would not be skipped for it either, its tag differs)
@@ -1301,6 +1350,10 @@ def build_bundle(commit, out_dir, root=ROOT, results_dir=GPU_RESULTS, corpus=Non
             raise SystemExit(f'{path}: SHA-256 {topics[topic]}, not the recorded '
                              f'{corpus_sha256(report)}')
         shutil.copy2(path, out_dir / f'topic_{topic}_sentences.txt')
+    week19 = {}               # week 19: graph_names.py's lexicon files, when there are any
+    for path in sorted((Path(root) / WEEK19_DIR).glob('names_*.json')):
+        week19[path.name] = file_sha256(path)
+        shutil.copy2(path, out_dir / f'{WEEK19_PREFIX}{path.name}')
     results = sorted(p.name for p in Path(results_dir).glob('ner_results_*.json')
                      if is_gpu_runs_file(p)) if Path(results_dir).is_dir() else []
     for name in results:
@@ -1308,7 +1361,8 @@ def build_bundle(commit, out_dir, root=ROOT, results_dir=GPU_RESULTS, corpus=Non
     for wheel in wheels:
         shutil.copy2(wheel, out_dir / Path(wheel).name)
     info = {'commit': full, 'corpus_sha256': digest, 'sofc_corpus_sha256': sofc_digest,
-            'mulms_files': mulms, 'topic_corpora': topics or None, 'results': results,
+            'mulms_files': mulms, 'topic_corpora': topics or None,
+            **({'week19_names': week19} if week19 else {}), 'results': results,
             'wheels': sorted(Path(w).name for w in wheels),
             'created': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}
     (out_dir / 'BUNDLE.json').write_text(json.dumps(info, indent=2))

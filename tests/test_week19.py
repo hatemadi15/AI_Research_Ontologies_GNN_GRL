@@ -409,3 +409,57 @@ def test_teachers_check_against_the_stored_names_runs(tmp_path):
     teachers[2]['test_f1'] = 51.1
     assert gn.teachers_check(teachers, 'mulms', 'sofc', tmp_path)['equal'] is False
     assert gn.teachers_check(teachers, 'mulms', 'steel', tmp_path)['equal'] is False
+
+
+# --- Phase 1: the batch, its spec and the placed lexicon files ----------------------------------
+
+def test_week19_phase1_batch(monkeypatch):
+    lane0, lane1 = kj.batch_lanes('w19b')
+    assert lane0[0][-2:] == ['--tag', 'smokebg']
+    jobs = lane0[1:] + lane1
+    assert len(jobs) == 1 + 2 * 7 + 2 * 10          # the replay, then both arms
+    with monkeypatch.context() as m:
+        m.setattr(nb.os.path, 'isfile', lambda path: True)    # the lexicon files are not here
+        parsed = [nb.parse_args(job) for job in jobs]
+    replay = parsed[0]
+    assert (nb.variant_name(replay), replay.subfields, replay.names_file) == (
+        'crf_mrf6_m300', ['sofc'], 'data/processed/week19/names_mulms_f.json')
+    mulms = [a for a in parsed[1:] if a.granularity == 'mulms']
+    fine = [a for a in parsed[1:] if a.granularity == 'fine']
+    assert sorted(nb.variant_name(a) for a in mulms) == sorted(
+        f'crf_mr{arm}6_m{off}' for arm in 'gv' for off in range(300, 1000, 100))
+    assert sorted(nb.variant_name(a) for a in fine) == sorted(
+        f'crf_mr{arm}6_m{off}' for arm in 'gv' for off in range(0, 1000, 100))
+    for a in parsed[1:]:
+        corpus = 'mulms' if a.granularity == 'mulms' else 'fine'
+        assert a.names_file == f'data/processed/week19/names_{corpus}_{a.names_arm}.json'
+        assert (a.augment_mentions, a.crf, a.save_predictions) == (6, True, True)
+
+
+def test_week19_spec_lists_the_lexicon_files(monkeypatch):
+    original = kj.file_sha256
+    monkeypatch.setattr(kj, 'file_sha256', lambda path: (
+        f'sha-{path.name}' if 'week19' in str(path) else original(path)))
+    spec = kj.batch_spec('w19b')
+    assert spec['week19_names'] == {f'names_{c}_{a}.json': f'sha-names_{c}_{a}.json'
+                                    for c, a in (('mulms', 'f'), ('mulms', 'g'), ('mulms', 'v'),
+                                                 ('fine', 'g'), ('fine', 'v'))}
+    assert 'week19_names' not in kj.batch_spec('w19a')
+
+
+def test_run_jobs_places_the_lexicon_files_only_when_asked(tmp_path):
+    from test_kaggle_jobs import _run_jobs
+    rj = _run_jobs()
+    inputs, repo = tmp_path / 'input', tmp_path / 'repo'
+    (inputs / 'bundle').mkdir(parents=True)
+    names = inputs / 'bundle' / 'week19__names_mulms_g.json'
+    names.write_text('{"runs": {}}')
+    assert rj.place_week19_names({}, inputs, repo) is None and not repo.exists()
+    digest = rj.file_sha256(names)
+    assert rj.place_week19_names({'week19_names': {'names_mulms_g.json': digest}}, inputs,
+                                 repo) == {'names_mulms_g.json': digest}
+    assert (repo / rj.WEEK19_DIR / 'names_mulms_g.json').read_bytes() == names.read_bytes()
+    with pytest.raises(RuntimeError, match='SHA-256'):
+        rj.place_week19_names({'week19_names': {'names_mulms_g.json': '0' * 64}}, inputs, repo)
+    with pytest.raises(FileNotFoundError):
+        rj.place_week19_names({'week19_names': {'names_fine_v.json': digest}}, inputs, repo)

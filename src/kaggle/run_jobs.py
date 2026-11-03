@@ -118,6 +118,30 @@ def place_topic_corpora(spec, inputs, repo):
     return dict(sorted(expected.items()))
 
 
+WEEK19_DIR = Path('data/processed/week19')      # week 19's lexicon files (kaggle_jobs.py)
+WEEK19_PREFIX = 'week19__'
+
+
+def place_week19_names(spec, inputs, repo):
+    """Week 19's lexicon files into the repository when the spec lists them (week19_names:
+    {name: SHA-256}): bundle files week19__<name>, each with its SHA-256. Returns them, or
+    None when the batch reads none."""
+    expected = spec.get('week19_names')
+    if not expected:
+        return None
+    folder = repo / WEEK19_DIR
+    folder.mkdir(parents=True, exist_ok=True)
+    for name, digest in sorted(expected.items()):
+        path = find(inputs, f'{WEEK19_PREFIX}{name}')
+        if path is None:
+            raise FileNotFoundError(f'{WEEK19_PREFIX}{name} is not under {inputs}')
+        found = file_sha256(path)
+        if found != digest:
+            raise RuntimeError(f'names file {name}: SHA-256 {found} is not {digest}')
+        shutil.copy2(path, folder / name)
+    return dict(sorted(expected.items()))
+
+
 def place_mulms(spec, inputs, repo):
     """The MuLMS files (mulms.py) into the repository when the spec lists them (mulms_files:
     {name: SHA-256}): bundle files mulms__<name>, each with its SHA-256. Returns how many, or
@@ -374,6 +398,7 @@ def main(spec):
         sofc_digest = place_sofc_corpus(spec, INPUT, REPO)
         mulms = place_mulms(spec, INPUT, REPO)
         topics = place_topic_corpora(spec, INPUT, REPO)
+        week19 = place_week19_names(spec, INPUT, REPO)
         restored = (restore_results(INPUT, processed / 'ner')
                     if spec.get('restore_results', True) else [])
         setup_step(started, f'code, corpora and {len(restored)} results files in place')
@@ -383,7 +408,8 @@ def main(spec):
             'code': how, 'bundle': bundle, 'corpus_sha256': digest,
             **({'sofc_corpus_sha256': sofc_digest} if sofc_digest else {}),
             **({'mulms_files': mulms} if mulms else {}),
-            **({'topic_corpora': topics} if topics else {}), 'restored': restored,
+            **({'topic_corpora': topics} if topics else {}),
+            **({'week19_names': week19} if week19 else {}), 'restored': restored,
             'models': pinned, 'environment': environment(device),
             'setup_minutes': round((time.time() - started) / 60, 2)}))
         setup_step(started, 'environment recorded; the lanes start')
