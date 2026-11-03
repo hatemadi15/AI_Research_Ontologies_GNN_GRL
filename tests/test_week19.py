@@ -393,3 +393,19 @@ def test_collect_copies_the_dumps_apart_from_the_names(tmp_path):
     assert sorted(copied) == ['ner_candidates_mulms_sofc.json.gz', 'ner_names_x_w19.json']
     assert (names / 'ner_names_x_w19.json').exists()
     assert (dumps / 'ner_candidates_mulms_sofc.json.gz').exists()
+
+
+def test_teachers_check_against_the_stored_names_runs(tmp_path):
+    def results(offset, f1s):
+        run = {'run_id': 'sofc', 'test_pred': [],      # stored runs keep their predictions
+               'self_training': {'teachers': [{'test_f1': f} for f in f1s]}}
+        return {'runs': [run]}
+    for offset in range(300, 1000, 100):
+        (tmp_path / f'ner_results_mulms_leave_one_subfield_out_crf_mrm_topic6_m{offset}.json'
+         ).write_text(json.dumps(results(offset, [50.1, 49.8, 51.0])))
+    teachers = [{'test_f1': 50.1}, {'test_f1': 49.8}, {'test_f1': 51.0}]
+    check = gn.teachers_check(teachers, 'mulms', 'sofc', tmp_path)
+    assert check == {'equal': True, 'runs_checked': 7, 'rebuilt_teachers_f1': [50.1, 49.8, 51.0]}
+    teachers[2]['test_f1'] = 51.1
+    assert gn.teachers_check(teachers, 'mulms', 'sofc', tmp_path)['equal'] is False
+    assert gn.teachers_check(teachers, 'mulms', 'steel', tmp_path)['equal'] is False

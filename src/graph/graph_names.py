@@ -552,6 +552,25 @@ def names_records(setting, which, names_dir=NAMES_DIR):
     return runs
 
 
+# the stored names runs whose teachers the harvest rebuilds: (granularity, protocol, family,
+# seed offsets)
+NAMES_RUNS = {'mulms': ('mulms', 'leave_one_subfield_out', 'crf_mrm_topic6', range(300, 1000, 100)),
+              'fine': ('fine', 'leave_one_paper_out', 'crf_mrm6', range(0, 1000, 100))}
+
+
+def teachers_check(teachers, setting, unit, directory=GPU_RESULTS):
+    """Whether the rebuilt teachers' test F1 equal those stored with every names run of the
+    unit (week 15's check: deterministic CUDA gives the same teachers)."""
+    import ner_mentions as nm
+    granularity, protocol, family, offsets = NAMES_RUNS[setting]
+    files = nm.family_files(directory, granularity, protocol, family, tuple(offsets)) or []
+    rebuilt = [t['test_f1'] for t in teachers or []]
+    same = [[t['test_f1'] for t in run['self_training']['teachers']] == rebuilt
+            for f in files for run in f['runs'] if run['run_id'] == unit]
+    return {'equal': bool(same) and all(same), 'runs_checked': len(same),
+            'rebuilt_teachers_f1': rebuilt}
+
+
 def names_check(votes, record):
     """V at 0.9, 3 of 3 rebuilt from the dump against the --save-names record of the same job
     (week 15's format: [type, words, count] rows): equal counts or the differences."""
@@ -585,6 +604,7 @@ def run_probe(dump_dir=DUMP_DIR, names_dir=NAMES_DIR, write_names=False):
             # the checks: V at 0.9, 3 of 3 from the dump against the same job's names and
             # against week 15's rebuild (deterministic teachers give the same names)
             report['checks'] = {
+                'teachers': teachers_check(record.get('teachers'), setting, unit),
                 'dump_vs_w19a_names': (names_check(votes, w19a[unit]) if unit in w19a
                                        else None),
                 'dump_vs_week15_names': (names_check(votes, week15[unit]) if unit in week15
