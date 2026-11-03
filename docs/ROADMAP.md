@@ -6575,7 +6575,15 @@ its names entries, since every training mention is one draw from its
 type's pool of training mentions then names). Re-running the seed
 analysis showed week 18's `crf_mr6_bias` read as a week-12 variant; it
 is left out now, as week 14's and week 19's variants are, and the stored
-analysis reproduces unchanged.
+analysis reproduces unchanged. `w19a` completed at 03:51 UTC (141.1
+minutes on two T4s, 7.8 of them setup; all 12 jobs done, the harvests
+16.9 to 21.3 minutes each): the repeat `smokebf` is identical to
+`smokebe` of 1 November (77.95; every field and the environment); the 8
+candidate dumps (one per subfield, the 4 papers in one file; 4.2 to 25.2
+MB compressed) and the 8 names files collected, both git-ignored. The
+probe started at 03:54 UTC on the CPU (`267730f`, which adds a progress
+line per unit), writing the Phase-1 lexicon files in the same pass
+(git-ignored; read only if the gate passes, by `w19b`).
 
 *Budget.* `w19a`: 11 harvest jobs of about 20 minutes, under 4 of the
 22.6 GPU hours left this week. `w19b`: about 5.5 GPU hours per arm and
