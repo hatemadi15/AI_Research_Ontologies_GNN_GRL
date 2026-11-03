@@ -191,12 +191,14 @@ from the committed results (no training; re-run it when results change):
   filters admit at 0.9, the held-out CRF head's precision and recall, and the
   dictionary rule's F1 change with each lexicon and with the gold unseen names
   (C24).
-- Table 6 (`table6_held_out_decisions.md`): every pre-registered decision on
-  held-out documents of the three corpora, from the seed analysis: MuLMS's
-  held-out subfields (weeks 10–12), the consistency rule of weeks 7 and 13 on
-  MuLMS and MaterioMiner, SOFC-Exp's article folds (13.3) and the pooled
-  decision 13.2; its units, the paired micro-F1 difference with 95% CI and
-  whether the CI lies above 0 (C22–C25). The methods route's evidence in one
+- Table 6 (`table6_held_out_decisions.md`): the pre-registered decisions on
+  held-out documents of the three corpora from weeks 7 to 14, from the seed
+  analysis: MuLMS's held-out subfields (weeks 10–12), the consistency rule
+  of weeks 7 and 13 on MuLMS and MaterioMiner, the week-12 winner's
+  MaterioMiner analogue, SOFC-Exp's article folds (13.3, 13.4), the pooled
+  decision 13.2 and week 14's 14.1 and 14.2; its units, the paired micro-F1
+  difference with 95% CI and whether the CI lies above 0 (C22–C26). Weeks
+  17 and 18 are in Tables 11 and 12. The methods route's evidence in one
   table; the reported comparisons stay in the README's bullets.
 - Table 7 (`table7_ablations.md`): the names method's ablations (14.3;
   reported, 3 seeds): on MuLMS's 7 held-out subfields at the screen's
