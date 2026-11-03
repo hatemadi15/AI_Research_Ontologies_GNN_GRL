@@ -230,6 +230,18 @@ Week 20 (two controls for paper B's first referee; ROADMAP §4, week 20):
           the crf_bias_m<N> inner folds at seed offsets 300 to 900 on both granularities (w8b's
           and w7a's flags), balanced over the lanes
 
+Week 21 (a free generalist NER baseline, GLiNER-medium; ROADMAP §4, week 21; gliner_baseline.py
+jobs, gliner installed --no-deps beside the pinned packages, GLINER_PINS):
+  w21s    the smoke session: lane 0 the CRF run of smoke4 again (smokebl), then the timed
+          fine-tuning runs (gliner_ft_m0) on MaterioMiner fine paper 1 and MuLMS's first subfield;
+          lane 1 the determinism repeat of the paper-1 run (smokebm), the timed run on SOFC-Exp's
+          fold 0 and zero-shot on paper 1 (gliner_zs_m0)
+  w21a    every arm (the results files resume w21s's runs): the CRF run of smoke4 again
+          (smokebn), then fine-tuning (gliner_ft_m<N>, seed offsets 0 to 900) on MaterioMiner's
+          4 papers at both granularities, MuLMS's 7 subfields and SOFC-Exp's 5 folds, and
+          zero-shot (gliner_zs_m0) on fine, MuLMS and SOFC-Exp, a job per setting and offset,
+          balanced over the lanes; pushed again if one session does not finish it
+
 The TPU spike (docs/METHODS_PLAN.md §5; every batch named tpu... runs on the TPU v5e-8, one
 lane per chip, its jobs with --device xla, its results in results/tpu/, a family of their own):
   tpu-smoke1  one fine-grained CRF job (the 4 held-out papers, seed 0) on one chip (crf_tpu1):
@@ -290,7 +302,17 @@ MODELS = {'m3rg-iitd/matscibert': 'ced9d8f5f208712c4a90f98a246fe32155b29995'}
 DEBERTA = 'microsoft/deberta-v3-large'
 DEBERTA_PINS = {'pip': ('sentencepiece==0.2.2',),
                 'models': {DEBERTA: '64a8c8eab3e352a784c658aef62be1662607476f'}}
-BATCH_EXTRAS = {'smoke5': DEBERTA_PINS, 'smoke6': DEBERTA_PINS, 'w6a': DEBERTA_PINS}
+# week 21 (ROADMAP §4, the week-21 protocol): GLiNER-medium and its backbone, whose tokenizer
+# needs sentencepiece; gliner itself is installed without its dependencies (`pip_no_deps`, a pip
+# install of its own), so that the pinned packages stay the stored runs' (gliner_baseline.py
+# checks the same pins)
+GLINER = 'urchade/gliner_medium-v2.1'
+GLINER_BACKBONE = 'microsoft/deberta-v3-base'
+GLINER_PINS = {'pip': ('sentencepiece==0.2.2',), 'pip_no_deps': ('gliner==0.2.30',),
+               'models': {GLINER: '40ec419335d09393f298636f471328b722c6da9e',
+                          GLINER_BACKBONE: '8ccc9b6f36199bec6961081d44eb72fb3f7353f3'}}
+BATCH_EXTRAS = {'smoke5': DEBERTA_PINS, 'smoke6': DEBERTA_PINS, 'w6a': DEBERTA_PINS,
+                'w21s': GLINER_PINS, 'w21a': GLINER_PINS}
 THREADS = 2
 DEADLINE_HOURS = 10                 # no job starts later; a Kaggle session lasts 12 hours
 # the TPU spike (docs/METHODS_PLAN.md §5): a batch named tpu... runs on Kaggle's TPU v5e-8, one
@@ -650,6 +672,34 @@ def inner_bias_job(granularity, offset, tag=None):
 # folds, each trained on at most two papers' sentences) and of an inner job (6 such folds; w7a)
 SIZED_COST = COST['crf'] * 8
 INNER_COST = COST['crf'] * 4
+
+# week 21 (ROADMAP §4, the week-21 protocol): GLiNER on the CRF head's held-out units, jobs of
+# gliner_baseline.py (a job that starts with the script runs it, run_jobs.job_command), each
+# setting with the CRF head's protocol options
+GLINER_SCRIPT = 'src/graph/gliner_baseline.py'
+GLINER_SETTINGS = {'fine': ('--granularity', 'fine', '--leave-one-paper-out'),
+                   'coarse': ('--granularity', 'coarse', '--leave-one-paper-out'),
+                   'mulms': ('--granularity', 'mulms', '--leave-one-subfield-out', '--train-pool',
+                             str(MULMS_POOL)),
+                   'sofc': ('--granularity', 'sofc', *SOFC_SPLITS['document_folds'])}
+GLINER_ZERO_SHOT = ('fine', 'mulms', 'sofc')       # coarse: no zero-shot arm (the protocol)
+# each setting's first unit: w21s's timed fine-tuning runs and its zero-shot unit (paper 1)
+GLINER_FIRST_UNITS = {'fine': PAPERS[0], 'mulms': MULMS_SUBFIELD_NAMES[0], 'sofc': 'fold0'}
+# the relative GPU time of a setting's units, the CRF head's (a fine-tuning job's estimated
+# factor on it, GLINER_FACTOR; zero-shot decodes only), for balancing the lanes
+GLINER_UNIT_COST = {'fine': COST['crf'] * RUNS['leave_one_paper_out'],
+                    'coarse': COST['crf'] * RUNS['leave_one_paper_out'],
+                    'mulms': COST['mulms'] * MULMS_SUBFIELDS, 'sofc': COST['sofc'] * 5}
+GLINER_FACTOR = {'ft': 2.0, 'zs': 0.1}
+
+
+def gliner_job(setting, offset=0, zero_shot=False, tag=None, units=()):
+    """A gliner_baseline.py job on a setting's held-out units (all, or `units`): fine-tuning
+    (gliner_ft_m<N>, seed offset N) or zero-shot (gliner_zs_m0); `tag` replaces the seed tag (the
+    determinism repeat smokebm)."""
+    return [GLINER_SCRIPT, *GLINER_SETTINGS[setting], *(('--zero-shot',) if zero_shot else ()),
+            *(('--units', *units) if units else ()), '--tag', tag or f'm{offset}',
+            *(('--seed-offset', str(offset)) if offset else ()), '--threads', str(THREADS)]
 
 
 def week12_variant(name):
@@ -1187,6 +1237,29 @@ def batch_lanes(name):
                    for g in GRANULARITIES for off in OFFSETS_W5])
         lanes = balance(jobs, loads=[COST['crf'] + mulms, SIZED_COST + INNER_COST])
         return [checks[0] + lanes[0], checks[1] + lanes[1]]
+    if name == 'w21s':
+        # week 21 (ROADMAP §4, the week-21 protocol), the smoke session: lane 0 the repeat of the
+        # CRF run of smoke4 (smokebl), then the timed fine-tuning runs at seed offset 0 on
+        # MaterioMiner fine paper 1 and MuLMS's first subfield; lane 1 the determinism repeat of
+        # the paper-1 run (smokebm, on the other GPU), the timed run on SOFC-Exp's fold 0 and
+        # zero-shot on paper 1. The m0 files are real runs, which w21a resumes
+        first = GLINER_FIRST_UNITS
+        return [[repeat + ['--tag', 'smokebl'], gliner_job('fine', units=(first['fine'],)),
+                 gliner_job('mulms', units=(first['mulms'],))],
+                [gliner_job('fine', tag='smokebm', units=(first['fine'],)),
+                 gliner_job('sofc', units=(first['sofc'],)),
+                 gliner_job('fine', zero_shot=True, units=(first['fine'],))]]
+    if name == 'w21a':
+        # week 21, every arm: the repeat of the CRF run of smoke4 (smokebn), then fine-tuning at
+        # seed offsets 0 to 900 on the four settings and zero-shot on fine, MuLMS and SOFC-Exp,
+        # a job per setting and offset over all its units (each writes its own file), balanced
+        # over the lanes; the files resume w21s's runs, and a second session the first's
+        jobs = ([(GLINER_UNIT_COST[s] * GLINER_FACTOR['ft'], gliner_job(s, off))
+                 for s in GLINER_SETTINGS for off in OFFSETS_PUBLISHED]
+                + [(GLINER_UNIT_COST[s] * GLINER_FACTOR['zs'], gliner_job(s, zero_shot=True))
+                   for s in GLINER_ZERO_SHOT])
+        lanes = balance(jobs, loads=[COST['crf'], 0.0])
+        return [[repeat + ['--tag', 'smokebn']] + lanes[0], lanes[1]]
     if name == 'w14a':
         # week 14, 14.1: the 6-copy control without names (crf_mr6_m<N>) on MuLMS's held-out
         # subfields, seed offsets 300 to 900 (one job per offset over the 7 subfields), and
@@ -1210,7 +1283,7 @@ BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'i
            'w12e', 'w12f', 'w12g', 'w13a', 'w13b', 'w13c',
            *(f'w12b:{v}' for v in WEEK12_VARIANTS), *(f'w12d:{v}' for v in WEEK12_ANALOGUES),
            'tpu-smoke1', 'tpu-smoke', 'w14a', 'w14b', 'w14c', 'w15a', 'w17a', 'w17b', 'w18a',
-           'w19a', 'w19b', 'w20a')
+           'w19a', 'w19b', 'w20a', 'w21s', 'w21a')
 
 
 def batch_extras(name):
@@ -1239,13 +1312,16 @@ def batch_name(name):
 
 def batch_spec(name):
     """The job spec that run_jobs.py runs (see its docstring), with the batch's extra pins;
-    a batch whose jobs use the SOFC corpus also has its SHA-256 (sofc_corpus_sha256)."""
+    a batch whose jobs use the SOFC corpus also has its SHA-256 (sofc_corpus_sha256). Week 21:
+    a batch's packages to install without their dependencies (`pip_no_deps`, GLINER_PINS)."""
     extra = batch_extras(name)
     lanes = batch_lanes(name)
     spec = {'batch': name, 'gpu': GPU, 'pip': list(PIP) + list(extra.get('pip', ())),
             'wheels': list(WHEEL_FILES), 'models': {**MODELS, **extra.get('models', {})},
             'corpus_sha256': corpus_sha256(), 'deadline_hours': DEADLINE_HOURS,
             'lanes': lanes}
+    if extra.get('pip_no_deps'):
+        spec['pip_no_deps'] = list(extra['pip_no_deps'])
     if any(SOFC_CORPUS in job for lane in lanes for job in lane):
         spec['sofc_corpus_sha256'] = corpus_sha256(SOFC_CORPUS_REPORT)
     if any(job[i:i + 2] == ['--granularity', 'mulms'] for lane in lanes for job in lane

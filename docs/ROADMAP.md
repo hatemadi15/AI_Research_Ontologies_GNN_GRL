@@ -6965,6 +6965,28 @@ decisions were never re-run" changes with the result.
   - GLiNER's pre-training text may contain the test articles, so "never
     read" holds for its fine-tuning only.
 
+*Implementation details, fixed at the code review before any run (3 November).*
+- **MaterioMiner as one corpus.** It reads "above" only if 21.1 and 21.2
+  both pass, and "below" only if both are below. One granularity alone is
+  reported as that granularity's result and does not count towards "two or
+  more corpora".
+- **Training details the recipe leaves open** follow the package's
+  training defaults (`create_training_args` and its Trainer):
+  - the focal loss at α −1 and γ 0, i.e. binary cross-entropy, summed;
+  - gradient clipping at 1.0;
+  - no weight decay on biases or LayerNorm weights;
+  - AdamW's default betas and ε;
+  - warm-up steps rounded up.
+- **The training loop** is `gliner_baseline.py`'s own, because the
+  package's Trainer needs `accelerate`, which the pinned environment
+  lacks. Batches are shuffled per epoch by the CRF head's rule.
+- **The repeats.** Each session repeats smoke4 (`smokebl` in `w21s`,
+  `smokebn` in `w21a`), and each repeat is compared with `smokebh` at the
+  pull. The determinism repeat `smokebm` runs on the session's other GPU.
+- **Disclosed.** Under the pinned transformers 5.18, DeBERTa-v3's fast
+  tokenizer maps 32 of MuLMS's 14,423 distinct words (rare non-ASCII
+  characters) to `[UNK]`. MaterioMiner and SOFC-Exp have none.
+
 *Runs and budget.*
 - **First a smoke session (`w21s`).** It holds:
   - the repeat of smoke4;

@@ -250,8 +250,29 @@ def pin_models(models):
     return pinned
 
 
+# week 21: a job that starts with one of these scripts runs it with the rest of its arguments
+SCRIPTS = ('src/graph/gliner_baseline.py',)
+
+
 def job_command(job):
+    """`python src/graph/ner_baseline.py <job>`, or, for a job that starts with a script of
+    SCRIPTS (week 21: gliner_baseline.py), `python <job>`."""
+    if job and job[0] in SCRIPTS:
+        return [sys.executable, *job]
     return [sys.executable, 'src/graph/ner_baseline.py', *job]
+
+
+def pip_commands(spec, wheels):
+    """{manifest key: pip command} of the setup: the spec's pinned packages and the bundle's
+    wheels (`pip`), then, when the spec has `pip_no_deps` (week 21: gliner), those packages
+    without their dependencies, in an install of their own (`pip_no_deps`), so that the pinned
+    packages stay as they are."""
+    commands = {'pip': [sys.executable, '-m', 'pip', 'install', '-q', *spec['pip'],
+                        *map(str, wheels)]}
+    if spec.get('pip_no_deps'):
+        commands['pip_no_deps'] = [sys.executable, '-m', 'pip', 'install', '-q', '--no-deps',
+                                   *spec['pip_no_deps']]
+    return commands
 
 
 TPU_ENV = {'PJRT_DEVICE': 'TPU', 'TPU_PROCESS_BOUNDS': '1,1,1',
@@ -379,13 +400,14 @@ def main(spec):
         wheels = [find(INPUT, name) for name in spec.get('wheels', [])]
         if None in wheels:
             raise FileNotFoundError(f"wheels {spec.get('wheels')} not all under {INPUT}")
-        pip = subprocess.run([sys.executable, '-m', 'pip', 'install', '-q', *spec['pip'],
-                              *map(str, wheels)], capture_output=True, text=True,
-                             timeout=TIMEOUTS['pip'])
-        manifest.update(lambda d: d['setup'].update({'pip': pip.returncode,
-                                                     'pip_output': (pip.stdout + pip.stderr)[-12000:]}))
-        if pip.returncode:
-            raise RuntimeError('pip install failed')
+        for key, command in pip_commands(spec, wheels).items():
+            pip = subprocess.run(command, capture_output=True, text=True,
+                                 timeout=TIMEOUTS['pip'])
+            manifest.update(lambda d, k=key, p=pip: d['setup'].update({
+                k: p.returncode, f'{k}_output': (p.stdout + p.stderr)[-12000:]}))
+            if pip.returncode:
+                raise RuntimeError('pip install failed' if key == 'pip'
+                                   else 'pip install --no-deps failed')
         setup_step(started, 'pip install')
         how = unpack(INPUT, 'code.tar.gz', 'src/graph/ner_baseline.py', REPO)
         bundle = json.loads(find(INPUT, 'BUNDLE.json').read_text())

@@ -254,6 +254,28 @@ WEEK20_REPEATS = {
                 'ner_results_coarse_leave_two_papers_out_crf_bias_m0.json'),
 }
 REPEAT_IGNORED = ('runtime_sec',)
+# week 21 (ROADMAP §4, the week-21 protocol): GLiNER-medium on the CRF head's held-out units,
+# fine-tuned (gliner_ft, seeds 0 to 900: decisions 21.1 to 21.4 against the stored CRF head) and
+# zero-shot (gliner_zs_m0, one run per unit: reported). Neither name starts with crf_, so no
+# week-12-style glob reads their files; this section names them. Per setting: the results-file
+# prefix, the decision and the corpus of the protocol's readings
+WEEK21_FT = 'gliner_ft'
+WEEK21_ZS = 'gliner_zs'
+WEEK21_SETTINGS = {'fine': (f'fine_{LOPO}', '21.1', 'materiominer'),
+                   'coarse': (f'coarse_{LOPO}', '21.2', 'materiominer'),
+                   'mulms': (f'mulms_{MULMS_PROTOCOLS[0]}', '21.3', 'mulms'),
+                   'sofc': ('sofc_document_folds', '21.4', 'sofc_exp')}
+WEEK21_ZERO_SHOT = ('fine', 'mulms', 'sofc')        # coarse has no zero-shot arm
+# what a null reads, from the detectable differences at 80% power (the protocol)
+WEEK21_NULL = {'fine': 'about 4-5 points', 'coarse': 'about 4-5 points',
+               'mulms': 'about 3.5 points', 'sofc': 'about 1.5-2 points'}
+# the determinism repeat (a smoke tag, so never collected: read from w21s's pulled output,
+# --repeats): gliner_ft at seed 0 on MaterioMiner fine paper 1, against the stored run of that unit
+WEEK21_REPEATS = {'smokebm': ('ner_results_fine_leave_one_paper_out_gliner_ft_smokebm.json',
+                              'ner_results_fine_leave_one_paper_out_gliner_ft_m0.json')}
+# the fields a GLiNER run shares with the stored CRF run of its unit (the same split and test
+# sentences), and the one it shares unless its training sentences were cut (--max-train)
+WEEK21_SPLIT_FIELDS = ('test_index', 'test_gold', 'n_val', 'n_test')
 
 
 def load_files(directory, names):
@@ -1393,6 +1415,212 @@ def week20(directory, repeats_dir=None):
     return out
 
 
+def week21_names(prefix, system):
+    """The results files of a week-21 system on a setting: gliner_ft's 10 seeds, gliner_zs's one
+    file, or the CRF head's 10 seeds (crf)."""
+    if system == WEEK21_ZS:
+        return [f'ner_results_{prefix}_{WEEK21_ZS}_m0.json']
+    return [f'ner_results_{prefix}_{system}_m{off}.json' for off in WEEK5_OFFSETS]
+
+
+def week21_checks(directory):
+    """The split and environment checks of week 21 (ROADMAP §4, the week-21 protocol): every run
+    of every GLiNER file there (gliner_ft_m<N>, gliner_zs_m0) against the stored CRF run of its
+    unit (crf_m0 of the setting): the same test positions, gold tags and numbers of validation
+    and test sentences (WEEK21_SPLIT_FIELDS) and, unless its training sentences were cut, of
+    training sentences (`splits_differ` lists the others as 'file run_id: fields'); and the same
+    environment (`environment_differs`), the stored runs' (the protocol keeps it). {} without any
+    GLiNER file."""
+    out = {'n_files': 0, 'n_runs': 0, 'splits_differ': [], 'environment_differs': []}
+    for setting, (prefix, _, _) in WEEK21_SETTINGS.items():
+        crf = load_files(directory, [f'ner_results_{prefix}_crf_m0.json'])
+        stored = {r['run_id']: r for r in crf[0]['runs']} if crf else {}
+        systems = (WEEK21_FT, WEEK21_ZS) if setting in WEEK21_ZERO_SHOT else (WEEK21_FT,)
+        for name in (n for s in systems for n in week21_names(prefix, s)):
+            files = load_files(directory, [name])
+            if not files:
+                continue
+            out['n_files'] += 1
+            cut = (files[0].get('config') or {}).get('max_train')
+            for run in files[0]['runs']:
+                out['n_runs'] += 1
+                ref = stored.get(run['run_id'])
+                fields = (['run_id'] if ref is None else
+                          [k for k in WEEK21_SPLIT_FIELDS + (() if cut else ('n_train',))
+                           if run.get(k) != ref.get(k)])
+                if fields:
+                    out['splits_differ'].append(f"{name} {run['run_id']}: {', '.join(fields)}")
+                if ref is not None and run.get('environment') != ref.get('environment'):
+                    out['environment_differs'].append(f"{name} {run['run_id']}")
+    if not out['n_files']:
+        return {}
+    out.update({'splits_equal': not out['splits_differ'],
+                'environment_equal': not out['environment_differs']})
+    return out
+
+
+def week21_repeats(directory, repeats_dir):
+    """The determinism repeat of week 21 (WEEK21_REPEATS, under `repeats_dir`, w21s's pulled
+    output): its runs against the stored runs of the same units (the stored file holds every
+    unit, the repeat paper 1), in every field but runtime_sec, the environment included
+    (repeat_check); {} without repeats_dir or the files. The sessions' repeats of the CRF run of
+    smoke4 (smokebl in w21s, smokebn in w21a) are compared with smokebh at the pull, as every
+    smoke repeat before them, not here."""
+    if not repeats_dir:
+        return {}
+    if not Path(repeats_dir).is_dir():
+        raise SystemExit(f'--repeats: no directory {repeats_dir}')
+    out = {}
+    for tag, (name, stored_name) in WEEK21_REPEATS.items():
+        path = find_repeat(repeats_dir, name)
+        stored = load_files(directory, [stored_name])
+        if path is None or not stored:
+            continue
+        with open(path) as f:
+            repeat = json.load(f)
+        ids = {r['run_id'] for r in repeat['runs']}
+        same_units = {'runs': [r for r in stored[0]['runs'] if r['run_id'] in ids]}
+        out[tag] = {'repeat': name, 'stored': stored_name, **repeat_check(repeat, same_units)}
+    return out
+
+
+def week21_status(repeats, checks):
+    """How the checks bear on 21.1 to 21.4 (ROADMAP §4, the week-21 protocol): `checked` when the
+    determinism repeat is there (`unchecked` names it otherwise); `repeat_differs`,
+    `splits_differ` and `environment_differs` (a session whose environment is not the stored
+    runs' is reported with the difference and decides nothing)."""
+    unchecked = [tag for tag in WEEK21_REPEATS if tag not in repeats]
+    return {'checked': not unchecked, 'unchecked': unchecked,
+            'repeat_differs': any(not r['equal'] for r in repeats.values()),
+            'splits_differ': not checks.get('splits_equal', True),
+            'environment_differs': not checks.get('environment_equal', True)}
+
+
+def week21_units(files, crf_files):
+    """The units of the CRF head's files (in their order) when every file of `files` holds each
+    of them, else None (a family still running is not read)."""
+    units = [r['run_id'] for r in crf_files[0]['runs']]
+    if not all({r['run_id'] for r in f['runs']} >= set(units) for f in files + crf_files):
+        return None
+    return units
+
+
+def week21_decision(directory, setting, status):
+    """Decision 21.1 to 21.4 of a setting (WEEK21_SETTINGS): gliner_ft minus the stored CRF head,
+    each unit the mean of its 10 seeds (0 to 900), paired over the units: both sides' means and
+    the difference with its 95% Student-t interval per F1 average; `passes` (the micro-F1
+    interval above 0, the rule as before), `below` (below 0) and the protocol's `reading` (a null:
+    not shown within the detectable size, WEEK21_NULL); `decided` False with a `flag` when a
+    check fails (the repeat, the splits or the environment), None when the repeat is not checked
+    here; per unit both sides' micro and macro F1; each side's best epoch and validation F1; and
+    the post hoc dependence reading of the micro-F1 differences, decision_tests.dependent_t with
+    layout(n) (week21_dependence). {} without every file of both families with every unit."""
+    prefix, decision, corpus = WEEK21_SETTINGS[setting]
+    files = {WEEK21_FT: load_files(directory, week21_names(prefix, WEEK21_FT)),
+             'crf': load_files(directory, week21_names(prefix, 'crf'))}
+    if not all(files.values()):
+        return {}
+    ids = week21_units(files[WEEK21_FT], files['crf'])
+    if ids is None:
+        return {}
+    scores = {s: system_scores(f) for s, f in files.items()}
+    entry = {'decision': decision, 'corpus': corpus, 'seeds': list(WEEK5_OFFSETS),
+             'n_units': len(ids)}
+    entry.update({s: {avg: spread([scores[s][i][avg] for i in ids]) for avg in F1_AVERAGES}
+                  for s in files})
+    entry['minus_crf'] = {avg: spread([scores[WEEK21_FT][i][avg] - scores['crf'][i][avg]
+                                       for i in ids], 'mean_diff') for avg in F1_AVERAGES}
+    lo, hi = entry['minus_crf']['micro']['ci95']
+    entry.update({'passes': lo > 0, 'below': hi < 0,
+                  'reading': ('above the CRF head' if lo > 0 else 'below the CRF head' if hi < 0
+                              else f'not shown within {WEEK21_NULL[setting]}')})
+    fails = [label for key, label in (('repeat_differs', 'the determinism repeat differs'),
+                                      ('splits_differ', 'a split is not the CRF head\'s'),
+                                      ('environment_differs', 'the environment is not the stored '
+                                                              "runs'"))
+             if status[key]]
+    entry['decided'] = False if fails else (True if status['checked'] else None)
+    if fails:
+        entry['flag'] = f"{'; '.join(fails)}: {decision} is reported and decides nothing"
+    elif not status['checked']:
+        entry['flag'] = (f"the repeat {', '.join(status['unchecked'])} is not checked here "
+                         f'(ner_seed_analysis.py --repeats)')
+    entry['units'] = {i: {s: {avg: round(scores[s][i][avg], 2) for avg in ('micro', 'macro')}
+                          for s in files} for i in ids}
+    entry['validation'] = {s: validation_summary(f, ids) for s, f in files.items()}
+    entry.update(week21_dependence(setting, ids, entry['minus_crf']['micro']['per_run']))
+    return entry
+
+
+def week21_dependence(setting, ids, values):
+    """{'dependence': decision_tests.dependent_t of the per-unit differences `values` (of the
+    units `ids`) with layout(n), with above_0}: the protocol's post hoc allowance, 1/4 between
+    MaterioMiner's papers, 1/5 between SOFC-Exp's folds, layout(7) on MuLMS (its subfields in
+    MULMS_UNITS' order); {} unless the units are the whole layout."""
+    import decision_tests as dt
+    per_unit = dict(zip(ids, values))
+    order = list(dt.MULMS_UNITS) if setting == 'mulms' else list(ids)
+    if sorted(order) != sorted(ids):
+        return {}
+    e = dt.dependent_t([per_unit[u] for u in order], dt.layout(len(order)))
+    return {'dependence': dict(e, above_0=e['ci95'][0] > 0)}
+
+
+def week21_zero_shot(directory, setting):
+    """Zero-shot GLiNER against the CRF head on a setting (reported, no decision; not coarse):
+    gliner_zs_m0's one run per unit minus the CRF head's 10-seed unit mean, paired over the units:
+    both sides and the difference with its 95% Student-t interval per F1 average, per unit both
+    sides' micro and macro F1 and the threshold chosen on its validation sentences, and the post
+    hoc dependence reading (week21_dependence). {} without the files with every unit."""
+    prefix = WEEK21_SETTINGS[setting][0]
+    files = {WEEK21_ZS: load_files(directory, week21_names(prefix, WEEK21_ZS)),
+             'crf': load_files(directory, week21_names(prefix, 'crf'))}
+    if not all(files.values()):
+        return {}
+    ids = week21_units(files[WEEK21_ZS], files['crf'])
+    if ids is None:
+        return {}
+    scores = {s: system_scores(f) for s, f in files.items()}
+    entry = {'seeds': {WEEK21_ZS: [0], 'crf': list(WEEK5_OFFSETS)}, 'n_units': len(ids)}
+    entry.update({s: {avg: spread([scores[s][i][avg] for i in ids]) for avg in F1_AVERAGES}
+                  for s in files})
+    entry['minus_crf'] = {avg: spread([scores[WEEK21_ZS][i][avg] - scores['crf'][i][avg]
+                                       for i in ids], 'mean_diff') for avg in F1_AVERAGES}
+    thresholds = {r['run_id']: r.get('threshold') for r in files[WEEK21_ZS][0]['runs']}
+    entry['units'] = {i: {**{s: {avg: round(scores[s][i][avg], 2) for avg in ('micro', 'macro')}
+                             for s in files}, 'threshold': thresholds[i]} for i in ids}
+    entry.update(week21_dependence(setting, ids, entry['minus_crf']['micro']['per_run']))
+    return entry
+
+
+def week21(directory, repeats_dir=None):
+    """Week 21 (ROADMAP §4, the week-21 protocol), present once GLiNER files are there: `checks`
+    (week21_checks: the splits and the environment), `repeats` (week21_repeats, with `status`,
+    week21_status), `decisions` (week21_decision, 21.1 to 21.4, each when its files are complete)
+    with `corpora` (each corpus's decisions and their verdicts: passes, below or null), and
+    `zero_shot` (week21_zero_shot, reported); {} without any GLiNER file."""
+    checks = week21_checks(directory)
+    if not checks:
+        return {}
+    repeats = week21_repeats(directory, repeats_dir)
+    status = week21_status(repeats, checks)
+    out = {'checks': checks}
+    if repeats:
+        out['repeats'] = {**repeats, 'status': status}
+    decisions = {s: e for s in WEEK21_SETTINGS if (e := week21_decision(directory, s, status))}
+    if decisions:
+        out['decisions'] = decisions
+        corpora = {}
+        for e in decisions.values():
+            verdict = 'passes' if e['passes'] else 'below' if e['below'] else 'null'
+            corpora.setdefault(e['corpus'], {})[e['decision']] = verdict
+        out['corpora'] = corpora
+    zero = {s: e for s in WEEK21_ZERO_SHOT if (e := week21_zero_shot(directory, s))}
+    if zero:
+        out['zero_shot'] = zero
+    return out
+
+
 def topic(directory):
     """Week 14, 14.2 (the topic part of week14): V4 with the subfield's own topic corpus
     (WEEK14_WINNER) against V4 with the mixed corpus of the six other topics (MIXED_VARIANT),
@@ -1519,6 +1747,9 @@ def analyse(directory, repeats_dir=None):
     w20 = week20(directory, repeats_dir)
     if w20:                                   # absent until week 20's files exist
         out['week20'] = w20
+    w21 = week21(directory, repeats_dir)
+    if w21:                                   # absent until week 21's files exist
+        out['week21'] = w21
     out['paper_count'] = paper_count(directory)
     out['paper_diversity'] = paper_diversity(directory)
     out['errors'] = {}
@@ -1581,15 +1812,56 @@ def print_week20(w20):
                   f"{d['ci95']}, size {z['mean_diff']:+.2f} {z['ci95']}")
 
 
+def print_week21(w21):
+    """main's lines for the week21 section (week21)."""
+    checks = w21.get('checks')
+    if checks:
+        splits = 'the CRF head\'s' if checks['splits_equal'] else 'DIFFER: ' + '; '.join(
+            checks['splits_differ'][:5])
+        environment = ('the stored runs\'' if checks['environment_equal'] else 'DIFFERS: '
+                       + ', '.join(checks['environment_differs'][:5]))
+        print(f"  week 21, {checks['n_runs']} GLiNER runs in {checks['n_files']} files: splits "
+              f"{splits}; environment {environment}")
+    for tag, r in w21.get('repeats', {}).items():
+        if tag == 'status':
+            continue
+        verdict = 'identical' if r['equal'] else 'DIFFERS' + ''.join(
+            f'; {label} {", ".join(r[key])}' for key, label in (('differ', 'in'),
+                                                                 ('missing', 'runs missing'))
+            if r[key])
+        print(f"  week 21, the repeat {tag} against {r['stored']}: {verdict} ({r['n_runs']} "
+              f"runs; environment {'identical' if r['environment_equal'] else 'DIFFERS'})")
+    for setting, e in w21.get('decisions', {}).items():
+        d = e['minus_crf']['micro']
+        verdict = 'passes' if e['passes'] else e['reading']
+        if e['decided'] is False or e['decided'] is None:
+            verdict += f"; {e['flag']}"
+        print(f"  week 21, {e['decision']} ({setting}): GLiNER fine-tuned "
+              f"{e[WEEK21_FT]['micro']['mean']:.2f} minus the CRF head "
+              f"{e['crf']['micro']['mean']:.2f} over {e['n_units']} units: "
+              f"{d['mean_diff']:+.2f} {d['ci95']} ({verdict})")
+        if 'dependence' in e:
+            dep = e['dependence']
+            print(f"    post hoc dependence: {dep['mean_diff']:+.2f} {dep['ci95']}, SE "
+                  f"x{dep['se_ratio']:.3f}{'' if dep['above_0'] else ', covers 0'}")
+    for setting, e in w21.get('zero_shot', {}).items():
+        d = e['minus_crf']['micro']
+        print(f"  week 21, zero-shot ({setting}, reported): GLiNER "
+              f"{e[WEEK21_ZS]['micro']['mean']:.2f} minus the CRF head "
+              f"{e['crf']['micro']['mean']:.2f} over {e['n_units']} units: "
+              f"{d['mean_diff']:+.2f} {d['ci95']}")
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description='Exploratory analyses of the 10-seed runs '
                                                  '(no training, no decision)')
     parser.add_argument('--results', default=str(RESULTS_DIR), metavar='DIR')
     parser.add_argument('--out', default=None, metavar='PATH')
     parser.add_argument('--repeats', default=None, metavar='DIR',
-                        help="week 20: where the repeats smokebi, smokebj and smokebk are "
-                             "(never collected into results/gpu); default results/gpu_repeats, "
-                             "the copies of them versioned after w20a's pull, when it exists")
+                        help="week 20: where the repeats smokebi, smokebj and smokebk are, and "
+                             "week 21: smokebm (never collected into results/gpu); default "
+                             "results/gpu_repeats, the copies of them versioned after the pulls, "
+                             "when it exists")
     args = parser.parse_args(argv)
     repeats = args.repeats or (str(REPEATS_DIR) if REPEATS_DIR.is_dir() else None)
     result = analyse(args.results, repeats)
@@ -1751,6 +2023,7 @@ def main(argv=None):
         print(f"  week 19, {e.get('decision', key)}: {e['system']} minus {e['reference']} over "
               f"{e['n_units']} units: {d['mean_diff']:+.2f} {d['ci95']}{verdict}")
     print_week20(result.get('week20', {}))
+    print_week21(result.get('week21', {}))
     out = args.out or os.path.join(args.results, OUT_NAME)
     with open(out, 'w') as f:
         json.dump(result, f, indent=2)

@@ -2510,7 +2510,9 @@ def compare_all(directory):
     comparisons = {}
     for fn in sorted(os.listdir(directory)):
         parsed = parse_result_name(fn)
-        if parsed is None or parsed[2] == 'baseline' or 'smoke' in parsed[2]:
+        # GLiNER's files (gliner_baseline.py, week 21) are no variant of this script's
+        if (parsed is None or parsed[2] == 'baseline' or 'smoke' in parsed[2]
+                or parsed[2].startswith('gliner_')):
             continue
         granularity, protocol, variant = parsed
         reference = reference_variant(variant)

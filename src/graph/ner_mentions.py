@@ -520,9 +520,62 @@ def sentence_pool(directory):
             'minus_crf': paired(members[SPOOL], members[REFERENCE])}
 
 
+# week 21 (ROADMAP §4, the week-21 protocol): GLiNER on the CRF head's held-out units, fine-tuned
+# (gliner_ft, 10 seeds) and zero-shot (gliner_zs, one run per unit); the settings, as the files
+# name them
+GLINER_SETTINGS = {'fine': ('fine', LOPO), 'coarse': ('coarse', LOPO),
+                   'mulms': ('mulms', SUBFIELDS), 'sofc': ('sofc', DOCUMENT_FOLDS)}
+GLINER_FT, GLINER_ZS = 'gliner_ft', 'gliner_zs'
+
+
+def gliner(directory):
+    """Week 21's seen and unseen test names (reported, no decision; output key `week21`, absent
+    without the files): per setting, GLiNER fine-tuned (its 10 seeds) and zero-shot (its one run
+    per unit), each where every file holds every unit of the CRF head's, and the CRF head (its 10
+    seeds), the test entities of each run split by week 10's kinds (kind_of) against the unit's
+    CRF training sentences (run_split rebuilds them from the file, the CRF head's split). Per
+    system the scores of every kind over all its runs (summary: the recall on the seen and the
+    unseen names, and their shares); per unit each system's recall on the seen and the unseen
+    names; and each GLiNER system minus the CRF head paired by unit, each side the mean over its
+    runs (paired; the zero-shot run stands for each of the CRF head's seeds)."""
+    out = {}
+    for setting, (granularity, protocol) in GLINER_SETTINGS.items():
+        crf = family_files(directory, granularity, protocol, REFERENCE)
+        if not crf:
+            continue
+        units = {r['run_id'] for r in crf[0]['runs']}
+        zero_shot = f'ner_results_{granularity}_{protocol}_{GLINER_ZS}_m0.json'
+        found = {GLINER_FT: family_files(directory, granularity, protocol, GLINER_FT),
+                 GLINER_ZS: load(directory, [zero_shot])}
+        found = {s: f for s, f in found.items()
+                 if f and all({r['run_id'] for r in x['runs']} >= units for x in f)}
+        if not found:
+            continue
+        data = corpus(granularity)
+        members = {REFERENCE: family_counts(crf, data, granularity),
+                   **{s: family_counts(f, data, granularity) for s, f in found.items()}}
+        unit_ids = [r['run_id'] for r in crf[0]['runs']]
+        per_unit = {}
+        for u in unit_ids:
+            for s, m in members.items():
+                sc = scores(pooled([{u: runs[u]} for runs in m]))
+                per_unit.setdefault(u, {})[s] = {'recall_seen': sc['seen']['recall'],
+                                                 'recall_unseen': sc['unseen']['recall']}
+        n_ref = len(members[REFERENCE])
+        out[setting] = {
+            'seeds': {s: [0] if s == GLINER_ZS else list(WEEK5_OFFSETS) for s in members},
+            'reference': REFERENCE,
+            'systems': {s: summary(m) for s, m in members.items()},
+            'units': per_unit,
+            'minus_crf': {s: paired(m if len(m) == n_ref else m * n_ref, members[REFERENCE])
+                          for s, m in members.items() if s != REFERENCE}}
+    return out
+
+
 def analyse(directory, corpus_path=CORPUS):
-    """The analyses of every granularity and protocol that has the files (module docstring), and
-    week 20a's sentence pool (`spool`, sentence_pool) once its files exist."""
+    """The analyses of every granularity and protocol that has the files (module docstring),
+    week 20a's sentence pool (`spool`, sentence_pool) and week 21's GLiNER runs (`week21`,
+    gliner), each once its files exist."""
     out = {'kinds': {'seen': 'its words are an entity of the same type in the training '
                              'sentences',
                      'seen_other': 'they are an entity there, only of other types',
@@ -574,6 +627,9 @@ def analyse(directory, corpus_path=CORPUS):
     spool = sentence_pool(directory)
     if spool:                         # absent until week 20a's files exist
         out['spool'] = spool
+    week21 = gliner(directory)
+    if week21:                        # absent until week 21's files exist
+        out['week21'] = week21
     return out
 
 
@@ -620,6 +676,15 @@ def main(argv=None):
         d = spool['minus_crf']
         print(f"  week 20a, {SPOOL} minus {REFERENCE}, recall: " + ', '.join(
             f"{k} {d[k]['recall']['mean_diff']:+.2f} {d[k]['recall']['ci95']}" for k in COMPARED))
+    for setting, entry in result.get('week21', {}).items():
+        for system, s in entry['systems'].items():
+            print(f"  week 21, {setting}, {system}: unseen {100 * s['unseen']['share']:.1f}% of "
+                  f"{s['all']['n_gold']} entities; recall seen {s['seen']['recall']:.1f}, unseen "
+                  f"{s['unseen']['recall']:.1f}")
+        for system, d in entry['minus_crf'].items():
+            print(f"  week 21, {setting}, {system} minus {REFERENCE}, recall: " + ', '.join(
+                f"{k} {d[k]['recall']['mean_diff']:+.2f} {d[k]['recall']['ci95']}"
+                for k in COMPARED))
     out = args.out or os.path.join(args.results, OUT_NAME)
     with open(out, 'w') as f:
         json.dump(result, f, indent=2)
