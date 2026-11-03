@@ -24,44 +24,33 @@ rest to an appendix; a journal paper keeps all of it.*
 
 ## Abstract
 
-Materials-science named-entity recognition (NER) corpora are built from a few documents and scored
-on random sentence splits of them, so a published score says how well a
-model reads more sentences of the papers it was trained on, not how it
-reads a new paper. We measure the difference on three corpora under
-protocols committed before their results, with 7 or 10 model seeds per
-unit (fewer in the early weeks) and paired confidence intervals over
-held-out documents. On MaterioMiner, a model that scores 80 F1 on random
-splits scores 49 on a held-out paper (fine-grained; 79 against 61
-coarse-grained); on MuLMS a held-out
-materials subfield costs 17 points; on SOFC-Exp, whose 45 articles share
-one topic and one annotation scheme, held-out articles cost 3.5. The gap
-is partly names: 81% of a new MaterioMiner paper's entities and 88% of a
-new MuLMS subfield's are names no training sentence annotates, and the
-model finds about a third of them, against 46% on SOFC-Exp, where it finds
-four in five; the held-out mix of names accounts for 40 to 58% of
-MaterioMiner's recall gap and a third of MuLMS's. Coarse-grained, the
-model finds almost every entity of a new paper and loses on boundaries
-and types, in part where the papers' annotators set them differently. We then test the additions a practitioner would reach
-for: 111 pre-registered decisions over eighteen weeks, of which 24 pass.
-The conditional random field (CRF) output layer helps on MaterioMiner and SOFC-Exp (decided on
-SOFC-Exp only; MuLMS has no run without it), and seed votes add 0.8 to
-2.5 points wherever measured (reported); multi-task training over two
-type levels holds on MaterioMiner and fails on SOFC-Exp's two levels;
-mention replacement holds on MaterioMiner, passes on MuLMS only by its
-votes and is not shown to gain on SOFC-Exp; label semantics,
-self-training, document context, recall calibration, a larger encoder and
-coarse-to-fine completion fail. A names method built on mention
-replacement passes a pooled decision on two corpora under a criterion
-adopted mid-study, but three-copy mention replacement alone gives 2.35 of
-its 3.58 points (post hoc), and the names are not shown to add to
-six-copy mention replacement (paper A). Three lessons are methodological.
-A 3-seed design passes a real 1.8-point gain in 41% of seed triples, and
-the four comparisons of weeks 3 and 4 that passed with 3 seeds all failed
-with 10. A third training paper adds 7 to 9 points, as much as the best
-method. And a new document is worth more than as many sentences of known
-ones: at equal sentence counts the third paper still adds 1.2 and 3.6
-points (3 seeds), though most of its 7 to 9 points is its sentences.
-The predictions of every GPU run behind a decision are released.
+Materials-science named-entity recognition (NER) corpora are built from a
+few documents and scored on random sentence splits of them, so a published
+score says how well a model reads more sentences of the papers it was
+trained on, not a new paper. We measure the difference on three corpora
+with fine-tuned encoder taggers, under protocols committed before their
+results, with 7 or 10 model seeds per unit and paired intervals over
+held-out documents. A held-out paper costs 28 to 31 F1 points
+fine-grained on MaterioMiner (17 to 20 coarse-grained), and a held-out
+MuLMS subfield 17, though its models also train on fewer articles; on
+SOFC-Exp, whose articles share one topic, the 3.5 points are not
+established. The loss is mostly names: 81% of a new MaterioMiner paper's
+entities and 88% of a new MuLMS subfield's are names no training sentence
+annotates, and the model finds about a third of them. Of 111
+pre-registered decisions on the additions a practitioner would reach for,
+24 pass, where about 3 would by chance. Mention replacement passes on
+MaterioMiner's held-out papers, multi-task training on its random splits,
+and seed votes add 0.8 to 2.5 points wherever measured. Label semantics,
+self-training, document context and recall calibration are not shown to
+help; their decisions could detect gains of 0.4 to 6 points.
+Allowing, post hoc, for the training documents the units share, 5 of the
+15 passes over units with 7 or 10 seeds keep their margin. Two findings
+concern method. Four comparisons that passed with 3 seeds failed when
+re-run with 10, three of them already on another machine at the same
+seeds. And SOFC-Exp's test articles are tokenized unlike its training
+articles, which costs the CRF head 0.9 F1 points on the official split
+and plain MatSciBERT 1.9. The
+predictions of every GPU run behind a decision are released.
 
 ## 1 Introduction
 
@@ -103,9 +92,12 @@ test predictions released (weeks 1 to 3 and week 4's votes ran on CPUs);
 two probes without decisions trained on CPUs (Section 7.6).
 
 The results are these. The published numbers reproduce (Section 5.1). A
-held-out document costs 28 to 31 F1 points fine-grained on MaterioMiner,
-17 on MuLMS and 3.5 on SOFC-Exp, and the size of the gap follows the
-share of test names that training has not seen (Section 5.2). Most of the
+held-out document costs 28 to 31 F1 points fine-grained on MaterioMiner
+and 17 on MuLMS, whose held-out models also train on fewer articles; on
+SOFC-Exp the 3.5 points are not established (Welch interval [−0.90,
++7.86]). The gap is largest where held-out documents add the most names
+that training has not seen, an ordering over four settings rather than a
+predictor (Section 5.2). Most of the
 fine-grained gap is unseen names the model misses outright; most of the
 coarse-grained gap is boundaries and types, in part where the papers'
 annotators set them differently (Sections 5.3 to 5.5), and the missed entities are not
@@ -320,7 +312,8 @@ The gap depends on how much the documents differ. SOFC-Exp's 45 articles
 share one topic and one annotation scheme. There the CRF head scores
 86.27 [84.82, 87.71] over 5 random sentence splits and 82.79 [78.33,
 87.24] over 5 folds of 9 held-out articles (10 seeds each; Figure 1, third
-panel): a gap of 3.48 points, against 28–31 on MaterioMiner. A held-out
+panel): a gap of 3.48 points, against 28–31 on MaterioMiner, but not
+established (Welch 95% interval [−0.90, +7.86]; post hoc). A held-out
 SOFC-Exp article brings fewer new names (46% of its test names are
 unseen, 30% on random splits; 81% on a held-out MaterioMiner paper,
 fine-grained), and the CRF head finds 80% of them. About two of the three
@@ -339,7 +332,8 @@ the change of topic with fewer training documents at equal size (Section
 3; week 20 separates them). The CRF head scores 65.72 [65.25,
 66.19] over 5 random splits of that size and 48.66 [40.91, 56.40] over
 the 7 held-out subfields (10 seeds each; Figure 1, fourth panel): a gap
-of 17.06 points. Per subfield it scores 32.49 (semi) to 56.82 (steel).
+of 17.06 points (Welch 95% interval [+9.31, +24.81]; post hoc). Per
+subfield it scores 32.49 (semi) to 56.82 (steel).
 88% of a held-out subfield's test names are unseen, 57% on random
 splits.
 
@@ -908,6 +902,31 @@ mixed-backbone vote 0 of 2, in-domain pre-training 0 of 2 and a third
 paper at equal size 2 of 2; with one run per split, week 2's multi-task
 training, domain-adaptive pre-training and seed vote pass none of 6.
 
+Three post hoc readings qualify the 24 passes (review round 1;
+`paper_b_checks.py`); none changes a verdict.
+- **Shared training documents.** Paper A's model of the units'
+  dependence (Section 10: a correlation of 1/4 between MaterioMiner's
+  papers, 1/5 between SOFC-Exp's folds, 1/4 between MuLMS subfields whose
+  pools share an article) and, on random splits, the corrected resampled
+  test (nadeau2003inference; 96 test and 309 training sentences) widen
+  the intervals by a factor of 1.2 to 1.6. Of the 15 passes over units
+  with 7 or 10 seeds, 5 keep their margin: mention replacement
+  fine-grained on MaterioMiner, paper A's D4, D5 and D11, and the
+  document-level rule on MuLMS (13.1a). Ten lose it, among them every
+  multi-task pass and mention replacement's votes on MuLMS. The three
+  seed-paired SOFC-Exp passes on one split take no such allowance.
+- **Multiplicity.** About 2.8 of the 24 passes are expected by chance, a
+  false-discovery share near 12%. Under Benjamini–Hochberg control of the
+  111 one-sided P values (benjamini1995controlling), 3 pass at a 5%
+  false-discovery rate (SOFC-Exp's two tokenization measurements and week
+  3's CPU label-semantics pass, which did not replicate) and 12 at 10%.
+  Within each addition's family (Holm, family-wise 2.5%), 6 survive;
+  none is a method for unseen documents with 7 or 10 seeds.
+- **Power.** The single-model decisions on held-out papers could detect
+  0.4 to 3.8 points at 80% power (multi-task self-training's
+  fine-grained one 8.1), so each failure reads "not shown within" that
+  size, not "no effect".
+
 Two findings of the count stand on their own. First, wherever a pass on
 held-out documents was split by kind of name, its gain shows on unseen
 names (Section 5.4; paper A), and on seen names it clears 0 only where
@@ -959,8 +978,10 @@ their increment over mention replacement is not established.
 1. **Hold out documents, and say which.** A random sentence split scores
    the reading of known papers; a held-out paper or subfield scores what
    an extractor will meet. Report both, and the share of test names the
-   training data does not contain, which predicts the size of the gap
-   (81% and 88% against 46%).
+   training data does not contain: the gap is largest where held-out
+   documents add the most unseen names (+47, +39, +31 and +16 points over
+   random splits, against gaps of 31, 17.5, 17 and 3.5), an ordering over
+   four settings rather than a predictor.
 2. **Count unseen names and match criteria separately.** Fine-grained,
    the gap is names missed outright; coarse-grained, it is boundaries and
    types, in part where the papers' annotators set them differently, and the model finds

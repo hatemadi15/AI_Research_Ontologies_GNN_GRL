@@ -62,3 +62,24 @@ Labels below: R = referee, A = audit, C = consistency.
     to fine-tuned taggers, and the related work is extended.
   - R13's adjudication of 200 errors. Meanwhile the wording is softened.
   - R16's page plan, which depends on the venue (TACL or ARR).
+
+**The post hoc reanalysis** (`paper_b_checks.py`, `62f9641`). Nothing
+decides anything here. The 111 decisions and 24 passes reproduce from the
+files, and every stored interval reproduces within 0.02.
+- **Shared training documents.** Of the 15 passes over units with 7 or 10
+  seeds, 5 keep their margin: MR fine-grained, D4, D5, D11 and 13.1a.
+  Ten lose it. The 3 SOFC-Exp passes, seed-paired on one split, get no
+  allowance.
+- **Multiplicity.** Benjamini–Hochberg passes 3 at FDR 5% and 12 at 10%;
+  Holm within each family keeps 6.
+- **Hardware.** 186 matched CPU–GPU runs differ by a median 1.43 F1.
+- **Gaps** with Welch intervals: SOFC-Exp +3.48 [−0.90, +7.86]; MuLMS
+  +17.06 [+9.31, +24.81].
+- **Power.** The single-model decisions on held-out papers detect 0.4 to
+  3.8 points (multi-task self-training's fine-grained one 8.1).
+- **Unseen minus seen** cannot be tested: the stored summaries hold no
+  per-unit values.
+
+These go into §7.7, §1, §5.2, lesson 1 and the abstract. The abstract is
+rewritten at 307 words, from about 450. The page-plan cut waits on the
+venue.
