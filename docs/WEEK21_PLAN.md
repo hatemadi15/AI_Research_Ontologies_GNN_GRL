@@ -1,7 +1,10 @@
 # Week 21 plan (3 November 2026): a generalist NER baseline, and paper B for TACL
 
-*Status: draft for an independent check (a Fable-model referee) before any
-run. Nothing here has been run.*
+*Status: checked before any run by an independent referee (a Fable-model
+referee: "approve with required changes"). The binding protocol, with its
+required changes (gliner_medium for every arm, the fixed recipe and labels, the
+environment kept, the detectable sizes, the readings and the checks), is
+`docs/ROADMAP.md` §4's week-21 protocol. This draft keeps the first reasons.*
 
 ## 1. Why
 

@@ -6827,3 +6827,163 @@ decisions were never re-run" changes with the result.
   other run can write `crf_spool`'s files.
 - **The push.** Batch `w20a` (42 jobs, 21 per lane) was pushed on 3
   November at 08:38 UTC, from the bundle of `393b482` (kernel version 20).
+
+### Week 21 protocol: a free generalist NER baseline (GLiNER), fixed before any run (3 November, 10:00 UTC)
+
+*Why, and when.*
+- Paper B's round-1 referee (R11) asked for an LLM or generalist-NER
+  baseline. The author chose a free one (open weights, Kaggle's free
+  GPUs, no API) and TACL as the venue.
+- The plan (`docs/WEEK21_PLAN.md`) was checked before any run by an
+  independent referee (a Fable-model referee: "approve with required
+  changes"). Its required items are applied here.
+- Registered after every held-out result of the CRF head was known.
+  - The CRF side is stored, with unit means: MaterioMiner fine 51.00,
+    43.74, 48.73 and 42.36; coarse 60.27, 62.54, 55.58 and 56.02; MuLMS
+    32.49–56.82; SOFC-Exp 79.77–88.76.
+  - No GLiNER result is known.
+
+*Model and environment.*
+- **Model.** `urchade/gliner_medium-v2.1` at revision `40ec4193`
+  (Apache-2.0) for every arm.
+  - Its backbone is `microsoft/deberta-v3-base` at `8ccc9b6f` (MIT), a
+    base-size encoder like MatSciBERT. That keeps the budget on a T4 and
+    narrows the size confound.
+  - The large model would cost about 25–30 GPU hours, and its backbone
+    did not fit a T4 on SOFC-Exp in week 6.
+- **Packages.** `gliner==0.2.30` (Apache-2.0; it requires transformers
+  <5.23, >=4.51.3), installed with `--no-deps` beside the pinned
+  transformers 5.18.0, with sentencepiece 0.2.2. The environment
+  therefore stays the stored runs' one.
+  - The session's repeat of smoke4 must be identical to `smokebh`.
+  - Otherwise the session's results are reported with the difference and
+    decide nothing.
+- **Pinning.** Both models are pinned offline (`pin_models`). The config
+  records the gliner version and the revisions.
+- **Families.** `gliner_ft` (fine-tuned) and `gliner_zs` (zero-shot),
+  results in `results/gpu/` under the stored schema. Neither name starts
+  with `crf_`, and both are excluded from every week-12-style glob.
+
+*Data, tokens and scoring.*
+- **Splits.** Exactly the CRF head's (`ner_baseline.make_folds`, reused).
+  Every unit's `test_index` and training and validation positions must
+  equal the stored runs'.
+- **Sizes.** MaterioMiner trains on 234–370 sentences and validates on
+  41–65. SOFC-Exp folds train on 534–628 and validate on 94–111. MuLMS
+  trains on 340 and validates on 60.
+- **Tokens.** GLiNER gets the corpus words as its tokens (the package's
+  token-level path) and returns word spans. Decoding is flat
+  (`flat_ner=True`, `multi_label=False`, `max_width` 12, `max_len` 384).
+  Spans become IOB2 tags on the same words, scored by seqeval as every
+  system is.
+- **Checks before any number is read:**
+  - on gold spans, the conversion reproduces the gold tags;
+  - the splits are equal to the stored runs';
+  - `gliner_ft` at seed 0 on MaterioMiner fine-grained, paper 1, run
+    twice, is identical in every field but `runtime_sec`.
+
+*Labels, fixed now; each maps back to its code one to one.*
+- **MaterioMiner fine-grained.** The 27 class names, camel case split
+  and lowercased, for example "stress amplitude". The dataset's
+  misspelled "CrackInitation" becomes "crack initiation".
+- **MaterioMiner coarse-grained.** The codes lowercased. The codes have
+  no documented expansion, so this level has no zero-shot arm.
+- **SOFC-Exp.** device, experiment, material, value.
+- **MuLMS.** The MuLMS paper's names:
+  | Code | Label |
+  |---|---|
+  | CITE | citation |
+  | DEV | device |
+  | FORM | form |
+  | INSTRUMENT | instrument |
+  | MAT | material |
+  | MEASUREMENT | measurement |
+  | NUM | number |
+  | PROPERTY | property |
+  | RANGE | range |
+  | SAMPLE | sample |
+  | TECHNIQUE | technique |
+  | UNIT | unit |
+  | VALUE | value |
+- **Order.** Labels are given in the corpus's label order, and every
+  example carries the full label set, as the CRF head's closed set does.
+
+*Arms.*
+- **GZ (`gliner_zs`).** One deterministic run per unit, on MaterioMiner
+  fine (4 papers), MuLMS (7 subfields) and SOFC-Exp (5 folds).
+  - The threshold is chosen from 0.3, 0.4, 0.5 and 0.6 by validation
+    micro F1, ties going to the higher threshold. One decode at 0.3 is
+    filtered by score.
+- **GF (`gliner_ft`).** Fine-tuned on the CRF head's training sentences,
+  in float32, under `cuda_determinism()`:
+  - AdamW: encoder learning rate 1e-5, others 5e-5, weight decay 0.01,
+    linear warm-up over 10% of the steps;
+  - batch 8 (gradient accumulation if memory requires);
+  - at most 20 epochs, patience 3, keeping the epoch of best validation
+    micro F1 at threshold 0.5, which is also the test threshold;
+  - seed = split seed + offset, as the CRF head's;
+  - seed offsets 0–900 on all four settings, all ten seeds on MuLMS
+    since no screen ran.
+
+*Decisions 21.1–21.4 (the rule as before).*
+- **The measure.** GF minus the CRF head, each unit the mean of its 10
+  seeds, paired over the units: MaterioMiner fine (21.1), coarse (21.2),
+  MuLMS (21.3) and SOFC-Exp's folds (21.4).
+- **They enter paper B's count whatever the outcome.** About 0.1 false
+  passes are expected.
+- **Detectable differences at 80% power,** from two proxies:
+  - a method increment (`crf_mr` − `crf`): 1.65 fine, 1.60 coarse, 3.30
+    on MuLMS, 1.17 on SOFC-Exp;
+  - a different encoder (week 6's DeBERTa screen): 3.8 fine and 4.8
+    coarse.
+  - A null therefore reads "not shown within about 4–5 points"
+    (MaterioMiner), 3.5 (MuLMS) and 1.5–2 (SOFC-Exp).
+- **Reported, no decision:**
+  - GZ against the CRF head, as numbers with intervals;
+  - GZ's and GF's recall on unseen and seen names (week 10's split,
+    against each unit's CRF training sentences);
+  - the post hoc dependence allowance, fixed now: 1/4 between the
+    papers, 1/5 between the folds, and `layout(7)` on MuLMS.
+- **What each outcome means for paper B:**
+  - A corpus is MaterioMiner (fine and coarse together), MuLMS or
+    SOFC-Exp.
+  - GF above the CRF head on two or more corpora: a generalist-pretrained
+    tagger of base size scores higher on held-out documents than
+    MatSciBERT's CRF head.
+  - On one corpus: that corpus only.
+  - Below the CRF head: it scores lower.
+  - Otherwise: not shown within the sizes above.
+  - Every reading carries the confound: the generalist NER pre-training
+    and the general-domain DeBERTa encoder cannot be separated. Week 6's
+    3-seed screen of DeBERTa-v3-large with the CRF head lost −4.4 and
+    −8.0 on these units.
+  - No GF random-split runs are made, so a pass reads "scores higher on
+    held-out units", not "transfers better".
+- **Disclosed:**
+  - `max_width` 12 can miss 0 of the gold test entities (fine), 1 of
+    2,194 (coarse), 4 of 4,590 (SOFC-Exp) and 78 of 31,952 (MuLMS);
+  - GLiNER's pre-training text may contain the test articles, so "never
+    read" holds for its fine-tuning only.
+
+*Runs and budget.*
+- **First a smoke session (`w21s`).** It holds:
+  - the repeat of smoke4;
+  - GZ on one unit;
+  - one GF run per corpus, timed;
+  - the determinism repeat.
+- **Then `w21a`** with every arm, planned over two sessions if the timed
+  runs project more than 9 hours. The results files resume, and the model
+  and recipe stay as fixed here.
+- **Budget.** Estimated 6–13 GPU hours, within this week's quota or after
+  the 7 November reset.
+- **Analysis.** A week-21 section of `ner_seed_analysis.py`, dry-run on
+  fake families before any result. Both stored analyses must reproduce
+  unchanged.
+
+*TACL (paper B), for later.* The paper goes to 10 pages, references
+uncounted, with appendices after them within TACL's caps (as last read: up
+to 5 pages and 3 pages for two kinds of content). It is anonymized under
+ACL's policy, keeping the commit history: authorship is rewritten by
+mailmap, and the push log's account, the Kaggle names and
+`docs/submission/` are scrubbed, with a hash map kept for the camera-ready.
+It keeps a word budget per section: about 6,000 words with the figures.
