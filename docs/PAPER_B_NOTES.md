@@ -83,3 +83,23 @@ files, and every stored interval reproduces within 0.02.
 These go into §7.7, §1, §5.2, lesson 1 and the abstract. The abstract is
 rewritten at 307 words, from about 450. The page-plan cut waits on the
 venue.
+
+## The TACL version (3 November 2026)
+
+- **`docs/PAPER_B_TACL.md`.** The anonymized TACL submission, condensed
+  from this draft.
+  - The main text is about 6,280 words with 4 figures and 4 tables.
+  - Appendix A (replication material) is about 2,930 words; Appendix B
+    (tables only) has 73 rows.
+- **This draft stays the full record.**
+- **Placeholders.** Every number that stage 21 sets is a ⟦GLINER⟧ or
+  ⟦COUNT⟧ placeholder, 33 in all, until `w21a` is decided.
+- **Changes from this draft:**
+  - the abstract drops the post hoc margin count, the power range and
+    the tokenization finding, which stay in the body;
+  - "fine-tuned encoder taggers only" becomes a limitation naming
+    DeBERTa's screen and GLiNER;
+  - an anonymized statement of AI assistance is added, as in paper A.
+- **Every main-text number** occurs in this draft, checked by a script,
+  apart from stage 21's numbers, which come from its protocol.
+- **Review round 2** comes after the placeholders are filled.
