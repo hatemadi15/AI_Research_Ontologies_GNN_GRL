@@ -172,21 +172,21 @@ HELD_OUT_CORPORA = {'mulms': 'MuLMS, held-out subfields',
                     'sofc_folds': 'SOFC-Exp, article folds'}
 
 
-def held_out_rows(analysis, week12=None):
-    """The rows of Table 6 from the week-5 analyses file, in week order: every pre-registered
+def held_out_entries(analysis, week12=None):
+    """The entries of Table 6 from the week-5 analyses file, in week order: every pre-registered
     decision on held-out documents that the seed analysis holds (MuLMS's decisions of weeks
     10 and 11, the week-12 winner's, the consistency rule's of weeks 7 and 13, 13.3's on
     SOFC-Exp's folds, and the pooled decision 13.2), and from the week-12 comparisons
     (`week12`, ner_week12_comparisons.json) the winner's MaterioMiner analogue against the CRF
     head on the held-out papers, which 13.2 pools; week 14's decisions 14.1 (the names
     against matched copies, pooled) and 14.2 (the topic's own corpus against the mixed one);
-    with its units, difference and verdict; reported comparisons are left out
-    (MaterioMiner's other decisions are in Table 2)."""
+    each (week, corpus, comparison, decision, units, the stored difference entry with its
+    per-unit values, passes); reported comparisons are left out (MaterioMiner's other
+    decisions are in Table 2)."""
     rows = []
 
     def row(week, corpus, comparison, decision, units, diff, passes):
-        rows.append([week, corpus, comparison, decision, units,
-                     interval(diff, 'mean_diff', signed=True), 'passes' if passes else 'no'])
+        rows.append((week, corpus, comparison, decision, units, diff, passes))
 
     mulms = analysis.get('mulms') or {}
     held = mulms.get('leave_one_subfield_out')
@@ -253,6 +253,15 @@ def held_out_rows(analysis, week12=None):
             mixed['n_units'], mixed['minus_crf_mrm_mixed6']['micro'], mixed['passes'])
     rows.sort(key=lambda r: r[0])
     return rows
+
+
+def held_out_rows(analysis, week12=None):
+    """The rows of Table 6: held_out_entries with the difference as 'mean [95% CI]' and the
+    verdict as 'passes' or 'no'."""
+    return [[week, corpus, comparison, decision, units, interval(diff, 'mean_diff', signed=True),
+             'passes' if passes else 'no']
+            for week, corpus, comparison, decision, units, diff, passes
+            in held_out_entries(analysis, week12)]
 
 
 def table6(rows):

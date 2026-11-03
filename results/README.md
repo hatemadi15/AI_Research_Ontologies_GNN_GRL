@@ -581,3 +581,24 @@ pooled rates from its counts. Run record: `w19a` from the bundle of
 the stored ones on every unit. Outcome: the gate fails (G 16.78%, V 24.86%,
 M 18.80% coverage; wrong-type 4.65% against 10.14%), so Phase 1 (`w19b`) was
 not run.
+
+Paper B's post hoc checks (review round 1, 3 November; none decides
+anything): `gpu/paper_b_checks.json` (`paper_b_checks.py`) enumerates the
+111 pre-registered decisions with their per-unit differences. It checks
+that each stored interval reproduces, and that the totals match paper B's
+§7.7 by design and by addition. Per decision it gives:
+- the one-sided P;
+- the 80%-power detectable difference;
+- the interval allowing for units that share training documents (paper
+  A's model, `decision_tests.dependent_t`), or the corrected resampled
+  test of Nadeau and Bengio on random splits.
+
+Over the decisions it gives Benjamini–Hochberg q-values and Holm within
+each addition's family. It also gives:
+- week 3 and 4's four 3-seed passes recomputed on the other machine at the
+  same seeds;
+- matched CPU–GPU runs;
+- each corpus's gap with a Welch interval.
+
+It notes that unseen-minus-seen gains cannot be computed from the stored
+summaries.
