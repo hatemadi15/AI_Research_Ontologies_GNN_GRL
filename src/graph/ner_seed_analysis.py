@@ -138,6 +138,7 @@ A family or vote family is used only if all its files exist. Usage:
 import argparse
 import itertools
 import json
+import math
 import os
 import statistics
 from pathlib import Path
@@ -235,6 +236,24 @@ ABLATION_VARIANTS = ('crf_mrm_topic10k6', 'crf_mrm_topic20k6', 'crf_mrm_topiclow
                      'crf_mrm_topictwo6', 'crf_mrm_topiccap6')
 WEEK14_VARIANTS = (MIXED_VARIANT,) + ABLATION_VARIANTS       # not week-12 variants
 SETTING_KEYS = ('n_sampled', 'marginal_threshold', 'teachers_agree', 'names_share')
+# week 20 (ROADMAP §4, the week-20 protocol): 20a, the CRF head on MuLMS's held-out subfields with
+# the pool drawn by sentence (--pool-by-sentence) against the stored article pool (crf, decision
+# 20.1); 20b, week 8's diversity decisions on the seeds 300 to 900 (20.2 fine, 20.3 coarse)
+WEEK20_SPOOL = 'crf_spool'
+WEEK20_VARIANTS = (WEEK20_SPOOL,)       # not a week-12 variant
+WEEK20_DECISIONS = {'fine': '20.2', 'coarse': '20.3'}
+# the repeats of the stored runs that the readings rest on (smoke tags, so never collected: read
+# from w20a's pulled output, --repeats), each with the stored file it must equal in every run
+# field but runtime_sec, and in the environment
+WEEK20_REPEATS = {
+    'smokebi': ('ner_results_mulms_leave_one_subfield_out_crf_smokebi.json',
+                'ner_results_mulms_leave_one_subfield_out_crf_m0.json'),
+    'smokebj': ('ner_results_coarse_leave_one_paper_out_crf_p3n2_smokebj.json',
+                'ner_results_coarse_leave_one_paper_out_crf_p3n2_m0.json'),
+    'smokebk': ('ner_results_coarse_leave_two_papers_out_crf_bias_smokebk.json',
+                'ner_results_coarse_leave_two_papers_out_crf_bias_m0.json'),
+}
+REPEAT_IGNORED = ('runtime_sec',)
 
 
 def load_files(directory, names):
@@ -512,13 +531,15 @@ def paper_count(directory):
     return out
 
 
-def paper_diversity(directory):
-    """The paper_diversity section (see the module docstring); a granularity is left out
-    unless every held-out paper has every pair, with every seed, on every side."""
+def paper_diversity(directory, offsets=SCREEN_OFFSETS):
+    """The paper_diversity section (see the module docstring) on the seed offsets `offsets`
+    (week 8's 0 to 200 by default; week 20 decides on 300 to 900, week20_diversity); a
+    granularity is left out unless every held-out paper has every pair, with every seed, on
+    every side."""
     out = {}
     for g in GRANULARITIES:
         names = {kind: [f'ner_results_{g}_{protocol}_{variant}_m{off}.json'
-                        for off in SCREEN_OFFSETS]
+                        for off in offsets]
                  for kind, protocol, variant in (('two', 'leave_two_papers_out', 'crf_bias'),
                                                  ('sized', LOPO, 'crf_p3n2'),
                                                  ('full', LOPO, 'crf'))}
@@ -547,7 +568,7 @@ def paper_diversity(directory):
             pairs = [(pair, next(p for p in others if p not in pair))
                      for pair in itertools.combinations(others, 2)]
             keys = [((paper, third), (paper, '+'.join(pair))) for pair, third in pairs]
-            n = len(SCREEN_OFFSETS)
+            n = len(offsets)
             if not all(len(f1['two'].get(k2, ())) == n and len(f1['sized'].get(k3, ())) == n
                        for k2, k3 in keys) or len(f1['full'][paper]) != n:
                 complete = False
@@ -754,14 +775,15 @@ def week12_variants(directory):
     decisions 1 and 2 for the screen's winner, week12_winner, reported for any other
     variant with those seeds, such as week 14's copy control) and ten_seeds (WEEK5_OFFSETS,
     no decision), each present when the variant and both references have every file of its
-    offsets. Week 14's, 18's and 19's variants (WEEK14_VARIANTS, WEEK18_VARIANTS,
-    WEEK19_VARIANTS) are not week-12 variants."""
+    offsets. Week 14's, 18's, 19's and 20's variants (WEEK14_VARIANTS, WEEK18_VARIANTS,
+    WEEK19_VARIANTS, WEEK20_VARIANTS) are not week-12 variants."""
     prefix = f'ner_results_mulms_{MULMS_PROTOCOLS[0]}_'
     variants = set()
     for path in sorted(Path(directory).glob(f'{prefix}crf_*_m*.json')):
         variant, _, offset = path.name[len(prefix):-len('.json')].rpartition('_m')
         if (variant not in ('crf', 'crf_mr', 'crf_mrs')
-                and variant not in WEEK14_VARIANTS + WEEK18_VARIANTS + WEEK19_VARIANTS
+                and variant not in (WEEK14_VARIANTS + WEEK18_VARIANTS + WEEK19_VARIANTS
+                                    + WEEK20_VARIANTS)
                 and offset.isdigit() and variant.rpartition('_')[2] not in ('dc', 'dcr')):
             variants.add(variant)
     out = {}
@@ -1157,6 +1179,220 @@ def week19(directory):
     return out
 
 
+# week 20's repeat files, copied from w20a's pulled output and versioned, so that the analysis
+# reproduces from the repository without the pulled output (main's default for --repeats)
+REPEATS_DIR = Path(__file__).resolve().parents[2] / 'results' / 'gpu_repeats'
+
+
+def find_repeat(root, name):
+    """The one file `name` under `root`, searched recursively (a pulled output keeps its
+    results files under processed/ner), or None; SystemExit if there are several."""
+    found = sorted(Path(root).rglob(name))
+    if len(found) > 1:
+        raise SystemExit(f'--repeats: {name} is there {len(found)} times under {root} '
+                         f'({", ".join(map(str, found))}); give one pulled output')
+    return found[0] if found else None
+
+
+def repeat_check(repeat, stored):
+    """A repeat's runs against the stored runs, paired by run_id. `equal`: both files hold the
+    same runs and every run equals the stored one in every field but runtime_sec, its
+    environment included; `environment_equal`: every run's environment is the stored run's
+    (week 4's rule); `differ` names the fields that do not match (`environment` among them),
+    `runs_differ` the runs that differ in them and `missing` the runs that only one of the
+    files holds."""
+    a, b = ({r['run_id']: r for r in f['runs']} for f in (repeat, stored))
+    common = [i for i in b if i in a]
+    differ, runs = set(), []
+    for i in common:
+        keys = {k for k in set(a[i]) | set(b[i])
+                if k not in REPEAT_IGNORED and a[i].get(k) != b[i].get(k)}
+        if keys:
+            differ |= keys
+            runs.append(i)
+    missing = sorted(set(a) ^ set(b))
+    return {'n_runs': len(common), 'equal': not differ and not missing,
+            'environment_equal': all(a[i].get('environment') == b[i].get('environment')
+                                     for i in common),
+            'differ': sorted(differ), 'runs_differ': runs, 'missing': missing}
+
+
+def week20_repeats(directory, repeats_dir):
+    """The repeats part of week20 (ROADMAP §4, the week-20 protocol, checks 2 to 4): for each
+    repeat of WEEK20_REPEATS found under `repeats_dir` (w20a's pulled output; the smoke files
+    are never collected), repeat_check against its stored file in `directory`, with both names;
+    {} without repeats_dir. The fourth repeat, smokebh (the CRF run of smoke4), is compared
+    with smokebf at the pull, as every smoke repeat before it, not here."""
+    if not repeats_dir:
+        return {}
+    if not Path(repeats_dir).is_dir():
+        raise SystemExit(f'--repeats: no directory {repeats_dir}')
+    out = {}
+    for tag, (name, stored_name) in WEEK20_REPEATS.items():
+        path = find_repeat(repeats_dir, name)
+        stored = load_files(directory, [stored_name])
+        if path is None or not stored:
+            continue
+        with open(path) as f:
+            repeat = json.load(f)
+        out[tag] = {'repeat': name, 'stored': stored_name, **repeat_check(repeat, stored[0])}
+    return out
+
+
+def repeats_status(repeats):
+    """How the repeats bear on week 20's readings (the protocol's checks): `checked` when every
+    repeat of WEEK20_REPEATS is there (`unchecked` names the others); `environment_differs` when
+    a repeat's environment is not the stored runs' (week 4's rule: no comparison with stored
+    runs); `differs` when a repeat differs in a field (its environment included) or in its runs
+    (20b's 10-seed readings are not reported, and 20.1 is not decided until the difference is
+    explained)."""
+    unchecked = [tag for tag in WEEK20_REPEATS if tag not in repeats]
+    return {'checked': not unchecked, 'unchecked': unchecked,
+            'environment_differs': any(not r['environment_equal'] for r in repeats.values()),
+            'differs': any(not r['equal'] for r in repeats.values())}
+
+
+def welch(a, b):
+    """mean(a) - mean(b) of two independent samples with its 95% Welch interval
+    (Welch-Satterthwaite degrees of freedom), and the two sample sizes."""
+    from scipy import stats
+    va, vb = statistics.variance(a) / len(a), statistics.variance(b) / len(b)
+    diff = statistics.fmean(a) - statistics.fmean(b)
+    df = (va + vb) ** 2 / (va ** 2 / (len(a) - 1) + vb ** 2 / (len(b) - 1))
+    half = float(stats.t.ppf(0.975, df)) * math.sqrt(va + vb)
+    return {'mean_diff': round(diff, 2), 'ci95': [round(diff - half, 2), round(diff + half, 2)],
+            'df': round(df, 1), 'n': [len(a), len(b)]}
+
+
+def validation_summary(files, ids):
+    """The mean best epoch and validation F1 of a family's runs on the units `ids`, over all
+    its runs and per unit (week 20: validation only picks the epoch)."""
+    def means(runs):
+        return {'best_epoch': round(statistics.fmean(r['best_epoch'] for r in runs), 2),
+                'val_f1': round(statistics.fmean(r['val_f1'] for r in runs), 2)}
+    runs = [r for f in files for r in f['runs'] if r['run_id'] in ids]
+    return {**means(runs), 'units': {i: means([r for r in runs if r['run_id'] == i])
+                                     for i in ids}}
+
+
+def week20_spool(directory, status):
+    """Week 20a (the spool part of week20): decision 20.1, the CRF head on MuLMS's 7 held-out
+    subfields with the pool drawn by sentence (WEEK20_SPOOL) minus the stored CRF head on the
+    article pool (crf), each unit the mean of its 10 seeds (0 to 900), paired over the
+    subfields: both sides' means and the difference with its 95% Student-t interval per F1
+    average (`passes`: the micro-F1 interval above 0; `decided` is False with a `flag` when a
+    repeat differs, None when the repeats are not checked here); per subfield both sides'
+    micro and macro F1; each side's best epoch and validation F1; the sentence pools'
+    recorded documents and subfields. Reported: the remaining part, the random-split pool's
+    10-seed means over its 5 splits minus the sentence pool's (welch, per F1 average), and the
+    17-point gap the same way against the article pool (`gap`); and the post hoc dependence
+    readings of the micro-F1 differences, decision_tests.dependent_t with layout(7) (pairs
+    whose article pools share an article at 1/4) and with every pair at 1/4. `status` is
+    repeats_status: a differing environment stops the section (week 4's rule). {} without
+    every file of both families."""
+    import decision_tests as dt
+    prefix = f'ner_results_mulms_{MULMS_PROTOCOLS[0]}_'
+    systems = (WEEK20_SPOOL, 'crf')
+    files = {s: load_files(directory, [f'{prefix}{s}_m{off}.json' for off in WEEK5_OFFSETS])
+             for s in systems}
+    if not all(files.values()):
+        return {}
+    if status['environment_differs']:
+        return {'stopped': "a repeat's environment is not the stored runs' (week 4's rule): "
+                           'no comparison with stored runs'}
+    scores = {s: system_scores(f) for s, f in files.items()}
+    ids = [i for i in scores[WEEK20_SPOOL] if i in scores['crf']]
+    entry = {s: {avg: spread([scores[s][i][avg] for i in ids]) for avg in F1_AVERAGES}
+             for s in systems}
+    entry['minus_crf'] = {avg: spread([scores[WEEK20_SPOOL][i][avg] - scores['crf'][i][avg]
+                                       for i in ids], 'mean_diff') for avg in F1_AVERAGES}
+    entry.update({'decision': '20.1', 'seeds': list(WEEK5_OFFSETS), 'n_subfields': len(ids),
+                  'passes': entry['minus_crf']['micro']['ci95'][0] > 0,
+                  'decided': False if status['differs'] else (True if status['checked'] else None)})
+    if status['differs']:
+        entry['flag'] = 'a repeat differs: 20.1 is not decided until the difference is explained'
+    elif not status['checked']:
+        entry['flag'] = (f"the repeats {', '.join(status['unchecked'])} are not checked here "
+                         f'(ner_seed_analysis.py --repeats)')
+    entry['subfields'] = {i: {s: {avg: round(scores[s][i][avg], 2) for avg in ('micro', 'macro')}
+                              for s in systems} for i in ids}
+    entry['validation'] = {s: validation_summary(files[s], ids) for s in systems}
+    pools = {r['run_id']: r['pool'] for r in files[WEEK20_SPOOL][0]['runs'] if 'pool' in r}
+    if pools:
+        entry['pools'] = {i: pools[i] for i in ids if i in pools}
+    pool = load_files(directory, [f'ner_results_mulms_{MULMS_PROTOCOLS[1]}_crf_m{off}.json'
+                                  for off in WEEK5_OFFSETS])
+    if pool:
+        splits = list(system_scores(pool).values())
+        for key, side in (('remaining', WEEK20_SPOOL), ('gap', 'crf')):
+            entry[key] = {avg: welch([v[avg] for v in splits], [scores[side][i][avg] for i in ids])
+                          for avg in F1_AVERAGES}
+    if sorted(ids) == sorted(dt.MULMS_UNITS):
+        per_unit = dict(zip(ids, entry['minus_crf']['micro']['per_run']))
+        values = [per_unit[u] for u in dt.MULMS_UNITS]           # layout(7)'s order
+        entry['dependence'] = {}
+        # every two sentence pools share documents: the second reading sets every pair at 1/4
+        for key, rho in (('shared_articles', None),
+                         ('every_pair', {'every_pair': dt.SHARED_POOL_RHO})):
+            e = dt.dependent_t(values, dt.layout(len(values)), rho)
+            entry['dependence'][key] = dict(e, above_0=e['ci95'][0] > 0)
+    return entry
+
+
+def week20_diversity(directory, status):
+    """Week 20b (the diversity part of week20): decisions 20.2 (fine) and 20.3 (coarse), week 8's
+    diversity, three papers at the size of two minus the two papers alone, on the seeds 300 to
+    900 (paper_diversity with DECISION_OFFSETS, `passes`: the interval above 0), with size on
+    the same seeds and the post hoc dependence reading of the per-paper differences,
+    decision_tests.dependent_t with layout(4) (MaterioMiner's 1/4); and, reported, the 10-seed
+    reading (seeds 0 to 900; `above_0`, no verdict), which is not reported when a repeat
+    differs. `status` is repeats_status: with a differing environment the decisions keep only
+    their new runs (no `three`, no `size`; week 4's rule). {} without the decision's files."""
+    import decision_tests as dt
+    decision = paper_diversity(directory, DECISION_OFFSETS)
+    if not decision:
+        return {}
+    stored = ('three', 'size')                  # the sides that the stored runs give
+    out = {'decision': {}}
+    for g, e in decision.items():
+        values = e['diversity']['per_run']
+        dep = dt.dependent_t(values, dt.layout(len(values)))
+        entry = {'decision': WEEK20_DECISIONS[g], 'seeds': list(DECISION_OFFSETS), **e,
+                 'passes': e['diversity']['passes'],
+                 'dependence': dict(dep, above_0=dep['ci95'][0] > 0)}
+        if status['environment_differs']:
+            entry = {k: v for k, v in entry.items() if k not in stored}
+            entry['papers'] = {p: {k: v for k, v in r.items() if k not in stored}
+                               for p, r in e['papers'].items()}
+        out['decision'][g] = entry
+    if status['differs']:
+        out['ten_seeds'] = {'not_reported': 'a repeat differs (ROADMAP §4, week 20, the checks)'}
+        return out
+    ten = paper_diversity(directory, WEEK5_OFFSETS)
+    for g, e in ten.items():
+        diversity = {k: v for k, v in e['diversity'].items() if k != 'passes'}
+        diversity['above_0'] = e['diversity']['passes']
+        out.setdefault('ten_seeds', {})[g] = {'seeds': list(WEEK5_OFFSETS), **e,
+                                              'diversity': diversity}
+    return out
+
+
+def week20(directory, repeats_dir=None):
+    """Week 20 (ROADMAP §4, the week-20 protocol): `repeats` (week20_repeats, with `status`,
+    repeats_status), `spool` (week20_spool, 20.1) and `diversity` (week20_diversity, 20.2 and
+    20.3), each present when its files are there; {} when none is."""
+    repeats = week20_repeats(directory, repeats_dir)
+    status = repeats_status(repeats)
+    out = {}
+    if repeats:
+        out['repeats'] = {**repeats, 'status': status}
+    for key, part in (('spool', week20_spool), ('diversity', week20_diversity)):
+        entry = part(directory, status)
+        if entry:
+            out[key] = entry
+    return out
+
+
 def topic(directory):
     """Week 14, 14.2 (the topic part of week14): V4 with the subfield's own topic corpus
     (WEEK14_WINNER) against V4 with the mixed corpus of the six other topics (MIXED_VARIANT),
@@ -1250,8 +1486,9 @@ def week14(directory):
             'ablations': ablations(directory), 'types': week14_types(directory)}
 
 
-def analyse(directory):
-    """The analyses for every protocol and granularity that has the files."""
+def analyse(directory, repeats_dir=None):
+    """The analyses for every protocol and granularity that has the files; week 20's repeats
+    are read from `repeats_dir` (w20a's pulled output), its other parts from `directory`."""
     out = {'spread': {}, 'triples': {}, 'types': {}}
     for protocol in PROTOCOLS:
         for g in GRANULARITIES:
@@ -1279,6 +1516,9 @@ def analyse(directory):
     w19 = week19(directory)
     if w19:                                   # absent until week 19's Phase 1 files exist
         out['week19'] = w19
+    w20 = week20(directory, repeats_dir)
+    if w20:                                   # absent until week 20's files exist
+        out['week20'] = w20
     out['paper_count'] = paper_count(directory)
     out['paper_diversity'] = paper_diversity(directory)
     out['errors'] = {}
@@ -1290,13 +1530,69 @@ def analyse(directory):
     return out
 
 
+def print_week20(w20):
+    """main's lines for the week20 section (week20)."""
+    for tag, r in w20.get('repeats', {}).items():
+        if tag == 'status':
+            continue
+        verdict = 'identical' if r['equal'] else 'DIFFERS' + ''.join(
+            f'; {label} {", ".join(r[key])}' for key, label in (('differ', 'in'),
+                                                                 ('missing', 'runs missing'))
+            if r[key])
+        print(f"  week 20, the repeat {tag} against {r['stored']}: {verdict} ({r['n_runs']} "
+              f"runs; environment {'identical' if r['environment_equal'] else 'DIFFERS'})")
+    s = w20.get('spool')
+    if s and 'stopped' in s:
+        print(f"  week 20, 20.1: stopped, {s['stopped']}")
+    elif s:
+        d = s['minus_crf']['micro']
+        verdict = 'passes' if s['passes'] else 'no'
+        if s['decided'] is False:
+            verdict = f"NOT DECIDED: {s['flag']}"
+        elif s['decided'] is None:
+            verdict += f"; {s['flag']}"
+        print(f"  week 20, 20.1: the sentence pool {s[WEEK20_SPOOL]['micro']['mean']:.2f} minus "
+              f"the article pool {s['crf']['micro']['mean']:.2f} over {s['n_subfields']} "
+              f"subfields: {d['mean_diff']:+.2f} {d['ci95']} ({verdict})")
+        for key, label in (('remaining', 'the remaining part, the random-split pool minus the '
+                                         'sentence pool'),
+                           ('gap', 'the gap, the random-split pool minus the article pool')):
+            if key in s:
+                w = s[key]['micro']
+                print(f"    {label} (Welch, df {w['df']}): {w['mean_diff']:+.2f} {w['ci95']}")
+        for key, e in s.get('dependence', {}).items():
+            print(f"    post hoc dependence ({key}): {e['mean_diff']:+.2f} {e['ci95']}, SE "
+                  f"x{e['se_ratio']:.3f}{'' if e['above_0'] else ', covers 0'}")
+    div = w20.get('diversity', {})
+    for g, e in div.get('decision', {}).items():
+        d = e['diversity']
+        size = f"; size {e['size']['mean_diff']:+.2f} {e['size']['ci95']}" if 'size' in e else ''
+        print(f"  week 20, {e['decision']} ({g}-grained, seeds 300-900): three papers at the size "
+              f"of two minus two papers {d['mean_diff']:+.2f} {d['ci95']} "
+              f"({'passes' if e['passes'] else 'no'}){size}; post hoc dependence "
+              f"{e['dependence']['ci95']}")
+    ten = div.get('ten_seeds', {})
+    if 'not_reported' in ten:
+        print(f"  week 20, the 10-seed readings: not reported, {ten['not_reported']}")
+    else:
+        for g, e in ten.items():
+            d, z = e['diversity'], e['size']
+            print(f"  week 20, {g}-grained, 10 seeds (reported): diversity {d['mean_diff']:+.2f} "
+                  f"{d['ci95']}, size {z['mean_diff']:+.2f} {z['ci95']}")
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description='Exploratory analyses of the 10-seed runs '
                                                  '(no training, no decision)')
     parser.add_argument('--results', default=str(RESULTS_DIR), metavar='DIR')
     parser.add_argument('--out', default=None, metavar='PATH')
+    parser.add_argument('--repeats', default=None, metavar='DIR',
+                        help="week 20: where the repeats smokebi, smokebj and smokebk are "
+                             "(never collected into results/gpu); default results/gpu_repeats, "
+                             "the copies of them versioned after w20a's pull, when it exists")
     args = parser.parse_args(argv)
-    result = analyse(args.results)
+    repeats = args.repeats or (str(REPEATS_DIR) if REPEATS_DIR.is_dir() else None)
+    result = analyse(args.results, repeats)
     for key, fams in result['triples'].items():
         for fam, t in fams.items():
             ten = t['ten_seed']
@@ -1454,6 +1750,7 @@ def main(argv=None):
         verdict = f" ({'passes' if e['passes'] else 'no'})" if 'decision' in e else ' (reported)'
         print(f"  week 19, {e.get('decision', key)}: {e['system']} minus {e['reference']} over "
               f"{e['n_units']} units: {d['mean_diff']:+.2f} {d['ci95']}{verdict}")
+    print_week20(result.get('week20', {}))
     out = args.out or os.path.join(args.results, OUT_NAME)
     with open(out, 'w') as f:
         json.dump(result, f, indent=2)

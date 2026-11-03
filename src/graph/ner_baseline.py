@@ -2238,7 +2238,7 @@ PLAIN_VARIANTS = ('baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_st', 'crf_mt
                   'crf_ctx', 'crf_mt_st3', 'crf_mt_ctx', 'crf_mr', 'crf_bias', 'crf_mt_bias',
                   'crf_ls_bias', 'crf_mt_ls_bias', 'crf_ctx_bias', 'crf_mt_ctx_bias',
                   'crf_mr_bias', 'crf_eb', 'crf_ebv', 'crf_p3n2', 'crf_mt_mr', 'crf_mrs',
-                  'crf_mrm')
+                  'crf_mrm', 'crf_spool')
 
 
 def variant_name(args):
@@ -2248,8 +2248,9 @@ def variant_name(args):
     (--names-feature; 'crf_mr_gzm' with --augment-mentions too, 'crf_mrm_gzm' with
     --augment-names as well), these and the self-training names plus _<names tag>
     (crf_mrm_topic, crf_gzm_topic, crf_st3_topic), the mention replacement names plus the
-    copies when not 3 (crf_mr6, crf_mrm_topic6), with _bias for --entity-bias (crf_bias,
-    crf_ctx_bias), then the tag.
+    copies when not 3 (crf_mr6, crf_mrm_topic6), 'crf_p3n2' (--two-paper-size), 'crf_spool'
+    (--pool-by-sentence, week 20), with _bias for --entity-bias (crf_bias, crf_ctx_bias), then
+    the tag.
 
     'cw' is --class-weights, 'crf_mt' is --crf --multi-task, 'crf_ls' is --crf
     --label-semantics, 'crf_mt_ls' both, 'crf_st' is --crf --self-train and 'crf_st<N>' that
@@ -2290,6 +2291,8 @@ def variant_name(args):
             name += str(args.augment_mentions)         # crf_mr6: 6 copies (week 12)
         if getattr(args, 'two_paper_size', False):
             name = 'crf_p3n2'
+        if getattr(args, 'pool_by_sentence', False):
+            name = 'crf_spool'                  # the pool drawn by sentence (week 20)
         if hasattr(args, 'entity_bias'):
             name += '_bias'
     else:
@@ -2582,7 +2585,8 @@ def make_folds(data, args, indices=False, granularity=None):
                 for i, group in enumerate(groups)]
     if getattr(args, 'leave_one_subfield_out', False):
         folds = subfield_folds(data, mulms_subfields(), args.split_seed,
-                               getattr(args, 'train_pool', 0), indices)
+                               getattr(args, 'train_pool', 0), indices,
+                               by_sentence=getattr(args, 'pool_by_sentence', False))
         keep = getattr(args, 'subfields', None)
         if keep:
             unknown = sorted(set(keep) - {name for name, *_ in folds})
@@ -2614,13 +2618,18 @@ def mulms_subfields(folder=MULMS_DIR):
         return {f'{doc}.conll': name for doc, name in json.load(f).items()}
 
 
-def subfield_folds(data, subfields, split_seed, pool=0, indices=False):
+def subfield_folds(data, subfields, split_seed, pool=0, indices=False, by_sentence=False):
     """The folds of --leave-one-subfield-out (ROADMAP §4, week 10): one per subfield (sorted;
     fold i, named after it), whose documents are the test set. The other documents are sorted
     and shuffled with random.Random(split_seed + i); with --train-pool N they are taken in
     that order until they hold N sentences, the last one cut to its first sentences, else all
-    of them. Their sentences are shuffled with random.Random(split_seed), 15% of them for
-    validation, as in paper_fold."""
+    of them. With by_sentence (--pool-by-sentence, which needs the pool; ROADMAP §4, week 20)
+    the pool is drawn by sentence instead: the other documents' sentences, in corpus order
+    (their positions in `data`), are shuffled with random.Random(split_seed + i) and the first
+    N form it. The pool's sentences are shuffled with random.Random(split_seed), 15% of them
+    for validation, as in paper_fold."""
+    if by_sentence and not pool:
+        raise ValueError('a pool drawn by sentence needs its size (--train-pool)')
     docs = sorted({d for _, _, d in data})
     missing = [d for d in docs if d not in subfields]
     if missing:
@@ -2630,9 +2639,13 @@ def subfield_folds(data, subfields, split_seed, pool=0, indices=False):
         positions[d].append(j)
     folds = []
     for i, name in enumerate(sorted({subfields[d] for d in docs})):
-        order = [d for d in docs if subfields[d] != name]
-        random.Random(split_seed + i).shuffle(order)
-        rest = [j for d in order for j in positions[d]]
+        if by_sentence:
+            rest = [j for j, (_, _, d) in enumerate(data) if subfields[d] != name]
+            random.Random(split_seed + i).shuffle(rest)
+        else:
+            order = [d for d in docs if subfields[d] != name]
+            random.Random(split_seed + i).shuffle(order)
+            rest = [j for d in order for j in positions[d]]
         if pool:
             if len(rest) < pool:
                 raise SystemExit(f'--train-pool {pool}: the documents outside {name} hold only '
@@ -2648,6 +2661,14 @@ def subfield_folds(data, subfields, split_seed, pool=0, indices=False):
             train, val, test = ([data[j] for j in part] for part in (train, val, test))
         folds.append((name, train, val, test))
     return folds
+
+
+def pool_record(data, positions, subfields):
+    """The `pool` record of a --pool-by-sentence run (week 20): the numbers of documents and of
+    subfields that the pool's sentences (the fold's training and validation positions in
+    `data`) come from."""
+    docs = {data[j][2] for j in positions}
+    return {'n_documents': len(docs), 'n_subfields': len({subfields[d] for d in docs})}
 
 
 def pool_split(n, seed, pool):
@@ -2998,10 +3019,13 @@ def run(args):
             for seed in args.seeds:
                 split_seed = seed if args.vary_split else args.split_seed
                 folds.append((f'seed{seed}', *random_split(len(data), split_seed)))
+        # --pool-by-sentence (week 20): each run records its pool's documents and subfields
+        subfields = mulms_subfields() if getattr(args, 'pool_by_sentence', False) else None
         for run_id, tr, va, te in folds:
             if run_id in done:
                 print(f"  {run_id}: already done, skipping")
                 continue
+            pool = pool_record(data, tr + va, subfields) if subfields is not None else None
             if args.max_train:
                 tr = tr[:args.max_train]
             train, val, test = ([data[i] for i in part] for part in (tr, va, te))
@@ -3029,6 +3053,8 @@ def run(args):
                 if names_file is not None:
                     res['names_file'] = {'sha256': names_sha, 'arm': args.names_arm,
                                          'coverage': name_coverage(names, train, test)}
+            if pool is not None:
+                res['pool'] = pool
             res['run_id'] = run_id
             res['runtime_sec'] = round(time.time() - start, 1)
             if environment:
@@ -3458,6 +3484,12 @@ def parse_args(argv=None):
                              "documents' first N sentences in a shuffled document order; with "
                              '--vary-split the first N of the shuffled sentences, the next 20%% '
                              'testing (protocol random_split_pool; ROADMAP §4, week 10)')
+    parser.add_argument('--pool-by-sentence', action='store_true', default=argparse.SUPPRESS,
+                        help='with --leave-one-subfield-out --train-pool N and --crf: draw each '
+                             "fold's pool by sentence, not by document: the other subfields' "
+                             'sentences in corpus order, shuffled with the split seed + i (fold '
+                             'i), the first N; each run records its pool\'s numbers of documents '
+                             'and subfields (variant crf_spool; ROADMAP §4, week 20)')
     parser.add_argument('--published-split', action='store_true', default=argparse.SUPPRESS,
                         help="the train, validation and test sentences, and the tags, of the "
                              "MaterioMiner release (data/raw/dataset/published_split); every "
@@ -3714,6 +3746,17 @@ def parse_args(argv=None):
         parser.error('--leave-one-subfield-out is a protocol of its own: no --vary-split')
     if hasattr(args, 'train_pool') and args.train_pool < 1:
         parser.error('--train-pool: at least 1 sentence')
+    if hasattr(args, 'pool_by_sentence'):
+        if not (getattr(args, 'leave_one_subfield_out', False) and hasattr(args, 'train_pool')):
+            parser.error('--pool-by-sentence needs --leave-one-subfield-out and --train-pool (it '
+                         "draws a held-out subfield's training pool by sentence)")
+        if not args.crf:
+            parser.error('--pool-by-sentence needs --crf (variant crf_spool)')
+        for option in ('multi_task', 'label_semantics', 'self_train', 'context',
+                       'augment_mentions', 'entity_bias', 'names_file'):
+            if getattr(args, option, None) not in (None, False):
+                parser.error(f"--pool-by-sentence is not available with "
+                             f"--{option.replace('_', '-')}")
     if getattr(args, 'papers', None) and not args.leave_one_paper_out:
         parser.error('--papers needs --leave-one-paper-out (it picks held-out papers)')
     if hasattr(args, 'subfields') and not getattr(args, 'leave_one_subfield_out', False):

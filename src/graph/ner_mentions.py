@@ -59,7 +59,8 @@ from pathlib import Path
 import metrics
 from ner_baseline import (DOCUMENT_FOLDS, POOL_SPLITS, SUBFIELDS, corpus_words,
                           document_groups, granularity_data, mulms_subfields, paper_fold,
-                          pool_split, published_split, random_split, subfield_folds)
+                          pool_record, pool_split, published_split, random_split,
+                          subfield_folds)
 from ner_ensemble import ensemble_run, tags_to_spans
 from ner_seedmeans import (DECISION_OFFSETS, GRANULARITIES, LOPO, SCREEN_OFFSETS, WEEK5_OFFSETS,
                            WEEK5_TRIPLES, seed_family)
@@ -124,7 +125,9 @@ def corpus(granularity, retokenized_test=False):
 
 def run_split(results, run, data, granularity):
     """(data, training positions, test positions) of a stored run, its split rebuilt as
-    ner_baseline.py builds it; the data has the release's tags on a published split."""
+    ner_baseline.py builds it; the data has the release's tags on a published split. A held-out
+    subfield's pool drawn by sentence (config pool_by_sentence, week 20) is rebuilt so, and its
+    numbers of documents and subfields must be the run's recorded ones (its `pool`)."""
     protocol, run_id = results['protocol'], run['run_id']
     config = results.get('config') or {}
     split_seed = config.get('split_seed') or 0
@@ -144,9 +147,17 @@ def run_split(results, run, data, granularity):
         train, _, test = pool_split(len(data), int(run_id.removeprefix('seed')),
                                     config['train_pool'])
     elif protocol == SUBFIELDS:
-        folds = {name: (tr, te) for name, tr, _, te in subfield_folds(
-            data, mulms_subfields(), split_seed, config.get('train_pool', 0), indices=True)}
-        train, test = folds[run_id]
+        subfields = mulms_subfields()
+        by_sentence = bool(config.get('pool_by_sentence'))
+        folds = {name: (tr, va, te) for name, tr, va, te in subfield_folds(
+            data, subfields, split_seed, config.get('train_pool', 0), indices=True,
+            by_sentence=by_sentence)}
+        train, val, test = folds[run_id]
+        if by_sentence:
+            rebuilt, recorded = pool_record(data, train + val, subfields), run.get('pool') or {}
+            if any(recorded.get(k) != v for k, v in rebuilt.items()):
+                raise MentionError(f'run {run_id}: its pool ({recorded or "not recorded"}) is '
+                                   f'not the rebuilt sentence pool ({rebuilt})')
     else:
         raise MentionError(f'run {run_id}: no split for protocol {protocol}')
     if config.get('max_train'):
@@ -471,8 +482,47 @@ def corpus_coverage(directory, path=CORPUS):
     return out
 
 
+# week 20a (ROADMAP §4, the week-20 protocol): the CRF head on MuLMS's held-out subfields trained
+# on the pool drawn by sentence (--pool-by-sentence), against week 10's article pool (crf)
+SPOOL = 'crf_spool'
+
+
+def sentence_pool(directory):
+    """Week 20a's seen and unseen test names (reported, no decision; output key `spool`, absent
+    without the files): on MuLMS's held-out subfields, the CRF head trained on the sentence pool
+    (crf_spool) and on the article pool (crf), each with its 10 seeds and their predictions, the
+    test entities of each run split by week 10's kinds (kind_of) against its own training
+    sentences. Per side the scores of every kind over all its runs (summary), whose unseen share
+    (`unseen_share`) is the share of the gold test entities that the pool's training sentences do
+    not hold; per subfield each side's unseen share and recall on the seen and on the unseen
+    names; and crf_spool minus crf paired by subfield, each side the mean over its seeds
+    (paired: F1, recall and precision per kind with the 95% CI). {} without every crf_spool file
+    with its predictions."""
+    spool = family_files(directory, 'mulms', SUBFIELDS, SPOOL)
+    crf = family_files(directory, 'mulms', SUBFIELDS, REFERENCE) if spool else None
+    if not spool or not crf:
+        return {}
+    data = corpus('mulms')
+    members = {REFERENCE: family_counts(crf, data, 'mulms'),
+               SPOOL: family_counts(spool, data, 'mulms')}
+    sides = {s: summary(m) for s, m in members.items()}
+    units = [u for u in members[SPOOL][0] if all(u in runs for m in members.values() for runs in m)]
+    subfields = {}
+    for u in units:
+        for s, m in members.items():
+            sc = scores(pooled([{u: runs[u]} for runs in m]))
+            subfields.setdefault(u, {})[s] = {'unseen_share': sc['unseen']['share'],
+                                              'recall_seen': sc['seen']['recall'],
+                                              'recall_unseen': sc['unseen']['recall']}
+    return {'seeds': list(WEEK5_OFFSETS), 'reference': REFERENCE,
+            'unseen_share': {s: e['unseen']['share'] for s, e in sides.items()},
+            'systems': sides, 'subfields': subfields,
+            'minus_crf': paired(members[SPOOL], members[REFERENCE])}
+
+
 def analyse(directory, corpus_path=CORPUS):
-    """The analyses of every granularity and protocol that has the files (module docstring)."""
+    """The analyses of every granularity and protocol that has the files (module docstring), and
+    week 20a's sentence pool (`spool`, sentence_pool) once its files exist."""
     out = {'kinds': {'seen': 'its words are an entity of the same type in the training '
                              'sentences',
                      'seen_other': 'they are an entity there, only of other types',
@@ -521,6 +571,9 @@ def analyse(directory, corpus_path=CORPUS):
                                        **paired(members, systems[reference])}
         out['methods'][key] = comparisons
     out['corpus_coverage'] = corpus_coverage(directory, corpus_path)
+    spool = sentence_pool(directory)
+    if spool:                         # absent until week 20a's files exist
+        out['spool'] = spool
     return out
 
 
@@ -558,6 +611,15 @@ def main(argv=None):
         if g != 'corpus':
             print(f'  {g}-grained, unseen test names in the self-training corpus: ' + ', '.join(
                 f"{paper[:20]} {100 * c['in_corpus']:.1f}%" for paper, c in papers.items()))
+    spool = result.get('spool')
+    if spool:
+        for system, s in spool['systems'].items():
+            print(f"  week 20a, MuLMS's held-out subfields, {system}: unseen "
+                  f"{100 * s['unseen']['share']:.1f}% of {s['all']['n_gold']} entities; recall "
+                  f"seen {s['seen']['recall']:.1f}, unseen {s['unseen']['recall']:.1f}")
+        d = spool['minus_crf']
+        print(f"  week 20a, {SPOOL} minus {REFERENCE}, recall: " + ', '.join(
+            f"{k} {d[k]['recall']['mean_diff']:+.2f} {d[k]['recall']['ci95']}" for k in COMPARED))
     out = args.out or os.path.join(args.results, OUT_NAME)
     with open(out, 'w') as f:
         json.dump(result, f, indent=2)

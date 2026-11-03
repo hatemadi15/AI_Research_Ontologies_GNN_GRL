@@ -162,8 +162,12 @@ def layout(n):
 def pair_rho(a, b, rho=None):
     """The assumed correlation of two units' differences: 1/K within a leave-one-out design,
     SHARED_POOL_RHO for two MuLMS subfields whose pools share an article, else 0. rho:
-    {'materiominer', 'sofc_exp', 'mulms': correlation} overriding those values."""
+    {'materiominer', 'sofc_exp', 'mulms': correlation} overriding those values, or
+    {'every_pair': correlation} for every pair (week 20's second reading of MuLMS's sentence
+    pools, any two of which share documents)."""
     rho = rho or {}
+    if 'every_pair' in rho:
+        return rho['every_pair']
     if a[0] != b[0]:
         return 0.0
     if a[0] in LEAVE_ONE_OUT:

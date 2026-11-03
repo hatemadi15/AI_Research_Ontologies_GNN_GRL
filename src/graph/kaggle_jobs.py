@@ -221,6 +221,15 @@ Week 19 (graph-propagated names; ROADMAP §4, week 19):
           at seed offsets 300 to 900 (one job per offset over the 7 subfields) and
           MaterioMiner fine at 0 to 900 (one job per offset over the 4 papers), balanced
 
+Week 20 (two controls for paper B's first referee; ROADMAP §4, week 20):
+  w20a    the checks first: lane 0 the CRF run of smoke4 again (smokebh) and w10a's crf_m0 job
+          on MuLMS's 7 held-out subfields (smokebi), lane 1 w8b's crf_p3n2_m0 (smokebj) and
+          w7a's inner folds crf_bias_m0 (smokebk), both coarse-grained; then 20a, the CRF head
+          on the held-out subfields with the pool drawn by sentence (--pool-by-sentence,
+          crf_spool_m<N>, seed offsets 0 to 900, with predictions), and 20b, crf_p3n2_m<N> and
+          the crf_bias_m<N> inner folds at seed offsets 300 to 900 on both granularities (w8b's
+          and w7a's flags), balanced over the lanes
+
 The TPU spike (docs/METHODS_PLAN.md §5; every batch named tpu... runs on the TPU v5e-8, one
 lane per chip, its jobs with --device xla, its results in results/tpu/, a family of their own):
   tpu-smoke1  one fine-grained CRF job (the 4 held-out papers, seed 0) on one chip (crf_tpu1):
@@ -609,6 +618,38 @@ def mr6_bias_mulms_job(offset):
     job = mr6_mulms_job(offset)
     at = job.index('--save-predictions')
     return job[:at] + ['--entity-bias', *BIAS_GRID_W18] + job[at:]
+
+
+def held_crf_job(offset, tag=None, extra=()):
+    """The CRF head on MuLMS's 7 held-out subfields, 400 pool sentences, with predictions: w10a's
+    crf_m<N> job (week 10). Week 20: `tag` replaces the seed tag (the repeat smokebi) and `extra`
+    adds options after the pool (20a: --pool-by-sentence, crf_spool_m<N>)."""
+    return ['--granularity', 'mulms', '--leave-one-subfield-out', '--train-pool',
+            str(MULMS_POOL), *extra, '--crf', '--tag', tag or f'm{offset}',
+            *(('--seed-offset', str(offset)) if offset else ()), '--save-predictions',
+            '--threads', str(THREADS)]
+
+
+def sized_job(granularity, offset, tag=None):
+    """The CRF head on the held-out papers with --two-paper-size (crf_p3n2_m<N>), w8b's job
+    (week 8, part 2); `tag` replaces the seed tag (week 20's repeat smokebj)."""
+    return job(granularity, 'leave_one_paper_out', '--two-paper-size', offset=offset,
+               tag=tag or f'm{offset}')
+
+
+def inner_bias_job(granularity, offset, tag=None):
+    """The inner folds (--leave-two-papers-out) of the CRF head with the bias grid
+    (crf_bias_m<N>; counts only, no predictions), w7a's job (week 7, part 2a); `tag` replaces
+    the seed tag (week 20's repeat smokebk)."""
+    return ['--granularity', granularity, '--leave-two-papers-out', '--crf', '--entity-bias',
+            *BIAS_GRID, '--tag', tag or f'm{offset}',
+            *(('--seed-offset', str(offset)) if offset else ()), '--threads', str(THREADS)]
+
+
+# week 20 (ROADMAP §4, the week-20 protocol): the relative GPU time of a --two-paper-size job (12
+# folds, each trained on at most two papers' sentences) and of an inner job (6 such folds; w7a)
+SIZED_COST = COST['crf'] * 8
+INNER_COST = COST['crf'] * 4
 
 
 def week12_variant(name):
@@ -1128,6 +1169,24 @@ def batch_lanes(name):
         lanes = balance(jobs, loads=[COST['crf'] + COST['mulms'] * COST['mr6'], 0.0])
         return [[repeat + ['--tag', 'smokebg'], w19_mulms_job('f', 300, ['sofc'])] + lanes[0],
                 lanes[1]]
+    if name == 'w20a':
+        # week 20 (ROADMAP §4, the week-20 protocol): the checks first, the repeat of the CRF
+        # run of smoke4 (smokebh) and of week 10's crf_m0 on MuLMS's held-out subfields
+        # (smokebi) in lane 0, of week 8's crf_p3n2_m0 (smokebj) and week 7's inner folds
+        # crf_bias_m0 (smokebk), coarse-grained, in lane 1; then 20a, the CRF head with the
+        # pool drawn by sentence (crf_spool_m<N>, seed offsets 0 to 900), and 20b, crf_p3n2 and
+        # the crf_bias inner folds at seed offsets 300 to 900 on both granularities, each job
+        # writing its own files, balanced over the lanes
+        mulms = COST['mulms'] * MULMS_SUBFIELDS
+        checks = ([repeat + ['--tag', 'smokebh'], held_crf_job(0, 'smokebi')],
+                  [sized_job('coarse', 0, 'smokebj'), inner_bias_job('coarse', 0, 'smokebk')])
+        jobs = ([(mulms, held_crf_job(off, extra=('--pool-by-sentence',)))
+                 for off in OFFSETS_PUBLISHED]
+                + [(SIZED_COST, sized_job(g, off)) for g in GRANULARITIES for off in OFFSETS_W5]
+                + [(INNER_COST, inner_bias_job(g, off))
+                   for g in GRANULARITIES for off in OFFSETS_W5])
+        lanes = balance(jobs, loads=[COST['crf'] + mulms, SIZED_COST + INNER_COST])
+        return [checks[0] + lanes[0], checks[1] + lanes[1]]
     if name == 'w14a':
         # week 14, 14.1: the 6-copy control without names (crf_mr6_m<N>) on MuLMS's held-out
         # subfields, seed offsets 300 to 900 (one job per offset over the 7 subfields), and
@@ -1151,7 +1210,7 @@ BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'i
            'w12e', 'w12f', 'w12g', 'w13a', 'w13b', 'w13c',
            *(f'w12b:{v}' for v in WEEK12_VARIANTS), *(f'w12d:{v}' for v in WEEK12_ANALOGUES),
            'tpu-smoke1', 'tpu-smoke', 'w14a', 'w14b', 'w14c', 'w15a', 'w17a', 'w17b', 'w18a',
-           'w19a', 'w19b')
+           'w19a', 'w19b', 'w20a')
 
 
 def batch_extras(name):
