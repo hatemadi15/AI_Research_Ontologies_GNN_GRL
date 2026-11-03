@@ -6556,7 +6556,26 @@ numbers only (no test name was read): the rebuilt vote equal to
 labelled, 13 types) built in 65 s; homophily on labelled pairs 0.42
 (co-occurrence), 0.86 (character kNN), 1.0 (shared head, 34 pairs); one
 R-GCN training 163 s on the CPU. Batch `w19a` pushed 3 November, 01:25
-UTC, from the bundle of `c449864` (kernel version 19).
+UTC, from the bundle of `c449864` (kernel version 19). Phase 1's analysis
+was written while `w19a` ran, before the probe and before any Phase-1
+run (`667aaf1`): `ner_seed_analysis.py`, section `week19` (G1 and G2
+pooled over the 11 units from the unrounded unit means, with their
+verdicts; the reported differences per F1 average and per corpus; each
+family's `n_augmented` and the SHA-256 of the file its runs read; the
+replay check, the replay's sofc run at seed 300 equal to the stored one
+byte for byte once the machine's record, the timing, the teachers it did
+not train and the file's record are set aside, with the local replay
+test now equal on exactly those fields), and `ner_lexicon_recall.py
+--week19` (each arm against the 6-copy control on the unseen test names
+in and out of its own lexicon; the unsplit unseen-name recall and
+precision paired over the units, the graph arm minus the vote arm among
+them; the names' share of the replacement draws as its expectation,
+Σ g·n/(g + n) over Σ g per unit with g a type's training mentions and n
+its names entries, since every training mention is one draw from its
+type's pool of training mentions then names). Re-running the seed
+analysis showed week 18's `crf_mr6_bias` read as a week-12 variant; it
+is left out now, as week 14's and week 19's variants are, and the stored
+analysis reproduces unchanged.
 
 *Budget.* `w19a`: 11 harvest jobs of about 20 minutes, under 4 of the
 22.6 GPU hours left this week. `w19b`: about 5.5 GPU hours per arm and
