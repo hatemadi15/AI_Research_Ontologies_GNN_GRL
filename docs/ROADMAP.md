@@ -1043,6 +1043,7 @@ chance at class level. For a Task C-style result:
 | 18 | The names against a recall-matched control (approved 1 November after the round-9 referee of paper A asked for it; protocol fixed before any run, below): MR6 on MuLMS's 7 held-out subfields at the decision seeds 300 to 900, the stored `crf_mr6` jobs again with a bias added to every entity tag at decoding (`crf_mr6_bias`), matched per subfield to the names' recall; decisions 18.1 (D11, recall on the unseen names the lexicon holds) and 18.2 (D12, micro F1) at matched recall; batch `w18a` | Done (1 November): 18.1 +11.24 [+3.31, +19.18], passes (7 of 7 subfields positive); 18.2 +3.26 [−0.79, +7.31], no. In three subfields (electrolysis, pemfc, sofc) no bias on the grid reaches the names' recall and the protocol matched them at D = 5; without them (pre-specified) 18.1 +6.05 [−3.33, +15.44] (4 of 4 positive) and 18.2 −0.03 [−2.78, +2.72]; matched post hoc at the control's nearest recall, +8.63 [+3.35, +13.90] and +1.37 [−0.66, +3.41]. At matched overall recall the names find more of the names their lexicon holds and fewer of the others (−1.73 [−3.02, −0.44], pre-specified); their F1 is not shown to beat the bias. The names route's decisions become twelve, four passing; paper A updated (outcome below) |
 | 19 | Graph-propagated names at matched lexicon size (after paper A's submission on 2 November, on the author's request to explore graph representation learning, the plan checked by an independent referee before any run; `docs/WEEK19_PLAN.md`; protocol below): a relational GNN over every name the teachers tag, against the teachers' vote at a lowered threshold and the same model without the graph, at equal lexicon size; a probe with a test-set gate, then, if it passes, decisions G1 and G2 over the 11 units of D7. Paper B brought to a submittable state alongside (track B) | Done (3 November): the gate fails, so G1 and G2 are not run. At matched size (N primary, means over the 11 units) the R-GCN's lexicon holds 16.78% of the unseen test mentions, the vote's 24.86% and the graph-removed MLP's 18.80% (+5 over the vote and +2 over the MLP needed); its wrong-type rate, 4.65% against the vote's 10.14%, passes. The graph ranker is below the vote in all 11 units. Graph propagation does not rescue the names route at matched size; one negative lexicon screen in paper B's count (outcome below) |
 | 20 | Two controls paper B's first referee asked for (3 November; the plan `docs/WEEK20_PLAN.md` checked by an independent referee before any run; protocol below): 20a, MuLMS's held-out subfields with a 400-sentence pool drawn by sentence from all other subfields' articles (`crf_spool`) against the stored pool of 2–3 articles (decision 20.1); 20b, week 8's diversity decisions on 7 fresh seeds (20.2, 20.3); batch `w20a` | Done 3 November: 20.1, 20.2 and 20.3 pass, and every check holds (outcome below) |
+| 21 | A free generalist NER baseline for paper B's first referee (3 November; the plan `docs/WEEK21_PLAN.md` checked by an independent referee before any run; protocol below): GLiNER-medium fine-tuned on the CRF head's training sentences (10 seeds) against the CRF head on the held-out units (decisions 21.1 to 21.4), and zero-shot (reported); batches `w21s` and `w21a` | Done 4 November: none passes. Fine-tuned GLiNER is not shown to differ from the CRF head on MaterioMiner fine-grained (+3.77 [−5.38, +12.92]), MuLMS (+1.58) or SOFC-Exp (+0.27); it is below at MaterioMiner's coarse level (−10.12 [−15.68, −4.56]). Zero-shot it trails by 20 to 48 points. Every check holds (outcome below) |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -7065,6 +7066,77 @@ decisions were never re-run" changes with the result.
   is made, and the batch is pushed again; finished runs are skipped. The
   4 runs of `w21s` are in `results/gpu/` and the bundle, so `w21a`
   resumes them.
+- **`w21a`, first session** (kernel version 22) completed at 23:39 UTC.
+  The deadline left the 3 zero-shot jobs unstarted; `smokebn` and the 40
+  fine-tuning jobs ran. `smokebn` is identical to `smokebh`, environment
+  included. The 40 files were collected (`3138ee5`), none refused, with
+  `w21s`'s units in the m0 files unchanged.
+- **Second session** (kernel version 23, bundle of `3138ee5`): pushed at
+  00:03 UTC on 4 November and completed at 00:15 UTC.
+  - `smokebn` is identical to `smokebh` again.
+  - It ran the 3 zero-shot jobs and skipped every finished unit.
+  - It rewrote 3 finished files (fine m600 and m800, coarse m700) with
+    a summary mean rounded the other way (51.055 and the like; float
+    summation order on resume). Their runs are identical, and the first
+    session's files are kept.
+
+*Outcome (4 November, 00:05–00:40 UTC): none passes. MaterioMiner's coarse
+level is below the CRF head, and every check holds.*
+- **Checks.**
+  - `smokebm` is versioned in `results/gpu_repeats/` and is identical to
+    the paper-1 run of `gliner_ft_m0`.
+  - All 216 GLiNER runs, in 43 files, use the CRF head's splits and the
+    stored runs' environment.
+  - Both stored analyses re-run with only their `week21` sections added.
+- **Decisions** (GLiNER fine-tuned minus the CRF head, 10 seeds):
+
+  | Decision | Fine-tuned − CRF head | Reading | Units |
+  |---|---|---|---|
+  | 21.1, MaterioMiner fine | 50.23 − 46.46 = +3.77 [−5.38, +12.92] | not shown | one paper +12.25, the others −0.54 to +1.72, so the interval is wider than the protocol's 4–5 points |
+  | 21.2, coarse | 48.48 − 58.60 = −10.12 [−15.68, −4.56] | below the CRF head | every paper below (−5.57 to −13.94); macro −14.62 [−24.01, −5.22] |
+  | 21.3, MuLMS | 50.23 − 48.66 = +1.58 [−1.92, +5.08] | not shown within about 3.5 points | — |
+  | 21.4, SOFC-Exp folds | 83.05 − 82.79 = +0.27 [−1.84, +2.37] | not shown within about 1.5–2 points | — |
+
+- **Post hoc dependence allowance:** fine [−10.21, +17.75], coarse
+  [−18.62, −1.63] (still below), MuLMS [−2.63, +5.78] and SOFC-Exp [−2.89,
+  +3.42].
+- **Validation F1 is lower for GLiNER in every setting** (74.15 vs 79.47
+  fine, 70.24 vs 79.33 coarse, 74.03 vs 76.89 MuLMS, 85.62 vs 86.44
+  SOFC-Exp).
+- **The protocol's readings.**
+  - MaterioMiner as one corpus is neither above nor below (21.1 not
+    shown, 21.2 below). Its coarse level alone is below, reported as
+    that level's result.
+  - MuLMS and SOFC-Exp: not shown.
+  - So a generalist-pretrained tagger of base size is not shown to score
+    higher or lower than MatSciBERT's CRF head on held-out documents on
+    any corpus, within the sizes above. At MaterioMiner's coarse level it
+    scores lower.
+  - The confound holds for every reading, and "never read" holds for
+    GLiNER's fine-tuning only.
+- **Exploratory, not tested.** GLiNER conditions on label names, and the
+  coarse level's names are its codes lowercased. Its fine-tuned F1 is
+  lower coarse-grained than fine-grained (48.48 vs 50.23), while the CRF
+  head's is 12.14 points higher.
+- **Reported:**
+  - **Zero-shot minus the CRF head:** −19.87 [−30.73, −9.00] (MaterioMiner
+    fine, 26.59), −32.44 [−38.71, −26.17] (MuLMS, 16.22) and −47.78
+    [−48.85, −46.70] (SOFC-Exp, 35.01). Thresholds were chosen on
+    validation, 0.3–0.6.
+  - **Recall on unseen names, fine-tuned minus the CRF head** (week 10's
+    split, `ner_mentions.json`):
+
+    | Setting | Unseen names | Seen names |
+    |---|---|---|
+    | MaterioMiner fine | 43.80 vs 36.14, +7.66 [−5.20, +20.52] | −3.85 [−13.77, +6.07] |
+    | coarse | −17.01 [−23.47, −10.56] | −14.18 [−22.86, −5.50] |
+    | MuLMS | +2.68 [−1.19, +6.54] | +4.01 [−4.84, +12.87] |
+    | SOFC-Exp | 81.86 vs 79.96, +1.89 [+0.54, +3.25] | 0.00 [−2.26, +2.26] |
+
+  - **Zero-shot recall on unseen names:** 23.85, 18.07 and 45.23, against
+    the CRF head's 36.14, 40.07 and 79.96.
+- **The count** goes to 118 decisions with 27 passes, where about 3.0 are
+  expected by chance. With 7 or 10 seeds: 88 decisions, 21 passing.
 
 *TACL (paper B), for later.* The paper goes to 10 pages, references
 uncounted, with appendices after them within TACL's caps (as last read: up

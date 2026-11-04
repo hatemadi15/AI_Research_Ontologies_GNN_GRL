@@ -30785,6 +30785,2108 @@
       }
     }
   },
+  "week21": {
+    "checks": {
+      "n_files": 43,
+      "n_runs": 216,
+      "splits_differ": [],
+      "environment_differs": [],
+      "splits_equal": true,
+      "environment_equal": true
+    },
+    "repeats": {
+      "smokebm": {
+        "repeat": "ner_results_fine_leave_one_paper_out_gliner_ft_smokebm.json",
+        "stored": "ner_results_fine_leave_one_paper_out_gliner_ft_m0.json",
+        "n_runs": 1,
+        "equal": true,
+        "environment_equal": true,
+        "differ": [],
+        "runs_differ": [],
+        "missing": []
+      },
+      "status": {
+        "checked": true,
+        "unchecked": [],
+        "repeat_differs": false,
+        "splits_differ": false,
+        "environment_differs": false
+      }
+    },
+    "decisions": {
+      "fine": {
+        "decision": "21.1",
+        "corpus": "materiominer",
+        "seeds": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "n_units": 4,
+        "gliner_ft": {
+          "micro": {
+            "mean": 50.23,
+            "ci95": [
+              42.3,
+              58.15
+            ],
+            "per_run": [
+              52.64,
+              43.2,
+              50.45,
+              54.61
+            ]
+          },
+          "micro_strict": {
+            "mean": 50.23,
+            "ci95": [
+              42.3,
+              58.15
+            ],
+            "per_run": [
+              52.64,
+              43.2,
+              50.45,
+              54.61
+            ]
+          },
+          "macro": {
+            "mean": 38.37,
+            "ci95": [
+              28.01,
+              48.72
+            ],
+            "per_run": [
+              40.62,
+              28.7,
+              41.42,
+              42.74
+            ]
+          },
+          "weighted": {
+            "mean": 48.44,
+            "ci95": [
+              38.54,
+              58.34
+            ],
+            "per_run": [
+              54.33,
+              40.28,
+              47.1,
+              52.05
+            ]
+          }
+        },
+        "crf": {
+          "micro": {
+            "mean": 46.46,
+            "ci95": [
+              39.96,
+              52.95
+            ],
+            "per_run": [
+              51.0,
+              43.74,
+              48.73,
+              42.36
+            ]
+          },
+          "micro_strict": {
+            "mean": 46.46,
+            "ci95": [
+              39.96,
+              52.95
+            ],
+            "per_run": [
+              51.0,
+              43.74,
+              48.73,
+              42.36
+            ]
+          },
+          "macro": {
+            "mean": 36.25,
+            "ci95": [
+              32.41,
+              40.08
+            ],
+            "per_run": [
+              39.35,
+              34.1,
+              36.94,
+              34.6
+            ]
+          },
+          "weighted": {
+            "mean": 42.02,
+            "ci95": [
+              31.9,
+              52.14
+            ],
+            "per_run": [
+              49.96,
+              39.3,
+              43.74,
+              35.09
+            ]
+          }
+        },
+        "minus_crf": {
+          "micro": {
+            "mean_diff": 3.77,
+            "ci95": [
+              -5.38,
+              12.92
+            ],
+            "per_run": [
+              1.64,
+              -0.54,
+              1.72,
+              12.25
+            ]
+          },
+          "micro_strict": {
+            "mean_diff": 3.77,
+            "ci95": [
+              -5.38,
+              12.92
+            ],
+            "per_run": [
+              1.64,
+              -0.54,
+              1.72,
+              12.25
+            ]
+          },
+          "macro": {
+            "mean_diff": 2.12,
+            "ci95": [
+              -7.02,
+              11.26
+            ],
+            "per_run": [
+              1.27,
+              -5.4,
+              4.48,
+              8.14
+            ]
+          },
+          "weighted": {
+            "mean_diff": 6.42,
+            "ci95": [
+              -4.99,
+              17.83
+            ],
+            "per_run": [
+              4.38,
+              0.98,
+              3.36,
+              16.96
+            ]
+          }
+        },
+        "passes": false,
+        "below": false,
+        "reading": "not shown within about 4-5 points",
+        "decided": true,
+        "units": {
+          "10.1007_s11340-021-00758-x.conll": {
+            "gliner_ft": {
+              "micro": 52.64,
+              "macro": 40.62
+            },
+            "crf": {
+              "micro": 51.0,
+              "macro": 39.35
+            }
+          },
+          "10.1038_ncomms7164.conll": {
+            "gliner_ft": {
+              "micro": 43.2,
+              "macro": 28.7
+            },
+            "crf": {
+              "micro": 43.74,
+              "macro": 34.1
+            }
+          },
+          "10.1038_s41467-020-19071-7.conll": {
+            "gliner_ft": {
+              "micro": 50.45,
+              "macro": 41.42
+            },
+            "crf": {
+              "micro": 48.73,
+              "macro": 36.94
+            }
+          },
+          "10.3390_met10111458.conll": {
+            "gliner_ft": {
+              "micro": 54.61,
+              "macro": 42.74
+            },
+            "crf": {
+              "micro": 42.36,
+              "macro": 34.6
+            }
+          }
+        },
+        "validation": {
+          "gliner_ft": {
+            "best_epoch": 10.25,
+            "val_f1": 74.15,
+            "units": {
+              "10.1007_s11340-021-00758-x.conll": {
+                "best_epoch": 12.9,
+                "val_f1": 80.0
+              },
+              "10.1038_ncomms7164.conll": {
+                "best_epoch": 8.5,
+                "val_f1": 72.85
+              },
+              "10.1038_s41467-020-19071-7.conll": {
+                "best_epoch": 10.6,
+                "val_f1": 71.88
+              },
+              "10.3390_met10111458.conll": {
+                "best_epoch": 9.0,
+                "val_f1": 71.88
+              }
+            }
+          },
+          "crf": {
+            "best_epoch": 8.6,
+            "val_f1": 79.47,
+            "units": {
+              "10.1007_s11340-021-00758-x.conll": {
+                "best_epoch": 8.5,
+                "val_f1": 83.72
+              },
+              "10.1038_ncomms7164.conll": {
+                "best_epoch": 9.0,
+                "val_f1": 78.7
+              },
+              "10.1038_s41467-020-19071-7.conll": {
+                "best_epoch": 8.9,
+                "val_f1": 77.45
+              },
+              "10.3390_met10111458.conll": {
+                "best_epoch": 8.0,
+                "val_f1": 78.0
+              }
+            }
+          }
+        },
+        "dependence": {
+          "mean_diff": 3.77,
+          "ci95": [
+            -10.21,
+            17.75
+          ],
+          "p_two_sided": 0.4541,
+          "se_ratio": 1.528,
+          "correlated_pairs": 6,
+          "above_0": false
+        }
+      },
+      "coarse": {
+        "decision": "21.2",
+        "corpus": "materiominer",
+        "seeds": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "n_units": 4,
+        "gliner_ft": {
+          "micro": {
+            "mean": 48.48,
+            "ci95": [
+              40.83,
+              56.13
+            ],
+            "per_run": [
+              49.05,
+              52.77,
+              41.64,
+              50.45
+            ]
+          },
+          "micro_strict": {
+            "mean": 48.48,
+            "ci95": [
+              40.83,
+              56.13
+            ],
+            "per_run": [
+              49.05,
+              52.77,
+              41.64,
+              50.45
+            ]
+          },
+          "macro": {
+            "mean": 32.71,
+            "ci95": [
+              23.87,
+              41.54
+            ],
+            "per_run": [
+              31.05,
+              36.72,
+              25.57,
+              37.48
+            ]
+          },
+          "weighted": {
+            "mean": 44.09,
+            "ci95": [
+              36.28,
+              51.89
+            ],
+            "per_run": [
+              44.97,
+              48.08,
+              36.98,
+              46.32
+            ]
+          }
+        },
+        "crf": {
+          "micro": {
+            "mean": 58.6,
+            "ci95": [
+              53.24,
+              63.97
+            ],
+            "per_run": [
+              60.27,
+              62.54,
+              55.58,
+              56.02
+            ]
+          },
+          "micro_strict": {
+            "mean": 58.6,
+            "ci95": [
+              53.24,
+              63.97
+            ],
+            "per_run": [
+              60.27,
+              62.54,
+              55.58,
+              56.02
+            ]
+          },
+          "macro": {
+            "mean": 47.32,
+            "ci95": [
+              40.29,
+              54.35
+            ],
+            "per_run": [
+              49.05,
+              52.76,
+              44.09,
+              43.38
+            ]
+          },
+          "weighted": {
+            "mean": 57.39,
+            "ci95": [
+              52.32,
+              62.45
+            ],
+            "per_run": [
+              59.24,
+              60.88,
+              54.24,
+              55.18
+            ]
+          }
+        },
+        "minus_crf": {
+          "micro": {
+            "mean_diff": -10.12,
+            "ci95": [
+              -15.68,
+              -4.56
+            ],
+            "per_run": [
+              -11.22,
+              -9.77,
+              -13.94,
+              -5.57
+            ]
+          },
+          "micro_strict": {
+            "mean_diff": -10.12,
+            "ci95": [
+              -15.68,
+              -4.56
+            ],
+            "per_run": [
+              -11.22,
+              -9.77,
+              -13.94,
+              -5.57
+            ]
+          },
+          "macro": {
+            "mean_diff": -14.62,
+            "ci95": [
+              -24.01,
+              -5.22
+            ],
+            "per_run": [
+              -18.0,
+              -16.04,
+              -18.52,
+              -5.91
+            ]
+          },
+          "weighted": {
+            "mean_diff": -13.3,
+            "ci95": [
+              -18.85,
+              -7.75
+            ],
+            "per_run": [
+              -14.27,
+              -12.8,
+              -17.26,
+              -8.86
+            ]
+          }
+        },
+        "passes": false,
+        "below": true,
+        "reading": "below the CRF head",
+        "decided": true,
+        "units": {
+          "10.1007_s11340-021-00758-x.conll": {
+            "gliner_ft": {
+              "micro": 49.05,
+              "macro": 31.05
+            },
+            "crf": {
+              "micro": 60.27,
+              "macro": 49.05
+            }
+          },
+          "10.1038_ncomms7164.conll": {
+            "gliner_ft": {
+              "micro": 52.77,
+              "macro": 36.72
+            },
+            "crf": {
+              "micro": 62.54,
+              "macro": 52.76
+            }
+          },
+          "10.1038_s41467-020-19071-7.conll": {
+            "gliner_ft": {
+              "micro": 41.64,
+              "macro": 25.57
+            },
+            "crf": {
+              "micro": 55.58,
+              "macro": 44.09
+            }
+          },
+          "10.3390_met10111458.conll": {
+            "gliner_ft": {
+              "micro": 50.45,
+              "macro": 37.48
+            },
+            "crf": {
+              "micro": 56.02,
+              "macro": 43.38
+            }
+          }
+        },
+        "validation": {
+          "gliner_ft": {
+            "best_epoch": 15.05,
+            "val_f1": 70.24,
+            "units": {
+              "10.1007_s11340-021-00758-x.conll": {
+                "best_epoch": 15.3,
+                "val_f1": 74.63
+              },
+              "10.1038_ncomms7164.conll": {
+                "best_epoch": 14.8,
+                "val_f1": 70.65
+              },
+              "10.1038_s41467-020-19071-7.conll": {
+                "best_epoch": 14.4,
+                "val_f1": 66.17
+              },
+              "10.3390_met10111458.conll": {
+                "best_epoch": 15.7,
+                "val_f1": 69.51
+              }
+            }
+          },
+          "crf": {
+            "best_epoch": 10.25,
+            "val_f1": 79.33,
+            "units": {
+              "10.1007_s11340-021-00758-x.conll": {
+                "best_epoch": 9.3,
+                "val_f1": 80.81
+              },
+              "10.1038_ncomms7164.conll": {
+                "best_epoch": 9.4,
+                "val_f1": 80.86
+              },
+              "10.1038_s41467-020-19071-7.conll": {
+                "best_epoch": 11.2,
+                "val_f1": 77.55
+              },
+              "10.3390_met10111458.conll": {
+                "best_epoch": 11.1,
+                "val_f1": 78.08
+              }
+            }
+          }
+        },
+        "dependence": {
+          "mean_diff": -10.12,
+          "ci95": [
+            -18.62,
+            -1.63
+          ],
+          "p_two_sided": 0.0321,
+          "se_ratio": 1.528,
+          "correlated_pairs": 6,
+          "above_0": false
+        }
+      },
+      "mulms": {
+        "decision": "21.3",
+        "corpus": "mulms",
+        "seeds": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "n_units": 7,
+        "gliner_ft": {
+          "micro": {
+            "mean": 50.23,
+            "ci95": [
+              43.8,
+              56.67
+            ],
+            "per_run": [
+              58.05,
+              47.07,
+              52.49,
+              50.17,
+              41.1,
+              43.37,
+              59.38
+            ]
+          },
+          "micro_strict": {
+            "mean": 50.23,
+            "ci95": [
+              43.8,
+              56.67
+            ],
+            "per_run": [
+              58.05,
+              47.07,
+              52.49,
+              50.17,
+              41.1,
+              43.37,
+              59.38
+            ]
+          },
+          "macro": {
+            "mean": 30.33,
+            "ci95": [
+              26.41,
+              34.24
+            ],
+            "per_run": [
+              36.36,
+              27.5,
+              30.81,
+              31.13,
+              27.02,
+              24.69,
+              34.77
+            ]
+          },
+          "weighted": {
+            "mean": 48.16,
+            "ci95": [
+              41.04,
+              55.29
+            ],
+            "per_run": [
+              57.38,
+              42.39,
+              52.04,
+              47.29,
+              38.72,
+              41.65,
+              57.68
+            ]
+          }
+        },
+        "crf": {
+          "micro": {
+            "mean": 48.66,
+            "ci95": [
+              40.91,
+              56.4
+            ],
+            "per_run": [
+              55.85,
+              49.95,
+              50.02,
+              51.99,
+              32.49,
+              43.48,
+              56.82
+            ]
+          },
+          "micro_strict": {
+            "mean": 48.66,
+            "ci95": [
+              40.91,
+              56.4
+            ],
+            "per_run": [
+              55.85,
+              49.95,
+              50.02,
+              51.99,
+              32.49,
+              43.48,
+              56.82
+            ]
+          },
+          "macro": {
+            "mean": 29.22,
+            "ci95": [
+              23.36,
+              35.09
+            ],
+            "per_run": [
+              35.64,
+              28.77,
+              27.65,
+              36.2,
+              19.27,
+              23.58,
+              33.45
+            ]
+          },
+          "weighted": {
+            "mean": 45.81,
+            "ci95": [
+              37.5,
+              54.12
+            ],
+            "per_run": [
+              54.58,
+              44.79,
+              48.91,
+              49.31,
+              28.28,
+              41.39,
+              53.43
+            ]
+          }
+        },
+        "minus_crf": {
+          "micro": {
+            "mean_diff": 1.58,
+            "ci95": [
+              -1.92,
+              5.08
+            ],
+            "per_run": [
+              2.2,
+              -2.87,
+              2.48,
+              -1.82,
+              8.62,
+              -0.12,
+              2.56
+            ]
+          },
+          "micro_strict": {
+            "mean_diff": 1.58,
+            "ci95": [
+              -1.92,
+              5.08
+            ],
+            "per_run": [
+              2.2,
+              -2.87,
+              2.48,
+              -1.82,
+              8.62,
+              -0.12,
+              2.56
+            ]
+          },
+          "macro": {
+            "mean_diff": 1.1,
+            "ci95": [
+              -2.52,
+              4.73
+            ],
+            "per_run": [
+              0.72,
+              -1.27,
+              3.16,
+              -5.06,
+              7.75,
+              1.1,
+              1.32
+            ]
+          },
+          "weighted": {
+            "mean_diff": 2.35,
+            "ci95": [
+              -1.71,
+              6.42
+            ],
+            "per_run": [
+              2.8,
+              -2.4,
+              3.13,
+              -2.02,
+              10.43,
+              0.26,
+              4.26
+            ]
+          }
+        },
+        "passes": false,
+        "below": false,
+        "reading": "not shown within about 3.5 points",
+        "decided": true,
+        "units": {
+          "electrolysis": {
+            "gliner_ft": {
+              "micro": 58.05,
+              "macro": 36.36
+            },
+            "crf": {
+              "micro": 55.85,
+              "macro": 35.64
+            }
+          },
+          "graphene": {
+            "gliner_ft": {
+              "micro": 47.07,
+              "macro": 27.5
+            },
+            "crf": {
+              "micro": 49.95,
+              "macro": 28.77
+            }
+          },
+          "pemfc": {
+            "gliner_ft": {
+              "micro": 52.49,
+              "macro": 30.81
+            },
+            "crf": {
+              "micro": 50.02,
+              "macro": 27.65
+            }
+          },
+          "poly": {
+            "gliner_ft": {
+              "micro": 50.17,
+              "macro": 31.13
+            },
+            "crf": {
+              "micro": 51.99,
+              "macro": 36.2
+            }
+          },
+          "semi": {
+            "gliner_ft": {
+              "micro": 41.1,
+              "macro": 27.02
+            },
+            "crf": {
+              "micro": 32.49,
+              "macro": 19.27
+            }
+          },
+          "sofc": {
+            "gliner_ft": {
+              "micro": 43.37,
+              "macro": 24.69
+            },
+            "crf": {
+              "micro": 43.48,
+              "macro": 23.58
+            }
+          },
+          "steel": {
+            "gliner_ft": {
+              "micro": 59.38,
+              "macro": 34.77
+            },
+            "crf": {
+              "micro": 56.82,
+              "macro": 33.45
+            }
+          }
+        },
+        "validation": {
+          "gliner_ft": {
+            "best_epoch": 8.5,
+            "val_f1": 74.03,
+            "units": {
+              "electrolysis": {
+                "best_epoch": 10.8,
+                "val_f1": 73.01
+              },
+              "graphene": {
+                "best_epoch": 8.4,
+                "val_f1": 77.75
+              },
+              "pemfc": {
+                "best_epoch": 8.5,
+                "val_f1": 72.63
+              },
+              "poly": {
+                "best_epoch": 9.1,
+                "val_f1": 75.86
+              },
+              "semi": {
+                "best_epoch": 6.4,
+                "val_f1": 70.65
+              },
+              "sofc": {
+                "best_epoch": 7.2,
+                "val_f1": 68.33
+              },
+              "steel": {
+                "best_epoch": 9.1,
+                "val_f1": 79.97
+              }
+            }
+          },
+          "crf": {
+            "best_epoch": 7.06,
+            "val_f1": 76.89,
+            "units": {
+              "electrolysis": {
+                "best_epoch": 7.9,
+                "val_f1": 72.75
+              },
+              "graphene": {
+                "best_epoch": 6.5,
+                "val_f1": 82.91
+              },
+              "pemfc": {
+                "best_epoch": 4.8,
+                "val_f1": 77.1
+              },
+              "poly": {
+                "best_epoch": 8.7,
+                "val_f1": 77.56
+              },
+              "semi": {
+                "best_epoch": 7.5,
+                "val_f1": 78.36
+              },
+              "sofc": {
+                "best_epoch": 6.7,
+                "val_f1": 69.01
+              },
+              "steel": {
+                "best_epoch": 7.3,
+                "val_f1": 80.56
+              }
+            }
+          }
+        },
+        "dependence": {
+          "mean_diff": 1.58,
+          "ci95": [
+            -2.63,
+            5.78
+          ],
+          "p_two_sided": 0.3938,
+          "se_ratio": 1.201,
+          "correlated_pairs": 5,
+          "above_0": false
+        }
+      },
+      "sofc": {
+        "decision": "21.4",
+        "corpus": "sofc_exp",
+        "seeds": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "n_units": 5,
+        "gliner_ft": {
+          "micro": {
+            "mean": 83.05,
+            "ci95": [
+              78.42,
+              87.69
+            ],
+            "per_run": [
+              81.32,
+              88.96,
+              83.1,
+              78.81,
+              83.08
+            ]
+          },
+          "micro_strict": {
+            "mean": 83.05,
+            "ci95": [
+              78.42,
+              87.69
+            ],
+            "per_run": [
+              81.32,
+              88.96,
+              83.1,
+              78.81,
+              83.08
+            ]
+          },
+          "macro": {
+            "mean": 81.73,
+            "ci95": [
+              76.88,
+              86.59
+            ],
+            "per_run": [
+              80.03,
+              87.94,
+              81.58,
+              77.29,
+              81.83
+            ]
+          },
+          "weighted": {
+            "mean": 83.13,
+            "ci95": [
+              78.57,
+              87.7
+            ],
+            "per_run": [
+              81.52,
+              88.94,
+              83.18,
+              78.91,
+              83.12
+            ]
+          }
+        },
+        "crf": {
+          "micro": {
+            "mean": 82.79,
+            "ci95": [
+              78.33,
+              87.24
+            ],
+            "per_run": [
+              82.85,
+              88.76,
+              82.28,
+              79.77,
+              80.27
+            ]
+          },
+          "micro_strict": {
+            "mean": 82.79,
+            "ci95": [
+              78.33,
+              87.24
+            ],
+            "per_run": [
+              82.85,
+              88.76,
+              82.28,
+              79.77,
+              80.27
+            ]
+          },
+          "macro": {
+            "mean": 81.39,
+            "ci95": [
+              76.65,
+              86.13
+            ],
+            "per_run": [
+              81.85,
+              87.72,
+              80.11,
+              77.86,
+              79.41
+            ]
+          },
+          "weighted": {
+            "mean": 82.83,
+            "ci95": [
+              78.4,
+              87.26
+            ],
+            "per_run": [
+              82.98,
+              88.78,
+              82.19,
+              79.72,
+              80.49
+            ]
+          }
+        },
+        "minus_crf": {
+          "micro": {
+            "mean_diff": 0.27,
+            "ci95": [
+              -1.84,
+              2.37
+            ],
+            "per_run": [
+              -1.53,
+              0.19,
+              0.81,
+              -0.95,
+              2.81
+            ]
+          },
+          "micro_strict": {
+            "mean_diff": 0.27,
+            "ci95": [
+              -1.84,
+              2.37
+            ],
+            "per_run": [
+              -1.53,
+              0.19,
+              0.81,
+              -0.95,
+              2.81
+            ]
+          },
+          "macro": {
+            "mean_diff": 0.34,
+            "ci95": [
+              -1.73,
+              2.41
+            ],
+            "per_run": [
+              -1.82,
+              0.22,
+              1.46,
+              -0.57,
+              2.42
+            ]
+          },
+          "weighted": {
+            "mean_diff": 0.3,
+            "ci95": [
+              -1.69,
+              2.29
+            ],
+            "per_run": [
+              -1.47,
+              0.16,
+              0.99,
+              -0.8,
+              2.63
+            ]
+          }
+        },
+        "passes": false,
+        "below": false,
+        "reading": "not shown within about 1.5-2 points",
+        "decided": true,
+        "units": {
+          "fold0": {
+            "gliner_ft": {
+              "micro": 81.32,
+              "macro": 80.03
+            },
+            "crf": {
+              "micro": 82.85,
+              "macro": 81.85
+            }
+          },
+          "fold1": {
+            "gliner_ft": {
+              "micro": 88.96,
+              "macro": 87.94
+            },
+            "crf": {
+              "micro": 88.76,
+              "macro": 87.72
+            }
+          },
+          "fold2": {
+            "gliner_ft": {
+              "micro": 83.1,
+              "macro": 81.58
+            },
+            "crf": {
+              "micro": 82.28,
+              "macro": 80.11
+            }
+          },
+          "fold3": {
+            "gliner_ft": {
+              "micro": 78.81,
+              "macro": 77.29
+            },
+            "crf": {
+              "micro": 79.77,
+              "macro": 77.86
+            }
+          },
+          "fold4": {
+            "gliner_ft": {
+              "micro": 83.08,
+              "macro": 81.83
+            },
+            "crf": {
+              "micro": 80.27,
+              "macro": 79.41
+            }
+          }
+        },
+        "validation": {
+          "gliner_ft": {
+            "best_epoch": 8.88,
+            "val_f1": 85.62,
+            "units": {
+              "fold0": {
+                "best_epoch": 7.2,
+                "val_f1": 84.54
+              },
+              "fold1": {
+                "best_epoch": 8.8,
+                "val_f1": 84.99
+              },
+              "fold2": {
+                "best_epoch": 9.8,
+                "val_f1": 85.76
+              },
+              "fold3": {
+                "best_epoch": 8.9,
+                "val_f1": 87.66
+              },
+              "fold4": {
+                "best_epoch": 9.7,
+                "val_f1": 85.13
+              }
+            }
+          },
+          "crf": {
+            "best_epoch": 5.98,
+            "val_f1": 86.44,
+            "units": {
+              "fold0": {
+                "best_epoch": 5.3,
+                "val_f1": 85.98
+              },
+              "fold1": {
+                "best_epoch": 6.8,
+                "val_f1": 85.51
+              },
+              "fold2": {
+                "best_epoch": 4.6,
+                "val_f1": 85.39
+              },
+              "fold3": {
+                "best_epoch": 6.1,
+                "val_f1": 88.5
+              },
+              "fold4": {
+                "best_epoch": 7.1,
+                "val_f1": 86.81
+              }
+            }
+          }
+        },
+        "dependence": {
+          "mean_diff": 0.27,
+          "ci95": [
+            -2.89,
+            3.42
+          ],
+          "p_two_sided": 0.8264,
+          "se_ratio": 1.5,
+          "correlated_pairs": 10,
+          "above_0": false
+        }
+      }
+    },
+    "corpora": {
+      "materiominer": {
+        "21.1": "null",
+        "21.2": "below"
+      },
+      "mulms": {
+        "21.3": "null"
+      },
+      "sofc_exp": {
+        "21.4": "null"
+      }
+    },
+    "zero_shot": {
+      "fine": {
+        "seeds": {
+          "gliner_zs": [
+            0
+          ],
+          "crf": [
+            0,
+            100,
+            200,
+            300,
+            400,
+            500,
+            600,
+            700,
+            800,
+            900
+          ]
+        },
+        "n_units": 4,
+        "gliner_zs": {
+          "micro": {
+            "mean": 26.59,
+            "ci95": [
+              21.99,
+              31.18
+            ],
+            "per_run": [
+              24.79,
+              28.44,
+              23.53,
+              29.59
+            ]
+          },
+          "micro_strict": {
+            "mean": 26.59,
+            "ci95": [
+              21.99,
+              31.18
+            ],
+            "per_run": [
+              24.79,
+              28.44,
+              23.53,
+              29.59
+            ]
+          },
+          "macro": {
+            "mean": 20.96,
+            "ci95": [
+              10.99,
+              30.94
+            ],
+            "per_run": [
+              27.3,
+              12.35,
+              21.43,
+              22.78
+            ]
+          },
+          "weighted": {
+            "mean": 22.36,
+            "ci95": [
+              17.17,
+              27.56
+            ],
+            "per_run": [
+              24.22,
+              21.45,
+              18.2,
+              25.58
+            ]
+          }
+        },
+        "crf": {
+          "micro": {
+            "mean": 46.46,
+            "ci95": [
+              39.96,
+              52.95
+            ],
+            "per_run": [
+              51.0,
+              43.74,
+              48.73,
+              42.36
+            ]
+          },
+          "micro_strict": {
+            "mean": 46.46,
+            "ci95": [
+              39.96,
+              52.95
+            ],
+            "per_run": [
+              51.0,
+              43.74,
+              48.73,
+              42.36
+            ]
+          },
+          "macro": {
+            "mean": 36.25,
+            "ci95": [
+              32.41,
+              40.08
+            ],
+            "per_run": [
+              39.35,
+              34.1,
+              36.94,
+              34.6
+            ]
+          },
+          "weighted": {
+            "mean": 42.02,
+            "ci95": [
+              31.9,
+              52.14
+            ],
+            "per_run": [
+              49.96,
+              39.3,
+              43.74,
+              35.09
+            ]
+          }
+        },
+        "minus_crf": {
+          "micro": {
+            "mean_diff": -19.87,
+            "ci95": [
+              -30.73,
+              -9.0
+            ],
+            "per_run": [
+              -26.21,
+              -15.3,
+              -25.2,
+              -12.77
+            ]
+          },
+          "micro_strict": {
+            "mean_diff": -19.87,
+            "ci95": [
+              -30.73,
+              -9.0
+            ],
+            "per_run": [
+              -26.21,
+              -15.3,
+              -25.2,
+              -12.77
+            ]
+          },
+          "macro": {
+            "mean_diff": -15.28,
+            "ci95": [
+              -22.65,
+              -7.92
+            ],
+            "per_run": [
+              -12.05,
+              -21.75,
+              -15.51,
+              -11.82
+            ]
+          },
+          "weighted": {
+            "mean_diff": -19.66,
+            "ci95": [
+              -31.91,
+              -7.41
+            ],
+            "per_run": [
+              -25.74,
+              -17.85,
+              -25.54,
+              -9.51
+            ]
+          }
+        },
+        "units": {
+          "10.1007_s11340-021-00758-x.conll": {
+            "gliner_zs": {
+              "micro": 24.79,
+              "macro": 27.3
+            },
+            "crf": {
+              "micro": 51.0,
+              "macro": 39.35
+            },
+            "threshold": 0.5
+          },
+          "10.1038_ncomms7164.conll": {
+            "gliner_zs": {
+              "micro": 28.44,
+              "macro": 12.35
+            },
+            "crf": {
+              "micro": 43.74,
+              "macro": 34.1
+            },
+            "threshold": 0.4
+          },
+          "10.1038_s41467-020-19071-7.conll": {
+            "gliner_zs": {
+              "micro": 23.53,
+              "macro": 21.43
+            },
+            "crf": {
+              "micro": 48.73,
+              "macro": 36.94
+            },
+            "threshold": 0.4
+          },
+          "10.3390_met10111458.conll": {
+            "gliner_zs": {
+              "micro": 29.59,
+              "macro": 22.78
+            },
+            "crf": {
+              "micro": 42.36,
+              "macro": 34.6
+            },
+            "threshold": 0.4
+          }
+        },
+        "dependence": {
+          "mean_diff": -19.87,
+          "ci95": [
+            -36.47,
+            -3.27
+          ],
+          "p_two_sided": 0.0318,
+          "se_ratio": 1.528,
+          "correlated_pairs": 6,
+          "above_0": false
+        }
+      },
+      "mulms": {
+        "seeds": {
+          "gliner_zs": [
+            0
+          ],
+          "crf": [
+            0,
+            100,
+            200,
+            300,
+            400,
+            500,
+            600,
+            700,
+            800,
+            900
+          ]
+        },
+        "n_units": 7,
+        "gliner_zs": {
+          "micro": {
+            "mean": 16.22,
+            "ci95": [
+              14.38,
+              18.05
+            ],
+            "per_run": [
+              16.12,
+              15.59,
+              18.03,
+              16.88,
+              12.55,
+              15.72,
+              18.62
+            ]
+          },
+          "micro_strict": {
+            "mean": 16.22,
+            "ci95": [
+              14.38,
+              18.05
+            ],
+            "per_run": [
+              16.12,
+              15.59,
+              18.03,
+              16.88,
+              12.55,
+              15.72,
+              18.62
+            ]
+          },
+          "macro": {
+            "mean": 11.22,
+            "ci95": [
+              9.65,
+              12.79
+            ],
+            "per_run": [
+              12.2,
+              12.47,
+              10.94,
+              10.82,
+              8.61,
+              9.84,
+              13.63
+            ]
+          },
+          "weighted": {
+            "mean": 17.4,
+            "ci95": [
+              14.43,
+              20.38
+            ],
+            "per_run": [
+              17.02,
+              14.25,
+              20.68,
+              18.71,
+              12.46,
+              17.42,
+              21.28
+            ]
+          }
+        },
+        "crf": {
+          "micro": {
+            "mean": 48.66,
+            "ci95": [
+              40.91,
+              56.4
+            ],
+            "per_run": [
+              55.85,
+              49.95,
+              50.02,
+              51.99,
+              32.49,
+              43.48,
+              56.82
+            ]
+          },
+          "micro_strict": {
+            "mean": 48.66,
+            "ci95": [
+              40.91,
+              56.4
+            ],
+            "per_run": [
+              55.85,
+              49.95,
+              50.02,
+              51.99,
+              32.49,
+              43.48,
+              56.82
+            ]
+          },
+          "macro": {
+            "mean": 29.22,
+            "ci95": [
+              23.36,
+              35.09
+            ],
+            "per_run": [
+              35.64,
+              28.77,
+              27.65,
+              36.2,
+              19.27,
+              23.58,
+              33.45
+            ]
+          },
+          "weighted": {
+            "mean": 45.81,
+            "ci95": [
+              37.5,
+              54.12
+            ],
+            "per_run": [
+              54.58,
+              44.79,
+              48.91,
+              49.31,
+              28.28,
+              41.39,
+              53.43
+            ]
+          }
+        },
+        "minus_crf": {
+          "micro": {
+            "mean_diff": -32.44,
+            "ci95": [
+              -38.71,
+              -26.17
+            ],
+            "per_run": [
+              -39.73,
+              -34.36,
+              -31.99,
+              -35.11,
+              -19.94,
+              -27.76,
+              -38.2
+            ]
+          },
+          "micro_strict": {
+            "mean_diff": -32.44,
+            "ci95": [
+              -38.71,
+              -26.17
+            ],
+            "per_run": [
+              -39.73,
+              -34.36,
+              -31.99,
+              -35.11,
+              -19.94,
+              -27.76,
+              -38.2
+            ]
+          },
+          "macro": {
+            "mean_diff": -18.01,
+            "ci95": [
+              -22.84,
+              -13.17
+            ],
+            "per_run": [
+              -23.44,
+              -16.3,
+              -16.71,
+              -25.38,
+              -10.66,
+              -13.74,
+              -19.82
+            ]
+          },
+          "weighted": {
+            "mean_diff": -28.41,
+            "ci95": [
+              -34.79,
+              -22.03
+            ],
+            "per_run": [
+              -37.56,
+              -30.54,
+              -28.23,
+              -30.6,
+              -15.82,
+              -23.97,
+              -32.15
+            ]
+          }
+        },
+        "units": {
+          "electrolysis": {
+            "gliner_zs": {
+              "micro": 16.12,
+              "macro": 12.2
+            },
+            "crf": {
+              "micro": 55.85,
+              "macro": 35.64
+            },
+            "threshold": 0.4
+          },
+          "graphene": {
+            "gliner_zs": {
+              "micro": 15.59,
+              "macro": 12.47
+            },
+            "crf": {
+              "micro": 49.95,
+              "macro": 28.77
+            },
+            "threshold": 0.4
+          },
+          "pemfc": {
+            "gliner_zs": {
+              "micro": 18.03,
+              "macro": 10.94
+            },
+            "crf": {
+              "micro": 50.02,
+              "macro": 27.65
+            },
+            "threshold": 0.3
+          },
+          "poly": {
+            "gliner_zs": {
+              "micro": 16.88,
+              "macro": 10.82
+            },
+            "crf": {
+              "micro": 51.99,
+              "macro": 36.2
+            },
+            "threshold": 0.3
+          },
+          "semi": {
+            "gliner_zs": {
+              "micro": 12.55,
+              "macro": 8.61
+            },
+            "crf": {
+              "micro": 32.49,
+              "macro": 19.27
+            },
+            "threshold": 0.6
+          },
+          "sofc": {
+            "gliner_zs": {
+              "micro": 15.72,
+              "macro": 9.84
+            },
+            "crf": {
+              "micro": 43.48,
+              "macro": 23.58
+            },
+            "threshold": 0.3
+          },
+          "steel": {
+            "gliner_zs": {
+              "micro": 18.62,
+              "macro": 13.63
+            },
+            "crf": {
+              "micro": 56.82,
+              "macro": 33.45
+            },
+            "threshold": 0.3
+          }
+        },
+        "dependence": {
+          "mean_diff": -32.44,
+          "ci95": [
+            -39.97,
+            -24.91
+          ],
+          "p_two_sided": 0.0,
+          "se_ratio": 1.201,
+          "correlated_pairs": 5,
+          "above_0": false
+        }
+      },
+      "sofc": {
+        "seeds": {
+          "gliner_zs": [
+            0
+          ],
+          "crf": [
+            0,
+            100,
+            200,
+            300,
+            400,
+            500,
+            600,
+            700,
+            800,
+            900
+          ]
+        },
+        "n_units": 5,
+        "gliner_zs": {
+          "micro": {
+            "mean": 35.01,
+            "ci95": [
+              30.82,
+              39.19
+            ],
+            "per_run": [
+              34.58,
+              40.74,
+              34.32,
+              33.51,
+              31.89
+            ]
+          },
+          "micro_strict": {
+            "mean": 35.01,
+            "ci95": [
+              30.82,
+              39.19
+            ],
+            "per_run": [
+              34.58,
+              40.74,
+              34.32,
+              33.51,
+              31.89
+            ]
+          },
+          "macro": {
+            "mean": 30.18,
+            "ci95": [
+              26.91,
+              33.45
+            ],
+            "per_run": [
+              29.47,
+              34.65,
+              30.24,
+              28.36,
+              28.19
+            ]
+          },
+          "weighted": {
+            "mean": 32.4,
+            "ci95": [
+              28.47,
+              36.33
+            ],
+            "per_run": [
+              32.14,
+              37.77,
+              31.39,
+              31.31,
+              29.4
+            ]
+          }
+        },
+        "crf": {
+          "micro": {
+            "mean": 82.79,
+            "ci95": [
+              78.33,
+              87.24
+            ],
+            "per_run": [
+              82.85,
+              88.76,
+              82.28,
+              79.77,
+              80.27
+            ]
+          },
+          "micro_strict": {
+            "mean": 82.79,
+            "ci95": [
+              78.33,
+              87.24
+            ],
+            "per_run": [
+              82.85,
+              88.76,
+              82.28,
+              79.77,
+              80.27
+            ]
+          },
+          "macro": {
+            "mean": 81.39,
+            "ci95": [
+              76.65,
+              86.13
+            ],
+            "per_run": [
+              81.85,
+              87.72,
+              80.11,
+              77.86,
+              79.41
+            ]
+          },
+          "weighted": {
+            "mean": 82.83,
+            "ci95": [
+              78.4,
+              87.26
+            ],
+            "per_run": [
+              82.98,
+              88.78,
+              82.19,
+              79.72,
+              80.49
+            ]
+          }
+        },
+        "minus_crf": {
+          "micro": {
+            "mean_diff": -47.78,
+            "ci95": [
+              -48.85,
+              -46.7
+            ],
+            "per_run": [
+              -48.27,
+              -48.02,
+              -47.96,
+              -46.26,
+              -48.38
+            ]
+          },
+          "micro_strict": {
+            "mean_diff": -47.78,
+            "ci95": [
+              -48.85,
+              -46.7
+            ],
+            "per_run": [
+              -48.27,
+              -48.02,
+              -47.96,
+              -46.26,
+              -48.38
+            ]
+          },
+          "macro": {
+            "mean_diff": -51.21,
+            "ci95": [
+              -53.12,
+              -49.29
+            ],
+            "per_run": [
+              -52.38,
+              -53.07,
+              -49.87,
+              -49.5,
+              -51.22
+            ]
+          },
+          "weighted": {
+            "mean_diff": -50.43,
+            "ci95": [
+              -51.84,
+              -49.02
+            ],
+            "per_run": [
+              -50.84,
+              -51.01,
+              -50.8,
+              -48.41,
+              -51.09
+            ]
+          }
+        },
+        "units": {
+          "fold0": {
+            "gliner_zs": {
+              "micro": 34.58,
+              "macro": 29.47
+            },
+            "crf": {
+              "micro": 82.85,
+              "macro": 81.85
+            },
+            "threshold": 0.4
+          },
+          "fold1": {
+            "gliner_zs": {
+              "micro": 40.74,
+              "macro": 34.65
+            },
+            "crf": {
+              "micro": 88.76,
+              "macro": 87.72
+            },
+            "threshold": 0.3
+          },
+          "fold2": {
+            "gliner_zs": {
+              "micro": 34.32,
+              "macro": 30.24
+            },
+            "crf": {
+              "micro": 82.28,
+              "macro": 80.11
+            },
+            "threshold": 0.4
+          },
+          "fold3": {
+            "gliner_zs": {
+              "micro": 33.51,
+              "macro": 28.36
+            },
+            "crf": {
+              "micro": 79.77,
+              "macro": 77.86
+            },
+            "threshold": 0.4
+          },
+          "fold4": {
+            "gliner_zs": {
+              "micro": 31.89,
+              "macro": 28.19
+            },
+            "crf": {
+              "micro": 80.27,
+              "macro": 79.41
+            },
+            "threshold": 0.5
+          }
+        },
+        "dependence": {
+          "mean_diff": -47.78,
+          "ci95": [
+            -49.39,
+            -46.16
+          ],
+          "p_two_sided": 0.0,
+          "se_ratio": 1.5,
+          "correlated_pairs": 10,
+          "above_0": false
+        }
+      }
+    }
+  },
   "paper_count": {
     "fine": {
       "papers": {

@@ -4,7 +4,10 @@
 referee: "approve with required changes"). The binding protocol, with its
 required changes (gliner_medium for every arm, the fixed recipe and labels, the
 environment kept, the detectable sizes, the readings and the checks), is
-`docs/ROADMAP.md` §4's week-21 protocol. This draft keeps the first reasons.*
+`docs/ROADMAP.md` §4's week-21 protocol. This draft keeps the first reasons.
+Run and decided on 4 November: none of 21.1–21.4 passes; fine-tuned GLiNER is not
+shown to differ from the CRF head on MaterioMiner fine-grained, MuLMS or SOFC-Exp and
+is below it at MaterioMiner's coarse level (ROADMAP §4, the week-21 outcome).*
 
 ## 1. Why
 
