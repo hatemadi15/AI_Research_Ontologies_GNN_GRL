@@ -17124,5 +17124,1451 @@
         }
       }
     }
+  },
+  "week21": {
+    "fine": {
+      "seeds": {
+        "crf": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "gliner_ft": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "gliner_zs": [
+          0
+        ]
+      },
+      "reference": "crf",
+      "systems": {
+        "crf": {
+          "n_runs": 40,
+          "seen": {
+            "n_gold": 2210,
+            "n_pred": 2524,
+            "n_correct": 1577,
+            "recall": 71.36,
+            "precision": 62.48,
+            "f1": 66.62,
+            "share": 0.166
+          },
+          "seen_other": {
+            "n_gold": 280,
+            "n_pred": 83,
+            "n_correct": 32,
+            "recall": 11.43,
+            "precision": 38.55,
+            "f1": 17.63,
+            "share": 0.021
+          },
+          "unseen": {
+            "n_gold": 10790,
+            "n_pred": 7419,
+            "n_correct": 3777,
+            "recall": 35.0,
+            "precision": 50.91,
+            "f1": 41.48,
+            "share": 0.812
+          },
+          "all": {
+            "n_gold": 13280,
+            "n_pred": 10026,
+            "n_correct": 5386,
+            "recall": 40.56,
+            "precision": 53.72,
+            "f1": 46.22,
+            "share": 1.0
+          }
+        },
+        "gliner_ft": {
+          "n_runs": 40,
+          "seen": {
+            "n_gold": 2210,
+            "n_pred": 2338,
+            "n_correct": 1516,
+            "recall": 68.6,
+            "precision": 64.84,
+            "f1": 66.67,
+            "share": 0.166
+          },
+          "seen_other": {
+            "n_gold": 280,
+            "n_pred": 56,
+            "n_correct": 5,
+            "recall": 1.79,
+            "precision": 8.93,
+            "f1": 2.98,
+            "share": 0.021
+          },
+          "unseen": {
+            "n_gold": 10790,
+            "n_pred": 8504,
+            "n_correct": 4566,
+            "recall": 42.32,
+            "precision": 53.69,
+            "f1": 47.33,
+            "share": 0.812
+          },
+          "all": {
+            "n_gold": 13280,
+            "n_pred": 10898,
+            "n_correct": 6087,
+            "recall": 45.84,
+            "precision": 55.85,
+            "f1": 50.35,
+            "share": 1.0
+          }
+        },
+        "gliner_zs": {
+          "n_runs": 4,
+          "seen": {
+            "n_gold": 221,
+            "n_pred": 101,
+            "n_correct": 73,
+            "recall": 33.03,
+            "precision": 72.28,
+            "f1": 45.34,
+            "share": 0.166
+          },
+          "seen_other": {
+            "n_gold": 28,
+            "n_pred": 22,
+            "n_correct": 0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "f1": 0.0,
+            "share": 0.021
+          },
+          "unseen": {
+            "n_gold": 1079,
+            "n_pred": 846,
+            "n_correct": 230,
+            "recall": 21.32,
+            "precision": 27.19,
+            "f1": 23.9,
+            "share": 0.812
+          },
+          "all": {
+            "n_gold": 1328,
+            "n_pred": 969,
+            "n_correct": 303,
+            "recall": 22.82,
+            "precision": 31.27,
+            "f1": 26.38,
+            "share": 1.0
+          }
+        }
+      },
+      "units": {
+        "10.1007_s11340-021-00758-x.conll": {
+          "crf": {
+            "recall_seen": 78.24,
+            "recall_unseen": 44.19
+          },
+          "gliner_ft": {
+            "recall_seen": 76.47,
+            "recall_unseen": 51.63
+          },
+          "gliner_zs": {
+            "recall_seen": 11.76,
+            "recall_unseen": 30.23
+          }
+        },
+        "10.1038_ncomms7164.conll": {
+          "crf": {
+            "recall_seen": 71.43,
+            "recall_unseen": 32.84
+          },
+          "gliner_ft": {
+            "recall_seen": 61.02,
+            "recall_unseen": 35.0
+          },
+          "gliner_zs": {
+            "recall_seen": 34.69,
+            "recall_unseen": 22.06
+          }
+        },
+        "10.1038_s41467-020-19071-7.conll": {
+          "crf": {
+            "recall_seen": 72.02,
+            "recall_unseen": 39.47
+          },
+          "gliner_ft": {
+            "recall_seen": 75.85,
+            "recall_unseen": 41.35
+          },
+          "gliner_zs": {
+            "recall_seen": 34.04,
+            "recall_unseen": 17.65
+          }
+        },
+        "10.3390_met10111458.conll": {
+          "crf": {
+            "recall_seen": 68.36,
+            "recall_unseen": 28.07
+          },
+          "gliner_ft": {
+            "recall_seen": 61.31,
+            "recall_unseen": 47.24
+          },
+          "gliner_zs": {
+            "recall_seen": 36.07,
+            "recall_unseen": 25.47
+          }
+        }
+      },
+      "minus_crf": {
+        "gliner_ft": {
+          "seen": {
+            "method": 64.96,
+            "reference": 65.72,
+            "mean_diff": -0.75,
+            "ci95": [
+              -9.37,
+              7.86
+            ],
+            "n_pairs": 4,
+            "recall": {
+              "method": 68.66,
+              "reference": 72.51,
+              "mean_diff": -3.85,
+              "ci95": [
+                -13.77,
+                6.07
+              ]
+            },
+            "precision": {
+              "method": 62.4,
+              "reference": 61.67,
+              "mean_diff": 0.73,
+              "ci95": [
+                -10.64,
+                12.1
+              ]
+            }
+          },
+          "unseen": {
+            "method": 46.96,
+            "reference": 41.36,
+            "mean_diff": 5.6,
+            "ci95": [
+              -6.85,
+              18.05
+            ],
+            "n_pairs": 4,
+            "recall": {
+              "method": 43.8,
+              "reference": 36.14,
+              "mean_diff": 7.66,
+              "ci95": [
+                -5.2,
+                20.52
+              ]
+            },
+            "precision": {
+              "method": 51.97,
+              "reference": 50.46,
+              "mean_diff": 1.51,
+              "ci95": [
+                -6.77,
+                9.79
+              ]
+            }
+          },
+          "all": {
+            "method": 50.22,
+            "reference": 46.46,
+            "mean_diff": 3.77,
+            "ci95": [
+              -5.38,
+              12.92
+            ],
+            "n_pairs": 4,
+            "recall": {
+              "method": 47.94,
+              "reference": 42.76,
+              "mean_diff": 5.18,
+              "ci95": [
+                -5.69,
+                16.04
+              ]
+            },
+            "precision": {
+              "method": 54.0,
+              "reference": 52.7,
+              "mean_diff": 1.3,
+              "ci95": [
+                -2.44,
+                5.04
+              ]
+            }
+          }
+        },
+        "gliner_zs": {
+          "seen": {
+            "method": 40.28,
+            "reference": 65.72,
+            "mean_diff": -25.44,
+            "ci95": [
+              -49.59,
+              -1.29
+            ],
+            "n_pairs": 4,
+            "recall": {
+              "method": 29.14,
+              "reference": 72.51,
+              "mean_diff": -43.37,
+              "ci95": [
+                -68.19,
+                -18.56
+              ]
+            },
+            "precision": {
+              "method": 71.89,
+              "reference": 61.67,
+              "mean_diff": 10.22,
+              "ci95": [
+                -21.34,
+                41.78
+              ]
+            }
+          },
+          "unseen": {
+            "method": 25.08,
+            "reference": 41.36,
+            "mean_diff": -16.28,
+            "ci95": [
+              -26.7,
+              -5.86
+            ],
+            "n_pairs": 4,
+            "recall": {
+              "method": 23.85,
+              "reference": 36.14,
+              "mean_diff": -12.29,
+              "ci95": [
+                -24.94,
+                0.36
+              ]
+            },
+            "precision": {
+              "method": 27.23,
+              "reference": 50.46,
+              "mean_diff": -23.22,
+              "ci95": [
+                -27.93,
+                -18.51
+              ]
+            }
+          },
+          "all": {
+            "method": 26.59,
+            "reference": 46.46,
+            "mean_diff": -19.87,
+            "ci95": [
+              -30.73,
+              -9.0
+            ],
+            "n_pairs": 4,
+            "recall": {
+              "method": 23.76,
+              "reference": 42.76,
+              "mean_diff": -19.0,
+              "ci95": [
+                -34.12,
+                -3.89
+              ]
+            },
+            "precision": {
+              "method": 30.69,
+              "reference": 52.7,
+              "mean_diff": -22.01,
+              "ci95": [
+                -31.3,
+                -12.72
+              ]
+            }
+          }
+        }
+      }
+    },
+    "coarse": {
+      "seeds": {
+        "crf": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "gliner_ft": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ]
+      },
+      "reference": "crf",
+      "systems": {
+        "crf": {
+          "n_runs": 40,
+          "seen": {
+            "n_gold": 4390,
+            "n_pred": 4573,
+            "n_correct": 3603,
+            "recall": 82.07,
+            "precision": 78.79,
+            "f1": 80.4,
+            "share": 0.2
+          },
+          "seen_other": {
+            "n_gold": 260,
+            "n_pred": 228,
+            "n_correct": 70,
+            "recall": 26.92,
+            "precision": 30.7,
+            "f1": 28.69,
+            "share": 0.012
+          },
+          "unseen": {
+            "n_gold": 17290,
+            "n_pred": 17162,
+            "n_correct": 8919,
+            "recall": 51.58,
+            "precision": 51.97,
+            "f1": 51.78,
+            "share": 0.788
+          },
+          "all": {
+            "n_gold": 21940,
+            "n_pred": 21963,
+            "n_correct": 12592,
+            "recall": 57.39,
+            "precision": 57.33,
+            "f1": 57.36,
+            "share": 1.0
+          }
+        },
+        "gliner_ft": {
+          "n_runs": 40,
+          "seen": {
+            "n_gold": 4390,
+            "n_pred": 3716,
+            "n_correct": 2944,
+            "recall": 67.06,
+            "precision": 79.22,
+            "f1": 72.64,
+            "share": 0.2
+          },
+          "seen_other": {
+            "n_gold": 260,
+            "n_pred": 407,
+            "n_correct": 86,
+            "recall": 33.08,
+            "precision": 21.13,
+            "f1": 25.79,
+            "share": 0.012
+          },
+          "unseen": {
+            "n_gold": 17290,
+            "n_pred": 12287,
+            "n_correct": 5962,
+            "recall": 34.48,
+            "precision": 48.52,
+            "f1": 40.32,
+            "share": 0.788
+          },
+          "all": {
+            "n_gold": 21940,
+            "n_pred": 16410,
+            "n_correct": 8992,
+            "recall": 40.98,
+            "precision": 54.8,
+            "f1": 46.89,
+            "share": 1.0
+          }
+        }
+      },
+      "units": {
+        "10.1007_s11340-021-00758-x.conll": {
+          "crf": {
+            "recall_seen": 82.05,
+            "recall_unseen": 55.04
+          },
+          "gliner_ft": {
+            "recall_seen": 67.73,
+            "recall_unseen": 36.3
+          }
+        },
+        "10.1038_ncomms7164.conll": {
+          "crf": {
+            "recall_seen": 78.83,
+            "recall_unseen": 57.64
+          },
+          "gliner_ft": {
+            "recall_seen": 66.12,
+            "recall_unseen": 39.93
+          }
+        },
+        "10.1038_s41467-020-19071-7.conll": {
+          "crf": {
+            "recall_seen": 86.41,
+            "recall_unseen": 49.85
+          },
+          "gliner_ft": {
+            "recall_seen": 65.0,
+            "recall_unseen": 29.41
+          }
+        },
+        "10.3390_met10111458.conll": {
+          "crf": {
+            "recall_seen": 78.77,
+            "recall_unseen": 49.92
+          },
+          "gliner_ft": {
+            "recall_seen": 70.49,
+            "recall_unseen": 38.75
+          }
+        }
+      },
+      "minus_crf": {
+        "gliner_ft": {
+          "seen": {
+            "method": 72.08,
+            "reference": 79.41,
+            "mean_diff": -7.33,
+            "ci95": [
+              -14.78,
+              0.11
+            ],
+            "n_pairs": 4,
+            "recall": {
+              "method": 67.33,
+              "reference": 81.52,
+              "mean_diff": -14.18,
+              "ci95": [
+                -22.86,
+                -5.5
+              ]
+            },
+            "precision": {
+              "method": 77.86,
+              "reference": 77.62,
+              "mean_diff": 0.24,
+              "ci95": [
+                -6.89,
+                7.38
+              ]
+            }
+          },
+          "unseen": {
+            "method": 42.11,
+            "reference": 53.23,
+            "mean_diff": -11.12,
+            "ci95": [
+              -16.48,
+              -5.76
+            ],
+            "n_pairs": 4,
+            "recall": {
+              "method": 36.1,
+              "reference": 53.11,
+              "mean_diff": -17.01,
+              "ci95": [
+                -23.47,
+                -10.56
+              ]
+            },
+            "precision": {
+              "method": 50.63,
+              "reference": 53.4,
+              "mean_diff": -2.77,
+              "ci95": [
+                -7.04,
+                1.49
+              ]
+            }
+          },
+          "all": {
+            "method": 48.48,
+            "reference": 58.6,
+            "mean_diff": -10.12,
+            "ci95": [
+              -15.68,
+              -4.56
+            ],
+            "n_pairs": 4,
+            "recall": {
+              "method": 42.72,
+              "reference": 58.82,
+              "mean_diff": -16.1,
+              "ci95": [
+                -22.55,
+                -9.65
+              ]
+            },
+            "precision": {
+              "method": 56.11,
+              "reference": 58.43,
+              "mean_diff": -2.31,
+              "ci95": [
+                -6.87,
+                2.25
+              ]
+            }
+          }
+        }
+      }
+    },
+    "mulms": {
+      "seeds": {
+        "crf": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "gliner_ft": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "gliner_zs": [
+          0
+        ]
+      },
+      "reference": "crf",
+      "systems": {
+        "crf": {
+          "n_runs": 70,
+          "seen": {
+            "n_gold": 36910,
+            "n_pred": 33363,
+            "n_correct": 24530,
+            "recall": 66.46,
+            "precision": 73.52,
+            "f1": 69.81,
+            "share": 0.116
+          },
+          "seen_other": {
+            "n_gold": 1310,
+            "n_pred": 822,
+            "n_correct": 161,
+            "recall": 12.29,
+            "precision": 19.59,
+            "f1": 15.1,
+            "share": 0.004
+          },
+          "unseen": {
+            "n_gold": 281300,
+            "n_pred": 198531,
+            "n_correct": 110730,
+            "recall": 39.36,
+            "precision": 55.77,
+            "f1": 46.15,
+            "share": 0.88
+          },
+          "all": {
+            "n_gold": 319520,
+            "n_pred": 232716,
+            "n_correct": 135421,
+            "recall": 42.38,
+            "precision": 58.19,
+            "f1": 49.04,
+            "share": 1.0
+          }
+        },
+        "gliner_ft": {
+          "n_runs": 70,
+          "seen": {
+            "n_gold": 36910,
+            "n_pred": 37407,
+            "n_correct": 27007,
+            "recall": 73.17,
+            "precision": 72.2,
+            "f1": 72.68,
+            "share": 0.116
+          },
+          "seen_other": {
+            "n_gold": 1310,
+            "n_pred": 946,
+            "n_correct": 125,
+            "recall": 9.54,
+            "precision": 13.21,
+            "f1": 11.08,
+            "share": 0.004
+          },
+          "unseen": {
+            "n_gold": 281300,
+            "n_pred": 221304,
+            "n_correct": 120456,
+            "recall": 42.82,
+            "precision": 54.43,
+            "f1": 47.93,
+            "share": 0.88
+          },
+          "all": {
+            "n_gold": 319520,
+            "n_pred": 259657,
+            "n_correct": 147588,
+            "recall": 46.19,
+            "precision": 56.84,
+            "f1": 50.96,
+            "share": 1.0
+          }
+        },
+        "gliner_zs": {
+          "n_runs": 7,
+          "seen": {
+            "n_gold": 3691,
+            "n_pred": 668,
+            "n_correct": 509,
+            "recall": 13.79,
+            "precision": 76.2,
+            "f1": 23.35,
+            "share": 0.116
+          },
+          "seen_other": {
+            "n_gold": 131,
+            "n_pred": 537,
+            "n_correct": 14,
+            "recall": 10.69,
+            "precision": 2.61,
+            "f1": 4.19,
+            "share": 0.004
+          },
+          "unseen": {
+            "n_gold": 28130,
+            "n_pred": 34983,
+            "n_correct": 5135,
+            "recall": 18.25,
+            "precision": 14.68,
+            "f1": 16.27,
+            "share": 0.88
+          },
+          "all": {
+            "n_gold": 31952,
+            "n_pred": 36188,
+            "n_correct": 5658,
+            "recall": 17.71,
+            "precision": 15.64,
+            "f1": 16.61,
+            "share": 1.0
+          }
+        }
+      },
+      "units": {
+        "electrolysis": {
+          "crf": {
+            "recall_seen": 71.38,
+            "recall_unseen": 51.75
+          },
+          "gliner_ft": {
+            "recall_seen": 80.52,
+            "recall_unseen": 53.75
+          },
+          "gliner_zs": {
+            "recall_seen": 11.38,
+            "recall_unseen": 15.53
+          }
+        },
+        "graphene": {
+          "crf": {
+            "recall_seen": 73.72,
+            "recall_unseen": 38.62
+          },
+          "gliner_ft": {
+            "recall_seen": 62.7,
+            "recall_unseen": 36.6
+          },
+          "gliner_zs": {
+            "recall_seen": 4.91,
+            "recall_unseen": 16.1
+          }
+        },
+        "pemfc": {
+          "crf": {
+            "recall_seen": 59.05,
+            "recall_unseen": 40.52
+          },
+          "gliner_ft": {
+            "recall_seen": 78.3,
+            "recall_unseen": 44.08
+          },
+          "gliner_zs": {
+            "recall_seen": 8.72,
+            "recall_unseen": 19.38
+          }
+        },
+        "poly": {
+          "crf": {
+            "recall_seen": 79.78,
+            "recall_unseen": 43.99
+          },
+          "gliner_ft": {
+            "recall_seen": 78.34,
+            "recall_unseen": 42.91
+          },
+          "gliner_zs": {
+            "recall_seen": 28.48,
+            "recall_unseen": 22.61
+          }
+        },
+        "semi": {
+          "crf": {
+            "recall_seen": 43.66,
+            "recall_unseen": 22.59
+          },
+          "gliner_ft": {
+            "recall_seen": 42.92,
+            "recall_unseen": 32.05
+          },
+          "gliner_zs": {
+            "recall_seen": 11.52,
+            "recall_unseen": 10.13
+          }
+        },
+        "sofc": {
+          "crf": {
+            "recall_seen": 47.03,
+            "recall_unseen": 34.74
+          },
+          "gliner_ft": {
+            "recall_seen": 54.28,
+            "recall_unseen": 34.99
+          },
+          "gliner_zs": {
+            "recall_seen": 12.71,
+            "recall_unseen": 16.87
+          }
+        },
+        "steel": {
+          "crf": {
+            "recall_seen": 70.02,
+            "recall_unseen": 48.28
+          },
+          "gliner_ft": {
+            "recall_seen": 75.69,
+            "recall_unseen": 54.84
+          },
+          "gliner_zs": {
+            "recall_seen": 11.79,
+            "recall_unseen": 25.87
+          }
+        }
+      },
+      "minus_crf": {
+        "gliner_ft": {
+          "seen": {
+            "method": 68.7,
+            "reference": 67.06,
+            "mean_diff": 1.64,
+            "ci95": [
+              -3.47,
+              6.75
+            ],
+            "n_pairs": 7,
+            "recall": {
+              "method": 67.53,
+              "reference": 63.52,
+              "mean_diff": 4.01,
+              "ci95": [
+                -4.84,
+                12.87
+              ]
+            },
+            "precision": {
+              "method": 71.87,
+              "reference": 72.72,
+              "mean_diff": -0.86,
+              "ci95": [
+                -3.46,
+                1.74
+              ]
+            }
+          },
+          "unseen": {
+            "method": 47.35,
+            "reference": 45.83,
+            "mean_diff": 1.52,
+            "ci95": [
+              -1.97,
+              5.02
+            ],
+            "n_pairs": 7,
+            "recall": {
+              "method": 42.75,
+              "reference": 40.07,
+              "mean_diff": 2.68,
+              "ci95": [
+                -1.19,
+                6.54
+              ]
+            },
+            "precision": {
+              "method": 54.24,
+              "reference": 55.56,
+              "mean_diff": -1.32,
+              "ci95": [
+                -3.42,
+                0.79
+              ]
+            }
+          },
+          "all": {
+            "method": 50.23,
+            "reference": 48.66,
+            "mean_diff": 1.58,
+            "ci95": [
+              -1.92,
+              5.08
+            ],
+            "n_pairs": 7,
+            "recall": {
+              "method": 45.86,
+              "reference": 43.0,
+              "mean_diff": 2.85,
+              "ci95": [
+                -1.32,
+                7.03
+              ]
+            },
+            "precision": {
+              "method": 56.7,
+              "reference": 58.06,
+              "mean_diff": -1.36,
+              "ci95": [
+                -3.27,
+                0.55
+              ]
+            }
+          }
+        },
+        "gliner_zs": {
+          "seen": {
+            "method": 21.26,
+            "reference": 67.06,
+            "mean_diff": -45.8,
+            "ci95": [
+              -58.12,
+              -33.48
+            ],
+            "n_pairs": 7,
+            "recall": {
+              "method": 12.79,
+              "reference": 63.52,
+              "mean_diff": -50.73,
+              "ci95": [
+                -63.17,
+                -38.3
+              ]
+            },
+            "precision": {
+              "method": 74.35,
+              "reference": 72.72,
+              "mean_diff": 1.63,
+              "ci95": [
+                -14.24,
+                17.5
+              ]
+            }
+          },
+          "unseen": {
+            "method": 16.11,
+            "reference": 45.83,
+            "mean_diff": -29.72,
+            "ci95": [
+              -35.3,
+              -24.14
+            ],
+            "n_pairs": 7,
+            "recall": {
+              "method": 18.07,
+              "reference": 40.07,
+              "mean_diff": -22.0,
+              "ci95": [
+                -28.67,
+                -15.33
+              ]
+            },
+            "precision": {
+              "method": 15.34,
+              "reference": 55.56,
+              "mean_diff": -40.22,
+              "ci95": [
+                -44.19,
+                -36.25
+              ]
+            }
+          },
+          "all": {
+            "method": 16.22,
+            "reference": 48.66,
+            "mean_diff": -32.44,
+            "ci95": [
+              -38.71,
+              -26.17
+            ],
+            "n_pairs": 7,
+            "recall": {
+              "method": 17.25,
+              "reference": 43.0,
+              "mean_diff": -25.75,
+              "ci95": [
+                -33.61,
+                -17.89
+              ]
+            },
+            "precision": {
+              "method": 16.18,
+              "reference": 58.06,
+              "mean_diff": -41.89,
+              "ci95": [
+                -45.39,
+                -38.38
+              ]
+            }
+          }
+        }
+      }
+    },
+    "sofc": {
+      "seeds": {
+        "crf": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "gliner_ft": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900
+        ],
+        "gliner_zs": [
+          0
+        ]
+      },
+      "reference": "crf",
+      "systems": {
+        "crf": {
+          "n_runs": 50,
+          "seen": {
+            "n_gold": 24570,
+            "n_pred": 26312,
+            "n_correct": 21931,
+            "recall": 89.26,
+            "precision": 83.35,
+            "f1": 86.2,
+            "share": 0.535
+          },
+          "seen_other": {
+            "n_gold": 20,
+            "n_pred": 23,
+            "n_correct": 8,
+            "recall": 40.0,
+            "precision": 34.78,
+            "f1": 37.21,
+            "share": 0.0
+          },
+          "unseen": {
+            "n_gold": 21310,
+            "n_pred": 22165,
+            "n_correct": 16982,
+            "recall": 79.69,
+            "precision": 76.62,
+            "f1": 78.12,
+            "share": 0.464
+          },
+          "all": {
+            "n_gold": 45900,
+            "n_pred": 48500,
+            "n_correct": 38921,
+            "recall": 84.8,
+            "precision": 80.25,
+            "f1": 82.46,
+            "share": 1.0
+          }
+        },
+        "gliner_ft": {
+          "n_runs": 50,
+          "seen": {
+            "n_gold": 24570,
+            "n_pred": 26368,
+            "n_correct": 21933,
+            "recall": 89.27,
+            "precision": 83.18,
+            "f1": 86.12,
+            "share": 0.535
+          },
+          "seen_other": {
+            "n_gold": 20,
+            "n_pred": 16,
+            "n_correct": 10,
+            "recall": 50.0,
+            "precision": 62.5,
+            "f1": 55.56,
+            "share": 0.0
+          },
+          "unseen": {
+            "n_gold": 21310,
+            "n_pred": 23133,
+            "n_correct": 17403,
+            "recall": 81.67,
+            "precision": 75.23,
+            "f1": 78.32,
+            "share": 0.464
+          },
+          "all": {
+            "n_gold": 45900,
+            "n_pred": 49517,
+            "n_correct": 39346,
+            "recall": 85.72,
+            "precision": 79.46,
+            "f1": 82.47,
+            "share": 1.0
+          }
+        },
+        "gliner_zs": {
+          "n_runs": 5,
+          "seen": {
+            "n_gold": 2457,
+            "n_pred": 660,
+            "n_correct": 486,
+            "recall": 19.78,
+            "precision": 73.64,
+            "f1": 31.18,
+            "share": 0.535
+          },
+          "seen_other": {
+            "n_gold": 2,
+            "n_pred": 71,
+            "n_correct": 0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "f1": 0.0,
+            "share": 0.0
+          },
+          "unseen": {
+            "n_gold": 2131,
+            "n_pred": 2950,
+            "n_correct": 957,
+            "recall": 44.91,
+            "precision": 32.44,
+            "f1": 37.67,
+            "share": 0.464
+          },
+          "all": {
+            "n_gold": 4590,
+            "n_pred": 3681,
+            "n_correct": 1443,
+            "recall": 31.44,
+            "precision": 39.2,
+            "f1": 34.89,
+            "share": 1.0
+          }
+        }
+      },
+      "units": {
+        "fold0": {
+          "crf": {
+            "recall_seen": 91.52,
+            "recall_unseen": 78.36
+          },
+          "gliner_ft": {
+            "recall_seen": 89.68,
+            "recall_unseen": 80.25
+          },
+          "gliner_zs": {
+            "recall_seen": 24.25,
+            "recall_unseen": 40.68
+          }
+        },
+        "fold1": {
+          "crf": {
+            "recall_seen": 92.75,
+            "recall_unseen": 89.04
+          },
+          "gliner_ft": {
+            "recall_seen": 91.49,
+            "recall_unseen": 89.07
+          },
+          "gliner_zs": {
+            "recall_seen": 17.68,
+            "recall_unseen": 62.09
+          }
+        },
+        "fold2": {
+          "crf": {
+            "recall_seen": 87.35,
+            "recall_unseen": 77.73
+          },
+          "gliner_ft": {
+            "recall_seen": 89.56,
+            "recall_unseen": 79.95
+          },
+          "gliner_zs": {
+            "recall_seen": 19.85,
+            "recall_unseen": 40.31
+          }
+        },
+        "fold3": {
+          "crf": {
+            "recall_seen": 86.65,
+            "recall_unseen": 78.32
+          },
+          "gliner_ft": {
+            "recall_seen": 88.31,
+            "recall_unseen": 80.99
+          },
+          "gliner_zs": {
+            "recall_seen": 19.82,
+            "recall_unseen": 45.16
+          }
+        },
+        "fold4": {
+          "crf": {
+            "recall_seen": 88.59,
+            "recall_unseen": 76.36
+          },
+          "gliner_ft": {
+            "recall_seen": 87.8,
+            "recall_unseen": 79.03
+          },
+          "gliner_zs": {
+            "recall_seen": 15.27,
+            "recall_unseen": 37.91
+          }
+        }
+      },
+      "minus_crf": {
+        "gliner_ft": {
+          "seen": {
+            "method": 86.49,
+            "reference": 86.54,
+            "mean_diff": -0.04,
+            "ci95": [
+              -1.5,
+              1.41
+            ],
+            "n_pairs": 5,
+            "recall": {
+              "method": 89.37,
+              "reference": 89.37,
+              "mean_diff": -0.0,
+              "ci95": [
+                -2.26,
+                2.26
+              ]
+            },
+            "precision": {
+              "method": 83.87,
+              "reference": 83.93,
+              "mean_diff": -0.05,
+              "ci95": [
+                -1.66,
+                1.56
+              ]
+            }
+          },
+          "unseen": {
+            "method": 79.09,
+            "reference": 78.46,
+            "mean_diff": 0.63,
+            "ci95": [
+              -3.22,
+              4.48
+            ],
+            "n_pairs": 5,
+            "recall": {
+              "method": 81.86,
+              "reference": 79.96,
+              "mean_diff": 1.89,
+              "ci95": [
+                0.54,
+                3.25
+              ]
+            },
+            "precision": {
+              "method": 76.76,
+              "reference": 77.11,
+              "mean_diff": -0.35,
+              "ci95": [
+                -7.44,
+                6.73
+              ]
+            }
+          },
+          "all": {
+            "method": 83.05,
+            "reference": 82.79,
+            "mean_diff": 0.27,
+            "ci95": [
+              -1.84,
+              2.37
+            ],
+            "n_pairs": 5,
+            "recall": {
+              "method": 85.85,
+              "reference": 84.98,
+              "mean_diff": 0.87,
+              "ci95": [
+                -0.76,
+                2.5
+              ]
+            },
+            "precision": {
+              "method": 80.55,
+              "reference": 80.75,
+              "mean_diff": -0.19,
+              "ci95": [
+                -4.14,
+                3.75
+              ]
+            }
+          }
+        },
+        "gliner_zs": {
+          "seen": {
+            "method": 30.56,
+            "reference": 86.54,
+            "mean_diff": -55.98,
+            "ci95": [
+              -62.61,
+              -49.35
+            ],
+            "n_pairs": 5,
+            "recall": {
+              "method": 19.37,
+              "reference": 89.37,
+              "mean_diff": -70.0,
+              "ci95": [
+                -74.83,
+                -65.17
+              ]
+            },
+            "precision": {
+              "method": 73.97,
+              "reference": 83.93,
+              "mean_diff": -9.96,
+              "ci95": [
+                -14.09,
+                -5.82
+              ]
+            }
+          },
+          "unseen": {
+            "method": 37.93,
+            "reference": 78.46,
+            "mean_diff": -40.53,
+            "ci95": [
+              -43.63,
+              -37.43
+            ],
+            "n_pairs": 5,
+            "recall": {
+              "method": 45.23,
+              "reference": 79.96,
+              "mean_diff": -34.73,
+              "ci95": [
+                -40.71,
+                -28.75
+              ]
+            },
+            "precision": {
+              "method": 33.0,
+              "reference": 77.11,
+              "mean_diff": -44.12,
+              "ci95": [
+                -50.03,
+                -38.2
+              ]
+            }
+          },
+          "all": {
+            "method": 35.01,
+            "reference": 82.79,
+            "mean_diff": -47.78,
+            "ci95": [
+              -48.85,
+              -46.7
+            ],
+            "n_pairs": 5,
+            "recall": {
+              "method": 31.54,
+              "reference": 84.98,
+              "mean_diff": -53.44,
+              "ci95": [
+                -56.03,
+                -50.85
+              ]
+            },
+            "precision": {
+              "method": 39.64,
+              "reference": 80.75,
+              "mean_diff": -41.11,
+              "ci95": [
+                -44.09,
+                -38.13
+              ]
+            }
+          }
+        }
+      }
+    }
   }
 }
