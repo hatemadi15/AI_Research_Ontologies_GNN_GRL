@@ -92,8 +92,9 @@ interval of a paired difference over random splits or held-out units
 (over seeds on SOFC-Exp's official split), each side the mean of its 7 or
 10 model seeds (one in week 2, three in weeks 3, 4 and 8;
 reimers2017reporting; dodge2020finetuning; bouthillier2021accounting).
-From week 4 on, every decision rests on deterministic GPU runs with their
-test predictions released (weeks 1 to 3 and week 4's votes ran on CPUs);
+From week 5 on, every decision rests on deterministic GPU runs with their
+test predictions released (weeks 1 to 3 and week 4's label-semantics and
+self-training votes ran on CPUs; week 4's other decisions on GPUs);
 two probes without decisions trained on CPUs (Section 7.6).
 
 The results are these. The published numbers reproduce (Section 5.1). A
@@ -253,8 +254,8 @@ carries no inference. Intervals over seeds on one split (SOFC-Exp's
 official split) are conditional on that split's articles.
 
 **Pre-registration and runs.** A week is a stage of the programme in
-which protocols were fixed, not a calendar week; weeks 1 to 19 ran from 5
-October to 3 November 2026. Each protocol was committed to the repository
+which protocols were fixed, not a calendar week; weeks 1 to 21 ran from 5
+October to 4 November 2026. Each protocol was committed to the repository
 before its results, and before its runs except week 14's (two minutes
 after its first batch was pushed) and D5 as executed, whose MuLMS means
 include the screen's runs of seeds 0–200, under way when the pooled
@@ -267,8 +268,8 @@ commit dates, as paper A's Supplementary Table S1 does. Runs
 use Kaggle T4 GPUs with deterministic CUDA, one frozen commit per batch
 and a pinned image. From 15 October 16:00 UTC every completed GPU session
 but two began by repeating an earlier run, and every repeat was
-identical. Weeks 1 to 3 and week 4's votes ran on CPUs, week 4's training
-on GPUs; the claims they passed were re-tested on GPUs with 10 seeds in
+identical. Weeks 1 to 3 and week 4's label-semantics and self-training
+votes ran on CPUs, the rest of week 4 on GPUs; the claims they passed were re-tested on GPUs with 10 seeds in
 week 5 (changing the machine as well as the seeds; Section 6.2), and GPU
 and CPU runs are never compared with each other in a decision.
 
@@ -1161,7 +1162,7 @@ their increment over mention replacement is not established.
   criteria are reported, not decided on.
 - **The count is of this programme's choices.** The 118 decisions test
   the additions we chose, in the order we chose them, with amendments
-  marked; another programme would test others. About 2.9 would pass by
+  marked; another programme would test others. About 3.0 would pass by
   chance whatever their dependence, which only makes chance passes come
   together. The votes share their members, the pooled decisions share
   units with the per-corpus ones, and the units share training documents

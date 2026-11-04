@@ -109,3 +109,61 @@ venue.
   The count is 118 decisions, 27 passing, about 3.0 by chance, and 88 with
   7 or 10 seeds, 21 passing. `docs/PAPER_B.md` gains §7.7 on the
   generalist tagger, and its count moves to §7.8.
+
+## TACL review round 2 (4 November 2026)
+
+A referee and a number audit read `PAPER_B_TACL.md` at `1cdb766`. The referee
+asked for a major revision (3 blocking, 12 major and 14 minor findings). The
+audit found 6 mismatches; the count and every stage-21 number were right.
+
+**Fixed in the text:**
+- **Stage 21 is read by its intervals.** The protocol's proxies are kept only
+  as its expectation, and §5.3's power bullet now reads each null by its
+  interval.
+- **The premise is scoped.** MaterioMiner is the corpus scored on random
+  splits; SOFC-Exp and MuLMS hold out articles.
+- **The abstract is rewritten** (205 words). It says "mostly unseen names"
+  only where the decomposition supports it, and adds the dependence reading
+  (6 of 18 passes keep their margin).
+- **The coarse codes.** Wherever 21.2 appears, the coarse labels are named as
+  codes, and the 12-point swing is reported as exploratory.
+- **GLiNER is reported in full.** Recall on unseen names is given for all
+  four settings, with validation F1, in a new Table 4. The confounds are
+  listed, and "GLiNER-medium" is used throughout.
+- **Nulls and causal wording.** Nulls are no longer read as negatives, and
+  causal wording is removed (§3.4, §3.5, §4, §5.1 and lessons 3, 5 and 7).
+- **Deviations from confirmatory practice** are listed in §5.3.
+- **Normality.** With 4 or 5 units, every pass rests on the t distribution's
+  normality; §2 and the limitations say so.
+- **Data against method.** §6 and lesson 7 now say the baselines differ, and
+  lesson 7 uses the fresh-seed decomposition.
+- **Dependence model.** A.5 derives the correlations, so the model does not
+  rest on the companion study.
+- **The chronology** moves to A.8, in relative time.
+- **Figure 1 is dropped** (unreadable at column width), and the other figures
+  are renumbered.
+- **The audit's mismatches** M1–M6, X3–X5 and I1–I9 are corrected.
+- **The long version** gets the stale dates, "About 2.9" and the CPU/GPU
+  wording corrected.
+
+**Open:**
+- **Length.** The text is about 6,190 words of prose and 750 in tables. It
+  is not yet typeset in tacl2021v1.sty, and it needs cutting after the
+  typeset check.
+- **The post hoc checks** (dependence, BH, Holm) are still over 111
+  decisions. `paper_b_checks.py` should take all 118.
+- **Per-decision classification.** Each decision should be marked
+  confirmatory or deviating, and the count given both ways.
+- **A units-by-seeds randomization check** as a sensitivity analysis.
+- **GLiNER fidelity**: the package trainer against our loop on one unit,
+  and a validation-chosen threshold as a sensitivity analysis. Optionally, a
+  coarse arm with the namesake class names (post hoc, outside the count).
+  Both need GPU time.
+- **The figures** use "consistency rule" and "silver names", and GLiNER is
+  not yet in the methods figure.
+- **Related work** lacks other generalist and LLM taggers, whose references
+  must be verified first.
+- **For the author:**
+  - the title ("never read" holds for fine-tuning only);
+  - disclosing the companion submission to the editor;
+  - whether to offer the time-stamped record to the action editor.
