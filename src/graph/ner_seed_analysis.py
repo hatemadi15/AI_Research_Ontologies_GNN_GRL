@@ -1842,8 +1842,9 @@ def print_week21(w21):
               f"{d['mean_diff']:+.2f} {d['ci95']} ({verdict})")
         if 'dependence' in e:
             dep = e['dependence']
+            side = '' if dep['above_0'] else ', below 0' if dep['ci95'][1] < 0 else ', covers 0'
             print(f"    post hoc dependence: {dep['mean_diff']:+.2f} {dep['ci95']}, SE "
-                  f"x{dep['se_ratio']:.3f}{'' if dep['above_0'] else ', covers 0'}")
+                  f"x{dep['se_ratio']:.3f}{side}")
     for setting, e in w21.get('zero_shot', {}).items():
         d = e['minus_crf']['micro']
         print(f"  week 21, zero-shot ({setting}, reported): GLiNER "

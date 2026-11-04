@@ -1934,3 +1934,27 @@ def test_week20_note():
     assert '+9.51 [+1.12, +17.91], passes' in note and '+7.55 [+4.05, +11.05] (Welch) of the 17.06' in note
     assert '20.2 (a third paper at equal size, fine-grained, seeds 300-900) +4.03 [+1.06, +7.00], passes' in note
     assert '20.3' in note and '+3.52 [-0.10, +5.72], no' in note
+
+
+def test_week21_note():
+    import report_results as rr
+    assert rr.week21_note({}) == '' and rr.week21_note({'week21': {'checks': {}}}) == ''
+    d = lambda m, lo, hi: {'micro': {'mean_diff': m, 'ci95': [lo, hi]}}
+    entry = lambda dec, m, lo, hi, reading, decided=True: {
+        'decision': dec, 'minus_crf': d(m, lo, hi), 'passes': lo > 0, 'reading': reading,
+        'decided': decided}
+    analysis = {'week21': {
+        'repeats': {'status': {'checked': True, 'repeat_differs': False, 'splits_differ': False,
+                               'environment_differs': False}},
+        'decisions': {'fine': entry('21.1', 3.77, -5.38, 12.92, 'not shown within about 4-5 points'),
+                      'coarse': entry('21.2', -10.12, -15.68, -4.56, 'below the CRF head')},
+        'zero_shot': {'mulms': {'minus_crf': d(-20.0, -25.0, -15.0)}}}}
+    note = rr.week21_note(analysis)
+    assert note.startswith('* NER week 21') and note.endswith('the checks hold.\n')
+    assert ('21.1 (MaterioMiner fine-grained) +3.77 [-5.38, +12.92], not shown within about 4-5 '
+            'points; 21.2 (coarse-grained) -10.12 [-15.68, -4.56], below the CRF head') in note
+    assert "zero-shot GLiNER minus the CRF head (reported): MuLMS's 7 subfields -20.00" in note
+    analysis['week21']['repeats']['status']['repeat_differs'] = True
+    analysis['week21']['decisions']['fine'].update(decided=False, flag='the determinism repeat differs')
+    note = rr.week21_note(analysis)
+    assert 'points; the determinism repeat differs' in note and note.endswith('not all done or equal.\n')

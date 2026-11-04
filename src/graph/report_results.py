@@ -1156,7 +1156,8 @@ def ner_notes(res):
     return (note + sofc_note(analysis) + mulms_note(analysis) + week13_note(analysis)
             + week14_note(analysis) + week17_note(analysis)
             + week18_note(res.get(GPU_PREFIX + WEEK18_FILE) or {})
-            + week19_note(res.get(WEEK19_FILE) or {}) + week20_note(analysis))
+            + week19_note(res.get(WEEK19_FILE) or {}) + week20_note(analysis)
+            + week21_note(analysis))
 
 
 WEEK13_CORPORA = {'mulms': "MuLMS's 7 held-out subfields",
@@ -1370,6 +1371,39 @@ def week20_note(analysis):
             parts.append(f"{e['decision']} (a third paper at equal size, {label}-grained, seeds "
                          f"300-900) {delta_cell(e['diversity'])}, {word[e['passes']]}")
     return ("* NER week 20 (two controls for paper B's first referee): " + '; '.join(parts)
+            + f"; {held}.\n")
+
+
+WEEK21_LABELS = {'fine': 'MaterioMiner fine-grained', 'coarse': 'coarse-grained',
+                 'mulms': "MuLMS's 7 subfields", 'sofc': "SOFC-Exp's 5 folds"}
+WEEK21_CHECKS = ('repeat_differs', 'splits_differ', 'environment_differs')
+
+
+def week21_note(analysis):
+    """The week-21 bullet (ROADMAP §4, the week-21 protocol) from the week-5 analyses file ('' without
+    its week21 section's decisions): 21.1 to 21.4, GLiNER-medium fine-tuned minus the CRF head on
+    each setting's held-out units (10 seeds), each with its reading (and its flag when it is not
+    decided); zero-shot GLiNER minus the CRF head where its files are complete (reported); whether
+    the checks hold."""
+    w = analysis.get('week21') or {}
+    decisions = w.get('decisions') or {}
+    if not decisions:
+        return ''
+    parts = []
+    for s, e in decisions.items():
+        verdict = 'passes' if e['passes'] else e['reading']
+        if e.get('decided') is not True:
+            verdict += f"; {e.get('flag', 'not decided')}"
+        parts.append(f"{e['decision']} ({WEEK21_LABELS.get(s, s)}) "
+                     f"{delta_cell(e['minus_crf']['micro'])}, {verdict}")
+    zero = [f"{WEEK21_LABELS.get(s, s)} {delta_cell(e['minus_crf']['micro'])}"
+            for s, e in (w.get('zero_shot') or {}).items()]
+    status = (w.get('repeats') or {}).get('status') or {}
+    held = ('the checks hold' if status.get('checked') and not any(status.get(k) for k in WEEK21_CHECKS)
+            else 'the checks are not all done or equal')
+    return ("* NER week 21 (a free generalist NER baseline: GLiNER-medium fine-tuned minus the CRF "
+            "head on the held-out units, 10 seeds): " + '; '.join(parts)
+            + (f"; zero-shot GLiNER minus the CRF head (reported): {', '.join(zero)}" if zero else '')
             + f"; {held}.\n")
 
 
