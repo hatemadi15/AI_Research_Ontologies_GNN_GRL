@@ -1000,33 +1000,41 @@ mixed-backbone vote 0 of 2, in-domain pre-training 0 of 2 and a third
 paper at equal size 2 of 2; with one run per split, week 2's multi-task
 training, domain-adaptive pre-training and seed vote pass none of 6.
 
-Three post hoc readings qualify the 24 passes of weeks 2 to 18 (review
-round 1; `paper_b_checks.py`); none changes a verdict. Week 20's three
-passes carry the dependence reading fixed in their protocol: the
-coarse-grained third paper keeps its margin, the other two lose it.
-Week 21 passes none; 21.2, below the CRF head, stays below with it.
+Three post hoc readings qualify the 27 passes (review round 1,
+`paper_b_checks.py`, extended to weeks 20 and 21 on 4 November); none
+changes a verdict. Week 20's three passes carry the dependence reading
+fixed in their protocol, which the checks reproduce: the coarse-grained
+third paper keeps its margin, the other two lose it. Week 21 passes none;
+21.2, below the CRF head, stays below with it.
 - **Shared training documents.** Paper A's model of the units'
   dependence (Section 10: a correlation of 1/4 between MaterioMiner's
   papers, 1/5 between SOFC-Exp's folds, 1/4 between MuLMS subfields whose
   pools share an article) and, on random splits, the corrected resampled
   test (nadeau2003inference; 96 test and 309 training sentences) widen
-  the intervals by a factor of 1.2 to 1.6. Of the 15 passes over units
-  with 7 or 10 seeds, 5 keep their margin: mention replacement
-  fine-grained on MaterioMiner, paper A's D4, D5 and D11, and the
-  document-level rule on MuLMS (13.1a). Ten lose it, among them every
-  multi-task pass and mention replacement's votes on MuLMS. The three
-  seed-paired SOFC-Exp passes on one split take no such allowance.
-- **Multiplicity.** About 2.8 of the 24 passes are expected by chance, a
-  false-discovery share near 12%. Under Benjamini–Hochberg control of the
-  111 one-sided P values (benjamini1995controlling), 3 pass at a 5%
+  the intervals by a factor of 1.2 to 1.6. Of the 18 passes over units
+  with 7 or 10 seeds, 6 keep their margin: mention replacement
+  fine-grained on MaterioMiner, paper A's D4, D5 and D11, the
+  document-level rule on MuLMS (13.1a) and week 20's coarse-grained third
+  paper (20.3). Twelve lose it, among them every multi-task pass, mention
+  replacement's votes on MuLMS, the sentence pool (20.1) and the
+  fine-grained third paper (20.2). The three seed-paired SOFC-Exp passes
+  on one split take no such allowance.
+- **Multiplicity.** About 3.0 of the 27 passes are expected by chance, a
+  false-discovery share near 11%. Under Benjamini–Hochberg control of the
+  118 one-sided P values (benjamini1995controlling), 3 pass at a 5%
   false-discovery rate (SOFC-Exp's two tokenization measurements and week
-  3's CPU label-semantics pass, which did not replicate) and 12 at 10%.
-  Within each addition's family (Holm, family-wise 2.5%), 6 survive;
-  none is a method for unseen documents with 7 or 10 seeds.
-- **Power.** The single-model decisions on held-out papers could detect
-  0.4 to 3.8 points at 80% power (multi-task self-training's
-  fine-grained one 8.1), so each failure reads "not shown within" that
-  size, not "no effect".
+  3's CPU label-semantics pass, which did not replicate) and all 27 at
+  10%. The 10% count is fragile: the largest of the 27 P values, 0.0223,
+  falls just under its step-up threshold, 27/118 × 10% = 0.0229, and of
+  the 111 decisions of weeks 2 to 18, 12 passed at 10%. Within each
+  addition's family (Holm, family-wise 2.5%), 9 survive, week 20's three
+  measurements among them; none is a method for unseen documents with 7
+  or 10 seeds.
+- **Power.** At the variance in their own data, the single-model
+  decisions on held-out papers could detect 0.4 to 3.9 points at 80%
+  power (multi-task self-training's fine-grained one 8.1, GLiNER-medium's
+  12.0 fine-grained and 7.3 coarse-grained), so each failure reads "not
+  shown within" that size, not "no effect".
 
 Two findings of the count stand on their own. First, wherever a pass on
 held-out documents was split by kind of name, its gain shows on unseen

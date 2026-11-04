@@ -1,6 +1,6 @@
 {
- "note": "Post hoc, for round 1 of paper B's internal review (3 November 2026), at its first referee's request. Nothing here decides anything: each decision stands as taken by its registered rule, the 95% Student-t interval of the mean paired difference above 0.",
- "decisions_note": "post hoc: the 111 pre-registered decisions of paper B's Section 7.7, each with its per-unit differences, its stored mean, interval and verdict, the t test of its per-unit values (decision_tests.t_test), the difference it detects with 80% power at the two-sided 5% level (ner_robustness.mde), its dependence-adjusted 95% interval, its Benjamini-Hochberg q-value over all 111 and its Holm-adjusted P within its family",
+ "note": "Post hoc, for round 1 of paper B's internal review (3 November 2026; weeks 20 and 21 added 4 November), at its first referee's request. Nothing here decides anything: each decision stands as taken by its registered rule, the 95% Student-t interval of the mean paired difference above 0.",
+ "decisions_note": "post hoc: the 118 pre-registered decisions of paper B's Section 7.8, each with its per-unit differences, its stored mean, interval and verdict, the t test of its per-unit values (decision_tests.t_test), the difference it detects with 80% power at the two-sided 5% level (ner_robustness.mde), its dependence-adjusted 95% interval, its Benjamini-Hochberg q-value over all 118 and its Holm-adjusted P within its family",
  "decisions": [
   {
    "id": "w3 CPU MaterioMiner fine, random splits: crf_mix3 vs crf_ens3",
@@ -85,7 +85,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.6553,
+   "bh_q": 0.6491,
    "holm_p": 0.9682,
    "holm_survives": false
   },
@@ -172,7 +172,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.9673,
+   "bh_q": 0.9742,
    "holm_p": 0.9682,
    "holm_survives": false
   },
@@ -253,7 +253,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.7164,
+   "bh_q": 0.7149,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -334,7 +334,7 @@
     "corrected": true,
     "above_0": true
    },
-   "bh_q": 0.0155,
+   "bh_q": 0.0165,
    "holm_p": 0.0022,
    "holm_survives": true
   },
@@ -415,7 +415,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1509,
+   "bh_q": 0.1463,
    "holm_p": 0.2108,
    "holm_survives": false
   },
@@ -496,7 +496,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.7074,
+   "bh_q": 0.705,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -587,7 +587,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.2432,
+   "bh_q": 0.2468,
    "holm_p": 0.3148,
    "holm_survives": false
   },
@@ -678,7 +678,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1014,
+   "bh_q": 0.0931,
    "holm_p": 0.0649,
    "holm_survives": false
   },
@@ -769,7 +769,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.6283,
+   "bh_q": 0.6218,
    "holm_p": 0.9169,
    "holm_survives": false
   },
@@ -860,7 +860,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.7661,
+   "bh_q": 0.7665,
    "holm_p": 0.9169,
    "holm_survives": false
   },
@@ -937,7 +937,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.52,
+   "bh_q": 0.5191,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -1014,7 +1014,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1023,
+   "bh_q": 0.0962,
    "holm_p": 0.148,
    "holm_survives": false
   },
@@ -1091,7 +1091,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1523,
+   "bh_q": 0.1491,
    "holm_p": 0.2108,
    "holm_survives": false
   },
@@ -1168,7 +1168,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.6759,
+   "bh_q": 0.6722,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -1255,7 +1255,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.2132,
+   "bh_q": 0.2149,
    "holm_p": 0.3148,
    "holm_survives": false
   },
@@ -1342,7 +1342,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.6792,
+   "bh_q": 0.6759,
    "holm_p": 0.5384,
    "holm_survives": false
   },
@@ -1433,7 +1433,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.2015,
+   "bh_q": 0.2025,
    "holm_p": 0.472,
    "holm_survives": false
   },
@@ -1524,7 +1524,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.2202,
+   "bh_q": 0.2226,
    "holm_p": 0.472,
    "holm_survives": false
   },
@@ -1605,7 +1605,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1697,
+   "bh_q": 0.1679,
    "holm_p": 0.367,
    "holm_survives": false
   },
@@ -1686,7 +1686,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.6716,
+   "bh_q": 0.6659,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -1767,7 +1767,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.0951,
+   "bh_q": 0.0927,
    "holm_p": 0.0565,
    "holm_survives": false
   },
@@ -1848,7 +1848,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.189,
+   "bh_q": 0.1886,
    "holm_p": 0.2349,
    "holm_survives": false
   },
@@ -1953,7 +1953,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1014,
+   "bh_q": 0.0931,
    "holm_p": 0.0992,
    "holm_survives": false
   },
@@ -2058,7 +2058,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1509,
+   "bh_q": 0.1463,
    "holm_p": 0.2074,
    "holm_survives": false
   },
@@ -2153,7 +2153,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1988,
+   "bh_q": 0.1989,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -2248,7 +2248,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.8834,
+   "bh_q": 0.8849,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -2343,7 +2343,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.189,
+   "bh_q": 0.1886,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -2438,7 +2438,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1788,
+   "bh_q": 0.1774,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -2529,7 +2529,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.2132,
+   "bh_q": 0.2149,
    "holm_p": 0.4225,
    "holm_survives": false
   },
@@ -2620,7 +2620,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1014,
+   "bh_q": 0.0931,
    "holm_p": 0.0977,
    "holm_survives": false
   },
@@ -2701,7 +2701,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1014,
+   "bh_q": 0.0931,
    "holm_p": 0.1041,
    "holm_survives": false
   },
@@ -2782,7 +2782,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.9456,
+   "bh_q": 0.9488,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -2873,7 +2873,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.9615,
+   "bh_q": 0.9678,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -2964,7 +2964,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.451,
+   "bh_q": 0.4498,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -3045,7 +3045,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.3381,
+   "bh_q": 0.3361,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -3126,7 +3126,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.9615,
+   "bh_q": 0.9678,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -3217,7 +3217,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1451,
+   "bh_q": 0.1393,
    "holm_p": 0.9881,
    "holm_survives": false
   },
@@ -3308,7 +3308,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1586,
+   "bh_q": 0.1556,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -3389,7 +3389,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.3324,
+   "bh_q": 0.3301,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -3470,7 +3470,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.281,
+   "bh_q": 0.2777,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -3565,7 +3565,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1995,
+   "bh_q": 0.2003,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -3660,7 +3660,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.6055,
+   "bh_q": 0.5987,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -3755,7 +3755,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1391,
+   "bh_q": 0.1331,
    "holm_p": 0.9477,
    "holm_survives": false
   },
@@ -3850,7 +3850,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.2324,
+   "bh_q": 0.2356,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -3931,7 +3931,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.9615,
+   "bh_q": 0.9678,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -4012,7 +4012,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.3324,
+   "bh_q": 0.3301,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -4093,7 +4093,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.2202,
+   "bh_q": 0.2226,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -4174,7 +4174,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.2324,
+   "bh_q": 0.2356,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -4269,7 +4269,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.2275,
+   "bh_q": 0.2301,
    "holm_p": 0.6045,
    "holm_survives": false
   },
@@ -4364,7 +4364,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1023,
+   "bh_q": 0.0962,
    "holm_p": 0.1834,
    "holm_survives": false
   },
@@ -4445,7 +4445,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.3298,
+   "bh_q": 0.3262,
    "holm_p": 0.6578,
    "holm_survives": false
   },
@@ -4526,7 +4526,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.197,
+   "bh_q": 0.1969,
    "holm_p": 0.5473,
    "holm_survives": false
   },
@@ -4621,7 +4621,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.9614,
+   "bh_q": 0.9663,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -4716,7 +4716,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1995,
+   "bh_q": 0.2003,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -4797,7 +4797,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.9716,
+   "bh_q": 0.979,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -4878,7 +4878,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.7606,
+   "bh_q": 0.7601,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -4973,7 +4973,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.3395,
+   "bh_q": 0.3378,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -5054,7 +5054,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.5946,
+   "bh_q": 0.5875,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -5149,7 +5149,7 @@
     "corrected": true,
     "above_0": true
    },
-   "bh_q": 0.067,
+   "bh_q": 0.0713,
    "holm_p": 0.0272,
    "holm_survives": false
   },
@@ -5244,7 +5244,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.103,
+   "bh_q": 0.0973,
    "holm_p": 0.1559,
    "holm_survives": false
   },
@@ -5325,7 +5325,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.6759,
+   "bh_q": 0.6722,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -5406,7 +5406,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1218,
+   "bh_q": 0.1161,
    "holm_p": 0.1711,
    "holm_survives": false
   },
@@ -5501,7 +5501,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1014,
+   "bh_q": 0.0931,
    "holm_p": 0.1028,
    "holm_survives": false
   },
@@ -5596,7 +5596,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1014,
+   "bh_q": 0.0931,
    "holm_p": 0.0954,
    "holm_survives": false
   },
@@ -5677,7 +5677,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1023,
+   "bh_q": 0.0962,
    "holm_p": 0.106,
    "holm_survives": false
   },
@@ -5758,7 +5758,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1513,
+   "bh_q": 0.1474,
    "holm_p": 0.1789,
    "holm_survives": false
   },
@@ -5853,7 +5853,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.3647,
+   "bh_q": 0.3632,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -5948,7 +5948,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.2649,
+   "bh_q": 0.2651,
    "holm_p": 0.9166,
    "holm_survives": false
   },
@@ -6043,7 +6043,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.0951,
+   "bh_q": 0.0927,
    "holm_p": 0.1173,
    "holm_survives": false
   },
@@ -6138,7 +6138,7 @@
     "corrected": true,
     "above_0": true
    },
-   "bh_q": 0.0888,
+   "bh_q": 0.0865,
    "holm_p": 0.1015,
    "holm_survives": false
   },
@@ -6212,7 +6212,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1472,
+   "bh_q": 0.1418,
    "holm_p": 0.1923,
    "holm_survives": false
   },
@@ -6286,7 +6286,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1023,
+   "bh_q": 0.0958,
    "holm_p": 0.1494,
    "holm_survives": false
   },
@@ -6360,7 +6360,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1788,
+   "bh_q": 0.1774,
    "holm_p": 0.609,
    "holm_survives": false
   },
@@ -6434,7 +6434,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.6963,
+   "bh_q": 0.6934,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -6508,7 +6508,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1697,
+   "bh_q": 0.1679,
    "holm_p": 0.6035,
    "holm_survives": false
   },
@@ -6582,7 +6582,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.3324,
+   "bh_q": 0.3301,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -6656,7 +6656,7 @@
     "corrected": true,
     "above_0": true
    },
-   "bh_q": 0.0964,
+   "bh_q": 0.0931,
    "holm_p": 0.1043,
    "holm_survives": false
   },
@@ -6730,7 +6730,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1513,
+   "bh_q": 0.1474,
    "holm_p": 0.3597,
    "holm_survives": false
   },
@@ -6801,7 +6801,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.2808,
+   "bh_q": 0.2772,
    "holm_p": 0.6578,
    "holm_survives": false
   },
@@ -6872,7 +6872,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.189,
+   "bh_q": 0.1886,
    "holm_p": 0.5473,
    "holm_survives": false
   },
@@ -6944,7 +6944,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.9614,
+   "bh_q": 0.9663,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -7016,7 +7016,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.7938,
+   "bh_q": 0.7947,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -7088,7 +7088,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.6759,
+   "bh_q": 0.6722,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -7166,7 +7166,7 @@
     "corrected": true,
     "above_0": true
    },
-   "bh_q": 0.0888,
+   "bh_q": 0.0865,
    "holm_p": 0.1015,
    "holm_survives": false
   },
@@ -7244,7 +7244,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.2324,
+   "bh_q": 0.2356,
    "holm_p": 0.8809,
    "holm_survives": false
   },
@@ -7318,7 +7318,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.7164,
+   "bh_q": 0.7149,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -7380,7 +7380,7 @@
     "model": "none: week 2's single runs are left uncorrected",
     "corrected": false
    },
-   "bh_q": 0.1687,
+   "bh_q": 0.1659,
    "holm_p": 0.1125,
    "holm_survives": false
   },
@@ -7442,7 +7442,7 @@
     "model": "none: week 2's single runs are left uncorrected",
     "corrected": false
    },
-   "bh_q": 0.5861,
+   "bh_q": 0.5786,
    "holm_p": 0.4119,
    "holm_survives": false
   },
@@ -7504,7 +7504,7 @@
     "model": "none: week 2's single runs are left uncorrected",
     "corrected": false
    },
-   "bh_q": 0.4376,
+   "bh_q": 0.4362,
    "holm_p": 0.5914,
    "holm_survives": false
   },
@@ -7566,7 +7566,7 @@
     "model": "none: week 2's single runs are left uncorrected",
     "corrected": false
    },
-   "bh_q": 0.6759,
+   "bh_q": 0.6722,
    "holm_p": 0.5914,
    "holm_survives": false
   },
@@ -7628,7 +7628,7 @@
     "model": "none: week 2's single runs are left uncorrected",
     "corrected": false
    },
-   "bh_q": 0.1697,
+   "bh_q": 0.1679,
    "holm_p": 0.1182,
    "holm_survives": false
   },
@@ -7690,7 +7690,7 @@
     "model": "none: week 2's single runs are left uncorrected",
     "corrected": false
    },
-   "bh_q": 0.2018,
+   "bh_q": 0.2031,
    "holm_p": 0.1182,
    "holm_survives": false
   },
@@ -7760,7 +7760,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1014,
+   "bh_q": 0.0931,
    "holm_p": 0.0149,
    "holm_survives": true
   },
@@ -7830,7 +7830,7 @@
     "corrected": true,
     "above_0": true
    },
-   "bh_q": 0.0888,
+   "bh_q": 0.0865,
    "holm_p": 0.0105,
    "holm_survives": true
   },
@@ -7897,7 +7897,7 @@
     "model": "none: paired by seed on SOFC-Exp's one official split",
     "corrected": false
    },
-   "bh_q": 0.0553,
+   "bh_q": 0.0588,
    "holm_p": 0.002,
    "holm_survives": true
   },
@@ -7964,7 +7964,7 @@
     "model": "none: paired by seed on SOFC-Exp's one official split",
     "corrected": false
    },
-   "bh_q": 0.189,
+   "bh_q": 0.1886,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -8165,7 +8165,7 @@
     "model": "none: paired by seed on SOFC-Exp's one official split",
     "corrected": false
    },
-   "bh_q": 0.9511,
+   "bh_q": 0.9549,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -8232,7 +8232,7 @@
     "model": "none: paired by seed on SOFC-Exp's one official split",
     "corrected": false
    },
-   "bh_q": 0.8906,
+   "bh_q": 0.8927,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -8299,7 +8299,7 @@
     "model": "none: paired by seed on SOFC-Exp's one official split",
     "corrected": false
    },
-   "bh_q": 0.9402,
+   "bh_q": 0.9429,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -8366,7 +8366,7 @@
     "model": "none: paired by seed on SOFC-Exp's one official split",
     "corrected": false
    },
-   "bh_q": 0.7278,
+   "bh_q": 0.7268,
    "holm_p": 1.0,
    "holm_survives": false
   },
@@ -8433,7 +8433,7 @@
     "model": "none: paired by seed on SOFC-Exp's one official split",
     "corrected": false
    },
-   "bh_q": 0.0468,
+   "bh_q": 0.0498,
    "holm_p": 0.0013,
    "holm_survives": true
   },
@@ -8500,7 +8500,7 @@
     "model": "none: paired by seed on SOFC-Exp's one official split",
     "corrected": false
    },
-   "bh_q": 0.0022,
+   "bh_q": 0.0023,
    "holm_p": 0.0,
    "holm_survives": true
   },
@@ -8567,7 +8567,7 @@
     "model": "none: paired by seed on SOFC-Exp's one official split",
     "corrected": false
    },
-   "bh_q": 0.3324,
+   "bh_q": 0.3301,
    "holm_p": 0.6379,
    "holm_survives": false
   },
@@ -8696,7 +8696,7 @@
     "model": "none: the 5 draws of 10 of the 26 official training articles are scored on the one official test split and paired by draw, as seeds on one split are; their training articles overlap, which no model here describes",
     "corrected": false
    },
-   "bh_q": 0.2202,
+   "bh_q": 0.2226,
    "holm_p": 0.4523,
    "holm_survives": false
   },
@@ -8767,7 +8767,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1149,
+   "bh_q": 0.109,
    "holm_p": 0.3105,
    "holm_survives": false
   },
@@ -8838,7 +8838,7 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1995,
+   "bh_q": 0.2003,
    "holm_p": 0.7332,
    "holm_survives": false
   },
@@ -8912,7 +8912,7 @@
     "corrected": true,
     "above_0": true
    },
-   "bh_q": 0.0888,
+   "bh_q": 0.0865,
    "holm_p": 0.1015,
    "holm_survives": false
   },
@@ -8986,14 +8986,599 @@
     "corrected": true,
     "above_0": false
    },
-   "bh_q": 0.1523,
+   "bh_q": 0.1491,
    "holm_p": 0.5283,
+   "holm_survives": false
+  },
+  {
+   "id": "w20 MuLMS, held-out subfields: crf_spool vs crf",
+   "label": "week 20, 20.1",
+   "week": 20,
+   "machine": "GPU",
+   "corpus": "MuLMS",
+   "level": null,
+   "protocol": "leave_one_subfield_out",
+   "comparison": "crf_spool vs crf",
+   "measure": "micro F1",
+   "addition": "pool drawn by sentence",
+   "family": "MuLMS's pool drawn by sentence, and a third paper at equal size on fresh seeds (measurements, week 20)",
+   "in_by_addition_table": true,
+   "design": "7 or 10 seeds",
+   "seeds": "10",
+   "source": "results/gpu/ner_week5_seed_analysis.json, week20.spool",
+   "n_units": 7,
+   "per_unit": [
+    5.77,
+    3.61,
+    9.35,
+    0.94,
+    24.8,
+    19.24,
+    2.88
+   ],
+   "stored": {
+    "mean_diff": 9.51,
+    "ci95": [
+     1.12,
+     17.91
+    ]
+   },
+   "passes": true,
+   "verdict": "passes",
+   "decision": "20.1",
+   "stored_dependence": {
+    "mean_diff": 9.51,
+    "ci95": [
+     -0.57,
+     19.6
+    ],
+    "p_two_sided": 0.0605,
+    "se_ratio": 1.201,
+    "correlated_pairs": 5,
+    "above_0": false
+   },
+   "t_test": {
+    "n_units": 7,
+    "mean_diff": 9.51,
+    "sd": 9.08,
+    "t": 2.77,
+    "df": 6,
+    "p_one_sided": 0.0162,
+    "p_two_sided": 0.0323,
+    "ci95": [
+     1.12,
+     17.91
+    ]
+   },
+   "interval_matches": true,
+   "p_agrees": true,
+   "p_one_sided_unrounded": 0.01617,
+   "detectable_80": {
+    "half_width": 8.4,
+    "df": 6,
+    "difference": 11.51
+   },
+   "dependence": {
+    "mean_diff": 9.51,
+    "ci95": [
+     -0.57,
+     19.6
+    ],
+    "p_two_sided": 0.0605,
+    "se_ratio": 1.201,
+    "correlated_pairs": 5,
+    "model": "MuLMS's 7 held-out subfields, the pairs whose training pools share an article (MULMS_POOLS) at 1/4 (decision_tests.dependent_t)",
+    "corrected": true,
+    "above_0": false
+   },
+   "bh_q": 0.0931,
+   "holm_p": 0.0229,
+   "holm_survives": true
+  },
+  {
+   "id": "w20 MaterioMiner fine, unseen papers: crf_p3n2 (three papers at the size of two) vs two papers",
+   "label": "week 20, 20.2",
+   "week": 20,
+   "machine": "GPU",
+   "corpus": "MaterioMiner",
+   "level": "fine",
+   "protocol": "leave_one_paper_out",
+   "comparison": "crf_p3n2 (three papers at the size of two) vs two papers",
+   "measure": "micro F1",
+   "addition": "a third paper at equal size",
+   "family": "MuLMS's pool drawn by sentence, and a third paper at equal size on fresh seeds (measurements, week 20)",
+   "in_by_addition_table": true,
+   "design": "7 or 10 seeds",
+   "seeds": "7 (300-900)",
+   "source": "results/gpu/ner_week5_seed_analysis.json, week20.diversity.decision.fine",
+   "n_units": 4,
+   "per_unit": [
+    1.42,
+    4.0,
+    5.62,
+    5.09
+   ],
+   "stored": {
+    "mean_diff": 4.03,
+    "ci95": [
+     1.06,
+     7.0
+    ]
+   },
+   "passes": true,
+   "verdict": "passes",
+   "decision": "20.2",
+   "stored_dependence": {
+    "mean_diff": 4.03,
+    "ci95": [
+     -0.51,
+     8.57
+    ],
+    "p_two_sided": 0.0664,
+    "se_ratio": 1.528,
+    "correlated_pairs": 6,
+    "above_0": false
+   },
+   "t_test": {
+    "n_units": 4,
+    "mean_diff": 4.03,
+    "sd": 1.87,
+    "t": 4.32,
+    "df": 3,
+    "p_one_sided": 0.0114,
+    "p_two_sided": 0.0229,
+    "ci95": [
+     1.06,
+     7.0
+    ]
+   },
+   "interval_matches": true,
+   "p_agrees": true,
+   "p_one_sided_unrounded": 0.01144,
+   "detectable_80": {
+    "half_width": 2.97,
+    "df": 3,
+    "difference": 3.89
+   },
+   "dependence": {
+    "mean_diff": 4.03,
+    "ci95": [
+     -0.51,
+     8.57
+    ],
+    "p_two_sided": 0.0664,
+    "se_ratio": 1.528,
+    "correlated_pairs": 6,
+    "model": "MaterioMiner's 4 held-out papers, every pair correlated at 1/4 (decision_tests.dependent_t)",
+    "corrected": true,
+    "above_0": false
+   },
+   "bh_q": 0.0931,
+   "holm_p": 0.0229,
+   "holm_survives": true
+  },
+  {
+   "id": "w20 MaterioMiner coarse, unseen papers: crf_p3n2 (three papers at the size of two) vs two papers",
+   "label": "week 20, 20.3",
+   "week": 20,
+   "machine": "GPU",
+   "corpus": "MaterioMiner",
+   "level": "coarse",
+   "protocol": "leave_one_paper_out",
+   "comparison": "crf_p3n2 (three papers at the size of two) vs two papers",
+   "measure": "micro F1",
+   "addition": "a third paper at equal size",
+   "family": "MuLMS's pool drawn by sentence, and a third paper at equal size on fresh seeds (measurements, week 20)",
+   "in_by_addition_table": true,
+   "design": "7 or 10 seeds",
+   "seeds": "7 (300-900)",
+   "source": "results/gpu/ner_week5_seed_analysis.json, week20.diversity.decision.coarse",
+   "n_units": 4,
+   "per_unit": [
+    3.34,
+    1.63,
+    4.6,
+    4.5
+   ],
+   "stored": {
+    "mean_diff": 3.52,
+    "ci95": [
+     1.32,
+     5.72
+    ]
+   },
+   "passes": true,
+   "verdict": "passes",
+   "decision": "20.3",
+   "stored_dependence": {
+    "mean_diff": 3.52,
+    "ci95": [
+     0.16,
+     6.88
+    ],
+    "p_two_sided": 0.0447,
+    "se_ratio": 1.528,
+    "correlated_pairs": 6,
+    "above_0": true
+   },
+   "t_test": {
+    "n_units": 4,
+    "mean_diff": 3.52,
+    "sd": 1.38,
+    "t": 5.09,
+    "df": 3,
+    "p_one_sided": 0.0073,
+    "p_two_sided": 0.0147,
+    "ci95": [
+     1.32,
+     5.72
+    ]
+   },
+   "interval_matches": true,
+   "p_agrees": true,
+   "p_one_sided_unrounded": 0.007329,
+   "detectable_80": {
+    "half_width": 2.2,
+    "df": 3,
+    "difference": 2.88
+   },
+   "dependence": {
+    "mean_diff": 3.52,
+    "ci95": [
+     0.16,
+     6.88
+    ],
+    "p_two_sided": 0.0447,
+    "se_ratio": 1.528,
+    "correlated_pairs": 6,
+    "model": "MaterioMiner's 4 held-out papers, every pair correlated at 1/4 (decision_tests.dependent_t)",
+    "corrected": true,
+    "above_0": true
+   },
+   "bh_q": 0.0865,
+   "holm_p": 0.022,
+   "holm_survives": true
+  },
+  {
+   "id": "w21 MaterioMiner fine, unseen papers: gliner_ft vs crf",
+   "label": "week 21, 21.1",
+   "week": 21,
+   "machine": "GPU",
+   "corpus": "MaterioMiner",
+   "level": "fine",
+   "protocol": "leave_one_paper_out",
+   "comparison": "gliner_ft vs crf",
+   "measure": "micro F1",
+   "addition": "a generalist tagger",
+   "family": "a generalist tagger, GLiNER-medium, fine-tuned in the CRF head's place (a baseline, week 21)",
+   "in_by_addition_table": true,
+   "design": "7 or 10 seeds",
+   "seeds": "10",
+   "source": "results/gpu/ner_week5_seed_analysis.json, week21.decisions.fine",
+   "n_units": 4,
+   "per_unit": [
+    1.64,
+    -0.54,
+    1.72,
+    12.25
+   ],
+   "stored": {
+    "mean_diff": 3.77,
+    "ci95": [
+     -5.38,
+     12.92
+    ]
+   },
+   "passes": false,
+   "verdict": "no",
+   "decision": "21.1",
+   "reading": "not shown within about 4-5 points",
+   "stored_dependence": {
+    "mean_diff": 3.77,
+    "ci95": [
+     -10.21,
+     17.75
+    ],
+    "p_two_sided": 0.4541,
+    "se_ratio": 1.528,
+    "correlated_pairs": 6,
+    "above_0": false
+   },
+   "t_test": {
+    "n_units": 4,
+    "mean_diff": 3.77,
+    "sd": 5.75,
+    "t": 1.31,
+    "df": 3,
+    "p_one_sided": 0.1407,
+    "p_two_sided": 0.2814,
+    "ci95": [
+     -5.38,
+     12.92
+    ]
+   },
+   "interval_matches": true,
+   "p_agrees": true,
+   "p_one_sided_unrounded": 0.1407,
+   "detectable_80": {
+    "half_width": 9.15,
+    "df": 3,
+    "difference": 11.96
+   },
+   "dependence": {
+    "mean_diff": 3.77,
+    "ci95": [
+     -10.21,
+     17.75
+    ],
+    "p_two_sided": 0.4541,
+    "se_ratio": 1.528,
+    "correlated_pairs": 6,
+    "model": "MaterioMiner's 4 held-out papers, every pair correlated at 1/4 (decision_tests.dependent_t)",
+    "corrected": true,
+    "above_0": false
+   },
+   "bh_q": 0.2478,
+   "holm_p": 0.5628,
+   "holm_survives": false
+  },
+  {
+   "id": "w21 MaterioMiner coarse, unseen papers: gliner_ft vs crf",
+   "label": "week 21, 21.2",
+   "week": 21,
+   "machine": "GPU",
+   "corpus": "MaterioMiner",
+   "level": "coarse",
+   "protocol": "leave_one_paper_out",
+   "comparison": "gliner_ft vs crf",
+   "measure": "micro F1",
+   "addition": "a generalist tagger",
+   "family": "a generalist tagger, GLiNER-medium, fine-tuned in the CRF head's place (a baseline, week 21)",
+   "in_by_addition_table": true,
+   "design": "7 or 10 seeds",
+   "seeds": "10",
+   "source": "results/gpu/ner_week5_seed_analysis.json, week21.decisions.coarse",
+   "n_units": 4,
+   "per_unit": [
+    -11.22,
+    -9.77,
+    -13.94,
+    -5.57
+   ],
+   "stored": {
+    "mean_diff": -10.12,
+    "ci95": [
+     -15.68,
+     -4.56
+    ]
+   },
+   "passes": false,
+   "verdict": "no",
+   "decision": "21.2",
+   "reading": "below the CRF head",
+   "stored_dependence": {
+    "mean_diff": -10.12,
+    "ci95": [
+     -18.62,
+     -1.63
+    ],
+    "p_two_sided": 0.0321,
+    "se_ratio": 1.528,
+    "correlated_pairs": 6,
+    "above_0": false
+   },
+   "t_test": {
+    "n_units": 4,
+    "mean_diff": -10.12,
+    "sd": 3.49,
+    "t": -5.8,
+    "df": 3,
+    "p_one_sided": 0.9949,
+    "p_two_sided": 0.0102,
+    "ci95": [
+     -15.68,
+     -4.57
+    ]
+   },
+   "interval_matches": true,
+   "p_agrees": true,
+   "p_one_sided_unrounded": 0.9949,
+   "detectable_80": {
+    "half_width": 5.56,
+    "df": 3,
+    "difference": 7.27
+   },
+   "dependence": {
+    "mean_diff": -10.12,
+    "ci95": [
+     -18.62,
+     -1.63
+    ],
+    "p_two_sided": 0.0321,
+    "se_ratio": 1.528,
+    "correlated_pairs": 6,
+    "model": "MaterioMiner's 4 held-out papers, every pair correlated at 1/4 (decision_tests.dependent_t)",
+    "corrected": true,
+    "above_0": false
+   },
+   "bh_q": 0.9995,
+   "holm_p": 0.9949,
+   "holm_survives": false
+  },
+  {
+   "id": "w21 MuLMS, held-out subfields: gliner_ft vs crf",
+   "label": "week 21, 21.3",
+   "week": 21,
+   "machine": "GPU",
+   "corpus": "MuLMS",
+   "level": null,
+   "protocol": "leave_one_subfield_out",
+   "comparison": "gliner_ft vs crf",
+   "measure": "micro F1",
+   "addition": "a generalist tagger",
+   "family": "a generalist tagger, GLiNER-medium, fine-tuned in the CRF head's place (a baseline, week 21)",
+   "in_by_addition_table": true,
+   "design": "7 or 10 seeds",
+   "seeds": "10",
+   "source": "results/gpu/ner_week5_seed_analysis.json, week21.decisions.mulms",
+   "n_units": 7,
+   "per_unit": [
+    2.2,
+    -2.87,
+    2.48,
+    -1.82,
+    8.62,
+    -0.12,
+    2.56
+   ],
+   "stored": {
+    "mean_diff": 1.58,
+    "ci95": [
+     -1.92,
+     5.08
+    ]
+   },
+   "passes": false,
+   "verdict": "no",
+   "decision": "21.3",
+   "reading": "not shown within about 3.5 points",
+   "stored_dependence": {
+    "mean_diff": 1.58,
+    "ci95": [
+     -2.63,
+     5.78
+    ],
+    "p_two_sided": 0.3938,
+    "se_ratio": 1.201,
+    "correlated_pairs": 5,
+    "above_0": false
+   },
+   "t_test": {
+    "n_units": 7,
+    "mean_diff": 1.58,
+    "sd": 3.79,
+    "t": 1.1,
+    "df": 6,
+    "p_one_sided": 0.1561,
+    "p_two_sided": 0.3121,
+    "ci95": [
+     -1.92,
+     5.08
+    ]
+   },
+   "interval_matches": true,
+   "p_agrees": true,
+   "p_one_sided_unrounded": 0.1561,
+   "detectable_80": {
+    "half_width": 3.5,
+    "df": 6,
+    "difference": 4.8
+   },
+   "dependence": {
+    "mean_diff": 1.58,
+    "ci95": [
+     -2.63,
+     5.78
+    ],
+    "p_two_sided": 0.3938,
+    "se_ratio": 1.201,
+    "correlated_pairs": 5,
+    "model": "MuLMS's 7 held-out subfields, the pairs whose training pools share an article (MULMS_POOLS) at 1/4 (decision_tests.dependent_t)",
+    "corrected": true,
+    "above_0": false
+   },
+   "bh_q": 0.2669,
+   "holm_p": 0.5628,
+   "holm_survives": false
+  },
+  {
+   "id": "w21 SOFC-Exp, article folds: gliner_ft vs crf",
+   "label": "week 21, 21.4",
+   "week": 21,
+   "machine": "GPU",
+   "corpus": "SOFC-Exp",
+   "level": null,
+   "protocol": "document_folds",
+   "comparison": "gliner_ft vs crf",
+   "measure": "micro F1",
+   "addition": "a generalist tagger",
+   "family": "a generalist tagger, GLiNER-medium, fine-tuned in the CRF head's place (a baseline, week 21)",
+   "in_by_addition_table": true,
+   "design": "7 or 10 seeds",
+   "seeds": "10",
+   "source": "results/gpu/ner_week5_seed_analysis.json, week21.decisions.sofc",
+   "n_units": 5,
+   "per_unit": [
+    -1.53,
+    0.19,
+    0.81,
+    -0.95,
+    2.81
+   ],
+   "stored": {
+    "mean_diff": 0.27,
+    "ci95": [
+     -1.84,
+     2.37
+    ]
+   },
+   "passes": false,
+   "verdict": "no",
+   "decision": "21.4",
+   "reading": "not shown within about 1.5-2 points",
+   "stored_dependence": {
+    "mean_diff": 0.27,
+    "ci95": [
+     -2.89,
+     3.42
+    ],
+    "p_two_sided": 0.8264,
+    "se_ratio": 1.5,
+    "correlated_pairs": 10,
+    "above_0": false
+   },
+   "t_test": {
+    "n_units": 5,
+    "mean_diff": 0.27,
+    "sd": 1.69,
+    "t": 0.35,
+    "df": 4,
+    "p_one_sided": 0.3716,
+    "p_two_sided": 0.7432,
+    "ci95": [
+     -1.84,
+     2.37
+    ]
+   },
+   "interval_matches": true,
+   "p_agrees": true,
+   "p_one_sided_unrounded": 0.3716,
+   "detectable_80": {
+    "half_width": 2.1,
+    "df": 4,
+    "difference": 2.82
+   },
+   "dependence": {
+    "mean_diff": 0.27,
+    "ci95": [
+     -2.89,
+     3.42
+    ],
+    "p_two_sided": 0.8264,
+    "se_ratio": 1.5,
+    "correlated_pairs": 10,
+    "model": "SOFC-Exp's 5 article folds, every pair at 1/5 (decision_tests.dependent_t)",
+    "corrected": true,
+    "above_0": false
+   },
+   "bh_q": 0.5283,
+   "holm_p": 0.7432,
    "holm_survives": false
   }
  ],
  "counts": {
-  "decisions": 111,
-  "passes": 24,
+  "decisions": 118,
+  "passes": 27,
   "weeks": [
    2,
    3,
@@ -9009,7 +9594,9 @@
    13,
    14,
    17,
-   18
+   18,
+   20,
+   21
   ],
   "by_design": {
    "one run per split": [
@@ -9021,8 +9608,8 @@
     6
    ],
    "7 or 10 seeds": [
-    81,
-    18
+    88,
+    21
    ]
   },
   "three_seeds": {
@@ -9036,14 +9623,14 @@
    ]
   },
   "seed_bases": {
-   "10": 75,
-   "7 (300-900)": 5,
+   "10": 80,
+   "7 (300-900)": 7,
    "MuLMS 7 (300-900), MaterioMiner 10": 1
   },
   "random_splits_7_or_10": 8,
   "by_addition_rows": [
-   81,
-   18
+   88,
+   21
   ],
   "by_addition": {
    "CRF head over plain MatSciBERT": {
@@ -9253,6 +9840,49 @@
      "week 7, part 2e, decision 1",
      "week 7, part 2e, decision 2"
     ]
+   },
+   "MuLMS's pool drawn by sentence, and a third paper at equal size on fresh seeds (measurements, week 20)": {
+    "decisions": {
+     "MaterioMiner": 2,
+     "MuLMS": 1
+    },
+    "passes": {
+     "MaterioMiner": 2,
+     "MuLMS": 1
+    },
+    "n_decisions": 3,
+    "n_passes": 3,
+    "sofc_exp": 0,
+    "sofc_protocols": {},
+    "random_splits": 0,
+    "additions": {
+     "a third paper at equal size": 2,
+     "pool drawn by sentence": 1
+    },
+    "passing": [
+     "week 20, 20.1",
+     "week 20, 20.2",
+     "week 20, 20.3"
+    ]
+   },
+   "a generalist tagger, GLiNER-medium, fine-tuned in the CRF head's place (a baseline, week 21)": {
+    "decisions": {
+     "MaterioMiner": 2,
+     "MuLMS": 1,
+     "SOFC-Exp": 1
+    },
+    "passes": {},
+    "n_decisions": 4,
+    "n_passes": 0,
+    "sofc_exp": 1,
+    "sofc_protocols": {
+     "document_folds": 1
+    },
+    "random_splits": 0,
+    "additions": {
+     "a generalist tagger": 4
+    },
+    "passing": []
    }
   },
   "three_seed_additions": {
@@ -9337,14 +9967,14 @@
  ],
  "interval_check": {
   "tolerance": 0.02,
-  "matched": 111,
+  "matched": 118,
   "mismatched": []
  },
  "dependence_summary": {
   "note": "post hoc: per dependence model, the passes whose 95% interval stays above 0 with the units correlated, those whose interval then covers 0, and those left uncorrected",
   "passes": {
-   "above_0": 7,
-   "covers_0": 14,
+   "above_0": 8,
+   "covers_0": 16,
    "uncorrected": 3
   },
   "models": {
@@ -9358,13 +9988,14 @@
     ]
    },
    "MaterioMiner's 4 held-out papers, every pair correlated at 1/4 (decision_tests.dependent_t)": {
-    "decisions": 58,
-    "passes": 14,
+    "decisions": 62,
+    "passes": 16,
     "passes_above_0": [
      "w3 CPU MaterioMiner coarse, unseen papers: crf_ls vs crf",
      "w7 MaterioMiner fine, unseen papers: crf_mr vs crf",
      "D4: w12 MaterioMiner coarse, unseen papers: crf_mrm6 vs crf",
-     "week 8, part 2, decision 2: w8 MaterioMiner coarse, unseen papers: crf_p3n2 (three papers at the size of two) vs two papers"
+     "week 8, part 2, decision 2: w8 MaterioMiner coarse, unseen papers: crf_p3n2 (three papers at the size of two) vs two papers",
+     "week 20, 20.3: w20 MaterioMiner coarse, unseen papers: crf_p3n2 (three papers at the size of two) vs two papers"
     ],
     "passes_covers_0": [
      "w4 CPU MaterioMiner coarse, unseen papers: crf_ls_ens3 vs crf_ens3",
@@ -9376,14 +10007,16 @@
      "w9 MaterioMiner coarse, unseen papers: crf_mt_mr vs crf_mt",
      "w9 MaterioMiner fine, unseen papers: crf_mt_mr_ens3 vs crf_mt_ens3",
      "D3: w12 MaterioMiner fine, unseen papers: crf_mrm6 vs crf",
-     "week 8, part 2, decision 1: w8 MaterioMiner fine, unseen papers: crf_p3n2 (three papers at the size of two) vs two papers"
+     "week 8, part 2, decision 1: w8 MaterioMiner fine, unseen papers: crf_p3n2 (three papers at the size of two) vs two papers",
+     "week 20, 20.2: w20 MaterioMiner fine, unseen papers: crf_p3n2 (three papers at the size of two) vs two papers"
     ]
    },
    "MuLMS's 7 held-out subfields, the pairs whose training pools share an article (MULMS_POOLS) at 1/4 (decision_tests.dependent_t)": {
-    "decisions": 11,
-    "passes": 3,
+    "decisions": 13,
+    "passes": 4,
     "passes_covers_0": [
-     "week 10, decision 2: w10 MuLMS, held-out subfields: crf_mr votes vs crf votes"
+     "week 10, decision 2: w10 MuLMS, held-out subfields: crf_mr votes vs crf votes",
+     "week 20, 20.1: w20 MuLMS, held-out subfields: crf_spool vs crf"
     ],
     "passes_above_0": [
      "week 13, 13.1a: w13 MuLMS, held-out subfields: crf_dc vs crf",
@@ -9391,7 +10024,7 @@
     ]
    },
    "SOFC-Exp's 5 article folds, every pair at 1/5 (decision_tests.dependent_t)": {
-    "decisions": 3,
+    "decisions": 4,
     "passes": 0
    },
    "the 11 pooled units in two blocks uncorrelated across corpora: MuLMS's 7 subfields (pools sharing an article at 1/4) and MaterioMiner's 4 papers (at 1/4) (decision_tests.dependent_t)": {
@@ -9473,12 +10106,187 @@
     "correlated_pairs": 5,
     "above_0": true
    }
+  },
+  "week 20, 20.1": {
+   "equal": true,
+   "here": {
+    "mean_diff": 9.51,
+    "ci95": [
+     -0.57,
+     19.6
+    ],
+    "p_two_sided": 0.0605,
+    "se_ratio": 1.201,
+    "correlated_pairs": 5,
+    "above_0": false
+   },
+   "analysis": {
+    "mean_diff": 9.51,
+    "ci95": [
+     -0.57,
+     19.6
+    ],
+    "p_two_sided": 0.0605,
+    "se_ratio": 1.201,
+    "correlated_pairs": 5,
+    "above_0": false
+   }
+  },
+  "week 20, 20.2": {
+   "equal": true,
+   "here": {
+    "mean_diff": 4.03,
+    "ci95": [
+     -0.51,
+     8.57
+    ],
+    "p_two_sided": 0.0664,
+    "se_ratio": 1.528,
+    "correlated_pairs": 6,
+    "above_0": false
+   },
+   "analysis": {
+    "mean_diff": 4.03,
+    "ci95": [
+     -0.51,
+     8.57
+    ],
+    "p_two_sided": 0.0664,
+    "se_ratio": 1.528,
+    "correlated_pairs": 6,
+    "above_0": false
+   }
+  },
+  "week 20, 20.3": {
+   "equal": true,
+   "here": {
+    "mean_diff": 3.52,
+    "ci95": [
+     0.16,
+     6.88
+    ],
+    "p_two_sided": 0.0447,
+    "se_ratio": 1.528,
+    "correlated_pairs": 6,
+    "above_0": true
+   },
+   "analysis": {
+    "mean_diff": 3.52,
+    "ci95": [
+     0.16,
+     6.88
+    ],
+    "p_two_sided": 0.0447,
+    "se_ratio": 1.528,
+    "correlated_pairs": 6,
+    "above_0": true
+   }
+  },
+  "week 21, 21.1": {
+   "equal": true,
+   "here": {
+    "mean_diff": 3.77,
+    "ci95": [
+     -10.21,
+     17.75
+    ],
+    "p_two_sided": 0.4541,
+    "se_ratio": 1.528,
+    "correlated_pairs": 6,
+    "above_0": false
+   },
+   "analysis": {
+    "mean_diff": 3.77,
+    "ci95": [
+     -10.21,
+     17.75
+    ],
+    "p_two_sided": 0.4541,
+    "se_ratio": 1.528,
+    "correlated_pairs": 6,
+    "above_0": false
+   }
+  },
+  "week 21, 21.2": {
+   "equal": true,
+   "here": {
+    "mean_diff": -10.12,
+    "ci95": [
+     -18.62,
+     -1.63
+    ],
+    "p_two_sided": 0.0321,
+    "se_ratio": 1.528,
+    "correlated_pairs": 6,
+    "above_0": false
+   },
+   "analysis": {
+    "mean_diff": -10.12,
+    "ci95": [
+     -18.62,
+     -1.63
+    ],
+    "p_two_sided": 0.0321,
+    "se_ratio": 1.528,
+    "correlated_pairs": 6,
+    "above_0": false
+   }
+  },
+  "week 21, 21.3": {
+   "equal": true,
+   "here": {
+    "mean_diff": 1.58,
+    "ci95": [
+     -2.63,
+     5.78
+    ],
+    "p_two_sided": 0.3938,
+    "se_ratio": 1.201,
+    "correlated_pairs": 5,
+    "above_0": false
+   },
+   "analysis": {
+    "mean_diff": 1.58,
+    "ci95": [
+     -2.63,
+     5.78
+    ],
+    "p_two_sided": 0.3938,
+    "se_ratio": 1.201,
+    "correlated_pairs": 5,
+    "above_0": false
+   }
+  },
+  "week 21, 21.4": {
+   "equal": true,
+   "here": {
+    "mean_diff": 0.27,
+    "ci95": [
+     -2.89,
+     3.42
+    ],
+    "p_two_sided": 0.8264,
+    "se_ratio": 1.5,
+    "correlated_pairs": 10,
+    "above_0": false
+   },
+   "analysis": {
+    "mean_diff": 0.27,
+    "ci95": [
+     -2.89,
+     3.42
+    ],
+    "p_two_sided": 0.8264,
+    "se_ratio": 1.5,
+    "correlated_pairs": 10,
+    "above_0": false
+   }
   }
  },
  "multiplicity": {
-  "note": "post hoc: Benjamini-Hochberg q-values of the one-sided t-test P values (mean > 0, unrounded) over all the decisions; Holm within each family (the rows of Section 7.7's by-addition table for 7 or 10 seeds, the 3-seed and one-run groups of the paragraph after it), one-sided, family-wise 2.5%",
+  "note": "post hoc: Benjamini-Hochberg q-values of the one-sided t-test P values (mean > 0, unrounded) over all the decisions; Holm within each family (the rows of Section 7.8's by-addition table for 7 or 10 seeds, the 3-seed and one-run groups of the paragraph after it), one-sided, family-wise 2.5%",
   "benjamini_hochberg": {
-   "m": 111,
+   "m": 118,
    "fdr_0.05": {
     "n": 3,
     "decisions": [
@@ -9488,20 +10296,35 @@
     ]
    },
    "fdr_0.10": {
-    "n": 12,
+    "n": 27,
     "decisions": [
      "w3 CPU MaterioMiner coarse, unseen papers: crf_ls vs crf",
+     "w3 CPU MaterioMiner coarse, random splits: crf_mt vs crf",
+     "w4 CPU MaterioMiner coarse, unseen papers: crf_ls_ens3 vs crf_ens3",
      "w4 MaterioMiner fine, unseen papers: crf_st3 vs crf",
+     "w5 MaterioMiner fine, random splits: crf_mt vs crf",
+     "w5 MaterioMiner coarse, random splits: crf_mt_ens3 vs crf_ens3",
+     "w5 MaterioMiner fine, unseen papers: crf_mt_ens3 vs crf_ens3",
+     "w7 MaterioMiner coarse, unseen papers: crf_dc vs crf",
      "w7 MaterioMiner fine, unseen papers: crf_mr vs crf",
+     "w7 MaterioMiner coarse, unseen papers: crf_mr vs crf",
+     "w9 MaterioMiner fine, unseen papers: crf_mt_mr vs crf_mt",
+     "w9 MaterioMiner coarse, unseen papers: crf_mt_mr vs crf_mt",
+     "w9 MaterioMiner fine, unseen papers: crf_mt_mr_ens3 vs crf_mt_ens3",
      "D3: w12 MaterioMiner fine, unseen papers: crf_mrm6 vs crf",
      "D4: w12 MaterioMiner coarse, unseen papers: crf_mrm6 vs crf",
+     "week 10, decision 2: w10 MuLMS, held-out subfields: crf_mr votes vs crf votes",
      "week 13, 13.1a: w13 MuLMS, held-out subfields: crf_dc vs crf",
      "D5: w13 pooled, MuLMS subfields + MaterioMiner papers: crf_mrm_topic6 vs crf",
+     "week 8, part 2, decision 1: w8 MaterioMiner fine, unseen papers: crf_p3n2 (three papers at the size of two) vs two papers",
      "week 8, part 2, decision 2: w8 MaterioMiner coarse, unseen papers: crf_p3n2 (three papers at the size of two) vs two papers",
      "week 6, S1: w6 SOFC-Exp entity, official split, paired by seed: crf vs baseline",
      "week 7, part 2e, decision 1: w7 SOFC-Exp entity, official split, paired by seed: crf_cdetest vs crf",
      "week 7, part 2e, decision 2: w7 SOFC-Exp entity, official split, paired by seed: cdetest vs baseline",
-     "D11: w18 MuLMS, held-out subfields: crf_mrm_topic6 vs crf_mr6_bias at the recall-matched bias, recall on the unseen test names the lexicon holds"
+     "D11: w18 MuLMS, held-out subfields: crf_mrm_topic6 vs crf_mr6_bias at the recall-matched bias, recall on the unseen test names the lexicon holds",
+     "week 20, 20.1: w20 MuLMS, held-out subfields: crf_spool vs crf",
+     "week 20, 20.2: w20 MaterioMiner fine, unseen papers: crf_p3n2 (three papers at the size of two) vs two papers",
+     "week 20, 20.3: w20 MaterioMiner coarse, unseen papers: crf_p3n2 (three papers at the size of two) vs two papers"
     ]
    }
   },
@@ -9602,6 +10425,20 @@
       "week 7, part 2e, decision 1: w7 SOFC-Exp entity, official split, paired by seed: crf_cdetest vs crf",
       "week 7, part 2e, decision 2: w7 SOFC-Exp entity, official split, paired by seed: cdetest vs baseline"
      ]
+    },
+    "MuLMS's pool drawn by sentence, and a third paper at equal size on fresh seeds (measurements, week 20)": {
+     "decisions": 3,
+     "passes": 3,
+     "survivors": [
+      "week 20, 20.1: w20 MuLMS, held-out subfields: crf_spool vs crf",
+      "week 20, 20.2: w20 MaterioMiner fine, unseen papers: crf_p3n2 (three papers at the size of two) vs two papers",
+      "week 20, 20.3: w20 MaterioMiner coarse, unseen papers: crf_p3n2 (three papers at the size of two) vs two papers"
+     ]
+    },
+    "a generalist tagger, GLiNER-medium, fine-tuned in the CRF head's place (a baseline, week 21)": {
+     "decisions": 4,
+     "passes": 0,
+     "survivors": []
     }
    },
    "survivors": [
@@ -9610,15 +10447,18 @@
     "week 8, part 2, decision 2: w8 MaterioMiner coarse, unseen papers: crf_p3n2 (three papers at the size of two) vs two papers",
     "week 6, S1: w6 SOFC-Exp entity, official split, paired by seed: crf vs baseline",
     "week 7, part 2e, decision 1: w7 SOFC-Exp entity, official split, paired by seed: crf_cdetest vs crf",
-    "week 7, part 2e, decision 2: w7 SOFC-Exp entity, official split, paired by seed: cdetest vs baseline"
+    "week 7, part 2e, decision 2: w7 SOFC-Exp entity, official split, paired by seed: cdetest vs baseline",
+    "week 20, 20.1: w20 MuLMS, held-out subfields: crf_spool vs crf",
+    "week 20, 20.2: w20 MaterioMiner fine, unseen papers: crf_p3n2 (three papers at the size of two) vs two papers",
+    "week 20, 20.3: w20 MaterioMiner coarse, unseen papers: crf_p3n2 (three papers at the size of two) vs two papers"
    ]
   },
   "chance": {
    "alpha": 0.025,
-   "decisions": 111,
-   "expected_passes": 2.775,
-   "passes": 24,
-   "share_of_passes": 0.116
+   "decisions": 118,
+   "expected_passes": 2.95,
+   "passes": 27,
+   "share_of_passes": 0.109
   }
  },
  "hardware": {

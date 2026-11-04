@@ -146,24 +146,35 @@ audit found 6 mismatches; the count and every stage-21 number were right.
 - **The long version** gets the stale dates, "About 2.9" and the CPU/GPU
   wording corrected.
 
+**Done after round 2 (4 November):**
+- **The post hoc checks take all 118 decisions** (`paper_b_checks.py`).
+  Weeks 20 and 21's dependence entries equal the readings their protocols
+  fixed. The dependence allowance keeps 6 of 18 passes. Benjamini–Hochberg
+  passes 3 at FDR 5% and all 27 at 10%, a fragile count: the largest of
+  their P values, 0.0223, is just under its threshold, 0.0229. Holm keeps
+  9, week 20's 3 among them. §7.8 and the TACL §5.3 say so.
+- **"Before their data"** in the TACL power bullet was wrong: the
+  detectable differences come from each decision's own variance. It now
+  reads "at the variance in their own data", with GLiNER-medium's 12.0 and
+  7.3.
+- **Decided by the author:** the title is "Materials NER on unseen
+  documents: a pre-registered evaluation on three corpora"; at submission
+  the companion paper is disclosed to the editor and the time-stamped
+  protocol record offered.
+
 **Open:**
 - **Length.** The text is about 6,190 words of prose and 750 in tables. It
   is not yet typeset in tacl2021v1.sty, and it needs cutting after the
   typeset check.
-- **The post hoc checks** (dependence, BH, Holm) are still over 111
-  decisions. `paper_b_checks.py` should take all 118.
 - **Per-decision classification.** Each decision should be marked
   confirmatory or deviating, and the count given both ways.
 - **A units-by-seeds randomization check** as a sensitivity analysis.
 - **GLiNER fidelity**: the package trainer against our loop on one unit,
   and a validation-chosen threshold as a sensitivity analysis. Optionally, a
   coarse arm with the namesake class names (post hoc, outside the count).
-  Both need GPU time.
+  The trainer check and the class-name arm run as batch `w21x`
+  (exploratory, outside the count); the threshold check is not run.
 - **The figures** use "consistency rule" and "silver names", and GLiNER is
   not yet in the methods figure.
 - **Related work** lacks other generalist and LLM taggers, whose references
   must be verified first.
-- **For the author:**
-  - the title ("never read" holds for fine-tuning only);
-  - disclosing the companion submission to the editor;
-  - whether to offer the time-stamped record to the action editor.

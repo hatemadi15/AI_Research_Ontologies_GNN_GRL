@@ -1,24 +1,27 @@
 """
-paper_b_checks.py - post hoc checks of paper B's 111 pre-registered decisions
+paper_b_checks.py - post hoc checks of paper B's 118 pre-registered decisions
 
-No training, and nothing here decides anything. Paper B (docs/PAPER_B.md, Section 7.7) counts
-111 pre-registered decisions, 24 passing, each taken by its registered rule: the 95% Student-t
+No training, and nothing here decides anything. Paper B (docs/PAPER_B.md, Section 7.8) counts
+118 pre-registered decisions, 27 passing, each taken by its registered rule: the 95% Student-t
 interval of the mean paired micro-F1 difference above 0, which is a one-sided t test at 2.5%
 (the pooled decisions also need neither corpus's interval below 0). Its first referee asked for
 post hoc checks of them. Every item here is post hoc, computed for round 1 of paper B's internal
-review (3 November 2026), and labelled so; the decisions stand as taken.
+review (3 November 2026) and extended to weeks 20 and 21 on 4 November, and labelled so; the
+decisions stand as taken.
 
-`decisions` lists the 111 with the per-unit (or per-seed) differences each used: Table 2's 70
+`decisions` lists the 118 with the per-unit (or per-seed) differences each used: Table 2's 70
 (paper_tables.COMPARISONS, role 'decision'); Table 6's 20 rows (paper_tables.held_out_entries)
 less the 4 that repeat Table 2 rows (week 7's crf_dc and week 12's crf_mrm6, both levels),
 which are checked against them; week 2's 6, one run per split (results/ner_comparisons.json);
 week 8 part 2's 2 (`paper_diversity`); SOFC-Exp's 12 on its official split, paired by seed
-(`published_split`); the training-size decision (`sofc_draws`); and paper A's D9 to D12
-(`week17`, ner_recall_matched.json). Each carries its week, corpus, comparison, design, the
-family of Section 7.7's by-addition table, the stored mean, interval and verdict. The interval
-is recomputed from the per-unit values (decision_tests.t_test) and compared with the stored one
-within 0.02; the totals, by design and by family, are checked against Section 7.7 (`SECTION_7_7`),
-and a mismatch stops the run with each discrepancy named.
+(`published_split`); the training-size decision (`sofc_draws`); paper A's D9 to D12 (`week17`,
+ner_recall_matched.json); week 20's 3 (`week20`: the pool drawn by sentence, 20.1, and week
+8's diversity decisions on fresh seeds, 20.2 and 20.3); and week 21's 4 (`week21.decisions`:
+GLiNER fine-tuned against the CRF head, 21.1 to 21.4). Each carries its week, corpus,
+comparison, design, the family of Section 7.8's by-addition table, the stored mean, interval
+and verdict. The interval is recomputed from the per-unit values (decision_tests.t_test) and
+compared with the stored one within 0.02; the totals, by design and by family, are checked
+against Section 7.8 (`SECTION_7_8`), and a mismatch stops the run with each discrepancy named.
 
 Per decision: the one- and two-sided P of the t test; the difference it detects with 80% power
 (ner_robustness.mde); and the 95% interval with units that share training documents correlated
@@ -28,9 +31,11 @@ units in two blocks uncorrelated across corpora) or, on random sentence splits, 
 resampled t test (Nadeau and Bengio 2003: the variance of the mean (1/J + n_test/n_train) S^2,
 J = 5, n - 1 degrees of freedom, the sizes from the reference runs). Decisions paired by seed on
 SOFC-Exp's one official split, the draws of training articles scored on that split, and week
-2's single runs get no correction, and say so. Over the decisions: Benjamini-Hochberg q-values of
-the 111 one-sided P values (unrounded), Holm within each family, one-sided at a family-wise 2.5%
-(a family is a row of Section 7.7's by-addition table for the 81 decisions with 7 or 10 seeds,
+2's single runs get no correction, and say so. D5's and D11's adjusted values are compared with
+ner_decision_tests.json's, and weeks 20 and 21's with the readings their protocols fixed in the
+analysis file (20.1's on the pools that share an article). Over the decisions: Benjamini-Hochberg q-values of
+the 118 one-sided P values (unrounded), Holm within each family, one-sided at a family-wise 2.5%
+(a family is a row of Section 7.8's by-addition table for the 88 decisions with 7 or 10 seeds,
 and for the 30 others an addition at its design, as the paragraph after the table groups them),
 and the passes expected by chance. Then weeks 3 and 4's four 3-seed passes recomputed from each
 machine's runs at the same seeds, and every CPU run against its GPU repeat; unseen- against
@@ -72,9 +77,10 @@ ALPHA = 0.025                     # the registered rule is a one-sided test at 2
 FDR = (0.05, 0.10)
 SPLITS = 5                        # J of the corrected resampled t test: the 5 random splits
 OFFSETS = tuple(range(0, 1000, 100))
-NOTE = ("Post hoc, for round 1 of paper B's internal review (3 November 2026), at its first "
-        "referee's request. Nothing here decides anything: each decision stands as taken by its "
-        "registered rule, the 95% Student-t interval of the mean paired difference above 0.")
+NOTE = ("Post hoc, for round 1 of paper B's internal review (3 November 2026; weeks 20 and 21 "
+        "added 4 November), at its first referee's request. Nothing here decides anything: "
+        "each decision stands as taken by its registered rule, the 95% Student-t interval of "
+        "the mean paired difference above 0.")
 
 # the designs, and the seed bases of the 7- or 10-seed decisions
 ONE_RUN, THREE, SEVEN_OR_TEN = 'one run per split', '3 seeds', '7 or 10 seeds'
@@ -86,7 +92,7 @@ PROTOCOLS = {'random_split_vary': 'random splits', 'leave_one_paper_out': 'unsee
              'published_split': 'official split, paired by seed',
              'article_draws': '10-article draws, official split'}
 
-# the rows of Section 7.7's by-addition table, which counts the decisions with 7 or 10 seeds
+# the rows of Section 7.8's by-addition table, which counts the decisions with 7 or 10 seeds
 CRF = 'CRF head over plain MatSciBERT'
 VOTE = 'seed vote over the single model'
 MT = 'multi-task training (two type levels)'
@@ -97,12 +103,19 @@ DC = 'document-level label propagation'
 OTHER = ('label semantics, self-training, document context, multi-task self-training, '
          'recall calibration, coarse-to-fine completion')
 TOKENS = "SOFC-Exp's test articles cut as its training articles are (a measurement)"
+W20 = ("MuLMS's pool drawn by sentence, and a third paper at equal size on fresh seeds "
+       '(measurements, week 20)')
+W21 = ("a generalist tagger, GLiNER-medium, fine-tuned in the CRF head's place (a baseline, "
+       'week 21)')
 OTHERS = ('label semantics', 'self-training', 'document context', 'multi-task self-training',
           'recall calibration', 'coarse-to-fine completion')
+# a third paper at equal size is week 20's row with 7 seeds; week 8's 3-seed decisions keep the
+# group of the paragraph after the table (`family`)
 FAMILY = {'CRF head': CRF, 'seed vote': VOTE, 'multi-task training': MT, 'mention replacement': MR,
           'mention replacement on the multi-task model': MTMR, 'harvested names': NAMES,
           'document-level label propagation': DC, 'test tokens': TOKENS,
-          **{a: OTHER for a in OTHERS}}
+          'pool drawn by sentence': W20, 'a third paper at equal size': W20,
+          'a generalist tagger': W21, **{a: OTHER for a in OTHERS}}
 # the addition a decision's variant tests
 ADDITION = {
     'crf': 'CRF head', 'crf_ens3': 'seed vote', 'crf_mix3': 'the mixed-backbone vote',
@@ -125,6 +138,7 @@ ADDITION = {
     'crf_mt_mrm6': 'harvested names',
     'crf_cdetest': 'test tokens', 'cdetest': 'test tokens',
     'crf_p3n2': 'a third paper at equal size',
+    'crf_spool': 'pool drawn by sentence', 'gliner_ft': 'a generalist tagger',
 }
 # paper A's labels of the Table 6 rows (by their decision label) and of Table 2's week-12 rows
 TABLE6_LABELS = {'week 12, decision 1': 'D1', 'week 12, decision 2': 'D2', 'week 13, 13.2': 'D5',
@@ -159,17 +173,17 @@ SOFC_OFFICIAL = (
 )
 SOFC_LEVELS = {'sofc': 'entity', 'sofc_slot': 'slot'}
 
-# What Section 7.7 states (with the week-2 protocol's two levels per variant): the totals, by
+# What Section 7.8 states (with the week-2 protocol's two levels per variant): the totals, by
 # design, the seed bases, the by-addition table (decisions and passes per corpus, with the
 # breakdowns it gives) and the 3-seed and one-run families of the paragraph below it.
-SECTION_7_7 = {
-    'decisions': 111, 'passes': 24,
-    'weeks': [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 17, 18],
-    'by_design': {ONE_RUN: [6, 0], THREE: [24, 6], SEVEN_OR_TEN: [81, 18]},
+SECTION_7_8 = {
+    'decisions': 118, 'passes': 27,
+    'weeks': [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 17, 18, 20, 21],
+    'by_design': {ONE_RUN: [6, 0], THREE: [24, 6], SEVEN_OR_TEN: [88, 21]},
     'three_seeds': {'weeks 3 and 4': [22, 4], 'week 8': [2, 2]},
-    'seed_bases': {TEN: 75, SEVEN: 5, BOTH: 1},
+    'seed_bases': {TEN: 80, SEVEN: 7, BOTH: 1},
     'random_splits_7_or_10': 8,
-    'by_addition_rows': [81, 18],
+    'by_addition_rows': [88, 21],
     'by_addition': {
         CRF: {'decisions': {'SOFC-Exp': 1}, 'passes': {'SOFC-Exp': 1},
               'sofc_protocols': {'published_split': 1}},
@@ -189,6 +203,10 @@ SECTION_7_7 = {
                               'multi-task self-training': 4, 'recall calibration': 5,
                               'coarse-to-fine completion': 2}},
         TOKENS: {'n_decisions': 2, 'n_passes': 2},
+        W20: {'decisions': {'MaterioMiner': 2, 'MuLMS': 1},
+              'passes': {'MaterioMiner': 2, 'MuLMS': 1}},
+        W21: {'decisions': {'MaterioMiner': 2, 'MuLMS': 1, 'SOFC-Exp': 1}, 'passes': {},
+              'sofc_protocols': {'document_folds': 1}},
     },
     'three_seed_additions': {'label semantics': [8, 2], 'self-training': [6, 1],
                              'multi-task training': [4, 1], 'the mixed-backbone vote': [2, 0],
@@ -201,7 +219,7 @@ SECTION_7_7 = {
 
 
 class CountMismatch(AssertionError):
-    """The enumeration does not give Section 7.7's counts; the message names each discrepancy."""
+    """The enumeration does not give Section 7.8's counts; the message names each discrepancy."""
 
 
 def load(path):
@@ -215,7 +233,7 @@ def plain(comparison):
 
 
 def family(addition, design):
-    """The family of a decision: its row of Section 7.7's by-addition table for 7 or 10 seeds,
+    """The family of a decision: its row of Section 7.8's by-addition table for 7 or 10 seeds,
     else the addition with the design, as the paragraph after the table groups them."""
     return FAMILY[addition] if design == SEVEN_OR_TEN else f'{addition} ({design})'
 
@@ -358,10 +376,58 @@ def names_decisions(analysis, matched):
     return out
 
 
+ANALYSIS_SOURCE = 'results/gpu/ner_week5_seed_analysis.json'
+
+
+def week20_decisions(analysis):
+    """Week 20's 3 decisions (ROADMAP's week-20 protocol): 20.1, the CRF head on MuLMS's 7
+    held-out subfields with its pool drawn by sentence (`crf_spool`) against the stored article
+    pool, 10 seeds (`week20.spool`); 20.2 and 20.3, week 8's diversity decisions on the 7 fresh
+    seeds 300 to 900 (`week20.diversity.decision`). Each keeps the dependence reading its
+    protocol fixed (20.1's on the pools that share an article), for `dependence_matches`."""
+    w = analysis['week20']
+    s = w['spool']
+    out = [record(20, 'MuLMS', None, 'leave_one_subfield_out', 'crf_spool vs crf',
+                  ADDITION['crf_spool'], SEVEN_OR_TEN, TEN, s['minus_crf']['micro'], s['passes'],
+                  f'{ANALYSIS_SOURCE}, week20.spool', label=f"week 20, {s['decision']}",
+                  decision=s['decision'], stored_dependence=s['dependence']['shared_articles'])]
+    for g in ('fine', 'coarse'):
+        e = w['diversity']['decision'][g]
+        out.append(record(20, 'MaterioMiner', g, 'leave_one_paper_out',
+                          'crf_p3n2 (three papers at the size of two) vs two papers',
+                          ADDITION['crf_p3n2'], SEVEN_OR_TEN, SEVEN, e['diversity'], e['passes'],
+                          f'{ANALYSIS_SOURCE}, week20.diversity.decision.{g}',
+                          label=f"week 20, {e['decision']}", decision=e['decision'],
+                          stored_dependence=e['dependence']))
+    return out
+
+
+# week 21's decisions in their order, 21.1 to 21.4: (key in week21.decisions, CORPORA key)
+WEEK21_UNITS = (('fine', 'fine'), ('coarse', 'coarse'), ('mulms', 'mulms'),
+                ('sofc', 'sofc_folds'))
+
+
+def week21_decisions(analysis):
+    """Week 21's 4 decisions (ROADMAP's week-21 protocol): GLiNER-medium fine-tuned
+    (`gliner_ft`) against the CRF head on the held-out units, 10 seeds: 21.1 and 21.2 on
+    MaterioMiner's 4 papers at both levels, 21.3 on MuLMS's 7 subfields and 21.4 on SOFC-Exp's
+    5 article folds (`week21.decisions`), with the protocol's reading and dependence entry."""
+    out = []
+    for key, corpus in WEEK21_UNITS:
+        e = analysis['week21']['decisions'][key]
+        name, level, protocol = CORPORA[corpus]
+        out.append(record(21, name, level, protocol, 'gliner_ft vs crf', ADDITION['gliner_ft'],
+                          SEVEN_OR_TEN, TEN, e['minus_crf']['micro'], e['passes'],
+                          f'{ANALYSIS_SOURCE}, week21.decisions.{key}',
+                          label=f"week 21, {e['decision']}", decision=e['decision'],
+                          reading=e['reading'], stored_dependence=e['dependence']))
+    return out
+
+
 def enumerate_decisions(results_dir):
-    """(the 111 decisions, Table 6's 4 rows that repeat Table 2, with their agreement), in the
+    """(the 118 decisions, Table 6's 4 rows that repeat Table 2, with their agreement), in the
     order: Table 2, Table 6's others, week 2, week 8, SOFC-Exp's official split, its draws, D9
-    to D12."""
+    to D12, week 20 and week 21."""
     analysis = load(os.path.join(results_dir, ANALYSIS))
     table2 = table2_decisions(results_dir)
     table6 = table6_entries(analysis, load(os.path.join(results_dir, WEEK12)))
@@ -384,7 +450,8 @@ def enumerate_decisions(results_dir):
     decisions = (table2 + others + week2_decisions(load(os.path.join(results_dir, WEEK2)))
                  + week8_decisions(analysis) + sofc_official_decisions(analysis)
                  + sofc_draws_decision(analysis)
-                 + names_decisions(analysis, load(os.path.join(results_dir, WEEK18))))
+                 + names_decisions(analysis, load(os.path.join(results_dir, WEEK18)))
+                 + week20_decisions(analysis) + week21_decisions(analysis))
     ids = [d['id'] for d in decisions]
     if len(set(ids)) != len(ids):
         raise CountMismatch(f'duplicate ids: {sorted({i for i in ids if ids.count(i) > 1})}')
@@ -392,7 +459,7 @@ def enumerate_decisions(results_dir):
 
 
 def counts(decisions):
-    """The counts of SECTION_7_7, from an enumeration."""
+    """The counts of SECTION_7_8, from an enumeration."""
     def tally(rows, key):
         out = {}
         for d in rows:
@@ -405,7 +472,7 @@ def counts(decisions):
     three = [d for d in decisions if d['design'] == THREE]
     one = [d for d in decisions if d['design'] == ONE_RUN]
     by_addition = {}
-    for row in SECTION_7_7['by_addition']:
+    for row in SECTION_7_8['by_addition']:
         rows = [d for d in tables if d['family'] == row]
         passing = [d for d in rows if d['passes']]
         sofc = [d for d in rows if d['corpus'] == 'SOFC-Exp']
@@ -424,7 +491,7 @@ def counts(decisions):
             'seed_bases': tally(tables, 'seeds'),
             'random_splits_7_or_10': sum(d['protocol'] == 'random_split_vary' for d in tables),
             'by_addition_rows': both([d for d in tables
-                                      if d['family'] in SECTION_7_7['by_addition']]),
+                                      if d['family'] in SECTION_7_8['by_addition']]),
             'by_addition': by_addition,
             'three_seed_additions': {a: both([d for d in three if d['addition'] == a])
                                      for a in sorted({d['addition'] for d in three})},
@@ -435,14 +502,14 @@ def counts(decisions):
 
 
 # the counts compared as wholes (a tally must hold exactly the corpora, protocols, additions or
-# seed bases stated); the other dicts are compared key by key, on the keys Section 7.7 states
+# seed bases stated); the other dicts are compared key by key, on the keys Section 7.8 states
 WHOLE = {'decisions', 'passes', 'passing', 'additions', 'sofc_protocols', 'seed_bases',
          'three_seed_additions', 'one_run_additions'}
 
 
 def discrepancies(found, expected=None, path=''):
-    """Each place where `found` (counts) differs from what Section 7.7 states."""
-    expected = SECTION_7_7 if expected is None else expected
+    """Each place where `found` (counts) differs from what Section 7.8 states."""
+    expected = SECTION_7_8 if expected is None else expected
     if isinstance(expected, dict) and path.rpartition('/')[2] not in WHOLE:
         found = found if isinstance(found, dict) else {}
         out = []
@@ -451,15 +518,15 @@ def discrepancies(found, expected=None, path=''):
         return out
     if found == expected:
         return []
-    return [f'{path}: enumerated {found}, Section 7.7 states {expected}']
+    return [f'{path}: enumerated {found}, Section 7.8 states {expected}']
 
 
 def check_counts(decisions):
-    """counts(decisions), or CountMismatch naming every count that differs from Section 7.7."""
+    """counts(decisions), or CountMismatch naming every count that differs from Section 7.8."""
     found = counts(decisions)
     wrong = discrepancies(found)
     if wrong:
-        raise CountMismatch('the enumeration does not match Section 7.7:\n  ' + '\n  '.join(wrong))
+        raise CountMismatch('the enumeration does not match Section 7.8:\n  ' + '\n  '.join(wrong))
     return found
 
 
@@ -646,7 +713,7 @@ def multiplicity(decisions, raw_p):
     return {
         'note': ('post hoc: Benjamini-Hochberg q-values of the one-sided t-test P values (mean > '
                  '0, unrounded) over all the decisions; Holm within each family (the rows of '
-                 "Section 7.7's by-addition table for 7 or 10 seeds, the 3-seed and one-run "
+                 "Section 7.8's by-addition table for 7 or 10 seeds, the 3-seed and one-run "
                  'groups of the paragraph after it), one-sided, family-wise 2.5%'),
         'benjamini_hochberg': {
             'm': len(decisions),
@@ -909,15 +976,20 @@ def gaps(root, analysis):
 
 
 def dependence_matches(decisions, stored_tests):
-    """Whether this module's dependence-adjusted values of D5 and D11 equal those of
-    results/gpu/ner_decision_tests.json (post_hoc_dependence)."""
+    """Whether this module's dependence-adjusted values equal those stored elsewhere: D5's and
+    D11's in results/gpu/ner_decision_tests.json (post_hoc_dependence), and weeks 20 and 21's in
+    the analysis file (`stored_dependence`, the readings their protocols fixed)."""
     stored = stored_tests['post_hoc_dependence']['decisions']
     out = {}
     for d in decisions:
         if d['label'] in ('D5', 'D11'):
-            mine = {k: d['dependence'][k] for k in stored[d['label']]}
-            out[d['label']] = {'equal': mine == stored[d['label']], 'here': mine,
-                               'ner_decision_tests': stored[d['label']]}
+            where, theirs = 'ner_decision_tests', stored[d['label']]
+        elif 'stored_dependence' in d:
+            where, theirs = 'analysis', d['stored_dependence']
+        else:
+            continue
+        mine = {k: d['dependence'][k] for k in theirs}
+        out[d['label']] = {'equal': mine == theirs, 'here': mine, where: theirs}
     return out
 
 
@@ -932,12 +1004,12 @@ def checks(root):
                   for d in decisions if not d['interval_matches']]
     return {
         'note': NOTE,
-        'decisions_note': ("post hoc: the 111 pre-registered decisions of paper B's Section 7.7, "
+        'decisions_note': ("post hoc: the 118 pre-registered decisions of paper B's Section 7.8, "
                            'each with its per-unit differences, its stored mean, interval and '
                            'verdict, the t test of its per-unit values (decision_tests.t_test), '
                            'the difference it detects with 80% power at the two-sided 5% level '
                            '(ner_robustness.mde), its dependence-adjusted 95% interval, its '
-                           'Benjamini-Hochberg q-value over all 111 and its Holm-adjusted P '
+                           'Benjamini-Hochberg q-value over all 118 and its Holm-adjusted P '
                            'within its family'),
         'decisions': decisions,
         'counts': found,
@@ -967,7 +1039,7 @@ def ci(pair):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="Post hoc checks of paper B's 111 decisions")
+    parser = argparse.ArgumentParser(description="Post hoc checks of paper B's 118 decisions")
     parser.add_argument('--results', default=str(pt.ROOT / 'results'))
     parser.add_argument('--out', default=None)
     args = parser.parse_args(argv)
@@ -978,7 +1050,7 @@ def main(argv=None):
     c = out['counts']
     print(f"{c['decisions']} decisions, {c['passes']} passing; by design "
           + ', '.join(f'{k} {n}/{p}' for k, (n, p) in c['by_design'].items())
-          + ' (decisions/passes; Section 7.7 matches)')
+          + ' (decisions/passes; Section 7.8 matches)')
     for m in out['interval_check']['mismatched']:
         print(f"interval not reproduced: {m['id']}: stored {m['stored']}, recomputed "
               f"{m['recomputed']}")

@@ -446,35 +446,39 @@ with 7 or 10 seeds (Table 3), none of them stage 21's.
 | label propagation | 10: 6 on MaterioMiner, 2 on MuLMS, 2 on SOFC-Exp | 2 | MuLMS and coarse-grained MaterioMiner; loses on SOFC-Exp | MuLMS (13.1a) | none |
 | label semantics, self-training, document context, multi-task self-training, recall calibration, coarse-to-fine | 28, 2 of them on SOFC-Exp | 0 | nowhere | — | — |
 | SOFC-Exp's test articles re-cut (a measurement) | 2 | 2 | — | paired by seed | both |
-| MuLMS's pool by sentence; a third paper at equal size, fresh seeds (measurements, stage 20) | 3 | 3 | MuLMS; MaterioMiner at both levels | the coarse-grained third paper (fixed in the protocol) | not tested |
-| GLiNER-medium fine-tuned (stage 21) | 4: 2 on MaterioMiner, 1 on MuLMS, 1 on SOFC-Exp | 0 | nowhere above the CRF head; below it at MaterioMiner's coarse level, whose types it was given as codes | no pass; 21.2 stays below | not tested |
+| MuLMS's pool by sentence; a third paper at equal size, fresh seeds (measurements, stage 20) | 3 | 3 | MuLMS; MaterioMiner at both levels | the coarse-grained third paper (fixed in the protocol) | none |
+| GLiNER-medium fine-tuned (stage 21) | 4: 2 on MaterioMiner, 1 on MuLMS, 1 on SOFC-Exp | 0 | nowhere above the CRF head; below it at MaterioMiner's coarse level, whose types it was given as codes | no pass; 21.2 stays below | none |
 
 **Table 3.** Decisions with 7 or 10 seeds, by addition (8 on
-MaterioMiner's random splits). The two right-hand columns are post hoc for
-stages 2 to 18; stages 20 and 21 fixed their dependence reading in their
-protocols and are not in the Benjamini–Hochberg test.
+MaterioMiner's random splits). The two right-hand columns are post hoc;
+stages 20 and 21 fixed their dependence reading in their protocols, and
+the post hoc model reproduces it.
 
-Three post hoc readings qualify the 24 passes of stages 2 to 18; none
-changes a verdict. Stage 20's three passes carry the reading fixed in
-their protocol (the coarse-grained third paper keeps its margin, the
-other two lose it); stage 21 has none, and 21.2 stays below.
+Three post hoc readings qualify the 27 passes; none changes a verdict.
+Stage 20's three passes carry the reading fixed in their protocol (the
+coarse-grained third paper keeps its margin, the other two lose it);
+stage 21 has none, and 21.2 stays below.
 - **Shared training documents.** The companion study's model of the units'
   dependence (Anonymous, 2026; Appendix A.5) and, on random splits, the
   corrected resampled test (nadeau2003inference) widen the intervals by a
-  factor of 1.2 to 1.6: of the 15 passes over units with 7 or 10 seeds, 5
-  keep their margin, 6 of 18 with stage 20's (Table 3).
-- **Multiplicity.** About 2.8 of the 24 passes are expected by chance, a
-  false-discovery share near 12%. Under Benjamini–Hochberg control of the
-  111 one-sided P values (benjamini1995controlling), 3 pass at a 5%
+  factor of 1.2 to 1.6: of the 18 passes over units with 7 or 10 seeds, 6
+  keep their margin (Table 3).
+- **Multiplicity.** About 3.0 of the 27 passes are expected by chance, a
+  false-discovery share near 11%. Under Benjamini–Hochberg control of the
+  118 one-sided P values (benjamini1995controlling), 3 pass at a 5%
   false-discovery rate (SOFC-Exp's two tokenization measurements and stage
-  3's CPU label-semantics pass, which did not replicate) and 12 at 10%;
-  within each addition's family (Holm, family-wise 2.5%), 6 survive, none
-  of them a method for unseen documents with 7 or 10 seeds.
-- **Power.** Before their data, the single-model decisions on held-out
-  papers could detect 0.4 to 3.8 points at 80% power (multi-task
-  self-training's fine-grained one 8.1). After them, each failure is read
-  by its interval: "not shown", with the upper bound as the largest gain
-  the data allow (Tables B1 to B3), not "no effect".
+  3's CPU label-semantics pass, which did not replicate) and all 27 at
+  10%, a fragile count: the largest of their P values, 0.0223, falls just
+  under its step-up threshold, 0.0229 (over stages 2 to 18's 111
+  decisions, 12 passed). Within each addition's family (Holm, family-wise
+  2.5%), 9 survive, stage 20's three measurements among them, none a
+  method for unseen documents with 7 or 10 seeds.
+- **Power.** At the variance in their own data, the single-model
+  decisions on held-out papers could detect 0.4 to 3.9 points at 80% power
+  (multi-task self-training's fine-grained one 8.1, GLiNER-medium's 12.0
+  and 7.3). Each failure is still read by its interval: "not shown", with
+  the upper bound as the largest gain the data allow (Tables B1 to B3), not
+  "no effect".
 - **Deviations.** Not every decision is confirmatory in the strict sense:
   the pooled names decision's criterion was adopted when three-copy
   mention replacement already met it, and three decisions would not have

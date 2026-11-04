@@ -1,8 +1,9 @@
 """The post hoc checks of paper B's decisions (paper_b_checks.py): Benjamini-Hochberg, Holm,
 the corrected resampled t test, the Welch gap and the exact rounding on small cases; the
 unseen-minus-seen reading with and without per-unit values; and on the committed results the
-enumeration of Section 7.7's 111 decisions with its counts, every stored interval reproduced,
-D5's and D11's dependence entries, the hardware re-decisions, the gaps and the written file."""
+enumeration of Section 7.8's 118 decisions with its counts, every stored interval reproduced,
+the dependence entries of D5, D11 and weeks 20 and 21, the hardware re-decisions, the gaps
+and the written file."""
 import json
 import os
 import statistics
@@ -94,13 +95,13 @@ def test_unseen_minus_seen_needs_per_unit_values():
     assert pair['mean_diff'] == 2.0 and pair['units'] == ['a', 'b', 'c']    # 2, 3, 1
 
 
-def test_committed_enumeration_matches_section_7_7():
-    """Section 7.7's count from the stored decisions: 111, 24 passing, by design and by family;
+def test_committed_enumeration_matches_section_7_8():
+    """Section 7.8's count from the stored decisions: 118, 27 passing, by design and by family;
     Table 6's 4 repeats of Table 2 rows agree with them; no scipy needed."""
     decisions, repeats = committed()
     found = pb.check_counts(decisions)
-    assert found['decisions'] == 111 and found['passes'] == 24
-    assert found['by_design'] == {pb.ONE_RUN: [6, 0], pb.THREE: [24, 6], pb.SEVEN_OR_TEN: [81, 18]}
+    assert found['decisions'] == 118 and found['passes'] == 27
+    assert found['by_design'] == {pb.ONE_RUN: [6, 0], pb.THREE: [24, 6], pb.SEVEN_OR_TEN: [88, 21]}
     sources = [d['source'].split(',')[0] for d in decisions]
     assert sources.count('Table 2') == 70 and sources.count('Table 6') == 16
     assert len(repeats) == 4 and {r['label'] for r in repeats} == {None, 'D3', 'D4'}
@@ -116,6 +117,20 @@ def test_committed_enumeration_matches_section_7_7():
     assert labels == {f'D{i}' for i in range(1, 13)}
     passing = {d['label'] for d in decisions if d['passes'] and d['label']}
     assert {'D3', 'D4', 'D5', 'D11', 'week 10, decision 2', 'week 13, 13.1a'} <= passing
+    # weeks 20 and 21: their own rows of the by-addition table, 7 or 10 seeds
+    late = {d['label']: d for d in decisions if d['week'] in (20, 21)}
+    assert sorted(late) == ['week 20, 20.1', 'week 20, 20.2', 'week 20, 20.3', 'week 21, 21.1',
+                            'week 21, 21.2', 'week 21, 21.3', 'week 21, 21.4']
+    assert {k for k, d in late.items() if d['passes']} == {'week 20, 20.1', 'week 20, 20.2',
+                                                          'week 20, 20.3'}
+    assert {d['family'] for k, d in late.items() if k.startswith('week 20')} == {pb.W20}
+    assert {d['family'] for k, d in late.items() if k.startswith('week 21')} == {pb.W21}
+    assert [late[f'week 20, 20.{i}']['seeds'] for i in (1, 2, 3)] == [pb.TEN, pb.SEVEN, pb.SEVEN]
+    assert late['week 21, 21.2']['reading'] == 'below the CRF head'
+    assert late['week 21, 21.4']['protocol'] == 'document_folds'
+    # week 8's 3-seed decisions on a third paper keep their own group
+    assert {d['family'] for d in decisions if d['week'] == 8} == {
+        'a third paper at equal size (3 seeds)'}
 
 
 def test_counts_name_each_discrepancy():
@@ -125,27 +140,29 @@ def test_counts_name_each_discrepancy():
     with pytest.raises(pb.CountMismatch) as err:
         pb.check_counts(flipped)
     text = str(err.value)
-    assert 'passes: enumerated 25, Section 7.7 states 24' in text
-    assert "by_design/3 seeds: enumerated [24, 7], Section 7.7 states [24, 6]" in text
+    assert 'passes: enumerated 28, Section 7.8 states 27' in text
+    assert "by_design/3 seeds: enumerated [24, 7], Section 7.8 states [24, 6]" in text
     assert "three_seed_additions: enumerated" in text
-    with pytest.raises(pb.CountMismatch, match='decisions: enumerated 110'):
+    with pytest.raises(pb.CountMismatch, match='decisions: enumerated 117'):
         pb.check_counts(decisions[1:])
 
 
 def test_committed_intervals_dependence_and_multiplicity(out):
     decisions = out['decisions']
-    assert out['interval_check']['mismatched'] == [] and out['interval_check']['matched'] == 111
+    assert out['interval_check']['mismatched'] == [] and out['interval_check']['matched'] == 118
     assert all(d['p_agrees'] for d in decisions)
     assert all(e['equal'] for e in out['dependence_check'].values())
-    assert set(out['dependence_check']) == {'D5', 'D11'}
+    assert set(out['dependence_check']) == {'D5', 'D11', 'week 20, 20.1', 'week 20, 20.2',
+                                            'week 20, 20.3', 'week 21, 21.1', 'week 21, 21.2',
+                                            'week 21, 21.3', 'week 21, 21.4'}
     summary = out['dependence_summary']
-    assert summary['passes'] == {'above_0': 7, 'covers_0': 14, 'uncorrected': 3}
+    assert summary['passes'] == {'above_0': 8, 'covers_0': 16, 'uncorrected': 3}
     assert summary['random_split_ratios'] == [0.3107]       # 96 / 309 on every random split
     above = {d['label'] or d['id'] for d in decisions
              if d['passes'] and d['dependence'].get('above_0')}
     assert above == {'w3 CPU MaterioMiner coarse, unseen papers: crf_ls vs crf',
                      'w7 MaterioMiner fine, unseen papers: crf_mr vs crf', 'D4', 'D5', 'D11',
-                     'week 13, 13.1a', 'week 8, part 2, decision 2'}
+                     'week 13, 13.1a', 'week 8, part 2, decision 2', 'week 20, 20.3'}
     ids = by_id(decisions)
     d3 = ids['w12 MaterioMiner fine, unseen papers: crf_mrm6 vs crf']
     assert d3['dependence']['ci95'] == [-0.13, 8.67] and d3['detectable_80']['difference'] == 3.77
@@ -154,16 +171,19 @@ def test_committed_intervals_dependence_and_multiplicity(out):
     assert not any(d['dependence']['corrected'] for d in decisions
                    if d['protocol'] in ('published_split', 'article_draws') or d['week'] == 2)
     mult = out['multiplicity']
-    assert mult['benjamini_hochberg']['m'] == 111
+    assert mult['benjamini_hochberg']['m'] == 118
     assert mult['benjamini_hochberg']['fdr_0.05']['n'] == 3
-    assert mult['benjamini_hochberg']['fdr_0.10']['n'] == 12
+    # every pass at 10%: the 27th smallest P, 0.0223, is under its step-up threshold 27/118 x 10%
+    assert mult['benjamini_hochberg']['fdr_0.10']['n'] == 27
     survivors = {d['label'] or d['id'] for d in decisions if d['holm_survives']}
     assert survivors == {'w3 CPU MaterioMiner coarse, unseen papers: crf_ls vs crf',
                          'week 8, part 2, decision 1', 'week 8, part 2, decision 2', 'week 6, S1',
-                         'week 7, part 2e, decision 1', 'week 7, part 2e, decision 2'}
+                         'week 7, part 2e, decision 1', 'week 7, part 2e, decision 2',
+                         'week 20, 20.1', 'week 20, 20.2', 'week 20, 20.3'}
     assert all(d['passes'] for d in decisions if d['bh_q'] <= 0.10 or d['holm_survives'])
-    assert mult['chance'] == {'alpha': 0.025, 'decisions': 111, 'expected_passes': 2.775,
-                              'passes': 24, 'share_of_passes': 0.116}
+    assert mult['holm']['families'][pb.W21] == {'decisions': 4, 'passes': 0, 'survivors': []}
+    assert mult['chance'] == {'alpha': 0.025, 'decisions': 118, 'expected_passes': 2.95,
+                              'passes': 27, 'share_of_passes': 0.109}
 
 
 def test_committed_hardware_and_gaps(out):

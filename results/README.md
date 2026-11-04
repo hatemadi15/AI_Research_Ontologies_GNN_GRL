@@ -603,11 +603,13 @@ identical to `smokebf`. Outcome:
 - 20.2: +4.03 [+1.06, +7.00], passes;
 - 20.3: +3.52 [+1.32, +5.72], passes.
 
-Paper B's post hoc checks (review round 1, 3 November; none decides
-anything): `gpu/paper_b_checks.json` (`paper_b_checks.py`) enumerates the
-111 pre-registered decisions with their per-unit differences. It checks
-that each stored interval reproduces, and that the totals match paper B's
-§7.7 by design and by addition. Per decision it gives:
+Paper B's post hoc checks (review round 1, 3 November, extended to weeks
+20 and 21 on 4 November; none decides anything): `gpu/paper_b_checks.json`
+(`paper_b_checks.py`) enumerates the 118 pre-registered decisions with
+their per-unit differences. It checks that each stored interval
+reproduces, that the totals match paper B's §7.8 by design and by
+addition, and that weeks 20 and 21's dependence entries equal the readings
+their protocols fixed. Per decision it gives:
 - the one-sided P;
 - the 80%-power detectable difference;
 - the interval allowing for units that share training documents (paper
@@ -622,7 +624,14 @@ each addition's family. It also gives:
 - each corpus's gap with a Welch interval.
 
 It notes that unseen-minus-seen gains cannot be computed from the stored
-summaries.
+summaries. Over the 118 decisions:
+- the dependence allowance keeps 6 of the 18 passes over units with 7 or
+  10 seeds (20.3 among them);
+- Benjamini–Hochberg passes 3 at FDR 5% and all 27 passes at 10%, since
+  the largest of their P values, 0.0223, is just under its threshold,
+  0.0229 (12 of the 111 of weeks 2 to 18 passed at 10%);
+- Holm within each family keeps 9: the 6 of weeks 2 to 18 and week 20's 3;
+- 2.95 passes are expected by chance, 10.9% of the 27.
 
 Week 21 (the week-21 protocol, ROADMAP §4; fixed 3 November 09:39 UTC
 before any run): a free generalist NER baseline, GLiNER-medium
