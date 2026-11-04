@@ -1,0 +1,616 @@
+{
+  "granularity": "fine",
+  "protocol": "leave_one_paper_out",
+  "variant": "gliner_ftp_m300",
+  "model": "urchade/gliner_medium-v2.1",
+  "labels": [
+    "Alloy",
+    "Crack",
+    "CrackInitation",
+    "DataSet",
+    "FatigueLifetime",
+    "FatigueTest",
+    "FatigueTestSpecimen",
+    "GrainBoundary",
+    "LoadingType",
+    "Location",
+    "MaterialClass",
+    "MechanicalProperty",
+    "MechanicalTestDataSet",
+    "MechanicalTreatment",
+    "Mechanism",
+    "Microstructure",
+    "MicrostructureEntity",
+    "StateDescriptor",
+    "StrainRate",
+    "StressAmplitude",
+    "TensileUltimateStrength",
+    "TensileYieldStrength",
+    "TestSpecimen",
+    "TestingMachine",
+    "TestingMedium",
+    "TwinBoundary",
+    "Value"
+  ],
+  "label_tie": {
+    "boundary_count": 24,
+    "tied_classes": [
+      "TensileYieldStrength",
+      "Dislocation"
+    ],
+    "kept_by_tiebreak": [
+      "TensileYieldStrength"
+    ]
+  },
+  "paper_test_f1": 69.92,
+  "config": {
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "split_seed": 0,
+    "vary_split": false,
+    "leave_one_paper_out": true,
+    "top_k": 27,
+    "model": "urchade/gliner_medium-v2.1",
+    "model_revision": "40ec419335d09393f298636f471328b722c6da9e",
+    "backbone": "microsoft/deberta-v3-base",
+    "backbone_revision": "8ccc9b6f36199bec6961081d44eb72fb3f7353f3",
+    "gliner_version": "0.2.30",
+    "zero_shot": false,
+    "label_names": {
+      "Alloy": "alloy",
+      "Crack": "crack",
+      "CrackInitation": "crack initiation",
+      "DataSet": "data set",
+      "FatigueLifetime": "fatigue lifetime",
+      "FatigueTest": "fatigue test",
+      "FatigueTestSpecimen": "fatigue test specimen",
+      "GrainBoundary": "grain boundary",
+      "LoadingType": "loading type",
+      "Location": "location",
+      "MaterialClass": "material class",
+      "MechanicalProperty": "mechanical property",
+      "MechanicalTestDataSet": "mechanical test data set",
+      "MechanicalTreatment": "mechanical treatment",
+      "Mechanism": "mechanism",
+      "Microstructure": "microstructure",
+      "MicrostructureEntity": "microstructure entity",
+      "StateDescriptor": "state descriptor",
+      "StrainRate": "strain rate",
+      "StressAmplitude": "stress amplitude",
+      "TensileUltimateStrength": "tensile ultimate strength",
+      "TensileYieldStrength": "tensile yield strength",
+      "TestSpecimen": "test specimen",
+      "TestingMachine": "testing machine",
+      "TestingMedium": "testing medium",
+      "TwinBoundary": "twin boundary",
+      "Value": "value"
+    },
+    "max_width": 12,
+    "max_len": 384,
+    "flat_ner": true,
+    "multi_label": false,
+    "dtype": "float32",
+    "eval_batch_size": 8,
+    "threshold": 0.5,
+    "trainer": "gliner.training.Trainer",
+    "accelerate_version": "1.15.0",
+    "epochs_from": "gliner_ft_m300: best_epoch + 1",
+    "training_args": {
+      "num_train_epochs": 20,
+      "max_steps": -1,
+      "per_device_train_batch_size": 8,
+      "gradient_accumulation_steps": 1,
+      "optim": "adamw_torch",
+      "learning_rate": 1e-05,
+      "others_lr": 5e-05,
+      "weight_decay": 0.01,
+      "others_weight_decay": 0.01,
+      "adam_beta1": 0.9,
+      "adam_beta2": 0.999,
+      "adam_epsilon": 1e-08,
+      "lr_scheduler_type": "linear",
+      "warmup_ratio": 0.1,
+      "warmup_steps": 0,
+      "max_grad_norm": 1.0,
+      "focal_loss_alpha": -1.0,
+      "focal_loss_gamma": 0.0,
+      "rel_focal_loss_alpha": -1.0,
+      "rel_focal_loss_gamma": 0.0,
+      "focal_loss_prob_margin": 0.0,
+      "label_smoothing": 0.0,
+      "loss_reduction": "sum",
+      "negatives": 1.0,
+      "masking": "none",
+      "loss_type": "focal",
+      "use_span_width_weight": false,
+      "dice_gamma": 1.0,
+      "ce_calib_weight": 0.5,
+      "fp16": false,
+      "bf16": false,
+      "full_determinism": false,
+      "eval_strategy": "no",
+      "save_strategy": "no",
+      "logging_strategy": "epoch",
+      "report_to": "none",
+      "disable_tqdm": true,
+      "remove_unused_columns": false,
+      "dataloader_num_workers": 0,
+      "dataloader_drop_last": false
+    },
+    "tag": "m300",
+    "seed_offset": 300,
+    "save_predictions": true,
+    "max_train": 0,
+    "device": null,
+    "threads": 2
+  },
+  "runs": [
+    {
+      "f1": 54.01,
+      "precision": 48.05,
+      "recall": 61.67,
+      "f1_strict": 54.01,
+      "per_class": {
+        "Alloy": {
+          "precision": 0.5,
+          "recall": 0.25,
+          "f1-score": 0.3333,
+          "support": 4.0
+        },
+        "Crack": {
+          "precision": 0.5714,
+          "recall": 1.0,
+          "f1-score": 0.7273,
+          "support": 4.0
+        },
+        "CrackInitation": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 2.0
+        },
+        "DataSet": {
+          "precision": 0.5,
+          "recall": 0.4545,
+          "f1-score": 0.4762,
+          "support": 11.0
+        },
+        "FatigueTest": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "FatigueTestSpecimen": {
+          "precision": 0.6,
+          "recall": 1.0,
+          "f1-score": 0.75,
+          "support": 3.0
+        },
+        "GrainBoundary": {
+          "precision": 0.25,
+          "recall": 1.0,
+          "f1-score": 0.4,
+          "support": 1.0
+        },
+        "LoadingType": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "Location": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 4.0
+        },
+        "MaterialClass": {
+          "precision": 0.2857,
+          "recall": 1.0,
+          "f1-score": 0.4444,
+          "support": 2.0
+        },
+        "MechanicalTestDataSet": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "MechanicalTreatment": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 1.0
+        },
+        "Mechanism": {
+          "precision": 0.5,
+          "recall": 0.5,
+          "f1-score": 0.5,
+          "support": 6.0
+        },
+        "Microstructure": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 2.0
+        },
+        "MicrostructureEntity": {
+          "precision": 0.3333,
+          "recall": 1.0,
+          "f1-score": 0.5,
+          "support": 1.0
+        },
+        "StateDescriptor": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 1.0
+        },
+        "StressAmplitude": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 1.0
+        },
+        "TestingMachine": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "Value": {
+          "precision": 0.7692,
+          "recall": 0.7143,
+          "f1-score": 0.7407,
+          "support": 14.0
+        },
+        "micro avg": {
+          "precision": 0.4805,
+          "recall": 0.6167,
+          "f1-score": 0.5401,
+          "support": 60.0
+        },
+        "macro avg": {
+          "precision": 0.3847,
+          "recall": 0.522,
+          "f1-score": 0.4143,
+          "support": 60.0
+        },
+        "weighted avg": {
+          "precision": 0.5585,
+          "recall": 0.6167,
+          "f1-score": 0.5648,
+          "support": 60.0
+        }
+      },
+      "seed": 300,
+      "best_epoch": 19,
+      "epochs": 20,
+      "val_f1": 80.68,
+      "n_train": 370,
+      "n_val": 65,
+      "n_test": 41,
+      "history": [
+        {
+          "epoch": 0,
+          "train_loss_mean": 107.1269,
+          "learning_rate": 2.446808510638298e-05,
+          "grad_norm": 180.0875
+        },
+        {
+          "epoch": 1,
+          "train_loss_mean": 75.0481,
+          "learning_rate": 4.946808510638298e-05,
+          "grad_norm": 201.5576
+        },
+        {
+          "epoch": 2,
+          "train_loss_mean": 57.0427,
+          "learning_rate": 4.728132387706856e-05,
+          "grad_norm": 197.1973
+        },
+        {
+          "epoch": 3,
+          "train_loss_mean": 46.6085,
+          "learning_rate": 4.4503546099290785e-05,
+          "grad_norm": 70.5424
+        },
+        {
+          "epoch": 4,
+          "train_loss_mean": 37.8645,
+          "learning_rate": 4.1725768321513004e-05,
+          "grad_norm": 416.2667
+        },
+        {
+          "epoch": 5,
+          "train_loss_mean": 32.6928,
+          "learning_rate": 3.894799054373522e-05,
+          "grad_norm": 634.1622
+        },
+        {
+          "epoch": 6,
+          "train_loss_mean": 27.2715,
+          "learning_rate": 3.617021276595745e-05,
+          "grad_norm": 489.0582
+        },
+        {
+          "epoch": 7,
+          "train_loss_mean": 24.4143,
+          "learning_rate": 3.3392434988179674e-05,
+          "grad_norm": 138.1716
+        },
+        {
+          "epoch": 8,
+          "train_loss_mean": 20.7088,
+          "learning_rate": 3.061465721040189e-05,
+          "grad_norm": 103.6253
+        },
+        {
+          "epoch": 9,
+          "train_loss_mean": 19.1786,
+          "learning_rate": 2.7836879432624114e-05,
+          "grad_norm": 70.1293
+        },
+        {
+          "epoch": 10,
+          "train_loss_mean": 17.296,
+          "learning_rate": 2.5059101654846333e-05,
+          "grad_norm": 382.7485
+        },
+        {
+          "epoch": 11,
+          "train_loss_mean": 15.1262,
+          "learning_rate": 2.228132387706856e-05,
+          "grad_norm": 69.2428
+        },
+        {
+          "epoch": 12,
+          "train_loss_mean": 13.1424,
+          "learning_rate": 1.950354609929078e-05,
+          "grad_norm": 672.4623
+        },
+        {
+          "epoch": 13,
+          "train_loss_mean": 13.9431,
+          "learning_rate": 1.6725768321513003e-05,
+          "grad_norm": 282.7246
+        },
+        {
+          "epoch": 14,
+          "train_loss_mean": 11.6226,
+          "learning_rate": 1.3947990543735227e-05,
+          "grad_norm": 277.0418
+        },
+        {
+          "epoch": 15,
+          "train_loss_mean": 11.2033,
+          "learning_rate": 1.1170212765957447e-05,
+          "grad_norm": 437.7746
+        },
+        {
+          "epoch": 16,
+          "train_loss_mean": 10.9979,
+          "learning_rate": 8.392434988179669e-06,
+          "grad_norm": 279.6711
+        },
+        {
+          "epoch": 17,
+          "train_loss_mean": 10.1596,
+          "learning_rate": 5.614657210401891e-06,
+          "grad_norm": 115.0649
+        },
+        {
+          "epoch": 18,
+          "train_loss_mean": 9.1523,
+          "learning_rate": 2.8368794326241136e-06,
+          "grad_norm": 115.808
+        },
+        {
+          "epoch": 19,
+          "train_loss_mean": 8.4898,
+          "learning_rate": 5.91016548463357e-08,
+          "grad_norm": 3.4449
+        }
+      ],
+      "test_index": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40
+      ],
+      "test_gold": [
+        "O O O B-FatigueTest I-FatigueTest O B-FatigueTestSpecimen I-FatigueTestSpecimen O O O O O O O O O O O O O B-DataSet O O O O B-DataSet O O O O",
+        "O B-DataSet I-DataSet O O O O O O B-MicrostructureEntity I-MicrostructureEntity O O O O O O O B-Mechanism I-Mechanism O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O B-Alloy I-Alloy O B-Alloy I-Alloy O O O B-MaterialClass I-MaterialClass I-MaterialClass O O O O O O O",
+        "O O O O O O O O O O O O O",
+        "O O B-FatigueTestSpecimen I-FatigueTestSpecimen I-FatigueTestSpecimen O O O B-StateDescriptor O O O O O O B-Value I-Value O O O O O O O O O B-MechanicalTreatment I-MechanicalTreatment O O O O",
+        "O B-FatigueTestSpecimen O O O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O O B-Value I-Value O O O O O O O O B-Value I-Value O O O",
+        "O O O O O O O O O O O O B-CrackInitation I-CrackInitation O O B-Location I-Location O O O O O B-Microstructure O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O O B-DataSet O O O O O",
+        "O O O O O O O O O O O O O O O",
+        "O B-DataSet I-DataSet O O O O O O O O O O O O O O O O O O B-Value I-Value O B-Value I-Value I-Value O B-Value I-Value O O O",
+        "O O O O O O O O O O",
+        "O O O O O O O O O B-Location I-Location I-Location O",
+        "O O O O O O O O O O O O O O O O O O O B-Value O O O O O O O O O O O O O",
+        "O O O O O O O B-Value I-Value O O O O O O",
+        "O O O O O O O O O O O",
+        "O B-DataSet I-DataSet O O O O O O O O B-Value I-Value I-Value O O O O O B-Value I-Value I-Value O O",
+        "O O O O B-MaterialClass I-MaterialClass I-MaterialClass B-Alloy O O O",
+        "O O O O O O O O O O O O O O O O O O O B-FatigueTest O O O O O O O O O",
+        "O O O O O O O O O O O O O O O B-DataSet I-DataSet O O O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O B-DataSet O O O",
+        "O O O O O O O O O O B-Alloy I-Alloy I-Alloy I-Alloy I-Alloy I-Alloy I-Alloy O O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O O O O O O B-Value I-Value I-Value O O O O O O O O O B-GrainBoundary I-GrainBoundary O O O O O",
+        "O O O O O O O O O O O B-DataSet O B-FatigueTest O O O O O O O B-Microstructure O",
+        "O O O O O O B-DataSet I-DataSet I-DataSet I-DataSet I-DataSet O O O O O O O O O O O O O O O O B-Mechanism I-Mechanism O O O O O O O O",
+        "O O O O O O O O",
+        "O O O O O B-Value I-Value I-Value I-Value I-Value I-Value O O O O O O O O O O O",
+        "O O O O O B-Value I-Value I-Value O B-Value I-Value I-Value O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O O O O B-Mechanism I-Mechanism O O O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O B-Mechanism I-Mechanism O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O B-Mechanism O",
+        "O O O O O O O O O O O O O O O O O O O O B-DataSet I-DataSet I-DataSet O O",
+        "O O O O O O B-Location I-Location O O B-Crack O O O O O O O O O O",
+        "O B-Location I-Location I-Location O O O B-Crack I-Crack O O B-Crack I-Crack O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O B-Mechanism I-Mechanism O O B-Crack O O O O O O O O O O O O O O O",
+        "B-CrackInitation I-CrackInitation O O O O O O O B-StressAmplitude I-StressAmplitude O O O O O O O O O O O O O O O O O"
+      ],
+      "test_pred": [
+        "O O O B-FatigueTest I-FatigueTest O B-FatigueTestSpecimen I-FatigueTestSpecimen O O O O O O O O O O O O O O O O O O O O O O O",
+        "O B-DataSet I-DataSet O O O O O O B-MicrostructureEntity I-MicrostructureEntity O O O O O O O B-Mechanism O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O B-Alloy I-Alloy O O O B-MaterialClass I-MaterialClass I-MaterialClass O O O O O O O",
+        "O O O O O O O O B-MaterialClass I-MaterialClass O O O",
+        "O O B-FatigueTestSpecimen I-FatigueTestSpecimen I-FatigueTestSpecimen O O O B-MaterialClass I-MaterialClass I-MaterialClass O O O O B-Value I-Value O O O O O O O O O O O O O O O",
+        "O B-FatigueTestSpecimen O O O O O O O O O O O O O O O O O O O B-FatigueTestSpecimen O O O O O O O O",
+        "O O O O O O O O O O O B-Value I-Value O O O B-Location O O O O B-Value I-Value O O O",
+        "O O O O O O O O O O O O B-CrackInitation I-CrackInitation O O O B-Location O O O O O B-Microstructure O O O",
+        "O O O O O O O O O O O O O O B-TestingMachine O O O O O O O O O O O O O B-DataSet O O O O O",
+        "O B-MechanicalTestDataSet O O B-TestingMachine I-TestingMachine I-TestingMachine O O O O O O O O",
+        "O O B-DataSet O O O O O O O O O O O O O O O O O O B-Value I-Value O B-Value I-Value I-Value O B-Value I-Value O O O",
+        "O O O O O O O O O O",
+        "B-Mechanism I-Mechanism O O O O O O O O O O O",
+        "O O O O O O O O O O B-DataSet O O O O O O O O B-Value O O O O O O O B-GrainBoundary I-GrainBoundary O O O O",
+        "O O O O O B-DataSet O B-Value I-Value O O O O O O",
+        "O O O O O B-Value O O O O O",
+        "O O B-DataSet O O O O O O O O B-Value I-Value I-Value O O O O O B-Value I-Value I-Value O O",
+        "O O O O B-MaterialClass I-MaterialClass I-MaterialClass B-Value O B-Value I-Value",
+        "O O O O O O O O O O O O O O O O O O O B-FatigueTest O O O O O O B-FatigueTestSpecimen B-Location O",
+        "O O O O O O O O B-Location O O O O O O B-DataSet I-DataSet O O O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O B-DataSet O O O",
+        "O O O O O O O B-Crack O O O O O B-MaterialClass B-Alloy I-Alloy I-Alloy O O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O O O O O O B-LoadingType I-LoadingType I-LoadingType O O O O O O O O O B-GrainBoundary I-GrainBoundary O O B-Location O O",
+        "O B-Location O O O O O O O O O B-DataSet O B-FatigueTest O O O O O O O B-Microstructure O",
+        "O O B-GrainBoundary I-GrainBoundary O O O O O O O O O O O B-GrainBoundary O O O B-MicrostructureEntity O O B-MicrostructureEntity O O O O O O O O O O O O O O",
+        "O O O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O B-Crack I-Crack I-Crack O O O B-Mechanism I-Mechanism O O O O O O O O",
+        "O O O B-Location I-Location O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O B-Mechanism I-Mechanism O O",
+        "O O O O O O O O B-MaterialClass O O O O O O O O O O O O B-Mechanism I-Mechanism I-Mechanism O O O O O O B-MaterialClass I-MaterialClass O O O O",
+        "O O O O O B-Crack I-Crack I-Crack O O O O O O O O O O O O B-DataSet I-DataSet O O O",
+        "O O O O O O O B-Location O O B-Crack O O O O O O O O O O",
+        "O O O B-Location O O O B-Crack I-Crack O O B-Crack I-Crack O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O B-Mechanism I-Mechanism O O B-Crack O O O O O O O O O O O O O O O",
+        "B-CrackInitation I-CrackInitation O O O O O O O O O O O O O O O O O O O O O O O O O O"
+      ],
+      "run_id": "10.1007_s11340-021-00758-x.conll",
+      "runtime_sec": 526.0,
+      "environment": {
+        "device": "Tesla T4",
+        "cuda": "12.8",
+        "cudnn": 91900,
+        "torch": "2.11.0+cu128",
+        "transformers": "5.18.0",
+        "deterministic": true,
+        "cublas_workspace_config": ":4096:8"
+      }
+    }
+  ],
+  "test_f1_mean": 54.01,
+  "test_f1_std": 0.0,
+  "test_f1_strict_mean": 54.01,
+  "summary": {
+    "n_runs": 1,
+    "run_ids": [
+      "10.1007_s11340-021-00758-x.conll"
+    ],
+    "micro": {
+      "mean": 54.01,
+      "pop_sd": 0.0,
+      "ci95": [
+        54.01,
+        54.01
+      ],
+      "per_run": [
+        54.01
+      ]
+    },
+    "micro_strict": {
+      "mean": 54.01,
+      "pop_sd": 0.0,
+      "ci95": [
+        54.01,
+        54.01
+      ],
+      "per_run": [
+        54.01
+      ]
+    },
+    "macro": {
+      "mean": 41.43,
+      "pop_sd": 0.0,
+      "ci95": [
+        41.43,
+        41.43
+      ],
+      "per_run": [
+        41.43
+      ]
+    },
+    "weighted": {
+      "mean": 56.48,
+      "pop_sd": 0.0,
+      "ci95": [
+        56.48,
+        56.48
+      ],
+      "per_run": [
+        56.48
+      ]
+    }
+  }
+}

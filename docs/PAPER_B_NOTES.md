@@ -162,6 +162,12 @@ audit found 6 mismatches; the count and every stage-21 number were right.
   the companion paper is disclosed to the editor and the time-stamped
   protocol record offered.
 
+- **Batch `w21x`** (4 November): with class names for the coarse codes,
+  GLiNER's coarse gap to the CRF head narrows to −3.97 [−9.15, +1.22]
+  (+6.16 [−0.35, +12.67] over the codes); the package's trainer matches
+  our loop, −0.25 [−3.93, +3.42] over 10 seeds. §7.7, the TACL §7,
+  Table 4 and A.7 report both as exploratory.
+
 **Open:**
 - **Length.** The text is about 6,190 words of prose and 750 in tables. It
   is not yet typeset in tacl2021v1.sty, and it needs cutting after the
@@ -169,11 +175,9 @@ audit found 6 mismatches; the count and every stage-21 number were right.
 - **Per-decision classification.** Each decision should be marked
   confirmatory or deviating, and the count given both ways.
 - **A units-by-seeds randomization check** as a sensitivity analysis.
-- **GLiNER fidelity**: the package trainer against our loop on one unit,
-  and a validation-chosen threshold as a sensitivity analysis. Optionally, a
-  coarse arm with the namesake class names (post hoc, outside the count).
-  The trainer check and the class-name arm run as batch `w21x`
-  (exploratory, outside the count); the threshold check is not run.
+- **GLiNER fidelity**: a validation-chosen threshold as a sensitivity
+  analysis is not run. The other two checks ran as batch `w21x`
+  (exploratory, outside the count; done, see below).
 - **The figures** use "consistency rule" and "silver names", and GLiNER is
   not yet in the methods figure.
 - **Related work** lacks other generalist and LLM taggers, whose references

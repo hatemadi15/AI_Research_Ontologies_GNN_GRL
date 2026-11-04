@@ -1043,7 +1043,7 @@ chance at class level. For a Task C-style result:
 | 18 | The names against a recall-matched control (approved 1 November after the round-9 referee of paper A asked for it; protocol fixed before any run, below): MR6 on MuLMS's 7 held-out subfields at the decision seeds 300 to 900, the stored `crf_mr6` jobs again with a bias added to every entity tag at decoding (`crf_mr6_bias`), matched per subfield to the names' recall; decisions 18.1 (D11, recall on the unseen names the lexicon holds) and 18.2 (D12, micro F1) at matched recall; batch `w18a` | Done (1 November): 18.1 +11.24 [+3.31, +19.18], passes (7 of 7 subfields positive); 18.2 +3.26 [−0.79, +7.31], no. In three subfields (electrolysis, pemfc, sofc) no bias on the grid reaches the names' recall and the protocol matched them at D = 5; without them (pre-specified) 18.1 +6.05 [−3.33, +15.44] (4 of 4 positive) and 18.2 −0.03 [−2.78, +2.72]; matched post hoc at the control's nearest recall, +8.63 [+3.35, +13.90] and +1.37 [−0.66, +3.41]. At matched overall recall the names find more of the names their lexicon holds and fewer of the others (−1.73 [−3.02, −0.44], pre-specified); their F1 is not shown to beat the bias. The names route's decisions become twelve, four passing; paper A updated (outcome below) |
 | 19 | Graph-propagated names at matched lexicon size (after paper A's submission on 2 November, on the author's request to explore graph representation learning, the plan checked by an independent referee before any run; `docs/WEEK19_PLAN.md`; protocol below): a relational GNN over every name the teachers tag, against the teachers' vote at a lowered threshold and the same model without the graph, at equal lexicon size; a probe with a test-set gate, then, if it passes, decisions G1 and G2 over the 11 units of D7. Paper B brought to a submittable state alongside (track B) | Done (3 November): the gate fails, so G1 and G2 are not run. At matched size (N primary, means over the 11 units) the R-GCN's lexicon holds 16.78% of the unseen test mentions, the vote's 24.86% and the graph-removed MLP's 18.80% (+5 over the vote and +2 over the MLP needed); its wrong-type rate, 4.65% against the vote's 10.14%, passes. The graph ranker is below the vote in all 11 units. Graph propagation does not rescue the names route at matched size; one negative lexicon screen in paper B's count (outcome below) |
 | 20 | Two controls paper B's first referee asked for (3 November; the plan `docs/WEEK20_PLAN.md` checked by an independent referee before any run; protocol below): 20a, MuLMS's held-out subfields with a 400-sentence pool drawn by sentence from all other subfields' articles (`crf_spool`) against the stored pool of 2–3 articles (decision 20.1); 20b, week 8's diversity decisions on 7 fresh seeds (20.2, 20.3); batch `w20a` | Done 3 November: 20.1, 20.2 and 20.3 pass, and every check holds (outcome below) |
-| 21 | A free generalist NER baseline for paper B's first referee (3 November; the plan `docs/WEEK21_PLAN.md` checked by an independent referee before any run; protocol below): GLiNER-medium fine-tuned on the CRF head's training sentences (10 seeds) against the CRF head on the held-out units (decisions 21.1 to 21.4), and zero-shot (reported); batches `w21s` and `w21a` | Done 4 November: none passes. Fine-tuned GLiNER is not shown to differ from the CRF head on MaterioMiner fine-grained (+3.77 [−5.38, +12.92]), MuLMS (+1.58) or SOFC-Exp (+0.27); it is below at MaterioMiner's coarse level (−10.12 [−15.68, −4.56]). Zero-shot it trails by 20 to 48 points. Every check holds (outcome below) |
+| 21 | A free generalist NER baseline for paper B's first referee (3 November; the plan `docs/WEEK21_PLAN.md` checked by an independent referee before any run; protocol below): GLiNER-medium fine-tuned on the CRF head's training sentences (10 seeds) against the CRF head on the held-out units (decisions 21.1 to 21.4), and zero-shot (reported); batches `w21s` and `w21a` | Done 4 November: none passes. Fine-tuned GLiNER is not shown to differ from the CRF head on MaterioMiner fine-grained (+3.77 [−5.38, +12.92]), MuLMS (+1.58) or SOFC-Exp (+0.27); it is below at MaterioMiner's coarse level (−10.12 [−15.68, −4.56]). Zero-shot it trails by 20 to 48 points. Every check holds (outcome below). Exploratory batch `w21x`: with class names for the codes the coarse gap narrows to −3.97 [−9.15, +1.22], and the package's trainer matches our loop (−0.25 [−3.93, +3.42]) |
 
 ### Week 2 protocol (fixed before any run)
 
@@ -7192,6 +7192,36 @@ points 4 and 5, with the author's approval of 4 November.
   the coarse-level loss shrinks to X", as an explanation, not a decision.
 - **Budget.** About 3 session-hours of the 5.75 left before the 7 November
   reset.
+
+*Outcome of w21x (4 November; exploratory, outside the count, no
+decision).*
+- **The session.** Kernel version 24 from the bundle of `c764023`, two T4
+  GPUs, 161 minutes (setup 6); all 22 jobs done. The weekly quota has 2.91
+  of 45 GPU hours left until the 7 November reset.
+- **Checks.**
+  - `smokebo` equals `smokebn` (and so `smokebh`), its environment
+    included.
+  - `smokebp` equals E2's seed-0 run, so E2 is deterministic across the two
+    GPUs.
+  - The 50 runs in 20 files use the CRF head's splits, in the stored runs'
+    environment.
+- **E1, `gliner_ftn`** (coarse-grained, the codes as class names): 54.64
+  [53.19, 56.08] over the 4 papers.
+  - Minus the CRF head: −3.97 [−9.15, +1.22] (−0.51 to −7.84 per paper).
+  - Minus `gliner_ft` (the codes): +6.16 [−0.35, +12.67], higher on every
+    paper (+1.93 to +11.73); macro F1 +11.36 [+7.70, +15.02].
+  - Validation F1 74.44, against 70.24 with the codes and the CRF head's
+    79.33.
+  - Reading, as fixed: with documented class names, the coarse-level loss
+    shrinks to −3.97, no longer shown. It is an explanation, not a
+    decision, and 21.2 stands as taken.
+- **E2, `gliner_ftp`** (the package's trainer, fine-grained paper 1): 52.38
+  [50.99, 53.78] against our loop's 52.64 [49.87, 55.41]. That is −0.25
+  [−3.93, +3.42] over 10 seed pairs, every seed stopped after its stored
+  best epoch. Reading, as fixed: the interval covers 0, which supports our
+  loop's fidelity.
+- **Recorded in** paper B's §7.7, the TACL draft's §7, Table 4 and A.7,
+  and `results/README.md`.
 
 *TACL (paper B), for later.* The paper goes to 10 pages, references
 uncounted, with appendices after them within TACL's caps (as last read: up

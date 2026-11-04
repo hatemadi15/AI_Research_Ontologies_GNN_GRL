@@ -505,14 +505,29 @@ def test_main_prints_the_week21x_section(dry21x, tmp_path, capsys):
     assert capsys.readouterr().out == ''
 
 
-def test_the_stored_analysis_has_no_week21x_section():
-    """Until their files exist, the exploratory checks add nothing: the stored analysis has no
-    week21x section, and the stored results give none."""
+def test_the_stored_week21x_section():
+    """Batch w21x's files are collected (4 November): the stored analysis's week21x section is
+    what the stored results give, and its checks hold: 20 files, 50 runs on the CRF head's
+    splits in the stored runs' environment; E1 over the 4 papers with the 27 documented names;
+    E2 over 10 seed pairs, each stopped after its stored best epoch, by the package's trainer
+    under accelerate 1.15.0."""
     stored = GPU / sa.OUT_NAME
     if not stored.exists():
         pytest.skip('the stored results are not here')
-    assert 'week21x' not in json.loads(stored.read_text())
-    assert sa.week21x(GPU) == {}
+    section = json.loads(stored.read_text()).get('week21x')
+    if section is None:
+        pytest.skip("the stored analysis has no week21x section")
+    assert section == json.loads(json.dumps(sa.week21x(GPU)))
+    checks = section['checks']
+    assert (checks['n_files'], checks['n_runs']) == (20, 50)
+    assert checks['splits_equal'] and checks['environment_equal']
+    names = section['names']
+    assert names['n_units'] == 4 and names['label_names'] == gb.COARSE_NAMES
+    assert names['label_names_differ'] == []
+    e2 = section['package_trainer']
+    assert e2['n_pairs'] == 10 and e2['seeds_equal'] and e2['epochs_match']
+    assert e2['trainers'] == ['gliner.training.Trainer']
+    assert e2['accelerate_versions'] == [gb.ACCELERATE_VERSION]
 
 
 # --- E2 on the real model (accelerate 1.15.0, gliner 0.2.30 and the pinned model) ----------------

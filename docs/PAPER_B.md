@@ -950,10 +950,25 @@ None passes.
 - **Caveats.** The reading carries the confound of generalist NER
   pre-training with a general-domain encoder, and GLiNER's pre-training
   text may contain the test articles.
-- **An explanation, not tested.** GLiNER reads the label names, and the
-  coarse names are bare codes. Its fine-tuned F1 is lower coarse-grained
-  than fine-grained (48.48 against 50.23), where the CRF head's is 12.14
-  points higher.
+- **An explanation, checked after the decision.** GLiNER reads the label
+  names, and the coarse names are bare codes. Its fine-tuned F1 is lower
+  coarse-grained than fine-grained (48.48 against 50.23), where the CRF
+  head's is 12.14 points higher. Batch `w21x` (exploratory, fixed before
+  its run, outside the count) gave each code its class name, the ontology
+  class's label (`COARSE_NAMES`, e.g. "mechanism" for MEC): the
+  fine-tuned model then scores 54.64, +6.16 [−0.35, +12.67] over the codes
+  (higher on every paper, +1.93 to +11.73; not shown), and its gap to the
+  CRF head narrows to −3.97 [−9.15, +1.22], no longer shown (macro F1
+  gains +11.36 [+7.70, +15.02] over the codes). Validation F1 rises from
+  70.24 to 74.44. Decision 21.2 stands as taken.
+- **Our training loop, checked.** The same batch trained GLiNER by the
+  package's own trainer (`gliner.training`, accelerate 1.15.0), with the
+  recipe, batches, loss, optimizer groups and learning rates of our loop,
+  stopped after each seed's best epoch in the stored run, on MaterioMiner
+  fine-grained paper 1 (10 seeds): 52.38 against our loop's 52.64,
+  −0.25 [−3.93, +3.42] paired by seed. No difference is shown within
+  about 4 points, and a repeat of seed 0 on the other GPU (`smokebp`)
+  reproduced it exactly.
 - **Zero-shot** it is below the CRF head by 19.87 points on MaterioMiner
   fine-grained (−19.87 [−30.73, −9.00]), 32.44 on MuLMS and 47.78 on
   SOFC-Exp (reported).

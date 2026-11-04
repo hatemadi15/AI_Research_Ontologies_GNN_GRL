@@ -555,12 +555,15 @@ with its loss and label conditioning, and its tokenizer.
 |---|---|---|---|---|---|
 | MaterioMiner fine (21.1) | 46.46 | −19.87 [−30.73, −9.00] | 50.23; +3.77 [−5.38, +12.92] | 74.15 / 79.47 | +7.66 [−5.20, +20.52] |
 | MaterioMiner coarse (21.2) | 58.60 | no arm | 48.48; −10.12 [−15.68, −4.56] | 70.24 / 79.33 | −17.01 [−23.47, −10.56] |
+| MaterioMiner coarse, class names (exploratory) | 58.60 | no arm | 54.64; −3.97 [−9.15, +1.22] | 74.44 / 79.33 | not computed |
 | MuLMS (21.3) | 48.66 | −32.44 [−38.71, −26.17] | 50.23; +1.58 [−1.92, +5.08] | 74.03 / 76.89 | +2.68 [−1.19, +6.54] |
 | SOFC-Exp folds (21.4) | 82.79 | −47.78 [−48.85, −46.70] | 83.05; +0.27 [−1.84, +2.37] | 85.62 / 86.44 | +1.89 [+0.54, +3.25] |
 
 **Table 4.** Stage 21, GLiNER-medium v2.1 against the CRF head: micro F1
 means over the units (zero-shot one run, fine-tuned 10 seeds), the
 decisions and the reported comparisons, with 95% intervals over the units.
+The exploratory row gives the coarse types' class names in place of their
+codes.
 
 None passes, and the intervals are wider than the protocol expected: they
 allow −5.4 to +12.9 points on MaterioMiner's fine-grained types (one paper
@@ -568,13 +571,24 @@ allow −5.4 to +12.9 points on MaterioMiner's fine-grained types (one paper
 +2.4 on SOFC-Exp. With its coarse types given as codes, GLiNER is 10.1
 points below on every paper and stays below with the allowance; its F1 is
 lower coarse-grained than fine-grained, while the CRF head's is 12 points
-higher (exploratory), so the codes may explain the loss. Zero-shot, it
+higher (exploratory); given class names, it loses less (below). Zero-shot, it
 trails by 20 to 48 points. Its recall on unseen names is higher only on
 SOFC-Exp, where its F1 is not shown to differ; on MaterioMiner
 fine-grained and MuLMS no difference is shown, and coarse-grained it is
 lower (no multiplicity control). Its validation F1 is lower in every
 setting, and its recipe was fixed, not tuned, with our own training loop
 (Appendix A.7).
+
+Two exploratory checks, each fixed before its run and outside the count,
+follow up the codes and the training loop. Given the coarse types'
+documented class names instead of their codes (e.g. "mechanism" for
+"mec"), the fine-tuned model scores +6.16 [−0.35, +12.67] more on the
+four papers, higher on every paper but not shown, and its gap to the CRF
+head narrows to −3.97 [−9.15, +1.22], no longer shown (Table 4);
+decision 21.2 stands as taken. Trained by the package's own trainer with the same recipe and
+stopping epochs, it differs from our loop by −0.25 [−3.93, +3.42] over 10
+paired seeds on one paper, fine-grained: no difference is shown within
+about 4 points.
 
 ## 8 Lessons
 
@@ -1029,7 +1043,9 @@ The companion study's 3-seed screens are not listed.
   dataset's misspelled "CrackInitation" becomes "crack initiation".
   MaterioMiner coarse-grained: the codes lowercased, with no zero-shot
   arm (the protocol took the codes to be undocumented; the release's
-  tag map names every one, found after the run). SOFC-Exp:
+  tag map names every one, found after the run); the exploratory rerun
+  gives each code's class name, the ontology class's label (e.g.
+  "mechanism", "mechanical test parameter"). SOFC-Exp:
   device, experiment, material, value. MuLMS: the MuLMS paper's names,
   CITE citation, DEV device, FORM form, INSTRUMENT instrument, MAT
   material, MEASUREMENT measurement, NUM number, PROPERTY property, RANGE
@@ -1053,7 +1069,11 @@ The companion study's 3-seed screens are not listed.
   biases or LayerNorm weights; AdamW's default betas and ε; warm-up steps
   rounded up. The training loop is our own, since the package's trainer
   needs a library the pinned environment lacks; batches are shuffled per
-  epoch by the CRF head's rule.
+  epoch by the CRF head's rule. The exploratory check of the loop runs the
+  package's trainer (with that library added) on the same batches, loss,
+  optimizer groups and learning rates, stopped after each seed's best
+  epoch in our loop's run; only the data order and the random state
+  differ, and a repeat on the other GPU reproduces it exactly.
 - **Detectable differences at 80% power**, from two proxies: a method
   increment (mention replacement over the CRF head), 1.65 fine-grained,
   1.60 coarse-grained, 3.30 on MuLMS and 1.17 on SOFC-Exp; and a different

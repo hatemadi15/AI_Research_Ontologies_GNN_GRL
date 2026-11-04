@@ -32887,6 +32887,829 @@
       }
     }
   },
+  "week21x": {
+    "checks": {
+      "n_files": 20,
+      "n_runs": 50,
+      "splits_differ": [],
+      "environment_differs": [],
+      "splits_equal": true,
+      "environment_equal": true
+    },
+    "names": {
+      "setting": "coarse",
+      "seeds": [
+        0,
+        100,
+        200,
+        300,
+        400,
+        500,
+        600,
+        700,
+        800,
+        900
+      ],
+      "n_units": 4,
+      "gliner_ftn": {
+        "micro": {
+          "mean": 54.64,
+          "ci95": [
+            53.19,
+            56.08
+          ],
+          "per_run": [
+            54.96,
+            54.7,
+            53.37,
+            55.51
+          ]
+        },
+        "micro_strict": {
+          "mean": 54.64,
+          "ci95": [
+            53.19,
+            56.08
+          ],
+          "per_run": [
+            54.96,
+            54.7,
+            53.37,
+            55.51
+          ]
+        },
+        "macro": {
+          "mean": 44.07,
+          "ci95": [
+            37.53,
+            50.61
+          ],
+          "per_run": [
+            41.13,
+            46.15,
+            40.17,
+            48.82
+          ]
+        },
+        "weighted": {
+          "mean": 52.59,
+          "ci95": [
+            50.24,
+            54.95
+          ],
+          "per_run": [
+            53.29,
+            50.74,
+            52.18,
+            54.16
+          ]
+        }
+      },
+      "crf": {
+        "micro": {
+          "mean": 58.6,
+          "ci95": [
+            53.24,
+            63.97
+          ],
+          "per_run": [
+            60.27,
+            62.54,
+            55.58,
+            56.02
+          ]
+        },
+        "micro_strict": {
+          "mean": 58.6,
+          "ci95": [
+            53.24,
+            63.97
+          ],
+          "per_run": [
+            60.27,
+            62.54,
+            55.58,
+            56.02
+          ]
+        },
+        "macro": {
+          "mean": 47.32,
+          "ci95": [
+            40.29,
+            54.35
+          ],
+          "per_run": [
+            49.05,
+            52.76,
+            44.09,
+            43.38
+          ]
+        },
+        "weighted": {
+          "mean": 57.39,
+          "ci95": [
+            52.32,
+            62.45
+          ],
+          "per_run": [
+            59.24,
+            60.88,
+            54.24,
+            55.18
+          ]
+        }
+      },
+      "gliner_ft": {
+        "micro": {
+          "mean": 48.48,
+          "ci95": [
+            40.83,
+            56.13
+          ],
+          "per_run": [
+            49.05,
+            52.77,
+            41.64,
+            50.45
+          ]
+        },
+        "micro_strict": {
+          "mean": 48.48,
+          "ci95": [
+            40.83,
+            56.13
+          ],
+          "per_run": [
+            49.05,
+            52.77,
+            41.64,
+            50.45
+          ]
+        },
+        "macro": {
+          "mean": 32.71,
+          "ci95": [
+            23.87,
+            41.54
+          ],
+          "per_run": [
+            31.05,
+            36.72,
+            25.57,
+            37.48
+          ]
+        },
+        "weighted": {
+          "mean": 44.09,
+          "ci95": [
+            36.28,
+            51.89
+          ],
+          "per_run": [
+            44.97,
+            48.08,
+            36.98,
+            46.32
+          ]
+        }
+      },
+      "minus_crf": {
+        "micro": {
+          "mean_diff": -3.97,
+          "ci95": [
+            -9.15,
+            1.22
+          ],
+          "per_run": [
+            -5.3,
+            -7.84,
+            -2.21,
+            -0.51
+          ]
+        },
+        "micro_strict": {
+          "mean_diff": -3.97,
+          "ci95": [
+            -9.15,
+            1.22
+          ],
+          "per_run": [
+            -5.3,
+            -7.84,
+            -2.21,
+            -0.51
+          ]
+        },
+        "macro": {
+          "mean_diff": -3.25,
+          "ci95": [
+            -12.84,
+            6.34
+          ],
+          "per_run": [
+            -7.92,
+            -6.61,
+            -3.91,
+            5.44
+          ]
+        },
+        "weighted": {
+          "mean_diff": -4.79,
+          "ci95": [
+            -11.4,
+            1.81
+          ],
+          "per_run": [
+            -5.95,
+            -10.15,
+            -2.07,
+            -1.02
+          ]
+        }
+      },
+      "minus_gliner_ft": {
+        "micro": {
+          "mean_diff": 6.16,
+          "ci95": [
+            -0.35,
+            12.67
+          ],
+          "per_run": [
+            5.91,
+            1.93,
+            11.73,
+            5.06
+          ]
+        },
+        "micro_strict": {
+          "mean_diff": 6.16,
+          "ci95": [
+            -0.35,
+            12.67
+          ],
+          "per_run": [
+            5.91,
+            1.93,
+            11.73,
+            5.06
+          ]
+        },
+        "macro": {
+          "mean_diff": 11.36,
+          "ci95": [
+            7.7,
+            15.02
+          ],
+          "per_run": [
+            10.08,
+            9.43,
+            14.6,
+            11.34
+          ]
+        },
+        "weighted": {
+          "mean_diff": 8.51,
+          "ci95": [
+            0.32,
+            16.69
+          ],
+          "per_run": [
+            8.33,
+            2.66,
+            15.19,
+            7.85
+          ]
+        }
+      },
+      "units": {
+        "10.1007_s11340-021-00758-x.conll": {
+          "gliner_ftn": {
+            "micro": 54.96,
+            "macro": 41.13
+          },
+          "crf": {
+            "micro": 60.27,
+            "macro": 49.05
+          },
+          "gliner_ft": {
+            "micro": 49.05,
+            "macro": 31.05
+          }
+        },
+        "10.1038_ncomms7164.conll": {
+          "gliner_ftn": {
+            "micro": 54.7,
+            "macro": 46.15
+          },
+          "crf": {
+            "micro": 62.54,
+            "macro": 52.76
+          },
+          "gliner_ft": {
+            "micro": 52.77,
+            "macro": 36.72
+          }
+        },
+        "10.1038_s41467-020-19071-7.conll": {
+          "gliner_ftn": {
+            "micro": 53.37,
+            "macro": 40.17
+          },
+          "crf": {
+            "micro": 55.58,
+            "macro": 44.09
+          },
+          "gliner_ft": {
+            "micro": 41.64,
+            "macro": 25.57
+          }
+        },
+        "10.3390_met10111458.conll": {
+          "gliner_ftn": {
+            "micro": 55.51,
+            "macro": 48.82
+          },
+          "crf": {
+            "micro": 56.02,
+            "macro": 43.38
+          },
+          "gliner_ft": {
+            "micro": 50.45,
+            "macro": 37.48
+          }
+        }
+      },
+      "validation": {
+        "gliner_ftn": {
+          "best_epoch": 12.93,
+          "val_f1": 74.44,
+          "units": {
+            "10.1007_s11340-021-00758-x.conll": {
+              "best_epoch": 10.3,
+              "val_f1": 76.69
+            },
+            "10.1038_ncomms7164.conll": {
+              "best_epoch": 14.5,
+              "val_f1": 74.9
+            },
+            "10.1038_s41467-020-19071-7.conll": {
+              "best_epoch": 12.3,
+              "val_f1": 73.78
+            },
+            "10.3390_met10111458.conll": {
+              "best_epoch": 14.6,
+              "val_f1": 72.38
+            }
+          }
+        },
+        "crf": {
+          "best_epoch": 10.25,
+          "val_f1": 79.33,
+          "units": {
+            "10.1007_s11340-021-00758-x.conll": {
+              "best_epoch": 9.3,
+              "val_f1": 80.81
+            },
+            "10.1038_ncomms7164.conll": {
+              "best_epoch": 9.4,
+              "val_f1": 80.86
+            },
+            "10.1038_s41467-020-19071-7.conll": {
+              "best_epoch": 11.2,
+              "val_f1": 77.55
+            },
+            "10.3390_met10111458.conll": {
+              "best_epoch": 11.1,
+              "val_f1": 78.08
+            }
+          }
+        },
+        "gliner_ft": {
+          "best_epoch": 15.05,
+          "val_f1": 70.24,
+          "units": {
+            "10.1007_s11340-021-00758-x.conll": {
+              "best_epoch": 15.3,
+              "val_f1": 74.63
+            },
+            "10.1038_ncomms7164.conll": {
+              "best_epoch": 14.8,
+              "val_f1": 70.65
+            },
+            "10.1038_s41467-020-19071-7.conll": {
+              "best_epoch": 14.4,
+              "val_f1": 66.17
+            },
+            "10.3390_met10111458.conll": {
+              "best_epoch": 15.7,
+              "val_f1": 69.51
+            }
+          }
+        }
+      },
+      "label_names": {
+        "CEL": "chemical element",
+        "CGE": "crystallographic entity",
+        "CHP": "characterization process",
+        "CPR": "chemical property",
+        "DAM": "damage",
+        "DAT": "data set",
+        "DEF": "defect",
+        "EQU": "equipment",
+        "ETP": "environmental test parameter",
+        "LOC": "location",
+        "MAC": "material class",
+        "MAT": "material",
+        "MEC": "mechanism",
+        "MEP": "mechanical property",
+        "MFP": "manufacturing process",
+        "MIC": "microstructure",
+        "MIP": "microstructural property",
+        "MOD": "model",
+        "MTP": "mechanical test parameter",
+        "OBJ": "object",
+        "ODE": "orientation descriptor",
+        "PQT": "physical quantity",
+        "PRO": "property",
+        "PRP": "process parameter",
+        "SDE": "shape descriptor",
+        "STD": "state descriptor",
+        "VAL": "value"
+      },
+      "label_names_differ": []
+    },
+    "package_trainer": {
+      "setting": "fine",
+      "unit": "10.1007_s11340-021-00758-x.conll",
+      "seeds": [
+        0,
+        100,
+        200,
+        300,
+        400,
+        500,
+        600,
+        700,
+        800,
+        900
+      ],
+      "n_pairs": 10,
+      "seeds_equal": true,
+      "gliner_ftp": {
+        "micro": {
+          "mean": 52.38,
+          "ci95": [
+            50.99,
+            53.78
+          ],
+          "per_run": [
+            56.06,
+            51.85,
+            51.75,
+            54.01,
+            51.43,
+            51.13,
+            50.38,
+            50.0,
+            52.55,
+            54.68
+          ]
+        },
+        "micro_strict": {
+          "mean": 52.38,
+          "ci95": [
+            50.99,
+            53.78
+          ],
+          "per_run": [
+            56.06,
+            51.85,
+            51.75,
+            54.01,
+            51.43,
+            51.13,
+            50.38,
+            50.0,
+            52.55,
+            54.68
+          ]
+        },
+        "macro": {
+          "mean": 39.27,
+          "ci95": [
+            37.36,
+            41.19
+          ],
+          "per_run": [
+            41.24,
+            35.58,
+            41.48,
+            41.43,
+            38.69,
+            40.74,
+            34.53,
+            37.27,
+            42.13,
+            39.64
+          ]
+        },
+        "weighted": {
+          "mean": 54.33,
+          "ci95": [
+            52.63,
+            56.03
+          ],
+          "per_run": [
+            57.65,
+            52.89,
+            55.09,
+            56.48,
+            53.6,
+            52.89,
+            50.44,
+            52.16,
+            54.6,
+            57.48
+          ]
+        }
+      },
+      "gliner_ft": {
+        "micro": {
+          "mean": 52.64,
+          "ci95": [
+            49.87,
+            55.41
+          ],
+          "per_run": [
+            50.0,
+            53.44,
+            54.93,
+            51.06,
+            60.47,
+            54.55,
+            55.17,
+            50.75,
+            47.06,
+            48.95
+          ]
+        },
+        "micro_strict": {
+          "mean": 52.64,
+          "ci95": [
+            49.87,
+            55.41
+          ],
+          "per_run": [
+            50.0,
+            53.44,
+            54.93,
+            51.06,
+            60.47,
+            54.55,
+            55.17,
+            50.75,
+            47.06,
+            48.95
+          ]
+        },
+        "macro": {
+          "mean": 40.62,
+          "ci95": [
+            35.9,
+            45.34
+          ],
+          "per_run": [
+            33.67,
+            45.15,
+            47.44,
+            37.39,
+            54.15,
+            41.53,
+            38.17,
+            39.7,
+            34.81,
+            34.18
+          ]
+        },
+        "weighted": {
+          "mean": 54.33,
+          "ci95": [
+            51.49,
+            57.17
+          ],
+          "per_run": [
+            51.93,
+            55.3,
+            57.75,
+            53.45,
+            62.91,
+            56.83,
+            52.33,
+            51.58,
+            49.25,
+            51.99
+          ]
+        }
+      },
+      "minus_gliner_ft": {
+        "micro": {
+          "mean_diff": -0.25,
+          "ci95": [
+            -3.93,
+            3.42
+          ],
+          "per_run": [
+            6.06,
+            -1.59,
+            -3.18,
+            2.95,
+            -9.04,
+            -3.42,
+            -4.79,
+            -0.75,
+            5.49,
+            5.73
+          ]
+        },
+        "micro_strict": {
+          "mean_diff": -0.25,
+          "ci95": [
+            -3.93,
+            3.42
+          ],
+          "per_run": [
+            6.06,
+            -1.59,
+            -3.18,
+            2.95,
+            -9.04,
+            -3.42,
+            -4.79,
+            -0.75,
+            5.49,
+            5.73
+          ]
+        },
+        "macro": {
+          "mean_diff": -1.35,
+          "ci95": [
+            -6.81,
+            4.12
+          ],
+          "per_run": [
+            7.57,
+            -9.57,
+            -5.96,
+            4.04,
+            -15.46,
+            -0.79,
+            -3.64,
+            -2.43,
+            7.32,
+            5.46
+          ]
+        },
+        "weighted": {
+          "mean_diff": -0.0,
+          "ci95": [
+            -3.54,
+            3.53
+          ],
+          "per_run": [
+            5.72,
+            -2.41,
+            -2.66,
+            3.03,
+            -9.31,
+            -3.94,
+            -1.89,
+            0.58,
+            5.35,
+            5.49
+          ]
+        }
+      },
+      "per_seed": [
+        {
+          "seed": 0,
+          "gliner_ftp": 56.06,
+          "gliner_ft": 50.0,
+          "epochs": 15,
+          "stored_best_epoch": 14,
+          "val_f1": {
+            "gliner_ftp": 80.58,
+            "gliner_ft": 79.33
+          }
+        },
+        {
+          "seed": 100,
+          "gliner_ftp": 51.85,
+          "gliner_ft": 53.44,
+          "epochs": 14,
+          "stored_best_epoch": 13,
+          "val_f1": {
+            "gliner_ftp": 81.57,
+            "gliner_ft": 80.98
+          }
+        },
+        {
+          "seed": 200,
+          "gliner_ftp": 51.75,
+          "gliner_ft": 54.93,
+          "epochs": 12,
+          "stored_best_epoch": 11,
+          "val_f1": {
+            "gliner_ftp": 80.19,
+            "gliner_ft": 79.51
+          }
+        },
+        {
+          "seed": 300,
+          "gliner_ftp": 54.01,
+          "gliner_ft": 51.06,
+          "epochs": 20,
+          "stored_best_epoch": 19,
+          "val_f1": {
+            "gliner_ftp": 80.68,
+            "gliner_ft": 79.81
+          }
+        },
+        {
+          "seed": 400,
+          "gliner_ftp": 51.43,
+          "gliner_ft": 60.47,
+          "epochs": 14,
+          "stored_best_epoch": 13,
+          "val_f1": {
+            "gliner_ftp": 80.39,
+            "gliner_ft": 80.29
+          }
+        },
+        {
+          "seed": 500,
+          "gliner_ftp": 51.13,
+          "gliner_ft": 54.55,
+          "epochs": 15,
+          "stored_best_epoch": 14,
+          "val_f1": {
+            "gliner_ftp": 80.78,
+            "gliner_ft": 81.68
+          }
+        },
+        {
+          "seed": 600,
+          "gliner_ftp": 50.38,
+          "gliner_ft": 55.17,
+          "epochs": 8,
+          "stored_best_epoch": 7,
+          "val_f1": {
+            "gliner_ftp": 75.69,
+            "gliner_ft": 78.99
+          }
+        },
+        {
+          "seed": 700,
+          "gliner_ftp": 50.0,
+          "gliner_ft": 50.75,
+          "epochs": 10,
+          "stored_best_epoch": 9,
+          "val_f1": {
+            "gliner_ftp": 77.22,
+            "gliner_ft": 78.2
+          }
+        },
+        {
+          "seed": 800,
+          "gliner_ftp": 52.55,
+          "gliner_ft": 47.06,
+          "epochs": 13,
+          "stored_best_epoch": 12,
+          "val_f1": {
+            "gliner_ftp": 78.01,
+            "gliner_ft": 80.3
+          }
+        },
+        {
+          "seed": 900,
+          "gliner_ftp": 54.68,
+          "gliner_ft": 48.95,
+          "epochs": 18,
+          "stored_best_epoch": 17,
+          "val_f1": {
+            "gliner_ftp": 78.97,
+            "gliner_ft": 80.86
+          }
+        }
+      ],
+      "epochs_match": true,
+      "trainers": [
+        "gliner.training.Trainer"
+      ],
+      "accelerate_versions": [
+        "1.15.0"
+      ]
+    }
+  },
   "paper_count": {
     "fine": {
       "papers": {

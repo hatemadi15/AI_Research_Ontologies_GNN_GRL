@@ -661,3 +661,22 @@ head, 10 seeds):
 Zero-shot minus the CRF head (reported): −19.87 [−30.73, −9.00]
 (MaterioMiner fine), −32.44 [−38.71, −26.17] (MuLMS), −47.78 [−48.85,
 −46.70] (SOFC-Exp).
+
+Week 21's exploratory checks (batch `w21x`; ROADMAP §4, fixed 4 November
+before the run; outside the count, no decision). In `gpu/`:
+- `gliner_ftn_m<N>`: E1, `gliner_ft`'s recipe on MaterioMiner
+  coarse-grained with each code given as its class name (`COARSE_NAMES`),
+  seed offsets 0-900;
+- `gliner_ftp_m<N>`: E2, the package's trainer (`gliner.training`,
+  accelerate 1.15.0) with the same recipe, stopped after each seed's best
+  epoch in `gliner_ft`, on MaterioMiner fine-grained paper 1, seed offsets
+  0-900.
+
+The analysis is the `week21x` section of `gpu/ner_week5_seed_analysis.json`.
+Run record: kernel version 24 (bundle of `c764023`); `smokebo` is
+identical to `smokebn`, and `smokebp` to E2's seed-0 run (not collected).
+Outcome:
+- E1: 54.64, minus the CRF head −3.97 [−9.15, +1.22] and minus the codes
+  +6.16 [−0.35, +12.67] (higher on every paper);
+- E2: 52.38 against our loop's 52.64, −0.25 [−3.93, +3.42] over 10 seed
+  pairs.
