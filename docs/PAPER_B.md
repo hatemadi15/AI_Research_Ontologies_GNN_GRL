@@ -919,8 +919,10 @@ held-out units, with its pinned environment. It ran two arms:
 
 The labels are the corpora's names in words: the 27 fine-grained class
 names, SOFC-Exp's four and MuLMS's types as its paper names them.
-MaterioMiner's coarse-grained codes have no documented expansion and enter
-lowercased, so that level has no zero-shot arm. Four decisions compare the
+MaterioMiner's coarse-grained codes entered lowercased, with no zero-shot
+arm, because the protocol took them to be undocumented; the dataset's
+paper (its Fig. 7b) and release (a tag map) name every code, which we found
+after the run (ROADMAP §4, the week-21 correction). Four decisions compare the
 fine-tuned arm with the CRF head, paired over the units.
 
 | Setting (decision) | CRF head | Zero-shot | Fine-tuned | Fine-tuned − CRF head |

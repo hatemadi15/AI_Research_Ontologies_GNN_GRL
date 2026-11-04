@@ -29,8 +29,9 @@ that takes the entity types as natural-language labels.
 - **Labels:** each corpus's types as words: MaterioMiner's fine-grained
   classes with their camel case split, and MuLMS's and SOFC-Exp's
   documented types written out. MaterioMiner's coarse labels are bare
-  abbreviations with no documented expansion, so the zero-shot arm is
-  fine-grained only. Writing expansions for them would be a labelling
+  abbreviations with no documented expansion (wrong, found on 4 November:
+  the dataset's paper and release name every code; ROADMAP §4, the
+  week-21 correction), so the zero-shot arm is fine-grained only. Writing expansions for them would be a labelling
   choice made after the data were seen.
 - **Scoring:** spans are mapped to IOB2 tags on the same words, then
   seqeval is applied as for every system. Overlapping spans are resolved

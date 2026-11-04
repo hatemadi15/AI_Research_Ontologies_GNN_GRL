@@ -530,8 +530,9 @@ SOFC-Exp's folds, its threshold chosen on validation micro F1; a
 fine-tuned arm trains on the CRF head's training sentences, splits and 10
 seeds, with a fixed recipe and threshold 0.5. The labels are the types'
 names in words (e.g. "stress amplitude"; Appendix A.7). MaterioMiner's
-coarse-grained types have no documented names and enter as their codes
-lowercased (e.g. "mec"), so that level has no zero-shot arm.
+coarse-grained types entered as their codes lowercased (e.g. "mec"), with
+no zero-shot arm, because the protocol took the codes to be undocumented;
+the dataset's release names every code, which we found after the run.
 
 Decisions 21.1–21.4 take the fine-tuned model minus the CRF head, each
 unit the mean of its 10 seeds, paired over MaterioMiner's papers
@@ -1022,8 +1023,9 @@ The companion study's 3-seed screens are not listed.
   CRF head's closed set does. MaterioMiner fine-grained: the 27 class
   names, camel case split and lowercased, e.g. "stress amplitude"; the
   dataset's misspelled "CrackInitation" becomes "crack initiation".
-  MaterioMiner coarse-grained: the codes lowercased; the codes have no
-  documented expansion, so this level has no zero-shot arm. SOFC-Exp:
+  MaterioMiner coarse-grained: the codes lowercased, with no zero-shot
+  arm (the protocol took the codes to be undocumented; the release's
+  tag map names every one, found after the run). SOFC-Exp:
   device, experiment, material, value. MuLMS: the MuLMS paper's names,
   CITE citation, DEV device, FORM form, INSTRUMENT instrument, MAT
   material, MEASUREMENT measurement, NUM number, PROPERTY property, RANGE
