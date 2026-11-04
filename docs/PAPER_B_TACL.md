@@ -17,14 +17,13 @@ subfields' articles; on SOFC-Exp, whose articles share one topic, the 3.5
 points are not established. The loss is mostly names: 81% of a new
 MaterioMiner paper's entities and 88% of a new MuLMS subfield's are names
 no training sentence annotates, and the model finds about a third of them.
-Of ⟦COUNT: decisions⟧ pre-registered decisions, ⟦COUNT: passes⟧ pass,
-where about ⟦COUNT: chance passes⟧ would by chance. Mention replacement
-passes on MaterioMiner's held-out papers and seed votes add 0.8 to 2.5
-points wherever measured; label semantics, self-training, document context
-and recall calibration are not shown to help. Four 3-seed passes failed
-with 10 seeds, three of them already on another machine at the same seeds.
-⟦GLINER: one sentence of at most 15 words on the generalist tagger's
-result⟧
+Of 118 pre-registered decisions, 27 pass, where about 3.0 would by chance.
+Mention replacement passes on MaterioMiner's held-out papers and seed
+votes add 0.8 to 2.5 points wherever measured; label semantics,
+self-training, document context and recall calibration are not shown to
+help. Four 3-seed passes failed with 10 seeds, three of them already on
+another machine at the same seeds. Fine-tuned, a generalist tagger
+(GLiNER) is not shown to beat the model on any corpus.
 
 ## 1 Introduction
 
@@ -61,13 +60,14 @@ MaterioMiner's held-out papers (its votes also on MuLMS's held-out
 subfields), multi-task training on MaterioMiner's random splits, and seed
 votes add 0.8 to 2.5 points wherever measured (reported); no method for
 unseen documents that passed on one corpus is shown to improve on the CRF
-head on SOFC-Exp. ⟦COUNT: decisions⟧ pre-registered decisions, ⟦COUNT:
-passes⟧ passing, are counted in Section 5.3. A third annotated paper adds
-as much on top of two papers as the best method adds on top of three
-(exploratory); at equal sentence counts it keeps about two fifths of its
-gain at both levels (re-decided on 7 fresh seeds), and the rest is its
-sentences (Section 6). A generalist tagger, GLiNER, ⟦GLINER: one clause on
-its result against the CRF head⟧ (Section 7).
+head on SOFC-Exp. 118 pre-registered decisions, 27 passing, are counted in
+Section 5.3. A third annotated paper adds as much on top of two papers as
+the best method adds on top of three (exploratory); at equal sentence
+counts it keeps about two fifths of its gain at both levels (re-decided on
+7 fresh seeds), and the rest is its sentences (Section 6). A generalist
+tagger, GLiNER, fine-tuned on the same sentences, is not shown to beat the
+CRF head on any corpus and is 10 points below it on MaterioMiner's coarse
+level (Section 7).
 
 A companion study (Anonymous, 2026) tests the method the programme arrived
 at, mention replacement with six copies and names harvested from unlabeled
@@ -431,16 +431,13 @@ failed and its decisions did not run.
 
 ### 5.3 The count
 
-Through stage 20 the programme took 114 pre-registered decisions (stages
+Through stage 21 the programme took 118 pre-registered decisions (stages
 15, 16 and 19 took none), 15 three-seed screens and stage 19's lexicon
-screen, which failed. 27 decisions pass, where about 2.9 would if nothing
+screen, which failed. 27 decisions pass, where about 3.0 would if nothing
 worked: none of the 6 with one run per split; 6 of the 24 with 3 seeds (4
 of the 22 of stages 3 and 4, none of which survived its 10-seed re-run,
-and stage 8's 2 on a third paper, re-run in stage 20); and 21 of the 84
-with 7 or 10 seeds (Table 3). Through stage 21: ⟦COUNT: decisions⟧
-decisions, ⟦COUNT: passes⟧ passing, where about ⟦COUNT: chance passes⟧
-would by chance; ⟦COUNT: decisions with 7 or 10 seeds⟧ with 7 or 10 seeds,
-⟦COUNT: of them passing⟧ passing.
+and stage 8's 2 on a third paper, re-run in stage 20); and 21 of the 88
+with 7 or 10 seeds (Table 3), none of them stage 21's.
 
 | Addition | Decisions | Pass | Where it holds | Margin kept with the dependence allowance (post hoc) | Passes BH at 5% (post hoc) |
 |---|---|---|---|---|---|
@@ -454,7 +451,7 @@ would by chance; ⟦COUNT: decisions with 7 or 10 seeds⟧ with 7 or 10 seeds,
 | label semantics, self-training, document context, multi-task self-training, recall calibration, coarse-to-fine | 28 (6, 6, 5, 4, 5, 2), 2 on SOFC-Exp | 0 | nowhere | — | — |
 | SOFC-Exp's test articles re-cut (a measurement) | 2 | 2 | — | paired by seed | both |
 | MuLMS's pool by sentence; a third paper at equal size, fresh seeds (measurements, stage 20) | 3 | 3 | MuLMS; MaterioMiner at both levels | the coarse-grained third paper (fixed in the protocol) | not tested |
-| GLiNER fine-tuned (stage 21) | 4: 2 on MaterioMiner, 1 on MuLMS, 1 on SOFC-Exp | ⟦GLINER: passes⟧ | ⟦GLINER: where it holds⟧ | ⟦GLINER: the reading fixed in the protocol⟧ | not tested |
+| GLiNER fine-tuned (stage 21) | 4: 2 on MaterioMiner, 1 on MuLMS, 1 on SOFC-Exp | 0 | nowhere above the CRF head; below it at MaterioMiner's coarse level | no pass; 21.2 stays below | not tested |
 
 **Table 3.** Decisions with 7 or 10 seeds, by addition (8 on
 MaterioMiner's random splits). The post hoc columns cover stages 2 to 18.
@@ -546,17 +543,19 @@ articles, "never read" holds for its fine-tuning only.
 
 | Setting (decision) | CRF head, stored | Detectable: method / encoder proxy | Zero-shot | Fine-tuned | Fine-tuned − CRF head |
 |---|---|---|---|---|---|
-| MaterioMiner fine (21.1) | 51.00, 43.74, 48.73, 42.36 | 1.65 / 3.8 | ⟦GLINER: F1⟧ | ⟦GLINER: F1⟧ | ⟦GLINER: Δ [CI], verdict⟧ |
-| MaterioMiner coarse (21.2) | 60.27, 62.54, 55.58, 56.02 | 1.60 / 4.8 | no arm | ⟦GLINER: F1⟧ | ⟦GLINER: Δ [CI], verdict⟧ |
-| MuLMS (21.3) | 48.66 (32.49–56.82) | 3.30 / — | ⟦GLINER: F1⟧ | ⟦GLINER: F1⟧ | ⟦GLINER: Δ [CI], verdict⟧ |
-| SOFC-Exp folds (21.4) | 82.79 (79.77–88.76) | 1.17 / — | ⟦GLINER: F1⟧ | ⟦GLINER: F1⟧ | ⟦GLINER: Δ [CI], verdict⟧ |
+| MaterioMiner fine (21.1) | 51.00, 43.74, 48.73, 42.36 | 1.65 / 3.8 | 26.59 | 50.23 | +3.77 [−5.38, +12.92], not shown |
+| MaterioMiner coarse (21.2) | 60.27, 62.54, 55.58, 56.02 | 1.60 / 4.8 | no arm | 48.48 | −10.12 [−15.68, −4.56], below |
+| MuLMS (21.3) | 48.66 (32.49–56.82) | 3.30 / — | 16.22 | 50.23 | +1.58 [−1.92, +5.08], not shown |
+| SOFC-Exp folds (21.4) | 82.79 (79.77–88.76) | 1.17 / — | 35.01 | 83.05 | +0.27 [−1.84, +2.37], not shown |
 
 **Table 4.** Stage 21: the CRF head's stored means (per paper, or mean and
-range) and the differences detectable at 80% power, by proxy.
+range), the differences detectable at 80% power by proxy, GLiNER's means over
+the units (zero-shot, one run; fine-tuned, 10 seeds) and the decisions.
 
-⟦GLINER: results in at most 40 words: the verdicts of 21.1–21.4 and their
-reading, the zero-shot arm against the CRF head, recall on unseen and seen
-names, and the dependence-allowance reading of any pass⟧
+None passes: on no corpus is GLiNER shown to score higher or lower. At
+MaterioMiner's coarse level it is 10.12 below, also with the allowance.
+Zero-shot, it trails by 20–48. Its recall on unseen names is higher only
+on SOFC-Exp (+1.89 [+0.54, +3.25]).
 
 ## 8 Lessons
 
@@ -581,9 +580,8 @@ names, and the dependence-allowance reading of any pass⟧
    not shown to gain on SOFC-Exp, whose held-out articles bring fewer new
    names and whose baseline leaves less headroom; which of the two blocks
    them is not known.
-6. **Pre-register and count.** Of ⟦COUNT: decisions⟧ decisions, ⟦COUNT:
-   passes⟧ pass; a paper that reported the ⟦COUNT: passes⟧ alone would
-   read as a different programme.
+6. **Pre-register and count.** Of 118 decisions, 27 pass; a paper that
+   reported the 27 alone would read as a different programme.
 7. **Annotate new documents.** A third paper adds 7 to 9 points on a new
    paper, as much as the best method; at equal sentence counts it still
    adds 4.0 and 3.5 points (7 fresh seeds), but most of its gain is its
@@ -657,15 +655,15 @@ wu2020teacher; qu2023adaptive) are the companion study's related work.
 - **Annotation conventions differ between papers** (Section 3.4). The
   decisions use strict F1 for comparability; the looser criteria are
   reported, not decided on.
-- **The count is of this programme's choices.** The ⟦COUNT: decisions⟧
-  decisions test the additions we chose, in the order we chose them. About
-  ⟦COUNT: chance passes⟧ would pass by chance whatever their dependence,
-  which only makes chance passes come together. The votes share members,
-  pooled decisions share units with per-corpus ones, and units share
-  training documents (two MaterioMiner papers' training sets share two
-  papers, two SOFC-Exp folds 27 of their 36 articles, 5 of the 21 MuLMS
-  pairs an article), which also makes the intervals over units too narrow;
-  Section 5.3 gives every pass with a post hoc allowance for it.
+- **The count is of this programme's choices.** The 118 decisions test the
+  additions we chose, in the order we chose them. About 3.0 would pass by
+  chance whatever their dependence, which only makes chance passes come
+  together. The votes share members, pooled decisions share units with
+  per-corpus ones, and units share training documents (two MaterioMiner
+  papers' training sets share two papers, two SOFC-Exp folds 27 of their
+  36 articles, 5 of the 21 MuLMS pairs an article), which also makes the
+  intervals over units too narrow; Section 5.3 gives every pass with a
+  post hoc allowance for it.
 
 ### Use of an AI assistant
 
@@ -963,7 +961,7 @@ between the folds and the MuLMS pools' layout.
 | 18 | GPU, 7 | names against a recall-matched bias (D11, D12) | 2 (1) |
 | 19 | GPU | names ranked by a graph network (a screen, failed) | none |
 | 20 | GPU, 7 or 10 | MuLMS's pool by sentence (20.1); a third paper at equal size on fresh seeds (20.2, 20.3) | 3 (3) |
-| 21 | GPU, 10 | GLiNER fine-tuned against the CRF head (21.1 to 21.4) | 4 (⟦GLINER: passes⟧) |
+| 21 | GPU, 10 | GLiNER fine-tuned against the CRF head (21.1 to 21.4) | 4 (0) |
 | — | GPU, 10 | SOFC-Exp's official split and 10-article draws (Table B3) | 13 (3) |
 
 **Table A1.** The stages, with the decisions each took and how many pass.

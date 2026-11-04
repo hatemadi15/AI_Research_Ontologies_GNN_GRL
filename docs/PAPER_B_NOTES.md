@@ -103,3 +103,9 @@ venue.
 - **Every main-text number** occurs in this draft, checked by a script,
   apart from stage 21's numbers, which come from its protocol.
 - **Review round 2** comes after the placeholders are filled.
+- **4 November: the 33 placeholders are filled** from week 21's analysis
+  files (`ner_week5_seed_analysis.json`, `week21`; `ner_mentions.json`,
+  `week21`). None of 21.1–21.4 passes, and 21.2 is below the CRF head.
+  The count is 118 decisions, 27 passing, about 3.0 by chance, and 88 with
+  7 or 10 seeds, 21 passing. `docs/PAPER_B.md` gains §7.7 on the
+  generalist tagger, and its count moves to §7.8.

@@ -19,7 +19,7 @@ difference over the units named (splits or held-out documents, or seeds
 or draws where stated); after a score, of that score over its splits,
 units or seeds. References are keys of
 `docs/references.bib`. The length is open until the venue is chosen: an
-8-page conference paper keeps Sections 1, 5, 6, 7.7, 8 and 9 and moves the
+8-page conference paper keeps Sections 1, 5, 6, 7.8, 8 and 9 and moves the
 rest to an appendix; a journal paper keeps all of it.*
 
 ## Abstract
@@ -37,13 +37,17 @@ from all the other subfields' articles rather than two or three; on
 SOFC-Exp, whose articles share one topic, the 3.5 points are not
 established. The loss is mostly names: 81% of a new MaterioMiner paper's
 entities and 88% of a new MuLMS subfield's are names no training sentence
-annotates, and the model finds about a third of them. Of 114
+annotates, and the model finds about a third of them. Of 118
 pre-registered decisions on the additions a practitioner would reach for,
 27 pass, where about 3 would by chance. Mention replacement passes on
 MaterioMiner's held-out papers, multi-task training on its random splits,
 and seed votes add 0.8 to 2.5 points wherever measured. Label semantics,
 self-training, document context and recall calibration are not shown to
-help; their decisions could detect gains of 0.4 to 6 points.
+help; their decisions could detect gains of 0.4 to 6 points. A
+generalist tagger, GLiNER-medium, fine-tuned on the same documents, is
+not shown to score higher than the CRF head on any corpus and scores 10
+points lower on MaterioMiner's coarse types; zero-shot it trails by 20 to
+48 points.
 Allowing, post hoc, for the training documents the units share, 5 of the
 15 passes over units with 7 or 10 seeds keep their margin. Two findings
 concern method. Four comparisons that passed with 3 seeds failed when
@@ -119,8 +123,11 @@ MuLMS's held-out subfields); document-level label propagation passes on
 MuLMS and coarse-grained on MaterioMiner by under a point; harvested
 names pass on MaterioMiner and, under a pooled criterion adopted
 mid-study, pooled with MuLMS, without being shown to add to mention
-replacement; the rest are not shown to help. 114 pre-registered
-decisions, 27 passing, are counted in Section 7.7. A third annotated paper
+replacement; the rest are not shown to help. A generalist tagger,
+GLiNER-medium, fine-tuned on the same documents, is not shown to beat the
+CRF head on any corpus and is 10 points below it on MaterioMiner's coarse
+level (Section 7.7). 118 pre-registered decisions, 27 passing, are
+counted in Section 7.8. A third annotated paper
 adds as much on top of two papers as the best method adds on top of three
 (exploratory); at equal sentence counts it keeps about two fifths of its
 gain at both levels (re-decided on 7 fresh seeds), and the rest is its
@@ -228,7 +235,7 @@ official split), the pairs are the seeds. With 4 papers the interval has 3
 degrees of freedom, with 5 folds 4, with 7 subfields 6, so a gain must be
 consistent across units to pass (dror2018hitchhiker). The interval treats
 the units as independent, though a corpus's units share training
-documents (Section 10); Section 7.7 reports each pass with a post hoc
+documents (Section 10); Section 7.8 reports each pass with a post hoc
 allowance for it. A pooled
 decision takes the units of two corpora together and requires, in
 addition, that neither corpus's own interval lie below 0. Each protocol
@@ -288,6 +295,10 @@ and CPU runs are never compared with each other in a decision.
   krishnan2006effective); coarse-to-fine completion; recall calibration;
   mention replacement (dai2020analysis), alone, on the multi-task model,
   and with harvested names (paper A).
+- **A generalist tagger** (Section 7.7): GLiNER-medium
+  (zaratiana2024gliner), a span model pre-trained to tag any label set it
+  is given by name, fine-tuned on the CRF head's training sentences and
+  zero-shot.
 
 ## 5 The gap and its anatomy
 
@@ -587,7 +598,7 @@ on a second corpus. Table 2 lists MaterioMiner's decisions and screens of
 weeks 3 to 12 and Table 6 the decisions on held-out documents of weeks 7
 to 14; week 2's six decisions, week 8's two on a third paper, SOFC-Exp's
 official-split and training-size decisions and paper A's D9 to D12 are
-not in them (Section 7.7 counts every decision).
+not in them (Section 7.8 counts every decision).
 
 ### 7.1 The CRF head, span validity and a tokenization shift (C3, C4, C13, C16)
 
@@ -883,7 +894,7 @@ mentions than the vote and 2 more than the MLP. It holds 16.8% of them on
 average, the vote 24.9% and the MLP 18.8%, below the vote in all 11 units
 though with fewer of the names it holds under a wrong type (4.7% against
 10.1%). The gate failed, the decisions did not run, and the screen enters
-Section 7.7's count as one negative screen. In paper A's ablations,
+Section 7.8's count as one negative screen. In paper A's ablations,
 lexicons holding 16% to 32% of the unseen names gave F1 within 0.16
 points of each other, so the screen bears on how names are ranked, not
 directly on F1. (The probe keeps one type per name and only names no
@@ -891,19 +902,78 @@ training sentence annotates, so on MuLMS, pooled, its vote holds 30.3% of
 the unseen test mentions at 0.7 and 22.0% at 0.9, a little below paper
 A's 31.5% and 22.2%.)
 
-### 7.7 The count
+### 7.7 A generalist tagger, fine-tuned and zero-shot (week 21)
 
-Through week 20 the programme took 114 pre-registered decisions (weeks 2
-to 20; weeks 15, 16 and 19 took none, and week 1's comparisons (class
+Paper B's first referee asked for a baseline that does not depend on the
+training documents' names. Week 21, fixed before any GLiNER run but after
+every held-out result of the CRF head was known (the plan checked by an
+independent referee), ran GLiNER-medium v2.1 (zaratiana2024gliner; a
+DeBERTa-v3-base encoder, base size like MatSciBERT) on the CRF head's
+held-out units, with its pinned environment. It ran two arms:
+- **zero-shot**, one run per unit, its threshold chosen from 0.3 to 0.6
+  on validation;
+- **fine-tuned** on the CRF head's training sentences, 10 seeds, with a
+  fixed recipe (AdamW, encoder 1e-5 and the rest 5e-5, at most 20 epochs,
+  patience 3, threshold 0.5).
+
+The labels are the corpora's names in words: the 27 fine-grained class
+names, SOFC-Exp's four and MuLMS's types as its paper names them.
+MaterioMiner's coarse-grained codes have no documented expansion and enter
+lowercased, so that level has no zero-shot arm. Four decisions compare the
+fine-tuned arm with the CRF head, paired over the units.
+
+| Setting (decision) | CRF head | Zero-shot | Fine-tuned | Fine-tuned − CRF head |
+|---|---|---|---|---|
+| MaterioMiner fine (21.1) | 46.46 | 26.59 | 50.23 | +3.77 [−5.38, +12.92], not shown |
+| MaterioMiner coarse (21.2) | 58.60 | no arm | 48.48 | −10.12 [−15.68, −4.56], below |
+| MuLMS (21.3) | 48.66 | 16.22 | 50.23 | +1.58 [−1.92, +5.08], not shown |
+| SOFC-Exp folds (21.4) | 82.79 | 35.01 | 83.05 | +0.27 [−1.84, +2.37], not shown |
+
+None passes.
+- **Not shown.** Fine-tuned GLiNER is not shown to differ from the CRF
+  head on MuLMS (within about 3.5 points) or SOFC-Exp's folds (within 1.5
+  to 2). Fine-grained on MaterioMiner, one paper gains 12.25 and the
+  other three −0.54 to +1.72, so the interval is wider than the 4 to 5
+  points the protocol expected.
+- **Below at the coarse level.** It is 10.12 points below on every
+  paper (−5.57 to −13.94), and stays below with the dependence allowance
+  ([−18.62, −1.63]).
+- **The reading.** MaterioMiner counts as one corpus, above or below only
+  if both levels are, so the protocol's reading is: a
+  generalist-pretrained tagger of base size is not shown to score higher
+  or lower than MatSciBERT's CRF head on held-out documents on any
+  corpus, within these sizes; at MaterioMiner's coarse level it scores
+  lower.
+- **Caveats.** The reading carries the confound of generalist NER
+  pre-training with a general-domain encoder, and GLiNER's pre-training
+  text may contain the test articles.
+- **An explanation, not tested.** GLiNER reads the label names, and the
+  coarse names are bare codes. Its fine-tuned F1 is lower coarse-grained
+  than fine-grained (48.48 against 50.23), where the CRF head's is 12.14
+  points higher.
+- **Zero-shot** it is below the CRF head by 19.87 points on MaterioMiner
+  fine-grained (−19.87 [−30.73, −9.00]), 32.44 on MuLMS and 47.78 on
+  SOFC-Exp (reported).
+- **By kind of name** (reported), the fine-tuned arm against the CRF head:
+  - SOFC-Exp, where F1 is level: recall on unseen names 81.86 against
+    79.96 (+1.89 [+0.54, +3.25]), and on seen names level (0.00);
+  - MaterioMiner fine-grained (+7.66 [−5.20, +20.52] on unseen, −3.85 on
+    seen) and MuLMS (+2.68 and +4.01): neither difference is shown;
+  - coarse-grained: lower on both (−17.01 and −14.18).
+
+### 7.8 The count
+
+Through week 21 the programme took 118 pre-registered decisions (weeks 2
+to 21; weeks 15, 16 and 19 took none, and week 1's comparisons (class
 weights and the CRF head) are left out, since they have no protocol in `docs/ROADMAP.md` §4), 15
 three-seed screens (Table 2; paper A, Supplementary Table S5) and week
 19's lexicon screen, which failed (Section 7.6). 27
-decisions pass, where about 2.9 would if nothing worked. By design: 6
+decisions pass, where about 3.0 would if nothing worked. By design: 6
 with one run per split (week 2), none passing; 24 with 3 seeds, 6
 passing, namely the 22 of weeks 3 and 4 (4 passing, none of which
 survived its 10-seed re-run) and week 8's 2 on a third paper at equal
-size (both passing, re-run in week 20); 84 with 7 or 10 seeds, 21
-passing (76 with 10 seeds, 7 with 7 seeds: 5 on MuLMS's 7 decision seeds
+size (both passing, re-run in week 20); 88 with 7 or 10 seeds, 21
+passing (80 with 10 seeds, 7 with 7 seeds: 5 on MuLMS's 7 decision seeds
 and week 20's 2 on a third paper; D7 on both). By addition,
 with 7 or 10 seeds (8 of them on MaterioMiner's random splits):
 
@@ -919,6 +989,7 @@ with 7 or 10 seeds (8 of them on MaterioMiner's random splits):
 | label semantics, self-training, document context, multi-task self-training, recall calibration, coarse-to-fine completion | 28 (6, 6, 5, 4, 5 and 2), 2 of them on SOFC-Exp | 0 | nowhere; DeBERTa-v3-large stopped at its screen, and its SOFC-Exp decision did not run |
 | SOFC-Exp's test articles cut as its training articles are (a measurement) | 2 | 2 | — |
 | MuLMS's pool drawn by sentence, and a third paper at equal size on fresh seeds (measurements, week 20) | 3 | 3 | MuLMS; MaterioMiner at both levels |
+| a generalist tagger, GLiNER-medium, fine-tuned in the CRF head's place (a baseline, week 21) | 4: 2 on MaterioMiner, 1 on MuLMS, 1 on SOFC-Exp | 0 | nowhere above the CRF head; below it at MaterioMiner's coarse level |
 
 With 3 seeds, label semantics passes 2 of 8 decisions (4 of them on the
 multi-task model), self-training 1 of 6, multi-task training 1 of 4, the
@@ -930,6 +1001,7 @@ Three post hoc readings qualify the 24 passes of weeks 2 to 18 (review
 round 1; `paper_b_checks.py`); none changes a verdict. Week 20's three
 passes carry the dependence reading fixed in their protocol: the
 coarse-grained third paper keeps its margin, the other two lose it.
+Week 21 passes none; 21.2, below the CRF head, stays below with it.
 - **Shared training documents.** Paper A's model of the units'
   dependence (Section 10: a correlation of 1/4 between MaterioMiner's
   papers, 1/5 between SOFC-Exp's folds, 1/4 between MuLMS subfields whose
@@ -1037,7 +1109,7 @@ their increment over mention replacement is not established.
    were not shown to gain on SOFC-Exp, whose held-out articles bring
    fewer new names and whose baseline leaves less headroom; which of the
    two blocks them is not known, so check both before adopting a method.
-6. **Pre-register and count.** Of 114 decisions, 27 pass; a paper that
+6. **Pre-register and count.** Of 118 decisions, 27 pass; a paper that
    reported the 27 alone would read as a different programme. The count
    is part of the result.
 7. **Annotate new documents.** A third paper adds 7 to 9 points on a new
@@ -1047,9 +1119,10 @@ their increment over mention replacement is not established.
 
 ## 10 Limitations
 
-- **Fine-tuned encoder taggers only.** Every system is a fine-tuned
-  BERT-base tagger, but for DeBERTa-v3-large's screen. No large language model or generalist tagger, which
-  would not depend on the training documents' names, was run on the
+- **Encoder taggers of base size.** Every system is a fine-tuned
+  BERT-base tagger, but for DeBERTa-v3-large's screen and GLiNER-medium
+  (Section 7.7), whose generalist NER pre-training and general-domain
+  encoder cannot be separated. No large language model was run on the
   held-out documents; whether one narrows the gap is open.
 - **Model selection inside the training documents.** The epoch is chosen
   on a random 15% of the training documents' own sentences (on MuLMS, 60
@@ -1086,7 +1159,7 @@ their increment over mention replacement is not established.
   chose differently, which no model trained on the other papers can
   learn. The decisions use strict F1 for comparability; the looser
   criteria are reported, not decided on.
-- **The count is of this programme's choices.** The 114 decisions test
+- **The count is of this programme's choices.** The 118 decisions test
   the additions we chose, in the order we chose them, with amendments
   marked; another programme would test others. About 2.9 would pass by
   chance whatever their dependence, which only makes chance passes come
@@ -1095,7 +1168,7 @@ their increment over mention replacement is not established.
   (two MaterioMiner papers' training sets share two papers, two SOFC-Exp
   folds 27 of their 36 articles, 5 of the 21 MuLMS pairs an article),
   which also makes the intervals over units too narrow (paper A,
-  Statistics and reproducibility); Section 7.7 gives every pass with a
+  Statistics and reproducibility); Section 7.8 gives every pass with a
   post hoc allowance for it.
 
 ## 11 Related work
@@ -1154,7 +1227,7 @@ MuLMS's decision seeds), under protocols committed before their results
 little power (card2020power), units that share training data make
 intervals too narrow (nadeau2003inference), and many decisions call for
 a false-discovery count (benjamini1995controlling) or a replicability
-analysis across datasets (dror2017replicability); Section 7.7 reports
+analysis across datasets (dror2017replicability); Section 7.8 reports
 each. Section 6.2
 shows what a 3-seed design would have concluded on the same runs, and
 what it did conclude in our own first weeks.
@@ -1201,5 +1274,5 @@ repeating an earlier run, and every repeat was identical. Table 1 gives
 the published-split numbers, Table 2 the decisions and screens on
 MaterioMiner of weeks 3 to 12, Table 3 default against strict scoring,
 Table 4 the unseen-name shares and match criteria, Table 6 the decisions
-on held-out documents of weeks 7 to 14; Section 7.7 counts the decisions
+on held-out documents of weeks 7 to 14; Section 7.8 counts the decisions
 that are in neither.
