@@ -1,135 +1,191 @@
-# Plan: beating the published numbers properly (draft, 4 November 2026)
+# Plan: beating the published numbers properly (4 November 2026)
 
-*Status: draft for an independent referee's check (a Fable-model referee) before
-any run. It runs after the current work: the two exploratory GLiNER checks, the
-post hoc checks over all 118 decisions, and paper B's typeset TACL version. The
-published numbers come from an audit of the literature on 4 November, every
-number read in its paper.*
+*Status: revised after an independent referee's check (a Fable-model referee,
+4 November: "approve with required changes"). Its seven required changes,
+R1–R7, are applied below, together with its missing candidates and its
+design points. The plan runs after the current work: the two exploratory
+GLiNER checks, the post hoc checks over all 118 decisions, and paper B's
+typeset TACL version. A protocol in `docs/ROADMAP.md` §4 fixes it in detail
+before any run. The published numbers come from a literature audit of
+4 November, every number read in its paper.*
 
 ## 1. What "properly" means
 
-A claim to beat the state of the art (SOTA) on a benchmark needs all of these.
-- **The benchmark's own protocol:** its split, entity set, nesting and scorer, exactly as
-  the best published result used them.
-- **A protocol fixed before any run,** with the decision rule, the target number and the
-  seeds.
-- **Selection on validation data only.** The test set is read once per final system, on
-  10 seeds never used before (offsets 1000–1900).
-- **Two decisions per benchmark:**
-  - **D-T:** our 10-seed mean is above the target number. Where the paper gives a mean,
-    an SD and a run count, this is a Welch test on those statistics; otherwise the target
-    is treated as fixed, and the decision uses the one-sample 95% interval.
-  - **D-P:** our system beats our own re-run of the published system, paired by seed on
-    the same split, so that the gain belongs to the method and not to the pipeline.
-- **Two numbers reported for ensembles:** a seed vote is an ensemble, so the single model
-  and the vote are reported separately and claimed as such.
-- **Every decision counted:** with the false passes expected by chance, as in papers A
-  and B.
+- **The benchmark's own protocol.** We use the split, entity set, nesting and scorer of
+  the result we compare with, and we name the test set of each decision.
+- **A protocol fixed before any run.** It holds the decision rules, the targets, the
+  seeds, the budget table and the outcome wordings (§5).
+- **Selection on validation data only.**
+  - The test set is read once per final system, on fresh seeds (offsets 1000–1900, and
+    up to 1000–3900 for the votes).
+  - MaterioMiner is screened on the validation sets of its 5 random splits, never on the
+    57-sentence validation set of the released split.
+  - The two best candidates within 1 point of each other on a benchmark get 4 more
+    screen seeds.
+  - The selection is made per benchmark and granularity.
+- **D-T, against the target.**
+  - Where the paper gives an SD and a run count, the test is Welch's, with the unit stated.
+  - Otherwise, our one-sample 95% interval is set against the target taken as fixed. That
+    is anti-conservative, and the paper says so.
+  - Every D-T is worded "on this test set": the seed interval does not cover sampling of
+    the test set (173 and 96 sentences).
+- **D-P, against our own re-run.**
+  - The reference is our re-run of the published system, or the tuned reference
+    (candidate A) when the winner is another candidate, so that tuning is not credited to
+    a method. If A itself wins, D-P reads "tuning".
+  - The interval is paired by seed. Across architectures, seed pairing is nominal and the
+    interval is unpaired (Welch).
+  - A paired bootstrap over test sentences is reported beside it.
+- **Single models are the headline.** A vote is an ensemble, and gets its own decisions
+  only on 30 fresh seeds: 10 disjoint votes of 3, and 6 of 5, on SOFC-Exp's official split
+  and MaterioMiner's released split, under 3 session-hours. Otherwise votes are reported
+  without a decision.
+- **Every decision is counted,** with the false passes expected by chance. Decisions
+  whose outcome is already known are re-tests, in a count of their own (R3).
 
-## 2. The targets (audit, 4 November)
+## 2. The targets, and what is already known
 
-| Benchmark and protocol | Best verified number | Higher claims, protocol unverified | Our runs so far (known, so not usable for selection) |
+| Benchmark and protocol | Best verified number (± as printed) | Higher claims, protocol unverified | D-T unit |
 |---|---|---|---|
-| MaterioMiner, released 323/57/96 sentence split, seqeval exact match, micro | 69.92 fine-grained, 72.32 coarse-grained: MatSciBERT, linear head, mean of 5 (Durmaz 2024) | none; no later paper uses this split | CRF head 73.31 [72.28, 74.35] and 75.48 [74.23, 76.72], 10 seeds (reported) |
-| SOFC-Exp, 4 entity types, micro, conlleval, cross-validation over the 34 non-test articles (5 folds × 3 seeds, fixed 11 test articles) | 84.77 ± 1.02: MatSciBERT-CRF (Gupta 2022) | 85.71 ± 0.20 (MatSciBERT-MRC; best run 85.95; split unstated; Huang 2024); ≈86.0 (LLaMA-3.2-3B with QLoRA, official split, read off a bar chart; Lee 2025) | — |
-| SOFC-Exp, official 26/8/11 article split | 83.4 ± 0.9: MatSciBERT-CRF, one test article dropped (MuLMS paper) | ≈86.0 (Lee 2025, as above) | CRF head 83.75 [82.85, 84.65], seed vote 85.13 |
-| MuLMS, official 36/7/7-document split, 13 types, every nested entity scored, micro | 79.6 ± 0.4: MatSciBERT-CRF with nested BILOU (3 stacked layers), 5 runs (Schrader 2023) | none | none comparable: our runs keep only the outermost entities |
+| MaterioMiner, released 323/57/96 sentence split, seqeval exact match, micro | 69.92 fine-grained, 72.32 coarse-grained: MatSciBERT, linear head, mean of 5, no SD printed (Durmaz 2024) | none | one-sample, target fixed |
+| SOFC-Exp, 4 entity types, micro, conlleval, cross-validation (CV) | 84.77 ± 1.02: MatSciBERT-CRF, SD over 15 fold × seed runs (Gupta 2022) | 85.71 ± 0.20 (MatSciBERT-MRC, best run 85.95, split unstated; Huang 2024) | the per-seed mean over the 5 folds (n = 10), Welch against n = 15 |
+| SOFC-Exp, official 26/8/11 article split | 83.4 ± 0.9 on 10 test articles: MatSciBERT-CRF, 5 seeds; one test article is a MuLMS training article (Schrader 2023) | ≈86.0 on all 11 test articles (LLaMA-3.2-3B with QLoRA, read off a bar chart; Lee 2025) | per seed (n = 10), Welch against n = 5 on 10 articles; the margin over 86.0 is reported on 11 |
+| MuLMS, official 36/7/7-document split, 13 types, every nested entity, micro | 79.6 ± 0.4: MatSciBERT-CRF with stacked BILOU layers, 5 runs over the 5 train-fold configurations (Schrader 2023) | none | per run (n = 10), Welch against n = 5 |
 
-**Bars.** A claim must clear the highest credible number for its benchmark, not only the
-best verified one:
-- **SOFC-Exp:** about 86.0 on the official split. D-T is taken against 84.77 under
-  cross-validation and against 83.4 on the official split, and the margin over 86.0 is
-  reported as a separate line. A "SOTA" headline needs the lower bound of the official-split
-  interval above 86.0.
-- **MaterioMiner:** the published numbers are the bar.
-- **MuLMS:** the published numbers are the bar.
+**The folds and test sets (R1, R2, R6).**
+- **SOFC-Exp's CV folds** follow the release code (`modify_cross_val_data_split`): the 34
+  train and dev article IDs sorted alphabetically, and fold k's dev set every 5th article
+  from position k − 1. The test score is the mean of the per-fold scores, with no vote. P0
+  checks this against MatSciBERT's repository and records the fold IDs as a data file
+  with a hash.
+- **SOFC-Exp's official split.** Every system is scored on both test sets from the same
+  saved predictions: 11 articles (our history, Lee) and 10 (Schrader). Joint training with
+  MuLMS drops the shared article from MuLMS's side, never from SOFC-Exp's test.
+- **MuLMS** uses the release's tokens and evaluation script. Our loader alters 276 tokens
+  and drops 2 entities, so it is not used here. The 5 fold configurations are recorded as
+  a data file.
+
+**Known test results (R3).** The candidate list was drawn after seeing them.
+- **SOFC-Exp's official test articles:**
+  - plain MatSciBERT; the CRF head, 83.75;
+  - document context, 84.34;
+  - multi-task;
+  - mention replacement, alone and on the multi-task model;
+  - label propagation and recall calibration;
+  - the re-cut test articles;
+  - GLiNER-medium.
+- **MaterioMiner's released split:**
+  - plain MatSciBERT, 70.19;
+  - the CRF head, 73.31 and 75.48 (10 seeds);
+  - the multi-task model where it was run.
+
+So MaterioMiner's D-T against 69.92 and 72.32, and its D-P against plain MatSciBERT, are
+re-tests of known passes, counted apart. The live MaterioMiner decision is the selected
+system against the strongest known system, paired by seed: the CRF head, or the
+multi-task CRF fine-grained.
 
 ## 3. Candidates
 
-All candidates are screened on validation with 3 seeds, and none is tested.
-- **A. Tuning the reference.** MatSciBERT-CRF with its learning rate (2e-5, 3e-5, 5e-5),
-  epochs and warm-up chosen on validation. Published baselines are rarely tuned, so this
-  is the cheapest gain and the honest baseline.
-- **B. Larger encoders, tuned.**
-  - DeBERTa-v3-large at 1e-5 and 2e-5, with gradient checkpointing to fit a T4. Our week-6
-    screen ran it at MatSciBERT's 5e-5 and lost 4.4 and 8.0 points on unseen papers, so
-    it has not been fairly tested.
-  - A continued-pre-training RoBERTa (ManufactuBERT, 84.40 on SOFC-Exp), if its weights
-    are public.
-- **C. Training changes with prior support here:**
-  - multi-task over the two type levels (MaterioMiner: +1.83 [+0.32, +3.34] on random
-    splits) and over SOFC-Exp's entities and slots;
-  - joint training across corpora, as Lee 2025 did. The shared SOFC-Exp/MuLMS article is
-    dropped first.
-- **D. Seed votes** of 3 and 5 models. They added 0.8 to 2.5 points wherever we measured
-  them. They are reported as ensembles.
-- **E. A span head for nested entities** (required for MuLMS):
-  - stacked BILOU layers as in the MuLMS paper, or
-  - a span classifier over MatSciBERT with a width cap.
+Every candidate is screened on validation, and none is tested.
+- **A. The reference, tuned.**
+  - MatSciBERT-CRF with its learning rate (2e-5, 3e-5, 5e-5), epochs and warm-up chosen
+    on validation.
+  - Fine-tuning stabilisers: layer-wise learning-rate decay, re-initialising the top
+    layer, weight averaging over the last epochs (Zhang et al. 2021; Mosbach et al. 2021).
+- **B. Encoders.**
+  - DeBERTa-v3-large and SciDeBERTa: learning rate 1e-5, warm-up 10%, up to 20 epochs,
+    gradient checkpointing, fp32, batch 8. Week 6's screen ran DeBERTa at 5e-5, which is
+    likely what it measured. Its tokenizer maps 32 MuLMS words to `[UNK]`; this is
+    disclosed.
+  - MatSciBERT with continued pre-training on the 40,000-sentence SOFC topic corpus
+    already built, under an hour of masked-language-model training.
+- **C. Training.**
+  - Multi-task over the two type levels (MaterioMiner, +1.83 [+0.32, +3.34] on random
+    splits) and over SOFC-Exp's entities and slots.
+  - Joint training across corpora (Lee 2025).
+  - Document context (+0.58 on SOFC-Exp's official test articles, known, so disclosed).
+  - Tokenization-robust training: training sentences also presented with a random re-cut
+    around hyphens, superscripts and units. The shift costs the CRF head 0.86, and was
+    found by inspecting the released test files; this is disclosed.
+- **D. Seed votes** of 3 and 5, decided as in §1.
+- **E. A head for nested entities**, required on MuLMS: the MuLMS paper's stacked BILOU
+  layers, or a span classifier with a width cap. The span head is also tried flat on
+  SOFC-Exp, where a reading-comprehension span model reached 85.7.
+- **F. Optional: a fine-tuned 3B decoder** (Qwen2.5-3B, Apache-2.0, no gated download).
+  It runs only if A–E fall short on SOFC-Exp's validation, and only within the budget.
+  - Setup: 4-bit weights with LoRA r = 16, entity markers, greedy decoding, and
+    hyperparameters from 3 seeds on validation.
+  - Scoring: the generated text is aligned back to the released words, converted to IOB2
+    and scored with the same scorer as every system. Unparsable outputs count as no
+    entities, and their rate is reported.
+  - Repeats: 4-bit kernels do not repeat bit-identically, so F's repeat check is a
+    tolerance declared in advance (within 0.1 F1) instead of identity (R7).
 
-  The span head is also tried flat on SOFC-Exp, where a reading-comprehension span model
-  reached 85.7.
-- **F. Optional: a fine-tuned 3B decoder** (LLaMA-3.2-3B or Qwen2.5-3B, 4-bit with LoRA,
-  entity markers), the one approach published near 86 on SOFC-Exp. It runs only if
-  A–E fall short of 86 on SOFC-Exp's validation, and only within the budget below.
+## 4. Phases, budget and fallbacks
 
-## 4. Phases
+- **P0, reproduction gates** (no claim). A failed gate stops that benchmark until the gap
+  is explained.
+  - MaterioMiner, plain MatSciBERT: done (70.19 against 69.92).
+  - SOFC-Exp CV: 5 folds × 3 seeds against 84.77 ± 1.02.
+  - SOFC-Exp official split: 83.75 on 11 articles, re-scored on 10 against 83.4 ± 0.9.
+  - MuLMS, nested: the release's evaluation, 5 configurations against 79.6 ± 0.4.
+- **P1, screens.** As in §1.
+- **P2, decisions.**
+  - The selected single model and its reference, 10 fresh seeds each (MuLMS: 5
+    configurations × 2 seeds).
+  - The votes on 30 fresh seeds where they are decided (§1).
+  - The live decisions: SOFC-Exp CV and official split (D-T and D-P, 4); MuLMS (D-T and
+    D-P, 2); MaterioMiner against its strongest known system (2); and votes on two
+    benchmarks (up to 4).
+  - The re-tests: MaterioMiner's 4, counted apart.
+- **P3, reported.** The selected systems run on papers A and B's held-out-document
+  protocols. On MuLMS this scores the nested system's outermost predictions.
+- **Budget** (R5). The quota is now 45 session-hours a week, with two T4s per session.
+  - Measured per run: MatSciBERT-CRF takes 3.3 min on SOFC-Exp's official split, 1.3 on
+    MaterioMiner, and about 20–30 min on MuLMS's full training folds. Large encoders are
+    4–5× slower.
+  - Before P1, timed smoke runs fill a table of session-hours per candidate and benchmark,
+    using both lanes.
+  - At base size: P0 about 3 h, P1 10–15 h, P2 15–20 h, P3 about 5 h.
+  - Large encoders add about 25 h for SOFC-Exp CV, 35–40 h for MuLMS P2 and 20 h for P3,
+    and F adds 15–20 h.
+- **Fallbacks, fixed now.**
+  - Large encoders are screened on SOFC-Exp's official split and MaterioMiner first. They
+    enter MuLMS and the CV protocol only if they lead on validation by more than 1 point
+    and the budget table fits.
+  - If a winner does not fit, its CV decision runs at 5 seeds × 5 folds.
+  - Sessions resume finished runs, as `w21a` did.
 
-- **P0, reproduction gates** (no claim). Our re-run of each published system must
-  reproduce its number within that number's spread before anything is compared on that
-  benchmark:
-  - **MaterioMiner, plain MatSciBERT.** Done: 70.19 against 69.92.
-  - **SOFC-Exp's cross-validation protocol.** First obtain Friedrich et al.'s fold
-    assignment, from the original release or MatSciBERT's code; our data hold only the
-    official split. If the folds cannot be found, the cross-validation target is dropped
-    and only the official split is used. The gate is 15 runs.
-  - **SOFC-Exp's official split.** Our CRF head's 83.75 is consistent with 83.4 ± 0.9.
-  - **MuLMS, nested.** The MuLMS paper's model is implemented and scored on every nested
-    entity, against 79.6 ± 0.4, over 5 runs.
+## 5. Outcome wordings, fixed now
 
-  A failed gate stops that benchmark until the gap is explained.
-- **P1, screens.** Candidates A–E on each benchmark, on validation, 3 seeds. The
-  selection rule is fixed in advance: the highest mean validation micro F1, with ties
-  going to the cheaper system. One system per benchmark, plus its vote, goes to P2.
-- **P2, the decisions.** The selected system and our re-run baseline, 10 fresh seeds
-  each, on the test set once. The decisions are D-T and D-P per benchmark and
-  granularity:
-  - MaterioMiner, fine-grained and coarse-grained: 4;
-  - SOFC-Exp, cross-validation and official split: 4;
-  - MuLMS: 2.
+- **SOFC-Exp, official split, 11 articles.**
+  - If the single-model interval's lower bound is above 86.0: "above every reported result
+    on SOFC-Exp's official split, on this test set".
+  - If D-T passes against 83.4 (10 articles) or 84.77 (CV) but the margin over 86.0 does
+    not clear: "above the best result with a stated protocol; not shown above the best
+    reported result, whose protocol we could not verify".
+- **MuLMS.** If D-T passes: "above the published result under its protocol"; else "not
+  shown above it".
+- **MaterioMiner.** The re-tests are reported as replications. The live decision reads "the
+  selected system improves on the strongest known system", or "not shown to".
+- **Nothing clears:** "not shown to beat the published numbers; our best single model
+  reaches X [interval]".
+- **Expected.** The referee expects a single model near 85–85.5 on SOFC-Exp and a vote
+  near 86–86.5, which would read "within the interval of the best reported number", not
+  above it. The plan is worth running for MuLMS, for the CV protocol and for MaterioMiner
+  even if SOFC-Exp's 86 is not cleared.
 
-  That makes 10 decisions, with about 0.25 false passes expected.
-- **P3, reported.** The selected systems also run on the held-out-document protocols of
-  papers A and B. A system that beats a random-split number need not narrow the
-  unseen-document gap, and the report says which it does.
+## 6. Risks, and publication
 
-## 5. Budget and order
-
-- **GPU hours** (Kaggle's free T4s, about 30 GPU hours a week):
-  - P0: about 5;
-  - P1: 15–20;
-  - P2: 10–15;
-  - F, if it runs: 10–20 more.
-
-  That is 2–3 weeks of quota without F.
-- **Order:** P0 code (SOFC-Exp folds, the nested MuLMS head) → the protocol for P0–P2
-  committed → the P0 runs after the 7 November quota reset → P1 → P2 → write-up.
-
-## 6. Risks and limits
-
-- **Test sets already seen.** Our CRF head's results on MaterioMiner's released split and
-  on SOFC-Exp's official test articles are known. Selection uses validation only, and the
-  P2 seeds are fresh; the paper discloses this.
 - **Comparability.**
-  - SOFC-Exp's test articles are tokenized unlike its training articles. The published
-  numbers carry this, so we score on the released test files and report the re-cut files
-  separately.
-  - Cross-validation numbers average fold models; the official split trains one.
-  - Macro and micro F1 are not mixed.
-  - Best-run numbers (Huang 2024) are compared with means only as reported numbers.
-- **MaterioMiner's split.** It is a random sentence split of 4 papers, so a new SOTA on it
-  says little about new documents, which is papers A and B's point. P3 answers that.
-- **Unverifiable bars.** The ≈86.0 on SOFC-Exp is read off a figure. We report our
-  margin over it, and do not claim to beat a number we cannot verify.
-- **Publication.** It goes in a short separate paper (paper C), or into paper B's
-  discussion if the gains are small; this is decided after P2.
+  - The tokenization shift: the released test files are scored, and the re-cut files are
+    reported apart.
+  - Cross-validation means average fold models.
+  - Macro and micro F1 are never mixed in a decision.
+  - Best-run numbers are compared with means only as reported numbers.
+- **MaterioMiner's split is random,** so a new number on it says little about new
+  documents; P3 answers that.
+- **Unverifiable bars.** The author may ask Lee et al. and Huang et al. for their exact
+  numbers, split and scorer before P2.
+- **Publication, fixed now.** A short paper C only if at least one live D-T passes on
+  SOFC-Exp or MuLMS; otherwise a section of paper B's discussion.
