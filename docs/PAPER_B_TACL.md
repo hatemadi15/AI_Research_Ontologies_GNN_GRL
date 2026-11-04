@@ -1,4 +1,4 @@
-# Materials NER on documents it has never read: a pre-registered evaluation on three corpora
+# Materials NER on unseen documents: a pre-registered evaluation on three corpora
 
 *Anonymous TACL submission*
 

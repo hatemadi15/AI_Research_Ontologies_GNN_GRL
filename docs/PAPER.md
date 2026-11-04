@@ -287,8 +287,9 @@ names' share of the gain is not established):
    materials NER on unseen documents.
 
 Paper B (evaluation):
-1. Materials NER on documents it has never read: a pre-registered
-   evaluation on three corpora.
+1. Materials NER on unseen documents: a pre-registered evaluation on three
+   corpora (chosen 4 November; the earlier "documents it has never read"
+   overstated it, since pre-training may include the test articles).
 2. What a random split hides: materials NER on held-out papers, with
    seeds, votes and the names a model lacks.
 3. A hundred and eleven decisions: how the usual additions to materials NER

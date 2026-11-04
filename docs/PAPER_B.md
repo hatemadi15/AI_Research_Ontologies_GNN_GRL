@@ -1,4 +1,4 @@
-# Paper B (evaluation): Materials NER on documents it has never read: a pre-registered evaluation on three corpora
+# Paper B (evaluation): Materials NER on unseen documents: a pre-registered evaluation on three corpora
 
 *The first draft of 30 October (begun ahead of week 16 on the author's
 go-ahead; `docs/METHODS_PLAN.md` §7), brought up to date on 3 November

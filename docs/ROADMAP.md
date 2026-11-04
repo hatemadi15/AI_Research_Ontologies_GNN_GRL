@@ -7161,3 +7161,13 @@ per section: about 6,000 words with the figures.
     tables, or a short main-text summary.
 - **Before submission.** The PDF's document properties carry no name, and
   a preprint, if posted, is disclosed to the editor.
+- **Approved by the author on 4 November** (TACL review round 2):
+  - the title becomes "Materials NER on unseen documents: a pre-registered
+    evaluation on three corpora";
+  - at submission, the companion submission (paper A, under review) is
+    disclosed to the editor;
+  - the editor is offered the time-stamped protocol record, confidentially,
+    so the pre-registration can be checked;
+  - two exploratory GPU checks of GLiNER run outside the count: the package's
+    trainer against our loop on one unit, and the coarse level with class
+    names in place of codes. Each gets a protocol fixed before its run.
