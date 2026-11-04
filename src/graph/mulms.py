@@ -146,7 +146,8 @@ def fetch_sources(cache, offline=False, files=FILES, get=download):
             if sha256(data) != digest:
                 raise ConversionError(f'{path}: downloaded SHA-256 {sha256(data)}, not {digest}')
             target.parent.mkdir(parents=True, exist_ok=True)
-            tmp = target.with_name(target.name + '.tmp')
+            # a name of its own per process: two jobs may fetch into one cache at once
+            tmp = target.with_name(f'{target.name}.{os.getpid()}.tmp')
             tmp.write_bytes(data)
             os.replace(tmp, target)
         local[path] = target

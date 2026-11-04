@@ -9,6 +9,20 @@ typeset TACL version. A protocol in `docs/ROADMAP.md` §4 fixes it in detail
 before any run. The published numbers come from a literature audit of
 4 November, every number read in its paper.*
 
+*P0, 4 November: the code is written and tested (`ner_baseline.py --sofc-cv`,
+`mulms_nested.py`, `sota_p0.py`), and its protocol is fixed in ROADMAP §4. The
+runs (batch `p0a`) wait for the 7 November quota reset. Three findings:
+- 84.77 is the micro F1 of the published (npj) version; the arXiv version prints
+  84.39 micro and 81.92 macro.
+- MatSciBERT's code picks its epoch by dev macro F1, while our recipe picks it by
+  micro F1.
+- The SOFC-Exp test article that MuLMS also holds is PMC6247067 (MuLMS's
+  `sofc_04`), which is in MuLMS's dev set, not its training folds.
+- MuLMS's MatSciBERT tagger used learning rates 1e-4/7e-3 (the paper's
+  Table 13), not the release script's 5e-5, which is SciBERT's.
+
+An independent referee approved P0 with six required changes, all applied.*
+
 ## 1. What "properly" means
 
 - **The benchmark's own protocol.** We use the split, entity set, nesting and scorer of
@@ -48,8 +62,8 @@ before any run. The published numbers come from a literature audit of
 | Benchmark and protocol | Best verified number (± as printed) | Higher claims, protocol unverified | D-T unit |
 |---|---|---|---|
 | MaterioMiner, released 323/57/96 sentence split, seqeval exact match, micro | 69.92 fine-grained, 72.32 coarse-grained: MatSciBERT, linear head, mean of 5, no SD printed (Durmaz 2024) | none | one-sample, target fixed |
-| SOFC-Exp, 4 entity types, micro, conlleval, cross-validation (CV) | 84.77 ± 1.02: MatSciBERT-CRF, SD over 15 fold × seed runs (Gupta 2022) | 85.71 ± 0.20 (MatSciBERT-MRC, best run 85.95, split unstated; Huang 2024) | the per-seed mean over the 5 folds (n = 10), Welch against n = 15 |
-| SOFC-Exp, official 26/8/11 article split | 83.4 ± 0.9 on 10 test articles: MatSciBERT-CRF, 5 seeds; one test article is a MuLMS training article (Schrader 2023) | ≈86.0 on all 11 test articles (LLaMA-3.2-3B with QLoRA, read off a bar chart; Lee 2025) | per seed (n = 10), Welch against n = 5 on 10 articles; the margin over 86.0 is reported on 11 |
+| SOFC-Exp, 4 entity types, micro, conlleval, cross-validation (CV) | 84.77 ± 1.02: MatSciBERT-CRF, SD over 15 fold × seed runs (Gupta 2022) | 85.71 ± 0.20 (MatSciBERT-MRC, best run 85.95, split unstated; Huang 2024) | per run, 5 folds × 10 seeds (n = 50), Welch against n = 15 runs, as P0 does |
+| SOFC-Exp, official 26/8/11 article split | 83.4 ± 0.9 on 10 test articles: MatSciBERT-CRF, 5 seeds; one test article is also in MuLMS, in its dev set (Schrader 2023) | ≈86.0 on all 11 test articles (LLaMA-3.2-3B with QLoRA, read off a bar chart; Lee 2025) | per seed (n = 10), Welch against n = 5 on 10 articles; the margin over 86.0 is reported on 11 |
 | MuLMS, official 36/7/7-document split, 13 types, every nested entity, micro | 79.6 ± 0.4: MatSciBERT-CRF with stacked BILOU layers, 5 runs over the 5 train-fold configurations (Schrader 2023) | none | per run (n = 10), Welch against n = 5 |
 
 **The folds and test sets (R1, R2, R6).**

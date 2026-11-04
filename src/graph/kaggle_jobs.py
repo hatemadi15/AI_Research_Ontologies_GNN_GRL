@@ -751,6 +751,30 @@ def week12_variant(name):
     return variant
 
 
+# the SOTA plan's P0 (docs/SOTA_PLAN.md; ROADMAP §4, the P0 protocol): MuLMS's nested NER as
+# published (mulms_nested.py, one file per training configuration, c<k>), and the CRF head on
+# SOFC-Exp's cross-validation as MatSciBERT's code builds it (--sofc-cv, crf_m<offset>); the
+# relative GPU time of a MuLMS configuration (about 6,000 training sentences, at most 100 epochs
+# with patience 5) and of a cross-validation job (5 runs)
+MULMS_NESTED_SCRIPT = 'src/graph/mulms_nested.py'
+COST['mulms_nested'] = 20.0
+SOFC_CV_OFFSETS = (0, 100, 200)
+P0_SMOKE = ('--max-train', '300', '--epochs', '2')
+
+
+def mulms_nested_job(config, tag=None, extra=()):
+    """mulms_nested.py on one configuration, its file tagged c<config> (or `tag`)."""
+    return [MULMS_NESTED_SCRIPT, '--configs', str(config), '--tag', tag or f'c{config}', *extra,
+            '--save-predictions', '--threads', str(THREADS)]
+
+
+def sofc_cv_job(offset):
+    """The CRF head on SOFC-Exp's 5 cross-validation folds at seed offset `offset`."""
+    return ['--granularity', 'sofc', '--sofc-cv', '--seeds', '0', '--crf', '--tag', f'm{offset}',
+            *(('--seed-offset', str(offset)) if offset else ()), '--save-predictions',
+            '--threads', str(THREADS)]
+
+
 def mrs_paper_job(granularity, paper):
     """Week 11 on MaterioMiner: one held-out paper; the 3 teachers tag the whole fatigue
     corpus and the 10 students train mention replacement with their silver names."""
@@ -1316,6 +1340,18 @@ def batch_lanes(name):
         e2_repeat = gliner_job(setting, tag='smokebp', units=(unit,), extra=flags)
         lanes = balance(jobs, loads=[COST['crf'], W21X_E2_COST])
         return [[repeat + ['--tag', 'smokebo']] + lanes[0], [e2_repeat] + lanes[1]]
+    if name == 'p0a':
+        # the SOTA plan's P0 gates: the repeat of the CRF run of smoke4 (smokebq); MuLMS's 5
+        # configurations (c1 to c5) and SOFC-Exp's cross-validation at seed offsets 0, 100 and
+        # 200, balanced over the lanes; and a short MuLMS run (configuration 1, 300 sentences,
+        # 2 epochs) on each GPU, smokebr first on lane 1 and smokebs last on lane 0, whose
+        # files must be identical but for the run times (mulms_nested.py's determinism)
+        jobs = ([(COST['mulms_nested'], mulms_nested_job(c)) for c in (1, 2, 3, 4, 5)]
+                + [(5 * COST['sofc'], sofc_cv_job(off)) for off in SOFC_CV_OFFSETS])
+        lanes = balance(jobs, loads=[COST['crf'], 1.0])
+        return [[repeat + ['--tag', 'smokebq']] + lanes[0]
+                + [mulms_nested_job(1, 'smokebs', P0_SMOKE)],
+                [mulms_nested_job(1, 'smokebr', P0_SMOKE)] + lanes[1]]
     if name == 'w14a':
         # week 14, 14.1: the 6-copy control without names (crf_mr6_m<N>) on MuLMS's held-out
         # subfields, seed offsets 300 to 900 (one job per offset over the 7 subfields), and
@@ -1339,7 +1375,7 @@ BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'i
            'w12e', 'w12f', 'w12g', 'w13a', 'w13b', 'w13c',
            *(f'w12b:{v}' for v in WEEK12_VARIANTS), *(f'w12d:{v}' for v in WEEK12_ANALOGUES),
            'tpu-smoke1', 'tpu-smoke', 'w14a', 'w14b', 'w14c', 'w15a', 'w17a', 'w17b', 'w18a',
-           'w19a', 'w19b', 'w20a', 'w21s', 'w21a', 'w21x')
+           'w19a', 'w19b', 'w20a', 'w21s', 'w21a', 'w21x', 'p0a')
 
 
 def batch_extras(name):

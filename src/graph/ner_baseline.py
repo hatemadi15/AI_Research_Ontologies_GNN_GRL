@@ -2231,7 +2231,8 @@ F1_AVERAGES = {
 RESULT_FILE = re.compile(r'ner_results_(fine|coarse|sofc_slot|sofc|mulms)'
                          r'(?:_(random_split_vary|leave_one_paper_out|leave_two_papers_out|'
                          r'published_split|document_folds|article_draws|'
-                         r'leave_one_subfield_out|random_split_pool))?'
+                         r'leave_one_subfield_out|random_split_pool|matscibert_cv|'
+                         r'nested_configs))?'
                          r'(?:_([a-z0-9_]+))?\.json')
 # untagged variants: a tagged variant must not take the name of one (--crf --tag mt: crf_mt)
 PLAIN_VARIANTS = ('baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_st', 'crf_mt_ls', 'crf_st3',
@@ -2562,6 +2563,8 @@ def make_folds(data, args, indices=False, granularity=None):
     The parts are lists of data tuples, or of their positions in `data` when
     `indices` is set (the test positions go with the stored predictions).
     """
+    if getattr(args, 'sofc_cv', False):
+        return sofc_cv_parts(data, indices)
     if getattr(args, 'published_split', False):
         parts, _ = published_split(data, granularity)
         if getattr(args, 'train_articles', 0):
@@ -2606,6 +2609,10 @@ def make_folds(data, args, indices=False, granularity=None):
 
 DOCUMENT_FOLDS = 'document_folds'
 ARTICLE_DRAWS = 'article_draws'
+# SOTA plan P0 (docs/SOTA_PLAN.md): SOFC-Exp's cross-validation as MatSciBERT's code builds it
+# (M3RG-IITD/MatSciBERT, ner/ner_datasets.py, modify_cross_val_data_split)
+SOFC_CV = 'matscibert_cv'
+SOFC_CV_FOLDS = 5
 SUBFIELDS = 'leave_one_subfield_out'                     # week 10 (MuLMS)
 POOL_SPLITS = 'random_split_pool'                        # week 10 (MuLMS)
 
@@ -2731,6 +2738,42 @@ def two_paper_size_folds(data, docs, keep, split_seed, indices=False):
     return folds
 
 
+def sofc_cv_folds(split, folds=SOFC_CV_FOLDS):
+    """[(cv<k>, train articles, dev articles, test articles)] of SOFC-Exp's cross-validation
+    as MatSciBERT's code builds it (--sofc-cv; modify_cross_val_data_split): the train and dev
+    articles of the official split (`split`, {article: train, dev or test}) sorted by name;
+    fold k (1 to `folds`) takes every `folds`-th of them from position k - 1 as its dev set
+    and the rest as its training set; every fold tests on the official test articles."""
+    pool = sorted(d for d, part in split.items() if part in ('train', 'dev'))
+    test = sorted(d for d, part in split.items() if part == 'test')
+    out = []
+    for k in range(1, folds + 1):
+        dev = pool[k - 1::folds]
+        out.append((f'cv{k}', [d for d in pool if d not in dev], dev, test))
+    return out
+
+
+def sofc_split():
+    """SOFC-Exp's official split, {article: train, dev or test} (split.json of sofc_exp.py)."""
+    with open(os.path.join(RAW_DIR, 'sofc_exp', 'split.json')) as f:
+        return json.load(f)
+
+
+def sofc_cv_parts(data, indices=False):
+    """make_folds for --sofc-cv: [(cv<k>, train, val, test)], the sentences of each fold's
+    articles in corpus order (positions in `data` when `indices` is set)."""
+    out = []
+    for name, *groups in sofc_cv_folds(sofc_split()):
+        parts = []
+        for group in groups:
+            members = set(group)
+            part = [i for i, (_, _, doc) in enumerate(data)
+                    if doc.removesuffix('.conll') in members]
+            parts.append(part if indices else [data[i] for i in part])
+        out.append((name, *parts))
+    return out
+
+
 def document_groups(docs, k, split_seed):
     """The k test groups of --document-folds: the documents sorted, shuffled with
     random.Random(split_seed) and dealt round-robin, so that group i holds the i-th, (i+k)-th,
@@ -2816,6 +2859,8 @@ def head_granularities(args):
 
 
 def protocol_name(args):
+    if getattr(args, 'sofc_cv', False):
+        return SOFC_CV
     if getattr(args, 'leave_one_subfield_out', False):
         return SUBFIELDS
     if getattr(args, 'train_pool', 0):
@@ -3467,6 +3512,11 @@ def parse_args(argv=None):
                              'the split seed, dealt into K groups, each the test set of one fold '
                              '(fold<i>); the other documents train and validate, as with '
                              '--leave-one-paper-out (ROADMAP §4, week 8)')
+    parser.add_argument('--sofc-cv', action='store_true', default=argparse.SUPPRESS,
+                        help="SOFC-Exp's cross-validation as MatSciBERT's code builds it (SOTA "
+                             'plan P0): the train and dev articles sorted, fold k holding out '
+                             'every 5th from position k - 1 for validation, every fold tested '
+                             'on the official test articles (runs cv1 to cv5)')
     parser.add_argument('--train-articles', type=int, default=argparse.SUPPRESS, metavar='K',
                         help="with --published-split on SOFC-Exp's entity or slot level: train on "
                              'K of the official training articles, drawn --draws times (folds '
@@ -3698,6 +3748,19 @@ def parse_args(argv=None):
                        'published_split'):
             if getattr(args, option, False):
                 parser.error(f"--document-folds is a protocol of its own: no "
+                             f"--{option.replace('_', '-')}")
+    if getattr(args, 'sofc_cv', False):
+        if len(args.seeds) != 1:
+            parser.error('--sofc-cv runs one seed per job (--seeds K, or --seed-offset): every '
+                         'fold trains once at it')
+        if args.granularity not in SOFC:
+            parser.error("--sofc-cv needs SOFC-Exp's entity or slot level (--granularity sofc "
+                         "or sofc_slot)")
+        for option in ('vary_split', 'leave_one_paper_out', 'leave_two_papers_out',
+                       'document_folds', 'published_split', 'train_articles',
+                       'leave_one_subfield_out', 'multi_task', 'self_train', 'retokenized_test'):
+            if getattr(args, option, None) not in (None, False, 0):
+                parser.error(f"--sofc-cv is a protocol of its own: no "
                              f"--{option.replace('_', '-')}")
     if hasattr(args, 'draws') and not hasattr(args, 'train_articles'):
         parser.error('--draws needs --train-articles')

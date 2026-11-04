@@ -251,12 +251,13 @@ def pin_models(models):
 
 
 # week 21: a job that starts with one of these scripts runs it with the rest of its arguments
-SCRIPTS = ('src/graph/gliner_baseline.py',)
+# (the SOTA plan's P0: mulms_nested.py)
+SCRIPTS = ('src/graph/gliner_baseline.py', 'src/graph/mulms_nested.py')
 
 
 def job_command(job):
     """`python src/graph/ner_baseline.py <job>`, or, for a job that starts with a script of
-    SCRIPTS (week 21: gliner_baseline.py), `python <job>`."""
+    SCRIPTS (week 21: gliner_baseline.py; P0: mulms_nested.py), `python <job>`."""
     if job and job[0] in SCRIPTS:
         return [sys.executable, *job]
     return [sys.executable, 'src/graph/ner_baseline.py', *job]

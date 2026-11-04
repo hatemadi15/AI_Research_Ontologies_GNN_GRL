@@ -7223,6 +7223,119 @@ decision).*
 - **Recorded in** paper B's §7.7, the TACL draft's §7, Table 4 and A.7,
   and `results/README.md`.
 
+*The SOTA plan's P0: reproduction gates (fixed 4 November, before any
+P0 run; `docs/SOTA_PLAN.md` §4; revised the same day after an independent
+referee's check, "approve with required changes", all six applied).* No
+claim and no decision of paper B's count: each gate checks that our
+pipeline reproduces a published number before any candidate is screened
+against it. Code: `ner_baseline.py --sofc-cv`, `mulms_nested.py` and
+`sota_p0.py`, with their tests.
+- **The rule.**
+  - A gate fails only when the Welch 95% interval of our mean minus the
+    published mean lies below 0. The test uses the published mean, its
+    sample SD and its number of runs.
+  - Schrader et al.'s SDs are printed by the release's `aggregate_cv_scores.py`
+    as `np.std`, a population SD rounded to one decimal. They enter as
+    sample SDs, printed × √(5/4): 1.006 and 0.447.
+  - Gupta et al. state no convention; 1.02 is taken as a sample SD, and
+    the gate also reports 1.06, its value as a population SD.
+  - A verdict that changes within the printed SD's rounding is flagged
+    borderline and stands as computed.
+  - Our SD above twice the published one is flagged.
+  - `sota_p0.py` checks every file it aggregates: the run IDs, seeds and
+    settings named below.
+- **A failed gate.** It stops its benchmark's D-T decisions.
+  - Its gap counts as explained only if one ablation fixed now, restoring
+    one named difference from the published recipe, makes the gate pass.
+  - Until then, and if no ablation does, that benchmark's P1 screens and
+    D-P decisions compare with our re-run's number, and its D-T is not
+    taken.
+  - The ablations:
+    - gate 1: MatSciBERT's own recipe (below);
+    - gate 2: Schrader et al.'s SOFC-Exp rates, 3e-4 and 7e-3 (their
+      Table 11), with `mulms_nested.py`'s tagger on BILOU tags made from
+      SOFC-Exp's (code written only if needed);
+    - gate 3: the paper's inverse square-root schedule with a patience of
+      15 (its Appendix A; `--lr-schedule sqrt --patience 15`).
+- **Gate 1, SOFC-Exp cross-validation.**
+  - Ours: the CRF head on MatSciBERT's folds (`--sofc-cv`; its code's
+    `modify_cross_val_data_split`), one job per seed offset (0, 100 and
+    200, `--seeds 0`). That makes 15 runs, cv1 to cv5 in each file, the
+    folds recorded in `results/sota/sofc_cv_folds.json` (SHA-256
+    `30e1e698…`). Every fold tests on the 11 official test articles.
+  - Published: 84.77 ± 1.02 micro F1 over 15 fold × seed runs (Gupta et
+    al. 2022, the npj version; the arXiv version prints 84.39). The unit
+    is the run on both sides.
+  - Disclosed: our CRF head's recipe is kept (learning rate 5e-5, batch
+    16, at most 20 epochs, patience 3, the epoch chosen on the fold's dev
+    micro F1). MatSciBERT's code instead:
+    - chooses its learning rate from 2e-5, 3e-5 and 5e-5, the best mean
+      over seeds on validation, a selection on their side;
+    - trains 20 epochs and keeps the epoch of the best dev macro F1;
+    - uses 3e-4 above the encoder, a 10% warm-up, linear decay and the
+      Trainer's weight decay of 0.
+- **Gate 2, SOFC-Exp's official split, 10 articles.**
+  - Ours: the stored CRF head (10 seeds; 83.75 on 11 articles, known),
+    re-scored per seed from its saved predictions without PMC6247067. That
+    article is MuLMS's `sofc_04`, matched by title
+    (`results/mulms_articles.json`), the only one of the 11 that MuLMS
+    holds, in its dev set. The 11-article re-score must equal each stored
+    F1.
+  - Published: 83.4 ± 0.9 over 5 runs on 10 test articles (Schrader et
+    al. 2023, Table 11; their tagger at 3e-4/7e-3).
+  - Their dropped article is taken to be the one MuLMS holds; the code
+    names none. Our IOB2-constrained CRF emits no stray I- tag, so seqeval's
+    default mode and a scorer that drops such tags agree on its predictions.
+- **Gate 3, MuLMS, every nested entity.**
+  - Ours: `mulms_nested.py`, the release's system re-implemented from its
+    code: MatSciBERT, dropout 0.2, a linear layer and a CRF over the 473
+    stacked BILOU tags that occur in the release's data. 383 of them occur
+    in its training folds; the release's constant lists 477, and the 4
+    others never occur.
+  - Training: AdamW at 1e-4 for the encoder and linear layer and 7e-3 for
+    the CRF (the paper's Table 13 for MatSciBERT, its Table 11 row 'MuLMS
+    1e-4/7e-3: 79.6 ± 0.4'; the release script's 5e-5 is SciBERT's), no
+    schedule, batch 32 (its gradient summed over micro-batches of 8 for
+    memory, the same update), at most 100 epochs, patience 5 on the
+    held-out train fold.
+  - Configurations c1 to c5 at seed 0, one file each with run `c<k>`,
+    recorded in `results/sota/mulms_configurations.json` (SHA-256
+    `b1afd22b…`).
+  - Scoring: the release's decoder and scorer, both checked against its
+    own functions on 20,000 random tag sequences.
+  - Published: 79.6 ± 0.4 over the 5 configurations (Schrader et al.
+    2023, Tables 9 and 11).
+  - Disclosed:
+    - the release's predictions shift after a word the tokenizer erases,
+      while ours stay aligned; 6 test sentences hold such a word;
+    - the release's own tags recover 99.67% of the test entities;
+    - the paper's Appendix A names an inverse square-root schedule and a
+      patience of 15, which the released NER script does not use. We
+      follow the script; they are gate 3's ablation.
+- **MaterioMiner** is done (70.19 [69.03, 71.35] against 69.92) and is
+  reported only.
+- **Checks.**
+  - `smokebq` (smoke4's CRF run) must equal `smokebn`.
+  - `smokebr` and `smokebs` are short MuLMS runs (configuration 1, 300
+    sentences, 2 epochs) on the two GPUs. They must be identical but for
+    the runs' `runtime_sec` and the files' `config.tag` (`python
+    src/graph/sota_p0.py smoke <file> <file>`).
+  - The MuLMS parquet files are fetched at run time (urllib; the kernel
+    has internet) and must have their pinned SHA-256. Each process writes
+    its own temporary file, so the two lanes can fetch at once.
+- **Runs and budget.** Batch `p0a`, one Kaggle session after the 7
+  November reset, from the bundle of the commit that adds this protocol:
+  - MuLMS takes about 20–30 minutes per configuration, and up to about 2
+    hours if one keeps improving to 100 epochs;
+  - the cross-validation runs take 15 × 3.3 minutes;
+  - the smoke runs take about 10 minutes.
+  - On two lanes that is about 2–3 hours of the 45 session-hours.
+- **Recording.** `python src/graph/sota_p0.py gates` writes
+  `results/gpu/sota_p0.json`. The outcome goes here, in `docs/SOTA_PLAN.md`
+  and in `results/README.md`. P1's protocol (screens, with a timed table of
+  session-hours) follows only once every gate has passed or its failure
+  has been dealt with as above.
+
 *TACL (paper B), for later.* The paper goes to 10 pages, references
 uncounted, with appendices after them within TACL's caps (as last read: up
 to 5 pages and 3 pages for two kinds of content). It keeps a word budget
