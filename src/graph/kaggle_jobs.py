@@ -241,6 +241,13 @@ jobs, gliner installed --no-deps beside the pinned packages, GLINER_PINS):
           4 papers at both granularities, MuLMS's 7 subfields and SOFC-Exp's 5 folds, and
           zero-shot (gliner_zs_m0) on fine, MuLMS and SOFC-Exp, a job per setting and offset,
           balanced over the lanes; pushed again if one session does not finish it
+  w21x    the two exploratory checks (outside the decision count): the CRF run of smoke4 again
+          (smokebo), then E1, w21a's coarse-grained fine-tuning with the codes given as class
+          names (--coarse-names, gliner_ftn_m<N>) on MaterioMiner's 4 papers, and E2, the
+          fine-tuning by the package's own trainer (--package-trainer, gliner_ftp_m<N>; each
+          seed's best epoch of the stored gliner_ft run) on MaterioMiner fine paper 1, each at
+          seed offsets 0 to 900, a job per check and offset, balanced over the lanes; W21X_PINS,
+          GLINER_PINS with accelerate (E2's trainer needs it) also installed --no-deps
 
 The TPU spike (docs/METHODS_PLAN.md §5; every batch named tpu... runs on the TPU v5e-8, one
 lane per chip, its jobs with --device xla, its results in results/tpu/, a family of their own):
@@ -311,8 +318,18 @@ GLINER_BACKBONE = 'microsoft/deberta-v3-base'
 GLINER_PINS = {'pip': ('sentencepiece==0.2.2',), 'pip_no_deps': ('gliner==0.2.30',),
                'models': {GLINER: '40ec419335d09393f298636f471328b722c6da9e',
                           GLINER_BACKBONE: '8ccc9b6f36199bec6961081d44eb72fb3f7353f3'}}
+# week 21's exploratory checks (w21x): E2's trainer (gliner.training) needs accelerate, installed
+# --no-deps as gliner is (gliner_baseline.py checks the same version). 1.15.0 (9 September 2026)
+# is the last release before the pinned transformers 5.18.0 (30 September), which requires
+# accelerate>=1.1.0 and gates features at 1.2.0, 1.10.1 and 1.12.0. Its own requirements (PyPI:
+# torch>=2.0.0, huggingface_hub>=0.21.0, safetensors>=0.4.3, numpy>=1.17, packaging>=20.0,
+# psutil, pyyaml) are met by the image's torch 2.11.0, the pins (huggingface_hub 1.33.0,
+# safetensors 0.8.0), transformers' own requirements (numpy, packaging, pyyaml) and the notebook
+# kernel's (psutil, which ipykernel requires)
+ACCELERATE = 'accelerate==1.15.0'
+W21X_PINS = {**GLINER_PINS, 'pip_no_deps': (*GLINER_PINS['pip_no_deps'], ACCELERATE)}
 BATCH_EXTRAS = {'smoke5': DEBERTA_PINS, 'smoke6': DEBERTA_PINS, 'w6a': DEBERTA_PINS,
-                'w21s': GLINER_PINS, 'w21a': GLINER_PINS}
+                'w21s': GLINER_PINS, 'w21a': GLINER_PINS, 'w21x': W21X_PINS}
 THREADS = 2
 DEADLINE_HOURS = 10                 # no job starts later; a Kaggle session lasts 12 hours
 # the TPU spike (docs/METHODS_PLAN.md §5): a batch named tpu... runs on Kaggle's TPU v5e-8, one
@@ -693,13 +710,36 @@ GLINER_UNIT_COST = {'fine': COST['crf'] * RUNS['leave_one_paper_out'],
 GLINER_FACTOR = {'ft': 2.0, 'zs': 0.1}
 
 
-def gliner_job(setting, offset=0, zero_shot=False, tag=None, units=()):
+def gliner_job(setting, offset=0, zero_shot=False, tag=None, units=(), extra=()):
     """A gliner_baseline.py job on a setting's held-out units (all, or `units`): fine-tuning
     (gliner_ft_m<N>, seed offset N) or zero-shot (gliner_zs_m0); `tag` replaces the seed tag (the
-    determinism repeat smokebm)."""
+    determinism repeat smokebm); `extra` adds options (w21x: an exploratory check's)."""
     return [GLINER_SCRIPT, *GLINER_SETTINGS[setting], *(('--zero-shot',) if zero_shot else ()),
-            *(('--units', *units) if units else ()), '--tag', tag or f'm{offset}',
+            *extra, *(('--units', *units) if units else ()), '--tag', tag or f'm{offset}',
             *(('--seed-offset', str(offset)) if offset else ()), '--threads', str(THREADS)]
+
+
+# week 21's exploratory checks (w21x; gliner_baseline.py's module docstring): E1 on MaterioMiner's
+# coarse level with the codes given as class names, E2 by the package's own trainer on paper 1 of
+# the fine level (the unit that w21s timed); the relative GPU time of an E2 job, one unit of the
+# fine level's fine-tuning (its epochs are at most gliner_ft's, with no validation decode)
+W21X_E1 = ('coarse', ('--coarse-names',))
+W21X_E2 = ('fine', ('--package-trainer',), GLINER_FIRST_UNITS['fine'])
+W21X_E2_COST = GLINER_UNIT_COST['fine'] / RUNS['leave_one_paper_out'] * GLINER_FACTOR['ft']
+
+
+def w21x_e1_job(offset):
+    """E1 (gliner_ftn_m<N>): w21a's coarse-grained fine-tuning job of seed offset N, its codes given
+    as class names."""
+    setting, flags = W21X_E1
+    return gliner_job(setting, offset, extra=flags)
+
+
+def w21x_e2_job(offset):
+    """E2 (gliner_ftp_m<N>): the fine-tuning by the package's own trainer on MaterioMiner fine paper
+    1, seed offset N, for the seed's best epoch of the stored gliner_ft_m<N> run."""
+    setting, flags, unit = W21X_E2
+    return gliner_job(setting, offset, extra=flags, units=(unit,))
 
 
 def week12_variant(name):
@@ -1260,6 +1300,17 @@ def batch_lanes(name):
                    for s in GLINER_ZERO_SHOT])
         lanes = balance(jobs, loads=[COST['crf'], 0.0])
         return [[repeat + ['--tag', 'smokebn']] + lanes[0], lanes[1]]
+    if name == 'w21x':
+        # week 21's two exploratory checks (outside the decision count): the repeat of the CRF
+        # run of smoke4 (smokebo), then E1 (gliner_ftn_m<N>, MaterioMiner's 4 papers
+        # coarse-grained, the codes as class names) and E2 (gliner_ftp_m<N>, the package's own
+        # trainer on MaterioMiner fine paper 1), each at seed offsets 0 to 900, a job per check
+        # and offset (each writes its own file), balanced over the lanes
+        jobs = ([(GLINER_UNIT_COST[W21X_E1[0]] * GLINER_FACTOR['ft'], w21x_e1_job(off))
+                 for off in OFFSETS_PUBLISHED]
+                + [(W21X_E2_COST, w21x_e2_job(off)) for off in OFFSETS_PUBLISHED])
+        lanes = balance(jobs, loads=[COST['crf'], 0.0])
+        return [[repeat + ['--tag', 'smokebo']] + lanes[0], lanes[1]]
     if name == 'w14a':
         # week 14, 14.1: the 6-copy control without names (crf_mr6_m<N>) on MuLMS's held-out
         # subfields, seed offsets 300 to 900 (one job per offset over the 7 subfields), and
@@ -1283,7 +1334,7 @@ BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'i
            'w12e', 'w12f', 'w12g', 'w13a', 'w13b', 'w13c',
            *(f'w12b:{v}' for v in WEEK12_VARIANTS), *(f'w12d:{v}' for v in WEEK12_ANALOGUES),
            'tpu-smoke1', 'tpu-smoke', 'w14a', 'w14b', 'w14c', 'w15a', 'w17a', 'w17b', 'w18a',
-           'w19a', 'w19b', 'w20a', 'w21s', 'w21a')
+           'w19a', 'w19b', 'w20a', 'w21s', 'w21a', 'w21x')
 
 
 def batch_extras(name):

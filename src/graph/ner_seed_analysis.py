@@ -276,6 +276,16 @@ WEEK21_REPEATS = {'smokebm': ('ner_results_fine_leave_one_paper_out_gliner_ft_sm
 # the fields a GLiNER run shares with the stored CRF run of its unit (the same split and test
 # sentences), and the one it shares unless its training sentences were cut (--max-train)
 WEEK21_SPLIT_FIELDS = ('test_index', 'test_gold', 'n_val', 'n_test')
+# week 21's two exploratory checks of a referee's points (gliner_baseline.py's E1 and E2; outside
+# the decision count, reported with no decision, fixed before their runs): E1, GLiNER fine-tuned
+# on MaterioMiner's coarse level with the codes given as class names (gliner_ftn) against the CRF
+# head and against gliner_ft (the codes lowercased); E2, GLiNER fine-tuned by the package's own
+# trainer (gliner_ftp) against gliner_ft (this repository's loop) on MaterioMiner fine paper 1.
+# Neither name is a week-21 system's or starts with crf_, so no other section reads their files
+WEEK21X_NAMES = 'gliner_ftn'
+WEEK21X_PACKAGE = 'gliner_ftp'
+WEEK21X_E1 = 'coarse'                                         # E1's setting (WEEK21_SETTINGS)
+WEEK21X_E2 = ('fine', '10.1007_s11340-021-00758-x.conll')     # E2's setting and unit (paper 1)
 
 
 def load_files(directory, names):
@@ -1423,19 +1433,25 @@ def week21_names(prefix, system):
     return [f'ner_results_{prefix}_{system}_m{off}.json' for off in WEEK5_OFFSETS]
 
 
-def week21_checks(directory):
+def week21_checks(directory, families=None):
     """The split and environment checks of week 21 (ROADMAP §4, the week-21 protocol): every run
     of every GLiNER file there (gliner_ft_m<N>, gliner_zs_m0) against the stored CRF run of its
     unit (crf_m0 of the setting): the same test positions, gold tags and numbers of validation
     and test sentences (WEEK21_SPLIT_FIELDS) and, unless its training sentences were cut, of
     training sentences (`splits_differ` lists the others as 'file run_id: fields'); and the same
-    environment (`environment_differs`), the stored runs' (the protocol keeps it). {} without any
-    GLiNER file."""
+    environment (`environment_differs`), the stored runs' (the protocol keeps it). `families`
+    ({setting: systems, each with seeds 0 to 900}) checks other GLiNER families instead (week21x's
+    exploratory checks). {} without any GLiNER file."""
     out = {'n_files': 0, 'n_runs': 0, 'splits_differ': [], 'environment_differs': []}
     for setting, (prefix, _, _) in WEEK21_SETTINGS.items():
+        if families is None:
+            systems = (WEEK21_FT, WEEK21_ZS) if setting in WEEK21_ZERO_SHOT else (WEEK21_FT,)
+        elif not families.get(setting):
+            continue
+        else:
+            systems = families[setting]
         crf = load_files(directory, [f'ner_results_{prefix}_crf_m0.json'])
         stored = {r['run_id']: r for r in crf[0]['runs']} if crf else {}
-        systems = (WEEK21_FT, WEEK21_ZS) if setting in WEEK21_ZERO_SHOT else (WEEK21_FT,)
         for name in (n for s in systems for n in week21_names(prefix, s)):
             files = load_files(directory, [name])
             if not files:
@@ -1621,6 +1637,97 @@ def week21(directory, repeats_dir=None):
     return out
 
 
+def week21x_names(directory):
+    """E1 of week 21's exploratory checks (reported, no decision): GLiNER fine-tuned on
+    MaterioMiner's coarse level with the codes given as class names (gliner_ftn) minus the stored
+    CRF head, and minus the stored gliner_ft (the codes lowercased), each unit the mean of its 10
+    seeds (0 to 900), paired over the papers, as week21_decision pairs them: every side's means and
+    each difference with its 95% Student-t interval per F1 average; per unit every side's micro
+    and macro F1; each side's best epoch and validation F1; the label names of the gliner_ftn files
+    (`label_names_differ` names the files whose names are not the first's). {} without every file
+    of the three families with every unit."""
+    prefix = WEEK21_SETTINGS[WEEK21X_E1][0]
+    systems = (WEEK21X_NAMES, 'crf', WEEK21_FT)
+    files = {s: load_files(directory, week21_names(prefix, s)) for s in systems}
+    if not all(files.values()):
+        return {}
+    ids = week21_units(files[WEEK21X_NAMES] + files[WEEK21_FT], files['crf'])
+    if ids is None:
+        return {}
+    scores = {s: system_scores(f) for s, f in files.items()}
+    entry = {'setting': WEEK21X_E1, 'seeds': list(WEEK5_OFFSETS), 'n_units': len(ids)}
+    entry.update({s: {avg: spread([scores[s][i][avg] for i in ids]) for avg in F1_AVERAGES}
+                  for s in systems})
+    for reference in ('crf', WEEK21_FT):
+        entry[f'minus_{reference}'] = {
+            avg: spread([scores[WEEK21X_NAMES][i][avg] - scores[reference][i][avg] for i in ids],
+                        'mean_diff') for avg in F1_AVERAGES}
+    entry['units'] = {i: {s: {avg: round(scores[s][i][avg], 2) for avg in ('micro', 'macro')}
+                          for s in systems} for i in ids}
+    entry['validation'] = {s: validation_summary(f, ids) for s, f in files.items()}
+    names = [(f.get('config') or {}).get('label_names') for f in files[WEEK21X_NAMES]]
+    entry['label_names'] = names[0]
+    entry['label_names_differ'] = [f'{WEEK21X_NAMES}_m{off}' for off, n in
+                                   zip(WEEK5_OFFSETS, names) if n != names[0]]
+    return entry
+
+
+def week21x_package(directory):
+    """E2 of week 21's exploratory checks (reported, no decision): GLiNER fine-tuned by the
+    package's own trainer (gliner_ftp) minus the stored gliner_ft (this repository's loop) on
+    MaterioMiner fine paper 1 (WEEK21X_E2), paired by seed: seed offsets 0 to 900, 10 pairs, each
+    the unit's run in the two files of an offset (`seeds_equal`: both runs of every pair have the
+    same seed). Each side's mean over the seeds and the difference, each with its 95% Student-t
+    interval, per F1 average; per seed both sides' micro F1 and validation F1, and the epochs that
+    gliner_ftp trained against the stored best epoch (`epochs_match`: every pair trained
+    best_epoch + 1); the trainers and accelerate versions that the gliner_ftp files record. {}
+    without every file of both with the unit."""
+    setting, unit = WEEK21X_E2
+    prefix = WEEK21_SETTINGS[setting][0]
+    systems = (WEEK21X_PACKAGE, WEEK21_FT)
+    files = {s: load_files(directory, week21_names(prefix, s)) for s in systems}
+    if not all(files.values()):
+        return {}
+    runs = {s: [next((r for r in f['runs'] if r['run_id'] == unit), None) for f in fs]
+            for s, fs in files.items()}
+    if any(r is None for rs in runs.values() for r in rs):
+        return {}
+    pairs = list(zip(runs[WEEK21X_PACKAGE], runs[WEEK21_FT]))
+    entry = {'setting': setting, 'unit': unit, 'seeds': [b['seed'] for _, b in pairs],
+             'n_pairs': len(pairs), 'seeds_equal': all(a['seed'] == b['seed'] for a, b in pairs)}
+    entry.update({s: {avg: spread([get(r) for r in rs]) for avg, get in F1_AVERAGES.items()}
+                  for s, rs in runs.items()})
+    entry[f'minus_{WEEK21_FT}'] = {avg: spread([get(a) - get(b) for a, b in pairs], 'mean_diff')
+                                   for avg, get in F1_AVERAGES.items()}
+    entry['per_seed'] = [{'seed': b['seed'], WEEK21X_PACKAGE: a['f1'], WEEK21_FT: b['f1'],
+                          'epochs': a.get('epochs'), 'stored_best_epoch': b['best_epoch'],
+                          'val_f1': {WEEK21X_PACKAGE: a['val_f1'], WEEK21_FT: b['val_f1']}}
+                         for a, b in pairs]
+    entry['epochs_match'] = all(a.get('epochs') == b['best_epoch'] + 1 for a, b in pairs)
+    configs = [f.get('config') or {} for f in files[WEEK21X_PACKAGE]]
+    entry['trainers'] = sorted({str(c.get('trainer')) for c in configs})
+    entry['accelerate_versions'] = sorted({str(c.get('accelerate_version')) for c in configs})
+    return entry
+
+
+def week21x(directory):
+    """Week 21's two exploratory checks (gliner_baseline.py's E1 and E2; reported, no decision),
+    present once their files are there: `checks` (week21_checks on their files: every run's split
+    against the stored CRF run of its unit, and its environment against the stored runs'),
+    `names` (E1, week21x_names) and `package_trainer` (E2, week21x_package), each when its files
+    are complete; {} without any of their files."""
+    checks = week21_checks(directory, {WEEK21X_E1: (WEEK21X_NAMES,),
+                                       WEEK21X_E2[0]: (WEEK21X_PACKAGE,)})
+    if not checks:
+        return {}
+    out = {'checks': checks}
+    for key, part in (('names', week21x_names), ('package_trainer', week21x_package)):
+        entry = part(directory)
+        if entry:
+            out[key] = entry
+    return out
+
+
 def topic(directory):
     """Week 14, 14.2 (the topic part of week14): V4 with the subfield's own topic corpus
     (WEEK14_WINNER) against V4 with the mixed corpus of the six other topics (MIXED_VARIANT),
@@ -1750,6 +1857,9 @@ def analyse(directory, repeats_dir=None):
     w21 = week21(directory, repeats_dir)
     if w21:                                   # absent until week 21's files exist
         out['week21'] = w21
+    w21x = week21x(directory)
+    if w21x:                                  # absent until the exploratory checks' files exist
+        out['week21x'] = w21x
     out['paper_count'] = paper_count(directory)
     out['paper_diversity'] = paper_diversity(directory)
     out['errors'] = {}
@@ -1851,6 +1961,41 @@ def print_week21(w21):
               f"{e[WEEK21_ZS]['micro']['mean']:.2f} minus the CRF head "
               f"{e['crf']['micro']['mean']:.2f} over {e['n_units']} units: "
               f"{d['mean_diff']:+.2f} {d['ci95']}")
+
+
+def print_week21x(w21x):
+    """main's lines for the week21x section (week21x): the exploratory checks, no decision."""
+    checks = w21x.get('checks')
+    if checks:
+        splits = 'the CRF head\'s' if checks['splits_equal'] else 'DIFFER: ' + '; '.join(
+            checks['splits_differ'][:5])
+        environment = ('the stored runs\'' if checks['environment_equal'] else 'DIFFERS: '
+                       + ', '.join(checks['environment_differs'][:5]))
+        print(f"  week 21x (exploratory), {checks['n_runs']} GLiNER runs in {checks['n_files']} "
+              f"files: splits {splits}; environment {environment}")
+    e = w21x.get('names')
+    if e:
+        d, f = e['minus_crf']['micro'], e[f'minus_{WEEK21_FT}']['micro']
+        names = '' if not e['label_names_differ'] else (
+            f"; the label names DIFFER in {', '.join(e['label_names_differ'])}")
+        print(f"  week 21x, E1 ({e['setting']}, the codes as class names; reported, no decision): "
+              f"GLiNER fine-tuned {e[WEEK21X_NAMES]['micro']['mean']:.2f} minus the CRF head "
+              f"{e['crf']['micro']['mean']:.2f} over {e['n_units']} units: {d['mean_diff']:+.2f} "
+              f"{d['ci95']}{names}")
+        print(f"    minus GLiNER fine-tuned with the codes lowercased "
+              f"{e[WEEK21_FT]['micro']['mean']:.2f}: {f['mean_diff']:+.2f} {f['ci95']}")
+    p = w21x.get('package_trainer')
+    if p:
+        d = p[f'minus_{WEEK21_FT}']['micro']
+        a, b = p[WEEK21X_PACKAGE]['micro'], p[WEEK21_FT]['micro']
+        flags = ''.join(f'; {label}' for key, label in (
+            ('seeds_equal', 'the seeds of a pair DIFFER'),
+            ('epochs_match', 'the epochs DIFFER from the stored best epochs')) if not p[key])
+        print(f"  week 21x, E2 ({p['setting']}, {p['unit']}; reported, no decision): the "
+              f"package's trainer {a['mean']:.2f} {a['ci95']} minus this repository's loop "
+              f"{b['mean']:.2f} {b['ci95']} over {p['n_pairs']} seeds: {d['mean_diff']:+.2f} "
+              f"{d['ci95']} ({', '.join(p['trainers'])}, accelerate "
+              f"{', '.join(p['accelerate_versions'])}{flags})")
 
 
 def main(argv=None):
@@ -2025,6 +2170,7 @@ def main(argv=None):
               f"{e['n_units']} units: {d['mean_diff']:+.2f} {d['ci95']}{verdict}")
     print_week20(result.get('week20', {}))
     print_week21(result.get('week21', {}))
+    print_week21x(result.get('week21x', {}))
     out = args.out or os.path.join(args.results, OUT_NAME)
     with open(out, 'w') as f:
         json.dump(result, f, indent=2)

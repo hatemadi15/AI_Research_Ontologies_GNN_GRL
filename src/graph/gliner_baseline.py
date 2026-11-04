@@ -40,21 +40,39 @@ settings of the CRF head, with the CRF head's own splits:
   - Pins: the model snapshot and the backbone (whose tokenizer and configuration GLiNER loads by
     name) must be the pinned revisions in the Hugging Face cache (kaggle_jobs.py pins both,
     run_jobs.pin_models); every weight comes from the checkpoint (strict loading).
+  - Two exploratory checks of week 21, for a referee's two points (outside the decision count;
+    their analysis is ner_seed_analysis.py's week21x, fixed before their runs):
+    E1, --coarse-names (variant gliner_ftn): gliner_ft's fine-tuning on MaterioMiner's coarse
+    level with one change, the labels: each code is given as its class name in words
+    (COARSE_NAMES, with the source of every name) instead of the code lowercased.
+    E2, --package-trainer (variant gliner_ftp): the fine-tuning by the package's own trainer,
+    gliner.training's Trainer and TrainingArguments, in place of this module's loop, with
+    gliner_ft's recipe wherever the package's arguments allow it (PACKAGE_ARGS), for a fixed
+    number of epochs per unit: the seed's best epoch in the stored gliner_ft run of the same unit
+    and seed offset (stored_epochs, from --stored-runs, results/gpu by default). The linear
+    schedule keeps gliner_ft's steps (num_train_epochs EPOCHS; a callback stops the training after
+    the fixed epochs, stop_after), and the test sentences are decoded and scored at FT_THRESHOLD
+    as gliner_ft's are. The package's trainer needs accelerate, at ACCELERATE_VERSION (checked,
+    and recorded in the config with the trainer).
 
 Results go to <PROCESSED_DIR>/ner/ner_results_<granularity>_<protocol>_<variant>.json, the
-variant gliner_ft or gliner_zs with the tag (gliner_ft_m300), in the CRF head's schema (labels,
-config with the protocol keys and the pins, per run f1, precision, recall, f1_strict, per_class,
-seed, best_epoch, val_f1, n_train, n_val, n_test, history, test_index, test_gold, test_pred,
-run_id, runtime_sec and, on a GPU, environment; a zero-shot run adds its threshold). The file is
-written after every unit and finished units are skipped when re-run, as ner_baseline.py does; a
-file written with other settings is not resumed (--overwrite replaces it; smoke-test files,
---max-train, are replaced at will).
+variant gliner_ft, gliner_zs, gliner_ftn or gliner_ftp with the tag (gliner_ft_m300), in the CRF
+head's schema (labels, config with the protocol keys and the pins, per run f1, precision, recall,
+f1_strict, per_class, seed, best_epoch, val_f1, n_train, n_val, n_test, history, test_index,
+test_gold, test_pred, run_id, runtime_sec and, on a GPU, environment; a zero-shot run adds its
+threshold, an E2 run the epochs it trained). The file is written after every unit and finished
+units are skipped when re-run, as ner_baseline.py does; a file written with other settings is not
+resumed (--overwrite replaces it; smoke-test files, --max-train, are replaced at will).
 
 Usage:
   python src/graph/gliner_baseline.py --granularity fine --leave-one-paper-out --tag m0
   python src/graph/gliner_baseline.py --granularity mulms --leave-one-subfield-out \\
       --train-pool 400 --tag m300 --seed-offset 300
   python src/graph/gliner_baseline.py --granularity sofc --document-folds 5 --zero-shot --tag m0
+  python src/graph/gliner_baseline.py --granularity coarse --leave-one-paper-out --coarse-names \\
+      --tag m300 --seed-offset 300                                                      # E1
+  python src/graph/gliner_baseline.py --granularity fine --leave-one-paper-out --package-trainer \\
+      --units 10.1007_s11340-021-00758-x --tag m300 --seed-offset 300                   # E2
 """
 
 import argparse
@@ -115,6 +133,90 @@ MULMS_LABELS = {'CITE': 'citation', 'DEV': 'device', 'FORM': 'form', 'INSTRUMENT
                 'PROPERTY': 'property', 'RANGE': 'range', 'SAMPLE': 'sample',
                 'TECHNIQUE': 'technique', 'UNIT': 'unit', 'VALUE': 'value'}
 ZERO_SHOT_GRANULARITIES = ('fine', 'mulms', 'sofc')
+
+# The exploratory checks of week 21 (module docstring): E1 and E2's variants
+NAMES_VARIANT = 'gliner_ftn'
+PACKAGE_VARIANT = 'gliner_ftp'
+# E1: MaterioMiner's 27 coarse-grained codes as the names of the classes they stand for, camel case
+# split and lowercased. The source of every name is the MaterioMiner paper (Durmaz et al. 2024,
+# Scientific Data 11, 1112, doi:10.1038/s41597-024-03926-5):
+#   - its Fig. 7b names the 27 coarse-grained entity types, ontology classes in camel case (the
+#     class each code stands for is in the comment beside it);
+#   - its Methods ("Data post-processing") give two codes in words, "mm:Mechanism is abbreviated
+#     as MEC, mm:EnvironmentalTestParameter as ETP";
+#   - its Data Records give "a mapping of the tags to the ontological preferred labels" in the
+#     release's CG-NER_tags.csv (v1.0.1, doi:10.24406/fordatis/329.2,
+#     dataset/coarse_grained_ner/), which has every code below; that release's CoNLL files are
+#     byte-identical to data/raw/dataset's.
+# Checked against the dataset files: each code's entities in data/raw/dataset/coarse_grained_ner
+# number its bar in Fig. 7b (2,194 in all; CPR's 7 has no printed number), and each name is the
+# rdfs:label, lowercased, of the class it names in data/raw/dataset/ontologies/ontology.ttl. So
+# no name rests on the ontology alone, and none on the fallback (the most frequent fine-grained
+# class nested in the code's spans). (The week-21 protocol took the codes to have no documented
+# expansion; the paper and its release document one.)
+COARSE_NAMES = {
+    'CEL': 'chemical element',              # ChemicalElement
+    'CGE': 'crystallographic entity',       # CrystallographicEntity
+    'CHP': 'characterization process',      # CharacterizationProcess
+    'CPR': 'chemical property',             # ChemicalProperty
+    'DAM': 'damage',                        # Damage
+    'DAT': 'data set',                      # DataSet
+    'DEF': 'defect',                        # Defect
+    'EQU': 'equipment',                     # Equipment
+    'ETP': 'environmental test parameter',  # EnvironmentalTestParameter; also the paper's text
+    'LOC': 'location',                      # Location
+    'MAC': 'material class',                # MaterialClass
+    'MAT': 'material',                      # Material
+    'MEC': 'mechanism',                     # Mechanism; also the paper's text
+    'MEP': 'mechanical property',           # MechanicalProperty
+    'MFP': 'manufacturing process',         # ManufacturingProcess
+    'MIC': 'microstructure',                # Microstructure
+    'MIP': 'microstructural property',      # MicrostructuralProperty
+    'MOD': 'model',                         # Model
+    'MTP': 'mechanical test parameter',     # MechanicalTestParameter
+    'OBJ': 'object',                        # Object
+    'ODE': 'orientation descriptor',        # OrientationDescriptor
+    'PQT': 'physical quantity',             # PhysicalQuantity
+    'PRO': 'property',                      # Property
+    'PRP': 'process parameter',             # ProcessParameter
+    'SDE': 'shape descriptor',              # ShapeDescriptor
+    'STD': 'state descriptor',              # StateDescriptor
+    'VAL': 'value',                         # Value
+}
+# E2: the package's trainer (gliner.training's Trainer and TrainingArguments) needs accelerate,
+# installed --no-deps beside the pinned packages at this version (kaggle_jobs.py, W21X_PINS); a run
+# checks it and records it in the config with the trainer
+PACKAGE_TRAINER = 'gliner.training.Trainer'
+ACCELERATE_VERSION = '1.15.0'
+# E2's epochs: per unit, the seed's best epoch in the stored gliner_ft run (stored_epochs)
+STORED_RUNS = Path(__file__).resolve().parents[2] / 'results' / 'gpu'
+# E2's TrainingArguments (besides the output directory, the seed and the device): gliner_ft's recipe
+# wherever the package's arguments allow it. The encoder (token_rep_layer, the package's rule) at
+# learning_rate, the rest at others_lr, weight decay on both (never on biases and LayerNorm weights,
+# the package's rule); AdamW's betas and epsilon; the linear schedule over num_train_epochs EPOCHS,
+# so that its steps and its warm-up (WARMUP_RATIO of them, rounded up) are gliner_ft's, a run
+# stopping after its fixed epochs (stop_after); batches of BATCH_SIZE, no accumulation; clipping at
+# MAX_GRAD_NORM; LOSS's loss (masking 'none', as GLiNER.create_training_args has it: the
+# TrainingArguments' default 'global' draws random numbers at every step, though with negatives 1.0
+# it masks nothing). No evaluation, checkpoint or report during the training; the batches are
+# collated in the main process; the precision is float32, the determinism ner_baseline's
+# (cuda_determinism, not the trainer's full_determinism, which would reset the cuBLAS workspace).
+PACKAGE_ARGS = {
+    'num_train_epochs': EPOCHS, 'max_steps': -1, 'per_device_train_batch_size': BATCH_SIZE,
+    'gradient_accumulation_steps': 1, 'optim': 'adamw_torch', 'learning_rate': LR_ENCODER,
+    'others_lr': LR_OTHERS, 'weight_decay': WEIGHT_DECAY, 'others_weight_decay': WEIGHT_DECAY,
+    'adam_beta1': ADAM_BETAS[0], 'adam_beta2': ADAM_BETAS[1], 'adam_epsilon': ADAM_EPS,
+    'lr_scheduler_type': 'linear', 'warmup_ratio': WARMUP_RATIO, 'warmup_steps': 0,
+    'max_grad_norm': MAX_GRAD_NORM, 'focal_loss_alpha': LOSS['alpha'],
+    'focal_loss_gamma': LOSS['gamma'], 'rel_focal_loss_alpha': LOSS['rel_alpha'],
+    'rel_focal_loss_gamma': LOSS['rel_gamma'], 'focal_loss_prob_margin': LOSS['prob_margin'],
+    'label_smoothing': LOSS['label_smoothing'], 'loss_reduction': LOSS['reduction'],
+    'negatives': LOSS['negatives'], 'masking': LOSS['masking'], 'loss_type': LOSS['loss_type'],
+    'use_span_width_weight': LOSS['use_span_width_weight'], 'dice_gamma': LOSS['dice_gamma'],
+    'ce_calib_weight': LOSS['ce_calib_weight'], 'fp16': False, 'bf16': False,
+    'full_determinism': False, 'eval_strategy': 'no', 'save_strategy': 'no',
+    'logging_strategy': 'epoch', 'report_to': 'none', 'disable_tqdm': True,
+    'remove_unused_columns': False, 'dataloader_num_workers': 0, 'dataloader_drop_last': False}
 # the config keys of a CRF results file that fix its protocol's split (nb.stored_config)
 PROTOCOL_KEYS = ('seeds', 'split_seed', 'vary_split', 'leave_one_paper_out', 'top_k',
                  'leave_one_subfield_out', 'train_pool', 'document_folds')
@@ -132,15 +234,20 @@ def camel_case_label(code):
     return ' '.join(w.lower() for w in re.findall(r'[A-Z]+(?![a-z])|[A-Z]?[a-z]+|\d+', code))
 
 
-def label_map(granularity, codes):
-    """{code: label} of a corpus's codes, in their order (the protocol's labels). Every code needs
-    a label and no two codes share one (ValueError otherwise)."""
+def label_map(granularity, codes, coarse_names=False):
+    """{code: label} of a corpus's codes, in their order (the protocol's labels; with
+    coarse_names, E1's: MaterioMiner's coarse-grained codes as the class names of COARSE_NAMES).
+    Every code needs a label and no two codes share one (ValueError otherwise)."""
+    if coarse_names and granularity != 'coarse':
+        raise ValueError(f'{granularity}: the class names of COARSE_NAMES are for the coarse '
+                         f'level only')
     if granularity == 'fine':
         names = {c: camel_case_label(c) for c in codes}
-    elif granularity == 'coarse':
+    elif granularity == 'coarse' and not coarse_names:
         names = {c: c.lower() for c in codes}
     else:
-        table = {'sofc': SOFC_LABELS, 'mulms': MULMS_LABELS}[granularity]
+        table = (COARSE_NAMES if coarse_names
+                 else {'sofc': SOFC_LABELS, 'mulms': MULMS_LABELS}[granularity])
         missing = [c for c in codes if c not in table]
         if missing or len(codes) != len(table):
             raise ValueError(f'{granularity}: the codes {list(codes)} are not those of the '
@@ -372,6 +479,133 @@ def fine_tune(seed, train, val, test, labels, names, args, device, test_index):
     return result
 
 
+def check_accelerate():
+    """E2: the package's trainer needs accelerate, at ACCELERATE_VERSION (SystemExit otherwise);
+    returns its version."""
+    try:
+        import accelerate
+    except ImportError as e:
+        raise SystemExit(f"--package-trainer: the package's trainer needs "
+                         f'accelerate=={ACCELERATE_VERSION} (kaggle_jobs.py installs it --no-deps, '
+                         f'W21X_PINS): {e}') from None
+    if accelerate.__version__ != ACCELERATE_VERSION:
+        raise SystemExit(f'accelerate {accelerate.__version__} is installed, not '
+                         f'{ACCELERATE_VERSION}')
+    return accelerate.__version__
+
+
+def stored_epochs(stored_dir, granularity, protocol, seed_offset, run_id, seed, names):
+    """E2's number of epochs for a unit: the seed's best epoch in the stored gliner_ft run of the
+    same unit and seed offset (<stored_dir>/ner_results_<granularity>_<protocol>_gliner_ft_m<offset>
+    .json), that is its best_epoch + 1, since best_epoch is the 0-based index of that epoch in the
+    run's history. SystemExit when the file, the unit or a run of this seed is not there, or when
+    the stored run is not a full gliner_ft run with these labels."""
+    variant = f'{VARIANTS[False]}_m{seed_offset}'
+    path = results_path(stored_dir, granularity, protocol, variant)
+    if not os.path.exists(path):
+        raise SystemExit(f'--package-trainer: no stored {variant} file {path} (--stored-runs)')
+    with open(path) as f:
+        stored = json.load(f)
+    config = stored.get('config') or {}
+    if (stored.get('variant') != variant or config.get('max_train')
+            or config.get('label_names') != names):
+        raise SystemExit(f'--package-trainer: {path} is not a full {variant} run with these labels')
+    run = next((r for r in stored['runs'] if r.get('run_id') == run_id), None)
+    if run is None or run.get('seed') != seed:
+        raise SystemExit(f'--package-trainer: {path} has no run of {run_id} with seed {seed}')
+    best = run['best_epoch']
+    if not (0 <= best < len(run['history'])) or run['history'][best]['val_f1'] != run['val_f1']:
+        raise SystemExit(f'--package-trainer: {path}, {run_id}: best_epoch {best} is not the '
+                         f'index of the best validation F1 in its history')
+    return best + 1
+
+
+def stop_after(epochs):
+    """E2: a transformers TrainerCallback that stops the training at the end of its `epochs`-th
+    epoch, the schedule keeping its steps (PACKAGE_ARGS)."""
+    from transformers import TrainerCallback
+
+    class StopAfter(TrainerCallback):
+        def __init__(self):
+            self.ended = 0
+
+        def on_epoch_end(self, args, state, control, **kwargs):
+            self.ended += 1
+            if self.ended >= epochs:
+                control.should_training_stop = True
+            return control
+
+    return StopAfter()
+
+
+def package_fine_tune(seed, epochs, train, val, test, labels, names, device, test_index):
+    """A fine-tuning run by the package's own trainer (gliner_ftp, E2; module docstring):
+    set_seed(seed) and the pretrained model, as fine_tune's; then gliner.training's Trainer with
+    the TrainingArguments of PACKAGE_ARGS and the seed, built as GLiNER.train_model builds it (the
+    package's collator, the tokenizer as its processing class), on `train`, every example
+    carrying the full label set in the corpus's order (ner_labels, the package's predefined
+    labels: fine_tune's entity_types, the same class ids), for `epochs` epochs (stop_after; the
+    trainer shuffles the batches by its own rule, from the seed). Then the validation and the test
+    sentences are decoded at FT_THRESHOLD and scored as fine_tune's. best_epoch is the last epoch
+    (epochs - 1), val_f1 its validation micro F1 (reported; it selects nothing); history: the
+    trainer's log of each epoch (its mean loss per step, its last learning rate and gradient
+    norm). A batch that the trainer skips (it skips one that runs out of memory, where the loop
+    would stop) makes the run fail: RuntimeError."""
+    import logging
+    import tempfile
+
+    from gliner.training import Trainer, TrainingArguments
+    from transformers import set_seed
+    set_seed(seed)
+    model = load_model(device)
+    prompts = [names[c] for c in labels]
+    codes_of = {names[c]: c for c in labels}
+    examples = [{'tokenized_text': list(w), 'ner': gold_spans(t, names),
+                 'ner_labels': list(prompts)} for w, t, _ in train]
+    skipped = []                # the trainer skips a batch that runs out of memory, with a warning
+
+    class Skips(logging.Handler):
+        def emit(self, record):
+            if record.getMessage().startswith('Skipping batch'):
+                skipped.append(record.getMessage())
+
+    handler, trainer_log = Skips(logging.WARNING), logging.getLogger(Trainer.__module__)
+    trainer_log.addHandler(handler)
+    try:
+        with tempfile.TemporaryDirectory() as out_dir:
+            training_args = TrainingArguments(output_dir=out_dir, seed=seed,
+                                              use_cpu=not str(device).startswith('cuda'),
+                                              **PACKAGE_ARGS)
+            trainer = Trainer(model=model, args=training_args, train_dataset=examples,
+                              eval_dataset=None, data_collator=model._create_data_collator(),
+                              processing_class=model.data_processor.transformer_tokenizer,
+                              callbacks=[stop_after(epochs)])
+            trainer.train()
+    finally:
+        trainer_log.removeHandler(handler)
+    if skipped:                 # another recipe: no run rather than a silently different one
+        raise RuntimeError(f'the trainer skipped {len(skipped)} batches: {skipped[0]}')
+    logs = [e for e in trainer.state.log_history if 'loss' in e]
+    if len(logs) != epochs:
+        raise RuntimeError(f'the trainer logged {len(logs)} epochs, not {epochs}')
+    history = [{'epoch': round(e['epoch']) - 1, 'train_loss_mean': round(float(e['loss']), 4),
+                'learning_rate': float(e['learning_rate']),
+                'grad_norm': (None if e.get('grad_norm') is None
+                              else round(float(e['grad_norm']), 4))} for e in logs]
+    val_words, val_gold = [w for w, _, _ in val], [g for _, g, _ in val]
+    val_pred = predicted_tags(decode(model, val_words, prompts, FT_THRESHOLD, device), val_words,
+                              codes_of, FT_THRESHOLD)
+    test_words = [w for w, _, _ in test]
+    test_pred = predicted_tags(decode(model, test_words, prompts, FT_THRESHOLD, device),
+                               test_words, codes_of, FT_THRESHOLD)
+    result = nb.score([g for _, g, _ in test], test_pred)
+    result.update({'seed': seed, 'best_epoch': epochs - 1, 'epochs': epochs,
+                   'val_f1': nb.score(val_gold, val_pred)['f1'], 'n_train': len(train),
+                   'n_val': len(val), 'n_test': len(test), 'history': history})
+    result.update(nb.prediction_fields(test_index, test, test_pred))
+    return result
+
+
 # ---------------------------------------------------------------------------
 # Runs and results files
 # ---------------------------------------------------------------------------
@@ -386,7 +620,11 @@ def crf_arguments(args):
 
 
 def variant_name(args):
-    """gliner_ft or gliner_zs, then the tag (gliner_ft_m300)."""
+    """gliner_ft or gliner_zs (E1: gliner_ftn, E2: gliner_ftp), then the tag (gliner_ft_m300)."""
+    if args.coarse_names:
+        return f'{NAMES_VARIANT}_{args.tag}'
+    if args.package_trainer:
+        return f'{PACKAGE_VARIANT}_{args.tag}'
     return f'{VARIANTS[args.zero_shot]}_{args.tag}'
 
 
@@ -400,7 +638,9 @@ def results_path(out_dir, granularity, protocol, variant, max_train=0):
 
 def stored_config(args, crf, names):
     """The results file's config: the CRF head's protocol keys (PROTOCOL_KEYS), the pins (gliner
-    version and both revisions), the labels, the decoding, the arm's recipe and the run options."""
+    version and both revisions), the labels, the decoding, the arm's recipe and the run options.
+    E1's is gliner_ft's with its labels; E2's recipe is the trainer, the accelerate version, the
+    stored runs whose best epochs it trains (epochs_from) and the trainer's arguments."""
     config = {k: v for k, v in nb.stored_config(crf).items() if k in PROTOCOL_KEYS}
     config.update({'model': MODEL, 'model_revision': MODEL_REVISION, 'backbone': BACKBONE,
                    'backbone_revision': BACKBONE_REVISION, 'gliner_version': GLINER_VERSION,
@@ -409,6 +649,11 @@ def stored_config(args, crf, names):
                    'dtype': 'float32', 'eval_batch_size': EVAL_BATCH_SIZE})
     if args.zero_shot:
         config.update({'thresholds': list(ZS_THRESHOLDS), 'threshold_ties': 'higher'})
+    elif args.package_trainer:
+        config.update({'threshold': FT_THRESHOLD, 'trainer': PACKAGE_TRAINER,
+                       'accelerate_version': ACCELERATE_VERSION,
+                       'epochs_from': f'{VARIANTS[False]}_m{args.seed_offset}: best_epoch + 1',
+                       'training_args': dict(PACKAGE_ARGS)})
     else:
         config.update({'threshold': FT_THRESHOLD, 'epochs': args.epochs, 'patience': args.patience,
                        'batch_size': BATCH_SIZE, 'grad_accumulation': args.grad_accumulation,
@@ -467,8 +712,10 @@ def select_units(folds, units):
 def run(args):
     out_dir = os.path.join(nb.PROCESSED_DIR, 'ner')
     crf = crf_arguments(args)
+    if args.package_trainer:
+        check_accelerate()
     data, labels, tie_info = nb.granularity_data(args.granularity, crf)
-    names = label_map(args.granularity, labels)
+    names = label_map(args.granularity, labels, coarse_names=args.coarse_names)
     protocol, variant = nb.protocol_name(crf), variant_name(args)
     out_path = results_path(out_dir, args.granularity, protocol, variant, args.max_train)
     config = stored_config(args, crf, names)
@@ -498,6 +745,10 @@ def run(args):
         start = time.time()
         if args.zero_shot:
             res = zero_shot(train, val, test, labels, names, device, te)
+        elif args.package_trainer:
+            epochs = stored_epochs(args.stored_runs, args.granularity, protocol, args.seed_offset,
+                                   run_id, seed, names)
+            res = package_fine_tune(seed, epochs, train, val, test, labels, names, device, te)
         else:
             res = fine_tune(seed, train, val, test, labels, names, args, device, te)
         res['run_id'] = run_id
@@ -509,6 +760,7 @@ def run(args):
         with open(out_path, 'w') as f:
             json.dump(results, f, indent=2)
         chosen = (f"threshold {res['threshold']}" if args.zero_shot
+                  else f"{res['epochs']} epochs, the stored best" if args.package_trainer
                   else f"best epoch {res['best_epoch']}")
         print(f"  {run_id}: test F1 {res['f1']:.2f} (strict {res['f1_strict']:.2f}), {chosen}, "
               f"{res['runtime_sec']:.0f}s; running mean {results['test_f1_mean']:.2f}", flush=True)
@@ -537,6 +789,17 @@ def parse_args(argv=None):
     parser.add_argument('--zero-shot', action='store_true',
                         help='no training (variant gliner_zs; not for coarse, whose codes have '
                              'no documented expansion)')
+    parser.add_argument('--coarse-names', action='store_true',
+                        help="E1 (exploratory): MaterioMiner's coarse-grained codes given as their "
+                             'class names (COARSE_NAMES), not lowercased; fine-tuning on '
+                             '--granularity coarse only (variant gliner_ftn)')
+    parser.add_argument('--package-trainer', action='store_true',
+                        help="E2 (exploratory): fine-tuning by the package's own trainer "
+                             "(gliner.training; it needs accelerate), each unit for the seed's "
+                             'best epoch in the stored gliner_ft run (variant gliner_ftp)')
+    parser.add_argument('--stored-runs', default=None, metavar='DIR',
+                        help='with --package-trainer: where the stored gliner_ft files are '
+                             '(default results/gpu)')
     parser.add_argument('--units', nargs='+', default=None, metavar='UNIT',
                         help='run only these units (run ids: a paper, .conll optional; a '
                              'subfield; fold<i>); the results file keeps collecting units; not '
@@ -574,6 +837,14 @@ def parse_args(argv=None):
     if args.granularity == 'sofc' and args.document_folds < 2:
         parser.error('--document-folds: at least 2 folds')
     training = ('epochs', 'patience', 'grad_accumulation')
+    if args.coarse_names and (args.granularity != 'coarse' or args.zero_shot
+                              or args.package_trainer):
+        parser.error('--coarse-names (E1) is fine-tuning by this module\'s loop on --granularity '
+                     'coarse only')
+    if args.package_trainer and args.zero_shot:
+        parser.error('--package-trainer (E2) is fine-tuning, not --zero-shot')
+    if args.stored_runs is not None and not args.package_trainer:
+        parser.error('--stored-runs is for --package-trainer')
     if args.zero_shot:
         if args.granularity not in ZERO_SHOT_GRANULARITIES:
             parser.error(f'--zero-shot: no zero-shot arm for {args.granularity} (its codes have '
@@ -583,6 +854,13 @@ def parse_args(argv=None):
         for option in training:
             if getattr(args, option) is not None:
                 parser.error(f"--{option.replace('_', '-')} is for fine-tuning, not --zero-shot")
+    elif args.package_trainer:
+        for option in training:
+            if getattr(args, option) is not None:
+                parser.error(f"--{option.replace('_', '-')} is not for --package-trainer (each "
+                             f"unit trains its stored best epoch, in batches of {BATCH_SIZE})")
+        if args.stored_runs is None:
+            args.stored_runs = str(STORED_RUNS)
     else:
         defaults = {'epochs': EPOCHS, 'patience': PATIENCE, 'grad_accumulation': 1}
         for option, default in defaults.items():
