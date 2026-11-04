@@ -169,12 +169,26 @@ audit found 6 mismatches; the count and every stage-21 number were right.
   Table 4 and A.7 report both as exploratory.
 
 **Open:**
-- **Length.** Typeset on 4 November (`src/graph/build_tacl.py`, TACL's
-  tacl2021v1.sty and acl_natbib.bst; `docs/submission/PAPER_B_TACL.pdf`).
-  The main text runs to 10.6 pages, so about 0.6 page must be cut.
-  Appendix A takes 4.9 pages (cap 5), and appendix B three pages of
-  tables after its heading (cap 3). The references take 4 pages, which
-  do not count. The PDF's properties carry the title only.
+- **Length: done (4 November).** Typeset with `src/graph/build_tacl.py`
+  (TACL's tacl2021v1.sty and acl_natbib.bst;
+  `docs/submission/PAPER_B_TACL.pdf`), the main text first ran to 10.6
+  pages. It now ends at 9.9, after cutting 406 words of repetition, with
+  no number changed and no claim dropped:
+  - §1's summary of results, which the abstract and the sections repeat;
+  - §3.2's second statement of SOFC-Exp's fewer new names, and §3.5's
+    break-even detail;
+  - §4's list of the four 3-seed passes and their re-tests, which Table
+    B1 gives;
+  - lessons 2, 4 and 7's repeated numbers, and §10's repeated sharing
+    details.
+  The tables' columns are sized to their text, and a table taller than
+  two thirds of a page is set at 9 pt (captions stay at 10 pt), so Table
+  3 tops a page of text. Appendix A takes 4.5 pages (cap 5) and appendix
+  B three pages of tables (cap 3); the references take 4 pages, which do
+  not count. The PDF's properties carry the title only.
+- **§10 corrected.** It said our GLiNER loop was "not compared with the
+  package's trainer", which `w21x` has since done; the clause is gone,
+  and §7 gives the comparison.
 - **The companion citation.** TACL's submission page asks authors to
   avoid "(Anonymous) showed" citations, which readers cannot check. The
   draft cites paper A as "Anonymous, 2026", while ROADMAP §4 planned a

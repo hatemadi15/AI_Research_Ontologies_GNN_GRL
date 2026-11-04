@@ -7249,9 +7249,10 @@ per section: about 6,000 words with the figures.
 - **Typeset, 4 November.** `src/graph/build_tacl.py` builds
   `docs/PAPER_B_TACL.md` with the author kit's tacl2021v1.sty (15 December
   2021) and acl_natbib.bst, pinned by SHA-256 in `docs/tacl/`. Its
-  wording is unchanged. The main text runs to 10.6 pages, appendix A to
-  4.9 and appendix B to three pages of tables. The PDF's properties
-  carry no name.
+  wording is unchanged. The main text ran to 10.6 pages, and after
+  cutting 406 words of repetition it ends at 9.9 (paper B's notes list
+  the cuts). Appendix A takes 4.5 pages and appendix B three pages of
+  tables. The PDF's properties carry no name.
 - **Approved by the author on 4 November** (TACL review round 2):
   - the title becomes "Materials NER on unseen documents: a pre-registered
     evaluation on three corpora";

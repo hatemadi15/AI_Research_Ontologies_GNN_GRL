@@ -307,7 +307,9 @@ def build(source=SOURCE, out=OUT, tex_only=False):
         shutil.copy(work / f'{NAME}.pdf', out / f'{NAME}.pdf')
         warnings = {'undefined_citations': sorted(set(re.findall(
                         r"Citation `([^']+)' .*undefined", log))),
-                    'overfull_hboxes': len(re.findall(r'^Overfull \\hbox', log, re.M)),
+                    'overfull_hboxes': [f'{by} at lines {a}-{b}' for by, a, b in re.findall(
+                        r'^Overfull \\hbox \(([\d.]+pt) too wide\) .*?lines (\d+)--(\d+)',
+                        log, re.M)],
                     'float_too_large': [f'{by} at line {line}' for by, line in re.findall(
                         r'Float too large for page by ([\d.]+pt) on input line (\d+)', log)]}
     pdf = out / f'{NAME}.pdf'

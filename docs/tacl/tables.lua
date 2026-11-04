@@ -11,7 +11,7 @@ local COLUMN_CHARS = 50     -- characters of \small text across one TACL column 
 local PAGE_CHARS = 104      -- across both columns (16 cm)
 local TABCOLSEP = '3.5pt'   -- half the space between columns (LaTeX's default is 6pt)
 local PAD = 1.6             -- 2\tabcolsep, in characters
-local MAX_LINES = 46        -- the estimated lines of a table set at \small on one page
+local MAX_LINES = 36        -- at most about two thirds of a page at \small (estimates run low)
 local SHORT = 22            -- a column whose cells are all this short is never wrapped
                             -- (an estimate with its interval, '+0.03 [-1.80, +1.86]')
 
@@ -55,27 +55,32 @@ local function caption_of(block, word)
 end
 
 -- column widths in characters: from the floors, the remaining room handed out one character
--- at a time to the column that most lowers the table's estimated height (each row's tallest
--- cell, in lines); when no character lowers it, the rest is shared by the text each column
--- holds. Returns the widths and the estimated height.
+-- at a time to the column that most lowers the table's height, estimated smoothly as each
+-- row's longest cell in lines, len / width, at least one line (whole lines would stall when
+-- two cells of a row are equally tall); once every row fits on one line, the rest is shared
+-- by the text each column holds. Returns the widths and the height in whole lines.
 local function allocate(lens, floor, room)
   local ncol = #floor
   local w, used = {}, 0
   for i = 1, ncol do w[i] = floor[i]; used = used + w[i] end
-  local function height()
+  local function height(whole)
     local h = 0
     for _, row in ipairs(lens) do
       local m = 1
-      for i, len in ipairs(row) do m = math.max(m, math.ceil(len / w[i])) end
+      for i, len in ipairs(row) do
+        local lines = len / w[i]
+        if whole then lines = math.ceil(lines) end
+        m = math.max(m, lines)
+      end
       h = h + m
     end
     return h
   end
   while used < room do
-    local best, best_h = nil, height()
+    local best, best_h = nil, height(false) - 1e-9
     for i = 1, ncol do
       w[i] = w[i] + 1
-      local h = height()
+      local h = height(false)
       w[i] = w[i] - 1
       if h < best_h then best, best_h = i, h end
     end
@@ -94,39 +99,51 @@ local function allocate(lens, floor, room)
       used = used + 1
     end
   end
-  return w, height()
+  return w, height(true)
 end
 
 local function table_float(tbl, caption)
   local rows = rows_of(tbl)
   local ncol = #tbl.colspecs
   -- each cell's length and each column's longest word, in characters
-  local lens, body_max, floor = {}, {}, {}
+  local lens, body_max, floor, body = {}, {}, {}, {}
   for i = 1, ncol do body_max[i], floor[i] = 1, 1 end
   for _, r in ipairs(rows) do
     local row = {}
     for i, cell in ipairs(r.row.cells) do
       local text = pandoc.utils.stringify(cell.contents)
       row[i] = length(text)
-      floor[i] = math.max(floor[i], longest_word(text) + 1)
-      if not r.head then body_max[i] = math.max(body_max[i], row[i]) end
+      -- a header word is set in bold, about 10% wider
+      local word = longest_word(text) * (r.head and 1.1 or 1)
+      floor[i] = math.max(floor[i], math.ceil(word) + 1)
+      if not r.head then
+        body_max[i] = math.max(body_max[i], row[i])
+        body[i] = body[i] or {}
+        table.insert(body[i], row[i])
+      end
     end
     table.insert(lens, row)
   end
-  -- a short column (every body cell at most SHORT characters) is never wrapped
+  -- a short, even column (every body cell at most SHORT characters, the longest at most
+  -- twice the median, as estimates with intervals are) is never wrapped
   for i = 1, ncol do
-    if body_max[i] <= SHORT then floor[i] = math.max(floor[i], body_max[i] + 1) end
+    local cells = body[i] or {1}
+    table.sort(cells)
+    local median = cells[math.floor((#cells + 1) / 2)]
+    if body_max[i] <= SHORT and body_max[i] <= 2 * median then
+      floor[i] = math.max(floor[i], body_max[i] + 1)
+    end
   end
   local natural = 0
   for i = 1, ncol do natural = natural + body_max[i] + 1 + PAD end
   local wide = natural > COLUMN_CHARS
   local chars = wide and PAGE_CHARS or COLUMN_CHARS
   -- at \small; a table that would not fit a page so is set at \footnotesize (9 pt, about
-  -- 10/9 the characters per line; footnotes' size) with its rows 10% closer
+  -- 10/9 the characters per line; footnotes' size) with its rows 15% closer
   local size, scale = '\\small', 1
   local w, h = allocate(lens, floor, chars - PAD * ncol)
   if h > MAX_LINES then
-    size, scale = '\\footnotesize\\renewcommand{\\arraystretch}{0.9}', 10 / 9
+    size, scale = '\\footnotesize\\renewcommand{\\arraystretch}{0.85}', 10 / 9
     w, h = allocate(lens, floor, (chars - PAD * ncol) * scale)
   end
   local sum = 0
