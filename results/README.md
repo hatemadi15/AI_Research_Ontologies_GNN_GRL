@@ -623,3 +623,32 @@ each addition's family. It also gives:
 
 It notes that unseen-minus-seen gains cannot be computed from the stored
 summaries.
+
+Week 21 (the week-21 protocol, ROADMAP §4; fixed 3 November 09:39 UTC
+before any run): a free generalist NER baseline, GLiNER-medium
+(`gliner_baseline.py`), on the CRF head's held-out units. In `gpu/`:
+- `gliner_ft_m<N>`: fine-tuned, seed offsets 0-900, on MaterioMiner's 4
+  papers at both levels, MuLMS's 7 subfields and SOFC-Exp's 5 folds;
+- `gliner_zs_m0`: zero-shot, one run per unit, on MaterioMiner fine,
+  MuLMS and SOFC-Exp (no coarse arm).
+
+The analysis is the `week21` section of `gpu/ner_week5_seed_analysis.json`
+(checks, repeats, decisions, `corpora`, `zero_shot`), and the `week21`
+section of `gpu/ner_mentions.json` gives seen and unseen recall.
+`gpu_repeats/` holds `smokebm`, identical to the paper-1 run of
+`gliner_ft_m0` but for `runtime_sec`. Run record: `w21s` (kernel version
+21, bundle of `ea8ac82`); `w21a` over two sessions, kernel version 22
+(bundle of `c8df5c4`; the deadline left the 3 zero-shot jobs) and 23
+(bundle of `3138ee5`); `smokebl` and both sessions' `smokebn` are
+identical to `smokebh`. The second session rewrote 3 finished files with a
+summary mean rounded the other way (51.055); their runs are identical, and
+the first session's files are kept. Outcome (fine-tuned minus the CRF
+head, 10 seeds):
+- 21.1, MaterioMiner fine: +3.77 [−5.38, +12.92], not shown;
+- 21.2, coarse: −10.12 [−15.68, −4.56], below the CRF head;
+- 21.3, MuLMS: +1.58 [−1.92, +5.08], not shown;
+- 21.4, SOFC-Exp folds: +0.27 [−1.84, +2.37], not shown.
+
+Zero-shot minus the CRF head (reported): −19.87 [−30.73, −9.00]
+(MaterioMiner fine), −32.44 [−38.71, −26.17] (MuLMS), −47.78 [−48.85,
+−46.70] (SOFC-Exp).
