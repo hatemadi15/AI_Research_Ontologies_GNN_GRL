@@ -7138,6 +7138,61 @@ level is below the CRF head, and every check holds.*
 - **The count** goes to 118 decisions with 27 passes, where about 3.0 are
   expected by chance. With 7 or 10 seeds: 88 decisions, 21 passing.
 
+*Correction (4 November, found while preparing the checks below).* The
+protocol said MaterioMiner's coarse-grained codes "have no documented
+expansion". They have one:
+- the MaterioMiner paper's Fig. 7b names all 27 coarse-grained types;
+- its Methods give two of them in words;
+- its release maps every code to its class's preferred label in
+  `CG-NER_tags.csv`, and the release's CoNLL files are the ones used here.
+
+So 21.2 gave GLiNER bare codes through our error, and its coarse arm had no
+zero-shot run for a reason that does not hold. 21.2 stands as decided, and
+its reading carries this.
+
+*Exploratory checks of week 21 (w21x), fixed before any run (4 November;
+outside the count, no decision).* They answer TACL review round 2's referee
+points 4 and 5, with the author's approval of 4 November.
+- **E1, `gliner_ftn`.**
+  - `gliner_ft`'s recipe on MaterioMiner coarse-grained (4 papers, seed
+    offsets 0–900), with one change: each code is given as the class it
+    stands for (`COARSE_NAMES` in `gliner_baseline.py`).
+  - The names: chemical element, crystallographic entity, characterization
+    process, chemical property, damage, data set, defect, equipment,
+    environmental test parameter, location, material class, material,
+    mechanism, mechanical property, manufacturing process, microstructure,
+    microstructural property, model, mechanical test parameter, object,
+    orientation descriptor, physical quantity, property, process parameter,
+    shape descriptor, state descriptor, value.
+  - Sources: Fig. 7b and the release's tag map. Each name is the ontology
+    class's `rdfs:label`, and each code's entity count equals its bar in
+    Fig. 7b.
+  - Reported:
+    - `gliner_ftn` minus the CRF head, and minus `gliner_ft`;
+    - each unit the mean of its 10 seeds, paired over the papers, with 95%
+      intervals.
+- **E2, `gliner_ftp`.**
+  - The fine-tuning by the package's own trainer (`gliner.training`), with
+    `gliner_ft`'s recipe and learning-rate schedule (20 epochs), stopped
+    after each seed's best epoch in the stored `gliner_ft` run.
+  - Run on MaterioMiner fine-grained paper 1, at seed offsets 0–900, with
+    accelerate 1.15.0 installed without its dependencies (W21X_PINS).
+  - Batches, loss, optimizer groups and all learning rates equal
+    `gliner_ft`'s; only the data order and the random state differ.
+  - Reported: `gliner_ftp` minus `gliner_ft`, paired by seed (10 pairs).
+  - Reading: both are seed-noise draws of the same recipe, so an interval
+    covering 0 supports our loop's fidelity, and one excluding 0 says the
+    loops differ.
+- **Checks.**
+  - `smokebo` (smoke4's CRF run) must equal `smokebh`.
+  - `smokebp` (E2 at seed 0, on the other GPU) is compared with E2's seed-0
+    run. If it differs, E2 is reported as non-deterministic.
+- **Where it goes.** Paper B's §7 and Table 4 report both checks as
+  exploratory. A large E1 gain would read: "with documented class names,
+  the coarse-level loss shrinks to X", as an explanation, not a decision.
+- **Budget.** About 3 session-hours of the 5.75 left before the 7 November
+  reset.
+
 *TACL (paper B), for later.* The paper goes to 10 pages, references
 uncounted, with appendices after them within TACL's caps (as last read: up
 to 5 pages and 3 pages for two kinds of content). It keeps a word budget

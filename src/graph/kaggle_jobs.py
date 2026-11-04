@@ -247,7 +247,8 @@ jobs, gliner installed --no-deps beside the pinned packages, GLINER_PINS):
           fine-tuning by the package's own trainer (--package-trainer, gliner_ftp_m<N>; each
           seed's best epoch of the stored gliner_ft run) on MaterioMiner fine paper 1, each at
           seed offsets 0 to 900, a job per check and offset, balanced over the lanes; W21X_PINS,
-          GLINER_PINS with accelerate (E2's trainer needs it) also installed --no-deps
+          GLINER_PINS with accelerate (E2's trainer needs it) also installed --no-deps; lane 1 first
+          repeats E2's seed-0 run (smokebp, the package trainer's determinism on CUDA)
 
 The TPU spike (docs/METHODS_PLAN.md §5; every batch named tpu... runs on the TPU v5e-8, one
 lane per chip, its jobs with --device xla, its results in results/tpu/, a family of their own):
@@ -1309,8 +1310,12 @@ def batch_lanes(name):
         jobs = ([(GLINER_UNIT_COST[W21X_E1[0]] * GLINER_FACTOR['ft'], w21x_e1_job(off))
                  for off in OFFSETS_PUBLISHED]
                 + [(W21X_E2_COST, w21x_e2_job(off)) for off in OFFSETS_PUBLISHED])
-        lanes = balance(jobs, loads=[COST['crf'], 0.0])
-        return [[repeat + ['--tag', 'smokebo']] + lanes[0], lanes[1]]
+        # lane 1 first repeats E2's seed-0 run on the other GPU (smokebp): the package's
+        # trainer's determinism on CUDA, compared at the pull with gliner_ftp_m0's paper-1 run
+        setting, flags, unit = W21X_E2
+        e2_repeat = gliner_job(setting, tag='smokebp', units=(unit,), extra=flags)
+        lanes = balance(jobs, loads=[COST['crf'], W21X_E2_COST])
+        return [[repeat + ['--tag', 'smokebo']] + lanes[0], [e2_repeat] + lanes[1]]
     if name == 'w14a':
         # week 14, 14.1: the 6-copy control without names (crf_mr6_m<N>) on MuLMS's held-out
         # subfields, seed offsets 300 to 900 (one job per offset over the 7 subfields), and

@@ -278,7 +278,10 @@ def test_the_w21x_batch(monkeypatch):
     smokebh = kj.batch_lanes('w20a')[0][0]
     lane0, lane1 = kj.batch_lanes('w21x')
     assert lane0[0] == smokebh[:-1] + ['smokebo']
-    jobs = lane0[1:] + lane1
+    repeat = _gliner_args(lane1[0])
+    assert (repeat.tag, repeat.seed_offset, repeat.package_trainer, repeat.units) == (
+        'smokebp', 0, True, [kj.PAPERS[0]])
+    jobs = lane0[1:] + lane1[1:]
     parsed = [_gliner_args(j) for j in jobs]
     e1 = [a for a in parsed if a.coarse_names]
     e2 = [a for a in parsed if a.package_trainer]
@@ -298,14 +301,16 @@ def test_the_w21x_batch(monkeypatch):
     for j in jobs:
         if '--coarse-names' in j:
             assert [x for x in j if x != '--coarse-names'] in w21a
-    for lane in (lane0[1:], lane1):
+    for lane in (lane0[1:], lane1[1:]):
         assert sum('--coarse-names' in j for j in lane) == 5
         assert sum('--package-trainer' in j for j in lane) == 5
     files = [_written(j) for j in lane0 + lane1]
-    assert len(set(files)) == 21
+    assert len(set(files)) == 22
     assert {f for f in files if f[2].startswith(sa.WEEK21X_NAMES)} == {
         ('coarse', 'leave_one_paper_out', f'{sa.WEEK21X_NAMES}_m{off}') for off in OFFSETS}
-    assert {f for f in files if f[2].startswith(sa.WEEK21X_PACKAGE)} == {
+    assert ('fine', 'leave_one_paper_out', f'{sa.WEEK21X_PACKAGE}_smokebp') in files
+    assert {f for f in files if f[2].startswith(sa.WEEK21X_PACKAGE)
+            and not f[2].endswith('_smokebp')} == {
         ('fine', 'leave_one_paper_out', f'{sa.WEEK21X_PACKAGE}_m{off}') for off in OFFSETS}
     assert (gb.NAMES_VARIANT, gb.PACKAGE_VARIANT) == (sa.WEEK21X_NAMES, sa.WEEK21X_PACKAGE)
     assert sa.WEEK21X_E1 == kj.W21X_E1[0] and sa.WEEK21X_E2 == ('fine', kj.W21X_E2[2] + '.conll')
