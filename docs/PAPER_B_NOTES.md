@@ -169,9 +169,17 @@ audit found 6 mismatches; the count and every stage-21 number were right.
   Table 4 and A.7 report both as exploratory.
 
 **Open:**
-- **Length.** The text is about 6,190 words of prose and 750 in tables. It
-  is not yet typeset in tacl2021v1.sty, and it needs cutting after the
-  typeset check.
+- **Length.** Typeset on 4 November (`src/graph/build_tacl.py`, TACL's
+  tacl2021v1.sty and acl_natbib.bst; `docs/submission/PAPER_B_TACL.pdf`).
+  The main text runs to 10.6 pages, so about 0.6 page must be cut.
+  Appendix A takes 4.9 pages (cap 5), and appendix B three pages of
+  tables after its heading (cap 3). The references take 4 pages, which
+  do not count. The PDF's properties carry the title only.
+- **The companion citation.** TACL's submission page asks authors to
+  avoid "(Anonymous) showed" citations, which readers cannot check. The
+  draft cites paper A as "Anonymous, 2026", while ROADMAP §4 planned a
+  third-person citation. This is for the author to decide with the
+  editor disclosure.
 - **Per-decision classification.** Each decision should be marked
   confirmatory or deviating, and the count given both ways.
 - **A units-by-seeds randomization check** as a sensitivity analysis.

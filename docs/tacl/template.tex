@@ -1,0 +1,44 @@
+% template.tex - pandoc template for build_tacl.py (docs/PAPER_B_TACL.md in TACL's style).
+% The preamble follows tacl2021v1-template.tex (15 December 2021): 11pt, A4, Times, T1, and
+% tacl2021v1.sty in its default submission mode, which prints "Anonymous TACL submission", the
+% line-number ruler and the confidentiality header. The PDF's properties carry the title only.
+\documentclass[11pt,a4paper]{article}
+\usepackage{times,latexsym}
+\usepackage{url}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{tacl2021v1}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{amsmath}
+\usepackage{microtype}
+\usepackage{caption}
+\usepackage{fvextra}
+\captionsetup{font=small,labelformat=empty}
+\DeclareUnicodeCharacter{2212}{\ensuremath{-}}
+\DeclareUnicodeCharacter{0394}{\ensuremath{\Delta}}
+\DeclareUnicodeCharacter{00B2}{\textsuperscript{2}}
+\DeclareUnicodeCharacter{03B1}{\ensuremath{\alpha}}
+\DeclareUnicodeCharacter{03B3}{\ensuremath{\gamma}}
+\DeclareUnicodeCharacter{03B5}{\ensuremath{\varepsilon}}
+\DeclareUnicodeCharacter{03C1}{\ensuremath{\rho}}
+\DeclareUnicodeCharacter{03A3}{\ensuremath{\Sigma}}
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setlength{\emergencystretch}{1em}
+\hypersetup{pdftitle={$title$},pdfauthor={},pdfsubject={},pdfkeywords={},pdfcreator={},
+  pdfproducer={}}
+\pdfinfoomitdate=1
+\pdftrailerid{}
+\title{$title$}
+\author{}
+\date{}
+\begin{document}
+\maketitle
+\begin{abstract}
+$abstract$
+\end{abstract}
+
+$body$
+
+\end{document}
