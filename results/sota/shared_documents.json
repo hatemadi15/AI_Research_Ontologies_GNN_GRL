@@ -1,0 +1,69 @@
+{
+ "rule": "at least 10 sentences of the MuLMS document share a word 8-gram with the SOFC-Exp article, after dapt_mlm.py's normalisation",
+ "pairs": [
+  {
+   "mulms": "sofc_01",
+   "sofc_exp": "PMC5700654",
+   "sentences": 151,
+   "sofc_exp_part": "train",
+   "sofc_exp_cv_dev": [
+    "cv3"
+   ],
+   "mulms_parts": {
+    "c1": "test",
+    "c2": "test",
+    "c3": "test",
+    "c4": "test",
+    "c5": "test"
+   }
+  },
+  {
+   "mulms": "sofc_02",
+   "sofc_exp": "PMC4772004",
+   "sentences": 144,
+   "sofc_exp_part": "train",
+   "sofc_exp_cv_dev": [
+    "cv4"
+   ],
+   "mulms_parts": {
+    "c1": "train",
+    "c2": "train",
+    "c3": "tune",
+    "c4": "train",
+    "c5": "train"
+   }
+  },
+  {
+   "mulms": "sofc_03",
+   "sofc_exp": "PMC6158676",
+   "sentences": 371,
+   "sofc_exp_part": "train",
+   "sofc_exp_cv_dev": [
+    "cv4"
+   ],
+   "mulms_parts": {
+    "c1": "train",
+    "c2": "train",
+    "c3": "train",
+    "c4": "tune",
+    "c5": "train"
+   }
+  },
+  {
+   "mulms": "sofc_04",
+   "sofc_exp": "PMC6247067",
+   "sentences": 209,
+   "sofc_exp_part": "test",
+   "sofc_exp_cv_dev": [],
+   "mulms_parts": {
+    "c1": "dev",
+    "c2": "dev",
+    "c3": "dev",
+    "c4": "dev",
+    "c5": "dev"
+   }
+  }
+ ],
+ "largest_other": 5,
+ "sha256": "d9fc77ddf3651c01e588485df81ab0735fd25324d0403a52dfff9925d1e82334"
+}

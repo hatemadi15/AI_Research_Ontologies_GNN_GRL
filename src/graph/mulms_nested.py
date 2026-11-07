@@ -69,7 +69,9 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR = Path(os.environ.get('PROCESSED_DIR', ROOT / 'data' / 'processed')) / 'ner'
 DEFAULT_MODEL = 'm3rg-iitd/matscibert'
 PROTOCOL = 'nested_configs'
+SCREEN_PROTOCOL = 'nested_screen'      # P1 (ROADMAP §4): scored on the dev set only
 SYSTEM = 'bilou_crf'
+SPAN_SYSTEM = 'span'                   # P1's E: span_ner's span head
 CONFIGS = (1, 2, 3, 4, 5)
 TYPES = ('MAT', 'NUM', 'VALUE', 'UNIT', 'PROPERTY', 'FORM', 'MEASUREMENT', 'CITE', 'SAMPLE',
          'TECHNIQUE', 'DEV', 'RANGE', 'INSTRUMENT')     # the release's mulms_named_entities
@@ -139,6 +141,53 @@ def configurations_record(sentences):
     return {f'c{c}': {part: sorted({s['doc_id'] for s in group})
                       for part, group in configuration(sentences, c).items()}
             for c in CONFIGS}
+
+
+def outermost_iob2(sentence):
+    """IOB2 tags of a sentence's outermost entities (P1's C2 joins them to SOFC-Exp): the gold
+    entities by first word, the longer first, then by type; an entity is kept unless it
+    overlaps one kept before it."""
+    tags = ['O'] * len(sentence['tokens'])
+    taken = set()
+    for kind, i, j in sorted(sentence['gold'], key=lambda e: (e[1], e[1] - e[2], e[0])):
+        if taken.isdisjoint(range(i, j + 1)):
+            tags[i] = f'B-{kind}'
+            for k in range(i + 1, j + 1):
+                tags[k] = f'I-{kind}'
+            taken.update(range(i, j + 1))
+    return tags
+
+
+def part_contexts(group):
+    """P1's C3: per sentence of a part, (left, right) context sentences as word lists, nearest
+    first: the other sentences of its document within the part, in the release's order (as
+    ner_baseline.part_contexts; a MuLMS document lies in one part)."""
+    by_doc = {}
+    for k, s in enumerate(group):
+        by_doc.setdefault(s['doc_id'], []).append(k)
+    out = []
+    for k, s in enumerate(group):
+        idx = by_doc[s['doc_id']]
+        at = idx.index(k)
+        out.append(([group[j]['tokens'] for j in reversed(idx[:at])],
+                    [group[j]['tokens'] for j in idx[at + 1:]]))
+    return out
+
+
+def sofc_joint_sentences():
+    """P1's C2 for MuLMS: SOFC-Exp's 34 training and validation articles' sentences as
+    (tokens, IOB2 tags of its 4 entity types), without the articles that MuLMS also holds
+    (results/sota/shared_documents.json), and its types."""
+    import ner_baseline as nb
+    import sota_p1
+    shared = sota_p1.shared_sofc_articles()
+    split = nb.sofc_split()
+    data = nb.load_split_corpus('sofc')
+    labels, _ = nb.select_labels(data)
+    out = [(list(tokens), list(tags)) for tokens, tags, doc in data
+           if split[doc.removesuffix('.conll')] in ('train', 'dev')
+           and doc.removesuffix('.conll') not in shared]
+    return out, list(labels)
 
 
 def tag_vocabulary(sentences):
@@ -310,21 +359,26 @@ def _define_modules():
 # ---------------------------------------------------------------------------------------------
 # Features
 # ---------------------------------------------------------------------------------------------
-def features(sentence, tokenizer, tag_index, max_length=SETTINGS['max_length']):
+def features(sentence, tokenizer, tag_index, max_length=SETTINGS['max_length'], left=(),
+             right=(), tags=None):
     """{input_ids, first, kept, tags, erased, truncated}: the sub-words of a sentence, the
     position of each kept word's first sub-word, the kept words' positions and tag ids, and
-    the numbers of words with no sub-word and of words cut by the length limit."""
-    enc = tokenizer(sentence['tokens'], is_split_into_words=True, truncation=True,
-                    max_length=max_length)
+    the numbers of words with no sub-word and of words cut by the length limit. left and
+    right (P1's C3): context words around the sentence, never tagged. tags: the sentence's
+    tags when not its own (P1's C2: SOFC-Exp's)."""
+    words = list(left) + list(sentence['tokens']) + list(right)
+    lo, hi = len(left), len(left) + len(sentence['tokens'])
+    enc = tokenizer(words, is_split_into_words=True, truncation=True, max_length=max_length)
     first = {}
     for pos, w in enumerate(enc.word_ids()):
-        if w is not None and w not in first:
-            first[w] = pos
+        if w is not None and lo <= w < hi and w - lo not in first:
+            first[w - lo] = pos
     full = tokenizer(sentence['tokens'], is_split_into_words=True, truncation=False)
     present = {w for w in full.word_ids() if w is not None}
     kept = sorted(first)
+    tags = sentence['tags'] if tags is None else tags
     return {'input_ids': enc['input_ids'], 'first': [first[w] for w in kept], 'kept': kept,
-            'tags': [tag_index[sentence['tags'][w]] for w in kept],
+            'tags': [tag_index[tags[w]] for w in kept],
             'erased': len(sentence['tokens']) - len(present),
             'truncated': len(present) - len(kept)}
 
@@ -376,25 +430,51 @@ def predict(model, feats, sentences, vocab, device, batch_size):
 # Training
 # ---------------------------------------------------------------------------------------------
 def train_config(sentences, c, seed, args, device, vocab):
-    """One run: configuration c at `seed`; returns its record."""
+    """One run: configuration c at `seed`; returns its record. P1's options (ROADMAP §4) on
+    top of P0's run, which they leave as it was when none is set: --screen (no test sentence
+    is encoded or scored; the record has the dev scores only), --context N (C3: up to N
+    sub-words of the document's other sentences of the same part on each side, untagged),
+    --joint-sofc (C2: SOFC-Exp's sentences on a CRF head of their own, each epoch min(n, m) of
+    them drawn by random.Random(f'{seed}-{epoch}') and shuffled in with MuLMS's; never scored)
+    and --gradient-checkpointing; --span-head runs train_span_config instead."""
     import torch
-    from transformers import AutoModel, AutoTokenizer, set_seed
+    from transformers import AutoModel, set_seed
     import ner_baseline as nb
+    if getattr(args, 'span_head', False):
+        return train_span_config(sentences, c, seed, args, device)
+    screen = getattr(args, 'screen', False)
     parts = configuration(sentences, c)
+    if screen:
+        del parts['test']
     if args.max_train:
         parts = {**parts, 'train': parts['train'][:args.max_train],
                  'tune': parts['tune'][:args.max_train]}
     set_seed(seed)
-    tokenizer = AutoTokenizer.from_pretrained(args.model)
+    tokenizer = nb.load_tokenizer(args.model)
     index = {t: i for i, t in enumerate(vocab)}
-    feats = {name: [features(s, tokenizer, index) for s in group]
-             for name, group in parts.items()}
+    feats = {name: encode_part(group, tokenizer, index, args) for name, group in parts.items()}
     _, NestedTagger = _define_modules()
-    model = NestedTagger(AutoModel.from_pretrained(args.model), len(vocab)).to(device)
+    encoder = AutoModel.from_pretrained(args.model, dtype=torch.float32)
+    model = NestedTagger(encoder, len(vocab)).to(device)
     model.pad_id = tokenizer.pad_token_id
-    lm = [p for n, p in model.named_parameters() if not n.startswith('crf.')]
+    joint = None
+    if getattr(args, 'joint_sofc', False):
+        StackedCRF, _ = _define_modules()
+        other, other_types = sofc_joint_sentences()
+        other_vocab = ['O'] + [f'{p}-{k}' for k in other_types for p in ('B', 'I')]
+        other_index = {k: i for i, k in enumerate(other_vocab)}
+        model.sofc_linear = torch.nn.Linear(encoder.config.hidden_size, len(other_vocab))
+        model.sofc_crf = StackedCRF(len(other_vocab))
+        model.to(device)
+        joint = {'feats': [features({'tokens': tokens, 'tags': tags}, tokenizer, other_index)
+                           for tokens, tags in other], 'types': other_types}
+    if getattr(args, 'gradient_checkpointing', False):
+        encoder.gradient_checkpointing_enable()
+    crf_names = ('crf.', 'sofc_crf.')
+    lm = [p for n, p in model.named_parameters() if not n.startswith(crf_names)]
     lm_opt = torch.optim.AdamW(lm, lr=args.lr)
-    crf_opt = torch.optim.AdamW(model.crf.parameters(), lr=args.lr_crf)
+    crf_opt = torch.optim.AdamW([p for n, p in model.named_parameters()
+                                 if n.startswith(crf_names)], lr=args.lr_crf)
     rng = random.Random(seed)
     order = [i for i, f in enumerate(feats['train']) if f['first']]
     schedules = []
@@ -403,19 +483,40 @@ def train_config(sentences, c, seed, args, device, vocab):
         schedules = [torch.optim.lr_scheduler.LambdaLR(opt, sqrt_schedule(warmup))
                      for opt in (lm_opt, crf_opt)]
     gold = {name: [s['gold'] for s in group] for name, group in parts.items()}
+
+    def sofc_nll(items):
+        batch = collate(items, model.pad_id, device)
+        hidden = model.encoder(input_ids=batch['input_ids'],
+                               attention_mask=batch['attention_mask']).last_hidden_state
+        logits = model.sofc_linear(model.dropout(hidden))
+        emissions = logits.gather(1, batch['first'].clamp(min=0).unsqueeze(2).expand(
+            -1, -1, logits.size(2)))
+        return model.sofc_crf.nll(emissions, batch['tags'], batch['mask'])
+
     best, best_f1, best_epoch, waited, history = None, -1.0, 0, 0, []
     for epoch in range(1, args.epochs + 1):
         model.train()
-        rng.shuffle(order)
-        for start in range(0, len(order), args.batch_size):
-            batch_ids = order[start:start + args.batch_size]
+        if joint is None:
+            rng.shuffle(order)                        # P0's order of operations
+        units = [('mulms', i) for i in order]
+        if joint is not None:
+            n_other = min(len(order), len(joint['feats']))
+            pick = random.Random(f'{seed}-{epoch}').sample(range(len(joint['feats'])), n_other)
+            units += [('sofc', j) for j in pick]
+            rng.shuffle(units)
+        for start in range(0, len(units), args.batch_size):
+            batch_units = units[start:start + args.batch_size]
             lm_opt.zero_grad()
             crf_opt.zero_grad()
             # the batch's summed loss, its gradient accumulated over micro-batches (memory)
-            for m in range(0, len(batch_ids), args.micro_batch):
-                micro = collate([feats['train'][i] for i in batch_ids[m:m + args.micro_batch]],
+            mulms_ids = [i for corpus, i in batch_units if corpus == 'mulms']
+            for m in range(0, len(mulms_ids), args.micro_batch):
+                micro = collate([feats['train'][i] for i in mulms_ids[m:m + args.micro_batch]],
                                 model.pad_id, device)
                 model.crf.nll(model.emissions(micro), micro['tags'], micro['mask']).backward()
+            sofc_ids = [j for corpus, j in batch_units if corpus == 'sofc']
+            for m in range(0, len(sofc_ids), args.micro_batch):
+                sofc_nll([joint['feats'][j] for j in sofc_ids[m:m + args.micro_batch]]).backward()
             lm_opt.step()
             crf_opt.step()
             for schedule in schedules:
@@ -433,19 +534,154 @@ def train_config(sentences, c, seed, args, device, vocab):
             if waited == args.patience:
                 break
     model.load_state_dict(best)
-    record = {'run_id': f'c{c}', 'config': c, 'seed': seed, 'tune_split': f'train{c}',
-              'n_train': len(parts['train']), 'n_tune': len(parts['tune']),
-              'n_dev': len(parts['dev']), 'n_test': len(parts['test']),
-              'best_epoch': best_epoch, 'tune_micro_f1': best_f1, 'history': history,
-              'erased_word_sentences': {name: sum(1 for f in group if f['erased'])
-                                        for name, group in feats.items()},
-              'truncated_words': sum(f['truncated'] for group in feats.values() for f in group)}
-    for name in ('dev', 'test'):
+    record = run_record(c, seed, parts, best_epoch, best_f1, history, feats, screen)
+    if joint is not None:
+        record['joint'] = {'n_other': len(joint['feats']), 'other_types': joint['types'],
+                           'other_per_epoch': min(len(order), len(joint['feats']))}
+    for name in ('dev',) if screen else ('dev', 'test'):
         predicted = predict(model, feats[name], parts[name], vocab, device, args.batch_size)
         record[name] = score(predicted, gold[name])
         if name == 'test' and args.save_predictions:
             record['test_pred'] = [sorted(list(e) for e in p) for p in predicted]
-    record['f1'] = record['test']['micro_f1']
+    if not screen:
+        record['f1'] = record['test']['micro_f1']
+    environment = nb.run_environment(str(device))
+    if environment:
+        record['environment'] = environment
+    return record
+
+
+def encode_part(group, tokenizer, index, args, tags=None):
+    """features() of every sentence of a part, with --context's words around each (C3)."""
+    import ner_baseline as nb
+    n = getattr(args, 'context', 0)
+    if not n:
+        return [features(s, tokenizer, index) for s in group]
+    out = []
+    for s, (left, right) in zip(group, part_contexts(group)):
+        own = len(tokenizer(s['tokens'], is_split_into_words=True,
+                            truncation=False)['input_ids'])
+        words = nb.context_words(tokenizer, left, right,
+                                 min(n, max(0, (SETTINGS['max_length'] - own) // 2)))
+        out.append(features(s, tokenizer, index, left=words[0], right=words[1]))
+    return out
+
+
+def run_record(c, seed, parts, best_epoch, best_f1, history, feats, screen):
+    """The fields of a run's record before its scores (screen: no test field)."""
+    record = {'run_id': f'c{c}', 'config': c, 'seed': seed, 'tune_split': f'train{c}',
+              'n_train': len(parts['train']), 'n_tune': len(parts['tune']),
+              'n_dev': len(parts['dev'])}
+    if not screen:
+        record['n_test'] = len(parts['test'])
+    record.update({'best_epoch': best_epoch, 'tune_micro_f1': best_f1, 'history': history,
+                   'erased_word_sentences': {name: sum(1 for f in group if f['erased'])
+                                             for name, group in feats.items()},
+                   'truncated_words': sum(f['truncated'] for group in feats.values()
+                                          for f in group)})
+    return record
+
+
+def train_span_config(sentences, c, seed, args, device):
+    """P1's E on MuLMS (--span-head): span_ner's span head on the encoder, by P0's recipe
+    (AdamW with torch's defaults, the encoder at args.lr and the head at span_ner.HEAD_LR, no
+    schedule unless --lr-schedule sqrt, no clipping, shuffled batches of args.batch_size in
+    micro-batches, the tune fold's micro F1 picking the epoch, args.patience), decoded nested.
+    The loss is the binary cross-entropy averaged over the batch's (span, type) pairs. The
+    width cap comes from the training folds' entities."""
+    import torch
+    from transformers import AutoModel, set_seed
+    import ner_baseline as nb
+    import span_ner
+    screen = getattr(args, 'screen', False)
+    parts = configuration(sentences, c)
+    if screen:
+        del parts['test']
+    if args.max_train:
+        parts = {**parts, 'train': parts['train'][:args.max_train],
+                 'tune': parts['tune'][:args.max_train]}
+    set_seed(seed)
+    tokenizer = nb.load_tokenizer(args.model)
+    types = list(TYPES)
+    type_index = {k: i for i, k in enumerate(types)}
+    spans = {name: [{'tokens': s['tokens'], 'entities': s['gold']} for s in group]
+             for name, group in parts.items()}
+    cap = span_ner.width_cap(spans['train'])
+    contexts = {name: part_contexts(group) for name, group in parts.items()} \
+        if getattr(args, 'context', 0) else None
+
+    def encoded(name):
+        out = []
+        for k, s in enumerate(spans[name]):
+            left = right = ()
+            if contexts is not None:
+                own = len(tokenizer(s['tokens'], is_split_into_words=True,
+                                    truncation=False)['input_ids'])
+                left, right = nb.context_words(tokenizer, *contexts[name][k], min(
+                    args.context, max(0, (SETTINGS['max_length'] - own) // 2)))
+            out.append(span_ner.encode(s, tokenizer, type_index, cap, SETTINGS['max_length'],
+                                       left, right))
+        return out
+    feats = {name: encoded(name) for name in parts}
+    encoder = AutoModel.from_pretrained(args.model, dtype=torch.float32)
+    model = span_ner.make_tagger(encoder, len(types), cap).to(device)
+    if getattr(args, 'gradient_checkpointing', False):
+        encoder.gradient_checkpointing_enable()
+    optimizer = torch.optim.AdamW([{'params': list(encoder.parameters())},
+                                   {'params': list(model.head.parameters()),
+                                    'lr': span_ner.HEAD_LR}], lr=args.lr)
+    schedules = []
+    order = [i for i, f in enumerate(feats['train']) if f['spans']]
+    if args.lr_schedule == 'sqrt':
+        schedules = [torch.optim.lr_scheduler.LambdaLR(
+            optimizer, sqrt_schedule(math.ceil(len(order) / args.batch_size)))]
+    rng = random.Random(seed)
+    pad_id = tokenizer.pad_token_id
+
+    def predicted(name):
+        return span_ner.predict(model, feats[name], types, True, args.batch_size, pad_id,
+                                device)
+    best, best_f1, best_epoch, waited, history = None, -1.0, 0, 0, []
+    for epoch in range(1, args.epochs + 1):
+        model.train()
+        rng.shuffle(order)
+        for start in range(0, len(order), args.batch_size):
+            ids = order[start:start + args.batch_size]
+            pairs = sum(len(feats['train'][i]['spans']) for i in ids) * len(types)
+            optimizer.zero_grad()
+            for m in range(0, len(ids), args.micro_batch):
+                items = [feats['train'][i] for i in ids[m:m + args.micro_batch]]
+                batch = span_ner.collate(items, pad_id, len(types), device)
+                logits = model(batch)
+                mask = batch['span_mask'].unsqueeze(2).expand_as(logits)
+                (torch.nn.functional.binary_cross_entropy_with_logits(
+                    logits[mask], batch['targets'][mask], reduction='sum') / pairs).backward()
+            optimizer.step()
+            for schedule in schedules:
+                schedule.step()
+        tune = score(predicted('tune'), [s['gold'] for s in parts['tune']])
+        history.append({'epoch': epoch, 'tune_micro_f1': tune['micro_f1'],
+                        'tune_macro_f1': tune['macro_f1']})
+        print(f"  c{c} epoch {epoch}: tune micro F1 {tune['micro_f1']:.2f}", flush=True)
+        if tune['micro_f1'] > best_f1:
+            best_f1, best_epoch, waited = tune['micro_f1'], epoch, 0
+            best = copy.deepcopy(model.state_dict())
+        else:
+            waited += 1
+            if waited == args.patience:
+                break
+    model.load_state_dict(best)
+    record = run_record(c, seed, parts, best_epoch, best_f1, history, feats, screen)
+    record['span_head'] = {'width_cap': cap, 'head_lr': span_ner.HEAD_LR,
+                           'unreachable': {name: sum(f['unreachable'] for f in group)
+                                           for name, group in feats.items()}}
+    for name in ('dev',) if screen else ('dev', 'test'):
+        pred = predicted(name)
+        record[name] = score(pred, [s['gold'] for s in parts[name]])
+        if name == 'test' and args.save_predictions:
+            record['test_pred'] = [sorted(list(e) for e in p) for p in pred]
+    if not screen:
+        record['f1'] = record['test']['micro_f1']
     environment = nb.run_environment(str(device))
     if environment:
         record['environment'] = environment
@@ -463,8 +699,9 @@ def sqrt_schedule(warmup):
     return factor
 
 
-def results_path(out_dir, tag=None, max_train=0):
-    name = f'ner_results_mulms_{PROTOCOL}_{SYSTEM}'
+def results_path(out_dir, tag=None, max_train=0, screen=False, span=False):
+    name = (f"ner_results_mulms_{SCREEN_PROTOCOL if screen else PROTOCOL}_"
+            f"{SPAN_SYSTEM if span else SYSTEM}")
     name += f'_{tag}' if tag else ''
     name += f'_smoke{max_train}' if max_train else ''
     return Path(out_dir) / f'{name}.json'
@@ -473,7 +710,7 @@ def results_path(out_dir, tag=None, max_train=0):
 def summarize(results):
     import statistics
     runs = results['runs']
-    for name in ('test', 'dev'):
+    for name in ('dev',) if results.get('screen') else ('test', 'dev'):
         values = [r[name]['micro_f1'] for r in runs]
         results[f'{name}_micro_f1_mean'] = round(statistics.fmean(values), 2) if values else None
         results[f'{name}_micro_f1_sd'] = (round(statistics.stdev(values), 2)
@@ -491,17 +728,20 @@ def run(args):
         nb.cuda_determinism()
     if args.threads:
         torch.set_num_threads(args.threads)
-    path = results_path(args.out_dir, args.tag, args.max_train)
+    path = results_path(args.out_dir, args.tag, args.max_train, args.screen, args.span_head)
     path.parent.mkdir(parents=True, exist_ok=True)
+    p1 = {k: getattr(args, k) for k in P1_OPTIONS if getattr(args, k)}   # P1's options set
     results = json.loads(path.read_text()) if path.exists() and not args.overwrite else {
-        'corpus': 'mulms', 'protocol': PROTOCOL, 'system': SYSTEM, 'model': args.model,
+        'corpus': 'mulms', 'protocol': SCREEN_PROTOCOL if args.screen else PROTOCOL,
+        'system': SPAN_SYSTEM if args.span_head else SYSTEM, 'model': args.model,
         'release': {'revision': mulms.REVISION, 'files': dict(mulms.FILES)},
         'config': {**{k: getattr(args, k) for k in ('lr', 'lr_crf', 'batch_size', 'epochs',
                                                      'patience', 'lr_schedule', 'micro_batch',
                                                      'seed', 'seed_offset', 'tag',
                                                      'max_train')},
                    'dropout': SETTINGS['dropout'], 'crf_init': SETTINGS['crf_init'],
-                   'max_length': SETTINGS['max_length'], 'n_tags': len(vocab)},
+                   'max_length': SETTINGS['max_length'], 'n_tags': len(vocab), **p1},
+        **({'screen': True} if args.screen else {}),
         'configurations': configurations_record(sentences), 'runs': []}
     done = {r['run_id'] for r in results['runs']}
     for c in args.configs:
@@ -514,8 +754,12 @@ def run(args):
         results['runs'].append(record)
         summarize(results)
         path.write_text(json.dumps(results, indent=2))
-        print(f"  c{c}: test micro F1 {record['test']['micro_f1']:.2f}, dev "
-              f"{record['dev']['micro_f1']:.2f} (best epoch {record['best_epoch']})")
+        if args.screen:
+            print(f"  c{c}: dev micro F1 {record['dev']['micro_f1']:.2f} (best epoch "
+                  f"{record['best_epoch']})")
+        else:
+            print(f"  c{c}: test micro F1 {record['test']['micro_f1']:.2f}, dev "
+                  f"{record['dev']['micro_f1']:.2f} (best epoch {record['best_epoch']})")
     print(f'wrote {path}')
     return results
 
@@ -539,6 +783,19 @@ def parse_args(argv=None):
     parser.add_argument('--lr-schedule', choices=('none', 'sqrt'), default='none',
                         help="none (the released script) or sqrt (the paper's Appendix A)")
     parser.add_argument('--save-predictions', action='store_true')
+    # the SOTA plan's P1 (ROADMAP §4, the screens)
+    parser.add_argument('--screen', action='store_true',
+                        help='P1: no test sentence is encoded or scored; the record has the '
+                             'dev scores (protocol nested_screen)')
+    parser.add_argument('--context', type=int, default=0, metavar='N',
+                        help="P1's C3: up to N sub-words of document context on each side")
+    parser.add_argument('--joint-sofc', action='store_true',
+                        help="P1's C2: joint training with SOFC-Exp's training and validation "
+                             'articles on a CRF head of their own')
+    parser.add_argument('--span-head', action='store_true',
+                        help="P1's E: span_ner's span head instead of the CRF (system span)")
+    parser.add_argument('--gradient-checkpointing', action='store_true',
+                        help="P1's B1 and B2 on MuLMS: the encoder's gradient checkpointing")
     parser.add_argument('--max-train', type=int, default=0,
                         help='smoke test: the first N training and tune sentences only')
     parser.add_argument('--cache', default=None)
@@ -550,7 +807,18 @@ def parse_args(argv=None):
     args = parser.parse_args(argv)
     if args.seed_offset and not args.tag:
         parser.error('--seed-offset needs --tag, so that offset runs get their own results file')
+    if args.context < 0:
+        parser.error('--context: 0 (off) or more sub-words')
+    if args.span_head and args.joint_sofc:
+        parser.error('--span-head and --joint-sofc each add a head: not both (P1)')
+    if args.screen and args.save_predictions:
+        parser.error('--screen has no test predictions to save')
+    if (args.screen or any(getattr(args, k) for k in P1_OPTIONS)) and not args.tag:
+        parser.error("P1's runs need a --tag (each cell writes its own results file)")
     return args
+
+
+P1_OPTIONS = ('context', 'joint_sofc', 'span_head', 'gradient_checkpointing', 'screen')
 
 
 def main(argv=None):

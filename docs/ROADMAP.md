@@ -7633,6 +7633,35 @@ for P2, and the tuned reference (candidate A) for P2's D-P decisions.
     bundle.
   - The selections go here, in `docs/SOTA_PLAN.md` and in
     `results/README.md`, with no test number.
+- **Amendment 1, 7 November, found while writing the code, before any P1
+  run.**
+  - **C1 on MaterioMiner runs one level at a time.** The two levels'
+    released splits are different random partitions. Only 25 of the 96
+    test sentences are the same, and 71 of each level's test sentences lie
+    in the other level's training or validation set. A multi-task run on
+    one level's split would train the other head on that head's test
+    sentences.
+    - So each level's C1 cell trains on its own level's screen split and
+      scores only that level's head, which alone picks the epoch and stops
+      the run (`--screen-level`).
+    - The other head trains on the same sentences, its tags dropped on
+      every sentence of its own level's released test set.
+    - The same rule is needed for P2's runs on the released split.
+  - **Round 2 runs in stages.** The chain is greedy, so each cell waits for
+    the one before it. `sota_p1.py next-jobs` writes every benchmark's next
+    cells, and batch `p1n` runs them, until nothing is left.
+  - **Every trainer averages for A7.** The span head and joint training
+    average too, so that every combination the chain can reach runs.
+  - **Where things are kept.**
+    - The screen files go to `results/gpu_screen/`, apart from every stored
+      analysis.
+    - `p1t`'s 2-epoch runs carry tags of their own (`p1t<kind>`), so they
+      never count as a cell's units.
+    - B3's pre-training runs again in each session that needs it.
+  - **Checked before any run, on the CPU with a tiny encoder.** With no P1
+    option, the new code trains exactly as the committed code did (history,
+    validation and test F1, predictions), for the single-task, multi-task and
+    MuLMS paths, and screen mode trains exactly as a full run.
 
 *TACL (paper B), for later.* The paper goes to 10 pages, references
 uncounted, with appendices after them within TACL's caps (as last read: up

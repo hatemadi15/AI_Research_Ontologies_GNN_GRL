@@ -1093,6 +1093,132 @@ def is_silver(tags, marginals, threshold=SILVER_THRESHOLD):
     return any(tag.startswith('B-') for tag in tags) and min(marginals) >= threshold
 
 
+# ---------------------------------------------------------------------------------------------
+# The SOTA plan's P1 (ROADMAP §4, the screens): screen mode and round 1's changes
+# ---------------------------------------------------------------------------------------------
+SCREEN_SPLIT = 'screen_split'          # MaterioMiner: splits of the released train + validation
+PUBLISHED_SCREEN = 'published_screen'  # SOFC-Exp: the official split, scored on validation only
+SCREEN_VAL = 57                        # the released split's validation sentences
+# the fields that a scored test set gives; a screen record (--screen) has none of them
+TEST_FIELDS = ('f1', 'f1_strict', 'precision', 'recall', 'macro_f1', 'weighted_f1', 'per_class',
+               'n_test', 'test_index', 'test_gold', 'test_pred', 'test')
+# byte-level BPE tokenizers (SciDeBERTa's DeBERTa v1): pre-split words need the space that
+# running text puts before a word (add_prefix_space), or every word but the first is cut as if
+# it went on the word before it
+BYTE_LEVEL_BPE = ('DebertaTokenizer', 'DebertaTokenizerFast', 'RobertaTokenizer',
+                  'RobertaTokenizerFast', 'GPT2Tokenizer', 'GPT2TokenizerFast')
+LAYER_RE = re.compile(r'(?:^|\.)layer\.(\d+)\.')
+
+
+def screen_split_parts(parts, seed, n_val=SCREEN_VAL):
+    """(train, val) positions of MaterioMiner's screen split `seed` (--screen-splits): the
+    released split's training positions, then its validation positions, in the files' order,
+    shuffled by random.Random(seed); the first n_val are validation and the rest training. No
+    test position is in either."""
+    pool = list(parts[0]) + list(parts[1])
+    order = list(range(len(pool)))
+    random.Random(seed).shuffle(order)
+    return [pool[i] for i in order[n_val:]], [pool[i] for i in order[:n_val]]
+
+
+def load_tokenizer(name):
+    """The fast tokenizer of a model for pre-split words (add_prefix_space for a byte-level BPE
+    one; MatSciBERT's and DeBERTa-v3's are loaded as they always were)."""
+    from transformers import AutoTokenizer
+    tokenizer = AutoTokenizer.from_pretrained(name)
+    if type(tokenizer).__name__ in BYTE_LEVEL_BPE:
+        tokenizer = AutoTokenizer.from_pretrained(name, add_prefix_space=True)
+    assert tokenizer.is_fast, 'a fast tokenizer is required for word_ids()'
+    return tokenizer
+
+
+def prepare_encoder(model, encoder, args):
+    """--reinit-top N: the top N layers of the encoder re-initialised by the model's own rule,
+    from the seeded generator (A6); --gradient-checkpointing (B1, B2). `model` is the module
+    whose _init_weights applies (the token-classification model, or the encoder itself)."""
+    n = getattr(args, 'reinit_top', 0)
+    if n:
+        init = getattr(model, '_init_weights', None) or encoder._init_weights
+        for layer in encoder.encoder.layer[-n:]:
+            layer.apply(init)
+    if getattr(args, 'gradient_checkpointing', False):
+        encoder.gradient_checkpointing_enable()
+
+
+def encoder_groups(encoder, lr, decay):
+    """AdamW parameter groups of an encoder for --llrd `decay` (A5): encoder layer i of L at
+    lr * decay ** (L - 1 - i), and everything outside the layers (the embeddings; DeBERTa's
+    relative embeddings and their norm) at lr * decay ** L, the lowest."""
+    n_layers = len(encoder.encoder.layer)
+    depth = {}
+    for name, p in encoder.named_parameters():
+        m = LAYER_RE.search(name)
+        depth.setdefault(int(m.group(1)) if m else -1, []).append(p)
+    return [{'params': ps, 'lr': lr * decay ** (n_layers - 1 - d)}
+            for d, ps in sorted(depth.items())]
+
+
+def optimizer_for(args, encoder, others, crf_params=()):
+    """AdamW over the encoder, the other trained modules (`others`: heads, a span head) at
+    args.lr and the CRF parameters at CRF_LR without weight decay, weight decay 0.01 otherwise:
+    the stored runs' optimiser. With --llrd the encoder is split by depth (encoder_groups);
+    without it the groups are those of the stored runs, in their order."""
+    import torch
+    decay = getattr(args, 'llrd', 0.0)
+    if decay:
+        groups = encoder_groups(encoder, args.lr, decay) + [{'params': list(others)}]
+    else:
+        groups = [{'params': [*encoder.parameters(), *others]}]
+    crf_params = list(crf_params)
+    if crf_params:
+        groups.append({'params': crf_params, 'lr': CRF_LR, 'weight_decay': 0.0})
+    return torch.optim.AdamW(groups, lr=args.lr, weight_decay=0.01)
+
+
+def warmup_steps(args, steps):
+    """The linear warm-up's steps: --warmup (default 0.1, the stored runs') of `steps`."""
+    return int(getattr(args, 'warmup', 0.1) * steps)
+
+
+class EpochWeights:
+    """--average-last K (A7): the weights (state dicts on the CPU) at the end of each recent
+    epoch; `average(best)` averages the selected epoch's and the K - 1 epochs' before it, as
+    many as were trained. Only floating-point tensors are averaged; any other buffer is the
+    selected epoch's."""
+
+    def __init__(self, k):
+        self.k, self.kept = k, {}
+
+    def add(self, epoch, states, best_epoch):
+        """states: {name: state dict} at the end of `epoch`; best_epoch: the selected epoch so
+        far (epochs that no later selection can need are dropped)."""
+        self.kept[epoch] = {name: {k: v.detach().cpu().clone() for k, v in sd.items()}
+                            for name, sd in states.items()}
+        for e in [e for e in self.kept if e < best_epoch - self.k + 1]:
+            del self.kept[e]
+
+    def average(self, best_epoch):
+        """({name: averaged state dict}, the averaged epochs)."""
+        epochs = [e for e in range(best_epoch - self.k + 1, best_epoch + 1) if e in self.kept]
+        out = {}
+        for name, best in self.kept[best_epoch].items():
+            out[name] = {}
+            for key, value in best.items():
+                if value.is_floating_point():
+                    out[name][key] = sum(self.kept[e][name][key] for e in epochs) / len(epochs)
+                else:
+                    out[name][key] = value
+        return out, epochs
+
+
+def screen_record(seed, best_epoch, val_f1, train, val, history, extra=None):
+    """A --screen run's record: validation only, no field of TEST_FIELDS."""
+    record = {'seed': seed, 'best_epoch': best_epoch, 'val_f1': val_f1,
+              'n_train': len(train), 'n_val': len(val), 'history': history, **(extra or {})}
+    assert not set(record) & set(TEST_FIELDS), 'a screen record holds a test field'
+    return record
+
+
 def train_one(seed, train, val, test, labels, args, device, test_index=None, descriptions=None,
               silver=None, keep_tagger=False, contexts=None, augmented=None, lexicon=None):
     """Fine-tune and test once; `seed` is the model seed (--seed-offset included).
@@ -1123,13 +1249,13 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
     label2id = {lab: i for i, lab in enumerate(label_list)}
     id2label = {i: lab for lab, i in label2id.items()}
 
-    tokenizer = AutoTokenizer.from_pretrained(args.model)
-    assert tokenizer.is_fast, 'a fast tokenizer is required for word_ids()'
+    tokenizer = load_tokenizer(args.model)
     # float32 whatever the checkpoint holds: transformers 5 loads a model in the dtype of its
     # weights, and DeBERTa-v3's are float16, where training gives a NaN loss
     model = AutoModelForTokenClassification.from_pretrained(
         args.model, num_labels=len(label_list), id2label=id2label, label2id=label2id,
         dtype=torch.float32).to(device)
+    prepare_encoder(model, model.base_model, args)
     if descriptions is not None:
         # embedded before any fine-tuning; the head replaces the linear classifier
         assert len(descriptions) == len(labels), 'one description per label'
@@ -1171,7 +1297,15 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
     loss_fn = torch.nn.CrossEntropyLoss(
         weight=class_weights(f_train, len(label_list)).to(device) if args.class_weights else None,
         ignore_index=-100)
-    if crf is None:
+    if getattr(args, 'llrd', 0.0):
+        # A5 (P1): the encoder by depth, the classifier at the base rate, the CRF at its own
+        assert gaz is None, '--llrd is not available with the match term'
+        prefix = model.base_model_prefix + '.'
+        optimizer = optimizer_for(args, model.base_model,
+                                  [p for n, p in model.named_parameters()
+                                   if not n.startswith(prefix)],
+                                  crf.parameters() if crf is not None else ())
+    elif crf is None:
         optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=0.01)
     else:
         groups = [{'params': model.parameters()},
@@ -1186,11 +1320,12 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
         return predict(model, part_features, args.batch_size, pad_id, id2label, device, crf,
                        gaz=gaz, feats=None if rows is None else rows[part])
     steps = args.epochs * ((len(f_train) + args.batch_size - 1) // args.batch_size)
-    scheduler = get_linear_schedule_with_warmup(optimizer, int(0.1 * steps), steps)
+    scheduler = get_linear_schedule_with_warmup(optimizer, warmup_steps(args, steps), steps)
 
     def snapshot(module):
         return {k: v.detach().cpu().clone() for k, v in module.state_dict().items()}
 
+    window = EpochWeights(args.average_last) if getattr(args, 'average_last', 0) else None
     best = (-1.0, None, -1)
     history = []
     xla = is_xla(device)
@@ -1229,7 +1364,9 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
         if val_f1 > best[0]:
             best = (val_f1, (snapshot(model), snapshot(crf) if crf is not None else None,
                              snapshot(gaz) if gaz is not None else None), epoch)
-        elif epoch - best[2] >= args.patience:
+        if window is not None:
+            window.add(epoch, {'model': model.state_dict(), 'crf': crf.state_dict()}, best[2])
+        if epoch != best[2] and epoch - best[2] >= args.patience:     # no gain this epoch
             break
 
     model.load_state_dict(best[1][0])
@@ -1237,6 +1374,19 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
         crf.load_state_dict(best[1][1])
     if gaz is not None:
         gaz.load_state_dict(best[1][2])
+    averaged = None
+    if window is not None:
+        # A7 (P1): the selected epoch's weights and those of the epochs before it, averaged,
+        # are the run's model; its validation F1, scored once, is the run's
+        states, epochs = window.average(best[2])
+        model.load_state_dict(states['model'])
+        crf.load_state_dict(states['crf'])
+        averaged = {'epochs': epochs, 'val_f1_selected': best[0],
+                    'val_f1': score([g for _, g, _ in val], decode(f_val, 'val'))['f1']}
+    if getattr(args, 'screen', False):
+        assert not test and not keep_tagger, 'a screen run has no test set'
+        return screen_record(seed, best[2], averaged['val_f1'] if averaged else best[0], train,
+                             val, history, {'average': averaged} if averaged else None)
     biases = entity_biases(args)
     if biases:
         decodes = biased_decodes(model, f_test, args.batch_size, pad_id, id2label, device, crf,
@@ -1248,6 +1398,8 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
     result.update({'seed': seed, 'best_epoch': best[2], 'val_f1': best[0],
                    'n_train': len(train), 'n_val': len(val), 'n_test': len(test),
                    'history': history})
+    if averaged:
+        result.update({'val_f1': averaged['val_f1'], 'average': averaged})
     if gaz is not None:
         result['names_feature'] = {
             'n_names': len(lexicon), 'lr': GAZ_LR,
@@ -1265,6 +1417,250 @@ def train_one(seed, train, val, test, labels, args, device, test_index=None, des
         return result, SimpleNamespace(model=model, crf=crf, tokenizer=tokenizer,
                                        label2id=label2id, id2label=id2label, gaz=gaz,
                                        lexicon=lexicon)
+    return result
+
+
+def load_encoder(name):
+    """The pre-trained encoder in float32, without a pooler where the model has one (BERT's,
+    as the stored multi-task runs loaded it; DeBERTa has none and takes no such argument)."""
+    import torch
+    from transformers import AutoConfig, AutoModel
+    config = AutoConfig.from_pretrained(name)
+    extra = {'add_pooling_layer': False} if config.model_type in ('bert', 'roberta') else {}
+    return AutoModel.from_pretrained(name, dtype=torch.float32, **extra)
+
+
+def span_sentences(part):
+    """(tokens, IOB2 tags, doc) sentences as span_ner sentences."""
+    import span_ner
+    return [{'tokens': list(t), 'entities': span_ner.iob2_entities(g)} for t, g, _ in part]
+
+
+def train_span(seed, train, val, test, labels, args, device, test_index=None, contexts=None):
+    """P1's candidate E on SOFC-Exp (--span-head): the encoder with span_ner's span head,
+    trained by A0's recipe (AdamW, the encoder at args.lr and the head at span_ner.HEAD_LR,
+    weight decay 0.01, the linear warm-up and schedule, clipping at 1.0, shuffled batches,
+    the epoch of the best validation micro F1, early stopping) and decoded flat. The width cap
+    comes from the training sentences. With --screen the record has validation only."""
+    import torch
+    from transformers import get_linear_schedule_with_warmup, set_seed
+    import span_ner
+
+    set_seed(seed)
+    tokenizer = load_tokenizer(args.model)
+    encoder = load_encoder(args.model).to(device)
+    types = list(labels)
+    type_index = {k: i for i, k in enumerate(types)}
+    sents = {name: span_sentences(part) for name, part in
+             (('train', train), ('val', val), ('test', test))}
+    cap = span_ner.width_cap(sents['train'])
+    model = span_ner.make_tagger(encoder, len(types), cap).to(device)
+    prepare_encoder(encoder, encoder, args)
+    max_length = encoder.config.max_position_embeddings
+
+    def feats(name):
+        out = []
+        for k, s in enumerate(sents[name]):
+            left = right = ()
+            if contexts is not None:
+                own = len(tokenizer(s['tokens'], is_split_into_words=True,
+                                    truncation=False)['input_ids'])
+                left, right = context_words(tokenizer, *contexts[name][k],
+                                            min(args.context, max(0, (max_length - own) // 2)))
+            out.append(span_ner.encode(s, tokenizer, type_index, cap, max_length, left, right))
+        return out
+    f = {name: feats(name) for name in sents}
+    pad_id = tokenizer.pad_token_id
+    if getattr(args, 'llrd', 0.0):
+        groups = encoder_groups(encoder, args.lr, args.llrd)
+    else:
+        groups = [{'params': list(encoder.parameters())}]
+    groups.append({'params': list(model.head.parameters()), 'lr': span_ner.HEAD_LR})
+    optimizer = torch.optim.AdamW(groups, lr=args.lr, weight_decay=0.01)
+    steps = args.epochs * ((len(f['train']) + args.batch_size - 1) // args.batch_size)
+    scheduler = get_linear_schedule_with_warmup(optimizer, warmup_steps(args, steps), steps)
+
+    def f1_of(name):
+        pred = span_ner.predict(model, f[name], types, False, args.batch_size, pad_id, device)
+        tags = [span_ner.entities_to_iob2(p, len(s['tokens'])) for p, s in
+                zip(pred, sents[name])]
+        return score([g for _, g, _ in (val if name == 'val' else test)], tags), tags
+
+    window = EpochWeights(args.average_last) if args.average_last else None
+    best, history = (-1.0, None, -1), []
+    for epoch in range(args.epochs):
+        model.train()
+        total = 0.0
+        order = list(range(len(f['train'])))
+        random.Random(seed * 1000 + epoch).shuffle(order)
+        for start in range(0, len(order), args.batch_size):
+            items = [f['train'][i] for i in order[start:start + args.batch_size]]
+            if not any(x['spans'] for x in items):
+                continue
+            batch = span_ner.collate(items, pad_id, len(types), device)
+            batch_loss = span_ner.loss(model(batch), batch)
+            batch_loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            optimizer.step()
+            scheduler.step()
+            optimizer.zero_grad()
+            total += batch_loss.item()
+        val_f1 = f1_of('val')[0]['f1']
+        history.append({'epoch': epoch, 'train_loss': round(total, 4), 'val_f1': val_f1})
+        print(f"    seed {seed} epoch {epoch}: loss {total:.3f} val F1 {val_f1:.2f}", flush=True)
+        if val_f1 > best[0]:
+            best = (val_f1, {k: v.detach().cpu().clone() for k, v in model.state_dict().items()},
+                    epoch)
+        if window is not None:
+            window.add(epoch, {'model': model.state_dict()}, best[2])
+        if epoch != best[2] and epoch - best[2] >= args.patience:
+            break
+    model.load_state_dict(best[1])
+    averaged = None
+    if window is not None:                    # A7: the selected epoch's and those before it
+        states, epochs = window.average(best[2])
+        model.load_state_dict(states['model'])
+        averaged = {'epochs': epochs, 'val_f1_selected': best[0]}
+    extra = {'span_head': {'width_cap': cap, 'head_lr': span_ner.HEAD_LR,
+                           'unreachable_train': sum(x['unreachable'] for x in f['train']),
+                           'unreachable_val': sum(x['unreachable'] for x in f['val'])}}
+    val_score = best[0]
+    if averaged is not None:
+        val_score = averaged['val_f1'] = f1_of('val')[0]['f1']
+        extra['average'] = averaged
+    if getattr(args, 'screen', False):
+        assert not test, 'a screen run has no test set'
+        return screen_record(seed, best[2], val_score, train, val, history, extra)
+    result, test_pred = f1_of('test')
+    result.update({'seed': seed, 'best_epoch': best[2], 'val_f1': val_score,
+                   'n_train': len(train), 'n_val': len(val), 'n_test': len(test),
+                   'history': history, **extra})
+    if getattr(args, 'save_predictions', False):
+        result.update(prediction_fields(test_index, test, test_pred))
+    return result
+
+
+JOINT_HEADS = ('main', 'other')
+
+
+def mulms_joint_sentences():
+    """P1's C2 for SOFC-Exp: MuLMS's training-fold sentences (the pinned release, read by
+    mulms_nested) as (tokens, IOB2 tags of their outermost entities), without the documents
+    that SOFC-Exp also holds (results/sota/shared_documents.json), and MuLMS's types."""
+    import mulms_nested as mn
+    import sota_p1
+    shared = sota_p1.shared_mulms_documents()
+    out = [(s['tokens'], mn.outermost_iob2(s)) for s in mn.read_release()
+           if s['split'].startswith('train') and s['doc_id'] not in shared]
+    return out, list(mn.TYPES)
+
+
+def train_joint(seed, train, val, test, labels, other, other_labels, args, device,
+                test_index=None, contexts=None):
+    """P1's C2 (--joint-mulms): one encoder with a CRF head per corpus (make_multitask_tagger,
+    heads 'main' and 'other'). Each epoch trains on the benchmark's training sentences and
+    min(n, m) of the other corpus's (`other`: (tokens, tags)), drawn without replacement by
+    random.Random(f'{seed}-{epoch}'), shuffled together; each sentence's loss is its own
+    head's (multitask_loss: the mean NLL of each head's rows, summed). The other corpus is
+    never scored, and has no document context. Otherwise A0's recipe; the epoch is the main
+    head's best on validation."""
+    import torch
+    from transformers import get_linear_schedule_with_warmup, set_seed
+
+    set_seed(seed)
+    label_lists = {'main': ['O'] + [f'{p}-{t}' for t in labels for p in ('B', 'I')],
+                   'other': ['O'] + [f'{p}-{t}' for t in other_labels for p in ('B', 'I')]}
+    label2id = {h: {lab: i for i, lab in enumerate(lst)} for h, lst in label_lists.items()}
+    id2label = {h: dict(enumerate(lst)) for h, lst in label_lists.items()}
+    tokenizer = load_tokenizer(args.model)
+    model = make_multitask_tagger(args.model, label_lists).to(device)
+    prepare_encoder(model.encoder, model.encoder, args)
+    pad_id = tokenizer.pad_token_id
+    max_length = model.encoder.config.max_position_embeddings
+    main = [(t, {'main': g, 'other': None}) for t, g, _ in train]
+    f_main = encode_multitask(tokenizer, main, label2id, max_length,
+                              contexts['train'] if contexts else None,
+                              args.context if contexts else 0, heads=JOINT_HEADS)
+    f_other = encode_multitask(tokenizer, [(t, {'main': None, 'other': g}) for t, g in other],
+                               label2id, max_length, heads=JOINT_HEADS)
+
+    def encoded(part, name):
+        if contexts is None:
+            return encode(tokenizer, [(t, g) for t, g, _ in part], label2id['main'])
+        return encode(tokenizer, [(t, g) for t, g, _ in part], label2id['main'], max_length,
+                      contexts[name], args.context)
+    f_val, f_test = encoded(val, 'val'), encoded(test, 'test')
+    n_other = min(len(train), len(other))
+    if getattr(args, 'llrd', 0.0):
+        optimizer = optimizer_for(args, model.encoder, model.heads.parameters(),
+                                  model.crfs.parameters())
+    else:
+        optimizer = torch.optim.AdamW(
+            [{'params': [*model.encoder.parameters(), *model.heads.parameters()]},
+             {'params': model.crfs.parameters(), 'lr': CRF_LR, 'weight_decay': 0.0}],
+            lr=args.lr, weight_decay=0.01)
+    steps = args.epochs * ((len(train) + n_other + args.batch_size - 1) // args.batch_size)
+    scheduler = get_linear_schedule_with_warmup(optimizer, warmup_steps(args, steps), steps)
+    head = HeadView(model, 'main')
+
+    window = EpochWeights(args.average_last) if args.average_last else None
+    best, history = (-1.0, None, -1), []
+    for epoch in range(args.epochs):
+        model.train()
+        pick = random.Random(f'{seed}-{epoch}').sample(range(len(other)), n_other)
+        f_train = {h: f_main[h] + [f_other[h][i] for i in pick] for h in JOINT_HEADS}
+        totals = dict.fromkeys(JOINT_HEADS, 0.0)
+        for ids, mask, lab, idx in multitask_batches(f_train, args.batch_size, pad_id,
+                                                      shuffle_seed=seed * 1000 + epoch,
+                                                      heads=JOINT_HEADS):
+            logits = model(input_ids=ids.to(device), attention_mask=mask.to(device))
+            losses = multitask_loss(logits, lab, model.crfs)
+            sum(losses.values()).backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            optimizer.step()
+            scheduler.step()
+            optimizer.zero_grad()
+            for h, value in losses.items():
+                totals[h] += value.item()
+        pred = predict(head, f_val, args.batch_size, pad_id, id2label['main'], device,
+                       model.crfs['main'])
+        val_f1 = score([g for _, g, _ in val], pred)['f1']
+        history.append({'epoch': epoch, 'train_loss': round(sum(totals.values()), 4),
+                        'train_loss_other': round(totals['other'], 4), 'val_f1': val_f1})
+        print(f"    seed {seed} epoch {epoch}: loss {totals['main']:.3f} + other "
+              f"{totals['other']:.3f}, val F1 {val_f1:.2f}", flush=True)
+        if val_f1 > best[0]:
+            best = (val_f1, {k: v.detach().cpu().clone() for k, v in model.state_dict().items()},
+                    epoch)
+        if window is not None:
+            window.add(epoch, {'model': model.state_dict()}, best[2])
+        if epoch != best[2] and epoch - best[2] >= args.patience:
+            break
+    model.load_state_dict(best[1])
+    averaged = None
+    if window is not None:                    # A7: the selected epoch's and those before it
+        states, epochs = window.average(best[2])
+        model.load_state_dict(states['model'])
+        averaged = {'epochs': epochs, 'val_f1_selected': best[0]}
+    extra = {'joint': {'n_other': len(other), 'other_per_epoch': n_other,
+                       'other_types': list(other_labels)}}
+    val_score = best[0]
+    if averaged is not None:
+        pred = predict(head, f_val, args.batch_size, pad_id, id2label['main'], device,
+                       model.crfs['main'])
+        val_score = averaged['val_f1'] = score([g for _, g, _ in val], pred)['f1']
+        extra['average'] = averaged
+    if getattr(args, 'screen', False):
+        assert not test, 'a screen run has no test set'
+        return screen_record(seed, best[2], val_score, train, val, history, extra)
+    test_pred = predict(head, f_test, args.batch_size, pad_id, id2label['main'], device,
+                        model.crfs['main'])
+    result = score([g for _, g, _ in test], test_pred)
+    result.update({'seed': seed, 'best_epoch': best[2], 'val_f1': val_score,
+                   'n_train': len(train), 'n_val': len(val), 'n_test': len(test),
+                   'history': history, **extra})
+    if getattr(args, 'save_predictions', False):
+        result.update(prediction_fields(test_index, test, test_pred))
     return result
 
 
@@ -1726,14 +2122,19 @@ def multitask_examples(fine, coarse):
     A sentence with the same tokens in both is one example with both tag
     sequences. Any other gives two: (fine tokens, fine tags) and (coarse tokens,
     coarse tags), each labelled for its own head only (None for the other head).
+    Tags of None (--screen-level, P1: the other level's tags of a sentence in that level's
+    released test set) leave that head without labels for the sentence: a sentence the two
+    corpora tokenise differently then gives one example, for the other head.
     """
     examples = []
     for (f_tokens, f_tags, _), (c_tokens, c_tags, _) in zip(fine, coarse, strict=True):
         if f_tokens == c_tokens:
             examples.append((f_tokens, {'fine': f_tags, 'coarse': c_tags}))
         else:
-            examples.append((f_tokens, {'fine': f_tags, 'coarse': None}))
-            examples.append((c_tokens, {'fine': None, 'coarse': c_tags}))
+            if f_tags is not None:
+                examples.append((f_tokens, {'fine': f_tags, 'coarse': None}))
+            if c_tags is not None:
+                examples.append((c_tokens, {'fine': None, 'coarse': c_tags}))
     return examples
 
 
@@ -1743,14 +2144,20 @@ def multitask_contexts(fine, coarse, contexts):
     examples of one they tokenise differently. contexts: {head: a (left, right) per sentence
     of that head's list (part_contexts)}."""
     out = []
-    for k, ((f_tokens, _, _), (c_tokens, _, _)) in enumerate(zip(fine, coarse, strict=True)):
-        out.append(contexts['fine'][k])
-        if f_tokens != c_tokens:
+    for k, ((f_tokens, f_tags, _), (c_tokens, c_tags, _)) in enumerate(
+            zip(fine, coarse, strict=True)):
+        if f_tokens == c_tokens:
+            out.append(contexts['fine'][k])
+            continue
+        if f_tags is not None:
+            out.append(contexts['fine'][k])
+        if c_tags is not None:
             out.append(contexts['coarse'][k])
     return out
 
 
-def encode_multitask(tokenizer, examples, label2id, max_length=512, contexts=None, budget=0):
+def encode_multitask(tokenizer, examples, label2id, max_length=512, contexts=None, budget=0,
+                     heads=MT_HEADS):
     """encode() for every head: {head: features}, in the order of `examples`.
 
     An example without tags for a head has only -100 labels for it, so that
@@ -1758,7 +2165,7 @@ def encode_multitask(tokenizer, examples, label2id, max_length=512, contexts=Non
     as in encode(), a (left, right) per example (multitask_contexts).
     """
     features = {}
-    for head in MT_HEADS:
+    for head in heads:
         sentences = [(tokens, ['O'] * len(tokens) if tags[head] is None else tags[head])
                      for tokens, tags in examples]
         features[head] = encode(tokenizer, sentences, label2id[head], max_length, contexts,
@@ -1769,16 +2176,16 @@ def encode_multitask(tokenizer, examples, label2id, max_length=512, contexts=Non
     return features
 
 
-def multitask_batches(features, batch_size, pad_id, shuffle_seed=None):
+def multitask_batches(features, batch_size, pad_id, shuffle_seed=None, heads=MT_HEADS):
     """batches() of every head at once: (ids, mask, {head: labels}, idx).
 
     The heads' features hold the same examples in the same order, and batches()
     orders them by the shuffle seed alone, so the batches of the heads line up.
     """
-    streams = [batches(features[head], batch_size, pad_id, shuffle_seed) for head in MT_HEADS]
+    streams = [batches(features[head], batch_size, pad_id, shuffle_seed) for head in heads]
     for parts in zip(*streams):
         ids, mask, _, idx = parts[0]
-        yield ids, mask, {head: part[2] for head, part in zip(MT_HEADS, parts)}, idx
+        yield ids, mask, {head: part[2] for head, part in zip(heads, parts)}, idx
 
 
 def multitask_loss(logits, labels, crfs, weights=None):
@@ -1848,8 +2255,7 @@ def _define_tagger():
 
         def __init__(self, model_name, label_lists):
             super().__init__()
-            self.encoder = AutoModel.from_pretrained(model_name, add_pooling_layer=False,
-                                                     dtype=torch.float32)   # as in train_one
+            self.encoder = load_encoder(model_name)            # float32, as in train_one
             config = self.encoder.config
             p = getattr(config, 'classifier_dropout', None)
             self.dropout = torch.nn.Dropout(config.hidden_dropout_prob if p is None else p)
@@ -1878,12 +2284,13 @@ def multitask_history(log, head):
     """
     return [{'epoch': epoch, 'train_loss': round(sum(losses.values()), 4), 'val_f1': f1[head],
              **{f'train_loss_{h}': round(losses[h], 4) for h in MT_HEADS},
-             **{f'val_f1_{h}': f1[h] for h in MT_HEADS}}
+             **{f'val_f1_{h}': f1[h] for h in MT_HEADS if h in f1}}
             for epoch, losses, f1 in log]
 
 
 def train_multitask(seed, parts, labels, args, device, test_index=None, descriptions=None,
-                    silver=None, keep_tagger=False, contexts=None, augmented=None):
+                    silver=None, keep_tagger=False, contexts=None, augmented=None,
+                    scored=MT_HEADS):
     """Fine-tune one encoder with a fine and a coarse CRF head together; test each head.
 
     parts: {head: (train, val, test)}, lists of (tokens, tags, doc) for the same
@@ -1908,7 +2315,9 @@ def train_multitask(seed, parts, labels, args, device, test_index=None, descript
     sentence is encoded with up to args.context subwords of context per side, as in train_one
     (a training example takes its context as in multitask_contexts). augmented
     (--augment-mentions): [(words, {head: tags})] trained on as gold examples
-    (mention_replacements_multitask).
+    (mention_replacements_multitask). scored (--screen-level, P1): the heads that are
+    validated, pick their epochs, stop the training and get a record; another head is trained
+    only (its parts hold no validation or test sentences).
     """
     import torch
     from transformers import AutoTokenizer, get_linear_schedule_with_warmup, set_seed
@@ -1919,9 +2328,9 @@ def train_multitask(seed, parts, labels, args, device, test_index=None, descript
     label2id = {h: {lab: i for i, lab in enumerate(lst)} for h, lst in label_lists.items()}
     id2label = {h: dict(enumerate(lst)) for h, lst in label_lists.items()}
 
-    tokenizer = AutoTokenizer.from_pretrained(args.model)
-    assert tokenizer.is_fast, 'a fast tokenizer is required for word_ids()'
+    tokenizer = load_tokenizer(args.model)
     model = make_multitask_tagger(args.model, label_lists).to(device)
+    prepare_encoder(model.encoder, model.encoder, args)
     if descriptions is not None:
         # embedded before any fine-tuning, head by head; each replaces its linear layer
         for h in MT_HEADS:
@@ -1955,30 +2364,35 @@ def train_multitask(seed, parts, labels, args, device, test_index=None, descript
         weight = [1.0] * len(examples) + [SILVER_WEIGHT] * len(silver)
     if contexts is None:
         f_val, f_test = ({h: encode(tokenizer, [(t, g) for t, g, _ in parts[h][k]], label2id[h])
-                          for h in MT_HEADS} for k in (1, 2))
+                          for h in scored} for k in (1, 2))
     else:
         f_val, f_test = ({h: encode(tokenizer, [(t, g) for t, g, _ in parts[h][k]], label2id[h],
                                     model.encoder.config.max_position_embeddings,
                                     contexts[h][name], args.context)
-                          for h in MT_HEADS} for k, name in ((1, 'val'), (2, 'test')))
+                          for h in scored} for k, name in ((1, 'val'), (2, 'test')))
 
-    optimizer = torch.optim.AdamW(
-        [{'params': [*model.encoder.parameters(), *model.heads.parameters()]},
-         {'params': model.crfs.parameters(), 'lr': CRF_LR, 'weight_decay': 0.0}],
-        lr=args.lr, weight_decay=0.01)
+    if getattr(args, 'llrd', 0.0):
+        optimizer = optimizer_for(args, model.encoder, model.heads.parameters(),
+                                  model.crfs.parameters())
+    else:
+        optimizer = torch.optim.AdamW(
+            [{'params': [*model.encoder.parameters(), *model.heads.parameters()]},
+             {'params': model.crfs.parameters(), 'lr': CRF_LR, 'weight_decay': 0.0}],
+            lr=args.lr, weight_decay=0.01)
     params = list(model.parameters())
     steps = args.epochs * ((len(f_train['fine']) + args.batch_size - 1) // args.batch_size)
-    scheduler = get_linear_schedule_with_warmup(optimizer, int(0.1 * steps), steps)
+    scheduler = get_linear_schedule_with_warmup(optimizer, warmup_steps(args, steps), steps)
+    window = EpochWeights(args.average_last) if getattr(args, 'average_last', 0) else None
 
     def val_scores():
         f1 = {}
-        for h in MT_HEADS:
+        for h in scored:
             pred = predict(HeadView(model, h), f_val[h], args.batch_size, pad_id, id2label[h],
                            device, model.crfs[h])
             f1[h] = score([g for _, g, _ in parts[h][1]], pred)['f1']
         return f1
 
-    best = dict.fromkeys(MT_HEADS, (-1.0, None, -1))     # per head: (val F1, snapshot, epoch)
+    best = dict.fromkeys(scored, (-1.0, None, -1))       # per head: (val F1, snapshot, epoch)
     log = []
     for epoch in range(args.epochs):
         model.train()
@@ -1999,22 +2413,47 @@ def train_multitask(seed, parts, labels, args, device, test_index=None, descript
         val_f1 = val_scores()
         log.append((epoch, totals, val_f1))
         print(f"    seed {seed} epoch {epoch}: loss fine {totals['fine']:.3f} coarse "
-              f"{totals['coarse']:.3f}, val F1 fine {val_f1['fine']:.2f} coarse "
-              f"{val_f1['coarse']:.2f}", flush=True)
-        improved = [h for h in MT_HEADS if val_f1[h] > best[h][0]]
+              f"{totals['coarse']:.3f}, val F1 " + ' '.join(
+                  f'{h} {val_f1[h]:.2f}' for h in scored), flush=True)
+        improved = [h for h in scored if val_f1[h] > best[h][0]]
         if improved:
             snapshot = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
             for h in improved:
                 best[h] = (val_f1[h], snapshot, epoch)
-        elif epoch - max(b[2] for b in best.values()) >= args.patience:
+        if window is not None:
+            window.add(epoch, {'model': model.state_dict()}, min(b[2] for b in best.values()))
+        if not improved and epoch - max(b[2] for b in best.values()) >= args.patience:
             break
 
     n_split = sum(1 for _, tags in examples if None in tags.values())
     records = {}
     biases = entity_biases(args)
-    for h in MT_HEADS:
+    for h in scored:
         model.load_state_dict(best[h][1])
         train, val, test = parts[h]
+        other = [o for o in MT_HEADS if o != h][0]
+        averaged = None
+        if window is not None:
+            # A7 (P1), per head: its selected epoch's weights and those before it, averaged
+            states, epochs = window.average(best[h][2])
+            model.load_state_dict(states['model'])
+            pred = predict(HeadView(model, h), f_val[h], args.batch_size, pad_id, id2label[h],
+                           device, model.crfs[h])
+            averaged = {'epochs': epochs, 'val_f1_selected': best[h][0],
+                        'val_f1': score([g for _, g, _ in val], pred)['f1']}
+        if getattr(args, 'screen', False):
+            assert not test and not keep_tagger, 'a screen run has no test set'
+            extra = {'multi_task': {'n_examples': len(examples), 'n_split_examples': n_split,
+                                    'other_best_epoch': best[other][2] if other in best
+                                    else None,
+                                    'other_tags_dropped': sum(
+                                        1 for _, tags in examples if tags[other] is None)}}
+            if averaged:
+                extra['average'] = averaged
+            records[h] = screen_record(seed, best[h][2],
+                                       averaged['val_f1'] if averaged else best[h][0], train,
+                                       val, multitask_history(log, h), extra)
+            continue
         if biases:
             decodes = biased_decodes(HeadView(model, h), f_test[h], args.batch_size, pad_id,
                                      id2label[h], device, model.crfs[h], biases)
@@ -2023,12 +2462,13 @@ def train_multitask(seed, parts, labels, args, device, test_index=None, descript
             test_pred = predict(HeadView(model, h), f_test[h], args.batch_size, pad_id,
                                 id2label[h], device, model.crfs[h])
         result = score([g for _, g, _ in test], test_pred)
-        other = [o for o in MT_HEADS if o != h][0]
         result.update({'seed': seed, 'best_epoch': best[h][2], 'val_f1': best[h][0],
                        'n_train': len(train), 'n_val': len(val), 'n_test': len(test),
                        'history': multitask_history(log, h),
                        'multi_task': {'n_examples': len(examples), 'n_split_examples': n_split,
                                       'other_best_epoch': best[other][2]}})
+        if averaged:
+            result.update({'val_f1': averaged['val_f1'], 'average': averaged})
         if getattr(args, 'save_predictions', False):
             result.update(prediction_fields(test_index, test, test_pred))
         if biases:
@@ -2232,7 +2672,7 @@ RESULT_FILE = re.compile(r'ner_results_(fine|coarse|sofc_slot|sofc|mulms)'
                          r'(?:_(random_split_vary|leave_one_paper_out|leave_two_papers_out|'
                          r'published_split|document_folds|article_draws|'
                          r'leave_one_subfield_out|random_split_pool|matscibert_cv|'
-                         r'nested_configs))?'
+                         r'nested_configs|screen_split|published_screen|nested_screen))?'
                          r'(?:_([a-z0-9_]+))?\.json')
 # untagged variants: a tagged variant must not take the name of one (--crf --tag mt: crf_mt)
 PLAIN_VARIANTS = ('baseline', 'cw', 'crf', 'crf_mt', 'crf_ls', 'crf_st', 'crf_mt_ls', 'crf_st3',
@@ -2258,7 +2698,9 @@ def variant_name(args):
     with --teachers N ('crf_mt_st<N>' with --multi-task too). A tag is appended with an underscore (crf_m100); the baseline is
     named by it alone.
     """
-    if getattr(args, 'crf', False):
+    if getattr(args, 'span_head', False):
+        name = 'span_ctx' if getattr(args, 'context', 0) else 'span'      # P1's E
+    elif getattr(args, 'crf', False):
         multi_task = getattr(args, 'multi_task', False)
         name = 'crf_mt' if multi_task else 'crf'
         if getattr(args, 'label_semantics', False):
@@ -2296,6 +2738,8 @@ def variant_name(args):
             name = 'crf_spool'                  # the pool drawn by sentence (week 20)
         if hasattr(args, 'entity_bias'):
             name += '_bias'
+        if getattr(args, 'joint_mulms', False):                         # P1's C2
+            name = 'crf_joint_ctx' if getattr(args, 'context', 0) else 'crf_joint'
     else:
         name = 'cw' if args.class_weights else 'baseline'
     tag = getattr(args, 'tag', None)
@@ -2460,6 +2904,16 @@ def summarize(results):
     runs = results['runs']
     if not runs:
         return results
+    if results.get('screen'):
+        # a --screen file (P1): validation scores only
+        vals = [r['val_f1'] for r in runs]
+        results['val_f1_mean'] = round(statistics.mean(vals), 2)
+        results['summary'] = {
+            'n_runs': len(runs), 'run_ids': [r.get('run_id') for r in runs],
+            'val': {'mean': round(statistics.mean(vals), 2),
+                    'sd': round(statistics.stdev(vals), 2) if len(vals) > 1 else 0.0,
+                    'per_run': [round(v, 2) for v in vals]}}
+        return results
     f1s = [r['f1'] for r in runs]
     results['test_f1_mean'] = round(statistics.mean(f1s), 2)
     results['test_f1_std'] = round(statistics.pstdev(f1s), 2) if len(f1s) > 1 else 0.0
@@ -2475,6 +2929,17 @@ def summarize(results):
         }
     results['summary'] = summary
     return results
+
+
+def summary_line(results):
+    """The printed summary of a summarized results file (a screen file's: validation)."""
+    s = results['summary']
+    if results.get('screen'):
+        return (f"val F1 {s['val']['mean']:.2f} (SD {s['val']['sd']:.2f}) over {s['n_runs']} "
+                f"runs")
+    return (f"micro F1 {s['micro']['mean']:.2f} 95% CI {s['micro']['ci95']}, macro "
+            f"{s['macro']['mean']:.2f}, weighted {s['weighted']['mean']:.2f} over "
+            f"{s['n_runs']} runs")
 
 
 def compare_to_baseline(base, variant):
@@ -2565,8 +3030,16 @@ def make_folds(data, args, indices=False, granularity=None):
     """
     if getattr(args, 'sofc_cv', False):
         return sofc_cv_parts(data, indices)
+    if getattr(args, 'screen_splits', False):
+        # P1: MaterioMiner's screen splits of the level's released training and validation
+        parts, _ = published_split(data, granularity)
+        folds = [(f'seed{seed}', *screen_split_parts(parts, seed), []) for seed in args.seeds]
+        return folds if indices else [(name, *([data[i] for i in part] for part in rest))
+                                      for name, *rest in folds]
     if getattr(args, 'published_split', False):
         parts, _ = published_split(data, granularity)
+        if getattr(args, 'screen', False):
+            parts = [parts[0], parts[1], []]      # P1: scored on validation only
         if getattr(args, 'train_articles', 0):
             return article_draws(data, parts, args.train_articles, args.draws,
                                  args.split_seed, indices)
@@ -2842,7 +3315,7 @@ def granularity_data(granularity, args):
         labels = [t for t in labels if t in SOFC_SLOT_TYPES]
     keep = set(labels)
     data = [(t, restrict_tags(g, keep), d) for t, g, d in data]
-    if getattr(args, 'published_split', False):
+    if getattr(args, 'published_split', False) or getattr(args, 'screen_splits', False):
         _, data = published_split(data, granularity)      # the release's tags
     return data, labels, tie_info
 
@@ -2859,6 +3332,10 @@ def head_granularities(args):
 
 
 def protocol_name(args):
+    if getattr(args, 'screen_splits', False):
+        return SCREEN_SPLIT
+    if getattr(args, 'screen', False) and getattr(args, 'published_split', False):
+        return PUBLISHED_SCREEN
     if getattr(args, 'sofc_cv', False):
         return SOFC_CV
     if getattr(args, 'leave_one_subfield_out', False):
@@ -3025,6 +3502,8 @@ def run(args):
     device = torch_device(args)
     environment = run_environment(device)
     os.makedirs(out_dir, exist_ok=True)
+    # P1's C2: the other corpus, read once
+    joint = mulms_joint_sentences() if getattr(args, 'joint_mulms', False) else None
 
     for granularity in granularities:
         data, labels, tie_info = tasks[granularity]
@@ -3038,6 +3517,8 @@ def run(args):
                                           args.seed_offset, args.save_predictions,
                                           corpus.get('self_train_sha256'),
                                           trained_run_ids(args))}
+        if getattr(args, 'screen', False):
+            results['screen'] = True
         if semantics:
             results['config']['label_descriptions_sha256'] = ner_label_text.descriptions_sha256(
                 labels, descriptions[granularity])
@@ -3092,9 +3573,16 @@ def run(args):
                 augmented = (mention_replacements([(w, t) for w, t, _ in train],
                                                   args.augment_mentions, seed, names=names)
                              if getattr(args, 'augment_mentions', 0) else None)
-                res = train_one(seed, train, val, test, labels, args, device, test_index=te,
-                                descriptions=descriptions[granularity], contexts=contexts,
-                                augmented=augmented)
+                if getattr(args, 'span_head', False):
+                    res = train_span(seed, train, val, test, labels, args, device,
+                                     test_index=te, contexts=contexts)
+                elif joint is not None:
+                    res = train_joint(seed, train, val, test, labels, *joint, args, device,
+                                      test_index=te, contexts=contexts)
+                else:
+                    res = train_one(seed, train, val, test, labels, args, device,
+                                    test_index=te, descriptions=descriptions[granularity],
+                                    contexts=contexts, augmented=augmented)
                 if augmented is not None:
                     res['n_augmented'] = len(augmented)
                 if names_file is not None:
@@ -3115,17 +3603,19 @@ def run(args):
             # the published numbers are in-distribution; no reference for held-out papers
             ref = ('' if held_out_protocol(args) or PAPER_F1[granularity] is None
                    else f" (paper {PAPER_F1[granularity]})")
-            print(f"  {run_id}: test F1 {res['f1']:.2f} (strict {res['f1_strict']:.2f}), "
-                  f"best epoch {res['best_epoch']}, {res['runtime_sec']:.0f}s; "
-                  f"running mean {results['test_f1_mean']:.2f}{ref}", flush=True)
+            if results.get('screen'):
+                print(f"  {run_id}: val F1 {res['val_f1']:.2f}, best epoch {res['best_epoch']}, "
+                      f"{res['runtime_sec']:.0f}s; running mean {results['val_f1_mean']:.2f}",
+                      flush=True)
+            else:
+                print(f"  {run_id}: test F1 {res['f1']:.2f} (strict {res['f1_strict']:.2f}), "
+                      f"best epoch {res['best_epoch']}, {res['runtime_sec']:.0f}s; "
+                      f"running mean {results['test_f1_mean']:.2f}{ref}", flush=True)
         if results['runs']:
             summarize(results)
             with open(out_path, 'w') as f:
                 json.dump(results, f, indent=2)
-            s = results['summary']
-            print(f"  micro F1 {s['micro']['mean']:.2f} 95% CI {s['micro']['ci95']}, "
-                  f"macro {s['macro']['mean']:.2f}, weighted {s['weighted']['mean']:.2f} "
-                  f"over {s['n_runs']} runs")
+            print('  ' + summary_line(results))
         print(f"Saved {out_path}")
 
 
@@ -3142,11 +3632,20 @@ def run_multitask(args, out_dir):
     for head in MT_HEADS:
         data[head], labels[head], ties[head] = granularity_data(gran[head], args)
     check_aligned(data['fine'], data['coarse'])
+    # --screen-level (P1): the level whose screen split the run uses and whose head it scores;
+    # MaterioMiner's two levels have different released splits, so the other level's tags are
+    # dropped on every sentence of that level's released test set
+    level = getattr(args, 'screen_level', None)
+    scored = (level,) if level else MT_HEADS
+    dropped = set()
+    if level:
+        other = [h for h in MT_HEADS if h != level][0]
+        dropped = set(published_split(data[other], gran[other])[0][2])
     semantics = getattr(args, 'label_semantics', False)
     descriptions = ({head: label_descriptions(head, labels[head]) for head in MT_HEADS}
                     if semantics else None)
-    paths = {head: results_path(out_dir, gran[head], args) for head in MT_HEADS}
-    check_results_files(args, [(paths[head], labels[head]) for head in MT_HEADS])
+    paths = {head: results_path(out_dir, gran[head], args) for head in scored}
+    check_results_files(args, [(paths[head], labels[head]) for head in scored])
     device = torch_device(args)
     environment = run_environment(device)
     os.makedirs(out_dir, exist_ok=True)
@@ -3155,16 +3654,17 @@ def run_multitask(args, out_dir):
                       'model': args.model, 'labels': labels[head], 'label_tie': ties[head],
                       'paper_test_f1': PAPER_F1[gran[head]], 'config': dict(config),
                       'runs': resumable_runs(paths[head], labels[head], args.model, variant,
-                                             args.seed_offset, args.save_predictions)}
-               for head in MT_HEADS}
+                                             args.seed_offset, args.save_predictions),
+                      **({'screen': True} if getattr(args, 'screen', False) else {})}
+               for head in scored}
     if semantics:
-        for head in MT_HEADS:
+        for head in scored:
             results[head]['config']['label_descriptions_sha256'] = \
                 ner_label_text.descriptions_sha256(labels[head], descriptions[head])
-    done = set.intersection(*({r.get('run_id') for r in results[h]['runs']} for h in MT_HEADS))
+    done = set.intersection(*({r.get('run_id') for r in results[h]['runs']} for h in scored))
 
     def save():
-        for head in MT_HEADS:
+        for head in scored:
             summarize(results[head])
             with open(paths[head], 'w') as f:
                 json.dump(results[head], f, indent=2)
@@ -3181,8 +3681,9 @@ def run_multitask(args, out_dir):
             print(f"  {head} label descriptions: sha256 "
                   f"{results[head]['config']['label_descriptions_sha256'][:12]}")
 
-    folds = make_folds(data['fine'], args, indices=True,     # parts as corpus positions
-                       granularity=gran['fine'])
+    first = level or 'fine'
+    folds = make_folds(data[first], args, indices=True,     # parts as corpus positions
+                       granularity=gran[first])
     if folds is None:
         folds = []
         for seed in args.seeds:
@@ -3198,6 +3699,11 @@ def run_multitask(args, out_dir):
         if args.max_train:
             tr = tr[:args.max_train]
         parts = {h: tuple([data[h][i] for i in part] for part in (tr, va, te)) for h in MT_HEADS}
+        if level:
+            # the other head trains on the level's training sentences, without the tags of
+            # its own released test set, and is never validated or tested
+            parts[other] = ([(data[other][i][0], None if i in dropped else data[other][i][1],
+                              data[other][i][2]) for i in tr], [], [])
         contexts = ({h: {name: part_contexts(data[h], part, load_full_texts(gran[h]))
                          for name, part in (('train', tr), ('val', va), ('test', te))}
                      for h in MT_HEADS} if getattr(args, 'context', 0) else None)
@@ -3209,7 +3715,7 @@ def run_multitask(args, out_dir):
         start = time.time()
         records = train_multitask(seed, parts, labels, args, device, test_index=te,
                                   descriptions=descriptions, contexts=contexts,
-                                  augmented=augmented)
+                                  augmented=augmented, scored=scored)
         runtime = round(time.time() - start, 1)
         for head, res in records.items():
             if augmented is not None:
@@ -3222,16 +3728,18 @@ def run_multitask(args, out_dir):
             results[head]['runs'] = [r for r in results[head]['runs']
                                      if r.get('run_id') != run_id] + [res]
         save()
-        print(f"  {run_id}, {runtime:.0f}s: " + '; '.join(
-            f"{h} test F1 {records[h]['f1']:.2f} (strict {records[h]['f1_strict']:.2f}), best "
-            f"epoch {records[h]['best_epoch']}, running mean {results[h]['test_f1_mean']:.2f}"
-            f"{ref[h]}" for h in MT_HEADS), flush=True)
+        if getattr(args, 'screen', False):
+            print(f"  {run_id}, {runtime:.0f}s: " + '; '.join(
+                f"{h} val F1 {records[h]['val_f1']:.2f}, best epoch "
+                f"{records[h]['best_epoch']}" for h in scored), flush=True)
+        else:
+            print(f"  {run_id}, {runtime:.0f}s: " + '; '.join(
+                f"{h} test F1 {records[h]['f1']:.2f} (strict {records[h]['f1_strict']:.2f}), "
+                f"best epoch {records[h]['best_epoch']}, running mean "
+                f"{results[h]['test_f1_mean']:.2f}{ref[h]}" for h in MT_HEADS), flush=True)
     save()                         # every run_id of `folds` is now in both files
-    for head in MT_HEADS:
-        s = results[head]['summary']
-        print(f"  {head}: micro F1 {s['micro']['mean']:.2f} 95% CI {s['micro']['ci95']}, "
-              f"macro {s['macro']['mean']:.2f}, weighted {s['weighted']['mean']:.2f} "
-              f"over {s['n_runs']} runs")
+    for head in scored:
+        print(f"  {head}: {summary_line(results[head])}")
         print(f"Saved {paths[head]}")
 
 
@@ -3700,6 +4208,39 @@ def parse_args(argv=None):
     parser.add_argument('--self-train-sample', type=int, default=argparse.SUPPRESS, metavar='N',
                         help='with --self-train: the number of corpus sentences tagged (default '
                              '2,000; 0: the whole corpus)')
+    # the SOTA plan's P1 (ROADMAP §4, the screens)
+    parser.add_argument('--screen', action='store_true',
+                        help='P1: train and select on validation only; no test sentence is '
+                             'encoded or scored, and the results file holds no test field '
+                             '(with --screen-splits, or --published-split on SOFC-Exp)')
+    parser.add_argument('--screen-splits', action='store_true',
+                        help="P1, with --screen: MaterioMiner's screen splits, k = each --seeds "
+                             "value: the released split's training and validation sentences "
+                             'shuffled by random.Random(k), 57 for validation and 323 for '
+                             'training (protocol screen_split)')
+    parser.add_argument('--screen-level', choices=MT_HEADS, default=None,
+                        help='P1, with --multi-task --screen-splits: the level whose screen '
+                             "split the run uses and whose head it scores; the other level's "
+                             'tags are dropped on its own released test sentences')
+    parser.add_argument('--warmup', type=float, default=0.1,
+                        help="the linear warm-up's share of the steps (default 0.1; P1's A4: 0)")
+    parser.add_argument('--llrd', type=float, default=0.0,
+                        help="P1's A5: layer-wise learning-rate decay (0.9); 0, the default, "
+                             'is off')
+    parser.add_argument('--reinit-top', type=int, default=0, metavar='N',
+                        help="P1's A6: the top N encoder layers re-initialised before training")
+    parser.add_argument('--average-last', type=int, default=0, metavar='K',
+                        help="P1's A7: the weights of the selected epoch and the K - 1 before "
+                             'it averaged, then scored (needs --crf)')
+    parser.add_argument('--gradient-checkpointing', action='store_true',
+                        help="P1's B1 and B2: the encoder's gradient checkpointing")
+    parser.add_argument('--span-head', action='store_true',
+                        help="P1's E on SOFC-Exp: span_ner's span head instead of the CRF "
+                             '(variant span), decoded flat')
+    parser.add_argument('--joint-mulms', action='store_true',
+                        help="P1's C2 on SOFC-Exp, with --crf: joint training with MuLMS's "
+                             'training folds, their outermost entities on a head of their own '
+                             '(variant crf_joint)')
     parser.add_argument('--tag', type=tag_name, default=None, metavar='NAME',
                         help='appended to the variant name and the results file (crf + m100: '
                              'crf_m100; baseline + m100: m100); lowercase letters and digits, '
@@ -3864,8 +4405,8 @@ def parse_args(argv=None):
             parser.error('--augment-names with --multi-task needs --silver-mentions (week 17: '
                          'the mention filter on both heads)')
     if hasattr(args, 'context'):
-        if not args.crf:
-            parser.error('--context needs --crf')
+        if not (args.crf or getattr(args, 'span_head', False)):
+            parser.error('--context needs --crf (or --span-head)')
         if args.context < 1:
             parser.error('--context: at least 1 subword on each side')
         for option in ('label_semantics', 'self_train'):
@@ -3973,6 +4514,7 @@ def parse_args(argv=None):
         if args.granularity not in GRANULARITY_PAIRS:
             parser.error('--multi-task trains the fine and the coarse head together: '
                          '--granularity must be both (the default) or sofc_both')
+    check_screen_args(parser, args)
     # neither the tag nor the name in a seed tag (mt of mt_m100) may give a plain variant:
     # --crf --tag mt would write over crf_mt, --crf --tag mt_m100 over the multi-task crf_mt_m100
     stem = SimpleNamespace(**{**vars(args), 'tag': args.tag.split('_')[0]}) if args.tag else None
@@ -3982,6 +4524,72 @@ def parse_args(argv=None):
     if min(args.seeds) + args.seed_offset < 0:
         parser.error('model seeds (seed + --seed-offset) must not be negative')
     return args
+
+
+SCREEN_EXCLUDES = ('vary_split', 'leave_one_paper_out', 'leave_two_papers_out', 'document_folds',
+                   'sofc_cv', 'train_articles', 'leave_one_subfield_out', 'train_pool',
+                   'self_train', 'teachers', 'augment_mentions', 'augment_names',
+                   'names_feature', 'names_file', 'entity_bias', 'retokenized_test',
+                   'label_semantics', 'class_weights', 'save_predictions')
+
+
+def check_screen_args(parser, args):
+    """The checks of P1's options (--screen and round 1's changes)."""
+    if not 0.0 <= args.warmup < 1.0:
+        parser.error('--warmup: a share of the steps, from 0 up to 1')
+    if not 0.0 <= args.llrd < 1.0:
+        parser.error('--llrd: a decay from 0 (off) up to 1')
+    if args.reinit_top < 0:
+        parser.error('--reinit-top: 0 or more layers')
+    if args.average_last:
+        if args.average_last < 2:
+            parser.error('--average-last: at least 2 epochs')
+        if not (args.crf or args.span_head):
+            parser.error('--average-last needs --crf or --span-head (the head is averaged with '
+                         'the encoder)')
+        if getattr(args, 'self_train', None) is not None or hasattr(args, 'names_feature'):
+            parser.error('--average-last is not available with self-training or a match term')
+    if args.screen_level and not (args.screen_splits and getattr(args, 'multi_task', False)
+                                  and args.granularity == 'both'):
+        parser.error('--screen-level needs --screen-splits and --multi-task with '
+                     '--granularity both')
+    if args.screen_splits:
+        if not args.screen:
+            parser.error('--screen-splits needs --screen')
+        if args.granularity not in ('fine', 'coarse', 'both'):
+            parser.error("--screen-splits are MaterioMiner's (--granularity fine, coarse or both)")
+        if getattr(args, 'multi_task', False) and not args.screen_level:
+            parser.error('--screen-splits with --multi-task needs --screen-level (the two '
+                         "levels' released splits differ)")
+        if getattr(args, 'published_split', False):
+            parser.error('--screen-splits is a protocol of its own: no --published-split')
+    if args.span_head or args.joint_mulms:
+        option = '--span-head' if args.span_head else '--joint-mulms'
+        if args.granularity != 'sofc':
+            parser.error(f'{option} is for --granularity sofc (MuLMS: mulms_nested.py)')
+        if args.span_head and (args.crf or args.joint_mulms):
+            parser.error('--span-head replaces the CRF: no --crf or --joint-mulms')
+        if args.joint_mulms and not args.crf:
+            parser.error('--joint-mulms needs --crf (a CRF head per corpus)')
+        if getattr(args, 'multi_task', False):
+            parser.error(f'{option} is not available with --multi-task')
+        if not (args.screen or getattr(args, 'published_split', False)
+                or getattr(args, 'sofc_cv', False)):
+            parser.error(f"{option} needs SOFC-Exp's official split or its cross-validation")
+    if args.screen:
+        if not (args.crf or args.span_head):
+            parser.error('--screen needs --crf (or --span-head)')
+        if not (args.screen_splits or getattr(args, 'published_split', False)):
+            parser.error('--screen needs --screen-splits (MaterioMiner) or --published-split '
+                         '(SOFC-Exp)')
+        if getattr(args, 'published_split', False) and args.granularity not in (
+                'sofc', 'sofc_both'):
+            parser.error("--screen with --published-split is SOFC-Exp's (--granularity sofc or "
+                         "sofc_both): MaterioMiner is screened on its screen splits, never on "
+                         'the released validation set')
+        for option in SCREEN_EXCLUDES:
+            if getattr(args, option, None) not in (None, False, 0):
+                parser.error(f"--screen is not available with --{option.replace('_', '-')}")
 
 
 def main():

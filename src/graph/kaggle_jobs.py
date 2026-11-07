@@ -284,6 +284,7 @@ ROOT = Path(__file__).resolve().parents[2]
 RUN_JOBS = ROOT / 'src' / 'kaggle' / 'run_jobs.py'
 WORK_DIR = ROOT / 'data' / 'processed' / 'kaggle'
 GPU_RESULTS = ROOT / 'results' / 'gpu'
+SCREEN_RESULTS = ROOT / 'results' / 'gpu_screen'     # the SOTA plan's P1: the screen files
 CORPUS = 'data/processed/corpus/fatigue_sentences.txt'
 CORPUS_REPORT = ROOT / 'results' / 'fatigue_corpus.json'
 # the SOFC corpus (week-6 amendment: multi-task self-training on SOFC-Exp, build_sofc_corpus.py)
@@ -329,8 +330,14 @@ GLINER_PINS = {'pip': ('sentencepiece==0.2.2',), 'pip_no_deps': ('gliner==0.2.30
 # kernel's (psutil, which ipykernel requires)
 ACCELERATE = 'accelerate==1.15.0'
 W21X_PINS = {**GLINER_PINS, 'pip_no_deps': (*GLINER_PINS['pip_no_deps'], ACCELERATE)}
+# the SOTA plan's P1 (ROADMAP §4): DeBERTa-v3-large (B1) and SciDeBERTa (B2), pinned
+SCIDEBERTA = 'KISTI-AI/scideberta'
+P1_PINS = {'pip': ('sentencepiece==0.2.2',),
+           'models': {DEBERTA: DEBERTA_PINS['models'][DEBERTA],
+                      SCIDEBERTA: '98fab84484cea48d2997348a18cebf2d4f419a14'}}
 BATCH_EXTRAS = {'smoke5': DEBERTA_PINS, 'smoke6': DEBERTA_PINS, 'w6a': DEBERTA_PINS,
-                'w21s': GLINER_PINS, 'w21a': GLINER_PINS, 'w21x': W21X_PINS}
+                'w21s': GLINER_PINS, 'w21a': GLINER_PINS, 'w21x': W21X_PINS,
+                'p1t': P1_PINS, 'p1n': P1_PINS}
 THREADS = 2
 DEADLINE_HOURS = 10                 # no job starts later; a Kaggle session lasts 12 hours
 # the TPU spike (docs/METHODS_PLAN.md §5): a batch named tpu... runs on Kaggle's TPU v5e-8, one
@@ -858,6 +865,82 @@ def stage2_methods(name):
     return methods
 
 
+# ---------------------------------------------------------------------------------------------
+# The SOTA plan's P1: batch p1t (timing and checks) and p1n (the next cells, from sota_p1)
+# ---------------------------------------------------------------------------------------------
+DAPT_SCRIPT = 'src/graph/dapt_mlm.py'
+P1_NEXT_JOBS = ROOT / 'results' / 'sota' / 'p1_next_jobs.json'
+P1_TIMING_EPOCHS = ('--epochs', '2')
+
+
+def dapt_b3_job():
+    """B3's pre-training: dapt_mlm.py's fixed settings on the SOFC corpus, on the GPU, the model
+    to sota_p1.B3_MODEL (the lane's later B3 jobs read it there)."""
+    import sota_p1
+    return [DAPT_SCRIPT, '--corpus', SOFC_CORPUS, '--out', sota_p1.B3_MODEL, '--report',
+            '/kaggle/working/processed/dapt_b3.json', '--device', 'cuda', '--save-every',
+            '100000', '--threads', str(THREADS)]
+
+
+def timing_job(benchmark, kind):
+    """A 2-epoch screen run of a cell kind on the benchmark's first unit, under a tag of its
+    own (p1t<kind>), so that it is never read as one of the cell's units."""
+    import sota_p1
+    units = sota_p1.UNITS[benchmark][:1]
+    job = sota_p1.jobs_for(benchmark, frozenset([kind]), units)[0]
+    at = job.index('--tag')
+    tag = job[at + 1].replace('p1', 'p1t', 1)
+    return [*job[:at], *P1_TIMING_EPOCHS, '--tag', tag, *job[at + 2:]]
+
+
+def p1t_lanes():
+    """Batch p1t: the checks (the smoke4 repeat smokebt; A0 on SOFC-Exp, seeds 0-400, whose
+    validation scores must equal the stored runs'; MuLMS's c1 in screen mode, which must equal
+    P0's dev score), B3's pre-training with a 2-epoch run on its model, and a 2-epoch timing
+    run of every new kind of cell on each benchmark it enters."""
+    import sota_p1
+    repeat = ['--granularity', 'fine', '--vary-split', '--seeds', '0', '--crf',
+              '--save-predictions', '--threads', str(THREADS), '--tag', 'smokebt']
+    lane0 = [repeat, dapt_b3_job(), timing_job('sofc', 'b3'),
+             *sota_p1.jobs_for('sofc', frozenset(), sota_p1.UNITS['sofc']),
+             *(timing_job('sofc', k) for k in ('b1', 'b2', 'c1', 'c2', 'c3', 'e'))]
+    lane1 = [*sota_p1.jobs_for('mulms', frozenset(), ['c1s0']),
+             *(timing_job('mulms', k) for k in ('c2', 'c3', 'e')),
+             *(timing_job('fine', k) for k in ('b1', 'b2', 'c1', 'c3'))]
+    return [lane0, lane1]
+
+
+def p1n_lanes(path=P1_NEXT_JOBS):
+    """Batch p1n: the jobs that sota_p1.py next-jobs wrote, balanced over the lanes by their
+    estimated minutes (the timing table's minutes per run, or 30 per job without one); a job
+    that trains on B3's model goes, after B3's pre-training, on lane 0."""
+    import sota_p1
+    entries = json.loads(Path(path).read_text())
+    minutes = {}
+    if sota_p1.TIMING_FILE.exists():
+        table = json.loads(sota_p1.TIMING_FILE.read_text())['table']
+        minutes = {(b, c): r['minutes_per_run'] for b, t in table.items()
+                   for c, r in t['cells'].items()}
+    costed, b3 = [], []
+    for entry in entries:
+        job, benchmark = entry['job'], entry['benchmark']
+        runs = (1 if job[0] == sota_p1.MULMS_NESTED_SCRIPT
+                else len(job[job.index('--seeds') + 1:job.index('--tag')]))
+        kinds = entry['changes'] or ['a0']
+        per_run = max(minutes.get((benchmark, k), 0.0) for k in kinds) or 30.0
+        if sota_p1.B3_MODEL in job:
+            b3.append(job)
+        else:
+            costed.append((runs * per_run, job))
+    loads = [0.0, 0.0]
+    if b3:
+        loads[0] = 60.0                      # the pre-training, at most an hour (P1's B3)
+    lanes = balance(costed, loads=loads)
+    if b3:
+        lanes[0] = [dapt_b3_job(), *b3, *lanes[0]]
+    return lanes
+
+
 def balance(costed, lanes=LANES, loads=None):
     """Jobs over `lanes`: longest first, each to the least loaded lane (ties: lowest);
     `loads` gives the lanes' starting loads."""
@@ -1340,6 +1423,10 @@ def batch_lanes(name):
         e2_repeat = gliner_job(setting, tag='smokebp', units=(unit,), extra=flags)
         lanes = balance(jobs, loads=[COST['crf'], W21X_E2_COST])
         return [[repeat + ['--tag', 'smokebo']] + lanes[0], [e2_repeat] + lanes[1]]
+    if name == 'p1t':
+        return p1t_lanes()
+    if name == 'p1n':
+        return p1n_lanes()
     if name == 'p0a':
         # the SOTA plan's P0 gates: the repeat of the CRF run of smoke4 (smokebq); MuLMS's 5
         # configurations (c1 to c5) and SOFC-Exp's cross-validation at seed offsets 0, 100 and
@@ -1375,7 +1462,7 @@ BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'i
            'w12e', 'w12f', 'w12g', 'w13a', 'w13b', 'w13c',
            *(f'w12b:{v}' for v in WEEK12_VARIANTS), *(f'w12d:{v}' for v in WEEK12_ANALOGUES),
            'tpu-smoke1', 'tpu-smoke', 'w14a', 'w14b', 'w14c', 'w15a', 'w17a', 'w17b', 'w18a',
-           'w19a', 'w19b', 'w20a', 'w21s', 'w21a', 'w21x', 'p0a')
+           'w19a', 'w19b', 'w20a', 'w21s', 'w21a', 'w21x', 'p0a', 'p1t', 'p1n')
 
 
 def batch_extras(name):
@@ -1513,7 +1600,7 @@ def is_gpu_runs_file(path):
 def build_bundle(commit, out_dir, root=ROOT, results_dir=GPU_RESULTS, corpus=None,
                  expected_sha256=None, wheels=(), sofc_corpus=None, sofc_report=None,
                  mulms_report=None, mulms_dir=None, topic_reports=None, topic_dir=None,
-                 week19_dir=None):
+                 week19_dir=None, screen_dir=None):
     """Write the bundle files to out_dir (emptied first); returns BUNDLE.json's content.
 
     code.tar.gz is `git archive` of `commit` (the frozen code, tracked files only); the
@@ -1529,7 +1616,8 @@ def build_bundle(commit, out_dir, root=ROOT, results_dir=GPU_RESULTS, corpus=Non
     root's TOPIC_CORPUS_DIR), goes in as topic_<topic>_sentences.txt with its recorded SHA-256
     (BUNDLE.json's topic_corpora, else None). graph_names.py's lexicon files in week19_dir
     (default root's WEEK19_DIR) go in as week19__<name> (BUNDLE.json's week19_names, their
-    SHA-256, when there are any).
+    SHA-256, when there are any). P1's screen files (screen_dir, results/gpu_screen) go in as
+    GPU results files too, so that a session resumes a cell's file (its extra units).
     """
     out_dir = Path(out_dir)
     if out_dir.exists():
@@ -1585,10 +1673,17 @@ def build_bundle(commit, out_dir, root=ROOT, results_dir=GPU_RESULTS, corpus=Non
     for path in sorted(week19_dir.glob('names_*.json')):
         week19[path.name] = file_sha256(path)
         shutil.copy2(path, out_dir / f'{WEEK19_PREFIX}{path.name}')
-    results = sorted(p.name for p in Path(results_dir).glob('ner_results_*.json')
-                     if is_gpu_runs_file(p)) if Path(results_dir).is_dir() else []
+    sources = {}
+    for folder in (Path(results_dir), Path(screen_dir) if screen_dir else None):
+        if folder is not None and folder.is_dir():
+            for p in folder.glob('ner_results_*.json'):
+                if is_gpu_runs_file(p):
+                    if p.name in sources:
+                        raise SystemExit(f'{p.name} is in two results folders')
+                    sources[p.name] = p
+    results = sorted(sources)
     for name in results:
-        shutil.copy2(Path(results_dir) / name, out_dir / f'{RESULTS_PREFIX}{name}')
+        shutil.copy2(sources[name], out_dir / f'{RESULTS_PREFIX}{name}')
     for wheel in wheels:
         shutil.copy2(wheel, out_dir / Path(wheel).name)
     info = {'commit': full, 'corpus_sha256': digest, 'sofc_corpus_sha256': sofc_digest,
@@ -1738,7 +1833,7 @@ def build_wheels(out_dir=WORK_DIR / 'wheels'):
 def cmd_bundle(args):
     user = username(args)
     folder = WORK_DIR / 'bundle'
-    info = build_bundle(args.commit, folder, wheels=build_wheels())
+    info = build_bundle(args.commit, folder, wheels=build_wheels(), screen_dir=SCREEN_RESULTS)
     (folder / 'dataset-metadata.json').write_text(
         json.dumps(dataset_metadata(user, args.dataset), indent=2))
     print(f"bundle: commit {info['commit'][:12]}, corpus {info['corpus_sha256'][:12]}, "

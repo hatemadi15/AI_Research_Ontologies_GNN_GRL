@@ -11,8 +11,12 @@ before any run. The published numbers come from a literature audit of
 
 *P1, 7 November: its protocol is fixed in ROADMAP §4, after an independent
 referee's check ("approve with required changes", all six applied). Its code
-comes next, then the timing batch `p1t` and the two rounds. It departs from
-this plan in four places, each justified there:
+is written and tested (`ner_baseline.py --screen` and round 1's options,
+`mulms_nested.py --screen`, `span_ner.py`, `sota_p1.py`, batches `p1t` and
+`p1n`). The timing batch `p1t` comes next, then the two rounds. Amendment 1
+(before any run) has C1 on MaterioMiner run one level at a time: the two levels'
+released splits are different partitions. It departs from this plan in four
+places, each justified there:
 - MaterioMiner is screened on 10 splits of the released training and
   validation sentences, not on 5 random splits that hold test sentences.
 - Tokenization-robust training is not screened, because no validation set is

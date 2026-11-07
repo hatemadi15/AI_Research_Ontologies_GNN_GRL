@@ -300,6 +300,8 @@ def mlm_loss(model, inputs, attention, labels, reduction='mean'):
     For BERT the prediction head only runs at those positions.
     """
     import torch
+    device = next(model.parameters()).device      # --device: the batch goes to the model
+    inputs, attention, labels = inputs.to(device), attention.to(device), labels.to(device)
     keep = labels != -100
     if hasattr(model, 'bert') and hasattr(model, 'cls'):
         hidden = model.bert(input_ids=inputs, attention_mask=attention).last_hidden_state
@@ -410,7 +412,7 @@ def train(model, data, args, meta, state, state_path, t0):
     job = {'started': time.strftime('%Y-%m-%d %H:%M:%S'), 'threads': torch.get_num_threads(),
            'start_step': 0, 'end_step': 0, 'steps': 0, 'step_seconds': 0.0, 'tokens': 0,
            'padded_tokens': 0, 'eval_seconds': 0.0, 'save_seconds': 0.0, 'wall_seconds': 0.0,
-           'versions': library_versions()}
+           'versions': library_versions(), 'device': str(next(model.parameters()).device)}
     step_times, step_padded, window = [], [], []
     epoch_padded = 0
 
@@ -675,6 +677,7 @@ def run(args):
         return
 
     model, info = AutoModelForMaskedLM.from_pretrained(args.model, output_loading_info=True)
+    model.to(args.device)
     load_info = {k: sorted(map(str, v)) for k, v in info.items()}
     if load_info.get('missing_keys') or load_info.get('mismatched_keys'):
         raise SystemExit(f"the MLM head did not load cleanly: {load_info}")
@@ -731,6 +734,9 @@ def parse_args(argv=None):
                        help='length grouping: sort within chunks of this many batches')
     running = parser.add_argument_group('running, smoke tests and benchmarks')
     running.add_argument('--threads', type=int, default=0, help='torch threads (0: all cores)')
+    running.add_argument('--device', default='cpu',
+                         help="the device of the training (default cpu, the stored runs'; the "
+                              "SOTA plan's P1, B3: cuda)")
     running.add_argument('--save-every', type=int, default=100)
     running.add_argument('--time-budget-min', type=float, default=0,
                          help='checkpoint and exit once the next checkpoint would end later')

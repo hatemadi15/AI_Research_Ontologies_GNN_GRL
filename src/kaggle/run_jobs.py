@@ -252,7 +252,8 @@ def pin_models(models):
 
 # week 21: a job that starts with one of these scripts runs it with the rest of its arguments
 # (the SOTA plan's P0: mulms_nested.py)
-SCRIPTS = ('src/graph/gliner_baseline.py', 'src/graph/mulms_nested.py')
+SCRIPTS = ('src/graph/gliner_baseline.py', 'src/graph/mulms_nested.py',
+           'src/graph/dapt_mlm.py')                     # the SOTA plan's P1: B3's pre-training
 
 
 def job_command(job):
