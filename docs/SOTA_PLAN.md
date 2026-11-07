@@ -9,9 +9,20 @@ typeset TACL version. A protocol in `docs/ROADMAP.md` §4 fixes it in detail
 before any run. The published numbers come from a literature audit of
 4 November, every number read in its paper.*
 
+*P0, 7 November: every gate passed (batch `p0a`; ROADMAP §4 has the record,
+`results/gpu/sota_p0.json` the numbers). A pass means that no shortfall was
+found, not that the numbers are shown equal. Our mean minus the published one:
+- SOFC-Exp cross-validation: 84.16 against 84.77, −0.61 [−1.28, +0.07]. The
+  interval only just reaches 0.
+- SOFC-Exp's official split on 10 articles: 84.34 against 83.4, +0.94 [−0.41,
+  +2.30].
+- MuLMS, every nested entity: 79.04 against 79.6, −0.56 [−1.41, +0.29].
+
+P1's protocol comes next.*
+
 *P0, 4 November: the code is written and tested (`ner_baseline.py --sofc-cv`,
-`mulms_nested.py`, `sota_p0.py`), and its protocol is fixed in ROADMAP §4. The
-runs (batch `p0a`) wait for the 7 November quota reset. Three findings:
+`mulms_nested.py`, `sota_p0.py`), and its protocol is fixed in ROADMAP §4. Four
+findings:
 - 84.77 is the micro F1 of the published (npj) version; the arXiv version prints
   84.39 micro and 81.92 macro.
 - MatSciBERT's code picks its epoch by dev macro F1, while our recipe picks it by
@@ -137,8 +148,8 @@ Every candidate is screened on validation, and none is tested.
 
 ## 4. Phases, budget and fallbacks
 
-- **P0, reproduction gates** (no claim). A failed gate stops that benchmark until the gap
-  is explained.
+- **P0, reproduction gates** (no claim; all passed on 7 November). A failed gate stops
+  that benchmark until the gap is explained.
   - MaterioMiner, plain MatSciBERT: done (70.19 against 69.92).
   - SOFC-Exp CV: 5 folds × 3 seeds against 84.77 ± 1.02.
   - SOFC-Exp official split: 83.75 on 11 articles, re-scored on 10 against 83.4 ± 0.9.

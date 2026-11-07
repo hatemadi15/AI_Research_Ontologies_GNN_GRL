@@ -157,10 +157,20 @@ def gate(values, published):
     test, verdict = verdict_at(published['sd_printed'])
     half = 0.5 * 10 ** -published['decimals']
     edges = {verdict_at(published['sd_printed'] + d)[1] for d in (-half, half)}
-    return {'ours': {'mean': round(mean, 2), 'sd': round(sd, 2), 'n': len(values)},
-            'published': {**published, 'sd_sample': round(sample_sd(published), 3)},
-            'welch': test, 'verdict': verdict, 'borderline': edges != {verdict},
-            'sd_warning': sd > SD_WARNING * sample_sd(published)}
+    record = {'ours': {'mean': round(mean, 2), 'sd': round(sd, 2), 'n': len(values)},
+              'published': {**published, 'sd_sample': round(sample_sd(published), 3)},
+              'welch': test, 'verdict': verdict, 'borderline': edges != {verdict},
+              'sd_warning': sd > SD_WARNING * sample_sd(published)}
+    if published['convention'] == 'sample (assumed)':
+        # reported only (the protocol's 1.06 for gate 1; added after P0's run, which the code
+        # had left out): the printed SD read as a population SD; the verdict above stands
+        other = {**published, 'convention': 'population (np.std)'}
+        test = welch_summary(ours, {'mean': published['mean'], 'sd': sample_sd(other),
+                                    'n': published['n']})
+        record['population_reading'] = {
+            'sd_sample': round(sample_sd(other), 3), 'welch': test,
+            'verdict': 'failed' if test['ci95'][1] < 0 else 'passed'}
+    return record
 
 
 def check_cv_file(data, offset):

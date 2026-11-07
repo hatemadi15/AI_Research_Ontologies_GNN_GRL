@@ -7335,6 +7335,42 @@ against it. Code: `ner_baseline.py --sofc-cv`, `mulms_nested.py` and
   and in `results/README.md`. P1's protocol (screens, with a timed table of
   session-hours) follows only once every gate has passed or its failure
   has been dealt with as above.
+- **The session, 7 November.** Kernel version 25 from the bundle of
+  `d0aa043`, two T4 GPUs, 118 minutes (setup 7); all 11 jobs done. The
+  week's quota has 43.04 of 45 GPU hours left until the 14 November reset.
+- **Checks.**
+  - `smokebq` equals `smokebn`, predictions and environment included.
+    `sota_p0.py smoke` flags one field, `variant`, the file's name for its
+    tag (`crf_smokebq`, `crf_smokebn`).
+  - `smokebr` and `smokebs` are identical but for run times and tags, so
+    MuLMS's runs are deterministic across the two GPUs. Both are in
+    `results/gpu_repeats/`.
+  - The MuLMS files were fetched at run time; the fetch stops on a wrong
+    SHA-256, and every job finished.
+  - Every aggregated file passed `sota_p0.py`'s checks, and the 11-article
+    re-score equals each stored F1.
+- **Outcome: every gate passed** (`results/gpu/sota_p0.json`). None is
+  borderline, and no SD is flagged. A pass means that no shortfall was
+  found, not that the two numbers are shown equal.
+  - Gate 1, SOFC-Exp cross-validation: 84.16 ± 0.75 over 15 runs against
+    84.77 ± 1.02, a difference of −0.61 [−1.28, +0.07]. The interval
+    only just reaches 0. With 1.02 read as a population SD (1.06), the
+    interval is [−1.30, +0.08], also a pass.
+  - Gate 2, SOFC-Exp's official split on 10 articles: 84.34 ± 1.30 over
+    10 seeds against 83.4 ± 0.9 (1.006 as a sample SD), +0.94 [−0.41,
+    +2.30]. On all 11 articles the stored runs score 83.75.
+  - Gate 3, MuLMS, every nested entity: 79.04 ± 0.67 over the 5
+    configurations (0.60 as `np.std` prints it) against 79.6 ± 0.4
+    (0.447), −0.56 [−1.41, +0.29].
+    - The configurations score 77.99 to 79.73.
+    - The dev set scores 77.54 ± 0.62.
+    - The best epochs were 4 to 9, after 9 to 14 epochs, at 27 to 43
+      minutes per configuration.
+  - No ablation is needed. P1's protocol comes next.
+- **Added after the run, to the record only.** The protocol names gate 1's
+  1.06 reading, which `sota_p0.py` had left out. It is now in the gate's
+  record as `population_reading`, reported only; the verdict rule is
+  unchanged.
 
 *TACL (paper B), for later.* The paper goes to 10 pages, references
 uncounted, with appendices after them within TACL's caps (as last read: up

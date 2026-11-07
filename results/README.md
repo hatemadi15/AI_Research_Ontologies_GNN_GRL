@@ -680,3 +680,28 @@ Outcome:
   +6.16 [−0.35, +12.67] (higher on every paper);
 - E2: 52.38 against our loop's 52.64, −0.25 [−3.93, +3.42] over 10 seed
   pairs.
+
+The SOTA plan's P0, reproduction gates (batch `p0a`; ROADMAP §4, fixed 4
+November before the run; no claim and no decision of paper B's count). In
+`gpu/`:
+- `sofc_matscibert_cv_crf_m<N>`: the CRF head on MatSciBERT's 5
+  cross-validation folds of SOFC-Exp (`--sofc-cv`; the folds are in
+  `sota/sofc_cv_folds.json`), runs `cv1` to `cv5`, seed offsets 0, 100
+  and 200;
+- `mulms_nested_configs_bilou_crf_c<k>`: `mulms_nested.py`, MuLMS's
+  released tagger over every nested entity, configuration k = 1-5 at seed
+  0 (the configurations are in `sota/mulms_configurations.json`);
+- `sota_p0.json`: the three gates, from `python src/graph/sota_p0.py
+  gates`.
+
+`gpu_repeats/` holds `smokebr` and `smokebs`, two short MuLMS runs on the
+two GPUs, identical but for `runtime_sec` and their tags. Run record:
+kernel version 25 (bundle of `d0aa043`). `smokebq` is identical to
+`smokebn` but for its tag (not collected). Outcome, our mean minus the
+published one; every gate passed:
+- SOFC-Exp cross-validation: 84.16 against 84.77 (Gupta et al. 2022),
+  −0.61 [−1.28, +0.07];
+- SOFC-Exp's official split on 10 articles: 84.34 against 83.4 (Schrader
+  et al. 2023), +0.94 [−0.41, +2.30];
+- MuLMS, every nested entity: 79.04 against 79.6 (Schrader et al. 2023),
+  −0.56 [−1.41, +0.29].

@@ -1,0 +1,183 @@
+{
+ "note": "P0 reproduction gates (SOTA plan); no claim. A gate fails only when the Welch 95% interval of our mean minus the published mean lies below 0.",
+ "materiominer": {
+  "ours": 70.19,
+  "ci95": [
+   69.03,
+   71.35
+  ],
+  "n": 10,
+  "published": 69.92,
+  "note": "plain MatSciBERT on the released split, fine-grained (paper B \u00a73.1)"
+ },
+ "sofc_official_10": {
+  "ours": {
+   "mean": 84.34,
+   "sd": 1.3,
+   "n": 10
+  },
+  "published": {
+   "mean": 83.4,
+   "sd_printed": 0.9,
+   "n": 5,
+   "decimals": 1,
+   "convention": "population (np.std)",
+   "source": "Schrader et al. 2023, Table 11, SOFC-Exp 3e-4/7e-3, 5 runs, 10 test articles",
+   "sd_sample": 1.006
+  },
+  "welch": {
+   "gap": 0.94,
+   "ci95": [
+    -0.41,
+    2.3
+   ],
+   "df": 10.3
+  },
+  "verdict": "passed",
+  "borderline": false,
+  "sd_warning": false,
+  "dropped_article": "PMC6247067",
+  "runs": [
+   {
+    "run_id": "seed0",
+    "seed": 0,
+    "f1_11": 84.98,
+    "f1_10": 85.47,
+    "n_sentences_10": 163
+   },
+   {
+    "run_id": "seed100",
+    "seed": 100,
+    "f1_11": 85.33,
+    "f1_10": 86.07,
+    "n_sentences_10": 163
+   },
+   {
+    "run_id": "seed200",
+    "seed": 200,
+    "f1_11": 85.33,
+    "f1_10": 85.94,
+    "n_sentences_10": 163
+   },
+   {
+    "run_id": "seed300",
+    "seed": 300,
+    "f1_11": 84.46,
+    "f1_10": 85.1,
+    "n_sentences_10": 163
+   },
+   {
+    "run_id": "seed400",
+    "seed": 400,
+    "f1_11": 83.59,
+    "f1_10": 84.36,
+    "n_sentences_10": 163
+   },
+   {
+    "run_id": "seed500",
+    "seed": 500,
+    "f1_11": 83.02,
+    "f1_10": 83.75,
+    "n_sentences_10": 163
+   },
+   {
+    "run_id": "seed600",
+    "seed": 600,
+    "f1_11": 82.42,
+    "f1_10": 82.78,
+    "n_sentences_10": 163
+   },
+   {
+    "run_id": "seed700",
+    "seed": 700,
+    "f1_11": 82.53,
+    "f1_10": 83.16,
+    "n_sentences_10": 163
+   },
+   {
+    "run_id": "seed800",
+    "seed": 800,
+    "f1_11": 81.93,
+    "f1_10": 82.43,
+    "n_sentences_10": 163
+   },
+   {
+    "run_id": "seed900",
+    "seed": 900,
+    "f1_11": 83.92,
+    "f1_10": 84.38,
+    "n_sentences_10": 163
+   }
+  ]
+ },
+ "sofc_cv": {
+  "ours": {
+   "mean": 84.16,
+   "sd": 0.75,
+   "n": 15
+  },
+  "published": {
+   "mean": 84.77,
+   "sd_printed": 1.02,
+   "n": 15,
+   "decimals": 2,
+   "convention": "sample (assumed)",
+   "source": "Gupta et al. 2022 (npj), MatSciBERT-CRF, 5 folds x 3 seeds",
+   "sd_sample": 1.02
+  },
+  "welch": {
+   "gap": -0.61,
+   "ci95": [
+    -1.28,
+    0.07
+   ],
+   "df": 25.8
+  },
+  "verdict": "passed",
+  "borderline": false,
+  "sd_warning": false,
+  "population_reading": {
+   "sd_sample": 1.056,
+   "welch": {
+    "gap": -0.61,
+    "ci95": [
+     -1.3,
+     0.08
+    ],
+    "df": 25.3
+   },
+   "verdict": "passed"
+  },
+  "folds_sha256": "30e1e698ece5dd3ee58aa334b929da1cc8c5948ddb257385cf36814ded07fd95"
+ },
+ "mulms_nested": {
+  "ours": {
+   "mean": 79.04,
+   "sd": 0.67,
+   "n": 5
+  },
+  "published": {
+   "mean": 79.6,
+   "sd_printed": 0.4,
+   "n": 5,
+   "decimals": 1,
+   "convention": "population (np.std)",
+   "source": "Schrader et al. 2023, Tables 9 and 11, MatSciBERT CRF tagger, MuLMS 1e-4/7e-3, 5 training configurations",
+   "sd_sample": 0.447
+  },
+  "welch": {
+   "gap": -0.56,
+   "ci95": [
+    -1.41,
+    0.29
+   ],
+   "df": 7.0
+  },
+  "verdict": "passed",
+  "borderline": false,
+  "sd_warning": false,
+  "erased_word_test_sentences": [
+   6
+  ]
+ }
+}

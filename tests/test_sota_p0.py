@@ -84,6 +84,17 @@ def test_gate_fails_only_below():
     wide = p0.gate([75.0, 85.0, 70.0, 90.0, 80.0], published)
     assert wide['sd_warning'] and not p0.gate([80.0, 80.1, 79.9, 80.2, 79.8],
                                               published)['sd_warning']
+    assert 'population_reading' not in low
+    # an SD of unstated convention (gate 1's 1.02): its population reading is reported too
+    assumed = {**published, 'convention': 'sample (assumed)'}
+    both = p0.gate([79.0, 79.5, 78.5, 79.2, 78.8], assumed)
+    other = both['population_reading']
+    assert other['sd_sample'] == round(0.5 * math.sqrt(1.25), 3)
+    assert both['published']['sd_sample'] == 0.5
+    assert other['welch']['gap'] == both['welch']['gap']
+    assert other['welch']['ci95'][0] < both['welch']['ci95'][0] < both['welch']['ci95'][1] \
+        < other['welch']['ci95'][1]
+    assert other['verdict'] in ('passed', 'failed')
 
 
 def test_gate_inputs_are_checked():
