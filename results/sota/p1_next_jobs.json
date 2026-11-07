@@ -1,0 +1,1199 @@
+[
+ {
+  "benchmark": "fine",
+  "cell": "a0",
+  "changes": [],
+  "job": [
+   "--granularity",
+   "fine",
+   "--crf",
+   "--screen",
+   "--screen-splits",
+   "--seeds",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "--tag",
+   "p1a0",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "fine",
+  "cell": "a1",
+  "changes": [
+   "a1"
+  ],
+  "job": [
+   "--granularity",
+   "fine",
+   "--crf",
+   "--screen",
+   "--screen-splits",
+   "--lr",
+   "2e-5",
+   "--seeds",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "--tag",
+   "p1a1",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "fine",
+  "cell": "a2",
+  "changes": [
+   "a2"
+  ],
+  "job": [
+   "--granularity",
+   "fine",
+   "--crf",
+   "--screen",
+   "--screen-splits",
+   "--lr",
+   "3e-5",
+   "--seeds",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "--tag",
+   "p1a2",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "fine",
+  "cell": "a3",
+  "changes": [
+   "a3"
+  ],
+  "job": [
+   "--granularity",
+   "fine",
+   "--crf",
+   "--screen",
+   "--screen-splits",
+   "--epochs",
+   "40",
+   "--patience",
+   "5",
+   "--seeds",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "--tag",
+   "p1a3",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "fine",
+  "cell": "a4",
+  "changes": [
+   "a4"
+  ],
+  "job": [
+   "--granularity",
+   "fine",
+   "--crf",
+   "--screen",
+   "--screen-splits",
+   "--warmup",
+   "0",
+   "--seeds",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "--tag",
+   "p1a4",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "fine",
+  "cell": "a5",
+  "changes": [
+   "a5"
+  ],
+  "job": [
+   "--granularity",
+   "fine",
+   "--crf",
+   "--screen",
+   "--screen-splits",
+   "--llrd",
+   "0.9",
+   "--seeds",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "--tag",
+   "p1a5",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "fine",
+  "cell": "a6",
+  "changes": [
+   "a6"
+  ],
+  "job": [
+   "--granularity",
+   "fine",
+   "--crf",
+   "--screen",
+   "--screen-splits",
+   "--reinit-top",
+   "1",
+   "--seeds",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "--tag",
+   "p1a6",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "fine",
+  "cell": "a7",
+  "changes": [
+   "a7"
+  ],
+  "job": [
+   "--granularity",
+   "fine",
+   "--crf",
+   "--screen",
+   "--screen-splits",
+   "--average-last",
+   "3",
+   "--seeds",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "--tag",
+   "p1a7",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "fine",
+  "cell": "b1",
+  "changes": [
+   "b1"
+  ],
+  "job": [
+   "--granularity",
+   "fine",
+   "--crf",
+   "--screen",
+   "--screen-splits",
+   "--model",
+   "microsoft/deberta-v3-large",
+   "--lr",
+   "1e-5",
+   "--batch-size",
+   "8",
+   "--gradient-checkpointing",
+   "--seeds",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "--tag",
+   "p1b1",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "fine",
+  "cell": "b2",
+  "changes": [
+   "b2"
+  ],
+  "job": [
+   "--granularity",
+   "fine",
+   "--crf",
+   "--screen",
+   "--screen-splits",
+   "--model",
+   "KISTI-AI/scideberta",
+   "--lr",
+   "1e-5",
+   "--batch-size",
+   "8",
+   "--gradient-checkpointing",
+   "--seeds",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "--tag",
+   "p1b2",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "fine",
+  "cell": "c1",
+  "changes": [
+   "c1"
+  ],
+  "job": [
+   "--granularity",
+   "both",
+   "--multi-task",
+   "--screen-level",
+   "fine",
+   "--crf",
+   "--screen",
+   "--screen-splits",
+   "--seeds",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "--tag",
+   "p1c1",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "fine",
+  "cell": "c3",
+  "changes": [
+   "c3"
+  ],
+  "job": [
+   "--granularity",
+   "fine",
+   "--crf",
+   "--screen",
+   "--screen-splits",
+   "--context",
+   "64",
+   "--seeds",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "--tag",
+   "p1c3",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "coarse",
+  "cell": "a0",
+  "changes": [],
+  "job": [
+   "--granularity",
+   "coarse",
+   "--crf",
+   "--screen",
+   "--screen-splits",
+   "--seeds",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "--tag",
+   "p1a0",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "coarse",
+  "cell": "a1",
+  "changes": [
+   "a1"
+  ],
+  "job": [
+   "--granularity",
+   "coarse",
+   "--crf",
+   "--screen",
+   "--screen-splits",
+   "--lr",
+   "2e-5",
+   "--seeds",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "--tag",
+   "p1a1",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "coarse",
+  "cell": "a2",
+  "changes": [
+   "a2"
+  ],
+  "job": [
+   "--granularity",
+   "coarse",
+   "--crf",
+   "--screen",
+   "--screen-splits",
+   "--lr",
+   "3e-5",
+   "--seeds",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "--tag",
+   "p1a2",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "coarse",
+  "cell": "a3",
+  "changes": [
+   "a3"
+  ],
+  "job": [
+   "--granularity",
+   "coarse",
+   "--crf",
+   "--screen",
+   "--screen-splits",
+   "--epochs",
+   "40",
+   "--patience",
+   "5",
+   "--seeds",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "--tag",
+   "p1a3",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "coarse",
+  "cell": "a4",
+  "changes": [
+   "a4"
+  ],
+  "job": [
+   "--granularity",
+   "coarse",
+   "--crf",
+   "--screen",
+   "--screen-splits",
+   "--warmup",
+   "0",
+   "--seeds",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "--tag",
+   "p1a4",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "coarse",
+  "cell": "a5",
+  "changes": [
+   "a5"
+  ],
+  "job": [
+   "--granularity",
+   "coarse",
+   "--crf",
+   "--screen",
+   "--screen-splits",
+   "--llrd",
+   "0.9",
+   "--seeds",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "--tag",
+   "p1a5",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "coarse",
+  "cell": "a6",
+  "changes": [
+   "a6"
+  ],
+  "job": [
+   "--granularity",
+   "coarse",
+   "--crf",
+   "--screen",
+   "--screen-splits",
+   "--reinit-top",
+   "1",
+   "--seeds",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "--tag",
+   "p1a6",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "coarse",
+  "cell": "a7",
+  "changes": [
+   "a7"
+  ],
+  "job": [
+   "--granularity",
+   "coarse",
+   "--crf",
+   "--screen",
+   "--screen-splits",
+   "--average-last",
+   "3",
+   "--seeds",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "--tag",
+   "p1a7",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "coarse",
+  "cell": "b1",
+  "changes": [
+   "b1"
+  ],
+  "job": [
+   "--granularity",
+   "coarse",
+   "--crf",
+   "--screen",
+   "--screen-splits",
+   "--model",
+   "microsoft/deberta-v3-large",
+   "--lr",
+   "1e-5",
+   "--batch-size",
+   "8",
+   "--gradient-checkpointing",
+   "--seeds",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "--tag",
+   "p1b1",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "coarse",
+  "cell": "b2",
+  "changes": [
+   "b2"
+  ],
+  "job": [
+   "--granularity",
+   "coarse",
+   "--crf",
+   "--screen",
+   "--screen-splits",
+   "--model",
+   "KISTI-AI/scideberta",
+   "--lr",
+   "1e-5",
+   "--batch-size",
+   "8",
+   "--gradient-checkpointing",
+   "--seeds",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "--tag",
+   "p1b2",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "coarse",
+  "cell": "c1",
+  "changes": [
+   "c1"
+  ],
+  "job": [
+   "--granularity",
+   "both",
+   "--multi-task",
+   "--screen-level",
+   "coarse",
+   "--crf",
+   "--screen",
+   "--screen-splits",
+   "--seeds",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "--tag",
+   "p1c1",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "coarse",
+  "cell": "c3",
+  "changes": [
+   "c3"
+  ],
+  "job": [
+   "--granularity",
+   "coarse",
+   "--crf",
+   "--screen",
+   "--screen-splits",
+   "--context",
+   "64",
+   "--seeds",
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "--tag",
+   "p1c3",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "sofc",
+  "cell": "a1",
+  "changes": [
+   "a1"
+  ],
+  "job": [
+   "--granularity",
+   "sofc",
+   "--crf",
+   "--screen",
+   "--published-split",
+   "--lr",
+   "2e-5",
+   "--seeds",
+   "0",
+   "100",
+   "200",
+   "300",
+   "400",
+   "--tag",
+   "p1a1",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "sofc",
+  "cell": "a2",
+  "changes": [
+   "a2"
+  ],
+  "job": [
+   "--granularity",
+   "sofc",
+   "--crf",
+   "--screen",
+   "--published-split",
+   "--lr",
+   "3e-5",
+   "--seeds",
+   "0",
+   "100",
+   "200",
+   "300",
+   "400",
+   "--tag",
+   "p1a2",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "sofc",
+  "cell": "a3",
+  "changes": [
+   "a3"
+  ],
+  "job": [
+   "--granularity",
+   "sofc",
+   "--crf",
+   "--screen",
+   "--published-split",
+   "--epochs",
+   "40",
+   "--patience",
+   "5",
+   "--seeds",
+   "0",
+   "100",
+   "200",
+   "300",
+   "400",
+   "--tag",
+   "p1a3",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "sofc",
+  "cell": "a4",
+  "changes": [
+   "a4"
+  ],
+  "job": [
+   "--granularity",
+   "sofc",
+   "--crf",
+   "--screen",
+   "--published-split",
+   "--warmup",
+   "0",
+   "--seeds",
+   "0",
+   "100",
+   "200",
+   "300",
+   "400",
+   "--tag",
+   "p1a4",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "sofc",
+  "cell": "a5",
+  "changes": [
+   "a5"
+  ],
+  "job": [
+   "--granularity",
+   "sofc",
+   "--crf",
+   "--screen",
+   "--published-split",
+   "--llrd",
+   "0.9",
+   "--seeds",
+   "0",
+   "100",
+   "200",
+   "300",
+   "400",
+   "--tag",
+   "p1a5",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "sofc",
+  "cell": "a6",
+  "changes": [
+   "a6"
+  ],
+  "job": [
+   "--granularity",
+   "sofc",
+   "--crf",
+   "--screen",
+   "--published-split",
+   "--reinit-top",
+   "1",
+   "--seeds",
+   "0",
+   "100",
+   "200",
+   "300",
+   "400",
+   "--tag",
+   "p1a6",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "sofc",
+  "cell": "a7",
+  "changes": [
+   "a7"
+  ],
+  "job": [
+   "--granularity",
+   "sofc",
+   "--crf",
+   "--screen",
+   "--published-split",
+   "--average-last",
+   "3",
+   "--seeds",
+   "0",
+   "100",
+   "200",
+   "300",
+   "400",
+   "--tag",
+   "p1a7",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "sofc",
+  "cell": "b1",
+  "changes": [
+   "b1"
+  ],
+  "job": [
+   "--granularity",
+   "sofc",
+   "--crf",
+   "--screen",
+   "--published-split",
+   "--model",
+   "microsoft/deberta-v3-large",
+   "--lr",
+   "1e-5",
+   "--batch-size",
+   "8",
+   "--gradient-checkpointing",
+   "--seeds",
+   "0",
+   "100",
+   "200",
+   "300",
+   "400",
+   "--tag",
+   "p1b1",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "sofc",
+  "cell": "b2",
+  "changes": [
+   "b2"
+  ],
+  "job": [
+   "--granularity",
+   "sofc",
+   "--crf",
+   "--screen",
+   "--published-split",
+   "--model",
+   "KISTI-AI/scideberta",
+   "--lr",
+   "1e-5",
+   "--batch-size",
+   "8",
+   "--gradient-checkpointing",
+   "--seeds",
+   "0",
+   "100",
+   "200",
+   "300",
+   "400",
+   "--tag",
+   "p1b2",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "sofc",
+  "cell": "b3",
+  "changes": [
+   "b3"
+  ],
+  "job": [
+   "--granularity",
+   "sofc",
+   "--crf",
+   "--screen",
+   "--published-split",
+   "--model",
+   "/tmp/dapt_b3",
+   "--seeds",
+   "0",
+   "100",
+   "200",
+   "300",
+   "400",
+   "--tag",
+   "p1b3",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "sofc",
+  "cell": "c1",
+  "changes": [
+   "c1"
+  ],
+  "job": [
+   "--granularity",
+   "sofc_both",
+   "--multi-task",
+   "--crf",
+   "--screen",
+   "--published-split",
+   "--seeds",
+   "0",
+   "100",
+   "200",
+   "300",
+   "400",
+   "--tag",
+   "p1c1",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "sofc",
+  "cell": "c2",
+  "changes": [
+   "c2"
+  ],
+  "job": [
+   "--granularity",
+   "sofc",
+   "--crf",
+   "--screen",
+   "--published-split",
+   "--joint-mulms",
+   "--seeds",
+   "0",
+   "100",
+   "200",
+   "300",
+   "400",
+   "--tag",
+   "p1c2",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "sofc",
+  "cell": "c3",
+  "changes": [
+   "c3"
+  ],
+  "job": [
+   "--granularity",
+   "sofc",
+   "--crf",
+   "--screen",
+   "--published-split",
+   "--context",
+   "64",
+   "--seeds",
+   "0",
+   "100",
+   "200",
+   "300",
+   "400",
+   "--tag",
+   "p1c3",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "sofc",
+  "cell": "e",
+  "changes": [
+   "e"
+  ],
+  "job": [
+   "--granularity",
+   "sofc",
+   "--span-head",
+   "--screen",
+   "--published-split",
+   "--seeds",
+   "0",
+   "100",
+   "200",
+   "300",
+   "400",
+   "--tag",
+   "p1e",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "mulms",
+  "cell": "a1m",
+  "changes": [
+   "a1m"
+  ],
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--screen",
+   "--configs",
+   "1",
+   "--seed",
+   "0",
+   "--lr",
+   "5e-5",
+   "--tag",
+   "p1a1mu1",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "mulms",
+  "cell": "a1m",
+  "changes": [
+   "a1m"
+  ],
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--screen",
+   "--configs",
+   "2",
+   "--seed",
+   "0",
+   "--lr",
+   "5e-5",
+   "--tag",
+   "p1a1mu2",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "mulms",
+  "cell": "a1m",
+  "changes": [
+   "a1m"
+  ],
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--screen",
+   "--configs",
+   "3",
+   "--seed",
+   "0",
+   "--lr",
+   "5e-5",
+   "--tag",
+   "p1a1mu3",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "mulms",
+  "cell": "c2",
+  "changes": [
+   "c2"
+  ],
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--screen",
+   "--configs",
+   "1",
+   "--seed",
+   "0",
+   "--joint-sofc",
+   "--tag",
+   "p1c2u1",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "mulms",
+  "cell": "c2",
+  "changes": [
+   "c2"
+  ],
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--screen",
+   "--configs",
+   "2",
+   "--seed",
+   "0",
+   "--joint-sofc",
+   "--tag",
+   "p1c2u2",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "mulms",
+  "cell": "c2",
+  "changes": [
+   "c2"
+  ],
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--screen",
+   "--configs",
+   "3",
+   "--seed",
+   "0",
+   "--joint-sofc",
+   "--tag",
+   "p1c2u3",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "mulms",
+  "cell": "e",
+  "changes": [
+   "e"
+  ],
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--screen",
+   "--configs",
+   "1",
+   "--seed",
+   "0",
+   "--span-head",
+   "--tag",
+   "p1eu1",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "mulms",
+  "cell": "e",
+  "changes": [
+   "e"
+  ],
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--screen",
+   "--configs",
+   "2",
+   "--seed",
+   "0",
+   "--span-head",
+   "--tag",
+   "p1eu2",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "benchmark": "mulms",
+  "cell": "e",
+  "changes": [
+   "e"
+  ],
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--screen",
+   "--configs",
+   "3",
+   "--seed",
+   "0",
+   "--span-head",
+   "--tag",
+   "p1eu3",
+   "--threads",
+   "2"
+  ]
+ }
+]

@@ -7662,6 +7662,51 @@ for P2, and the tuned reference (candidate A) for P2's D-P decisions.
     option, the new code trains exactly as the committed code did (history,
     validation and test F1, predictions), for the single-task, multi-task and
     MuLMS paths, and screen mode trains exactly as a full run.
+- **Batch `p1t`, 7 November** (kernel version 26, bundle of `4ca09ee`; 18
+  jobs on two T4 lanes, 53.7 minutes). Every check passed, so the batch
+  counts.
+  - The smoke4 repeat `smokebt` equals `smokebn` but for its tag and run
+    times (not collected).
+  - A0's screen runs on SOFC-Exp (`p1a0`, seeds 0–400) have the stored
+    runs' `val_f1` and history at every seed.
+  - MuLMS's c1 in screen mode (`p1a0u1`) has P0's dev scores and history.
+  - Its 17 screen files are in `results/gpu_screen/`, and `sota_p1.py`
+    takes every one.
+  - B3's pre-training took 15.9 minutes, under its hour, so B3 stays.
+    Held-out perplexity went from 10.59 to 3.96
+    (`results/sota/p1t_dapt_b3.json`, without the text of the 8 sentences
+    it dropped).
+- **The timing table** (`results/sota/p1_timing.json`, committed before
+  round 1). Minutes per epoch, from `p1t`'s 2-epoch runs and A0's stored
+  runs (MuLMS: P0's). Coarse-grained is not timed: its figures are
+  fine-grained's × the ratio of their A0s.
+
+  | Benchmark | A0 | B1 | B2 | B3 | C1 | C2 | C3 | E |
+  |---|---|---|---|---|---|---|---|---|
+  | MaterioMiner fine | 0.098 | 0.668 | 0.259 | – | 0.163 | – | 0.307 | – |
+  | MaterioMiner coarse | 0.097 | 0.665 | 0.258 | – | 0.162 | – | 0.305 | – |
+  | SOFC-Exp | 0.343 | 2.026 | 0.811 | 0.372 | 0.456 | 0.653 | 0.619 | 0.354 |
+  | MuLMS | 2.973 | – | – | – | – | 3.511 | 6.044 | 2.075 |
+
+  - Before cuts the table takes 31.1 session-hours; the protocol estimated
+    about 22. The cut ladder makes three cuts, in its order:
+    1. A2m leaves MuLMS (28.5 hours);
+    2. C3 leaves MuLMS (24.79);
+    3. MaterioMiner goes to 5 units, splits 0–4, with extras 5–8 (21.19).
+  - After the cuts, round 1 takes 9.06 session-hours, the round-2 reserve
+    7.67 and the extra units 4.45. MuLMS takes 12.11 of the 21.19.
+  - B1 would not fit on MuLMS (211 minutes a run); B2 would (84 minutes),
+    if its round-1 gains qualify it.
+  - **Disclosed.** The table also counts A0's rows on SOFC-Exp and MuLMS
+    (1.03 session-hours), though `p1t` ran them (SOFC-Exp, MuLMS's c1) or
+    P0's files supply them (MuLMS's c2 and c3). Without them, the table
+    after two cuts is 23.76 hours, and MaterioMiner would keep 10 units.
+    - The cut stands, because the table was committed before the run.
+    - The 5-unit design's units are the 10-unit design's first five. So an
+      amendment could still add units 5–9 to every MaterioMiner cell.
+- **Round 1** is batch `p1n`: the 47 jobs of
+  `results/sota/p1_next_jobs.json`, on the bundle of the commit that records
+  this.
 
 *TACL (paper B), for later.* The paper goes to 10 pages, references
 uncounted, with appendices after them within TACL's caps (as last read: up

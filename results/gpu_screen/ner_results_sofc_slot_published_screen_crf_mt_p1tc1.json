@@ -1,0 +1,113 @@
+{
+  "granularity": "sofc_slot",
+  "protocol": "published_screen",
+  "variant": "crf_mt_p1tc1",
+  "model": "m3rg-iitd/matscibert",
+  "labels": [
+    "anode_material",
+    "cathode_material",
+    "conductivity",
+    "current_density",
+    "degradation_rate",
+    "device",
+    "electrolyte_material",
+    "fuel_used",
+    "interlayer_material",
+    "open_circuit_voltage",
+    "power_density",
+    "resistance",
+    "support_material",
+    "thickness",
+    "time_of_operation",
+    "voltage",
+    "working_temperature"
+  ],
+  "label_tie": {},
+  "paper_test_f1": null,
+  "config": {
+    "seeds": [
+      0
+    ],
+    "split_seed": 0,
+    "vary_split": false,
+    "leave_one_paper_out": false,
+    "model": "m3rg-iitd/matscibert",
+    "top_k": 27,
+    "epochs": 2,
+    "patience": 3,
+    "lr": 5e-05,
+    "batch_size": 16,
+    "class_weights": false,
+    "crf": true,
+    "screen": true,
+    "tag": "p1tc1",
+    "seed_offset": 0,
+    "save_predictions": false,
+    "max_train": 0,
+    "device": null,
+    "threads": 2,
+    "multi_task": true,
+    "published_split": true
+  },
+  "runs": [
+    {
+      "seed": 0,
+      "best_epoch": 1,
+      "val_f1": 53.57,
+      "n_train": 568,
+      "n_val": 135,
+      "history": [
+        {
+          "epoch": 0,
+          "train_loss": 2262.7578,
+          "val_f1": 39.45,
+          "train_loss_fine": 1299.1053,
+          "train_loss_coarse": 963.6525,
+          "val_f1_fine": 39.45,
+          "val_f1_coarse": 58.19
+        },
+        {
+          "epoch": 1,
+          "train_loss": 612.9468,
+          "val_f1": 53.57,
+          "train_loss_fine": 366.8516,
+          "train_loss_coarse": 246.0952,
+          "val_f1_fine": 53.57,
+          "val_f1_coarse": 72.06
+        }
+      ],
+      "multi_task": {
+        "n_examples": 568,
+        "n_split_examples": 0,
+        "other_best_epoch": 1,
+        "other_tags_dropped": 0
+      },
+      "run_id": "seed0",
+      "runtime_sec": 54.7,
+      "environment": {
+        "device": "Tesla T4",
+        "cuda": "12.8",
+        "cudnn": 91900,
+        "torch": "2.11.0+cu128",
+        "transformers": "5.18.0",
+        "deterministic": true,
+        "cublas_workspace_config": ":4096:8"
+      }
+    }
+  ],
+  "screen": true,
+  "val_f1_mean": 53.57,
+  "summary": {
+    "n_runs": 1,
+    "run_ids": [
+      "seed0"
+    ],
+    "val": {
+      "mean": 53.57,
+      "sd": 0.0,
+      "per_run": [
+        53.57
+      ]
+    }
+  }
+}

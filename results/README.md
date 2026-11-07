@@ -705,3 +705,27 @@ published one; every gate passed:
   et al. 2023), +0.94 [−0.41, +2.30];
 - MuLMS, every nested entity: 79.04 against 79.6 (Schrader et al. 2023),
   −0.56 [−1.41, +0.29].
+
+The SOTA plan's P1, screens (ROADMAP §4, fixed 7 November before any P1
+run; validation scores only, no claim and no decision):
+- `sota/mm_screen_splits.json` and `sota/shared_documents.json`: the
+  hashed data files (MaterioMiner's screen splits; the four documents the
+  corpora share);
+- `gpu_screen/`: the screen files, kept apart from every stored analysis.
+  Batch `p1t`'s 2-epoch timing runs carry the tags `p1t<kind>`, and its A0
+  reference runs carry `p1a0` (SOFC-Exp) and `p1a0u1` (MuLMS's c1);
+- `sota/p1_timing.json`: the timing table and the budget's cuts, from
+  `python src/graph/sota_p1.py timing`;
+- `sota/p1t_dapt_b3.json`: B3's pre-training report, without the text of
+  the sentences it dropped;
+- `sota/p1_next_jobs.json`: the cells to run next, from `sota_p1.py
+  next-jobs`.
+
+Run record of `p1t`: kernel version 26 (bundle of `4ca09ee`). Every check
+passed:
+- the smoke4 repeat `smokebt` equals `smokebn` (not collected);
+- A0 on SOFC-Exp in screen mode equals the stored `val_f1`;
+- MuLMS's c1 in screen mode equals P0's dev score.
+
+The table's cuts are: A2m and C3 leave MuLMS, and MaterioMiner goes to 5
+units, for 21.19 session-hours of the 24-hour cap.

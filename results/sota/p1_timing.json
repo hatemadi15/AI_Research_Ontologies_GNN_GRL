@@ -1,0 +1,302 @@
+{
+ "table": {
+  "fine": {
+   "cells": {
+    "a0": {
+     "runs": 5,
+     "minutes_per_run": 1.15,
+     "lane_minutes": 5.8
+    },
+    "a1": {
+     "runs": 5,
+     "minutes_per_run": 1.15,
+     "lane_minutes": 5.8
+    },
+    "a2": {
+     "runs": 5,
+     "minutes_per_run": 1.15,
+     "lane_minutes": 5.8
+    },
+    "a3": {
+     "runs": 5,
+     "minutes_per_run": 1.35,
+     "lane_minutes": 6.7
+    },
+    "a4": {
+     "runs": 5,
+     "minutes_per_run": 1.15,
+     "lane_minutes": 5.8
+    },
+    "a5": {
+     "runs": 5,
+     "minutes_per_run": 1.15,
+     "lane_minutes": 5.8
+    },
+    "a6": {
+     "runs": 5,
+     "minutes_per_run": 1.15,
+     "lane_minutes": 5.8
+    },
+    "a7": {
+     "runs": 5,
+     "minutes_per_run": 1.15,
+     "lane_minutes": 5.8
+    },
+    "b1": {
+     "runs": 5,
+     "minutes_per_run": 7.89,
+     "lane_minutes": 39.4
+    },
+    "b2": {
+     "runs": 5,
+     "minutes_per_run": 3.06,
+     "lane_minutes": 15.3
+    },
+    "c1": {
+     "runs": 5,
+     "minutes_per_run": 1.92,
+     "lane_minutes": 9.6
+    },
+    "c3": {
+     "runs": 5,
+     "minutes_per_run": 3.62,
+     "lane_minutes": 18.1
+    }
+   },
+   "round2_reserve": 64.7,
+   "extra_reserve": 25.9,
+   "lane_minutes": 220.3
+  },
+  "coarse": {
+   "cells": {
+    "a0": {
+     "runs": 5,
+     "minutes_per_run": 1.41,
+     "lane_minutes": 7.0
+    },
+    "a1": {
+     "runs": 5,
+     "minutes_per_run": 1.41,
+     "lane_minutes": 7.0
+    },
+    "a2": {
+     "runs": 5,
+     "minutes_per_run": 1.41,
+     "lane_minutes": 7.0
+    },
+    "a3": {
+     "runs": 5,
+     "minutes_per_run": 1.6,
+     "lane_minutes": 8.0
+    },
+    "a4": {
+     "runs": 5,
+     "minutes_per_run": 1.41,
+     "lane_minutes": 7.0
+    },
+    "a5": {
+     "runs": 5,
+     "minutes_per_run": 1.41,
+     "lane_minutes": 7.0
+    },
+    "a6": {
+     "runs": 5,
+     "minutes_per_run": 1.41,
+     "lane_minutes": 7.0
+    },
+    "a7": {
+     "runs": 5,
+     "minutes_per_run": 1.41,
+     "lane_minutes": 7.0
+    },
+    "b1": {
+     "runs": 5,
+     "minutes_per_run": 9.65,
+     "lane_minutes": 48.2
+    },
+    "b2": {
+     "runs": 5,
+     "minutes_per_run": 3.74,
+     "lane_minutes": 18.7
+    },
+    "c1": {
+     "runs": 5,
+     "minutes_per_run": 2.35,
+     "lane_minutes": 11.7
+    },
+    "c3": {
+     "runs": 5,
+     "minutes_per_run": 4.43,
+     "lane_minutes": 22.1
+    }
+   },
+   "round2_reserve": 79.1,
+   "extra_reserve": 31.6,
+   "lane_minutes": 268.4
+  },
+  "sofc": {
+   "cells": {
+    "a0": {
+     "runs": 5,
+     "minutes_per_run": 3.25,
+     "lane_minutes": 16.3
+    },
+    "a1": {
+     "runs": 5,
+     "minutes_per_run": 3.25,
+     "lane_minutes": 16.3
+    },
+    "a2": {
+     "runs": 5,
+     "minutes_per_run": 3.25,
+     "lane_minutes": 16.3
+    },
+    "a3": {
+     "runs": 5,
+     "minutes_per_run": 3.94,
+     "lane_minutes": 19.7
+    },
+    "a4": {
+     "runs": 5,
+     "minutes_per_run": 3.25,
+     "lane_minutes": 16.3
+    },
+    "a5": {
+     "runs": 5,
+     "minutes_per_run": 3.25,
+     "lane_minutes": 16.3
+    },
+    "a6": {
+     "runs": 5,
+     "minutes_per_run": 3.25,
+     "lane_minutes": 16.3
+    },
+    "a7": {
+     "runs": 5,
+     "minutes_per_run": 3.25,
+     "lane_minutes": 16.3
+    },
+    "b1": {
+     "runs": 5,
+     "minutes_per_run": 19.25,
+     "lane_minutes": 96.2
+    },
+    "b2": {
+     "runs": 5,
+     "minutes_per_run": 7.7,
+     "lane_minutes": 38.5
+    },
+    "b3": {
+     "runs": 5,
+     "minutes_per_run": 3.54,
+     "lane_minutes": 17.7
+    },
+    "c1": {
+     "runs": 5,
+     "minutes_per_run": 4.33,
+     "lane_minutes": 21.7
+    },
+    "c2": {
+     "runs": 5,
+     "minutes_per_run": 6.21,
+     "lane_minutes": 31.0
+    },
+    "c3": {
+     "runs": 5,
+     "minutes_per_run": 5.88,
+     "lane_minutes": 29.4
+    },
+    "e": {
+     "runs": 5,
+     "minutes_per_run": 3.36,
+     "lane_minutes": 16.8
+    }
+   },
+   "round2_reserve": 153.9,
+   "extra_reserve": 61.6,
+   "lane_minutes": 600.6
+  },
+  "mulms": {
+   "cells": {
+    "a0": {
+     "runs": 3,
+     "minutes_per_run": 35.68,
+     "lane_minutes": 107.0
+    },
+    "a1m": {
+     "runs": 3,
+     "minutes_per_run": 35.68,
+     "lane_minutes": 107.0
+    },
+    "c2": {
+     "runs": 3,
+     "minutes_per_run": 42.13,
+     "lane_minutes": 126.4
+    },
+    "e": {
+     "runs": 3,
+     "minutes_per_run": 24.9,
+     "lane_minutes": 74.7
+    }
+   },
+   "round2_reserve": 622.8,
+   "extra_reserve": 415.2,
+   "lane_minutes": 1453.0
+  }
+ },
+ "session_hours": 21.19,
+ "cap": 24,
+ "cuts": [
+  "mulms: a2m",
+  "mulms: c3",
+  "mm: five_units"
+ ],
+ "removed": {
+  "mulms": [
+   "a2m",
+   "c3"
+  ]
+ },
+ "mm_five_units": true,
+ "mulms_b_fits": {
+  "b1": false,
+  "b2": true
+ },
+ "minutes_per_epoch": {
+  "fine": {
+   "a0": 0.098,
+   "b1": 0.668,
+   "b2": 0.259,
+   "c1": 0.163,
+   "c3": 0.307
+  },
+  "coarse": {
+   "a0": 0.097,
+   "b1": 0.665,
+   "b2": 0.258,
+   "c1": 0.162,
+   "c3": 0.305
+  },
+  "sofc": {
+   "a0": 0.343,
+   "b1": 2.026,
+   "b2": 0.811,
+   "b3": 0.372,
+   "c1": 0.456,
+   "c2": 0.653,
+   "c3": 0.619,
+   "e": 0.354
+  },
+  "mulms": {
+   "a0": 2.973,
+   "c2": 3.511,
+   "c3": 6.044,
+   "e": 2.075
+  }
+ },
+ "mulms_b_minutes_per_run": {
+  "b1": 211.0,
+  "b2": 84.4
+ },
+ "dapt_minutes": 15.9
+}

@@ -1,0 +1,131 @@
+{
+  "granularity": "fine",
+  "protocol": "screen_split",
+  "variant": "crf_mt_p1tc1",
+  "model": "m3rg-iitd/matscibert",
+  "labels": [
+    "Alloy",
+    "Crack",
+    "CrackInitation",
+    "DataSet",
+    "FatigueLifetime",
+    "FatigueTest",
+    "FatigueTestSpecimen",
+    "GrainBoundary",
+    "LoadingType",
+    "Location",
+    "MaterialClass",
+    "MechanicalProperty",
+    "MechanicalTestDataSet",
+    "MechanicalTreatment",
+    "Mechanism",
+    "Microstructure",
+    "MicrostructureEntity",
+    "StateDescriptor",
+    "StrainRate",
+    "StressAmplitude",
+    "TensileUltimateStrength",
+    "TensileYieldStrength",
+    "TestSpecimen",
+    "TestingMachine",
+    "TestingMedium",
+    "TwinBoundary",
+    "Value"
+  ],
+  "label_tie": {
+    "boundary_count": 24,
+    "tied_classes": [
+      "TensileYieldStrength",
+      "Dislocation"
+    ],
+    "kept_by_tiebreak": [
+      "TensileYieldStrength"
+    ]
+  },
+  "paper_test_f1": 69.92,
+  "config": {
+    "seeds": [
+      0
+    ],
+    "split_seed": 0,
+    "vary_split": false,
+    "leave_one_paper_out": false,
+    "model": "m3rg-iitd/matscibert",
+    "top_k": 27,
+    "epochs": 2,
+    "patience": 3,
+    "lr": 5e-05,
+    "batch_size": 16,
+    "class_weights": false,
+    "crf": true,
+    "screen": true,
+    "screen_splits": true,
+    "screen_level": "fine",
+    "tag": "p1tc1",
+    "seed_offset": 0,
+    "save_predictions": false,
+    "max_train": 0,
+    "device": null,
+    "threads": 2,
+    "multi_task": true
+  },
+  "runs": [
+    {
+      "seed": 0,
+      "best_epoch": 1,
+      "val_f1": 2.2,
+      "n_train": 323,
+      "n_val": 57,
+      "history": [
+        {
+          "epoch": 0,
+          "train_loss": 1761.734,
+          "val_f1": 0.0,
+          "train_loss_fine": 803.2792,
+          "train_loss_coarse": 958.4548,
+          "val_f1_fine": 0.0
+        },
+        {
+          "epoch": 1,
+          "train_loss": 945.6571,
+          "val_f1": 2.2,
+          "train_loss_fine": 428.2841,
+          "train_loss_coarse": 517.3729,
+          "val_f1_fine": 2.2
+        }
+      ],
+      "multi_task": {
+        "n_examples": 333,
+        "n_split_examples": 83,
+        "other_best_epoch": null,
+        "other_tags_dropped": 73
+      },
+      "run_id": "seed0",
+      "runtime_sec": 19.5,
+      "environment": {
+        "device": "Tesla T4",
+        "cuda": "12.8",
+        "cudnn": 91900,
+        "torch": "2.11.0+cu128",
+        "transformers": "5.18.0",
+        "deterministic": true,
+        "cublas_workspace_config": ":4096:8"
+      }
+    }
+  ],
+  "screen": true,
+  "val_f1_mean": 2.2,
+  "summary": {
+    "n_runs": 1,
+    "run_ids": [
+      "seed0"
+    ],
+    "val": {
+      "mean": 2.2,
+      "sd": 0.0,
+      "per_run": [
+        2.2
+      ]
+    }
+  }
+}

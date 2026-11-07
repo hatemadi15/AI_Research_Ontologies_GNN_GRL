@@ -1,0 +1,107 @@
+{
+  "granularity": "sofc",
+  "protocol": "published_screen",
+  "variant": "crf_joint_p1tc2",
+  "model": "m3rg-iitd/matscibert",
+  "labels": [
+    "DEVICE",
+    "EXPERIMENT",
+    "MATERIAL",
+    "VALUE"
+  ],
+  "label_tie": {},
+  "paper_test_f1": null,
+  "config": {
+    "seeds": [
+      0
+    ],
+    "split_seed": 0,
+    "vary_split": false,
+    "leave_one_paper_out": false,
+    "model": "m3rg-iitd/matscibert",
+    "top_k": 27,
+    "epochs": 2,
+    "patience": 3,
+    "lr": 5e-05,
+    "batch_size": 16,
+    "class_weights": false,
+    "crf": true,
+    "screen": true,
+    "joint_mulms": true,
+    "tag": "p1tc2",
+    "seed_offset": 0,
+    "save_predictions": false,
+    "max_train": 0,
+    "device": null,
+    "threads": 2,
+    "published_split": true
+  },
+  "runs": [
+    {
+      "seed": 0,
+      "best_epoch": 1,
+      "val_f1": 73.64,
+      "n_train": 568,
+      "n_val": 135,
+      "history": [
+        {
+          "epoch": 0,
+          "train_loss": 2961.0559,
+          "train_loss_other": 1624.343,
+          "val_f1": 69.4
+        },
+        {
+          "epoch": 1,
+          "train_loss": 986.1854,
+          "train_loss_other": 632.2796,
+          "val_f1": 73.64
+        }
+      ],
+      "joint": {
+        "n_other": 6989,
+        "other_per_epoch": 568,
+        "other_types": [
+          "MAT",
+          "NUM",
+          "VALUE",
+          "UNIT",
+          "PROPERTY",
+          "FORM",
+          "MEASUREMENT",
+          "CITE",
+          "SAMPLE",
+          "TECHNIQUE",
+          "DEV",
+          "RANGE",
+          "INSTRUMENT"
+        ]
+      },
+      "run_id": "seed0",
+      "runtime_sec": 78.4,
+      "environment": {
+        "device": "Tesla T4",
+        "cuda": "12.8",
+        "cudnn": 91900,
+        "torch": "2.11.0+cu128",
+        "transformers": "5.18.0",
+        "deterministic": true,
+        "cublas_workspace_config": ":4096:8"
+      }
+    }
+  ],
+  "screen": true,
+  "val_f1_mean": 73.64,
+  "summary": {
+    "n_runs": 1,
+    "run_ids": [
+      "seed0"
+    ],
+    "val": {
+      "mean": 73.64,
+      "sd": 0.0,
+      "per_run": [
+        73.64
+      ]
+    }
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "granularity": "sofc",
+  "protocol": "published_screen",
+  "variant": "crf_p1tb1",
+  "model": "microsoft/deberta-v3-large",
+  "labels": [
+    "DEVICE",
+    "EXPERIMENT",
+    "MATERIAL",
+    "VALUE"
+  ],
+  "label_tie": {},
+  "paper_test_f1": null,
+  "config": {
+    "seeds": [
+      0
+    ],
+    "split_seed": 0,
+    "vary_split": false,
+    "leave_one_paper_out": false,
+    "model": "microsoft/deberta-v3-large",
+    "top_k": 27,
+    "epochs": 2,
+    "patience": 3,
+    "lr": 1e-05,
+    "batch_size": 8,
+    "class_weights": false,
+    "crf": true,
+    "screen": true,
+    "gradient_checkpointing": true,
+    "tag": "p1tb1",
+    "seed_offset": 0,
+    "save_predictions": false,
+    "max_train": 0,
+    "device": null,
+    "threads": 2,
+    "published_split": true
+  },
+  "runs": [
+    {
+      "seed": 0,
+      "best_epoch": 1,
+      "val_f1": 73.55,
+      "n_train": 568,
+      "n_val": 135,
+      "history": [
+        {
+          "epoch": 0,
+          "train_loss": 1757.0432,
+          "val_f1": 70.26
+        },
+        {
+          "epoch": 1,
+          "train_loss": 414.3431,
+          "val_f1": 73.55
+        }
+      ],
+      "run_id": "seed0",
+      "runtime_sec": 243.1,
+      "environment": {
+        "device": "Tesla T4",
+        "cuda": "12.8",
+        "cudnn": 91900,
+        "torch": "2.11.0+cu128",
+        "transformers": "5.18.0",
+        "deterministic": true,
+        "cublas_workspace_config": ":4096:8"
+      }
+    }
+  ],
+  "screen": true,
+  "val_f1_mean": 73.55,
+  "summary": {
+    "n_runs": 1,
+    "run_ids": [
+      "seed0"
+    ],
+    "val": {
+      "mean": 73.55,
+      "sd": 0.0,
+      "per_run": [
+        73.55
+      ]
+    }
+  }
+}

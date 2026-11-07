@@ -13,7 +13,11 @@ before any run. The published numbers come from a literature audit of
 referee's check ("approve with required changes", all six applied). Its code
 is written and tested (`ner_baseline.py --screen` and round 1's options,
 `mulms_nested.py --screen`, `span_ner.py`, `sota_p1.py`, batches `p1t` and
-`p1n`). The timing batch `p1t` comes next, then the two rounds. Amendment 1
+`p1n`). The timing batch `p1t` passed every check (7 November). With its
+table, the cut ladder takes A2m and C3 off MuLMS and screens MaterioMiner
+on 5 units, for 21.19 session-hours. The table counts A0 rows that had
+already run; without them MaterioMiner would have kept 10 units (disclosed
+in ROADMAP §4). Round 1 (`p1n`) follows. Amendment 1
 (before any run) has C1 on MaterioMiner run one level at a time: the two levels'
 released splits are different partitions. It departs from this plan in four
 places, each justified there:
@@ -23,7 +27,7 @@ places, each justified there:
   cut like the test files.
 - The tie rule covers up to 3 cells.
 - P1's estimate from measured times is about 22 session-hours, capped at 24,
-  where §4 below says 10–15.
+  where §4 below says 10–15. `p1t`'s table measured 31.1 before cuts.
 
 The corpora share four documents, found by an 8-gram check. One of them is
 MuLMS's test document `sofc_01`, an SOFC-Exp training article. Joint training
