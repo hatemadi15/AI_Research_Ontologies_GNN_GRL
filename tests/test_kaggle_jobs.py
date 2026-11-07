@@ -357,7 +357,7 @@ def test_bundle_and_push_use_the_chosen_dataset(monkeypatch, tmp_path):
     monkeypatch.setattr(kj, 'kaggle', kaggle)
     monkeypatch.setattr(kj, 'WORK_DIR', tmp_path)
     monkeypatch.setattr(kj, 'build_wheels', lambda: [])
-    monkeypatch.setattr(kj, 'build_bundle', lambda commit, folder, wheels: (
+    monkeypatch.setattr(kj, 'build_bundle', lambda commit, folder, wheels, screen_dir=None: (
         folder.mkdir(parents=True, exist_ok=True),
         {'commit': 'c' * 40, 'corpus_sha256': 'x' * 64, 'results': []})[1])
     monkeypatch.setattr(kj.time, 'sleep', lambda seconds: None)

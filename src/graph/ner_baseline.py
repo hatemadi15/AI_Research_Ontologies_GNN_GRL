@@ -3372,11 +3372,20 @@ def results_path(out_dir, granularity, args):
     return os.path.join(out_dir, f'ner_results_{granularity}{suffix}.json')
 
 
+# P1's options at their defaults (the SOTA plan's screens): a config holds one only when it is
+# set, so that every other run's config is what it was before they existed
+P1_DEFAULTS = {'screen': False, 'screen_splits': False, 'screen_level': None, 'warmup': 0.1,
+               'llrd': 0.0, 'reinit_top': 0, 'average_last': 0, 'gradient_checkpointing': False,
+               'span_head': False, 'joint_mulms': False}
+
+
 def stored_config(args):
-    """The arguments saved as `config` (the granularity is a field of its own)."""
+    """The arguments saved as `config` (the granularity is a field of its own); P1's options
+    only when they are set."""
     return {k: v for k, v in vars(args).items()
             if k not in ('granularity', 'compare', 'overwrite', 'papers', 'student_offsets',
-                         'subfields', 'save_names', 'save_candidates')}
+                         'subfields', 'save_names', 'save_candidates')
+            and not (k in P1_DEFAULTS and v == P1_DEFAULTS[k])}
 
 
 def torch_device(args):
