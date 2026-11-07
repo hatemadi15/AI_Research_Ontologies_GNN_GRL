@@ -9,6 +9,22 @@ typeset TACL version. A protocol in `docs/ROADMAP.md` §4 fixes it in detail
 before any run. The published numbers come from a literature audit of
 4 November, every number read in its paper.*
 
+*P1, 7 November: its protocol is fixed in ROADMAP §4, after an independent
+referee's check ("approve with required changes", all six applied). Its code
+comes next, then the timing batch `p1t` and the two rounds. It departs from
+this plan in four places, each justified there:
+- MaterioMiner is screened on 10 splits of the released training and
+  validation sentences, not on 5 random splits that hold test sentences.
+- Tokenization-robust training is not screened, because no validation set is
+  cut like the test files.
+- The tie rule covers up to 3 cells.
+- P1's estimate from measured times is about 22 session-hours, capped at 24,
+  where §4 below says 10–15.
+
+The corpora share four documents, found by an 8-gram check. One of them is
+MuLMS's test document `sofc_01`, an SOFC-Exp training article. Joint training
+drops all four from the side it adds.*
+
 *P0, 7 November: every gate passed (batch `p0a`; ROADMAP §4 has the record,
 `results/gpu/sota_p0.json` the numbers). A pass means that no shortfall was
 found, not that the numbers are shown equal. Our mean minus the published one:

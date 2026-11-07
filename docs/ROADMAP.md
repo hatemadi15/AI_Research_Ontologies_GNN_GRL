@@ -7373,33 +7373,60 @@ against it. Code: `ner_baseline.py --sofc-cv`, `mulms_nested.py` and
   unchanged.
 
 *The SOTA plan's P1: the screens (fixed 7 November, before any P1 run and
-any of its code; `docs/SOTA_PLAN.md` §1, §3 and §4).* No claim and no
+any of its code; `docs/SOTA_PLAN.md` §1, §3 and §4; revised the same day
+after an independent referee's check, "approve with required changes",
+all six applied, with five of its six optional points).* No claim and no
 decision. P1 selects, on validation data only, one system per benchmark
-for P2, and the tuned reference (candidate A) for P2's D-P decisions. No
-P1 run reads a test set.
+for P2, and the tuned reference (candidate A) for P2's D-P decisions.
+- **What P1 reads.** No P1 run scores a test sentence of its benchmark.
+  - The loaders read whole corpora, but screen mode never encodes their
+    test parts.
+  - Disclosed: MuLMS's dev set holds `sofc_04`, MuLMS's own annotation of
+    PMC6247067, one of SOFC-Exp's test articles. It enters only MuLMS's
+    selection.
 - **The benchmarks.** P1 makes four selections: MaterioMiner fine-grained,
   MaterioMiner coarse-grained, SOFC-Exp (its 4 entity types) and MuLMS
   (every nested entity).
   - SOFC-Exp's selection serves both of its protocols. The
     cross-validation folds are cut from the same 34 training and
     validation articles, and they test on the same 11 articles.
-- **Screen data, never a test sentence.**
+- **Screen data.**
   - **MaterioMiner: 10 screen splits** of the released split's 380
-    training and validation sentences. Each split has 323 sentences for
-    training and 57 for validation, the released split's sizes, drawn by
-    seed k = 0–9. The 96 test sentences are in no split.
-    - The plan's 5 random splits are drawn from all 476 sentences, so
-      their validation sets hold released test sentences.
-    - There are 10 splits instead of 5 because the validation score varies
-      by about 3 points between splits (SD 3.1 over the stored
-      random-split runs).
+    training and validation sentences.
+    - The sentences are taken in the release's order: its training file,
+      then its validation file.
+    - For split k = 0–9, `random.Random(k)` shuffles their indices. The
+      first 57 indices are validation and the other 323 training, the
+      released split's sizes.
+    - The 96 test sentences are in no split.
+    - The splits are recorded in `results/sota/mm_screen_splits.json`,
+      with its SHA-256, before `p1t`.
+    - Why not the plan's 5 random splits: they are drawn from all 476
+      sentences, so their validation sets hold released test sentences.
+    - Why 10 rather than 5: the validation score varies by about 3 points
+      between splits (2.8–3.0 over the stored CRF-head runs).
   - **SOFC-Exp:** the official split's 26 training articles and 8
-    validation articles (568 and 135 sentences). Its 11 test articles
-    are read by no run.
+    validation articles (568 and 135 sentences).
   - **MuLMS:** P0's configurations. Configuration c trains on four
-    training folds and stops early on the fifth (train<c>), and its screen
+    training folds and stops early on the fifth (train<c>). Its screen
     score is the release's dev set (7 documents), which no configuration
-    trains or stops on. The test set is read by no run.
+    trains or stops on.
+- **Documents the corpora share.** A MuLMS document and an SOFC-Exp
+  article are shared when at least 10 of the document's sentences share a
+  word 8-gram with the article, after `dapt_mlm.py`'s normalisation.
+  - Four pairs are shared; every other pair has at most 5 such sentences,
+    which are boilerplate:
+    - `sofc_01` and PMC5700654 (151 sentences): SOFC-Exp training, CV
+      fold cv3's dev; MuLMS test;
+    - `sofc_02` and PMC4772004 (144): SOFC-Exp training, cv4's dev; MuLMS
+      training folds, c3's tune fold;
+    - `sofc_03` and PMC6158676 (371): SOFC-Exp training, cv4's dev; MuLMS
+      training folds, c4's tune fold;
+    - `sofc_04` and PMC6247067 (209): SOFC-Exp test; MuLMS dev.
+  - `results/mulms_articles.json`, a title match, finds only three of
+    them.
+  - The list is recorded in `results/sota/shared_documents.json`, with
+    its SHA-256, before `p1t`.
 - **Units, paired across candidates.**
   - MaterioMiner: 10 units. Unit k is screen split k with model seed k.
   - SOFC-Exp: 5 units, model seeds 0, 100, 200, 300 and 400.
@@ -7414,7 +7441,9 @@ P1 run reads a test set.
   validation set.
   - On MaterioMiner and SOFC-Exp that set also picks the epoch, so the
     score is a maximum over epochs. It is optimistic for every candidate,
-    more so for those with more epochs, and is disclosed as such.
+    more so for those with more epochs. Each cell's record therefore also
+    reports the mean of its last 3 validation scores, which plays no part
+    in selection.
   - On MuLMS the dev set picks nothing.
 - **The reference, A0.**
   - MaterioMiner and SOFC-Exp: the CRF head on MatSciBERT:
@@ -7422,11 +7451,18 @@ P1 run reads a test set.
     - batch 16, at most 20 epochs, patience 3;
     - a 10% linear warm-up, weight decay 0.01.
   - MuLMS: `mulms_nested.py` as P0 ran it.
-  - On SOFC-Exp, A0 runs again in screen mode. Its validation scores must
-    equal the stored runs' `val_f1` at seeds 0–400, which checks that
-    screen mode changes no training step.
+  - On SOFC-Exp, A0 runs again in screen mode at seeds 0–400 (`p1t`).
+    - Its validation scores must equal the stored runs' `val_f1`, which
+      checks that screen mode changes no training step.
+    - Its extra units also run in screen mode.
   - On MuLMS, c1 runs again in screen mode and must equal P0's dev score.
-    c2 and c3 then come from P0.
+    - A0's c2 and c3, and its seed-0 extra units c4 and c5, are then read
+      from P0's files.
+    - These are the one exception to `sota_p1.py`'s refusal of a test
+      field: it takes only their `dev` field, and checks their SHA-256
+      (c1–c5: `c0d296b9…`, `96454fc2…`, `b28cb4c7…`, `a61998b8…`,
+      `5aa81001…`).
+    - The seed-100 extra units run in screen mode.
 - **Round 1: one change each from A0**, every candidate on every unit of
   its benchmark.
   - **A, tuning** (MaterioMiner and SOFC-Exp):
@@ -7437,7 +7473,7 @@ P1 run reads a test set.
     - A6: the top encoder layer re-initialised, seeded, before
       fine-tuning;
     - A7: the weights, CRF included, averaged over the selected epoch and
-      the 2 before it, then scored once.
+      the 2 before it (or as many as exist), then scored once.
   - **A on MuLMS:**
     - A1m: learning rate 5e-5, the CRF's 7e-3 kept;
     - A2m: the paper's inverse square-root schedule with patience 15,
@@ -7447,41 +7483,61 @@ P1 run reads a test set.
     - B2: SciDeBERTa (`KISTI-AI/scideberta`, revision `98fab84`). Its
       card states no licence, which is disclosed. Its weights are a
       pickle, loaded with `weights_only`.
-    - B1 and B2 use learning rate 1e-5, a 10% warm-up, at most 20 epochs,
-      batch 8, fp32 and gradient checkpointing.
+    - B1 and B2 use learning rate 1e-5 and 5e-3 for the CRF, a 10%
+      warm-up, at most 20 epochs, patience 3, batch 8, fp32 and gradient
+      checkpointing.
     - B3, SOFC-Exp only: MatSciBERT continued on the 40,000-sentence SOFC
       corpus (`sofc_sentences.txt`, built without SOFC-Exp's 45 articles
-      or any sentence sharing an 8-gram with them). It is trained with
-      `dapt_mlm.py`'s fixed settings for at most 60 minutes on one T4,
-      then with A0's recipe.
-    - B1 and B2 enter MuLMS only if each beats A0 by more than 1 point
-      on SOFC-Exp and on one MaterioMiner level, and the budget table
-      fits.
+      or any sentence sharing an 8-gram with them).
+      - It uses `dapt_mlm.py`'s fixed settings: 3 epochs, batch 32,
+        learning rate 5e-5, a 6% warm-up, at most 128 tokens.
+      - It trains on the GPU, through a new `--device` option; the default
+        stays the CPU of the stored runs.
+      - All its epochs run, and the model is saved at their end. If `p1t`
+        measures more than 60 minutes, B3 leaves P1.
+      - Then the CRF head trains on it with A0's recipe.
+    - B1 and B2 enter MuLMS only if each one's paired mean gain over A0
+      exceeds 1.0 point on SOFC-Exp and on MaterioMiner fine-grained or
+      coarse-grained, and the budget table fits. On MuLMS they then use:
+      - learning rate 1e-5 and 7e-3 for the CRF;
+      - batch 32, in micro-batches of 8, or of 4 for DeBERTa-v3-large;
+      - at most 100 epochs, patience 5, gradient checkpointing.
   - **C, training:**
     - C1: multi-task. On MaterioMiner, both levels from one run, each
       head with its own selected epoch. On SOFC-Exp, entities and slots,
       scored on the entity head.
-    - C2: joint training across corpora (Lee 2025), with one encoder and a
-      CRF head per corpus.
-      - SOFC-Exp is joined with MuLMS's training folds (outermost
-        entities), and MuLMS with SOFC-Exp's 34 training and validation
-        articles.
-      - The two corpora share 3 documents (`results/mulms_articles.json`):
-        - `sofc_01`, PMC5700654: SOFC-Exp training, MuLMS test;
-        - `sofc_02`, PMC4772004: SOFC-Exp training, MuLMS training folds;
-        - `sofc_04`, PMC6247067: SOFC-Exp test, MuLMS dev.
-      - The joined side never carries one of the 3, so no copy reaches a
-        validation, dev or test set, in P1 or later in P2's folds.
-      - Each epoch adds as many of the other corpus's sentences as the
-        benchmark has, drawn without replacement by the seed.
-      - On SOFC-Exp and MuLMS only.
+    - C2: joint training across corpora (Lee 2025), on SOFC-Exp and
+      MuLMS only. There is one encoder, and one CRF head per corpus with
+      that corpus's own tags.
+      - SOFC-Exp is joined with MuLMS's training folds, using their
+        outermost entities as IOB2 tags.
+      - MuLMS is joined with SOFC-Exp's 34 training and validation
+        articles, using its 4 entity types, beside the stacked BILOU head.
+      - The joined side never carries a shared document, so no copy
+        reaches a validation, tune, dev or test set, in P1 or later in
+        P2's folds.
+      - Each epoch adds min(n, m) of the other corpus's sentences, drawn
+        without replacement by `random.Random(f'{seed}-{epoch}')`, where
+        n is the benchmark's training sentences and m the other corpus's.
+        They are shuffled in with the benchmark's.
+      - Each sentence's loss comes from its own corpus's head, and the
+        other corpus is never scored.
     - C3: document context, 64 subwords per side, as the stored runs, on
       all three corpora (new code for MuLMS).
   - **E, a span head** on SOFC-Exp and MuLMS:
-    - start, end and width features, and a sigmoid per type;
-    - the width cap covers 99.5% of the training entities;
-    - head learning rate 1e-3, otherwise A0's recipe (MuLMS: P0's);
-    - MuLMS keeps every span above 0.5, nested or not;
+    - A span's features are the first subword vectors of its first and
+      last words and a learned width embedding of size 32.
+    - Then a hidden layer of 256 with GELU and dropout 0.1, and one logit
+      per type.
+    - The loss is binary cross-entropy per span and type, averaged over
+      every span up to the width cap; there is no negative sampling.
+    - The width cap is the smallest width covering 99.5% of the training
+      part's entities. It is measured on that part only and recorded per
+      run.
+    - Inputs are at most 512 subwords, as elsewhere.
+    - The head trains at 1e-3. Otherwise it follows A0's recipe, and P0's
+      on MuLMS, with the epoch picked as there.
+    - MuLMS keeps every span and type above 0.5, nested or not.
     - SOFC-Exp keeps non-overlapping spans above 0.5, greedily from the
       highest.
   - **Not screened in P1:**
@@ -7493,55 +7549,90 @@ P1 run reads a test set.
     - F, the 3B decoder. It is considered only if, after round 2,
       SOFC-Exp's selected system leads A's best cell by less than 1
       point, and only under its own protocol, fixed before its runs.
-- **Round 2: combinations**, built from round 1 by `sota_p1.py`. G is the
-  round-1 cells whose mean gain over A0, paired by unit, is above 0.
-  - **A\*:** every A change in G in one cell, taking the better learning
-    rate if both are in G.
-  - **The chain** starts from the better of A\*'s cell and G's best B
-    cell. G's C and E changes are added one at a time, each as a new
-    cell, in order of their round-1 gain. A change is kept only if the
-    mean improves.
-    - E skips C1 and C2.
-    - A B start takes C and E changes but no A change.
+- **Round 2: combinations**, built from round 1 by `sota_p1.py`. A cell's
+  gain is its mean minus A0's over the same units, paired by unit. G is
+  the round-1 cells whose gain exceeds its standard error (the SD of the
+  paired differences over √units).
+  - **A\*:**
+    - with no A change in G, A\* is A0;
+    - with one, A\* is that round-1 cell, not re-run;
+    - with two or more, A\* is a new cell holding all of them, taking the
+      better learning rate if both are in G.
+  - **A's best cell** is the A-family cell with the highest mean: A0–A7
+    (MuLMS: A0, A1m, A2m) or A\*.
+  - **The chain** starts from A's best cell, or from G's best B cell if
+    its mean is higher.
+    - A B1 or B2 start takes no A change.
+    - A B3 start first takes A\*'s changes, as one new cell, if A\* is
+      not A0.
+  - **Additions.** Then G's C and E changes are tried in order of their
+    round-1 gain: C before E on equal gains, then by name. Each is one new
+    cell on the current cell, kept only if its mean over the same units
+    is strictly higher.
+  - **Heads.** C1, C2 and E each add a head, and at most one of them
+    enters a cell: once one is kept, the other two are skipped. C3
+    combines with any of them.
+  - Round 2 makes at most 6 new cells per benchmark.
 - **Selection.**
   - The selected system is the cell with the highest screen mean of all
     the benchmark's round-1 and round-2 cells.
-  - The tuned reference is A's best cell: one of A0–A7 (or A1m–A2m), or
-    A\*.
-  - The tie rule (plan §1): if the two highest means lie within 1 point,
-    both cells get the 4 extra units, and the higher mean over all units
-    is selected. A further tie goes to the cell with fewer changes.
+  - The tuned reference is A's best cell, fixed after round 2 on the base
+    units.
+  - **The tie rule.** Every cell within 1 point of the highest mean, at
+    most the 3 highest, gets the extra units, and the highest mean over
+    all units is selected. The plan names the two best; the third is the
+    referee's. A further tie goes to the cell with fewer changes, then by
+    name.
   - If the selected system is A's best cell, P2's D-P reads "tuning".
-- **Code, written and tested before the first run, then fixed:**
+- **Checks.** A failed check voids its batch: no P1 cell from it counts,
+  the cause is fixed in a new commit, and the batch runs again.
+  - The smoke4 repeat equals `smokebn`.
+  - A0's screen runs on SOFC-Exp equal the stored `val_f1`.
+  - MuLMS's c1 in screen mode equals P0's dev score.
+  - Every file aggregated passes `sota_p1.py`'s checks: its settings, its
+    units, and no test field outside the named P0 files.
+- **Code, written and tested before the first run, then fixed (one
+  commit, named in the `p1t` record):**
   - `ner_baseline.py --screen`, which never encodes a test set, writes no
     test field and marks its file `screen`;
-  - MaterioMiner's screen splits;
+  - MaterioMiner's screen splits and the shared-document list, as hashed
+    data files;
   - `--warmup`, `--llrd`, `--reinit-top`, `--average-last` and
     `--gradient-checkpointing`;
-  - B2's loading;
-  - B3 as a job that feeds its lane;
-  - C2, C3 for `mulms_nested.py`, and E;
+  - B2's loading, and `dapt_mlm.py --device`, B3 as a job that feeds its
+    lane;
+  - C2, C3 for `mulms_nested.py`, and E, with the settings above;
   - `mulms_nested.py --screen`;
-  - `sota_p1.py`, which refuses any file with a test field, builds round
-    2 and the extra units, and writes `results/gpu/sota_p1.json`.
-- **Timing first** (plan §4). Batch `p1t` gives 2-epoch screen-mode runs
-  of every new kind of cell on each benchmark that it enters.
-  - The checks above run in it: the smoke4 repeat, A0 against the stored
-    SOFC-Exp runs, and MuLMS's c1.
+  - `sota_p1.py`, which checks and aggregates the files, builds round 2
+    and the extra units, and writes `results/gpu/sota_p1.json`.
+- **Timing first** (plan §4). Batch `p1t` runs, in screen mode, 2-epoch
+  runs of every new kind of cell on each benchmark it enters, B3's
+  pre-training, and the checks above.
   - Its table of session-hours per cell and benchmark is committed before
-    round 1 is pushed. A run's time is the measured minutes per epoch
-    times the mean best epoch plus the patience plus 1, from A0's stored
-    runs, capped at the epoch limit.
+    round 1 is pushed. It reserves round 2 (6 cells per benchmark) and the
+    extra units (3 cells).
+  - A run's time is the measured minutes per epoch × (the mean best epoch
+    + the patience + 1) from A0's stored runs, capped at the epoch limit.
 - **Budget.**
-  - P1 is capped at 15 session-hours for rounds 1 and 2 and the extra
-    units; `p1t` takes at most 1 more hour.
-  - If the table exceeds the cap, MaterioMiner goes to 5 units first, then
-    the B cells leave MaterioMiner coarse-grained.
+  - From the measured times, round 1 takes about 14 session-hours, round
+    2 about 5 and the extra units about 3.
+  - P1 is capped at 24 session-hours; `p1t` takes at most 1 more.
+  - If the table exceeds the cap, cuts are made in this order until it
+    fits:
+    1. A2m leaves MuLMS;
+    2. C3 leaves MuLMS;
+    3. MaterioMiner goes to 5 units, splits 0–4, with extras 5–8;
+    4. B2 leaves every benchmark;
+    5. B1 leaves MaterioMiner coarse-grained.
   - Sessions resume finished runs, and a round may span two weekly quotas.
-- **Recording.** `sota_p1.py` writes each round's table: per cell the mean,
-  the paired mean gain over A0 and its SD, and the units. The selections go
-  here, in `docs/SOTA_PLAN.md` and in `results/README.md`, with no test
-  number.
+    P2 starts only after P1's selections.
+- **Recording.** `sota_p1.py` writes each round's table. Per cell it gives
+  the mean, the mean of the last 3 validation scores, the paired gain over
+  A0 and its SD, and the units.
+  - Each batch's record names its kernel version and the commit of its
+    bundle.
+  - The selections go here, in `docs/SOTA_PLAN.md` and in
+    `results/README.md`, with no test number.
 
 *TACL (paper B), for later.* The paper goes to 10 pages, references
 uncounted, with appendices after them within TACL's caps (as last read: up
