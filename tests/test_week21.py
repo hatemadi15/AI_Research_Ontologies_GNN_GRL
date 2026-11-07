@@ -388,7 +388,8 @@ def test_the_runner_runs_gliner_jobs_and_installs_gliner_alone():
     rj = _run_jobs()
     assert rj.job_command(['--crf'])[1:] == ['src/graph/ner_baseline.py', '--crf']
     job = kj.gliner_job('fine')
-    assert rj.job_command(job)[1:] == job and rj.SCRIPTS == (kj.GLINER_SCRIPT, kj.MULMS_NESTED_SCRIPT)
+    assert rj.job_command(job)[1:] == job and rj.SCRIPTS == (kj.GLINER_SCRIPT, kj.MULMS_NESTED_SCRIPT,
+                                                          kj.DAPT_SCRIPT)
     plain = {'pip': ['transformers==5.18.0']}
     assert rj.pip_commands(plain, ['w.whl']) == {
         'pip': [sys.executable, '-m', 'pip', 'install', '-q', 'transformers==5.18.0', 'w.whl']}
