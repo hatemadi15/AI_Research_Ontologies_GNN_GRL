@@ -748,3 +748,11 @@ Stage 3 (round 2's first cells; batch `p1n`, kernel version 29, bundle of
 Stage 4 (batch `p1n`, kernel version 30, bundle of `84c8186`):
 `sota/p1_stage4.json` is the table. Coarse-grained's selection is A3 with A6,
 and SOFC-Exp's is B1 (validation only).
+
+Stage 5 (batch `p1n`, kernel version 31, bundle of `e99e300`) holds fine's
+extra units. **P1's selections** are in `gpu/sota_p1.json`, from `python
+src/graph/sota_p1.py select` (validation only, no claim):
+- MaterioMiner fine: C1;
+- coarse: A3 with A6;
+- SOFC-Exp: B1;
+- MuLMS: A1m.

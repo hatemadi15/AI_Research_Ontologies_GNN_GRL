@@ -26,8 +26,14 @@ MaterioMiner and SOFC-Exp is running in stages. Stage 4 selected A3 with A6 on
 coarse-grained (78.59) and B1, DeBERTa-v3-large, on SOFC-Exp (79.18). B1
 leads SOFC-Exp's tuned reference by 0.30, under 1 point, so F (the 3B
 decoder) may be considered, under its own protocol. The author's decision (8
-November): F is skipped in P1 but kept as a later option. Fine-grained's
-extra units come next. Amendment 1
+November): F is skipped in P1 but kept as a later option. **P1 is complete
+(8 November).** Its selections, on validation only, are:
+- MaterioMiner fine: C1, multi-task, against the tuned reference A6;
+- MaterioMiner coarse: A3 with A6, which is also its tuned reference;
+- SOFC-Exp: B1, DeBERTa-v3-large, against A6;
+- MuLMS: A1m, learning rate 5e-5, which is also its tuned reference.
+
+P2's protocol comes next. Amendment 1
 (before any run) has C1 on MaterioMiner run one level at a time: the two levels'
 released splits are different partitions. It departs from this plan in four
 places, each justified there:

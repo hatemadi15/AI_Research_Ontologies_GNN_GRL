@@ -7848,6 +7848,26 @@ for P2, and the tuned reference (candidate A) for P2's D-P decisions.
       protocol fixed before any run.
   - **The next stage** holds 2 jobs: fine's extra units for A6 with C1 and
     for C1.
+- **Stage 5's record, 8 November** (batch `p1n`, kernel version 31, bundle of
+  `e99e300`; 2 jobs, 11 minutes, every job done). Fine's tie goes to C1: its
+  mean over all 9 units is 79.72, against A6 with C1's 79.64. No cell is
+  left to run.
+- **P1's selections** (`results/gpu/sota_p1.json`, from `sota_p1.py select`;
+  validation scores only, no claim). P1 used 15.4 of its 24 session-hours,
+  and `p1t` 0.9 more.
+
+  | Benchmark | Selected system | Its mean: all units (base units), gain over A0 | Tuned reference (A's best cell) | P2's D-P reads |
+  |---|---|---|---|---|
+  | MaterioMiner fine | C1, multi-task | 79.72 over 9 (81.17), +1.91 (0.92) | A6: 80.12, +0.86 (0.36) | C1 against A6 |
+  | MaterioMiner coarse | A3 with A6 | 78.59 over 9 (79.59), +1.79 (0.94) | A3 with A6 | "tuning" |
+  | SOFC-Exp | B1, DeBERTa-v3-large | 79.18 over 9 (79.08), +0.39 (1.23) | A6: 78.78, +0.09 (0.56) | B1 against A6 |
+  | MuLMS | A1m, learning rate 5e-5 | 78.62 over 7 (78.44), +0.81 (0.44) | A1m | "tuning" |
+
+  - Each selection is a validation mean. On MaterioMiner and SOFC-Exp, each
+    run's score is its best epoch, which is optimistic. P2, on fresh seeds
+    and the test sets, decides.
+  - F is skipped in P1 and kept for later (the author, 8 November).
+  - P2's protocol comes next. It is fixed before any P2 run.
 
 *TACL (paper B), for later.* The paper goes to 10 pages, references
 uncounted, with appendices after them within TACL's caps (as last read: up
