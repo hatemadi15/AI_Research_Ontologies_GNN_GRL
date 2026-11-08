@@ -741,3 +741,6 @@ Stage 2 (batch `p1n`, kernel version 28, bundle of `92078e6`; every job
 done): A6 runs again after its fix, and MuLMS's extra units run.
 `sota/p1_stage2.json` is the table. MuLMS's selection is A1m (validation
 only).
+
+Stage 3 (round 2's first cells; batch `p1n`, kernel version 29, bundle of
+`75b3970`): `sota/p1_stage3.json` is the table.

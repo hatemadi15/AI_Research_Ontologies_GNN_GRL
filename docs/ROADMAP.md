@@ -7804,6 +7804,25 @@ for P2, and the tuned reference (candidate A) for P2's D-P decisions.
       mean. It is not investigated further.
   - **The next stage** holds 3 jobs (`results/sota/p1_next_jobs.json`): A6
     with C1 on fine and on SOFC-Exp, and A3 with A6 on coarse.
+- **Stage 3's record, 8 November** (round 2's first cells; batch `p1n`,
+  kernel version 29, bundle of `75b3970`; 3 jobs, 38 minutes, every job done;
+  the table is `results/sota/p1_stage3.json`).
+
+  | Cell | MaterioMiner fine | MaterioMiner coarse | SOFC-Exp |
+  |---|---|---|---|
+  | A6 with C1 | 81.54 · 79.65 · +2.28 (0.68) | – | 79.41 · 77.43 · +0.72 (0.71) |
+  | A3 with A6 (A\*) | – | 79.59 · 78.25 · +1.79 (0.94) | – |
+
+  - fine: A6 with C1 is above A6 (80.12), so it is kept, and C3 is tried
+    on it next.
+  - coarse: A\* is A's best cell. No C or E change is in G, so the chain
+    ends there. By the tie rule, A3 with A6, A6 and A3 (79.59, 78.86,
+    78.85) get the extra units, splits 5–8.
+  - SOFC-Exp: A6 with C1 is above A6 (78.78), so it is kept. G holds no
+    other change, so the chain ends there. By the tie rule, A6 with C1, C1
+    and B1 (79.41, 79.37, 79.08) get the extra units, seeds 500–800.
+  - **The next stage** holds 7 jobs: A6 with C1 and C3 on fine, and the
+    extra units on coarse and SOFC-Exp.
 
 *TACL (paper B), for later.* The paper goes to 10 pages, references
 uncounted, with appendices after them within TACL's caps (as last read: up
