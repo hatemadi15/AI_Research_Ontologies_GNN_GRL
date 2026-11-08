@@ -144,6 +144,28 @@ def test_screen_trains_as_the_full_run(tiny):
     assert averaged['val_f1'] == averaged['average']['val_f1']
 
 
+def test_reinit_top_reinitialises_only_the_top_layer(tiny):
+    """--reinit-top 1 (A6) changes the loaded top layer's weights, from the seed, and nothing
+    else; round 1 ran A6 as A0 because transformers 5 skipped the loaded weights."""
+    import torch
+    from transformers import AutoModelForTokenClassification
+
+    def prepared(seed, n):
+        torch.manual_seed(seed)
+        model = AutoModelForTokenClassification.from_pretrained(tiny, num_labels=3)
+        nb.prepare_encoder(model, model.base_model, SimpleNamespace(reinit_top=n))
+        return {k: v.detach().clone() for k, v in model.base_model.state_dict().items()}
+
+    loaded, a, b, c = prepared(0, 0), prepared(0, 1), prepared(0, 1), prepared(1, 1)
+    changed = {k for k in loaded if not torch.equal(loaded[k], a[k])}
+    # the tiny encoder's 2 layers: only layer 1's weights change (its LayerNorms are already
+    # at their initial values, ones and zeros, and so may not)
+    assert any(k.endswith('query.weight') for k in changed)
+    assert changed and all(k.startswith('encoder.layer.1.') for k in changed)
+    assert all(torch.equal(a[k], b[k]) for k in a)                       # seeded
+    assert any(not torch.equal(a[k], c[k]) for k in changed)             # by the seed
+
+
 def test_multitask_scores_only_its_level(tiny):
     """--screen-level: the other head trains without its tags where they are dropped, and gets
     no record."""

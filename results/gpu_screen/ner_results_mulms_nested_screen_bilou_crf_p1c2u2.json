@@ -1,0 +1,539 @@
+{
+  "corpus": "mulms",
+  "protocol": "nested_screen",
+  "system": "bilou_crf",
+  "model": "m3rg-iitd/matscibert",
+  "release": {
+    "revision": "bc1c97d63b194e1102ff2e80f1b1bd7379148d6a",
+    "files": {
+      "MuLMS_Corpus/train-00000-of-00001.parquet": "802e019019c18e5543d9d96cb03f296a30f4ca8def35b368af1028430453add9",
+      "MuLMS_Corpus/validation-00000-of-00001.parquet": "7c94e244ed2c74cf1bae443b4346ab7f9ac1d6807896a5e7e52eb71be886e536",
+      "MuLMS_Corpus/test-00000-of-00001.parquet": "9ad56ac15c74faab3821a01e109abd462718d6d7dcb2dcdc748397dfc04eccf7"
+    }
+  },
+  "config": {
+    "lr": 0.0001,
+    "lr_crf": 0.007,
+    "batch_size": 32,
+    "epochs": 100,
+    "patience": 5,
+    "lr_schedule": "none",
+    "micro_batch": 8,
+    "seed": 0,
+    "seed_offset": 0,
+    "tag": "p1c2u2",
+    "max_train": 0,
+    "dropout": 0.2,
+    "crf_init": 0.1,
+    "max_length": 512,
+    "n_tags": 473,
+    "joint_sofc": true,
+    "screen": true
+  },
+  "screen": true,
+  "configurations": {
+    "c1": {
+      "train": [
+        "electrolysis_01",
+        "electrolysis_03",
+        "oastm_01",
+        "oastm_02",
+        "oastm_04",
+        "oastm_05",
+        "oastm_07",
+        "oastm_08",
+        "oastm_10",
+        "oastm_11",
+        "pemfc_04",
+        "pemfc_07",
+        "pemfc_08",
+        "pemfc_10",
+        "pemfc_14",
+        "poly_01",
+        "poly_02",
+        "poly_05",
+        "poly_07",
+        "semi_01",
+        "semi_02",
+        "semi_03",
+        "semi_05",
+        "sofc_02",
+        "sofc_03",
+        "steel_03",
+        "steel_06",
+        "steel_08",
+        "steel_11"
+      ],
+      "tune": [
+        "graphene_01",
+        "oastm_03",
+        "oastm_06",
+        "pemfc_02",
+        "poly_04",
+        "semi_06",
+        "steel_05"
+      ],
+      "dev": [
+        "electrolysis_04",
+        "oastm_09",
+        "pemfc_13",
+        "poly_11",
+        "semi_04",
+        "sofc_04",
+        "steel_07"
+      ],
+      "test": [
+        "electrolysis_02",
+        "graphene_02",
+        "pemfc_03",
+        "poly_09",
+        "semi_08",
+        "sofc_01",
+        "steel_04"
+      ]
+    },
+    "c2": {
+      "train": [
+        "electrolysis_01",
+        "graphene_01",
+        "oastm_01",
+        "oastm_02",
+        "oastm_03",
+        "oastm_04",
+        "oastm_06",
+        "oastm_07",
+        "oastm_08",
+        "oastm_10",
+        "oastm_11",
+        "pemfc_02",
+        "pemfc_07",
+        "pemfc_10",
+        "pemfc_14",
+        "poly_02",
+        "poly_04",
+        "poly_05",
+        "poly_07",
+        "semi_01",
+        "semi_02",
+        "semi_03",
+        "semi_06",
+        "sofc_02",
+        "sofc_03",
+        "steel_03",
+        "steel_05",
+        "steel_06",
+        "steel_08"
+      ],
+      "tune": [
+        "electrolysis_03",
+        "oastm_05",
+        "pemfc_04",
+        "pemfc_08",
+        "poly_01",
+        "semi_05",
+        "steel_11"
+      ],
+      "dev": [
+        "electrolysis_04",
+        "oastm_09",
+        "pemfc_13",
+        "poly_11",
+        "semi_04",
+        "sofc_04",
+        "steel_07"
+      ],
+      "test": [
+        "electrolysis_02",
+        "graphene_02",
+        "pemfc_03",
+        "poly_09",
+        "semi_08",
+        "sofc_01",
+        "steel_04"
+      ]
+    },
+    "c3": {
+      "train": [
+        "electrolysis_03",
+        "graphene_01",
+        "oastm_01",
+        "oastm_02",
+        "oastm_03",
+        "oastm_04",
+        "oastm_05",
+        "oastm_06",
+        "oastm_07",
+        "oastm_11",
+        "pemfc_02",
+        "pemfc_04",
+        "pemfc_07",
+        "pemfc_08",
+        "pemfc_10",
+        "poly_01",
+        "poly_02",
+        "poly_04",
+        "poly_07",
+        "semi_01",
+        "semi_02",
+        "semi_05",
+        "semi_06",
+        "sofc_03",
+        "steel_03",
+        "steel_05",
+        "steel_06",
+        "steel_11"
+      ],
+      "tune": [
+        "electrolysis_01",
+        "oastm_08",
+        "oastm_10",
+        "pemfc_14",
+        "poly_05",
+        "semi_03",
+        "sofc_02",
+        "steel_08"
+      ],
+      "dev": [
+        "electrolysis_04",
+        "oastm_09",
+        "pemfc_13",
+        "poly_11",
+        "semi_04",
+        "sofc_04",
+        "steel_07"
+      ],
+      "test": [
+        "electrolysis_02",
+        "graphene_02",
+        "pemfc_03",
+        "poly_09",
+        "semi_08",
+        "sofc_01",
+        "steel_04"
+      ]
+    },
+    "c4": {
+      "train": [
+        "electrolysis_01",
+        "electrolysis_03",
+        "graphene_01",
+        "oastm_01",
+        "oastm_03",
+        "oastm_05",
+        "oastm_06",
+        "oastm_07",
+        "oastm_08",
+        "oastm_10",
+        "oastm_11",
+        "pemfc_02",
+        "pemfc_04",
+        "pemfc_07",
+        "pemfc_08",
+        "pemfc_14",
+        "poly_01",
+        "poly_04",
+        "poly_05",
+        "poly_07",
+        "semi_01",
+        "semi_03",
+        "semi_05",
+        "semi_06",
+        "sofc_02",
+        "steel_03",
+        "steel_05",
+        "steel_08",
+        "steel_11"
+      ],
+      "tune": [
+        "oastm_02",
+        "oastm_04",
+        "pemfc_10",
+        "poly_02",
+        "semi_02",
+        "sofc_03",
+        "steel_06"
+      ],
+      "dev": [
+        "electrolysis_04",
+        "oastm_09",
+        "pemfc_13",
+        "poly_11",
+        "semi_04",
+        "sofc_04",
+        "steel_07"
+      ],
+      "test": [
+        "electrolysis_02",
+        "graphene_02",
+        "pemfc_03",
+        "poly_09",
+        "semi_08",
+        "sofc_01",
+        "steel_04"
+      ]
+    },
+    "c5": {
+      "train": [
+        "electrolysis_01",
+        "electrolysis_03",
+        "graphene_01",
+        "oastm_02",
+        "oastm_03",
+        "oastm_04",
+        "oastm_05",
+        "oastm_06",
+        "oastm_08",
+        "oastm_10",
+        "pemfc_02",
+        "pemfc_04",
+        "pemfc_08",
+        "pemfc_10",
+        "pemfc_14",
+        "poly_01",
+        "poly_02",
+        "poly_04",
+        "poly_05",
+        "semi_02",
+        "semi_03",
+        "semi_05",
+        "semi_06",
+        "sofc_02",
+        "sofc_03",
+        "steel_05",
+        "steel_06",
+        "steel_08",
+        "steel_11"
+      ],
+      "tune": [
+        "oastm_01",
+        "oastm_07",
+        "oastm_11",
+        "pemfc_07",
+        "poly_07",
+        "semi_01",
+        "steel_03"
+      ],
+      "dev": [
+        "electrolysis_04",
+        "oastm_09",
+        "pemfc_13",
+        "poly_11",
+        "semi_04",
+        "sofc_04",
+        "steel_07"
+      ],
+      "test": [
+        "electrolysis_02",
+        "graphene_02",
+        "pemfc_03",
+        "poly_09",
+        "semi_08",
+        "sofc_01",
+        "steel_04"
+      ]
+    }
+  },
+  "runs": [
+    {
+      "run_id": "c2",
+      "config": 2,
+      "seed": 0,
+      "tune_split": "train2",
+      "n_train": 6054,
+      "n_tune": 1484,
+      "n_dev": 1532,
+      "best_epoch": 4,
+      "tune_micro_f1": 75.16,
+      "history": [
+        {
+          "epoch": 1,
+          "tune_micro_f1": 71.73,
+          "tune_macro_f1": 56.33
+        },
+        {
+          "epoch": 2,
+          "tune_micro_f1": 72.8,
+          "tune_macro_f1": 62.83
+        },
+        {
+          "epoch": 3,
+          "tune_micro_f1": 73.79,
+          "tune_macro_f1": 63.86
+        },
+        {
+          "epoch": 4,
+          "tune_micro_f1": 75.16,
+          "tune_macro_f1": 66.35
+        },
+        {
+          "epoch": 5,
+          "tune_micro_f1": 74.1,
+          "tune_macro_f1": 65.33
+        },
+        {
+          "epoch": 6,
+          "tune_micro_f1": 73.09,
+          "tune_macro_f1": 63.7
+        },
+        {
+          "epoch": 7,
+          "tune_micro_f1": 73.64,
+          "tune_macro_f1": 64.88
+        },
+        {
+          "epoch": 8,
+          "tune_micro_f1": 75.12,
+          "tune_macro_f1": 64.48
+        },
+        {
+          "epoch": 9,
+          "tune_micro_f1": 72.85,
+          "tune_macro_f1": 64.94
+        }
+      ],
+      "erased_word_sentences": {
+        "train": 101,
+        "tune": 12,
+        "dev": 3
+      },
+      "truncated_words": 0,
+      "joint": {
+        "n_other": 655,
+        "other_types": [
+          "DEVICE",
+          "EXPERIMENT",
+          "MATERIAL",
+          "VALUE"
+        ],
+        "other_per_epoch": 655
+      },
+      "dev": {
+        "micro_f1": 78.71,
+        "precision": 78.14,
+        "recall": 79.28,
+        "macro_f1": 68.75,
+        "TP": 5859,
+        "FP": 1639,
+        "FN": 1531,
+        "per_type": {
+          "MAT": {
+            "precision": 81.89,
+            "recall": 83.91,
+            "f1": 82.89,
+            "TP": 1935,
+            "FP": 428,
+            "FN": 371
+          },
+          "NUM": {
+            "precision": 86.8,
+            "recall": 93.58,
+            "f1": 90.06,
+            "TP": 1006,
+            "FP": 153,
+            "FN": 69
+          },
+          "VALUE": {
+            "precision": 80.88,
+            "recall": 86.58,
+            "f1": 83.63,
+            "TP": 774,
+            "FP": 183,
+            "FN": 120
+          },
+          "UNIT": {
+            "precision": 93.07,
+            "recall": 91.89,
+            "f1": 92.47,
+            "TP": 725,
+            "FP": 54,
+            "FN": 64
+          },
+          "PROPERTY": {
+            "precision": 54.51,
+            "recall": 63.13,
+            "f1": 58.5,
+            "TP": 375,
+            "FP": 313,
+            "FN": 219
+          },
+          "FORM": {
+            "precision": 72.77,
+            "recall": 42.86,
+            "f1": 53.94,
+            "TP": 147,
+            "FP": 55,
+            "FN": 196
+          },
+          "MEASUREMENT": {
+            "precision": 59.15,
+            "recall": 66.77,
+            "f1": 62.73,
+            "TP": 223,
+            "FP": 154,
+            "FN": 111
+          },
+          "CITE": {
+            "precision": 95.44,
+            "recall": 99.27,
+            "f1": 97.32,
+            "TP": 272,
+            "FP": 13,
+            "FN": 2
+          },
+          "SAMPLE": {
+            "precision": 43.06,
+            "recall": 24.9,
+            "f1": 31.55,
+            "TP": 62,
+            "FP": 82,
+            "FN": 187
+          },
+          "TECHNIQUE": {
+            "precision": 50.0,
+            "recall": 54.23,
+            "f1": 52.03,
+            "TP": 77,
+            "FP": 77,
+            "FN": 65
+          },
+          "DEV": {
+            "precision": 70.54,
+            "recall": 72.34,
+            "f1": 71.43,
+            "TP": 170,
+            "FP": 71,
+            "FN": 65
+          },
+          "RANGE": {
+            "precision": 69.79,
+            "recall": 63.81,
+            "f1": 66.67,
+            "TP": 67,
+            "FP": 29,
+            "FN": 38
+          },
+          "INSTRUMENT": {
+            "precision": 49.06,
+            "recall": 52.0,
+            "f1": 50.49,
+            "TP": 26,
+            "FP": 27,
+            "FN": 24
+          }
+        }
+      },
+      "environment": {
+        "device": "Tesla T4",
+        "cuda": "12.8",
+        "cudnn": 91900,
+        "torch": "2.11.0+cu128",
+        "transformers": "5.18.0",
+        "deterministic": true,
+        "cublas_workspace_config": ":4096:8"
+      },
+      "runtime_sec": 1808.7
+    }
+  ],
+  "dev_micro_f1_mean": 78.71,
+  "dev_micro_f1_sd": null
+}

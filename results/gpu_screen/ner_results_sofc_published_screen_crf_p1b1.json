@@ -1,0 +1,388 @@
+{
+  "granularity": "sofc",
+  "protocol": "published_screen",
+  "variant": "crf_p1b1",
+  "model": "microsoft/deberta-v3-large",
+  "labels": [
+    "DEVICE",
+    "EXPERIMENT",
+    "MATERIAL",
+    "VALUE"
+  ],
+  "label_tie": {},
+  "paper_test_f1": null,
+  "config": {
+    "seeds": [
+      0,
+      100,
+      200,
+      300,
+      400
+    ],
+    "split_seed": 0,
+    "vary_split": false,
+    "leave_one_paper_out": false,
+    "model": "microsoft/deberta-v3-large",
+    "top_k": 27,
+    "epochs": 20,
+    "patience": 3,
+    "lr": 1e-05,
+    "batch_size": 8,
+    "class_weights": false,
+    "crf": true,
+    "screen": true,
+    "gradient_checkpointing": true,
+    "tag": "p1b1",
+    "seed_offset": 0,
+    "save_predictions": false,
+    "max_train": 0,
+    "device": null,
+    "threads": 2,
+    "published_split": true
+  },
+  "runs": [
+    {
+      "seed": 0,
+      "best_epoch": 5,
+      "val_f1": 80.41,
+      "n_train": 568,
+      "n_val": 135,
+      "history": [
+        {
+          "epoch": 0,
+          "train_loss": 3408.6257,
+          "val_f1": 40.29
+        },
+        {
+          "epoch": 1,
+          "train_loss": 595.0653,
+          "val_f1": 72.95
+        },
+        {
+          "epoch": 2,
+          "train_loss": 304.1554,
+          "val_f1": 76.97
+        },
+        {
+          "epoch": 3,
+          "train_loss": 200.4855,
+          "val_f1": 78.87
+        },
+        {
+          "epoch": 4,
+          "train_loss": 133.5935,
+          "val_f1": 79.88
+        },
+        {
+          "epoch": 5,
+          "train_loss": 91.1266,
+          "val_f1": 80.41
+        },
+        {
+          "epoch": 6,
+          "train_loss": 64.5931,
+          "val_f1": 78.4
+        },
+        {
+          "epoch": 7,
+          "train_loss": 49.7003,
+          "val_f1": 80.03
+        },
+        {
+          "epoch": 8,
+          "train_loss": 33.8388,
+          "val_f1": 80.21
+        }
+      ],
+      "run_id": "seed0",
+      "runtime_sec": 1057.3,
+      "environment": {
+        "device": "Tesla T4",
+        "cuda": "12.8",
+        "cudnn": 91900,
+        "torch": "2.11.0+cu128",
+        "transformers": "5.18.0",
+        "deterministic": true,
+        "cublas_workspace_config": ":4096:8"
+      }
+    },
+    {
+      "seed": 100,
+      "best_epoch": 7,
+      "val_f1": 78.53,
+      "n_train": 568,
+      "n_val": 135,
+      "history": [
+        {
+          "epoch": 0,
+          "train_loss": 3200.6045,
+          "val_f1": 51.56
+        },
+        {
+          "epoch": 1,
+          "train_loss": 621.574,
+          "val_f1": 74.45
+        },
+        {
+          "epoch": 2,
+          "train_loss": 294.6342,
+          "val_f1": 76.33
+        },
+        {
+          "epoch": 3,
+          "train_loss": 182.1886,
+          "val_f1": 76.95
+        },
+        {
+          "epoch": 4,
+          "train_loss": 125.1498,
+          "val_f1": 78.0
+        },
+        {
+          "epoch": 5,
+          "train_loss": 84.2851,
+          "val_f1": 77.79
+        },
+        {
+          "epoch": 6,
+          "train_loss": 59.6736,
+          "val_f1": 76.78
+        },
+        {
+          "epoch": 7,
+          "train_loss": 43.7861,
+          "val_f1": 78.53
+        },
+        {
+          "epoch": 8,
+          "train_loss": 34.6147,
+          "val_f1": 77.34
+        },
+        {
+          "epoch": 9,
+          "train_loss": 22.0725,
+          "val_f1": 78.16
+        },
+        {
+          "epoch": 10,
+          "train_loss": 16.2185,
+          "val_f1": 76.59
+        }
+      ],
+      "run_id": "seed100",
+      "runtime_sec": 1294.6,
+      "environment": {
+        "device": "Tesla T4",
+        "cuda": "12.8",
+        "cudnn": 91900,
+        "torch": "2.11.0+cu128",
+        "transformers": "5.18.0",
+        "deterministic": true,
+        "cublas_workspace_config": ":4096:8"
+      }
+    },
+    {
+      "seed": 200,
+      "best_epoch": 6,
+      "val_f1": 80.72,
+      "n_train": 568,
+      "n_val": 135,
+      "history": [
+        {
+          "epoch": 0,
+          "train_loss": 2788.9658,
+          "val_f1": 49.68
+        },
+        {
+          "epoch": 1,
+          "train_loss": 610.9949,
+          "val_f1": 77.69
+        },
+        {
+          "epoch": 2,
+          "train_loss": 303.7349,
+          "val_f1": 79.03
+        },
+        {
+          "epoch": 3,
+          "train_loss": 196.8642,
+          "val_f1": 80.54
+        },
+        {
+          "epoch": 4,
+          "train_loss": 124.1044,
+          "val_f1": 79.35
+        },
+        {
+          "epoch": 5,
+          "train_loss": 86.6263,
+          "val_f1": 78.62
+        },
+        {
+          "epoch": 6,
+          "train_loss": 53.7605,
+          "val_f1": 80.72
+        },
+        {
+          "epoch": 7,
+          "train_loss": 38.9175,
+          "val_f1": 79.5
+        },
+        {
+          "epoch": 8,
+          "train_loss": 30.0196,
+          "val_f1": 79.27
+        },
+        {
+          "epoch": 9,
+          "train_loss": 21.027,
+          "val_f1": 77.52
+        }
+      ],
+      "run_id": "seed200",
+      "runtime_sec": 1176.8,
+      "environment": {
+        "device": "Tesla T4",
+        "cuda": "12.8",
+        "cudnn": 91900,
+        "torch": "2.11.0+cu128",
+        "transformers": "5.18.0",
+        "deterministic": true,
+        "cublas_workspace_config": ":4096:8"
+      }
+    },
+    {
+      "seed": 300,
+      "best_epoch": 3,
+      "val_f1": 77.16,
+      "n_train": 568,
+      "n_val": 135,
+      "history": [
+        {
+          "epoch": 0,
+          "train_loss": 2913.1313,
+          "val_f1": 48.88
+        },
+        {
+          "epoch": 1,
+          "train_loss": 601.8827,
+          "val_f1": 73.13
+        },
+        {
+          "epoch": 2,
+          "train_loss": 315.0014,
+          "val_f1": 75.98
+        },
+        {
+          "epoch": 3,
+          "train_loss": 206.4379,
+          "val_f1": 77.16
+        },
+        {
+          "epoch": 4,
+          "train_loss": 141.179,
+          "val_f1": 77.0
+        },
+        {
+          "epoch": 5,
+          "train_loss": 98.2349,
+          "val_f1": 76.64
+        },
+        {
+          "epoch": 6,
+          "train_loss": 70.5445,
+          "val_f1": 77.04
+        }
+      ],
+      "run_id": "seed300",
+      "runtime_sec": 824.7,
+      "environment": {
+        "device": "Tesla T4",
+        "cuda": "12.8",
+        "cudnn": 91900,
+        "torch": "2.11.0+cu128",
+        "transformers": "5.18.0",
+        "deterministic": true,
+        "cublas_workspace_config": ":4096:8"
+      }
+    },
+    {
+      "seed": 400,
+      "best_epoch": 3,
+      "val_f1": 78.57,
+      "n_train": 568,
+      "n_val": 135,
+      "history": [
+        {
+          "epoch": 0,
+          "train_loss": 2654.1133,
+          "val_f1": 49.75
+        },
+        {
+          "epoch": 1,
+          "train_loss": 582.456,
+          "val_f1": 74.33
+        },
+        {
+          "epoch": 2,
+          "train_loss": 295.62,
+          "val_f1": 75.82
+        },
+        {
+          "epoch": 3,
+          "train_loss": 197.6675,
+          "val_f1": 78.57
+        },
+        {
+          "epoch": 4,
+          "train_loss": 122.8457,
+          "val_f1": 77.47
+        },
+        {
+          "epoch": 5,
+          "train_loss": 81.4947,
+          "val_f1": 77.78
+        },
+        {
+          "epoch": 6,
+          "train_loss": 51.0256,
+          "val_f1": 76.71
+        }
+      ],
+      "run_id": "seed400",
+      "runtime_sec": 818.7,
+      "environment": {
+        "device": "Tesla T4",
+        "cuda": "12.8",
+        "cudnn": 91900,
+        "torch": "2.11.0+cu128",
+        "transformers": "5.18.0",
+        "deterministic": true,
+        "cublas_workspace_config": ":4096:8"
+      }
+    }
+  ],
+  "screen": true,
+  "val_f1_mean": 79.08,
+  "summary": {
+    "n_runs": 5,
+    "run_ids": [
+      "seed0",
+      "seed100",
+      "seed200",
+      "seed300",
+      "seed400"
+    ],
+    "val": {
+      "mean": 79.08,
+      "sd": 1.48,
+      "per_run": [
+        80.41,
+        78.53,
+        80.72,
+        77.16,
+        78.57
+      ]
+    }
+  }
+}

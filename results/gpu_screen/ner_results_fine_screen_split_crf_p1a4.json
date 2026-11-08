@@ -1,0 +1,480 @@
+{
+  "granularity": "fine",
+  "protocol": "screen_split",
+  "variant": "crf_p1a4",
+  "model": "m3rg-iitd/matscibert",
+  "labels": [
+    "Alloy",
+    "Crack",
+    "CrackInitation",
+    "DataSet",
+    "FatigueLifetime",
+    "FatigueTest",
+    "FatigueTestSpecimen",
+    "GrainBoundary",
+    "LoadingType",
+    "Location",
+    "MaterialClass",
+    "MechanicalProperty",
+    "MechanicalTestDataSet",
+    "MechanicalTreatment",
+    "Mechanism",
+    "Microstructure",
+    "MicrostructureEntity",
+    "StateDescriptor",
+    "StrainRate",
+    "StressAmplitude",
+    "TensileUltimateStrength",
+    "TensileYieldStrength",
+    "TestSpecimen",
+    "TestingMachine",
+    "TestingMedium",
+    "TwinBoundary",
+    "Value"
+  ],
+  "label_tie": {
+    "boundary_count": 24,
+    "tied_classes": [
+      "TensileYieldStrength",
+      "Dislocation"
+    ],
+    "kept_by_tiebreak": [
+      "TensileYieldStrength"
+    ]
+  },
+  "paper_test_f1": 69.92,
+  "config": {
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "split_seed": 0,
+    "vary_split": false,
+    "leave_one_paper_out": false,
+    "model": "m3rg-iitd/matscibert",
+    "top_k": 27,
+    "epochs": 20,
+    "patience": 3,
+    "lr": 5e-05,
+    "batch_size": 16,
+    "class_weights": false,
+    "crf": true,
+    "screen": true,
+    "screen_splits": true,
+    "warmup": 0.0,
+    "tag": "p1a4",
+    "seed_offset": 0,
+    "save_predictions": false,
+    "max_train": 0,
+    "device": null,
+    "threads": 2
+  },
+  "runs": [
+    {
+      "seed": 0,
+      "best_epoch": 6,
+      "val_f1": 78.41,
+      "n_train": 323,
+      "n_val": 57,
+      "history": [
+        {
+          "epoch": 0,
+          "train_loss": 619.9133,
+          "val_f1": 15.05
+        },
+        {
+          "epoch": 1,
+          "train_loss": 242.4608,
+          "val_f1": 40.32
+        },
+        {
+          "epoch": 2,
+          "train_loss": 132.5623,
+          "val_f1": 64.83
+        },
+        {
+          "epoch": 3,
+          "train_loss": 71.3483,
+          "val_f1": 68.85
+        },
+        {
+          "epoch": 4,
+          "train_loss": 39.9596,
+          "val_f1": 77.74
+        },
+        {
+          "epoch": 5,
+          "train_loss": 28.2305,
+          "val_f1": 73.29
+        },
+        {
+          "epoch": 6,
+          "train_loss": 18.2514,
+          "val_f1": 78.41
+        },
+        {
+          "epoch": 7,
+          "train_loss": 14.5517,
+          "val_f1": 76.41
+        },
+        {
+          "epoch": 8,
+          "train_loss": 8.9752,
+          "val_f1": 76.67
+        },
+        {
+          "epoch": 9,
+          "train_loss": 6.9465,
+          "val_f1": 77.29
+        }
+      ],
+      "run_id": "seed0",
+      "runtime_sec": 61.2,
+      "environment": {
+        "device": "Tesla T4",
+        "cuda": "12.8",
+        "cudnn": 91900,
+        "torch": "2.11.0+cu128",
+        "transformers": "5.18.0",
+        "deterministic": true,
+        "cublas_workspace_config": ":4096:8"
+      }
+    },
+    {
+      "seed": 1,
+      "best_epoch": 6,
+      "val_f1": 78.26,
+      "n_train": 323,
+      "n_val": 57,
+      "history": [
+        {
+          "epoch": 0,
+          "train_loss": 623.0012,
+          "val_f1": 15.86
+        },
+        {
+          "epoch": 1,
+          "train_loss": 267.4549,
+          "val_f1": 47.39
+        },
+        {
+          "epoch": 2,
+          "train_loss": 143.1146,
+          "val_f1": 62.45
+        },
+        {
+          "epoch": 3,
+          "train_loss": 84.9914,
+          "val_f1": 69.57
+        },
+        {
+          "epoch": 4,
+          "train_loss": 47.6769,
+          "val_f1": 69.79
+        },
+        {
+          "epoch": 5,
+          "train_loss": 34.4489,
+          "val_f1": 75.69
+        },
+        {
+          "epoch": 6,
+          "train_loss": 22.6621,
+          "val_f1": 78.26
+        },
+        {
+          "epoch": 7,
+          "train_loss": 18.618,
+          "val_f1": 78.23
+        },
+        {
+          "epoch": 8,
+          "train_loss": 12.8517,
+          "val_f1": 77.36
+        },
+        {
+          "epoch": 9,
+          "train_loss": 9.9884,
+          "val_f1": 77.78
+        }
+      ],
+      "run_id": "seed1",
+      "runtime_sec": 57.6,
+      "environment": {
+        "device": "Tesla T4",
+        "cuda": "12.8",
+        "cudnn": 91900,
+        "torch": "2.11.0+cu128",
+        "transformers": "5.18.0",
+        "deterministic": true,
+        "cublas_workspace_config": ":4096:8"
+      }
+    },
+    {
+      "seed": 2,
+      "best_epoch": 6,
+      "val_f1": 81.44,
+      "n_train": 323,
+      "n_val": 57,
+      "history": [
+        {
+          "epoch": 0,
+          "train_loss": 620.898,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 1,
+          "train_loss": 292.5509,
+          "val_f1": 41.76
+        },
+        {
+          "epoch": 2,
+          "train_loss": 166.7396,
+          "val_f1": 57.14
+        },
+        {
+          "epoch": 3,
+          "train_loss": 97.773,
+          "val_f1": 68.73
+        },
+        {
+          "epoch": 4,
+          "train_loss": 60.4216,
+          "val_f1": 74.01
+        },
+        {
+          "epoch": 5,
+          "train_loss": 38.8869,
+          "val_f1": 74.25
+        },
+        {
+          "epoch": 6,
+          "train_loss": 26.1816,
+          "val_f1": 81.44
+        },
+        {
+          "epoch": 7,
+          "train_loss": 18.1935,
+          "val_f1": 80.57
+        },
+        {
+          "epoch": 8,
+          "train_loss": 13.6639,
+          "val_f1": 76.74
+        },
+        {
+          "epoch": 9,
+          "train_loss": 11.1846,
+          "val_f1": 80.11
+        }
+      ],
+      "run_id": "seed2",
+      "runtime_sec": 57.5,
+      "environment": {
+        "device": "Tesla T4",
+        "cuda": "12.8",
+        "cudnn": 91900,
+        "torch": "2.11.0+cu128",
+        "transformers": "5.18.0",
+        "deterministic": true,
+        "cublas_workspace_config": ":4096:8"
+      }
+    },
+    {
+      "seed": 3,
+      "best_epoch": 6,
+      "val_f1": 77.87,
+      "n_train": 323,
+      "n_val": 57,
+      "history": [
+        {
+          "epoch": 0,
+          "train_loss": 640.8018,
+          "val_f1": 15.38
+        },
+        {
+          "epoch": 1,
+          "train_loss": 332.0809,
+          "val_f1": 29.87
+        },
+        {
+          "epoch": 2,
+          "train_loss": 186.1218,
+          "val_f1": 53.89
+        },
+        {
+          "epoch": 3,
+          "train_loss": 106.9888,
+          "val_f1": 62.04
+        },
+        {
+          "epoch": 4,
+          "train_loss": 62.4119,
+          "val_f1": 68.89
+        },
+        {
+          "epoch": 5,
+          "train_loss": 40.4863,
+          "val_f1": 75.86
+        },
+        {
+          "epoch": 6,
+          "train_loss": 25.4554,
+          "val_f1": 77.87
+        },
+        {
+          "epoch": 7,
+          "train_loss": 15.9434,
+          "val_f1": 73.8
+        },
+        {
+          "epoch": 8,
+          "train_loss": 8.8108,
+          "val_f1": 77.27
+        },
+        {
+          "epoch": 9,
+          "train_loss": 5.6413,
+          "val_f1": 77.04
+        }
+      ],
+      "run_id": "seed3",
+      "runtime_sec": 58.7,
+      "environment": {
+        "device": "Tesla T4",
+        "cuda": "12.8",
+        "cudnn": 91900,
+        "torch": "2.11.0+cu128",
+        "transformers": "5.18.0",
+        "deterministic": true,
+        "cublas_workspace_config": ":4096:8"
+      }
+    },
+    {
+      "seed": 4,
+      "best_epoch": 12,
+      "val_f1": 84.18,
+      "n_train": 323,
+      "n_val": 57,
+      "history": [
+        {
+          "epoch": 0,
+          "train_loss": 610.4406,
+          "val_f1": 15.65
+        },
+        {
+          "epoch": 1,
+          "train_loss": 282.2225,
+          "val_f1": 47.66
+        },
+        {
+          "epoch": 2,
+          "train_loss": 160.8814,
+          "val_f1": 65.36
+        },
+        {
+          "epoch": 3,
+          "train_loss": 104.521,
+          "val_f1": 71.03
+        },
+        {
+          "epoch": 4,
+          "train_loss": 62.1711,
+          "val_f1": 77.64
+        },
+        {
+          "epoch": 5,
+          "train_loss": 40.0334,
+          "val_f1": 76.79
+        },
+        {
+          "epoch": 6,
+          "train_loss": 25.675,
+          "val_f1": 79.17
+        },
+        {
+          "epoch": 7,
+          "train_loss": 19.314,
+          "val_f1": 78.49
+        },
+        {
+          "epoch": 8,
+          "train_loss": 14.161,
+          "val_f1": 81.79
+        },
+        {
+          "epoch": 9,
+          "train_loss": 10.9391,
+          "val_f1": 80.24
+        },
+        {
+          "epoch": 10,
+          "train_loss": 6.6323,
+          "val_f1": 82.93
+        },
+        {
+          "epoch": 11,
+          "train_loss": 6.156,
+          "val_f1": 81.08
+        },
+        {
+          "epoch": 12,
+          "train_loss": 4.2125,
+          "val_f1": 84.18
+        },
+        {
+          "epoch": 13,
+          "train_loss": 2.6423,
+          "val_f1": 82.28
+        },
+        {
+          "epoch": 14,
+          "train_loss": 1.6333,
+          "val_f1": 82.28
+        },
+        {
+          "epoch": 15,
+          "train_loss": 1.585,
+          "val_f1": 82.63
+        }
+      ],
+      "run_id": "seed4",
+      "runtime_sec": 93.4,
+      "environment": {
+        "device": "Tesla T4",
+        "cuda": "12.8",
+        "cudnn": 91900,
+        "torch": "2.11.0+cu128",
+        "transformers": "5.18.0",
+        "deterministic": true,
+        "cublas_workspace_config": ":4096:8"
+      }
+    }
+  ],
+  "screen": true,
+  "val_f1_mean": 80.03,
+  "summary": {
+    "n_runs": 5,
+    "run_ids": [
+      "seed0",
+      "seed1",
+      "seed2",
+      "seed3",
+      "seed4"
+    ],
+    "val": {
+      "mean": 80.03,
+      "sd": 2.72,
+      "per_run": [
+        78.41,
+        78.26,
+        81.44,
+        77.87,
+        84.18
+      ]
+    }
+  }
+}

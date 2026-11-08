@@ -7707,6 +7707,77 @@ for P2, and the tuned reference (candidate A) for P2's D-P decisions.
 - **Round 1** is batch `p1n`: the 47 jobs of
   `results/sota/p1_next_jobs.json`, on the bundle of the commit that records
   this.
+- **Round 1's record, 8 November** (batch `p1n`, kernel version 27, bundle of
+  `e559980`; 48 jobs on two T4 lanes, 551 minutes, every job done; the table
+  had 9.06 session-hours). Validation scores only: micro F1 on the screen
+  units, MuLMS's dev set. Each entry gives the mean, the mean of the last 3
+  validation scores (none on MuLMS, whose dev set picks nothing), the paired
+  gain over A0 and its SE. G marks a gain above its SE. The table is
+  `results/sota/p1_round1.json`.
+
+  | Cell | MaterioMiner fine | MaterioMiner coarse | SOFC-Exp | MuLMS |
+  |---|---|---|---|---|
+  | A0 | 79.26 · 77.14 | 77.80 · 76.37 | 78.69 · 77.07 | 77.63 |
+  | A1 | 74.00 · 72.90 · −5.26 (1.32) | 75.28 · 74.37 · −2.52 (0.35) | 78.52 · 77.11 · −0.17 (0.70) | – |
+  | A2 | 78.18 · 76.46 · −1.08 (0.88) | 77.42 · 76.33 · −0.38 (0.70) | 77.88 · 76.84 · −0.81 (0.74) | – |
+  | A3 | 79.32 · 76.39 · +0.06 (0.83) | 78.85 · 77.08 · +1.06 (0.74) G | 78.48 · 76.16 · −0.21 (0.99) | – |
+  | A4 | 80.03 · 78.43 · +0.77 (0.89) | 77.89 · 75.78 · +0.09 (1.00) | 78.76 · 77.18 · +0.07 (0.55) | – |
+  | A5 | 79.42 · 77.74 · +0.16 (0.75) | 76.62 · 75.64 · −1.18 (0.69) | 77.62 · 76.26 · −1.07 (0.60) | – |
+  | A6 | runs again | runs again | runs again | – |
+  | A7 | 77.54 · 77.14 · −1.72 (0.69) | 76.65 · 76.37 · −1.15 (0.18) | 77.09 · 77.07 · −1.60 (0.49) | – |
+  | A1m | – | – | – | 78.44 · +0.81 (0.44) G |
+  | B1 | 76.12 · 75.25 · −3.14 (1.29) | 71.03 · 69.97 · −6.76 (0.75) | 79.08 · 77.98 · +0.39 (1.23) | – |
+  | B2 | 55.68 · 54.92 · −23.58 (1.71) | 60.59 · 60.12 · −17.21 (1.16) | 77.85 · 76.87 · −0.84 (0.68) | – |
+  | B3 | – | – | 77.98 · 76.26 · −0.71 (0.68) | – |
+  | C1 | 81.17 · 79.35 · +1.91 (0.92) G | 77.47 · 76.44 · −0.33 (0.89) | 79.37 · 77.10 · +0.68 (0.52) G | – |
+  | C2 | – | – | 78.04 · 76.34 · −0.65 (0.75) | 77.58 · −0.05 (0.65) |
+  | C3 | 80.21 · 78.80 · +0.95 (0.78) G | 77.35 · 76.12 · −0.44 (0.48) | 78.53 · 77.08 · −0.16 (0.61) | – |
+  | E | – | – | 76.90 · 75.78 · −1.79 (0.69) | 49.77 · −27.86 (25.20) |
+
+  - **A6 ran as A0: a bug, found after round 1 and fixed before any further
+    run.**
+    - Its runs equal A0's at every unit, in validation score and history,
+      on all three benchmarks.
+    - The cause: transformers 5 marks loaded weights as initialised, and the
+      model's init rule skips what is marked. So `--reinit-top`
+      re-initialised nothing. The CPU tests ran A6 but never checked that
+      its weights changed.
+    - The fix clears the marks first. A new test checks that only the top
+      layer changes, and that it changes by the seed. The void files are kept
+      in `results/gpu_screen_void/`.
+    - No other cell runs that code, which acts only with `--reinit-top`.
+    - A6 runs again in the next stage. Round 2 on MaterioMiner and SOFC-Exp
+      waits for it, because A6 can change A's best cell, A\* and G there.
+  - **Two cells score far below A0, as specified; nothing is changed.**
+    - B2 (SciDeBERTa) on MaterioMiner. Its validation F1 rises slowly: its
+      best epochs are 14–19 of at most 20, and 8 of its 10 runs reach the
+      limit. So at its fixed recipe (learning rate 1e-5, batch 8, 323
+      training sentences) it is under-trained. On SOFC-Exp its best epochs
+      are 6–14.
+    - E on MuLMS. c3's run predicted no entity in its first 6 epochs and
+      stopped on patience 5 (dev F1 0.0); c1's run first predicted at epoch
+      6. With the specified loss (binary cross-entropy averaged over every
+      span, no negative sampling), the head first learns to predict nothing.
+      Its c1 and c2 are 2.00 and 3.33 below A0's, so c3 would have needed
+      83.6, 5.3 points above A0's, for a positive gain.
+  - A7 trains as A0 does: its last-3 mean equals A0's, because averaging
+    changes only the scored model. That averaged model scores 1.2–1.7 points
+    below A0's selected epoch.
+  - **MuLMS goes to its extra units.**
+    - G is A1m, so A\* and A's best cell are A1m.
+    - No C or E change is in G, so round 2 adds no cell.
+    - B1 and B2 stay out of MuLMS: their SOFC-Exp gains are +0.39 and
+      −0.84, not above 1.0.
+    - By the tie rule, A1m, A0 and C2 (78.44, 77.63, 77.58) get the extra
+      units.
+  - **MaterioMiner and SOFC-Exp, until A6 is in:**
+    - fine: G is C1 and C3, and A's best cell is A4;
+    - coarse: G is A3, A\* and A's best cell are A3, and no C or E change is
+      in G;
+    - SOFC-Exp: G is C1, and A's best cell is A4.
+  - **The next stage** (batch `p1n`) holds 13 jobs
+    (`results/sota/p1_next_jobs.json`): A6 on the three benchmarks, and
+    MuLMS's 10 extra-unit runs. Those runs cannot depend on A6.
 
 *TACL (paper B), for later.* The paper goes to 10 pages, references
 uncounted, with appendices after them within TACL's caps (as last read: up

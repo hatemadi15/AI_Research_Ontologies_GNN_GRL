@@ -17,7 +17,10 @@ is written and tested (`ner_baseline.py --screen` and round 1's options,
 table, the cut ladder takes A2m and C3 off MuLMS and screens MaterioMiner
 on 5 units, for 21.19 session-hours. The table counts A0 rows that had
 already run; without them MaterioMiner would have kept 10 units (disclosed
-in ROADMAP §4). Round 1 (`p1n`) follows. Amendment 1
+in ROADMAP §4). Round 1 ran on 8 November; its table is in ROADMAP §4
+(validation only). A6 ran as A0 because of a bug, since fixed; it runs again
+with MuLMS's extra units, and round 2 on MaterioMiner and SOFC-Exp waits for
+it. Amendment 1
 (before any run) has C1 on MaterioMiner run one level at a time: the two levels'
 released splits are different partitions. It departs from this plan in four
 places, each justified there:

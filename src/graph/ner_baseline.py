@@ -1140,6 +1140,13 @@ def prepare_encoder(model, encoder, args):
     if n:
         init = getattr(model, '_init_weights', None) or encoder._init_weights
         for layer in encoder.encoder.layer[-n:]:
+            # transformers 5 marks every loaded tensor and module _is_hf_initialized, and its
+            # init functions skip what is marked: unless the marks are cleared, nothing is
+            # re-initialised (round 1's A6 ran so, as A0; ROADMAP §4, P1)
+            for t in (*layer.parameters(), *layer.buffers()):
+                t._is_hf_initialized = False
+            for m in layer.modules():
+                m._is_hf_initialized = False
             layer.apply(init)
     if getattr(args, 'gradient_checkpointing', False):
         encoder.gradient_checkpointing_enable()

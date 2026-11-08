@@ -729,3 +729,10 @@ passed:
 
 The table's cuts are: A2m and C3 leave MuLMS, and MaterioMiner goes to 5
 units, for 21.19 session-hours of the 24-hour cap.
+
+Round 1 (batch `p1n`, kernel version 27, bundle of `e559980`; every job
+done):
+- its screen files are in `gpu_screen/`, and its table is
+  `sota/p1_round1.json`, from `sota_p1.py select`;
+- A6's three files are in `gpu_screen_void/`. A bug made A6 run as A0, and
+  the bug is fixed (ROADMAP §4). A6 runs again in the next stage.

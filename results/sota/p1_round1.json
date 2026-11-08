@@ -1,0 +1,1190 @@
+{
+ "note": "P1 screens (SOTA plan, ROADMAP \u00a74): validation scores only; no claim and no decision",
+ "fine": {
+  "cells": {
+   "a0": {
+    "units": [
+     "seed0",
+     "seed1",
+     "seed2",
+     "seed3",
+     "seed4"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 77.78,
+     "seed1": 78.85,
+     "seed2": 81.13,
+     "seed3": 78.54,
+     "seed4": 80.0
+    },
+    "mean": 79.26,
+    "last3_mean": 77.14,
+    "gain": 0.0,
+    "gain_sd": 0.0,
+    "gain_se": 0.0,
+    "changes": [],
+    "round": 1
+   },
+   "a1": {
+    "units": [
+     "seed0",
+     "seed1",
+     "seed2",
+     "seed3",
+     "seed4"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 76.72,
+     "seed1": 74.85,
+     "seed2": 72.3,
+     "seed3": 73.15,
+     "seed4": 73.0
+    },
+    "mean": 74.0,
+    "last3_mean": 72.9,
+    "gain": -5.256,
+    "gain_sd": 2.959,
+    "gain_se": 1.323,
+    "changes": [
+     "a1"
+    ],
+    "round": 1
+   },
+   "a2": {
+    "units": [
+     "seed0",
+     "seed1",
+     "seed2",
+     "seed3",
+     "seed4"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 78.06,
+     "seed1": 76.43,
+     "seed2": 78.09,
+     "seed3": 76.68,
+     "seed4": 81.66
+    },
+    "mean": 78.18,
+    "last3_mean": 76.46,
+    "gain": -1.076,
+    "gain_sd": 1.975,
+    "gain_se": 0.883,
+    "changes": [
+     "a2"
+    ],
+    "round": 1
+   },
+   "a3": {
+    "units": [
+     "seed0",
+     "seed1",
+     "seed2",
+     "seed3",
+     "seed4"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 79.73,
+     "seed1": 78.4,
+     "seed2": 78.24,
+     "seed3": 79.52,
+     "seed4": 80.73
+    },
+    "mean": 79.32,
+    "last3_mean": 76.39,
+    "gain": 0.064,
+    "gain_sd": 1.859,
+    "gain_se": 0.832,
+    "changes": [
+     "a3"
+    ],
+    "round": 1
+   },
+   "a4": {
+    "units": [
+     "seed0",
+     "seed1",
+     "seed2",
+     "seed3",
+     "seed4"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 78.41,
+     "seed1": 78.26,
+     "seed2": 81.44,
+     "seed3": 77.87,
+     "seed4": 84.18
+    },
+    "mean": 80.03,
+    "last3_mean": 78.43,
+    "gain": 0.772,
+    "gain_sd": 1.986,
+    "gain_se": 0.888,
+    "changes": [
+     "a4"
+    ],
+    "round": 1
+   },
+   "a5": {
+    "units": [
+     "seed0",
+     "seed1",
+     "seed2",
+     "seed3",
+     "seed4"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 78.55,
+     "seed1": 77.91,
+     "seed2": 79.55,
+     "seed3": 78.37,
+     "seed4": 82.74
+    },
+    "mean": 79.42,
+    "last3_mean": 77.74,
+    "gain": 0.164,
+    "gain_sd": 1.686,
+    "gain_se": 0.754,
+    "changes": [
+     "a5"
+    ],
+    "round": 1
+   },
+   "a6": {
+    "units": [],
+    "n": 0,
+    "values": {},
+    "changes": [
+     "a6"
+    ],
+    "round": 1
+   },
+   "a7": {
+    "units": [
+     "seed0",
+     "seed1",
+     "seed2",
+     "seed3",
+     "seed4"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 76.38,
+     "seed1": 74.53,
+     "seed2": 80.9,
+     "seed3": 76.86,
+     "seed4": 79.04
+    },
+    "mean": 77.54,
+    "last3_mean": 77.14,
+    "gain": -1.718,
+    "gain_sd": 1.554,
+    "gain_se": 0.695,
+    "changes": [
+     "a7"
+    ],
+    "round": 1
+   },
+   "b1": {
+    "units": [
+     "seed0",
+     "seed1",
+     "seed2",
+     "seed3",
+     "seed4"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 74.92,
+     "seed1": 76.64,
+     "seed2": 81.82,
+     "seed3": 74.51,
+     "seed4": 72.73
+    },
+    "mean": 76.12,
+    "last3_mean": 75.25,
+    "gain": -3.136,
+    "gain_sd": 2.892,
+    "gain_se": 1.293,
+    "changes": [
+     "b1"
+    ],
+    "round": 1
+   },
+   "b2": {
+    "units": [
+     "seed0",
+     "seed1",
+     "seed2",
+     "seed3",
+     "seed4"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 51.26,
+     "seed1": 51.06,
+     "seed2": 62.22,
+     "seed3": 58.1,
+     "seed4": 55.78
+    },
+    "mean": 55.68,
+    "last3_mean": 54.92,
+    "gain": -23.576,
+    "gain_sd": 3.822,
+    "gain_se": 1.709,
+    "changes": [
+     "b2"
+    ],
+    "round": 1
+   },
+   "c1": {
+    "units": [
+     "seed0",
+     "seed1",
+     "seed2",
+     "seed3",
+     "seed4"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 77.97,
+     "seed1": 79.26,
+     "seed2": 81.92,
+     "seed3": 81.93,
+     "seed4": 84.76
+    },
+    "mean": 81.17,
+    "last3_mean": 79.35,
+    "gain": 1.908,
+    "gain_sd": 2.048,
+    "gain_se": 0.916,
+    "changes": [
+     "c1"
+    ],
+    "round": 1
+   },
+   "c3": {
+    "units": [
+     "seed0",
+     "seed1",
+     "seed2",
+     "seed3",
+     "seed4"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 80.13,
+     "seed1": 78.03,
+     "seed2": 81.11,
+     "seed3": 78.57,
+     "seed4": 83.23
+    },
+    "mean": 80.21,
+    "last3_mean": 78.8,
+    "gain": 0.954,
+    "gain_sd": 1.738,
+    "gain_se": 0.777,
+    "changes": [
+     "c3"
+    ],
+    "round": 1
+   }
+  },
+  "units": [
+   "seed0",
+   "seed1",
+   "seed2",
+   "seed3",
+   "seed4"
+  ],
+  "extra_units": [
+   "seed5",
+   "seed6",
+   "seed7",
+   "seed8"
+  ],
+  "next": [
+   [
+    "a6",
+    [
+     "seed0",
+     "seed1",
+     "seed2",
+     "seed3",
+     "seed4"
+    ]
+   ]
+  ]
+ },
+ "coarse": {
+  "cells": {
+   "a0": {
+    "units": [
+     "seed0",
+     "seed1",
+     "seed2",
+     "seed3",
+     "seed4"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 79.45,
+     "seed1": 79.26,
+     "seed2": 77.26,
+     "seed3": 76.46,
+     "seed4": 76.55
+    },
+    "mean": 77.8,
+    "last3_mean": 76.37,
+    "gain": 0.0,
+    "gain_sd": 0.0,
+    "gain_se": 0.0,
+    "changes": [],
+    "round": 1
+   },
+   "a1": {
+    "units": [
+     "seed0",
+     "seed1",
+     "seed2",
+     "seed3",
+     "seed4"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 78.12,
+     "seed1": 77.03,
+     "seed2": 74.13,
+     "seed3": 73.14,
+     "seed4": 73.98
+    },
+    "mean": 75.28,
+    "last3_mean": 74.37,
+    "gain": -2.516,
+    "gain_sd": 0.793,
+    "gain_se": 0.355,
+    "changes": [
+     "a1"
+    ],
+    "round": 1
+   },
+   "a2": {
+    "units": [
+     "seed0",
+     "seed1",
+     "seed2",
+     "seed3",
+     "seed4"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 79.33,
+     "seed1": 80.34,
+     "seed2": 75.87,
+     "seed3": 73.94,
+     "seed4": 77.6
+    },
+    "mean": 77.42,
+    "last3_mean": 76.33,
+    "gain": -0.38,
+    "gain_sd": 1.569,
+    "gain_se": 0.702,
+    "changes": [
+     "a2"
+    ],
+    "round": 1
+   },
+   "a3": {
+    "units": [
+     "seed0",
+     "seed1",
+     "seed2",
+     "seed3",
+     "seed4"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 81.24,
+     "seed1": 81.41,
+     "seed2": 77.63,
+     "seed3": 74.95,
+     "seed4": 79.04
+    },
+    "mean": 78.85,
+    "last3_mean": 77.08,
+    "gain": 1.058,
+    "gain_sd": 1.647,
+    "gain_se": 0.736,
+    "changes": [
+     "a3"
+    ],
+    "round": 1
+   },
+   "a4": {
+    "units": [
+     "seed0",
+     "seed1",
+     "seed2",
+     "seed3",
+     "seed4"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 81.24,
+     "seed1": 81.07,
+     "seed2": 78.24,
+     "seed3": 72.93,
+     "seed4": 75.96
+    },
+    "mean": 77.89,
+    "last3_mean": 75.78,
+    "gain": 0.092,
+    "gain_sd": 2.248,
+    "gain_se": 1.005,
+    "changes": [
+     "a4"
+    ],
+    "round": 1
+   },
+   "a5": {
+    "units": [
+     "seed0",
+     "seed1",
+     "seed2",
+     "seed3",
+     "seed4"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 77.43,
+     "seed1": 79.4,
+     "seed2": 77.41,
+     "seed3": 73.03,
+     "seed4": 75.81
+    },
+    "mean": 76.62,
+    "last3_mean": 75.64,
+    "gain": -1.18,
+    "gain_sd": 1.539,
+    "gain_se": 0.688,
+    "changes": [
+     "a5"
+    ],
+    "round": 1
+   },
+   "a6": {
+    "units": [],
+    "n": 0,
+    "values": {},
+    "changes": [
+     "a6"
+    ],
+    "round": 1
+   },
+   "a7": {
+    "units": [
+     "seed0",
+     "seed1",
+     "seed2",
+     "seed3",
+     "seed4"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 77.96,
+     "seed1": 78.13,
+     "seed2": 75.64,
+     "seed3": 75.75,
+     "seed4": 75.75
+    },
+    "mean": 76.65,
+    "last3_mean": 76.37,
+    "gain": -1.15,
+    "gain_sd": 0.404,
+    "gain_se": 0.181,
+    "changes": [
+     "a7"
+    ],
+    "round": 1
+   },
+   "b1": {
+    "units": [
+     "seed0",
+     "seed1",
+     "seed2",
+     "seed3",
+     "seed4"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 73.38,
+     "seed1": 72.6,
+     "seed2": 70.46,
+     "seed3": 67.04,
+     "seed4": 71.68
+    },
+    "mean": 71.03,
+    "last3_mean": 69.97,
+    "gain": -6.764,
+    "gain_sd": 1.668,
+    "gain_se": 0.746,
+    "changes": [
+     "b1"
+    ],
+    "round": 1
+   },
+   "b2": {
+    "units": [
+     "seed0",
+     "seed1",
+     "seed2",
+     "seed3",
+     "seed4"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 63.11,
+     "seed1": 61.35,
+     "seed2": 62.45,
+     "seed3": 55.08,
+     "seed4": 60.96
+    },
+    "mean": 60.59,
+    "last3_mean": 60.12,
+    "gain": -17.206,
+    "gain_sd": 2.599,
+    "gain_se": 1.162,
+    "changes": [
+     "b2"
+    ],
+    "round": 1
+   },
+   "c1": {
+    "units": [
+     "seed0",
+     "seed1",
+     "seed2",
+     "seed3",
+     "seed4"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 81.13,
+     "seed1": 78.97,
+     "seed2": 75.27,
+     "seed3": 73.84,
+     "seed4": 78.14
+    },
+    "mean": 77.47,
+    "last3_mean": 76.44,
+    "gain": -0.326,
+    "gain_sd": 1.983,
+    "gain_se": 0.887,
+    "changes": [
+     "c1"
+    ],
+    "round": 1
+   },
+   "c3": {
+    "units": [
+     "seed0",
+     "seed1",
+     "seed2",
+     "seed3",
+     "seed4"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 77.73,
+     "seed1": 79.2,
+     "seed2": 76.19,
+     "seed3": 77.61,
+     "seed4": 76.04
+    },
+    "mean": 77.35,
+    "last3_mean": 76.12,
+    "gain": -0.442,
+    "gain_sd": 1.085,
+    "gain_se": 0.485,
+    "changes": [
+     "c3"
+    ],
+    "round": 1
+   }
+  },
+  "units": [
+   "seed0",
+   "seed1",
+   "seed2",
+   "seed3",
+   "seed4"
+  ],
+  "extra_units": [
+   "seed5",
+   "seed6",
+   "seed7",
+   "seed8"
+  ],
+  "next": [
+   [
+    "a6",
+    [
+     "seed0",
+     "seed1",
+     "seed2",
+     "seed3",
+     "seed4"
+    ]
+   ]
+  ]
+ },
+ "sofc": {
+  "cells": {
+   "a0": {
+    "units": [
+     "seed0",
+     "seed100",
+     "seed200",
+     "seed300",
+     "seed400"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 76.8,
+     "seed100": 78.92,
+     "seed200": 78.0,
+     "seed300": 80.29,
+     "seed400": 79.44
+    },
+    "mean": 78.69,
+    "last3_mean": 77.07,
+    "gain": 0.0,
+    "gain_sd": 0.0,
+    "gain_se": 0.0,
+    "changes": [],
+    "round": 1
+   },
+   "a1": {
+    "units": [
+     "seed0",
+     "seed100",
+     "seed200",
+     "seed300",
+     "seed400"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 78.23,
+     "seed100": 77.98,
+     "seed200": 79.62,
+     "seed300": 78.86,
+     "seed400": 77.9
+    },
+    "mean": 78.52,
+    "last3_mean": 77.11,
+    "gain": -0.172,
+    "gain_sd": 1.567,
+    "gain_se": 0.701,
+    "changes": [
+     "a1"
+    ],
+    "round": 1
+   },
+   "a2": {
+    "units": [
+     "seed0",
+     "seed100",
+     "seed200",
+     "seed300",
+     "seed400"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 78.48,
+     "seed100": 77.3,
+     "seed200": 78.08,
+     "seed300": 78.12,
+     "seed400": 77.42
+    },
+    "mean": 77.88,
+    "last3_mean": 76.84,
+    "gain": -0.81,
+    "gain_sd": 1.655,
+    "gain_se": 0.74,
+    "changes": [
+     "a2"
+    ],
+    "round": 1
+   },
+   "a3": {
+    "units": [
+     "seed0",
+     "seed100",
+     "seed200",
+     "seed300",
+     "seed400"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 78.96,
+     "seed100": 78.12,
+     "seed200": 79.97,
+     "seed300": 77.4,
+     "seed400": 77.93
+    },
+    "mean": 78.48,
+    "last3_mean": 76.16,
+    "gain": -0.214,
+    "gain_sd": 2.213,
+    "gain_se": 0.99,
+    "changes": [
+     "a3"
+    ],
+    "round": 1
+   },
+   "a4": {
+    "units": [
+     "seed0",
+     "seed100",
+     "seed200",
+     "seed300",
+     "seed400"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 78.75,
+     "seed100": 78.57,
+     "seed200": 78.41,
+     "seed300": 78.92,
+     "seed400": 79.15
+    },
+    "mean": 78.76,
+    "last3_mean": 77.18,
+    "gain": 0.07,
+    "gain_sd": 1.228,
+    "gain_se": 0.549,
+    "changes": [
+     "a4"
+    ],
+    "round": 1
+   },
+   "a5": {
+    "units": [
+     "seed0",
+     "seed100",
+     "seed200",
+     "seed300",
+     "seed400"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 77.33,
+     "seed100": 76.79,
+     "seed200": 78.29,
+     "seed300": 78.32,
+     "seed400": 77.39
+    },
+    "mean": 77.62,
+    "last3_mean": 76.26,
+    "gain": -1.066,
+    "gain_sd": 1.351,
+    "gain_se": 0.604,
+    "changes": [
+     "a5"
+    ],
+    "round": 1
+   },
+   "a6": {
+    "units": [],
+    "n": 0,
+    "values": {},
+    "changes": [
+     "a6"
+    ],
+    "round": 1
+   },
+   "a7": {
+    "units": [
+     "seed0",
+     "seed100",
+     "seed200",
+     "seed300",
+     "seed400"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 75.99,
+     "seed100": 77.04,
+     "seed200": 77.2,
+     "seed300": 76.88,
+     "seed400": 78.36
+    },
+    "mean": 77.09,
+    "last3_mean": 77.07,
+    "gain": -1.596,
+    "gain_sd": 1.106,
+    "gain_se": 0.494,
+    "changes": [
+     "a7"
+    ],
+    "round": 1
+   },
+   "b1": {
+    "units": [
+     "seed0",
+     "seed100",
+     "seed200",
+     "seed300",
+     "seed400"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 80.41,
+     "seed100": 78.53,
+     "seed200": 80.72,
+     "seed300": 77.16,
+     "seed400": 78.57
+    },
+    "mean": 79.08,
+    "last3_mean": 77.98,
+    "gain": 0.388,
+    "gain_sd": 2.756,
+    "gain_se": 1.233,
+    "changes": [
+     "b1"
+    ],
+    "round": 1
+   },
+   "b2": {
+    "units": [
+     "seed0",
+     "seed100",
+     "seed200",
+     "seed300",
+     "seed400"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 78.43,
+     "seed100": 77.14,
+     "seed200": 77.57,
+     "seed300": 78.08,
+     "seed400": 78.03
+    },
+    "mean": 77.85,
+    "last3_mean": 76.87,
+    "gain": -0.84,
+    "gain_sd": 1.529,
+    "gain_se": 0.684,
+    "changes": [
+     "b2"
+    ],
+    "round": 1
+   },
+   "b3": {
+    "units": [
+     "seed0",
+     "seed100",
+     "seed200",
+     "seed300",
+     "seed400"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 77.72,
+     "seed100": 77.78,
+     "seed200": 78.89,
+     "seed300": 78.23,
+     "seed400": 77.27
+    },
+    "mean": 77.98,
+    "last3_mean": 76.26,
+    "gain": -0.712,
+    "gain_sd": 1.529,
+    "gain_se": 0.684,
+    "changes": [
+     "b3"
+    ],
+    "round": 1
+   },
+   "c1": {
+    "units": [
+     "seed0",
+     "seed100",
+     "seed200",
+     "seed300",
+     "seed400"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 77.63,
+     "seed100": 80.12,
+     "seed200": 79.85,
+     "seed300": 79.02,
+     "seed400": 80.24
+    },
+    "mean": 79.37,
+    "last3_mean": 77.1,
+    "gain": 0.682,
+    "gain_sd": 1.17,
+    "gain_se": 0.523,
+    "changes": [
+     "c1"
+    ],
+    "round": 1
+   },
+   "c2": {
+    "units": [
+     "seed0",
+     "seed100",
+     "seed200",
+     "seed300",
+     "seed400"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 78.7,
+     "seed100": 77.59,
+     "seed200": 77.07,
+     "seed300": 77.64,
+     "seed400": 79.18
+    },
+    "mean": 78.04,
+    "last3_mean": 76.34,
+    "gain": -0.654,
+    "gain_sd": 1.673,
+    "gain_se": 0.748,
+    "changes": [
+     "c2"
+    ],
+    "round": 1
+   },
+   "c3": {
+    "units": [
+     "seed0",
+     "seed100",
+     "seed200",
+     "seed300",
+     "seed400"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 78.35,
+     "seed100": 79.74,
+     "seed200": 77.69,
+     "seed300": 79.27,
+     "seed400": 77.62
+    },
+    "mean": 78.53,
+    "last3_mean": 77.08,
+    "gain": -0.156,
+    "gain_sd": 1.36,
+    "gain_se": 0.608,
+    "changes": [
+     "c3"
+    ],
+    "round": 1
+   },
+   "e": {
+    "units": [
+     "seed0",
+     "seed100",
+     "seed200",
+     "seed300",
+     "seed400"
+    ],
+    "n": 5,
+    "values": {
+     "seed0": 76.23,
+     "seed100": 77.86,
+     "seed200": 77.5,
+     "seed300": 77.4,
+     "seed400": 75.5
+    },
+    "mean": 76.9,
+    "last3_mean": 75.78,
+    "gain": -1.792,
+    "gain_sd": 1.543,
+    "gain_se": 0.69,
+    "changes": [
+     "e"
+    ],
+    "round": 1
+   }
+  },
+  "units": [
+   "seed0",
+   "seed100",
+   "seed200",
+   "seed300",
+   "seed400"
+  ],
+  "extra_units": [
+   "seed500",
+   "seed600",
+   "seed700",
+   "seed800"
+  ],
+  "next": [
+   [
+    "a6",
+    [
+     "seed0",
+     "seed100",
+     "seed200",
+     "seed300",
+     "seed400"
+    ]
+   ]
+  ]
+ },
+ "mulms": {
+  "cells": {
+   "a0": {
+    "units": [
+     "c1s0",
+     "c2s0",
+     "c3s0"
+    ],
+    "n": 3,
+    "values": {
+     "c1s0": 76.7,
+     "c2s0": 77.94,
+     "c3s0": 78.26
+    },
+    "mean": 77.63,
+    "last3_mean": null,
+    "gain": 0.0,
+    "gain_sd": 0.0,
+    "gain_se": 0.0,
+    "changes": [],
+    "round": 1
+   },
+   "a1m": {
+    "units": [
+     "c1s0",
+     "c2s0",
+     "c3s0"
+    ],
+    "n": 3,
+    "values": {
+     "c1s0": 77.76,
+     "c2s0": 79.35,
+     "c3s0": 78.22
+    },
+    "mean": 78.44,
+    "last3_mean": null,
+    "gain": 0.81,
+    "gain_sd": 0.757,
+    "gain_se": 0.437,
+    "changes": [
+     "a1m"
+    ],
+    "round": 1
+   },
+   "c2": {
+    "units": [
+     "c1s0",
+     "c2s0",
+     "c3s0"
+    ],
+    "n": 3,
+    "values": {
+     "c1s0": 77.11,
+     "c2s0": 78.71,
+     "c3s0": 76.93
+    },
+    "mean": 77.58,
+    "last3_mean": null,
+    "gain": -0.05,
+    "gain_sd": 1.123,
+    "gain_se": 0.648,
+    "changes": [
+     "c2"
+    ],
+    "round": 1
+   },
+   "e": {
+    "units": [
+     "c1s0",
+     "c2s0",
+     "c3s0"
+    ],
+    "n": 3,
+    "values": {
+     "c1s0": 74.7,
+     "c2s0": 74.61,
+     "c3s0": 0.0
+    },
+    "mean": 49.77,
+    "last3_mean": null,
+    "gain": -27.863,
+    "gain_sd": 43.65,
+    "gain_se": 25.201,
+    "changes": [
+     "e"
+    ],
+    "round": 1
+   }
+  },
+  "units": [
+   "c1s0",
+   "c2s0",
+   "c3s0"
+  ],
+  "extra_units": [
+   "c4s0",
+   "c5s0",
+   "c1s100",
+   "c2s100"
+  ],
+  "mulms_b": [],
+  "G": [
+   "a1m"
+  ],
+  "A*": "a1m",
+  "A_best": "a1m",
+  "chain": [
+   "a1m"
+  ],
+  "chain_end": "a1m",
+  "tie": [
+   "a1m",
+   "a0",
+   "c2"
+  ],
+  "next": [
+   [
+    "a1m",
+    [
+     "c4s0",
+     "c5s0",
+     "c1s100",
+     "c2s100"
+    ]
+   ],
+   [
+    "a0",
+    [
+     "c1s100",
+     "c2s100"
+    ]
+   ],
+   [
+    "c2",
+    [
+     "c4s0",
+     "c5s0",
+     "c1s100",
+     "c2s100"
+    ]
+   ]
+  ]
+ }
+}
