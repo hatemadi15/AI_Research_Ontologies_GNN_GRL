@@ -1,0 +1,338 @@
+[
+ {
+  "minutes": 0.0,
+  "job": [
+   "--granularity",
+   "fine",
+   "--vary-split",
+   "--seeds",
+   "0",
+   "--crf",
+   "--save-predictions",
+   "--threads",
+   "2",
+   "--tag",
+   "smokebu"
+  ]
+ },
+ {
+  "minutes": 36.2,
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--configs",
+   "1",
+   "--seed",
+   "1000",
+   "--lr",
+   "5e-5",
+   "--save-predictions",
+   "--tag",
+   "p2a1mu1s1000",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 36.2,
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--configs",
+   "2",
+   "--seed",
+   "1000",
+   "--lr",
+   "5e-5",
+   "--save-predictions",
+   "--tag",
+   "p2a1mu2s1000",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 36.2,
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--configs",
+   "3",
+   "--seed",
+   "1000",
+   "--lr",
+   "5e-5",
+   "--save-predictions",
+   "--tag",
+   "p2a1mu3s1000",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 36.2,
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--configs",
+   "4",
+   "--seed",
+   "1000",
+   "--lr",
+   "5e-5",
+   "--save-predictions",
+   "--tag",
+   "p2a1mu4s1000",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 36.2,
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--configs",
+   "5",
+   "--seed",
+   "1000",
+   "--lr",
+   "5e-5",
+   "--save-predictions",
+   "--tag",
+   "p2a1mu5s1000",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 36.2,
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--configs",
+   "1",
+   "--seed",
+   "1100",
+   "--lr",
+   "5e-5",
+   "--save-predictions",
+   "--tag",
+   "p2a1mu1s1100",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 36.2,
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--configs",
+   "2",
+   "--seed",
+   "1100",
+   "--lr",
+   "5e-5",
+   "--save-predictions",
+   "--tag",
+   "p2a1mu2s1100",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 36.2,
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--configs",
+   "3",
+   "--seed",
+   "1100",
+   "--lr",
+   "5e-5",
+   "--save-predictions",
+   "--tag",
+   "p2a1mu3s1100",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 36.2,
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--configs",
+   "4",
+   "--seed",
+   "1100",
+   "--lr",
+   "5e-5",
+   "--save-predictions",
+   "--tag",
+   "p2a1mu4s1100",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 36.2,
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--configs",
+   "5",
+   "--seed",
+   "1100",
+   "--lr",
+   "5e-5",
+   "--save-predictions",
+   "--tag",
+   "p2a1mu5s1100",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 30.7,
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--configs",
+   "1",
+   "--seed",
+   "1000",
+   "--save-predictions",
+   "--tag",
+   "p2a0u1s1000",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 30.7,
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--configs",
+   "2",
+   "--seed",
+   "1000",
+   "--save-predictions",
+   "--tag",
+   "p2a0u2s1000",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 30.7,
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--configs",
+   "3",
+   "--seed",
+   "1000",
+   "--save-predictions",
+   "--tag",
+   "p2a0u3s1000",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 30.7,
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--configs",
+   "4",
+   "--seed",
+   "1000",
+   "--save-predictions",
+   "--tag",
+   "p2a0u4s1000",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 30.7,
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--configs",
+   "5",
+   "--seed",
+   "1000",
+   "--save-predictions",
+   "--tag",
+   "p2a0u5s1000",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 30.7,
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--configs",
+   "1",
+   "--seed",
+   "1100",
+   "--save-predictions",
+   "--tag",
+   "p2a0u1s1100",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 30.7,
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--configs",
+   "2",
+   "--seed",
+   "1100",
+   "--save-predictions",
+   "--tag",
+   "p2a0u2s1100",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 30.7,
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--configs",
+   "3",
+   "--seed",
+   "1100",
+   "--save-predictions",
+   "--tag",
+   "p2a0u3s1100",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 30.7,
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--configs",
+   "4",
+   "--seed",
+   "1100",
+   "--save-predictions",
+   "--tag",
+   "p2a0u4s1100",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 30.7,
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--configs",
+   "5",
+   "--seed",
+   "1100",
+   "--save-predictions",
+   "--tag",
+   "p2a0u5s1100",
+   "--threads",
+   "2"
+  ]
+ }
+]

@@ -2469,11 +2469,15 @@ def train_multitask(seed, parts, labels, args, device, test_index=None, descript
             test_pred = predict(HeadView(model, h), f_test[h], args.batch_size, pad_id,
                                 id2label[h], device, model.crfs[h])
         result = score([g for _, g, _ in test], test_pred)
+        multi_task = {'n_examples': len(examples), 'n_split_examples': n_split,
+                      'other_best_epoch': best[other][2] if other in best else None}
+        if other not in scored:
+            # P2's one-level run (--score-level): the other head is never validated
+            multi_task['other_tags_dropped'] = sum(1 for _, tags in examples
+                                                   if tags[other] is None)
         result.update({'seed': seed, 'best_epoch': best[h][2], 'val_f1': best[h][0],
                        'n_train': len(train), 'n_val': len(val), 'n_test': len(test),
-                       'history': multitask_history(log, h),
-                       'multi_task': {'n_examples': len(examples), 'n_split_examples': n_split,
-                                      'other_best_epoch': best[other][2]}})
+                       'history': multitask_history(log, h), 'multi_task': multi_task})
         if averaged:
             result.update({'val_f1': averaged['val_f1'], 'average': averaged})
         if getattr(args, 'save_predictions', False):
@@ -3752,7 +3756,7 @@ def run_multitask(args, out_dir):
             print(f"  {run_id}, {runtime:.0f}s: " + '; '.join(
                 f"{h} test F1 {records[h]['f1']:.2f} (strict {records[h]['f1_strict']:.2f}), "
                 f"best epoch {records[h]['best_epoch']}, running mean "
-                f"{results[h]['test_f1_mean']:.2f}{ref[h]}" for h in MT_HEADS), flush=True)
+                f"{results[h]['test_f1_mean']:.2f}{ref[h]}" for h in scored), flush=True)
     save()                         # every run_id of `folds` is now in both files
     for head in scored:
         print(f"  {head}: {summary_line(results[head])}")
@@ -4234,10 +4238,12 @@ def parse_args(argv=None):
                              "value: the released split's training and validation sentences "
                              'shuffled by random.Random(k), 57 for validation and 323 for '
                              'training (protocol screen_split)')
-    parser.add_argument('--screen-level', choices=MT_HEADS, default=None,
-                        help='P1, with --multi-task --screen-splits: the level whose screen '
-                             "split the run uses and whose head it scores; the other level's "
-                             'tags are dropped on its own released test sentences')
+    parser.add_argument('--screen-level', '--score-level', dest='screen_level',
+                        choices=MT_HEADS, default=None,
+                        help='P1, with --multi-task --screen-splits, and P2, with --multi-task '
+                             '--published-split: the level whose split the run uses and whose '
+                             "head it scores; the other level's tags are dropped on its own "
+                             'released test sentences')
     parser.add_argument('--warmup', type=float, default=0.1,
                         help="the linear warm-up's share of the steps (default 0.1; P1's A4: 0)")
     parser.add_argument('--llrd', type=float, default=0.0,
@@ -4310,12 +4316,16 @@ def parse_args(argv=None):
         if len(args.seeds) != 1:
             parser.error('--sofc-cv runs one seed per job (--seeds K, or --seed-offset): every '
                          'fold trains once at it')
-        if args.granularity not in SOFC:
+        # P2: a multi-task CV system trains SOFC-Exp's entities and slots on the same folds
+        multi = getattr(args, 'multi_task', False)
+        if multi and args.granularity != 'sofc_both':
+            parser.error('--sofc-cv with --multi-task needs --granularity sofc_both')
+        if args.granularity not in SOFC and not multi:
             parser.error("--sofc-cv needs SOFC-Exp's entity or slot level (--granularity sofc "
                          "or sofc_slot)")
         for option in ('vary_split', 'leave_one_paper_out', 'leave_two_papers_out',
                        'document_folds', 'published_split', 'train_articles',
-                       'leave_one_subfield_out', 'multi_task', 'self_train', 'retokenized_test'):
+                       'leave_one_subfield_out', 'self_train', 'retokenized_test'):
             if getattr(args, option, None) not in (None, False, 0):
                 parser.error(f"--sofc-cv is a protocol of its own: no "
                              f"--{option.replace('_', '-')}")
@@ -4339,6 +4349,8 @@ def parse_args(argv=None):
         for option in ('vary_split', 'leave_one_paper_out', 'multi_task'):
             if option == 'multi_task' and args.granularity == 'sofc_both':
                 continue                  # SOFC-Exp: one split by article for both levels
+            if option == 'multi_task' and getattr(args, 'screen_level', None):
+                continue                  # P2: one level's partition, the other's tags dropped
             if getattr(args, option, False):
                 parser.error(f"--published-split is not available with "
                              f"--{option.replace('_', '-')} (its fine-grained and "
@@ -4565,10 +4577,11 @@ def check_screen_args(parser, args):
                          'the encoder)')
         if getattr(args, 'self_train', None) is not None or hasattr(args, 'names_feature'):
             parser.error('--average-last is not available with self-training or a match term')
-    if args.screen_level and not (args.screen_splits and getattr(args, 'multi_task', False)
+    if args.screen_level and not ((args.screen_splits or getattr(args, 'published_split', False))
+                                  and getattr(args, 'multi_task', False)
                                   and args.granularity == 'both'):
-        parser.error('--screen-level needs --screen-splits and --multi-task with '
-                     '--granularity both')
+        parser.error('--screen-level (--score-level) needs --screen-splits or --published-split, '
+                     'and --multi-task with --granularity both')
     if args.screen_splits:
         if not args.screen:
             parser.error('--screen-splits needs --screen')

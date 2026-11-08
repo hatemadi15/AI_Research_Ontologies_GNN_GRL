@@ -285,6 +285,7 @@ RUN_JOBS = ROOT / 'src' / 'kaggle' / 'run_jobs.py'
 WORK_DIR = ROOT / 'data' / 'processed' / 'kaggle'
 GPU_RESULTS = ROOT / 'results' / 'gpu'
 SCREEN_RESULTS = ROOT / 'results' / 'gpu_screen'     # the SOTA plan's P1: the screen files
+P2_RESULTS = ROOT / 'results' / 'gpu_p2'             # the SOTA plan's P2: its test-scored files
 CORPUS = 'data/processed/corpus/fatigue_sentences.txt'
 CORPUS_REPORT = ROOT / 'results' / 'fatigue_corpus.json'
 # the SOFC corpus (week-6 amendment: multi-task self-training on SOFC-Exp, build_sofc_corpus.py)
@@ -337,7 +338,7 @@ P1_PINS = {'pip': ('sentencepiece==0.2.2',),
                       SCIDEBERTA: '98fab84484cea48d2997348a18cebf2d4f419a14'}}
 BATCH_EXTRAS = {'smoke5': DEBERTA_PINS, 'smoke6': DEBERTA_PINS, 'w6a': DEBERTA_PINS,
                 'w21s': GLINER_PINS, 'w21a': GLINER_PINS, 'w21x': W21X_PINS,
-                'p1t': P1_PINS, 'p1n': P1_PINS}
+                'p1t': P1_PINS, 'p1n': P1_PINS, 'p2a': P1_PINS, 'p2m': P1_PINS, 'p2b': P1_PINS}
 THREADS = 2
 DEADLINE_HOURS = 10                 # no job starts later; a Kaggle session lasts 12 hours
 # the TPU spike (docs/METHODS_PLAN.md §5): a batch named tpu... runs on Kaggle's TPU v5e-8, one
@@ -941,6 +942,19 @@ def p1n_lanes(path=P1_NEXT_JOBS):
     return lanes
 
 
+def p2_lanes(batch, path=None):
+    """Batch p2a, p2m or p2b (the SOTA plan's P2): the jobs that sota_p2.py jobs <batch> wrote,
+    balanced over the lanes by their estimated minutes; the checks (minutes 0: smoke4's
+    repeat, A0's seed-0 repeats) head lane 0 and lane 1 in turn."""
+    import sota_p2
+    entries = json.loads(Path(path or sota_p2.jobs_file(batch)).read_text())
+    checks = [e['job'] for e in entries if e['minutes'] == 0]
+    costed = [(e['minutes'], e['job']) for e in entries if e['minutes'] > 0]
+    heads = [checks[0::2], checks[1::2]]
+    lanes = balance(costed, loads=[float(len(h)) for h in heads])
+    return [heads[i] + lanes[i] for i in range(LANES)]
+
+
 def balance(costed, lanes=LANES, loads=None):
     """Jobs over `lanes`: longest first, each to the least loaded lane (ties: lowest);
     `loads` gives the lanes' starting loads."""
@@ -1427,6 +1441,8 @@ def batch_lanes(name):
         return p1t_lanes()
     if name == 'p1n':
         return p1n_lanes()
+    if name in ('p2a', 'p2m', 'p2b'):
+        return p2_lanes(name)
     if name == 'p0a':
         # the SOTA plan's P0 gates: the repeat of the CRF run of smoke4 (smokebq); MuLMS's 5
         # configurations (c1 to c5) and SOFC-Exp's cross-validation at seed offsets 0, 100 and
@@ -1462,7 +1478,8 @@ BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'i
            'w12e', 'w12f', 'w12g', 'w13a', 'w13b', 'w13c',
            *(f'w12b:{v}' for v in WEEK12_VARIANTS), *(f'w12d:{v}' for v in WEEK12_ANALOGUES),
            'tpu-smoke1', 'tpu-smoke', 'w14a', 'w14b', 'w14c', 'w15a', 'w17a', 'w17b', 'w18a',
-           'w19a', 'w19b', 'w20a', 'w21s', 'w21a', 'w21x', 'p0a', 'p1t', 'p1n')
+           'w19a', 'w19b', 'w20a', 'w21s', 'w21a', 'w21x', 'p0a', 'p1t', 'p1n', 'p2a', 'p2m',
+           'p2b')
 
 
 def batch_extras(name):
@@ -1600,7 +1617,7 @@ def is_gpu_runs_file(path):
 def build_bundle(commit, out_dir, root=ROOT, results_dir=GPU_RESULTS, corpus=None,
                  expected_sha256=None, wheels=(), sofc_corpus=None, sofc_report=None,
                  mulms_report=None, mulms_dir=None, topic_reports=None, topic_dir=None,
-                 week19_dir=None, screen_dir=None):
+                 week19_dir=None, screen_dir=None, p2_dir=None):
     """Write the bundle files to out_dir (emptied first); returns BUNDLE.json's content.
 
     code.tar.gz is `git archive` of `commit` (the frozen code, tracked files only); the
@@ -1674,7 +1691,8 @@ def build_bundle(commit, out_dir, root=ROOT, results_dir=GPU_RESULTS, corpus=Non
         week19[path.name] = file_sha256(path)
         shutil.copy2(path, out_dir / f'{WEEK19_PREFIX}{path.name}')
     sources = {}
-    for folder in (Path(results_dir), Path(screen_dir) if screen_dir else None):
+    for folder in (Path(results_dir), Path(screen_dir) if screen_dir else None,
+                   Path(p2_dir) if p2_dir else None):
         if folder is not None and folder.is_dir():
             for p in folder.glob('ner_results_*.json'):
                 if is_gpu_runs_file(p):
@@ -1833,7 +1851,8 @@ def build_wheels(out_dir=WORK_DIR / 'wheels'):
 def cmd_bundle(args):
     user = username(args)
     folder = WORK_DIR / 'bundle'
-    info = build_bundle(args.commit, folder, wheels=build_wheels(), screen_dir=SCREEN_RESULTS)
+    info = build_bundle(args.commit, folder, wheels=build_wheels(), screen_dir=SCREEN_RESULTS,
+                        p2_dir=P2_RESULTS)
     (folder / 'dataset-metadata.json').write_text(
         json.dumps(dataset_metadata(user, args.dataset), indent=2))
     print(f"bundle: commit {info['commit'][:12]}, corpus {info['corpus_sha256'][:12]}, "

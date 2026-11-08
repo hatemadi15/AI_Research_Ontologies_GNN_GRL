@@ -7869,6 +7869,213 @@ for P2, and the tuned reference (candidate A) for P2's D-P decisions.
   - F is skipped in P1 and kept for later (the author, 8 November).
   - P2's protocol comes next. It is fixed before any P2 run.
 
+*The SOTA plan's P2: the decisions (drafted 8 November, before any P2 run;
+awaiting an independent referee's check, which comes before any run;
+`docs/SOTA_PLAN.md` §1, §2, §4 and §5, and P1's selections above).* These are the plan's claims. Each decision is fixed here with its
+systems, seeds, test set, unit, rule and wording.
+- **What P2 reads.** Each final system's test set is read once, on fresh
+  seeds.
+  - No P2 result changes a system, a setting, a rule or a wording.
+  - Validation enters only through the epoch that each run picks, as in
+    every stored run.
+- **The selected systems (S),** with P1's settings:
+  - **MaterioMiner fine: C1, multi-task** on the fine level's released split.
+    - The coarse head trains on the same sentences, its tags dropped on
+      every sentence of coarse-grained's released test set (amendment 1).
+    - Only the fine head is scored, and it alone picks the epoch.
+  - **MaterioMiner coarse: A3 with A6** (at most 40 epochs, patience 5, the
+    top layer re-initialised).
+  - **SOFC-Exp, official split: B1**, DeBERTa-v3-large with the CRF head:
+    - learning rate 1e-5, and 5e-3 for the CRF;
+    - batch 8, at most 20 epochs, patience 3, a 10% warm-up;
+    - fp32, with gradient checkpointing.
+  - **SOFC-Exp, cross-validation (CV): B1 does not enter.**
+    - The plan's fallback (§4) admits a large encoder to the CV protocol
+      only if it leads on validation by more than 1 point. B1 leads A's
+      best cell by 0.30 on the base units.
+    - So the CV system is chosen by P1's tie rule without B1. The 3
+      highest of the other cells are A6 with C1, C1 and A6 (79.41, 79.37
+      and 78.78 on the base units).
+    - A6 first runs its 4 extra units in screen mode (seeds 500–800). The
+      CV system is the highest mean over all 9 units. A further tie goes to
+      fewer changes, then by name.
+  - **MuLMS: A1m**, `mulms_nested.py` as P0 ran it, except a learning rate
+    of 5e-5 for the encoder and linear layer (the CRF's 7e-3 kept).
+- **The references.** The plan's D-P rule applies: the tuned reference when
+  the winner is another candidate, so that tuning is not credited to the
+  winner, and our re-run of the published system when the winner is in the
+  A family, which reads "tuning".
+  - SOFC-Exp, official split: A6.
+  - SOFC-Exp, CV: A6 if the CV system holds C1. If the CV system is A6, the
+    reference is A0 (the CRF head) and the decision reads "tuning".
+  - MuLMS: A0, P0's recipe. The decision reads "tuning".
+  - MaterioMiner, both levels: the strongest known system on the released
+    split, as the plan's §2 fixes. That is the CRF head (A0; known: 73.31
+    and 75.48 over seeds 0–900).
+    - Coarse-grained's selection is in the A family, so its decision reads
+      "tuning".
+    - Fine-grained's C1 holds no A change, so the comparison credits no
+      tuning to it.
+  - **Re-test system** (MaterioMiner, counted apart): plain MatSciBERT, our
+    re-run of the published system.
+- **Seeds and units.** No seed from 1000 up has run on these protocols.
+  This was checked over every stored run of the released split, the
+  official split, the CV folds, MuLMS's configurations and the screen
+  splits.
+  - Single models: 10 fresh seeds, 1000–1900 in steps of 100. Each
+    system's file holds them as run_ids seed1000 to seed1900.
+  - MuLMS: configurations c1–c5 at seeds 1000 and 1100, so 10 runs, the
+    unit being the configuration with its seed.
+  - SOFC-Exp CV: the 5 folds at each of seed offsets 1000–1900, so 50 runs.
+    The unit is the run (fold × seed), as in Gupta et al.'s 15 runs and in
+    P0's gate 1.
+  - MaterioMiner's votes: S at 30 seeds, 1000–3900, its first 10 being the
+    single-model runs. The votes of 3 take consecutive triples (1000–1200,
+    1300–1500, …), and the votes of 5 consecutive fives (1000–1400, …).
+- **Test sets and scorers,** as in the stored runs and P0:
+  - MaterioMiner: the level's released 96 test sentences, seqeval exact
+    match (default mode), micro F1;
+  - SOFC-Exp, official split: the 11 test articles, and the 10 without
+    PMC6247067, re-scored from the same saved predictions (P0's gate 2);
+  - SOFC-Exp, CV: each fold's model on the 11 official test articles;
+  - MuLMS: the 7 test documents, every nested entity, the release's
+    scorer (P0's gate 3).
+- **The decisions.** A decision passes when its 95% interval lies above 0.
+  There are 12 live decisions and 4 re-tests.
+  1. **SOFC-Exp official, D-T.** S's F1 per seed on the 10 articles,
+     against 83.4 ± 1.006 (n = 5). That SD is Schrader et al.'s
+     population SD of 0.9 taken as a sample SD, as in P0. The test is
+     Welch's.
+  2. **SOFC-Exp official, D-P.** S against A6 on the 11 articles, by
+     Welch's test: seed pairing across architectures is nominal.
+  3. **SOFC-Exp CV, D-T.** The CV system's F1 per run (n = 50), against
+     84.77 ± 1.02 (n = 15), Welch's test. The SD is taken as a sample SD;
+     its population reading, 1.06, is also reported.
+  4. **SOFC-Exp CV, D-P.** The CV system against its reference, paired by
+     fold and seed (n = 50).
+  5. **MuLMS, D-T.** S's micro F1 per run (n = 10), against 79.6 ± 0.447
+     (n = 5, as in P0), Welch's test.
+  6. **MuLMS, D-P.** S against A0, paired by configuration and seed
+     (n = 10). It reads "tuning".
+  7. **MaterioMiner fine-grained, and 8. coarse-grained.** S against the
+     CRF head, paired by seed (n = 10). Coarse-grained reads "tuning".
+  9. **MaterioMiner's votes, 9–12.** Per level, S's vote of 3 (10
+     disjoint votes) and vote of 5 (6 disjoint votes), each against the
+     CRF head's 10 single runs, by Welch's test. The unit is a vote on one
+     side and a run on the other.
+     - A vote keeps an entity that more than half of its members predict
+       with the same span and type (`ner_ensemble.vote_tags`, fixed in week
+       2).
+     - 30 seeds of S take about 1 session-hour per level, within the plan's
+       3 for decided votes.
+  - **The re-tests,** counted apart because their outcome is known:
+    - MaterioMiner's D-T, S against 69.92 and 72.32: a one-sample interval
+      with the target fixed, since no SD was printed;
+    - MaterioMiner's D-P, S against plain MatSciBERT, paired by seed.
+  - **Expected false passes.** With no effect, each live decision passes
+    with probability 0.025, so about 0.3 of the 12 would pass by chance.
+  - **Borderline.** A D-T verdict that changes within the printed SD's
+    rounding is flagged borderline, and stands as computed.
+- **Reported beside the decisions, with no decision of their own:**
+  - **A paired bootstrap over test sentences** for every D-P, live
+    MaterioMiner and vote decision. It draws 10,000 resamples of the test
+    sentences (`random.Random(0)`) and takes the difference of the two
+    systems' mean F1 over their runs. Its interval is the 95% percentile
+    interval.
+  - **SOFC-Exp, official split:** S's one-sample interval on the 11
+    articles against 86.0 (Lee 2025, LLaMA-3.2-3B with QLoRA, read off a
+    bar chart), for the wording below.
+  - **SOFC-Exp, CV:** the CV system's interval against 85.71 (Huang 2024,
+    MatSciBERT-MRC, split unstated), with the target fixed.
+  - **SOFC-Exp's votes** of 3 and of 5, from S's 10 seeds (3 votes of 3, 2
+    of 5). 30 fresh seeds of B1 would take about 5 session-hours, above the
+    plan's 3 for decided votes (§1).
+  - Strict IOB2 scores and per-type F1.
+- **The wordings,** fixed as in the plan's §5:
+  - **SOFC-Exp, official split:**
+    - if S's lower bound on the 11 articles is above 86.0: "above every
+      reported result on SOFC-Exp's official split, on this test set";
+    - if D-T passes (against 83.4) but the margin over 86.0 does not
+      clear: "above the best result with a stated protocol; not shown above
+      the best reported result, whose protocol we could not verify".
+  - **SOFC-Exp, CV:**
+    - if D-T passes and the lower bound is above 85.71: "above every
+      reported cross-validation result, on this test set";
+    - if D-T passes but the lower bound is not above 85.71: "above the
+      best cross-validation result with a stated protocol; not shown above
+      85.71, whose protocol we could not verify".
+  - **MuLMS:** "above the published result under its protocol" if D-T
+    passes; otherwise "not shown above it".
+  - **MaterioMiner:**
+    - the re-tests read as replications;
+    - a live decision reads "the selected system improves on the strongest
+      known system", or "not shown to";
+    - a vote reads "the vote of k improves on the strongest known single
+      system", or "not shown to".
+  - **D-P:** "the change improves on the tuned reference" (or, for A, on
+    the published recipe), or "not shown to". The A cases read "tuning".
+  - **Where nothing clears:** "not shown to beat the published numbers; our
+    best single model reaches X [interval]".
+  - Every D-T is worded "on this test set": the seed interval does not
+    cover sampling of the test set.
+- **Known test results (R3), disclosed.**
+  - On SOFC-Exp's official split, the CRF head (83.75), document context
+    (84.34) and multi-task (83.60, 11 articles) are known.
+  - On MaterioMiner's released split, the CRF head is known, and so is one
+    run of DeBERTa-v3-large with the CRF at seed 0 (74.38 fine-grained,
+    week 6).
+  - Neither A6, B1 on SOFC-Exp, A1m nor any CV run of these systems has
+    been read on a test set.
+- **Checks.** A failed check voids its batch: none of its decisions counts,
+  the cause is fixed in a new commit, and the batch runs again.
+  - smoke4's repeat equals `smokebn`.
+  - A0 at seed 0 runs again in P2's mode. On MaterioMiner fine-grained's
+    released split and on SOFC-Exp's official split, it must equal the
+    stored runs (`ner_results_fine_published_split_crf.json`, 73.49;
+    `ner_results_sofc_published_split_crf.json`, seed 0) in F1, history and
+    predictions. Both are known results, so nothing new is read.
+  - Every file aggregated must pass `sota_p2.py`'s checks:
+    - its settings, seeds and units, as named here;
+    - P1's environment (T4, CUDA 12.8, torch 2.11.0+cu128, transformers
+      5.18.0);
+    - every run's test sentences and gold, which must equal the stored
+      runs' on the same protocol.
+- **Code, written and tested before the first run,** in one commit named in
+  the record:
+  - `--score-level` (the dest of `--screen-level`) with `--published-split`:
+    one level's multi-task run on its released split, as amendment 1 rules;
+  - `--multi-task` with `--sofc-cv` (SOFC-Exp's entities and slots on the
+    CV folds), in case the CV system holds C1;
+  - `sota_p2.py`, which:
+    - writes the batches' jobs;
+    - checks and aggregates the files;
+    - forms the votes;
+    - computes the decisions and the bootstrap;
+    - writes `results/gpu/sota_p2.json` with the wordings.
+- **Budget,** from P1's measured runs (minutes per run, with 15% added for
+  scoring the test sets):
+
+  | Batch | Runs | Session-hours |
+  |---|---|---|
+  | `p2a`: the checks, A6's 4 extra units on SOFC-Exp, SOFC-Exp's official split (B1 21 min, A6 3.5) and MaterioMiner (S at 30 seeds, about 2 min; the CRF head and plain MatSciBERT at 10) | 4 + 4 + 20 + 100 | about 4.1 |
+  | `p2m`: MuLMS (A1m 31.5 min, A0 26.7) | 20 | about 5.6 |
+  | `p2b`: SOFC-Exp CV (the CV system at most 5.9 min, its reference 3.5) | 100 | about 4.5 |
+
+  - That makes about 14 session-hours, of the 26.9 GPU-hours left before
+    the 14 November reset. P3 waits for the reset.
+  - `p2m` may run beside `p2a` in a second session. `p2b` waits for `p2a`,
+    because A6's extra units choose the CV system.
+  - Sessions resume finished runs. A batch the quota cuts waits for the
+    reset.
+- **Recording.** Each batch's record names its kernel version and the commit
+  of its bundle.
+  - Each decision is recorded with its estimate, interval, verdict and
+    wording, in this section, in `docs/SOTA_PLAN.md` and in
+    `results/README.md`.
+  - The count is reported with the false passes expected by chance.
+- **Not in P2:** F (skipped and kept, the author, 8 November), and P3 (the
+  held-out-document protocols), which comes after.
+
 *TACL (paper B), for later.* The paper goes to 10 pages, references
 uncounted, with appendices after them within TACL's caps (as last read: up
 to 5 pages and 3 pages for two kinds of content). It keeps a word budget
