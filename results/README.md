@@ -736,3 +736,8 @@ done):
   `sota/p1_round1.json`, from `sota_p1.py select`;
 - A6's three files are in `gpu_screen_void/`. A bug made A6 run as A0, and
   the bug is fixed (ROADMAP §4). A6 runs again in the next stage.
+
+Stage 2 (batch `p1n`, kernel version 28, bundle of `92078e6`; every job
+done): A6 runs again after its fix, and MuLMS's extra units run.
+`sota/p1_stage2.json` is the table. MuLMS's selection is A1m (validation
+only).

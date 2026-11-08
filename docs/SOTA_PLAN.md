@@ -20,7 +20,9 @@ already run; without them MaterioMiner would have kept 10 units (disclosed
 in ROADMAP §4). Round 1 ran on 8 November; its table is in ROADMAP §4
 (validation only). A6 ran as A0 because of a bug, since fixed; it runs again
 with MuLMS's extra units, and round 2 on MaterioMiner and SOFC-Exp waits for
-it. Amendment 1
+it. Stage 2 ran on 8 November. MuLMS's selection is A1m, learning rate 5e-5:
+78.62 against A0's 77.60 over 7 units, validation only. Round 2 on
+MaterioMiner and SOFC-Exp is running in stages. Amendment 1
 (before any run) has C1 on MaterioMiner run one level at a time: the two levels'
 released splits are different partitions. It departs from this plan in four
 places, each justified there:

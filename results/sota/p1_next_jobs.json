@@ -1,12 +1,16 @@
 [
  {
   "benchmark": "fine",
-  "cell": "a6",
+  "cell": "a6c1",
   "changes": [
-   "a6"
+   "a6",
+   "c1"
   ],
   "job": [
    "--granularity",
+   "both",
+   "--multi-task",
+   "--screen-level",
    "fine",
    "--crf",
    "--screen",
@@ -20,15 +24,16 @@
    "3",
    "4",
    "--tag",
-   "p1a6",
+   "p1a6c1",
    "--threads",
    "2"
   ]
  },
  {
   "benchmark": "coarse",
-  "cell": "a6",
+  "cell": "a3a6",
   "changes": [
+   "a3",
    "a6"
   ],
   "job": [
@@ -37,6 +42,10 @@
    "--crf",
    "--screen",
    "--screen-splits",
+   "--epochs",
+   "40",
+   "--patience",
+   "5",
    "--reinit-top",
    "1",
    "--seeds",
@@ -46,20 +55,22 @@
    "3",
    "4",
    "--tag",
-   "p1a6",
+   "p1a3a6",
    "--threads",
    "2"
   ]
  },
  {
   "benchmark": "sofc",
-  "cell": "a6",
+  "cell": "a6c1",
   "changes": [
-   "a6"
+   "a6",
+   "c1"
   ],
   "job": [
    "--granularity",
-   "sofc",
+   "sofc_both",
+   "--multi-task",
    "--crf",
    "--screen",
    "--published-split",
@@ -72,205 +83,7 @@
    "300",
    "400",
    "--tag",
-   "p1a6",
-   "--threads",
-   "2"
-  ]
- },
- {
-  "benchmark": "mulms",
-  "cell": "a1m",
-  "changes": [
-   "a1m"
-  ],
-  "job": [
-   "src/graph/mulms_nested.py",
-   "--screen",
-   "--configs",
-   "4",
-   "--seed",
-   "0",
-   "--lr",
-   "5e-5",
-   "--tag",
-   "p1a1mu4",
-   "--threads",
-   "2"
-  ]
- },
- {
-  "benchmark": "mulms",
-  "cell": "a1m",
-  "changes": [
-   "a1m"
-  ],
-  "job": [
-   "src/graph/mulms_nested.py",
-   "--screen",
-   "--configs",
-   "5",
-   "--seed",
-   "0",
-   "--lr",
-   "5e-5",
-   "--tag",
-   "p1a1mu5",
-   "--threads",
-   "2"
-  ]
- },
- {
-  "benchmark": "mulms",
-  "cell": "a1m",
-  "changes": [
-   "a1m"
-  ],
-  "job": [
-   "src/graph/mulms_nested.py",
-   "--screen",
-   "--configs",
-   "1",
-   "--seed",
-   "100",
-   "--lr",
-   "5e-5",
-   "--tag",
-   "p1a1mu1s100",
-   "--threads",
-   "2"
-  ]
- },
- {
-  "benchmark": "mulms",
-  "cell": "a1m",
-  "changes": [
-   "a1m"
-  ],
-  "job": [
-   "src/graph/mulms_nested.py",
-   "--screen",
-   "--configs",
-   "2",
-   "--seed",
-   "100",
-   "--lr",
-   "5e-5",
-   "--tag",
-   "p1a1mu2s100",
-   "--threads",
-   "2"
-  ]
- },
- {
-  "benchmark": "mulms",
-  "cell": "a0",
-  "changes": [],
-  "job": [
-   "src/graph/mulms_nested.py",
-   "--screen",
-   "--configs",
-   "1",
-   "--seed",
-   "100",
-   "--tag",
-   "p1a0u1s100",
-   "--threads",
-   "2"
-  ]
- },
- {
-  "benchmark": "mulms",
-  "cell": "a0",
-  "changes": [],
-  "job": [
-   "src/graph/mulms_nested.py",
-   "--screen",
-   "--configs",
-   "2",
-   "--seed",
-   "100",
-   "--tag",
-   "p1a0u2s100",
-   "--threads",
-   "2"
-  ]
- },
- {
-  "benchmark": "mulms",
-  "cell": "c2",
-  "changes": [
-   "c2"
-  ],
-  "job": [
-   "src/graph/mulms_nested.py",
-   "--screen",
-   "--configs",
-   "4",
-   "--seed",
-   "0",
-   "--joint-sofc",
-   "--tag",
-   "p1c2u4",
-   "--threads",
-   "2"
-  ]
- },
- {
-  "benchmark": "mulms",
-  "cell": "c2",
-  "changes": [
-   "c2"
-  ],
-  "job": [
-   "src/graph/mulms_nested.py",
-   "--screen",
-   "--configs",
-   "5",
-   "--seed",
-   "0",
-   "--joint-sofc",
-   "--tag",
-   "p1c2u5",
-   "--threads",
-   "2"
-  ]
- },
- {
-  "benchmark": "mulms",
-  "cell": "c2",
-  "changes": [
-   "c2"
-  ],
-  "job": [
-   "src/graph/mulms_nested.py",
-   "--screen",
-   "--configs",
-   "1",
-   "--seed",
-   "100",
-   "--joint-sofc",
-   "--tag",
-   "p1c2u1s100",
-   "--threads",
-   "2"
-  ]
- },
- {
-  "benchmark": "mulms",
-  "cell": "c2",
-  "changes": [
-   "c2"
-  ],
-  "job": [
-   "src/graph/mulms_nested.py",
-   "--screen",
-   "--configs",
-   "2",
-   "--seed",
-   "100",
-   "--joint-sofc",
-   "--tag",
-   "p1c2u2s100",
+   "p1a6c1",
    "--threads",
    "2"
   ]

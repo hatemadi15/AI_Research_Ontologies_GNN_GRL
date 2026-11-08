@@ -7778,6 +7778,32 @@ for P2, and the tuned reference (candidate A) for P2's D-P decisions.
   - **The next stage** (batch `p1n`) holds 13 jobs
     (`results/sota/p1_next_jobs.json`): A6 on the three benchmarks, and
     MuLMS's 10 extra-unit runs. Those runs cannot depend on A6.
+- **Stage 2's record, 8 November** (batch `p1n`, kernel version 28, bundle of
+  `92078e6`; 13 jobs, 220 minutes, every job done; the table is
+  `results/sota/p1_stage2.json`).
+  - **A6, fixed,** now differs from A0 at every unit (as above: mean · last 3
+    · gain (SE)):
+
+    | Cell | MaterioMiner fine | MaterioMiner coarse | SOFC-Exp |
+    |---|---|---|---|
+    | A6 | 80.12 · 78.69 · +0.86 (0.36) G | 78.86 · 77.32 · +1.06 (0.70) G | 78.78 · 77.14 · +0.09 (0.56) |
+
+    - fine: G is A6, C1 and C3. A\* and A's best cell are A6. Round 2
+      starts at A6 and tries C1 (gain +1.91), then C3.
+    - coarse: G is A3 and A6, so A\* is a new cell, A3 with A6. A's best
+      cell waits for it.
+    - SOFC-Exp: G is C1. A's best cell is A6 (78.78, against A4's 78.76).
+      Round 2 starts at A6 and tries C1.
+  - **MuLMS's selection is A1m.** The means over all 7 units are A1m 78.62,
+    A0 77.60 and C2 68.04.
+    - A1m is above A0 on 6 of the 7 units.
+    - A1m is also A's best cell, so P2's D-P on MuLMS reads "tuning".
+    - C2's c4s0 run collapsed: its tune F1 stays at 0–12 (dev 13.48),
+      while C2's other six runs start near 70 at epoch 1. This changes
+      nothing, since c4s0 would have needed 87.5 for C2 to reach A1m's
+      mean. It is not investigated further.
+  - **The next stage** holds 3 jobs (`results/sota/p1_next_jobs.json`): A6
+    with C1 on fine and on SOFC-Exp, and A3 with A6 on coarse.
 
 *TACL (paper B), for later.* The paper goes to 10 pages, references
 uncounted, with appendices after them within TACL's caps (as last read: up
