@@ -9,6 +9,20 @@ typeset TACL version. A protocol in `docs/ROADMAP.md` §4 fixes it in detail
 before any run. The published numbers come from a literature audit of
 4 November, every number read in its paper.*
 
+*P2, 8 November: its protocol is fixed in ROADMAP §4, after an independent
+referee's check ("approve with required changes", all six applied). It makes
+15 live decisions, 2 of them gated on a D-T, and 4 re-tests. It departs from
+this plan in four places, each justified there:
+- B1 does not enter SOFC-Exp's CV protocol (§4's fallback). The CV system
+  is chosen by P1's tie rule without B1.
+- MaterioMiner's votes are tested against the CRF head's votes, not its
+  single runs, because the CRF head's own votes are known to beat its
+  single runs.
+- The 86.0 and 85.71 comparisons are decisions, gated on their D-T.
+- The CV wordings are new.
+
+P2 runs in three batches, about 15 session-hours: `p2a`, `p2m` and `p2b`.*
+
 *P1, 7 November: its protocol is fixed in ROADMAP §4, after an independent
 referee's check ("approve with required changes", all six applied). Its code
 is written and tested (`ner_baseline.py --screen` and round 1's options,
@@ -33,7 +47,7 @@ November): F is skipped in P1 but kept as a later option. **P1 is complete
 - SOFC-Exp: B1, DeBERTa-v3-large, against A6;
 - MuLMS: A1m, learning rate 5e-5, which is also its tuned reference.
 
-P2's protocol comes next. Amendment 1
+P2's protocol is fixed (above). Amendment 1
 (before any run) has C1 on MaterioMiner run one level at a time: the two levels'
 released splits are different partitions. It departs from this plan in four
 places, each justified there:

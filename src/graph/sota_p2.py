@@ -2,22 +2,25 @@
 sota_p2.py - the SOTA plan's P2: the decisions (docs/ROADMAP.md §4, the P2 protocol;
 docs/SOTA_PLAN.md §1, §2, §4 and §5)
 
-P2 reads each final system's test set once, on fresh seeds (1000 up). It makes 12 live
-decisions and 4 re-tests (MaterioMiner's, whose outcome is known). No P2 result changes a
-system, a setting, a rule or a wording. This script:
-  - writes the batches' jobs (p2a: the checks, A6's extra units on SOFC-Exp, SOFC-Exp's
-    official split and MaterioMiner; p2m: MuLMS; p2b: SOFC-Exp's cross-validation, whose
-    system P1's tie rule picks without B1 once A6's extra units are in);
-  - checks a pulled batch (smoke4's repeat; A0 at seed 0 against the stored runs);
+P2 reads each final system's test set once, on fresh seeds (1000 up). It makes 15 live
+decisions (2 of them gated on a D-T) and 4 re-tests (MaterioMiner's, whose outcome is known).
+No P2 result changes a system, a setting, a rule or a wording. This script:
+  - writes the batches' jobs: p2a (the checks, A6's 4 extra screen units on SOFC-Exp,
+    SOFC-Exp's official split and MaterioMiner), p2m (MuLMS) and p2b (SOFC-Exp's
+    cross-validation, whose system P1's tie rule picks without B1);
+  - runs a pulled batch's checks, which read only the check files: smoke4's repeat in every
+    batch, and a repeat of a known run on the batch's paths;
+  - takes A6's screen file from p2a and commits the CV system before any test-scored file is
+    opened;
   - checks and aggregates the files (results/gpu_p2), forms MaterioMiner's votes, computes
     the decisions, the paired bootstrap over test sentences and the wordings, and writes
     results/gpu/sota_p2.json.
 
 Usage:
-  python src/graph/sota_p2.py jobs p2a|p2m|p2b     # results/sota/p2_jobs_<batch>.json
-  python src/graph/sota_p2.py cv-system            # SOFC-Exp's CV system (after p2a)
-  python src/graph/sota_p2.py checks <pulled>       # a pulled batch's checks
-  python src/graph/sota_p2.py decide               # results/gpu/sota_p2.json
+  python src/graph/sota_p2.py jobs p2a|p2m|p2b          # results/sota/p2_jobs_<batch>.json
+  python src/graph/sota_p2.py checks <pulled> --batch B  # first, after every pull
+  python src/graph/sota_p2.py cv-system <pulled p2a>     # results/sota/p2_cv_system.json
+  python src/graph/sota_p2.py decide                     # results/gpu/sota_p2.json
 """
 import argparse
 import json
@@ -66,9 +69,11 @@ MM_FLAGS = {
     ('fine', 'a0'): ('--granularity', 'fine', '--crf', '--published-split'),
     ('coarse', 'a0'): ('--granularity', 'coarse', '--crf', '--published-split'),
     ('fine', 'plain'): ('--granularity', 'fine', '--published-split'),
+    ('fine', 'a6'): ('--granularity', 'fine', '--crf', '--published-split', '--reinit-top', '1'),
     ('coarse', 'plain'): ('--granularity', 'coarse', '--published-split'),
 }
 MM_SELECTED = {'fine': 'c1', 'coarse': 'a3a6'}
+MM_THIRTY = ('c1', 'a3a6', 'a0')       # the systems whose votes are decided run at 30 seeds
 MM_TARGETS = {'fine': 69.92, 'coarse': 72.32}     # Durmaz et al. 2024, no SD printed
 OFFICIAL_FLAGS = {
     'b1': ('--granularity', 'sofc', '--crf', '--published-split', '--model', DEBERTA, '--lr',
@@ -99,9 +104,17 @@ A6_EXTRA_JOB = ['--granularity', 'sofc', '--crf', '--screen', '--published-split
                 '1', '--seeds', '500', '600', '700', '800', '--tag', 'p1a6', '--threads',
                 str(THREADS)]
 CV_SYSTEM_FILE = SOTA_DIR / 'p2_cv_system.json'
+MULMS_SMOKE_JOB = [MULMS_NESTED_SCRIPT, '--configs', '1', '--tag', 'smokebv', '--max-train', '300',
+                   '--epochs', '2', '--save-predictions', '--threads', str(THREADS)]
+MULMS_SMOKE_REFERENCE = ROOT / 'results' / 'gpu_repeats' / \
+    'ner_results_mulms_nested_configs_bilou_crf_smokebr_smoke300.json'
+CV_CHECK_JOB = ['--granularity', 'sofc', '--sofc-cv', '--seeds', '0', '--crf', '--tag', 'p2chkcv',
+                '--save-predictions', '--threads', str(THREADS)]
+A6_SCREEN_FILE = 'ner_results_sofc_published_screen_crf_p1a6.json'
 
 # minutes per run, measured in P1 (screen mode; 15% is added for the test sets), for the lanes
-MINUTES = {'mm_c1': 1.69, 'mm_a3a6': 2.01, 'mm_a0': 1.33, 'mm_plain': 1.1, 'b1': 21.15,
+MINUTES = {'mm_c1': 1.69, 'mm_a3a6': 2.01, 'mm_a0': 1.33, 'mm_plain': 1.1, 'mm_a6': 1.29,
+           'b1': 21.15,
            'a6': 3.5, 'a0_sofc': 3.3, 'mulms_a1m': 31.52, 'mulms_a0': 26.67, 'cv_a6c1': 5.91,
            'cv_c1': 5.16, 'cv_a6': 3.5, 'cv_a0': 3.3, 'smoke': 1.2}
 TEST_OVERHEAD = 1.15
@@ -111,8 +124,12 @@ def seeds_args(seeds):
     return ['--seeds', *(str(s) for s in seeds)]
 
 
+def mm_seeds(level, cell):
+    return VOTE_SEEDS if cell in (MM_SELECTED[level], 'a0') else SEEDS
+
+
 def mm_job(level, cell):
-    seeds = VOTE_SEEDS if MM_SELECTED[level] == cell else SEEDS
+    seeds = mm_seeds(level, cell)
     return [*MM_FLAGS[(level, cell)], *seeds_args(seeds), '--save-predictions', '--tag',
             f'p2{cell}', '--threads', str(THREADS)]
 
@@ -148,20 +165,21 @@ def batch_jobs(batch, cv_system=None):
         for cell in ('b1', 'a6'):
             jobs.append((len(SEEDS) * MINUTES[cell] * TEST_OVERHEAD, official_job(cell)))
         for level in LEVELS:
-            for cell in (MM_SELECTED[level], 'a0', 'plain'):
-                key = 'mm_' + cell
-                n = len(VOTE_SEEDS) if cell == MM_SELECTED[level] else len(SEEDS)
-                jobs.append((n * MINUTES[key] * TEST_OVERHEAD, mm_job(level, cell)))
+            cells = (MM_SELECTED[level], 'a0', 'plain') + (('a6',) if level == 'fine' else ())
+            for cell in cells:
+                n = len(mm_seeds(level, cell))
+                jobs.append((n * MINUTES['mm_' + cell] * TEST_OVERHEAD, mm_job(level, cell)))
         return jobs
     if batch == 'p2m':
-        return [(0.0, SMOKE_JOB)] + [(MINUTES['mulms_' + cell] * TEST_OVERHEAD, mulms_job(cell, c, s))
-                                     for cell in ('a1m', 'a0') for c, s in MULMS_UNITS]
+        return [(0.0, SMOKE_JOB), (0.0, MULMS_SMOKE_JOB)] + [
+            (MINUTES['mulms_' + cell] * TEST_OVERHEAD, mulms_job(cell, c, s))
+            for cell in ('a1m', 'a0') for c, s in MULMS_UNITS]
     if batch == 'p2b':
         if cv_system is None:
             raise SystemExit('p2b needs the CV system (sota_p2.py cv-system, after p2a)')
-        return [(0.0, SMOKE_JOB)] + [(5 * MINUTES['cv_' + cell] * TEST_OVERHEAD, cv_job(cell, off))
-                                     for cell in (cv_system, cv_reference(cv_system))
-                                     for off in CV_OFFSETS]
+        return [(0.0, SMOKE_JOB), (0.0, CV_CHECK_JOB)] + [
+            (5 * MINUTES['cv_' + cell] * TEST_OVERHEAD, cv_job(cell, off))
+            for cell in (cv_system, cv_reference(cv_system)) for off in CV_OFFSETS]
     raise SystemExit(f'unknown P2 batch {batch!r}')
 
 
@@ -202,25 +220,36 @@ def cv_system_record(dirs=(SCREEN_DIR,)):
 # ---------------------------------------------------------------------------------------------
 # The checks of a pulled batch
 # ---------------------------------------------------------------------------------------------
+def same_runs(new_runs, old_runs, keys=('f1', 'history', 'test_index', 'test_gold',
+                                         'test_pred')):
+    """Problems of a repeat: per run_id of the stored file, the keys that differ."""
+    new = {r['run_id']: r for r in new_runs}
+    out = []
+    for old in old_runs:
+        run = new.get(old['run_id'])
+        if run is None:
+            out.append(f"{old['run_id']} is missing")
+            continue
+        out += [f"{old['run_id']}: {k} differs" for k in keys if run.get(k) != old.get(k)]
+    return out
+
+
 def check_repeat(found, granularity, results_dir=GPU_DIR):
-    """Problems of A0's seed-0 repeat (tag p2chk) against the stored run: F1, history, test
-    sentences, gold and predictions must be equal."""
+    """Problems of A0's seed-0 repeat in P2's mode (tag p2chk) against the stored run: its F1,
+    history, test sentences, gold and predictions must be equal."""
     name = f'ner_results_{granularity}_published_split_crf_p2chk.json'
     if name not in found:
         return [f'{name} is missing']
-    new = {r['run_id']: r for r in json.loads(found[name].read_text())['runs']}
-    old = {r['run_id']: r for r in json.loads(
-        (Path(results_dir) / STORED_A0[granularity]).read_text())['runs']}
-    a, b = new.get('seed0'), old.get('seed0')
-    if a is None or b is None:
-        return ['seed0 is missing']
-    return [f'{k} differs' for k in ('f1', 'history', 'test_index', 'test_gold', 'test_pred')
-            if a.get(k) != b.get(k)]
+    old = [r for r in json.loads((Path(results_dir) / STORED_A0[granularity]).read_text())['runs']
+           if r['run_id'] == 'seed0']
+    return same_runs(json.loads(found[name].read_text())['runs'], old)
 
 
-def batch_checks(pulled, batch=None):
+def batch_checks(pulled, batch):
     """{check: problems} of a pulled P2 batch ([] when it passes): smoke4's repeat in every
-    batch; A0's seed-0 repeats in p2a."""
+    batch, and the batch's repeat of a known run (p2a: A0 at seed 0 on MaterioMiner
+    fine-grained and SOFC-Exp's official split; p2m: P0's short MuLMS run smokebr; p2b: P0's
+    CV run at offset 0). Only these files are read: no test-scored file of the batch is."""
     found = {p.name: p for p in Path(pulled).rglob('ner_results_*.json')}
     out = {}
     smoke = found.get('ner_results_fine_random_split_vary_crf_smokebu.json')
@@ -230,11 +259,47 @@ def batch_checks(pulled, batch=None):
         a = sota_p1.without(json.loads(smoke.read_text()), 'smokebu')
         b = sota_p1.without(json.loads(sota_p1.SMOKE_REFERENCE.read_text()), 'smokebn')
         out['smoke'] = sorted(k for k in set(a) | set(b) if a.get(k) != b.get(k))
-    if any('p2chk' in n for n in found) or batch == 'p2a':
+    if batch == 'p2a':
         for granularity in ('fine', 'sofc'):
             out[f'a0_repeat_{granularity}'] = check_repeat(found, granularity)
+    elif batch == 'p2m':
+        name = 'ner_results_mulms_nested_configs_bilou_crf_smokebv_smoke300.json'
+        if name not in found:
+            out['mulms_smoke'] = [f'{name} is missing']
+        else:
+            out['mulms_smoke'] = sota_p0.smoke_identical(
+                json.loads(found[name].read_text()),
+                json.loads(MULMS_SMOKE_REFERENCE.read_text()))
+    elif batch == 'p2b':
+        name = 'ner_results_sofc_matscibert_cv_crf_p2chkcv.json'
+        if name not in found:
+            out['cv_repeat'] = [f'{name} is missing']
+        else:
+            old = json.loads((GPU_DIR / sota_p0.CV_FILE.format(offset=0)).read_text())['runs']
+            out['cv_repeat'] = same_runs(json.loads(found[name].read_text())['runs'], old)
+    else:
+        raise SystemExit(f'unknown P2 batch {batch!r}')
     return out
 
+
+def take_a6_screen(pulled, screen_dir=SCREEN_DIR):
+    """Copy A6's screen file on SOFC-Exp (its 4 extra units, in p2a) from a pulled batch to the
+    screen files, after checking that it is a screen file with all 9 units; returns its path.
+    It is the only file of p2a read before the CV system is committed."""
+    import shutil
+    path = next(Path(pulled).rglob(A6_SCREEN_FILE), None)
+    if path is None:
+        raise SystemExit(f'{A6_SCREEN_FILE} is not in {pulled}')
+    data = json.loads(path.read_text())
+    sota_p1.check_screen_file(data, A6_SCREEN_FILE)
+    sota_p1.check_settings(data, A6_EXTRA_JOB, A6_SCREEN_FILE)
+    units = sota_p1.UNITS['sofc'] + sota_p1.EXTRA_UNITS['sofc']
+    have = {r['run_id'] for r in data['runs']}
+    if not set(units) <= have:
+        raise SystemExit(f'{A6_SCREEN_FILE}: units {sorted(set(units) - have)} are missing')
+    target = Path(screen_dir) / A6_SCREEN_FILE
+    shutil.copy2(path, target)
+    return target
 
 # ---------------------------------------------------------------------------------------------
 # The files: checks and values
@@ -282,7 +347,7 @@ def released_values(level, cell, dirs=(P2_DIR,)):
     job = mm_job(level, cell)
     name = tagger_file(job, level)
     data = load_file(name, dirs)
-    seeds = VOTE_SEEDS if MM_SELECTED[level] == cell else SEEDS
+    seeds = mm_seeds(level, cell)
     reference = json.loads((GPU_DIR / STORED_A0[level]).read_text())
     runs = check_p2_file(data, job, name, [f'seed{s}' for s in seeds], reference)
     return {s: runs[f'seed{s}'] for s in seeds}
@@ -338,7 +403,9 @@ def cv_values(cell, dirs=(P2_DIR,)):
 
 
 def mulms_values(cell, dirs=(P2_DIR,)):
-    """{(configuration, seed): run} of a MuLMS system, every file checked."""
+    """{(configuration, seed): run} of a MuLMS system, every file checked; the number of test
+    sentences and predictions must be P0's."""
+    p0 = json.loads((GPU_DIR / sota_p1.P0_MULMS_FILE.format(c=1)).read_text())['runs'][0]
     out = {}
     for c, s in MULMS_UNITS:
         job = mulms_job(cell, c, s)
@@ -348,6 +415,9 @@ def mulms_values(cell, dirs=(P2_DIR,)):
         run = runs[f'c{c}']
         if run.get('seed') != s or 'test' not in run:
             raise ValueError(f'{name}: seed {run.get("seed")} or no test score')
+        if run.get('n_test') != p0['n_test'] or len(run.get('test_pred', [])) != \
+                len(p0['test_pred']):
+            raise ValueError(f'{name}: test sentences differ from P0\'s')
         out[(c, s)] = run
     return out
 
@@ -382,7 +452,11 @@ def paired(a, b):
 
 
 def welch(a, b):
-    """mean(a) minus mean(b) with Welch's 95% interval, from two samples."""
+    """mean(a) minus mean(b) with Welch's 95% interval, from two samples (a zero-width
+    interval when neither sample varies)."""
+    if statistics.stdev(a) == 0 and statistics.stdev(b) == 0:
+        gap = round(statistics.fmean(a) - statistics.fmean(b), 2)
+        return {'estimate': gap, 'ci95': [gap, gap], 'df': None, 'n': [len(a), len(b)]}
     test = sota_p0.welch_summary(
         {'mean': statistics.fmean(a), 'sd': statistics.stdev(a), 'n': len(a)},
         {'mean': statistics.fmean(b), 'sd': statistics.stdev(b), 'n': len(b)})
@@ -403,14 +477,15 @@ def against_published(values, key):
     published = sota_p0.PUBLISHED[key]
     ours = {'mean': statistics.fmean(values), 'sd': statistics.stdev(values), 'n': len(values)}
 
-    def at(printed):
-        test = sota_p0.welch_summary(ours, {'mean': published['mean'],
+    def at(printed, mean):
+        test = sota_p0.welch_summary(ours, {'mean': mean,
                                             'sd': sota_p0.sample_sd(published, printed),
                                             'n': published['n']})
         return test, test['ci95'][0] > 0
-    test, passed = at(published['sd_printed'])
+    test, passed = at(published['sd_printed'], published['mean'])
     half = 0.5 * 10 ** -published['decimals']
-    edges = {at(published['sd_printed'] + d)[1] for d in (-half, half)}
+    edges = {at(published['sd_printed'] + d, published['mean'] + m)[1]
+             for d in (-half, 0, half) for m in (-half, 0, half)}
     record = {'estimate': test['gap'], 'ci95': test['ci95'], 'df': test['df'],
               'ours': {'mean': round(ours['mean'], 2), 'sd': round(ours['sd'], 2),
                        'n': ours['n']},
@@ -526,145 +601,187 @@ def passed(record):
     return record['ci95'][0] > 0
 
 
-def wording(kind, record, benchmark=None, extra=None):
-    """The protocol's fixed wordings (ROADMAP §4, P2)."""
+ON = ', on this test set'
+WORDINGS = {   # (passed, not passed) per kind (ROADMAP §4, P2's wordings)
+    'mulms_dt': ('above the published result under its protocol' + ON,
+                 'not shown above the published result under its protocol' + ON),
+    'dp': ('the change improves on the tuned reference' + ON,
+           'the change: not shown to improve on the tuned reference' + ON),
+    'dp_tuning': ('tuning improves on our re-run of the published system' + ON,
+                  'tuning: not shown to improve on our re-run of the published system' + ON),
+    'mm_live': ('the selected system improves on the strongest known system' + ON,
+                'the selected system: not shown to improve on the strongest known system' + ON),
+    're-test': ('replicated', 'not replicated'),
+}
+
+
+def wording(kind, ok, extra=None):
+    """The protocol's fixed wordings."""
     extra = extra or {}
-    ok = record['passed']
     if kind == 'official_dt':
-        if extra.get('above_86'):
-            return 'above every reported result on SOFC-Exp\'s official split, on this test set'
+        if ok and extra.get('gate_passed'):
+            return ("above every reported result on SOFC-Exp's official split, on this test set "
+                    '(the 86.0 taken as fixed)')
         if ok:
             return ('above the best result with a stated protocol; not shown above the best '
-                    'reported result, whose protocol we could not verify (on this test set)')
-        return 'not shown above the best result with a stated protocol (on this test set)'
+                    'reported result, whose protocol we could not verify' + ON)
+        return 'not shown above the best result with a stated protocol' + ON
     if kind == 'cv_dt':
-        if ok and extra.get('above_85_71'):
-            return 'above every reported cross-validation result, on this test set'
+        if ok and extra.get('gate_passed'):
+            return ('above the best CV result with a stated protocol, and above the 85.71 '
+                    'reported without a stated split, on this test set (the 85.71 taken as '
+                    'fixed)')
         if ok:
-            return ('above the best cross-validation result with a stated protocol; not shown '
-                    'above 85.71, whose protocol we could not verify (on this test set)')
-        return ('not shown above the best cross-validation result with a stated protocol (on '
-                'this test set)')
-    if kind == 'mulms_dt':
-        return ('above the published result under its protocol (on this test set)' if ok else
-                'not shown above the published result under its protocol (on this test set)')
-    if kind == 'dp':
-        tuning = extra.get('tuning')
-        if tuning:
-            return 'tuning improves on the published recipe' if ok else \
-                'tuning: not shown to improve on the published recipe'
-        return 'the change improves on the tuned reference' if ok else \
-            'the change: not shown to improve on the tuned reference'
-    if kind == 'mm_live':
-        base = 'the selected system improves on the strongest known system'
-        text = base if ok else 'the selected system: not shown to improve on the strongest known ' \
-                               'system'
-        return text + (' (tuning)' if extra.get('tuning') else '')
+            return ('above the best CV result with a stated protocol, on this test set; not '
+                    'shown above the 85.71 reported without a stated split')
+        return 'not shown above the best CV result with a stated protocol' + ON
+    if kind == 'gated':
+        if not extra.get('gate_ok'):
+            return 'not taken: its gate did not pass'
+        return (f"above {extra['target']}, taken as fixed (anti-conservative){ON}" if ok else
+                f"not shown above {extra['target']}, taken as fixed{ON}")
     if kind == 'vote':
         k = extra['k']
-        return (f'the vote of {k} improves on the strongest known single system' if ok else
-                f'the vote of {k}: not shown to improve on the strongest known single system')
-    if kind == 're-test':
-        return 'replicated' if ok else 'not replicated'
-    raise ValueError(kind)
+        return (f"S's vote of {k} improves on the CRF head's vote of {k}{ON}" if ok else
+                f"S's vote of {k}: not shown to improve on the CRF head's vote of {k}{ON}")
+    return WORDINGS[kind][0 if ok else 1]
 
 
 def decide(dirs=(P2_DIR,), with_bootstrap=True):
-    """The record of results/gpu/sota_p2.json: every decision with its estimate, interval,
-    verdict and wording; the reported comparisons; the count."""
-    live, retests, reported = [], [], {}
+    """The record of results/gpu/sota_p2.json: the 15 live decisions (2 gated) and 4 re-tests
+    with their estimates, intervals, verdicts and wordings; the reported comparisons; the
+    count; per benchmark, S's mean with its seed interval (the "nothing clears" wording)."""
+    live, retests, reported, best = [], [], {}, {}
+
     def boot(make):
         """The bootstrap of the (counts S, counts R) that `make` returns, when it is on."""
         return bootstrap(*make()) if with_bootstrap else None
 
-    def add(rows, name, kind, record, extra=None, unit=None, test_set=None, boot_ci=None):
+    def add(rows, number, name, kind, record, extra=None, unit=None, test_set=None,
+            boot_ci=None):
         record = {**record}
         record.setdefault('passed', passed(record))
-        rows.append({'decision': name, 'unit': unit, 'test_set': test_set, **record,
-                     'bootstrap_ci95': boot_ci, 'wording': wording(kind, record, extra=extra)})
+        if kind == 'gated' and not (extra or {}).get('gate_ok'):
+            record['passed'] = False
+        row = {'number': number, 'decision': name, 'unit': unit, 'test_set': test_set, **record,
+               'bootstrap_ci95': boot_ci,
+               'wording': wording(kind, record['passed'], extra)}
+        rows.append(row)
+        return row
 
-    # SOFC-Exp, official split
+    def mean_ci(values):
+        mean, ci = t_interval(values)
+        return {'mean': round(mean, 2), 'ci95': [round(ci[0], 2), round(ci[1], 2)],
+                'n': len(values)}
+
+    # SOFC-Exp, official split: decisions 1-3
     s, r = official_values('b1', dirs), official_values('a6', dirs)
+    eleven = [s[x]['f1_11'] for x in SEEDS]
     dt = against_published([s[x]['f1_10'] for x in SEEDS], 'sofc_official_10')
-    above = one_sample([s[x]['f1_11'] for x in SEEDS], 86.0)
-    reported['official_vs_86_on_11'] = above
-    add(live, 'SOFC-Exp official, D-T: B1 against 83.4 (10 articles)', 'official_dt', dt,
-        {'above_86': above['ci95'][0] > 0}, 'seed', '10 test articles')
-    dp = welch([s[x]['f1_11'] for x in SEEDS], [r[x]['f1_11'] for x in SEEDS])
-    add(live, 'SOFC-Exp official, D-P: B1 against A6', 'dp', dp, {}, 'seed (Welch)',
+    gate = one_sample(eleven, 86.0)
+    gate_ok = dt['passed']
+    add(live, 1, 'SOFC-Exp official, D-T: B1 against 83.4 (10 articles)', 'official_dt', dt,
+        {'gate_passed': gate_ok and passed(gate)}, 'seed', '10 test articles')
+    dp = welch(eleven, [r[x]['f1_11'] for x in SEEDS])
+    add(live, 2, 'SOFC-Exp official, D-P: B1 against A6', 'dp', dp, {}, 'seed (Welch)',
         '11 test articles',
         boot(lambda: ([run_counts(s[x]['run']) for x in SEEDS],
                       [run_counts(r[x]['run']) for x in SEEDS])))
-    reported['official_votes'] = {}
+    add(live, 3, 'SOFC-Exp official: B1 against 86.0 (11 articles; gated on 1)', 'gated', gate,
+        {'gate_ok': gate_ok, 'target': 86.0}, 'seed (target fixed)', '11 test articles')
+    best['SOFC-Exp official (B1, 11 articles)'] = mean_ci(eleven)
+    reported['official_votes'] = {'note': "no decision; shown beside the CRF head's known 85.13"}
     official_runs = {x: s[x]['run'] for x in SEEDS}
     for k in VOTE_SIZES:
         votes = vote_runs(official_runs, k)
         reported['official_votes'][f'vote_of_{k}'] = [
             round(micro_f1(tagger_counts(g, v)), 2) for _, g, v in votes]
 
-    # SOFC-Exp, CV
+    # SOFC-Exp, CV: decisions 4-6
     cv = json.loads(CV_SYSTEM_FILE.read_text())
     system, ref_cell = cv['cv_system'], cv['reference']
     cs, cr = cv_values(system, dirs), cv_values(ref_cell, dirs)
-    dt = against_published([cs[u]['f1'] for u in sorted(cs)], 'sofc_cv')
-    above = one_sample([cs[u]['f1'] for u in sorted(cs)], 85.71)
-    reported['cv_vs_85_71'] = above
-    add(live, f'SOFC-Exp CV, D-T: {system} against 84.77', 'cv_dt', dt,
-        {'above_85_71': above['ci95'][0] > 0}, 'run (fold x seed)', '11 test articles')
-    dp = paired({u: cs[u]['f1'] for u in cs}, {u: cr[u]['f1'] for u in cr})
-    add(live, f'SOFC-Exp CV, D-P: {system} against {ref_cell}', 'dp', dp,
-        {'tuning': system == 'a6'}, 'fold x seed (paired)', '11 test articles',
-        boot(lambda: ([run_counts(cs[u]) for u in sorted(cs)],
-                      [run_counts(cr[u]) for u in sorted(cr)])))
+    units = sorted(cs)
+    values = [cs[u]['f1'] for u in units]
+    dt = against_published(values, 'sofc_cv')
+    gate = one_sample(values, 85.71)
+    gate_ok = dt['passed']
+    add(live, 4, f'SOFC-Exp CV, D-T: {system} against 84.77', 'cv_dt', dt,
+        {'gate_passed': gate_ok and passed(gate)}, 'run (fold x seed)', '11 test articles')
+    dp = paired({u: cs[u]['f1'] for u in units}, {u: cr[u]['f1'] for u in units})
+    add(live, 5, f'SOFC-Exp CV, D-P: {system} against {ref_cell}',
+        'dp_tuning' if system == 'a6' else 'dp', dp, {}, 'fold x seed (paired)',
+        '11 test articles',
+        boot(lambda: ([run_counts(cs[u]) for u in units], [run_counts(cr[u]) for u in units])))
+    add(live, 6, f'SOFC-Exp CV: {system} against 85.71 (gated on 4)', 'gated', gate,
+        {'gate_ok': gate_ok, 'target': 85.71}, 'run (target fixed)', '11 test articles')
+    reported['cv_fold_means'] = {fold: round(statistics.fmean(cs[(fold, o)]['f1']
+                                                             for o in CV_OFFSETS), 2)
+                                 for fold in CV_FOLDS}
+    best[f'SOFC-Exp CV ({system})'] = mean_ci(values)
 
-    # MuLMS
+    # MuLMS: decisions 7-8
     ms, mr = mulms_values('a1m', dirs), mulms_values('a0', dirs)
-    dt = against_published([ms[u]['test']['micro_f1'] for u in MULMS_UNITS], 'mulms_nested')
-    add(live, 'MuLMS, D-T: A1m against 79.6', 'mulms_dt', dt, {}, 'configuration x seed',
+    values = [ms[u]['test']['micro_f1'] for u in MULMS_UNITS]
+    dt = against_published(values, 'mulms_nested')
+    add(live, 7, 'MuLMS, D-T: A1m against 79.6', 'mulms_dt', dt, {}, 'configuration x seed',
         '7 test documents')
     dp = paired({u: ms[u]['test']['micro_f1'] for u in MULMS_UNITS},
                 {u: mr[u]['test']['micro_f1'] for u in MULMS_UNITS})
     gold = mulms_gold() if with_bootstrap else None
-    add(live, 'MuLMS, D-P: A1m against A0', 'dp', dp, {'tuning': True},
+    add(live, 8, 'MuLMS, D-P: A1m against A0', 'dp_tuning', dp, {},
         'configuration x seed (paired)', '7 test documents',
         boot(lambda: ([mulms_counts(ms[u], gold) for u in MULMS_UNITS],
                       [mulms_counts(mr[u], gold) for u in MULMS_UNITS])))
+    best['MuLMS (A1m)'] = mean_ci(values)
 
-    # MaterioMiner, per level
+    # MaterioMiner: decisions 9-15 and the 4 re-tests
+    numbers = {'fine': {'live': 9, 'dp': 10, 'votes': (12, 13)},
+               'coarse': {'live': 11, 'votes': (14, 15)}}
     for level in LEVELS:
         cell = MM_SELECTED[level]
         sel, a0, plain = (released_values(level, c, dirs) for c in (cell, 'a0', 'plain'))
         first = {x: sel[x] for x in SEEDS}
-        live_dp = paired({x: first[x]['f1'] for x in SEEDS}, {x: a0[x]['f1'] for x in SEEDS})
-        add(live, f'MaterioMiner {level}: {cell} against the CRF head', 'mm_live', live_dp,
-            {'tuning': cell != 'c1'}, 'seed (paired)', '96 released test sentences',
+        f1 = {x: first[x]['f1'] for x in SEEDS}
+        add(live, numbers[level]['live'], f'MaterioMiner {level}: {cell} against the CRF head',
+            'mm_live', paired(f1, {x: a0[x]['f1'] for x in SEEDS}), {}, 'seed (paired)',
+            '96 released test sentences',
             boot(lambda: ([run_counts(first[x]) for x in SEEDS],
                           [run_counts(a0[x]) for x in SEEDS])))
-        a0_f1 = [a0[x]['f1'] for x in SEEDS]
-        for k in VOTE_SIZES:
-            votes = vote_runs(sel, k)
-            vote_f1 = [micro_f1(tagger_counts(g, v)) for _, g, v in votes]
-            record = welch(vote_f1, a0_f1)
-            add(live, f'MaterioMiner {level}: the vote of {k} of {cell} against the CRF head',
-                'vote', record, {'k': k}, 'vote against run (Welch)',
+        if level == 'fine':
+            a6 = released_values(level, 'a6', dirs)
+            add(live, numbers[level]['dp'], 'MaterioMiner fine, D-P: c1 against A6', 'dp',
+                paired(f1, {x: a6[x]['f1'] for x in SEEDS}), {}, 'seed (paired)',
                 '96 released test sentences',
-                boot(lambda votes=votes: ([tagger_counts(g, v) for _, g, v in votes],
-                                          [run_counts(a0[x]) for x in SEEDS])))
+                boot(lambda: ([run_counts(first[x]) for x in SEEDS],
+                              [run_counts(a6[x]) for x in SEEDS])))
+        for number, k in zip(numbers[level]['votes'], VOTE_SIZES):
+            mine, theirs = vote_runs(sel, k), vote_runs(a0, k)
+            record = welch([micro_f1(tagger_counts(g, v)) for _, g, v in mine],
+                           [micro_f1(tagger_counts(g, v)) for _, g, v in theirs])
+            add(live, number, f"MaterioMiner {level}: {cell}'s vote of {k} against the CRF "
+                f"head's", 'vote', record, {'k': k}, 'vote (Welch)', '96 released test sentences',
+                boot(lambda mine=mine, theirs=theirs: (
+                    [tagger_counts(g, v) for _, g, v in mine],
+                    [tagger_counts(g, v) for _, g, v in theirs])))
         target = MM_TARGETS[level]
-        add(retests, f'MaterioMiner {level}, D-T (re-test): {cell} against {target}', 're-test',
-            one_sample([first[x]['f1'] for x in SEEDS], target), {}, 'seed (target fixed)',
+        add(retests, None, f'MaterioMiner {level}, D-T (re-test): {cell} against {target}',
+            're-test', one_sample(list(f1.values()), target), {}, 'seed (target fixed)',
             '96 released test sentences')
-        add(retests, f'MaterioMiner {level}, D-P (re-test): {cell} against plain MatSciBERT',
-            're-test', paired({x: first[x]['f1'] for x in SEEDS},
-                              {x: plain[x]['f1'] for x in SEEDS}), {}, 'seed (paired)',
-            '96 released test sentences')
+        add(retests, None, f'MaterioMiner {level}, D-P (re-test): {cell} against plain '
+            'MatSciBERT', 're-test', paired(f1, {x: plain[x]['f1'] for x in SEEDS}), {},
+            'seed (paired)', '96 released test sentences')
+        best[f'MaterioMiner {level} ({cell})'] = mean_ci(list(f1.values()))
+    live.sort(key=lambda row: row['number'])
     n_pass = sum(r['passed'] for r in live)
     return {'note': ("P2's decisions (ROADMAP §4, the P2 protocol): each final system's test set "
                      'read once, on fresh seeds 1000 up; a decision passes when its 95% interval '
-                     'lies above 0'),
+                     'lies above 0; every interval is over seeds and does not cover sampling of '
+                     'the test set'),
             'live': live, 're_tests': retests, 'reported': reported,
+            'selected_means': best,
             'count': {'live': len(live), 'passed': n_pass,
-                      'expected_false_passes': round(0.025 * len(live), 2),
+                      'expected_false_passes_at_most': round(0.025 * len(live), 3),
                       're_tests': len(retests),
                       're_tests_passed': sum(r['passed'] for r in retests)},
             'cv_system': cv}
@@ -675,10 +792,11 @@ def main(argv=None):
     sub = parser.add_subparsers(dest='command', required=True)
     p = sub.add_parser('jobs')
     p.add_argument('batch', choices=('p2a', 'p2m', 'p2b'))
-    sub.add_parser('cv-system')
+    p = sub.add_parser('cv-system')
+    p.add_argument('pulled', help="p2a's pulled output: A6's screen file is taken from it")
     p = sub.add_parser('checks')
     p.add_argument('pulled')
-    p.add_argument('--batch', choices=('p2a', 'p2m', 'p2b'), default=None)
+    p.add_argument('--batch', choices=('p2a', 'p2m', 'p2b'), required=True)
     p = sub.add_parser('decide')
     p.add_argument('--results', nargs='+', default=[str(P2_DIR)])
     p.add_argument('--out', default=str(OUT))
@@ -688,6 +806,7 @@ def main(argv=None):
         print(f'{len(entries)} jobs, about {sum(e["minutes"] for e in entries) / 120:.1f} '
               f'session-hours on two lanes, to {jobs_file(args.batch)}')
     elif args.command == 'cv-system':
+        take_a6_screen(args.pulled)
         record = cv_system_record()
         CV_SYSTEM_FILE.write_text(json.dumps(record, indent=1) + '\n')
         print(f"CV system {record['cv_system']} (means {record['means_over_9_units']}); "
@@ -697,15 +816,17 @@ def main(argv=None):
         for check, problems in result.items():
             print(f"{check}: {'passed' if not problems else 'FAILED: ' + '; '.join(problems)}")
         if any(result.values()):
-            raise SystemExit('a check failed: the batch counts for nothing (ROADMAP §4, P2)')
+            raise SystemExit('a check failed: the batch is void; move its files, unread, to '
+                             'results/gpu_p2_void/ (ROADMAP §4, P2)')
     else:
         record = decide(args.results)
         Path(args.out).write_text(json.dumps(record, indent=1) + '\n')
         for row in record['live'] + record['re_tests']:
-            print(f"{row['decision']}: {row['estimate']:+.2f} {row['ci95']} -> {row['wording']}")
+            print(f"{row['number'] or 're-test'}. {row['decision']}: {row['estimate']:+.2f} "
+                  f"{row['ci95']} -> {row['wording']}")
         print(f"{record['count']['passed']} of {record['count']['live']} live decisions pass "
-              f"(about {record['count']['expected_false_passes']} expected by chance); wrote "
-              f"{args.out}")
+              f"(at most about {record['count']['expected_false_passes_at_most']} by chance); "
+              f"wrote {args.out}")
 
 
 if __name__ == '__main__':

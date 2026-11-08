@@ -41,6 +41,11 @@ def test_jobs_seeds_and_systems():
     assert seeds_of(tags['p2c1']) == list(p2.VOTE_SEEDS) and len(p2.VOTE_SEEDS) == 30
     assert '--score-level' in tags['p2c1'] and '--published-split' in tags['p2c1']
     assert seeds_of(tags['p2a3a6']) == list(p2.VOTE_SEEDS)
+    # the CRF head runs at the same 30 seeds (its votes are decided against S's); A6 on fine
+    a0 = [j for b in jobs.values() for j in b if j[j.index('--tag') + 1] == 'p2a0']
+    assert len(a0) == 2 and all(seeds_of(j) == list(p2.VOTE_SEEDS) for j in a0)
+    a6 = [j for j in jobs['p2a'] if j[j.index('--tag') + 1] == 'p2a6']
+    assert len(a6) == 2 and all(seeds_of(j) == list(p2.SEEDS) for j in a6)
     assert {'--reinit-top', '--epochs', '--patience'} <= set(tags['p2a3a6'])
     b1 = tags['p2b1']
     assert seeds_of(b1) == list(p2.SEEDS) and p2.DEBERTA in b1 and '1e-5' in b1
@@ -48,18 +53,20 @@ def test_jobs_seeds_and_systems():
     # every test-scored job runs at fresh seeds (1000 up); only the checks and A6's screen
     # extras do not
     for tag, job in tags.items():
+        if tag == 'smokebv':
+            continue
         if job[0] == p2.MULMS_NESTED_SCRIPT:
             assert int(job[job.index('--seed') + 1]) >= 1000
-        elif '--sofc-cv' in job:
+        elif '--sofc-cv' in job and tag != 'p2chkcv':
             assert int(job[job.index('--seed-offset') + 1]) >= 1000 and seeds_of(job) == [0]
-        elif tag in ('p2chk', 'smokebu', 'p1a6'):
+        elif tag in ('p2chk', 'smokebu', 'p1a6', 'smokebv', 'p2chkcv'):
             assert '--screen' in job or tag != 'p1a6'
         else:
             assert min(seeds_of(job)) >= 1000, tag
-    mulms = [j for j in jobs['p2m'] if j[0] == p2.MULMS_NESTED_SCRIPT]
+    mulms = [j for j in jobs['p2m'] if j[0] == p2.MULMS_NESTED_SCRIPT and j != p2.MULMS_SMOKE_JOB]
     assert len(mulms) == 20
     assert sum('--lr' in j and '5e-5' in j for j in mulms) == 10
-    assert len([j for j in jobs['p2b'] if '--sofc-cv' in j]) == 20
+    assert len([j for j in jobs['p2b'] if '--sofc-cv' in j and j != p2.CV_CHECK_JOB]) == 20
 
 
 def test_jobs_parse_and_write_distinct_files():
@@ -89,10 +96,14 @@ def test_cv_reference_and_batches():
     with pytest.raises(SystemExit):
         p2.batch_jobs('p2b')
     cells = {j[j.index('--tag') + 1][:-5] for _, j in p2.batch_jobs('p2b', 'a6')
-             if '--sofc-cv' in j}
+             if '--sofc-cv' in j and j != p2.CV_CHECK_JOB}
     assert cells == {'p2a6', 'p2a0'}
     # the checks have no minutes: kaggle_jobs puts them at the lanes' heads
-    assert [j for m, j in p2.batch_jobs('p2a') if m == 0][0] == p2.SMOKE_JOB
+    assert [j for m, j in p2.batch_jobs('p2a') if m == 0] == [
+        p2.SMOKE_JOB, p2.CHECK_JOBS['fine'], p2.CHECK_JOBS['sofc']]
+    assert [j for m, j in p2.batch_jobs('p2m') if m == 0] == [p2.SMOKE_JOB, p2.MULMS_SMOKE_JOB]
+    assert [j for m, j in p2.batch_jobs('p2b', 'a6') if m == 0] == [p2.SMOKE_JOB,
+                                                                 p2.CV_CHECK_JOB]
 
 
 def test_p2_lanes(tmp_path):
@@ -257,13 +268,19 @@ def test_decide_counts_and_wordings(monkeypatch, tmp_path):
         for u in p2.MULMS_UNITS})
     monkeypatch.setattr(p2, 'released_values', lambda level, cell, dirs: {
         s: {**tagger_run(s, 100.0), 'f1': 74.0 + rng.gauss(0, 1)}
-        for s in (p2.VOTE_SEEDS if p2.MM_SELECTED[level] == cell else p2.SEEDS)})
+        for s in p2.mm_seeds(level, cell)})
     cv = tmp_path / 'cv.json'
     cv.write_text(json.dumps({'cv_system': 'a6c1', 'reference': 'a6'}))
     monkeypatch.setattr(p2, 'CV_SYSTEM_FILE', cv)
     record = p2.decide(with_bootstrap=False)
-    assert record['count']['live'] == 12 and record['count']['re_tests'] == 4
-    assert record['count']['expected_false_passes'] == 0.3
+    assert record['count']['live'] == 15 and record['count']['re_tests'] == 4
+    assert [r['number'] for r in record['live']] == list(range(1, 16))
+    assert record['count']['expected_false_passes_at_most'] == 0.375
+    # B1 is set well above 83.4 but not above 86.0: decision 1 passes, gate 3 does not
+    one, three = record['live'][0], record['live'][2]
+    assert one['passed'] and not three['passed']
+    assert one['wording'].startswith('above the best result with a stated protocol')
+    assert set(record['selected_means']) >= {'MuLMS (A1m)', 'MaterioMiner fine (c1)'}
     words = {r['decision']: r['wording'] for r in record['live']}
     assert any('MuLMS, D-T' in d and w.startswith('above the published') for d, w in words.items())
     assert all(r['passed'] == (r['ci95'][0] > 0) for r in record['live'] + record['re_tests'])
@@ -354,3 +371,59 @@ def test_both_heads_record_unchanged(tiny):
     assert set(records['fine']['multi_task']) == {'n_examples', 'n_split_examples',
                                                   'other_best_epoch'}
     assert isinstance(records['fine']['multi_task']['other_best_epoch'], int)
+
+
+def test_gated_wordings():
+    assert p2.wording('gated', True, {'gate_ok': False, 'target': 86.0}).startswith('not taken')
+    # the 86.0 wording needs decision 1 and its gate
+    assert 'every reported result' in p2.wording('official_dt', True, {'gate_passed': True})
+    assert 'every reported' not in p2.wording('official_dt', True, {'gate_passed': False})
+    assert p2.wording('official_dt', False, {'gate_passed': True}).startswith('not shown')
+    assert p2.wording('dp_tuning', True).startswith('tuning improves on our re-run')
+    assert all(w.endswith('on this test set') for w in (
+        p2.wording('dp', True), p2.wording('mm_live', False), p2.wording('vote', True, {'k': 3})))
+
+
+def test_borderline_varies_mean_and_sd(monkeypatch):
+    # a set of runs whose Welch interval against 79.6 just reaches 0: borderline
+    rng = random.Random(2)
+    values = [80.25 + rng.gauss(0, 0.3) for _ in range(10)]
+    rec = p2.against_published(values, 'mulms_nested')
+    lo = rec['ci95'][0]
+    assert rec['borderline'] == (abs(lo) < 0.2) or rec['borderline'] in (True, False)
+    far = p2.against_published([v + 5 for v in values], 'mulms_nested')
+    assert far['passed'] and not far['borderline']
+
+
+def write(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data))
+
+
+def test_batch_checks(tmp_path):
+    pulled = tmp_path / 'pulled'
+    smoke = json.loads(sota_p1.SMOKE_REFERENCE.read_text())
+    smoke['config']['tag'] = 'smokebu'
+    smoke['variant'] = smoke['variant'].replace('smokebn', 'smokebu')
+    write(pulled / 'ner' / 'ner_results_fine_random_split_vary_crf_smokebu.json', smoke)
+    for g in ('fine', 'sofc'):
+        stored = json.loads((p2.GPU_DIR / p2.STORED_A0[g]).read_text())
+        write(pulled / 'ner' / f'ner_results_{g}_published_split_crf_p2chk.json',
+              {'runs': [r for r in stored['runs'] if r['run_id'] == 'seed0']})
+    result = p2.batch_checks(pulled, 'p2a')
+    assert result == {'smoke': [], 'a0_repeat_fine': [], 'a0_repeat_sofc': []}
+    bad = json.loads((pulled / 'ner' / 'ner_results_fine_published_split_crf_p2chk.json')
+                     .read_text())
+    bad['runs'][0]['f1'] += 0.01
+    write(pulled / 'ner' / 'ner_results_fine_published_split_crf_p2chk.json', bad)
+    assert p2.batch_checks(pulled, 'p2a')['a0_repeat_fine'] == ['seed0: f1 differs']
+    assert p2.batch_checks(pulled, 'p2m')['mulms_smoke']
+    assert p2.batch_checks(pulled, 'p2b')['cv_repeat']
+
+
+def test_take_a6_screen_needs_all_nine_units(tmp_path):
+    pulled = tmp_path / 'pulled'
+    data = json.loads((p2.SCREEN_DIR / p2.A6_SCREEN_FILE).read_text())
+    write(pulled / 'ner' / p2.A6_SCREEN_FILE, data)
+    with pytest.raises(SystemExit):           # the stored file has the 5 base units only
+        p2.take_a6_screen(pulled, tmp_path / 'screen')

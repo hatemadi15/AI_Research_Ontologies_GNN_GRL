@@ -16,6 +16,23 @@
   ]
  },
  {
+  "minutes": 0.0,
+  "job": [
+   "src/graph/mulms_nested.py",
+   "--configs",
+   "1",
+   "--tag",
+   "smokebv",
+   "--max-train",
+   "300",
+   "--epochs",
+   "2",
+   "--save-predictions",
+   "--threads",
+   "2"
+  ]
+ },
+ {
   "minutes": 36.2,
   "job": [
    "src/graph/mulms_nested.py",
