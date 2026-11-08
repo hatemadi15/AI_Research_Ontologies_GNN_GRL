@@ -744,3 +744,7 @@ only).
 
 Stage 3 (round 2's first cells; batch `p1n`, kernel version 29, bundle of
 `75b3970`): `sota/p1_stage3.json` is the table.
+
+Stage 4 (batch `p1n`, kernel version 30, bundle of `84c8186`):
+`sota/p1_stage4.json` is the table. Coarse-grained's selection is A3 with A6,
+and SOFC-Exp's is B1 (validation only).

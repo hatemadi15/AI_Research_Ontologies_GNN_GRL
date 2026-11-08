@@ -1,11 +1,10 @@
 [
  {
   "benchmark": "fine",
-  "cell": "a6c1c3",
+  "cell": "a6c1",
   "changes": [
    "a6",
-   "c1",
-   "c3"
+   "c1"
   ],
   "job": [
    "--granularity",
@@ -18,123 +17,11 @@
    "--screen-splits",
    "--reinit-top",
    "1",
-   "--context",
-   "64",
-   "--seeds",
-   "0",
-   "1",
-   "2",
-   "3",
-   "4",
-   "--tag",
-   "p1a6c1c3",
-   "--threads",
-   "2"
-  ]
- },
- {
-  "benchmark": "coarse",
-  "cell": "a3a6",
-  "changes": [
-   "a3",
-   "a6"
-  ],
-  "job": [
-   "--granularity",
-   "coarse",
-   "--crf",
-   "--screen",
-   "--screen-splits",
-   "--epochs",
-   "40",
-   "--patience",
-   "5",
-   "--reinit-top",
-   "1",
    "--seeds",
    "5",
    "6",
    "7",
    "8",
-   "--tag",
-   "p1a3a6",
-   "--threads",
-   "2"
-  ]
- },
- {
-  "benchmark": "coarse",
-  "cell": "a6",
-  "changes": [
-   "a6"
-  ],
-  "job": [
-   "--granularity",
-   "coarse",
-   "--crf",
-   "--screen",
-   "--screen-splits",
-   "--reinit-top",
-   "1",
-   "--seeds",
-   "5",
-   "6",
-   "7",
-   "8",
-   "--tag",
-   "p1a6",
-   "--threads",
-   "2"
-  ]
- },
- {
-  "benchmark": "coarse",
-  "cell": "a3",
-  "changes": [
-   "a3"
-  ],
-  "job": [
-   "--granularity",
-   "coarse",
-   "--crf",
-   "--screen",
-   "--screen-splits",
-   "--epochs",
-   "40",
-   "--patience",
-   "5",
-   "--seeds",
-   "5",
-   "6",
-   "7",
-   "8",
-   "--tag",
-   "p1a3",
-   "--threads",
-   "2"
-  ]
- },
- {
-  "benchmark": "sofc",
-  "cell": "a6c1",
-  "changes": [
-   "a6",
-   "c1"
-  ],
-  "job": [
-   "--granularity",
-   "sofc_both",
-   "--multi-task",
-   "--crf",
-   "--screen",
-   "--published-split",
-   "--reinit-top",
-   "1",
-   "--seeds",
-   "500",
-   "600",
-   "700",
-   "800",
    "--tag",
    "p1a6c1",
    "--threads",
@@ -142,55 +29,27 @@
   ]
  },
  {
-  "benchmark": "sofc",
+  "benchmark": "fine",
   "cell": "c1",
   "changes": [
    "c1"
   ],
   "job": [
    "--granularity",
-   "sofc_both",
+   "both",
    "--multi-task",
+   "--screen-level",
+   "fine",
    "--crf",
    "--screen",
-   "--published-split",
+   "--screen-splits",
    "--seeds",
-   "500",
-   "600",
-   "700",
-   "800",
+   "5",
+   "6",
+   "7",
+   "8",
    "--tag",
    "p1c1",
-   "--threads",
-   "2"
-  ]
- },
- {
-  "benchmark": "sofc",
-  "cell": "b1",
-  "changes": [
-   "b1"
-  ],
-  "job": [
-   "--granularity",
-   "sofc",
-   "--crf",
-   "--screen",
-   "--published-split",
-   "--model",
-   "microsoft/deberta-v3-large",
-   "--lr",
-   "1e-5",
-   "--batch-size",
-   "8",
-   "--gradient-checkpointing",
-   "--seeds",
-   "500",
-   "600",
-   "700",
-   "800",
-   "--tag",
-   "p1b1",
    "--threads",
    "2"
   ]

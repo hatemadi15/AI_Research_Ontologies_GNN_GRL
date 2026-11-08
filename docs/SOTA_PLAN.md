@@ -22,7 +22,11 @@ in ROADMAP §4). Round 1 ran on 8 November; its table is in ROADMAP §4
 with MuLMS's extra units, and round 2 on MaterioMiner and SOFC-Exp waits for
 it. Stage 2 ran on 8 November. MuLMS's selection is A1m, learning rate 5e-5:
 78.62 against A0's 77.60 over 7 units, validation only. Round 2 on
-MaterioMiner and SOFC-Exp is running in stages. Amendment 1
+MaterioMiner and SOFC-Exp is running in stages. Stage 4 selected A3 with A6 on
+coarse-grained (78.59) and B1, DeBERTa-v3-large, on SOFC-Exp (79.18). B1
+leads SOFC-Exp's tuned reference by 0.30, under 1 point, so F (the 3B
+decoder) may be considered, under its own protocol. Fine-grained's extra
+units come next. Amendment 1
 (before any run) has C1 on MaterioMiner run one level at a time: the two levels'
 released splits are different partitions. It departs from this plan in four
 places, each justified there:

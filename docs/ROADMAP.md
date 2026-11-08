@@ -7823,6 +7823,29 @@ for P2, and the tuned reference (candidate A) for P2's D-P decisions.
     and B1 (79.41, 79.37, 79.08) get the extra units, seeds 500–800.
   - **The next stage** holds 7 jobs: A6 with C1 and C3 on fine, and the
     extra units on coarse and SOFC-Exp.
+- **Stage 4's record, 8 November** (batch `p1n`, kernel version 30, bundle of
+  `84c8186`; 7 jobs, 103 minutes, every job done; the session first waited 55
+  minutes in Kaggle's queue; the table is `results/sota/p1_stage4.json`).
+  - fine: A6 with C1 and C3 scores 80.26 · 78.43 · +1.00 (1.48). That is
+    below A6 with C1 (81.54), so it is not kept, and the chain ends at A6
+    with C1.
+    - By the tie rule, A6 with C1 and C1 (81.54, 81.17) get the extra units,
+      splits 5–8. No other cell is within 1 point.
+  - **Coarse-grained's selection is A3 with A6.** Its mean over all 9 units
+    is 78.59, against A3's 77.85 and A6's 77.79. It is also A's best cell,
+    so P2's D-P on coarse reads "tuning".
+  - **SOFC-Exp's selection is B1 (DeBERTa-v3-large).** The means over all 9
+    units are B1 79.18, A6 with C1 79.13 and C1 78.92. Its tuned
+    reference, A's best cell, is A6 (78.78 on the base units).
+  - **F's condition is met.** On the base units, SOFC-Exp's selected system
+    leads A's best cell by 0.30 (79.08 against 78.78), less than 1 point.
+    - So F, the 3B decoder, may now be considered, though only under its own
+      protocol, fixed before its runs, and within the budget.
+    - P1 has used 15.2 of its 24 session-hours, with about 0.4 more for the
+      next stage.
+    - Whether to take F up is the author's decision.
+  - **The next stage** holds 2 jobs: fine's extra units for A6 with C1 and
+    for C1.
 
 *TACL (paper B), for later.* The paper goes to 10 pages, references
 uncounted, with appendices after them within TACL's caps (as last read: up
