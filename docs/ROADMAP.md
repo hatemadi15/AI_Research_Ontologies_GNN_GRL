@@ -7843,7 +7843,9 @@ for P2, and the tuned reference (candidate A) for P2's D-P decisions.
       protocol, fixed before its runs, and within the budget.
     - P1 has used 15.2 of its 24 session-hours, with about 0.4 more for the
       next stage.
-    - Whether to take F up is the author's decision.
+    - **The author's decision, 8 November: F is skipped in P1 but kept.**
+      SOFC-Exp goes to P2 with B1. F stays a later option, under its own
+      protocol fixed before any run.
   - **The next stage** holds 2 jobs: fine's extra units for A6 with C1 and
     for C1.
 

@@ -25,8 +25,9 @@ it. Stage 2 ran on 8 November. MuLMS's selection is A1m, learning rate 5e-5:
 MaterioMiner and SOFC-Exp is running in stages. Stage 4 selected A3 with A6 on
 coarse-grained (78.59) and B1, DeBERTa-v3-large, on SOFC-Exp (79.18). B1
 leads SOFC-Exp's tuned reference by 0.30, under 1 point, so F (the 3B
-decoder) may be considered, under its own protocol. Fine-grained's extra
-units come next. Amendment 1
+decoder) may be considered, under its own protocol. The author's decision (8
+November): F is skipped in P1 but kept as a later option. Fine-grained's
+extra units come next. Amendment 1
 (before any run) has C1 on MaterioMiner run one level at a time: the two levels'
 released splits are different partitions. It departs from this plan in four
 places, each justified there:
@@ -171,6 +172,8 @@ Every candidate is screened on validation, and none is tested.
   SOFC-Exp, where a reading-comprehension span model reached 85.7.
 - **F. Optional: a fine-tuned 3B decoder** (Qwen2.5-3B, Apache-2.0, no gated download).
   It runs only if A–E fall short on SOFC-Exp's validation, and only within the budget.
+  - *8 November: its condition was met in P1, and the author chose to skip it there but
+    keep it as a later option, under its own protocol.*
   - Setup: 4-bit weights with LoRA r = 16, entity markers, greedy decoding, and
     hyperparameters from 3 seeds on validation.
   - Scoring: the generated text is aligned back to the released words, converted to IOB2
