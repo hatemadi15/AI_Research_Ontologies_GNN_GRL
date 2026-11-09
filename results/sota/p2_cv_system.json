@@ -1,0 +1,21 @@
+{
+ "note": "SOFC-Exp's CV system (ROADMAP \u00a74, P2): P1's tie rule without B1, which the plan's fallback keeps out of the CV protocol",
+ "units": [
+  "seed0",
+  "seed100",
+  "seed200",
+  "seed300",
+  "seed400",
+  "seed500",
+  "seed600",
+  "seed700",
+  "seed800"
+ ],
+ "means_over_9_units": {
+  "a6c1": 79.13,
+  "c1": 78.92,
+  "a6": 78.59
+ },
+ "cv_system": "a6c1",
+ "reference": "a6"
+}

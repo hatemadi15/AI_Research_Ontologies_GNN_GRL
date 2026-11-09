@@ -1,0 +1,444 @@
+[
+ {
+  "minutes": 0.0,
+  "job": [
+   "--granularity",
+   "fine",
+   "--vary-split",
+   "--seeds",
+   "0",
+   "--crf",
+   "--save-predictions",
+   "--threads",
+   "2",
+   "--tag",
+   "smokebu"
+  ]
+ },
+ {
+  "minutes": 0.0,
+  "job": [
+   "--granularity",
+   "sofc",
+   "--sofc-cv",
+   "--seeds",
+   "0",
+   "--crf",
+   "--tag",
+   "p2chkcv",
+   "--save-predictions",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 34.0,
+  "job": [
+   "--granularity",
+   "sofc_both",
+   "--multi-task",
+   "--crf",
+   "--sofc-cv",
+   "--reinit-top",
+   "1",
+   "--seeds",
+   "0",
+   "--seed-offset",
+   "1000",
+   "--save-predictions",
+   "--tag",
+   "p2a6c1m1000",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 34.0,
+  "job": [
+   "--granularity",
+   "sofc_both",
+   "--multi-task",
+   "--crf",
+   "--sofc-cv",
+   "--reinit-top",
+   "1",
+   "--seeds",
+   "0",
+   "--seed-offset",
+   "1100",
+   "--save-predictions",
+   "--tag",
+   "p2a6c1m1100",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 34.0,
+  "job": [
+   "--granularity",
+   "sofc_both",
+   "--multi-task",
+   "--crf",
+   "--sofc-cv",
+   "--reinit-top",
+   "1",
+   "--seeds",
+   "0",
+   "--seed-offset",
+   "1200",
+   "--save-predictions",
+   "--tag",
+   "p2a6c1m1200",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 34.0,
+  "job": [
+   "--granularity",
+   "sofc_both",
+   "--multi-task",
+   "--crf",
+   "--sofc-cv",
+   "--reinit-top",
+   "1",
+   "--seeds",
+   "0",
+   "--seed-offset",
+   "1300",
+   "--save-predictions",
+   "--tag",
+   "p2a6c1m1300",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 34.0,
+  "job": [
+   "--granularity",
+   "sofc_both",
+   "--multi-task",
+   "--crf",
+   "--sofc-cv",
+   "--reinit-top",
+   "1",
+   "--seeds",
+   "0",
+   "--seed-offset",
+   "1400",
+   "--save-predictions",
+   "--tag",
+   "p2a6c1m1400",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 34.0,
+  "job": [
+   "--granularity",
+   "sofc_both",
+   "--multi-task",
+   "--crf",
+   "--sofc-cv",
+   "--reinit-top",
+   "1",
+   "--seeds",
+   "0",
+   "--seed-offset",
+   "1500",
+   "--save-predictions",
+   "--tag",
+   "p2a6c1m1500",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 34.0,
+  "job": [
+   "--granularity",
+   "sofc_both",
+   "--multi-task",
+   "--crf",
+   "--sofc-cv",
+   "--reinit-top",
+   "1",
+   "--seeds",
+   "0",
+   "--seed-offset",
+   "1600",
+   "--save-predictions",
+   "--tag",
+   "p2a6c1m1600",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 34.0,
+  "job": [
+   "--granularity",
+   "sofc_both",
+   "--multi-task",
+   "--crf",
+   "--sofc-cv",
+   "--reinit-top",
+   "1",
+   "--seeds",
+   "0",
+   "--seed-offset",
+   "1700",
+   "--save-predictions",
+   "--tag",
+   "p2a6c1m1700",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 34.0,
+  "job": [
+   "--granularity",
+   "sofc_both",
+   "--multi-task",
+   "--crf",
+   "--sofc-cv",
+   "--reinit-top",
+   "1",
+   "--seeds",
+   "0",
+   "--seed-offset",
+   "1800",
+   "--save-predictions",
+   "--tag",
+   "p2a6c1m1800",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 34.0,
+  "job": [
+   "--granularity",
+   "sofc_both",
+   "--multi-task",
+   "--crf",
+   "--sofc-cv",
+   "--reinit-top",
+   "1",
+   "--seeds",
+   "0",
+   "--seed-offset",
+   "1900",
+   "--save-predictions",
+   "--tag",
+   "p2a6c1m1900",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 20.1,
+  "job": [
+   "--granularity",
+   "sofc",
+   "--crf",
+   "--sofc-cv",
+   "--reinit-top",
+   "1",
+   "--seeds",
+   "0",
+   "--seed-offset",
+   "1000",
+   "--save-predictions",
+   "--tag",
+   "p2a6m1000",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 20.1,
+  "job": [
+   "--granularity",
+   "sofc",
+   "--crf",
+   "--sofc-cv",
+   "--reinit-top",
+   "1",
+   "--seeds",
+   "0",
+   "--seed-offset",
+   "1100",
+   "--save-predictions",
+   "--tag",
+   "p2a6m1100",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 20.1,
+  "job": [
+   "--granularity",
+   "sofc",
+   "--crf",
+   "--sofc-cv",
+   "--reinit-top",
+   "1",
+   "--seeds",
+   "0",
+   "--seed-offset",
+   "1200",
+   "--save-predictions",
+   "--tag",
+   "p2a6m1200",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 20.1,
+  "job": [
+   "--granularity",
+   "sofc",
+   "--crf",
+   "--sofc-cv",
+   "--reinit-top",
+   "1",
+   "--seeds",
+   "0",
+   "--seed-offset",
+   "1300",
+   "--save-predictions",
+   "--tag",
+   "p2a6m1300",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 20.1,
+  "job": [
+   "--granularity",
+   "sofc",
+   "--crf",
+   "--sofc-cv",
+   "--reinit-top",
+   "1",
+   "--seeds",
+   "0",
+   "--seed-offset",
+   "1400",
+   "--save-predictions",
+   "--tag",
+   "p2a6m1400",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 20.1,
+  "job": [
+   "--granularity",
+   "sofc",
+   "--crf",
+   "--sofc-cv",
+   "--reinit-top",
+   "1",
+   "--seeds",
+   "0",
+   "--seed-offset",
+   "1500",
+   "--save-predictions",
+   "--tag",
+   "p2a6m1500",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 20.1,
+  "job": [
+   "--granularity",
+   "sofc",
+   "--crf",
+   "--sofc-cv",
+   "--reinit-top",
+   "1",
+   "--seeds",
+   "0",
+   "--seed-offset",
+   "1600",
+   "--save-predictions",
+   "--tag",
+   "p2a6m1600",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 20.1,
+  "job": [
+   "--granularity",
+   "sofc",
+   "--crf",
+   "--sofc-cv",
+   "--reinit-top",
+   "1",
+   "--seeds",
+   "0",
+   "--seed-offset",
+   "1700",
+   "--save-predictions",
+   "--tag",
+   "p2a6m1700",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 20.1,
+  "job": [
+   "--granularity",
+   "sofc",
+   "--crf",
+   "--sofc-cv",
+   "--reinit-top",
+   "1",
+   "--seeds",
+   "0",
+   "--seed-offset",
+   "1800",
+   "--save-predictions",
+   "--tag",
+   "p2a6m1800",
+   "--threads",
+   "2"
+  ]
+ },
+ {
+  "minutes": 20.1,
+  "job": [
+   "--granularity",
+   "sofc",
+   "--crf",
+   "--sofc-cv",
+   "--reinit-top",
+   "1",
+   "--seeds",
+   "0",
+   "--seed-offset",
+   "1900",
+   "--save-predictions",
+   "--tag",
+   "p2a6m1900",
+   "--threads",
+   "2"
+  ]
+ }
+]
