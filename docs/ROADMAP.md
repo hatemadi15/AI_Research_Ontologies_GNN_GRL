@@ -8164,6 +8164,23 @@ for P2, and the tuned reference (candidate A) for P2's D-P decisions.
   - The count is reported with the false passes expected by chance.
 - **Not in P2:** F (skipped and kept, the author, 8 November), and P3 (the
   held-out-document protocols), which comes after.
+- **Batch `p2a`, 8–9 November** (kernel version 32, bundle of `67cb142`; 13
+  jobs on two T4 lanes, 243 minutes, every job done).
+  - Every check passed, and the checks ran before any test-scored file was
+    opened:
+    - smoke4's repeat `smokebu` equals `smokebn`;
+    - A0's seed-0 repeats equal the stored runs on MaterioMiner
+      fine-grained (73.49) and on SOFC-Exp's official split, in F1, history
+      and predictions.
+  - **The CV system is A6 with C1.** A6's screen file was collected next.
+    By P1's tie rule without B1, the means over all 9 units are A6 with C1
+    79.13, C1 78.92 and A6 78.59. The reference is A6. This was committed
+    (`d7039bf`, `results/sota/p2_cv_system.json`) before any test-scored
+    file was opened.
+  - Its test-scored files go to `results/gpu_p2/`. The decisions wait for
+    `p2m` and `p2b`.
+- **Batch `p2m`** (MuLMS) runs beside it, on kernel `ner-gpu-jobs-2` (version
+  1, bundle of `67cb142`).
 
 *TACL (paper B), for later.* The paper goes to 10 pages, references
 uncounted, with appendices after them within TACL's caps (as last read: up
