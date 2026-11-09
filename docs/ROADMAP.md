@@ -8195,8 +8195,18 @@ for P2, and the tuned reference (candidate A) for P2's D-P decisions.
     matched it, environment included). It runs after `p2b`, since only one
     session at a time has that image.
   - No amendment is needed: P1's environment is still available.
-- **Batch `p2b`** (SOFC-Exp CV): kernel version 33, bundle of `d7039bf`,
-  pushed 9 November 08:40 UTC.
+- **Batch `p2b`, 9 November** (SOFC-Exp CV; kernel version 33, bundle of
+  `d7039bf`; 22 jobs on two T4 lanes, 253 minutes, every job done).
+  - Every check passed:
+    - smoke4's repeat equals `smokebn`, environment included;
+    - P0's CV run at offset 0 equals
+      `ner_results_sofc_matscibert_cv_crf_m0.json` in F1, history and
+      predictions.
+  - Its 31 files are in `results/gpu_p2/`: A6 with C1, an entity and a slot
+    file per offset; A6, one per offset; and the check.
+- **Batch `p2m`, second run:** on the main kernel, version 34, the bundle of
+  `d7039bf` (its jobs unchanged since `67cb142`), pushed 9 November 19:20
+  UTC. 12.0 GPU-hours were left before it.
 
 *TACL (paper B), for later.* The paper goes to 10 pages, references
 uncounted, with appendices after them within TACL's caps (as last read: up
