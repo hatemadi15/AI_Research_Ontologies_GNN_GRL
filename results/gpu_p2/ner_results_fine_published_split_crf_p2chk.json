@@ -1,0 +1,685 @@
+{
+  "granularity": "fine",
+  "protocol": "published_split",
+  "variant": "crf_p2chk",
+  "model": "m3rg-iitd/matscibert",
+  "labels": [
+    "Alloy",
+    "Crack",
+    "CrackInitation",
+    "DataSet",
+    "FatigueLifetime",
+    "FatigueTest",
+    "FatigueTestSpecimen",
+    "GrainBoundary",
+    "LoadingType",
+    "Location",
+    "MaterialClass",
+    "MechanicalProperty",
+    "MechanicalTestDataSet",
+    "MechanicalTreatment",
+    "Mechanism",
+    "Microstructure",
+    "MicrostructureEntity",
+    "StateDescriptor",
+    "StrainRate",
+    "StressAmplitude",
+    "TensileUltimateStrength",
+    "TensileYieldStrength",
+    "TestSpecimen",
+    "TestingMachine",
+    "TestingMedium",
+    "TwinBoundary",
+    "Value"
+  ],
+  "label_tie": {
+    "boundary_count": 24,
+    "tied_classes": [
+      "TensileYieldStrength",
+      "Dislocation"
+    ],
+    "kept_by_tiebreak": [
+      "TensileYieldStrength"
+    ]
+  },
+  "paper_test_f1": 69.92,
+  "config": {
+    "seeds": [
+      0
+    ],
+    "split_seed": 0,
+    "vary_split": false,
+    "leave_one_paper_out": false,
+    "model": "m3rg-iitd/matscibert",
+    "top_k": 27,
+    "epochs": 20,
+    "patience": 3,
+    "lr": 5e-05,
+    "batch_size": 16,
+    "class_weights": false,
+    "crf": true,
+    "tag": "p2chk",
+    "seed_offset": 0,
+    "save_predictions": true,
+    "max_train": 0,
+    "device": null,
+    "threads": 2,
+    "published_split": true
+  },
+  "runs": [
+    {
+      "f1": 73.49,
+      "precision": 76.25,
+      "recall": 70.93,
+      "f1_strict": 73.49,
+      "per_class": {
+        "Alloy": {
+          "precision": 0.6,
+          "recall": 0.6,
+          "f1-score": 0.6,
+          "support": 15.0
+        },
+        "Crack": {
+          "precision": 0.7692,
+          "recall": 0.8333,
+          "f1-score": 0.8,
+          "support": 12.0
+        },
+        "CrackInitation": {
+          "precision": 0.7143,
+          "recall": 0.8333,
+          "f1-score": 0.7692,
+          "support": 6.0
+        },
+        "DataSet": {
+          "precision": 1.0,
+          "recall": 0.7778,
+          "f1-score": 0.875,
+          "support": 9.0
+        },
+        "FatigueLifetime": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 6.0
+        },
+        "FatigueTest": {
+          "precision": 0.4286,
+          "recall": 0.3333,
+          "f1-score": 0.375,
+          "support": 9.0
+        },
+        "FatigueTestSpecimen": {
+          "precision": 1.0,
+          "recall": 0.8,
+          "f1-score": 0.8889,
+          "support": 10.0
+        },
+        "GrainBoundary": {
+          "precision": 0.7273,
+          "recall": 1.0,
+          "f1-score": 0.8421,
+          "support": 8.0
+        },
+        "LoadingType": {
+          "precision": 0.6667,
+          "recall": 0.5,
+          "f1-score": 0.5714,
+          "support": 4.0
+        },
+        "Location": {
+          "precision": 0.6,
+          "recall": 0.75,
+          "f1-score": 0.6667,
+          "support": 4.0
+        },
+        "MaterialClass": {
+          "precision": 0.8333,
+          "recall": 0.7895,
+          "f1-score": 0.8108,
+          "support": 19.0
+        },
+        "MechanicalProperty": {
+          "precision": 0.8571,
+          "recall": 1.0,
+          "f1-score": 0.9231,
+          "support": 6.0
+        },
+        "MechanicalTestDataSet": {
+          "precision": 0.5,
+          "recall": 0.5,
+          "f1-score": 0.5,
+          "support": 4.0
+        },
+        "MechanicalTreatment": {
+          "precision": 0.75,
+          "recall": 1.0,
+          "f1-score": 0.8571,
+          "support": 3.0
+        },
+        "Mechanism": {
+          "precision": 0.75,
+          "recall": 0.4444,
+          "f1-score": 0.5581,
+          "support": 27.0
+        },
+        "Microstructure": {
+          "precision": 1.0,
+          "recall": 0.6667,
+          "f1-score": 0.8,
+          "support": 6.0
+        },
+        "MicrostructureEntity": {
+          "precision": 0.8333,
+          "recall": 1.0,
+          "f1-score": 0.9091,
+          "support": 10.0
+        },
+        "StateDescriptor": {
+          "precision": 0.875,
+          "recall": 0.7778,
+          "f1-score": 0.8235,
+          "support": 18.0
+        },
+        "StrainRate": {
+          "precision": 0.7,
+          "recall": 0.875,
+          "f1-score": 0.7778,
+          "support": 8.0
+        },
+        "StressAmplitude": {
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1-score": 0.6667,
+          "support": 1.0
+        },
+        "TensileUltimateStrength": {
+          "precision": 0.5,
+          "recall": 0.5,
+          "f1-score": 0.5,
+          "support": 2.0
+        },
+        "TensileYieldStrength": {
+          "precision": 0.3333,
+          "recall": 0.5,
+          "f1-score": 0.4,
+          "support": 2.0
+        },
+        "TestSpecimen": {
+          "precision": 0.5714,
+          "recall": 0.8,
+          "f1-score": 0.6667,
+          "support": 5.0
+        },
+        "TestingMachine": {
+          "precision": 0.9,
+          "recall": 0.4286,
+          "f1-score": 0.5806,
+          "support": 21.0
+        },
+        "TestingMedium": {
+          "precision": 0.8,
+          "recall": 0.8,
+          "f1-score": 0.8,
+          "support": 5.0
+        },
+        "TwinBoundary": {
+          "precision": 0.75,
+          "recall": 0.4286,
+          "f1-score": 0.5455,
+          "support": 7.0
+        },
+        "Value": {
+          "precision": 0.7647,
+          "recall": 0.8387,
+          "f1-score": 0.8,
+          "support": 31.0
+        },
+        "micro avg": {
+          "precision": 0.7625,
+          "recall": 0.7093,
+          "f1-score": 0.7349,
+          "support": 258.0
+        },
+        "macro avg": {
+          "precision": 0.7305,
+          "recall": 0.7325,
+          "f1-score": 0.7151,
+          "support": 258.0
+        },
+        "weighted avg": {
+          "precision": 0.7763,
+          "recall": 0.7093,
+          "f1-score": 0.7255,
+          "support": 258.0
+        }
+      },
+      "seed": 0,
+      "best_epoch": 8,
+      "val_f1": 79.11,
+      "n_train": 323,
+      "n_val": 57,
+      "n_test": 96,
+      "history": [
+        {
+          "epoch": 0,
+          "train_loss": 1163.4667,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 1,
+          "train_loss": 457.7868,
+          "val_f1": 18.45
+        },
+        {
+          "epoch": 2,
+          "train_loss": 248.1723,
+          "val_f1": 46.74
+        },
+        {
+          "epoch": 3,
+          "train_loss": 126.0467,
+          "val_f1": 66.67
+        },
+        {
+          "epoch": 4,
+          "train_loss": 75.2049,
+          "val_f1": 70.16
+        },
+        {
+          "epoch": 5,
+          "train_loss": 44.0331,
+          "val_f1": 73.37
+        },
+        {
+          "epoch": 6,
+          "train_loss": 26.4137,
+          "val_f1": 74.32
+        },
+        {
+          "epoch": 7,
+          "train_loss": 20.104,
+          "val_f1": 75.94
+        },
+        {
+          "epoch": 8,
+          "train_loss": 12.7234,
+          "val_f1": 79.11
+        },
+        {
+          "epoch": 9,
+          "train_loss": 10.1929,
+          "val_f1": 71.39
+        },
+        {
+          "epoch": 10,
+          "train_loss": 6.5101,
+          "val_f1": 73.4
+        },
+        {
+          "epoch": 11,
+          "train_loss": 4.3621,
+          "val_f1": 76.14
+        }
+      ],
+      "test_index": [
+        403,
+        279,
+        203,
+        93,
+        448,
+        432,
+        45,
+        80,
+        374,
+        468,
+        459,
+        282,
+        276,
+        333,
+        220,
+        79,
+        167,
+        290,
+        320,
+        145,
+        196,
+        364,
+        442,
+        175,
+        326,
+        411,
+        117,
+        257,
+        27,
+        437,
+        102,
+        241,
+        391,
+        469,
+        186,
+        128,
+        439,
+        367,
+        91,
+        133,
+        89,
+        216,
+        23,
+        114,
+        371,
+        55,
+        341,
+        219,
+        217,
+        462,
+        314,
+        376,
+        129,
+        370,
+        344,
+        195,
+        274,
+        144,
+        456,
+        105,
+        398,
+        181,
+        239,
+        209,
+        66,
+        249,
+        464,
+        188,
+        410,
+        461,
+        430,
+        244,
+        110,
+        146,
+        408,
+        120,
+        104,
+        25,
+        63,
+        176,
+        413,
+        450,
+        160,
+        415,
+        179,
+        343,
+        9,
+        238,
+        3,
+        190,
+        174,
+        388,
+        269,
+        308,
+        35,
+        271
+      ],
+      "test_gold": [
+        "O O O O O O B-MaterialClass I-MaterialClass I-MaterialClass O O O O O O O B-Mechanism I-Mechanism I-Mechanism O O B-MechanicalProperty I-MechanicalProperty O",
+        "O B-MechanicalProperty I-MechanicalProperty I-MechanicalProperty O O B-MaterialClass O O O O B-TestingMachine I-TestingMachine I-TestingMachine O O B-Value I-Value I-Value O O O O B-StrainRate O B-Value I-Value I-Value I-Value O",
+        "B-FatigueLifetime O O B-StateDescriptor I-StateDescriptor O O O O B-StateDescriptor I-StateDescriptor O O B-TensileYieldStrength O B-TensileUltimateStrength I-TensileUltimateStrength O O B-StateDescriptor I-StateDescriptor O O O O O",
+        "O B-Crack I-Crack O O O B-TwinBoundary I-TwinBoundary O O B-TwinBoundary I-TwinBoundary I-TwinBoundary O O O O O B-DataSet O O O O O O O O O O O O B-TestSpecimen O O O O O O O O O O O",
+        "O B-StateDescriptor B-Alloy B-FatigueTestSpecimen O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O O O O O B-CrackInitation I-CrackInitation O O O O",
+        "O O O O O O O O O O O B-TwinBoundary O B-MechanicalProperty I-MechanicalProperty O O O O O B-MaterialClass I-MaterialClass O",
+        "O O O O O O O B-StateDescriptor B-Alloy I-Alloy O",
+        "O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O B-StrainRate I-StrainRate O O O O O O O O B-TestingMachine I-TestingMachine I-TestingMachine I-TestingMachine I-TestingMachine O",
+        "O O O O B-MechanicalTestDataSet I-MechanicalTestDataSet O O O O O O O O O O O O O O B-Value I-Value O O B-TestingMachine I-TestingMachine I-TestingMachine O B-TestingMachine O O B-TestingMachine I-TestingMachine O O O B-Value I-Value O O O O B-TestingMachine I-TestingMachine I-TestingMachine I-TestingMachine O O B-TestingMachine I-TestingMachine O B-TestingMachine O O",
+        "O O B-TestSpecimen O O O O O O O O O O O O O O O O O O O O O O O O B-FatigueTestSpecimen O O O O O B-Value I-Value O O B-Location O O O O O B-Value I-Value O",
+        "B-FatigueTestSpecimen O O O O O O B-FatigueTest I-FatigueTest I-FatigueTest I-FatigueTest I-FatigueTest I-FatigueTest I-FatigueTest O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O B-MicrostructureEntity O O O O B-StateDescriptor B-FatigueTestSpecimen O O O O O O O O O O O O O O O O O O O O O O B-Mechanism I-Mechanism I-Mechanism O O B-Mechanism I-Mechanism O O O O O O O B-Mechanism I-Mechanism O O O O O O O",
+        "O O O O O O O O O B-TwinBoundary I-TwinBoundary I-TwinBoundary O",
+        "O O B-Alloy O O O O O O O",
+        "O O O O O O O O O O B-Value I-Value O B-MechanicalTreatment I-MechanicalTreatment O B-Value I-Value O O O O O O O O B-MicrostructureEntity O O O O O O O O O",
+        "O B-DataSet O O O O O O O O O O O O O O O O O O O",
+        "O O O O B-Mechanism O O B-Mechanism I-Mechanism I-Mechanism I-Mechanism O O O O O B-Mechanism I-Mechanism I-Mechanism O O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O B-Value I-Value I-Value I-Value O O O",
+        "O B-Mechanism I-Mechanism O O O O O O O O O B-Crack B-Location O O B-Mechanism O O O O O O O B-Mechanism I-Mechanism I-Mechanism O",
+        "O O O O O O B-FatigueLifetime O O B-StrainRate I-StrainRate O",
+        "O O O O O O B-MechanicalProperty I-MechanicalProperty O O B-StateDescriptor O B-StateDescriptor I-StateDescriptor O O O O O O O O O O O O O B-Crack I-Crack O O O O O O O O O O O O O",
+        "O O O O O O B-MechanicalTestDataSet O B-FatigueTest I-FatigueTest I-FatigueTest O O O O O O O O O O O O O O O B-TestingMedium O",
+        "O O O O B-FatigueLifetime O O O O O O O O O O O O O O",
+        "O O O O O B-Value O B-Value I-Value I-Value O O O O B-Location I-Location O B-Value I-Value I-Value O O O O O O",
+        "O O O O B-DataSet O O O O B-MicrostructureEntity O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O B-DataSet I-DataSet I-DataSet I-DataSet I-DataSet O O O O O O O O O O O O O O O O B-Mechanism I-Mechanism O O O O O O O O",
+        "O O O O B-Alloy O B-Mechanism O O O O O O B-FatigueTest O O O B-TestingMedium I-TestingMedium O O O B-FatigueTest O O O B-TestingMedium",
+        "O B-Alloy I-Alloy O O O O O B-CrackInitation I-CrackInitation O O O O O O",
+        "O B-DataSet O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O O O O O O B-StrainRate I-StrainRate O O O O O O O B-MaterialClass I-MaterialClass O",
+        "O O O O O O O O O O B-MechanicalTestDataSet I-MechanicalTestDataSet I-MechanicalTestDataSet I-MechanicalTestDataSet O O B-Value I-Value O O O O O O O O O O O",
+        "O O O O O O O O O B-GrainBoundary I-GrainBoundary O O B-StateDescriptor O O O O O O B-StateDescriptor O O O",
+        "O O O O O O B-LoadingType O B-LoadingType I-LoadingType O O O O O O B-Microstructure O O B-Mechanism O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O B-StrainRate I-StrainRate O O O O O O O O O O O O O O O O O O O O O O O B-MaterialClass I-MaterialClass O",
+        "O O O O B-CrackInitation B-Location O O B-Crack I-Crack O O O O O O O O O O O O B-Value I-Value I-Value O B-TestSpecimen O O O O",
+        "O O O O O O O O O O O O O O O O O O O",
+        "O B-Crack O O O B-GrainBoundary O O B-Microstructure O O O O O O O O O O O O O B-Value B-TwinBoundary I-TwinBoundary I-TwinBoundary O B-Value B-Crack I-Crack O O O B-Value O O O O O O",
+        "O O O O O B-FatigueTest O O O O O O O B-MicrostructureEntity O O O O O O O O O O O B-Mechanism I-Mechanism O O O B-Microstructure O",
+        "O O O O O O O O O O B-Alloy I-Alloy I-Alloy I-Alloy B-Alloy I-Alloy B-Alloy O O O O O O O",
+        "O O O O O O B-CrackInitation I-CrackInitation O O O O O O O B-Crack O O O O B-GrainBoundary O O O O O O",
+        "O O B-StrainRate I-StrainRate O O O O O O O O O O O O O O O O O O O B-TensileYieldStrength I-TensileYieldStrength I-TensileYieldStrength O",
+        "O O O O O O O B-StateDescriptor B-TestSpecimen O B-Alloy I-Alloy O O O O O O O O O O O O",
+        "O O O O O O B-TestingMachine I-TestingMachine O",
+        "O O O O O O O O O B-Value I-Value O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O O O O B-Microstructure O O O O O O O O O O O O O O O O O O O O O",
+        "O B-FatigueTest O O O O O O",
+        "O O O O O O O O O O O O O B-Value I-Value O O O O O B-Value",
+        "O O B-StrainRate I-StrainRate O B-StateDescriptor I-StateDescriptor O O O O O",
+        "B-MaterialClass I-MaterialClass I-MaterialClass I-MaterialClass I-MaterialClass O O O O O B-MaterialClass I-MaterialClass O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "B-TestingMachine I-TestingMachine I-TestingMachine I-TestingMachine O O B-Value I-Value O O O O O B-LoadingType I-LoadingType I-LoadingType O O O O B-FatigueTestSpecimen B-Mechanism O",
+        "O O O O O O O O O O O O O O O O O O O O O O B-Mechanism I-Mechanism I-Mechanism O",
+        "O O O O O O O O O O O O O O O O",
+        "O O O O O O",
+        "O B-TestingMachine I-TestingMachine O O O B-FatigueTest I-FatigueTest O O B-Value I-Value B-TestingMachine I-TestingMachine I-TestingMachine O B-TestingMachine O O O B-TestingMachine I-TestingMachine I-TestingMachine O O B-Value I-Value B-TestingMachine I-TestingMachine I-TestingMachine O B-TestingMachine O O O B-Value I-Value B-TestingMachine I-TestingMachine I-TestingMachine O B-TestingMachine O O O B-TestingMachine I-TestingMachine",
+        "O O O O O O O O O O O B-Crack O O B-TwinBoundary O O O O O B-Value I-Value O O O O O",
+        "B-FatigueTestSpecimen I-FatigueTestSpecimen I-FatigueTestSpecimen O O O O O B-FatigueTestSpecimen O O B-FatigueTest I-FatigueTest I-FatigueTest I-FatigueTest I-FatigueTest I-FatigueTest O O O O O",
+        "O O B-MaterialClass I-MaterialClass I-MaterialClass O O O O B-MicrostructureEntity I-MicrostructureEntity O B-MicrostructureEntity O O O O O B-GrainBoundary I-GrainBoundary O",
+        "O O O O O O O B-Microstructure",
+        "O O O O O O O B-MicrostructureEntity O O O O O O O O O O B-Mechanism I-Mechanism O O B-GrainBoundary I-GrainBoundary O O B-GrainBoundary I-GrainBoundary O O",
+        "O O O O O O O O O O B-DataSet O O O O O O O O O O O O O O O O O O O O B-Crack O O O O O O B-TestSpecimen O O",
+        "O B-MechanicalProperty I-MechanicalProperty O O O O O O B-MaterialClass O B-MaterialClass O O O O O O O O O B-MaterialClass O B-MaterialClass O O",
+        "O O O O B-Value I-Value O O B-Mechanism I-Mechanism O O O B-StateDescriptor I-StateDescriptor I-StateDescriptor B-MaterialClass I-MaterialClass",
+        "O B-FatigueTest I-FatigueTest O O O O O O O B-MicrostructureEntity O O O O O O O O O O O B-Mechanism I-Mechanism I-Mechanism O O O O O B-CrackInitation I-CrackInitation I-CrackInitation O",
+        "O O O O O O O O O O O O O B-Mechanism I-Mechanism O O O O B-Crack O O O O O O O O O O O O O O O O",
+        "O B-TestingMachine I-TestingMachine I-TestingMachine O O O B-LoadingType I-LoadingType I-LoadingType O",
+        "O O O O O O O O O O O O O O B-MaterialClass I-MaterialClass O",
+        "O O O O O O O B-FatigueLifetime I-FatigueLifetime O O O O B-StressAmplitude I-StressAmplitude O",
+        "O O O O O O O O O O B-TwinBoundary I-TwinBoundary O",
+        "O B-Mechanism I-Mechanism O O B-CrackInitation I-CrackInitation I-CrackInitation I-CrackInitation I-CrackInitation O",
+        "O O O O B-Crack O O O O O O O O O O O O O O O B-Mechanism I-Mechanism I-Mechanism I-Mechanism O O O O O O O O O O O O O O",
+        "O O O O B-Microstructure I-Microstructure O O O O O O O O O B-Value I-Value I-Value O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O O O O O O B-Value I-Value I-Value O O O O O O O O O B-GrainBoundary I-GrainBoundary O O O O O",
+        "O O B-GrainBoundary I-GrainBoundary O O O",
+        "O O O O O O O B-MaterialClass O O O B-StateDescriptor O B-StateDescriptor I-StateDescriptor O O O O O O O",
+        "O O O B-Mechanism I-Mechanism I-Mechanism I-Mechanism O O O O B-Mechanism I-Mechanism I-Mechanism I-Mechanism O O B-FatigueLifetime I-FatigueLifetime O B-FatigueTestSpecimen O O B-TestingMedium O O O O O B-FatigueTestSpecimen O O B-TestingMedium I-TestingMedium O O O O O O O O",
+        "O O O O O O B-Mechanism I-Mechanism O O O O O B-MaterialClass I-MaterialClass O O B-StrainRate I-StrainRate O O O O O O O O O O O O O O O O",
+        "O O O O B-StateDescriptor I-StateDescriptor O O O O O O O O O O O O B-StateDescriptor I-StateDescriptor O",
+        "O O O O O O O O O B-Alloy I-Alloy I-Alloy",
+        "O O O O O O O O O B-FatigueTestSpecimen I-FatigueTestSpecimen O O O O B-FatigueLifetime O O O O O O O O O O O O B-Crack I-Crack O",
+        "O O O O B-TestingMachine I-TestingMachine I-TestingMachine I-TestingMachine O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O O B-DataSet O O O O O",
+        "O O O O O O B-MechanicalTreatment I-MechanicalTreatment O O O O O O O",
+        "O O O O B-Alloy I-Alloy O B-Alloy I-Alloy O O O B-MaterialClass I-MaterialClass I-MaterialClass O O O O O O O",
+        "O O O O O O O O O B-DataSet O O O O O O B-StateDescriptor B-Alloy O B-Alloy O O B-Alloy O O O B-Value I-Value I-Value O O O",
+        "O O O O O O O O O O O O O O O O O B-TensileUltimateStrength I-TensileUltimateStrength O B-MaterialClass O O O O O O O",
+        "O O O O O O O B-MechanicalTestDataSet I-MechanicalTestDataSet I-MechanicalTestDataSet I-MechanicalTestDataSet O B-Mechanism I-Mechanism I-Mechanism O O O O",
+        "O O O O O O O O O O B-MechanicalTreatment O O O O O O B-MicrostructureEntity O O O O O O O O O O",
+        "O O O O O O O O O O O B-DataSet O O O O O O O O O O O O O O B-Value I-Value O O O O O O O O O B-Value I-Value I-Value I-Value O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O B-Mechanism O",
+        "B-MaterialClass I-MaterialClass O B-MicrostructureEntity O O O O B-MechanicalProperty I-MechanicalProperty O O O O O"
+      ],
+      "test_pred": [
+        "O O O O O O B-MaterialClass I-MaterialClass I-MaterialClass O O O O O O O B-Mechanism I-Mechanism I-Mechanism O O B-MechanicalProperty I-MechanicalProperty O",
+        "O B-MechanicalProperty I-MechanicalProperty I-MechanicalProperty O O B-MaterialClass O O O O B-TestingMachine I-TestingMachine I-TestingMachine O O B-Value I-Value I-Value O O O O O O B-Value I-Value I-Value I-Value O",
+        "B-FatigueLifetime O O B-StateDescriptor I-StateDescriptor O O O O B-StateDescriptor O O O B-TensileYieldStrength O B-TensileUltimateStrength I-TensileUltimateStrength O O B-StateDescriptor I-StateDescriptor O O O O O",
+        "O B-Crack I-Crack O O O O O O O O B-Value O O O O O O O O O O O O O O O O O O O B-TestSpecimen O O O O O O O O O O O",
+        "O O B-Alloy B-FatigueTestSpecimen O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O O O O O B-CrackInitation I-CrackInitation O O O O",
+        "O O O O O O O O O O O B-TwinBoundary O B-MechanicalProperty I-MechanicalProperty O B-MechanicalProperty I-MechanicalProperty O O B-MaterialClass I-MaterialClass O",
+        "O O O O O O O B-StateDescriptor B-Alloy I-Alloy O",
+        "O O O O O O O O B-StrainRate I-StrainRate O O O O O O O O O O O",
+        "O O O O O O O B-StrainRate I-StrainRate O O B-FatigueTest I-FatigueTest O O O O O B-TestingMachine I-TestingMachine I-TestingMachine I-TestingMachine O",
+        "O O O O B-MechanicalTestDataSet I-MechanicalTestDataSet O O O O O O O O O O O O O O B-Value I-Value O O O O O O O O O O O O O O B-Value I-Value O O O O B-TestingMachine I-TestingMachine I-TestingMachine I-TestingMachine O O O O O O O O",
+        "O O B-TestSpecimen O O O O O O O O O O O O O O O O O O O O O O O O B-TestSpecimen O O O O O B-Value I-Value O O B-Location O O O O O B-Value I-Value O",
+        "B-TestSpecimen O O B-TestSpecimen O O O O O O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O B-MicrostructureEntity O O O O B-StateDescriptor B-FatigueTestSpecimen O B-FatigueTest O O O O O O O O O O O O O O O O O O O O B-Mechanism O B-Mechanism O O B-Mechanism I-Mechanism O O O O O O O B-Mechanism I-Mechanism O O O O O O O",
+        "O O O O O O O O O B-TwinBoundary I-TwinBoundary I-TwinBoundary O",
+        "O O B-Alloy O B-Alloy O O O O O",
+        "O O O O O B-LoadingType I-LoadingType O O O B-Value I-Value O B-MechanicalTreatment I-MechanicalTreatment O B-Value I-Value O O O O O O O O B-MicrostructureEntity O O O O B-MechanicalTreatment O O O O",
+        "O B-DataSet O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O O O O O O O B-Mechanism I-Mechanism I-Mechanism O O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O B-Value O B-Value I-Value O O O",
+        "O O O O O O O O O O O O B-Crack B-Location O O B-Mechanism O O O O O O O B-Mechanism I-Mechanism I-Mechanism O",
+        "O O O O O O B-FatigueLifetime O O B-StrainRate I-StrainRate O",
+        "O O O O O O B-MechanicalProperty I-MechanicalProperty O O B-StateDescriptor O B-StateDescriptor I-StateDescriptor O O O O O O O O O O O O O B-Crack I-Crack O O O O O O O O O O O O O",
+        "O O O O O O B-MechanicalTestDataSet O B-FatigueTest I-FatigueTest I-FatigueTest O O O O O O O O O O O O O O O O O",
+        "O O O O B-FatigueLifetime O O O O O O O O O O O O O O",
+        "O O O O O B-Value O B-Value I-Value I-Value O O O O O O O B-Value I-Value I-Value O O O O O O",
+        "O O O O B-DataSet O O O O B-MicrostructureEntity O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O B-GrainBoundary O O O O O O O O O O O O B-GrainBoundary I-GrainBoundary O O O O O O O O O O O O O O O O O O O O",
+        "O O O O B-Alloy O O O O O O O O O O O O B-TestingMedium I-TestingMedium O O O O O O O B-TestingMedium",
+        "O B-Alloy I-Alloy O O O O O B-CrackInitation I-CrackInitation O O O O O O",
+        "O B-DataSet O O O B-Location O O O O O O O O O O O O",
+        "O O O O O O O O O O O O O O O B-StrainRate I-StrainRate O O O O O O O B-MaterialClass I-MaterialClass O",
+        "O O O O O O O O O O B-TensileUltimateStrength I-TensileUltimateStrength I-TensileUltimateStrength B-MechanicalTestDataSet O O B-Value I-Value O O O O O O O O O O O",
+        "O O O O O O O O O B-GrainBoundary I-GrainBoundary O O O O O O O O O B-MaterialClass B-GrainBoundary I-GrainBoundary O",
+        "O O O O O O B-LoadingType O B-LoadingType I-LoadingType O O O O O O B-Microstructure O O B-Mechanism O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O B-StrainRate I-StrainRate O O O O O O O O O O O O O O O O O O O O O O O B-MaterialClass I-MaterialClass O",
+        "O O O O B-CrackInitation B-Location O O B-Crack I-Crack O O O O O O O O O O O O B-Value I-Value I-Value O B-TestSpecimen O O O O",
+        "O O O O O O O O O O O O O O O O O O O",
+        "O B-Crack O O O B-GrainBoundary O O B-Microstructure O O O O O O O O O O O O O B-TwinBoundary I-TwinBoundary I-TwinBoundary I-TwinBoundary O O B-Crack I-Crack O O O B-Value O O O O O O",
+        "O O O O O B-FatigueTest O O O O O O O B-MicrostructureEntity O O O O O O O O O O O B-Mechanism I-Mechanism O O O B-MicrostructureEntity O",
+        "O O O O O B-Crack O O O O O B-MaterialClass O B-MaterialClass I-MaterialClass B-Alloy I-Alloy O O O O O O O",
+        "O O O B-Mechanism I-Mechanism O B-CrackInitation I-CrackInitation O O O O O O B-Crack I-Crack O O O O B-GrainBoundary O O O O O O",
+        "O O B-StrainRate I-StrainRate O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O B-FatigueTest I-FatigueTest O B-StateDescriptor B-TestSpecimen O B-Alloy I-Alloy O O O O O O O O O O O O",
+        "O O O O O O B-TestingMachine I-TestingMachine O",
+        "O O O O O O O O O B-Value I-Value O O O O O O O O O O O O O O O O O O O",
+        "O O O O B-TensileYieldStrength O O O O O O O O B-MicrostructureEntity O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O",
+        "O O O O O O O O O O O O O B-Value I-Value O O O O O B-Value",
+        "O O B-StrainRate I-StrainRate O B-StateDescriptor I-StateDescriptor O O O O O",
+        "B-MaterialClass I-MaterialClass I-MaterialClass I-MaterialClass I-MaterialClass O O O O O B-MaterialClass I-MaterialClass O O O O",
+        "O O O O O O O O O B-StrainRate I-StrainRate O O O O O O O O O O O O O O O O O O O O O",
+        "B-TestingMachine I-TestingMachine I-TestingMachine I-TestingMachine O O B-Value I-Value O O O O O O O O O O O O B-FatigueTestSpecimen O O",
+        "O O O O O O O O O O O O O O O O B-StressAmplitude I-StressAmplitude O O O O B-Mechanism I-Mechanism I-Mechanism O",
+        "O O O O O O O O O O O O O O O O",
+        "O O O O O O",
+        "O B-TestingMachine I-TestingMachine O O O B-FatigueTest I-FatigueTest O O B-Value I-Value B-TestingMachine I-TestingMachine I-TestingMachine O O O O O O O O O O B-Value I-Value O O O O O O O O B-Value I-Value B-TestingMachine I-TestingMachine I-TestingMachine O O O O O O O",
+        "O B-MechanicalTestDataSet O O O O O O O O O B-Crack O O B-TwinBoundary O O O O O B-Value I-Value O O O O O",
+        "B-FatigueTestSpecimen I-FatigueTestSpecimen I-FatigueTestSpecimen O O O O O B-FatigueTestSpecimen O O O O B-StrainRate I-StrainRate B-FatigueTest I-FatigueTest O O O O O",
+        "O O B-MaterialClass I-MaterialClass I-MaterialClass O O O O B-MicrostructureEntity I-MicrostructureEntity O B-MicrostructureEntity O O O O O B-GrainBoundary I-GrainBoundary O",
+        "O O O O O O O B-Microstructure",
+        "O O O O O O O B-MicrostructureEntity O O O O O O O O O O O O O O B-GrainBoundary I-GrainBoundary O O B-GrainBoundary I-GrainBoundary O O",
+        "O O O O O O O O O O B-DataSet O O O O O O O O O O O O O O O O O O O O B-Crack O O O O O O O O O",
+        "O B-MechanicalProperty I-MechanicalProperty O O O O O O O O B-Value O O O O O O O O O B-MaterialClass O B-Value O O",
+        "O O O O B-Value I-Value O O O O O O O B-StateDescriptor I-StateDescriptor I-StateDescriptor B-MaterialClass I-MaterialClass",
+        "O O O O O O O O O O B-MicrostructureEntity O O O O O O O O O O O O O O O O O O O B-CrackInitation I-CrackInitation I-CrackInitation O",
+        "O O O O O O O O O O O O O O O O O O O B-Crack O O O O O O O O O O O O O O O O",
+        "O B-TestingMachine I-TestingMachine I-TestingMachine O O O O O O O",
+        "O O O O O O O O O O O O O O B-MaterialClass I-MaterialClass O",
+        "O O O O O O O B-FatigueLifetime I-FatigueLifetime O O O O B-StressAmplitude I-StressAmplitude O",
+        "O O O O O O O O O O B-Location I-Location O",
+        "O B-Mechanism I-Mechanism O O B-CrackInitation I-CrackInitation O B-CrackInitation I-CrackInitation O",
+        "O O O O B-Crack O O O O O O O O O O O O O O O B-Mechanism O O O O O O O O O O O O O O O O O",
+        "O O O O B-Microstructure I-Microstructure O O O O O O O O O B-Value I-Value I-Value O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O B-GrainBoundary I-GrainBoundary O O O O O",
+        "O O B-GrainBoundary I-GrainBoundary O O O",
+        "O O O O O O O O O O O B-StateDescriptor O B-StateDescriptor I-StateDescriptor O O O O O O O",
+        "O O O B-Mechanism I-Mechanism I-Mechanism I-Mechanism O O O O O O O B-TestingMedium O O B-FatigueLifetime I-FatigueLifetime O B-FatigueTestSpecimen O O B-TestingMedium O O O O O B-FatigueTestSpecimen O O B-TestingMedium I-TestingMedium O O O O O O O O",
+        "O O O O O O B-Mechanism I-Mechanism O O O O O B-MaterialClass I-MaterialClass O O B-StrainRate I-StrainRate O O O O O O O O O O O O O O O O",
+        "O O O O B-StateDescriptor I-StateDescriptor O O O O O O O O O O O O B-StateDescriptor I-StateDescriptor O",
+        "O O O O O O O O O B-StateDescriptor B-Alloy I-Alloy",
+        "O O O O O O O O O B-FatigueTestSpecimen I-FatigueTestSpecimen O O O O B-FatigueLifetime O O O O O O O O O O B-Crack I-Crack I-Crack I-Crack O",
+        "O O O O B-TestingMachine I-TestingMachine I-TestingMachine I-TestingMachine O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O O B-DataSet O O O O O",
+        "O O O O O O B-MechanicalTreatment I-MechanicalTreatment O O O O O O O",
+        "O O O O B-Alloy B-Alloy O B-Alloy I-Alloy O O O B-MaterialClass I-MaterialClass I-MaterialClass O O O O O O O",
+        "O O O O O O O O O B-DataSet O O O O O O B-StateDescriptor B-Alloy O B-Alloy O O B-Alloy I-Alloy O O B-Value I-Value I-Value O O O",
+        "O O O O O O O O O O O O O O O O O B-TensileYieldStrength I-TensileYieldStrength O B-MaterialClass O O O O O O O",
+        "O O O O O O O O O O O O O O O O O O O",
+        "O O O O O O O O O O B-MechanicalTreatment O O O O O O B-MicrostructureEntity O O O O O O O O O O",
+        "O O O O O O O O O O O B-DataSet O O O O O O O B-Value I-Value I-Value O O O O B-Value I-Value O O O O O O O O O B-Value O B-Value I-Value O",
+        "O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O O",
+        "B-MaterialClass I-MaterialClass O B-MicrostructureEntity O O O O B-MechanicalProperty I-MechanicalProperty O O O O O"
+      ],
+      "run_id": "seed0",
+      "runtime_sec": 77.7,
+      "environment": {
+        "device": "Tesla T4",
+        "cuda": "12.8",
+        "cudnn": 91900,
+        "torch": "2.11.0+cu128",
+        "transformers": "5.18.0",
+        "deterministic": true,
+        "cublas_workspace_config": ":4096:8"
+      }
+    }
+  ],
+  "test_f1_mean": 73.49,
+  "test_f1_std": 0.0,
+  "test_f1_strict_mean": 73.49,
+  "summary": {
+    "n_runs": 1,
+    "run_ids": [
+      "seed0"
+    ],
+    "micro": {
+      "mean": 73.49,
+      "pop_sd": 0.0,
+      "ci95": [
+        73.49,
+        73.49
+      ],
+      "per_run": [
+        73.49
+      ]
+    },
+    "micro_strict": {
+      "mean": 73.49,
+      "pop_sd": 0.0,
+      "ci95": [
+        73.49,
+        73.49
+      ],
+      "per_run": [
+        73.49
+      ]
+    },
+    "macro": {
+      "mean": 71.51,
+      "pop_sd": 0.0,
+      "ci95": [
+        71.51,
+        71.51
+      ],
+      "per_run": [
+        71.51
+      ]
+    },
+    "weighted": {
+      "mean": 72.55,
+      "pop_sd": 0.0,
+      "ci95": [
+        72.55,
+        72.55
+      ],
+      "per_run": [
+        72.55
+      ]
+    }
+  }
+}

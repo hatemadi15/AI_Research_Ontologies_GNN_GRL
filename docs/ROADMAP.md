@@ -8179,8 +8179,24 @@ for P2, and the tuned reference (candidate A) for P2's D-P decisions.
     file was opened.
   - Its test-scored files go to `results/gpu_p2/`. The decisions wait for
     `p2m` and `p2b`.
-- **Batch `p2m`** (MuLMS) runs beside it, on kernel `ner-gpu-jobs-2` (version
-  1, bundle of `67cb142`).
+- **Batch `p2m`, first run: void.** It ran on a new kernel, `ner-gpu-jobs-2`
+  (version 1, bundle of `67cb142`), beside `p2a`. All 22 jobs finished in
+  388 minutes.
+  - Both of its checks failed on the environment alone.
+    - A new kernel gets Kaggle's newer image: CUDA 13.0, cuDNN 9.27, torch
+      2.11.0+cu130. P1's environment is CUDA 12.8, cuDNN 9.19, torch
+      2.11.0+cu128.
+    - The repeats are otherwise identical: smoke4's F1 (77.95) and history,
+      and P0's MuLMS smoke run, but for its run time.
+  - As the protocol rules, the batch is void. Its 22 files were moved,
+    unread, to `results/gpu_p2_void/`.
+  - The fix is limited to the cause. `p2m` runs again unchanged on the main
+    kernel `ner-gpu-jobs`, which keeps P1's image (`p2a`'s smoke4 repeat
+    matched it, environment included). It runs after `p2b`, since only one
+    session at a time has that image.
+  - No amendment is needed: P1's environment is still available.
+- **Batch `p2b`** (SOFC-Exp CV): kernel version 33, bundle of `d7039bf`,
+  pushed 9 November 08:40 UTC.
 
 *TACL (paper B), for later.* The paper goes to 10 pages, references
 uncounted, with appendices after them within TACL's caps (as last read: up
