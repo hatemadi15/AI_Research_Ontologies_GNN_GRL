@@ -338,7 +338,8 @@ P1_PINS = {'pip': ('sentencepiece==0.2.2',),
                       SCIDEBERTA: '98fab84484cea48d2997348a18cebf2d4f419a14'}}
 BATCH_EXTRAS = {'smoke5': DEBERTA_PINS, 'smoke6': DEBERTA_PINS, 'w6a': DEBERTA_PINS,
                 'w21s': GLINER_PINS, 'w21a': GLINER_PINS, 'w21x': W21X_PINS,
-                'p1t': P1_PINS, 'p1n': P1_PINS, 'p2a': P1_PINS, 'p2m': P1_PINS, 'p2b': P1_PINS}
+                'p1t': P1_PINS, 'p1n': P1_PINS, 'p2a': P1_PINS, 'p2m': P1_PINS, 'p2b': P1_PINS,
+                'p3a': P1_PINS}
 THREADS = 2
 DEADLINE_HOURS = 10                 # no job starts later; a Kaggle session lasts 12 hours
 # the TPU spike (docs/METHODS_PLAN.md §5): a batch named tpu... runs on Kaggle's TPU v5e-8, one
@@ -1443,6 +1444,9 @@ def batch_lanes(name):
         return p1n_lanes()
     if name in ('p2a', 'p2m', 'p2b'):
         return p2_lanes(name)
+    if name == 'p3a':
+        import sota_p3
+        return p2_lanes(name, sota_p3.JOBS_FILE)
     if name == 'p0a':
         # the SOTA plan's P0 gates: the repeat of the CRF run of smoke4 (smokebq); MuLMS's 5
         # configurations (c1 to c5) and SOFC-Exp's cross-validation at seed offsets 0, 100 and
@@ -1479,7 +1483,7 @@ BATCHES = ('smoke1', 'smoke2', 'smoke3', 'item1', 'item2', 'item12', 'item3', 'i
            *(f'w12b:{v}' for v in WEEK12_VARIANTS), *(f'w12d:{v}' for v in WEEK12_ANALOGUES),
            'tpu-smoke1', 'tpu-smoke', 'w14a', 'w14b', 'w14c', 'w15a', 'w17a', 'w17b', 'w18a',
            'w19a', 'w19b', 'w20a', 'w21s', 'w21a', 'w21x', 'p0a', 'p1t', 'p1n', 'p2a', 'p2m',
-           'p2b')
+           'p2b', 'p3a')
 
 
 def batch_extras(name):

@@ -8286,6 +8286,54 @@ for P2, and the tuned reference (candidate A) for P2's D-P decisions.
     - MaterioMiner fine-grained (C1 above the strongest known system and the
       tuned reference, and its votes above the CRF head's).
 
+*The SOTA plan's P3: reported on the held-out-document protocols (fixed 10
+November, before any P3 run; `docs/SOTA_PLAN.md` §4). It makes no decision
+and no claim.* At the author's request, it runs in the 5.67 GPU-hours left
+before the 14 November reset.
+- **What runs.** P2's selected systems, on papers A and B's
+  held-out-document protocols (Table 1 of paper B):
+  - **MaterioMiner coarse-grained, leave-one-paper-out:** A3 with A6, at seed
+    offsets 0–900. That is 10 × 4 papers, `--seeds 0 --seed-offset N`, as
+    in the stored runs.
+  - **SOFC-Exp, 5 document folds of 9 articles:** the CV system, A6 with C1,
+    at offsets 0–900 (10 × 5 folds).
+    - B1 does not run. These are folds of articles, like the CV protocol,
+      and B1 leads A's best cell by less than 1 point (P2's rule).
+    - B1 would also take about 18 session-hours.
+  - **MaterioMiner fine-grained: nothing runs.**
+    - C1 is plain multi-task training. Its leave-one-paper-out runs are
+      stored at offsets 0–900 (paper B's `crf_mt`, `crf_mt_m100`–`m900`),
+      and they are reported.
+    - They differ from P2's C1 in one way: a run stops when neither head
+      improves, not when the fine head alone stops.
+  - **MuLMS waits.** Scoring the nested system's outermost predictions on
+    held-out subfields needs two things not yet written:
+    - code for it in `mulms_nested.py`;
+    - an alignment between the release's sentences and our loader's, which
+      alters 276 tokens.
+- **The reference:** the stored CRF head at the same offsets and folds
+  (`crf_m0`–`crf_m900`). Seeds equal offsets on both sides, so the runs pair
+  by fold and offset (n = 40 or 50). Every test set here was read before by
+  stored runs.
+- **Reported:**
+  - each system's mean with its 95% interval over runs;
+  - the paired difference against the CRF head, with its 95% interval;
+  - the per-fold means.
+
+  There is no decision and no wording of claims.
+- **Checks:**
+  - smoke4's repeat equals `smokebn`, environment included;
+  - every file has its job's settings and P1's environment;
+  - every run's test sentences and gold equal the stored CRF head's run.
+
+  A failed check voids the batch, as in P2.
+- **Budget:** about 3.1 session-hours of the 5.67 left: coarse-grained 40
+  runs at about 1.9 minutes, SOFC-Exp 50 runs at about 5.7. It runs on the
+  main kernel, which keeps P1's image.
+- No referee check: nothing here is decided.
+- Code: `sota_p3.py` (jobs, checks, report), and batch `p3a` in
+  `kaggle_jobs.py`.
+
 *TACL (paper B), for later.* The paper goes to 10 pages, references
 uncounted, with appendices after them within TACL's caps (as last read: up
 to 5 pages and 3 pages for two kinds of content). It keeps a word budget

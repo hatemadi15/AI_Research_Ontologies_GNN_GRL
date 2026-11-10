@@ -297,6 +297,7 @@ def take_a6_screen(pulled, screen_dir=SCREEN_DIR):
     have = {r['run_id'] for r in data['runs']}
     if not set(units) <= have:
         raise SystemExit(f'{A6_SCREEN_FILE}: units {sorted(set(units) - have)} are missing')
+    Path(screen_dir).mkdir(parents=True, exist_ok=True)
     target = Path(screen_dir) / A6_SCREEN_FILE
     shutil.copy2(path, target)
     return target

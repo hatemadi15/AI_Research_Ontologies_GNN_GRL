@@ -424,6 +424,10 @@ def test_batch_checks(tmp_path):
 def test_take_a6_screen_needs_all_nine_units(tmp_path):
     pulled = tmp_path / 'pulled'
     data = json.loads((p2.SCREEN_DIR / p2.A6_SCREEN_FILE).read_text())
-    write(pulled / 'ner' / p2.A6_SCREEN_FILE, data)
-    with pytest.raises(SystemExit):           # the stored file has the 5 base units only
+    base = set(sota_p1.UNITS['sofc'])
+    write(pulled / 'ner' / p2.A6_SCREEN_FILE,
+          {**data, 'runs': [r for r in data['runs'] if r['run_id'] in base]})
+    with pytest.raises(SystemExit):           # the 5 base units only
         p2.take_a6_screen(pulled, tmp_path / 'screen')
+    write(pulled / 'ner' / p2.A6_SCREEN_FILE, data)   # all 9, as p2a left it
+    assert p2.take_a6_screen(pulled, tmp_path / 'screen').exists()
