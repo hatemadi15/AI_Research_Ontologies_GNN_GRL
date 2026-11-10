@@ -9,6 +9,28 @@ typeset TACL version. A protocol in `docs/ROADMAP.md` §4 fixes it in detail
 before any run. The published numbers come from a literature audit of
 4 November, every number read in its paper.*
 
+*P2, 10 November: the decisions are in (ROADMAP §4, `results/gpu/sota_p2.json`).
+6 of the 15 live decisions pass; with no effect, at most about 0.4 would
+pass by chance. All 4 re-tests replicate.
+- **SOFC-Exp's official split: above the best result with a stated
+  protocol.** B1 (DeBERTa-v3-large) scores 85.46 on the 10 test articles,
+  +2.06 [+0.63, +3.49] above Schrader et al.'s 83.4. It is not shown above
+  the 86.0 read off a bar chart (84.91 on the 11 articles). It also improves
+  on the tuned MatSciBERT reference, by +1.15 [+0.01, +2.28].
+- **MaterioMiner fine-grained: the selected system improves on the strongest
+  known system.** Multi-task C1 scores 76.39, +3.31 [+1.05, +5.57] above the
+  CRF head and +3.02 above the tuned reference. Its votes of 3 and 5 improve
+  on the CRF head's votes. It is +6.47 above the published 69.92 (a
+  re-test).
+- **Not shown:**
+  - SOFC-Exp's cross-validation: 83.31, below 84.77;
+  - MuLMS: 79.20 against 79.6, −0.40 [−1.11, +0.30];
+  - MaterioMiner coarse-grained against the CRF head: +0.99 [−0.73, +2.70],
+    though +4.75 above the published 72.32 (a re-test).
+- MuLMS's published recipe collapsed in 2 of 10 fresh-seed runs, while the
+  selected learning rate stayed stable (77.92–80.69). This is reported, with
+  no decision.*
+
 *P2, 8 November: its protocol is fixed in ROADMAP §4, after an independent
 referee's check ("approve with required changes", all six applied). It makes
 15 live decisions, 2 of them gated on a D-T, and 4 re-tests. It departs from

@@ -8207,6 +8207,84 @@ for P2, and the tuned reference (candidate A) for P2's D-P decisions.
 - **Batch `p2m`, second run:** on the main kernel, version 34, the bundle of
   `d7039bf` (its jobs unchanged since `67cb142`), pushed 9 November 19:20
   UTC. 12.0 GPU-hours were left before it.
+  - 22 jobs, 380 minutes, every job done.
+  - Both checks passed: smoke4's repeat, environment included, and P0's
+    MuLMS smoke run.
+  - Its 20 MuLMS files are in `results/gpu_p2/`.
+- **P2's decisions, 10 November** (`results/gpu/sota_p2.json`, from
+  `sota_p2.py decide`, run once with every batch in and every check passed).
+  Each entry is S minus its comparison, with the 95% interval over seeds.
+  **6 of the 15 live decisions pass**; with no effect, at most about 0.4
+  would by chance.
+
+  | # | Decision | Estimate [95%] | Verdict | Bootstrap |
+  |---|---|---|---|---|
+  | 1 | SOFC-Exp official, D-T: B1 against 83.4 (10 articles) | +2.06 [+0.63, +3.49] | passes | – |
+  | 2 | SOFC-Exp official, D-P: B1 against A6 | +1.15 [+0.01, +2.28] | passes | [−0.17, +2.56] |
+  | 3 | SOFC-Exp official: B1 against 86.0 (11 articles; gated on 1) | −1.09 [−2.17, −0.00] | not shown | – |
+  | 4 | SOFC-Exp CV, D-T: A6 with C1 against 84.77 | −1.46 [−2.05, −0.86] | not shown | – |
+  | 5 | SOFC-Exp CV, D-P: A6 with C1 against A6 | −0.10 [−0.48, +0.27] | not shown | [−0.55, +0.37] |
+  | 6 | SOFC-Exp CV: A6 with C1 against 85.71 (gated on 4) | – | not taken | – |
+  | 7 | MuLMS, D-T: A1m against 79.6 | −0.40 [−1.11, +0.30] | not shown | – |
+  | 8 | MuLMS, D-P: A1m against A0 | +22.27 [−1.29, +45.83] | not shown | [+21.82, +22.73] |
+  | 9 | MaterioMiner fine: C1 against the CRF head | +3.31 [+1.05, +5.57] | passes | [+1.78, +4.87] |
+  | 10 | MaterioMiner fine, D-P: C1 against A6 | +3.02 [+1.34, +4.70] | passes | [+1.75, +4.33] |
+  | 11 | MaterioMiner coarse: A3 with A6 against the CRF head | +0.99 [−0.73, +2.70] | not shown | [−0.14, +2.14] |
+  | 12 | MaterioMiner fine: C1's vote of 3 against the CRF head's | +2.38 [+1.33, +3.44] | passes | [+0.96, +3.81] |
+  | 13 | MaterioMiner fine: C1's vote of 5 against the CRF head's | +1.74 [+0.19, +3.30] | passes | [+0.11, +3.42] |
+  | 14 | MaterioMiner coarse: A3 with A6's vote of 3 against the CRF head's | +0.54 [−0.33, +1.41] | not shown | [−0.37, +1.47] |
+  | 15 | MaterioMiner coarse: A3 with A6's vote of 5 against the CRF head's | +0.12 [−1.33, +1.56] | not shown | [−0.92, +1.17] |
+
+  - **The wordings**, as fixed:
+    - **SOFC-Exp, official split** (B1, DeBERTa-v3-large):
+      - 85.46 on the 10 articles, and 84.91 [83.83, 86.00] on the 11.
+      - "Above the best result with a stated protocol; not shown above the
+        best reported result, whose protocol we could not verify, on this
+        test set."
+      - B1 also improves on the tuned MatSciBERT reference, A6, though
+        only just: the interval's lower end is +0.01, and the bootstrap's
+        interval crosses 0.
+    - **SOFC-Exp, CV** (A6 with C1): 83.31 [83.09, 83.54]. "Not shown above
+      the best CV result with a stated protocol, on this test set." Its
+      interval lies below Gupta et al.'s 84.77.
+    - **MuLMS** (A1m): 79.20 [78.62, 79.77]. "Not shown above the published
+      result under its protocol, on this test set."
+    - **MaterioMiner fine-grained** (C1, multi-task): 76.39 [75.25, 77.53].
+      - "The selected system improves on the strongest known system, on
+        this test set."
+      - It also improves on the tuned reference A6.
+      - Its votes of 3 and of 5 improve on the CRF head's votes of the same
+        size.
+    - **MaterioMiner coarse-grained** (A3 with A6): 77.07 [76.14, 78.00].
+      "The selected system: not shown to improve on the strongest known
+      system, on this test set." Its votes are not shown to improve
+      either.
+  - **The re-tests replicate.** Fine-grained C1 is +6.47 [+5.33, +7.61]
+    above 69.92 and +8.13 above plain MatSciBERT. Coarse-grained A3 with
+    A6 is +4.75 [+3.82, +5.68] above 72.32 and +4.74 above plain
+    MatSciBERT.
+  - **MuLMS's published recipe is unstable at fresh seeds** (reported, no
+    decision).
+    - A0, the learning rate of 1e-4, collapsed in 2 of its 10 runs: c5 at
+      both seeds predicted no entity, with tune F1 at 0 throughout. It
+      degraded in 2 more: 33.47 (c2s1100) and 69.65 (c4s1000).
+    - A1m's 10 runs lie between 77.92 and 80.69.
+    - Every run counts as it comes, so decision 8's interval is wide and
+      does not pass. The bootstrap over sentences (+21.82, +22.73) does not
+      see that seed variance.
+  - **Reported beside, no decisions:**
+    - SOFC-Exp's votes of B1 from its 10 seeds: 86.53, 86.89 and 85.96 for
+      the votes of 3, and 87.13 and 85.98 for the votes of 5. The CRF head's
+      known vote is 85.13.
+    - The CV system's fold means are 82.83–83.73.
+    - B1's lowest seed scores 80.97 on the 11 articles, and its others
+      84.36–86.71.
+  - **Count:** 6 of 15 live decisions pass, and all 4 re-tests replicate.
+    The passing decisions sit on two benchmarks:
+    - SOFC-Exp's official split (B1 above Schrader et al.'s 83.4, and above
+      its tuned reference);
+    - MaterioMiner fine-grained (C1 above the strongest known system and the
+      tuned reference, and its votes above the CRF head's).
 
 *TACL (paper B), for later.* The paper goes to 10 pages, references
 uncounted, with appendices after them within TACL's caps (as last read: up

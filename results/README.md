@@ -756,3 +756,23 @@ src/graph/sota_p1.py select` (validation only, no claim):
 - coarse: A3 with A6;
 - SOFC-Exp: B1;
 - MuLMS: A1m.
+
+The SOTA plan's P2, decisions (ROADMAP §4, fixed 8 November before any P2
+run):
+- `gpu_p2/`: P2's test-scored files. Its batches are `p2a` (kernel version
+  32), `p2b` (33) and `p2m` (34, after a void first run).
+- `gpu_p2_void/`: the void first run of `p2m`, moved unread. It ran on
+  Kaggle's newer image.
+- `sota/p2_cv_system.json`: SOFC-Exp's CV system, committed before any
+  test-scored file was opened.
+- `gpu/sota_p2.json`: the decisions, from `python src/graph/sota_p2.py
+  decide`.
+
+6 of 15 live decisions pass:
+- SOFC-Exp's official split: B1 above the best stated-protocol result
+  (83.4), and above its tuned reference;
+- MaterioMiner fine-grained: C1 above the CRF head and above its tuned
+  reference, and its votes above the CRF head's.
+
+The re-tests replicate. SOFC-Exp's cross-validation, MuLMS and MaterioMiner
+coarse-grained are not shown above their comparisons.

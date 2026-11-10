@@ -1,0 +1,501 @@
+{
+ "note": "P2's decisions (ROADMAP \u00a74, the P2 protocol): each final system's test set read once, on fresh seeds 1000 up; a decision passes when its 95% interval lies above 0; every interval is over seeds and does not cover sampling of the test set",
+ "live": [
+  {
+   "number": 1,
+   "decision": "SOFC-Exp official, D-T: B1 against 83.4 (10 articles)",
+   "unit": "seed",
+   "test_set": "10 test articles",
+   "estimate": 2.06,
+   "ci95": [
+    0.63,
+    3.49
+   ],
+   "df": 11.5,
+   "ours": {
+    "mean": 85.46,
+    "sd": 1.5,
+    "n": 10
+   },
+   "published": {
+    "mean": 83.4,
+    "sd_printed": 0.9,
+    "n": 5,
+    "decimals": 1,
+    "convention": "population (np.std)",
+    "source": "Schrader et al. 2023, Table 11, SOFC-Exp 3e-4/7e-3, 5 runs, 10 test articles",
+    "sd_sample": 1.006
+   },
+   "passed": true,
+   "borderline": false,
+   "bootstrap_ci95": null,
+   "wording": "above the best result with a stated protocol; not shown above the best reported result, whose protocol we could not verify, on this test set"
+  },
+  {
+   "number": 2,
+   "decision": "SOFC-Exp official, D-P: B1 against A6",
+   "unit": "seed (Welch)",
+   "test_set": "11 test articles",
+   "estimate": 1.15,
+   "ci95": [
+    0.01,
+    2.28
+   ],
+   "df": 12.1,
+   "n": [
+    10,
+    10
+   ],
+   "passed": true,
+   "bootstrap_ci95": [
+    -0.17,
+    2.56
+   ],
+   "wording": "the change improves on the tuned reference, on this test set"
+  },
+  {
+   "number": 3,
+   "decision": "SOFC-Exp official: B1 against 86.0 (11 articles; gated on 1)",
+   "unit": "seed (target fixed)",
+   "test_set": "11 test articles",
+   "estimate": -1.09,
+   "ci95": [
+    -2.17,
+    -0.0
+   ],
+   "n": 10,
+   "target": 86.0,
+   "passed": false,
+   "bootstrap_ci95": null,
+   "wording": "not shown above 86.0, taken as fixed, on this test set"
+  },
+  {
+   "number": 4,
+   "decision": "SOFC-Exp CV, D-T: a6c1 against 84.77",
+   "unit": "run (fold x seed)",
+   "test_set": "11 test articles",
+   "estimate": -1.46,
+   "ci95": [
+    -2.05,
+    -0.86
+   ],
+   "df": 19.3,
+   "ours": {
+    "mean": 83.31,
+    "sd": 0.79,
+    "n": 50
+   },
+   "published": {
+    "mean": 84.77,
+    "sd_printed": 1.02,
+    "n": 15,
+    "decimals": 2,
+    "convention": "sample (assumed)",
+    "source": "Gupta et al. 2022 (npj), MatSciBERT-CRF, 5 folds x 3 seeds",
+    "sd_sample": 1.02
+   },
+   "passed": false,
+   "borderline": false,
+   "population_reading": {
+    "sd_sample": 1.056,
+    "welch": {
+     "gap": -1.46,
+     "ci95": [
+      -2.07,
+      -0.84
+     ],
+     "df": 18.9
+    },
+    "passed": false
+   },
+   "bootstrap_ci95": null,
+   "wording": "not shown above the best CV result with a stated protocol, on this test set"
+  },
+  {
+   "number": 5,
+   "decision": "SOFC-Exp CV, D-P: a6c1 against a6",
+   "unit": "fold x seed (paired)",
+   "test_set": "11 test articles",
+   "estimate": -0.1,
+   "ci95": [
+    -0.48,
+    0.27
+   ],
+   "n": 50,
+   "sd": 1.31,
+   "passed": false,
+   "bootstrap_ci95": [
+    -0.55,
+    0.37
+   ],
+   "wording": "the change: not shown to improve on the tuned reference, on this test set"
+  },
+  {
+   "number": 6,
+   "decision": "SOFC-Exp CV: a6c1 against 85.71 (gated on 4)",
+   "unit": "run (target fixed)",
+   "test_set": "11 test articles",
+   "estimate": -2.4,
+   "ci95": [
+    -2.62,
+    -2.17
+   ],
+   "n": 50,
+   "target": 85.71,
+   "passed": false,
+   "bootstrap_ci95": null,
+   "wording": "not taken: its gate did not pass"
+  },
+  {
+   "number": 7,
+   "decision": "MuLMS, D-T: A1m against 79.6",
+   "unit": "configuration x seed",
+   "test_set": "7 test documents",
+   "estimate": -0.4,
+   "ci95": [
+    -1.11,
+    0.3
+   ],
+   "df": 12.7,
+   "ours": {
+    "mean": 79.2,
+    "sd": 0.81,
+    "n": 10
+   },
+   "published": {
+    "mean": 79.6,
+    "sd_printed": 0.4,
+    "n": 5,
+    "decimals": 1,
+    "convention": "population (np.std)",
+    "source": "Schrader et al. 2023, Tables 9 and 11, MatSciBERT CRF tagger, MuLMS 1e-4/7e-3, 5 training configurations",
+    "sd_sample": 0.447
+   },
+   "passed": false,
+   "borderline": false,
+   "bootstrap_ci95": null,
+   "wording": "not shown above the published result under its protocol, on this test set"
+  },
+  {
+   "number": 8,
+   "decision": "MuLMS, D-P: A1m against A0",
+   "unit": "configuration x seed (paired)",
+   "test_set": "7 test documents",
+   "estimate": 22.27,
+   "ci95": [
+    -1.29,
+    45.83
+   ],
+   "n": 10,
+   "sd": 32.94,
+   "passed": false,
+   "bootstrap_ci95": [
+    21.82,
+    22.73
+   ],
+   "wording": "tuning: not shown to improve on our re-run of the published system, on this test set"
+  },
+  {
+   "number": 9,
+   "decision": "MaterioMiner fine: c1 against the CRF head",
+   "unit": "seed (paired)",
+   "test_set": "96 released test sentences",
+   "estimate": 3.31,
+   "ci95": [
+    1.05,
+    5.57
+   ],
+   "n": 10,
+   "sd": 3.16,
+   "passed": true,
+   "bootstrap_ci95": [
+    1.78,
+    4.87
+   ],
+   "wording": "the selected system improves on the strongest known system, on this test set"
+  },
+  {
+   "number": 10,
+   "decision": "MaterioMiner fine, D-P: c1 against A6",
+   "unit": "seed (paired)",
+   "test_set": "96 released test sentences",
+   "estimate": 3.02,
+   "ci95": [
+    1.34,
+    4.7
+   ],
+   "n": 10,
+   "sd": 2.35,
+   "passed": true,
+   "bootstrap_ci95": [
+    1.75,
+    4.33
+   ],
+   "wording": "the change improves on the tuned reference, on this test set"
+  },
+  {
+   "number": 11,
+   "decision": "MaterioMiner coarse: a3a6 against the CRF head",
+   "unit": "seed (paired)",
+   "test_set": "96 released test sentences",
+   "estimate": 0.99,
+   "ci95": [
+    -0.73,
+    2.7
+   ],
+   "n": 10,
+   "sd": 2.4,
+   "passed": false,
+   "bootstrap_ci95": [
+    -0.14,
+    2.14
+   ],
+   "wording": "the selected system: not shown to improve on the strongest known system, on this test set"
+  },
+  {
+   "number": 12,
+   "decision": "MaterioMiner fine: c1's vote of 3 against the CRF head's",
+   "unit": "vote (Welch)",
+   "test_set": "96 released test sentences",
+   "estimate": 2.38,
+   "ci95": [
+    1.33,
+    3.44
+   ],
+   "df": 16.0,
+   "n": [
+    10,
+    10
+   ],
+   "passed": true,
+   "bootstrap_ci95": [
+    0.96,
+    3.81
+   ],
+   "wording": "S's vote of 3 improves on the CRF head's vote of 3, on this test set"
+  },
+  {
+   "number": 13,
+   "decision": "MaterioMiner fine: c1's vote of 5 against the CRF head's",
+   "unit": "vote (Welch)",
+   "test_set": "96 released test sentences",
+   "estimate": 1.74,
+   "ci95": [
+    0.19,
+    3.3
+   ],
+   "df": 9.3,
+   "n": [
+    6,
+    6
+   ],
+   "passed": true,
+   "bootstrap_ci95": [
+    0.11,
+    3.42
+   ],
+   "wording": "S's vote of 5 improves on the CRF head's vote of 5, on this test set"
+  },
+  {
+   "number": 14,
+   "decision": "MaterioMiner coarse: a3a6's vote of 3 against the CRF head's",
+   "unit": "vote (Welch)",
+   "test_set": "96 released test sentences",
+   "estimate": 0.54,
+   "ci95": [
+    -0.33,
+    1.41
+   ],
+   "df": 18.0,
+   "n": [
+    10,
+    10
+   ],
+   "passed": false,
+   "bootstrap_ci95": [
+    -0.37,
+    1.47
+   ],
+   "wording": "S's vote of 3: not shown to improve on the CRF head's vote of 3, on this test set"
+  },
+  {
+   "number": 15,
+   "decision": "MaterioMiner coarse: a3a6's vote of 5 against the CRF head's",
+   "unit": "vote (Welch)",
+   "test_set": "96 released test sentences",
+   "estimate": 0.12,
+   "ci95": [
+    -1.33,
+    1.56
+   ],
+   "df": 10.0,
+   "n": [
+    6,
+    6
+   ],
+   "passed": false,
+   "bootstrap_ci95": [
+    -0.92,
+    1.17
+   ],
+   "wording": "S's vote of 5: not shown to improve on the CRF head's vote of 5, on this test set"
+  }
+ ],
+ "re_tests": [
+  {
+   "number": null,
+   "decision": "MaterioMiner fine, D-T (re-test): c1 against 69.92",
+   "unit": "seed (target fixed)",
+   "test_set": "96 released test sentences",
+   "estimate": 6.47,
+   "ci95": [
+    5.33,
+    7.61
+   ],
+   "n": 10,
+   "target": 69.92,
+   "passed": true,
+   "bootstrap_ci95": null,
+   "wording": "replicated"
+  },
+  {
+   "number": null,
+   "decision": "MaterioMiner fine, D-P (re-test): c1 against plain MatSciBERT",
+   "unit": "seed (paired)",
+   "test_set": "96 released test sentences",
+   "estimate": 8.13,
+   "ci95": [
+    6.46,
+    9.79
+   ],
+   "n": 10,
+   "sd": 2.33,
+   "passed": true,
+   "bootstrap_ci95": null,
+   "wording": "replicated"
+  },
+  {
+   "number": null,
+   "decision": "MaterioMiner coarse, D-T (re-test): a3a6 against 72.32",
+   "unit": "seed (target fixed)",
+   "test_set": "96 released test sentences",
+   "estimate": 4.75,
+   "ci95": [
+    3.82,
+    5.68
+   ],
+   "n": 10,
+   "target": 72.32,
+   "passed": true,
+   "bootstrap_ci95": null,
+   "wording": "replicated"
+  },
+  {
+   "number": null,
+   "decision": "MaterioMiner coarse, D-P (re-test): a3a6 against plain MatSciBERT",
+   "unit": "seed (paired)",
+   "test_set": "96 released test sentences",
+   "estimate": 4.74,
+   "ci95": [
+    3.78,
+    5.7
+   ],
+   "n": 10,
+   "sd": 1.34,
+   "passed": true,
+   "bootstrap_ci95": null,
+   "wording": "replicated"
+  }
+ ],
+ "reported": {
+  "official_votes": {
+   "note": "no decision; shown beside the CRF head's known 85.13",
+   "vote_of_3": [
+    86.53,
+    86.89,
+    85.96
+   ],
+   "vote_of_5": [
+    87.13,
+    85.98
+   ]
+  },
+  "cv_fold_means": {
+   "cv1": 83.73,
+   "cv2": 82.83,
+   "cv3": 83.02,
+   "cv4": 83.54,
+   "cv5": 83.45
+  }
+ },
+ "selected_means": {
+  "SOFC-Exp official (B1, 11 articles)": {
+   "mean": 84.91,
+   "ci95": [
+    83.83,
+    86.0
+   ],
+   "n": 10
+  },
+  "SOFC-Exp CV (a6c1)": {
+   "mean": 83.31,
+   "ci95": [
+    83.09,
+    83.54
+   ],
+   "n": 50
+  },
+  "MuLMS (A1m)": {
+   "mean": 79.2,
+   "ci95": [
+    78.62,
+    79.77
+   ],
+   "n": 10
+  },
+  "MaterioMiner fine (c1)": {
+   "mean": 76.39,
+   "ci95": [
+    75.25,
+    77.53
+   ],
+   "n": 10
+  },
+  "MaterioMiner coarse (a3a6)": {
+   "mean": 77.07,
+   "ci95": [
+    76.14,
+    78.0
+   ],
+   "n": 10
+  }
+ },
+ "count": {
+  "live": 15,
+  "passed": 6,
+  "expected_false_passes_at_most": 0.375,
+  "re_tests": 4,
+  "re_tests_passed": 4
+ },
+ "cv_system": {
+  "note": "SOFC-Exp's CV system (ROADMAP \u00a74, P2): P1's tie rule without B1, which the plan's fallback keeps out of the CV protocol",
+  "units": [
+   "seed0",
+   "seed100",
+   "seed200",
+   "seed300",
+   "seed400",
+   "seed500",
+   "seed600",
+   "seed700",
+   "seed800"
+  ],
+  "means_over_9_units": {
+   "a6c1": 79.13,
+   "c1": 78.92,
+   "a6": 78.59
+  },
+  "cv_system": "a6c1",
+  "reference": "a6"
+ }
+}
