@@ -1,0 +1,146 @@
+{
+ "note": "P3 (ROADMAP \u00a74, the P3 protocol): P2's selected systems on the held-out-document protocols, paired by fold and seed offset with the stored CRF head; reported, no decision and no claim",
+ "coarse_lopo": {
+  "system": "a3a6",
+  "selected": {
+   "mean": 58.41,
+   "ci95": [
+    56.99,
+    59.82
+   ],
+   "n": 40
+  },
+  "crf_head": {
+   "mean": 58.6,
+   "ci95": [
+    57.4,
+    59.81
+   ],
+   "n": 40
+  },
+  "paired_difference": {
+   "estimate": -0.2,
+   "ci95": [
+    -1.23,
+    0.84
+   ],
+   "n": 40,
+   "sd": 3.24
+  },
+  "per_fold": {
+   "10.1007_s11340-021-00758-x.conll": {
+    "selected": 62.16,
+    "crf_head": 60.27
+   },
+   "10.1038_ncomms7164.conll": {
+    "selected": 62.33,
+    "crf_head": 62.54
+   },
+   "10.1038_s41467-020-19071-7.conll": {
+    "selected": 53.32,
+    "crf_head": 55.58
+   },
+   "10.3390_met10111458.conll": {
+    "selected": 55.82,
+    "crf_head": 56.02
+   }
+  }
+ },
+ "sofc_folds": {
+  "system": "a6c1",
+  "selected": {
+   "mean": 82.86,
+   "ci95": [
+    81.97,
+    83.74
+   ],
+   "n": 50
+  },
+  "crf_head": {
+   "mean": 82.79,
+   "ci95": [
+    81.85,
+    83.72
+   ],
+   "n": 50
+  },
+  "paired_difference": {
+   "estimate": 0.07,
+   "ci95": [
+    -0.21,
+    0.35
+   ],
+   "n": 50,
+   "sd": 0.99
+  },
+  "per_fold": {
+   "fold0": {
+    "selected": 82.58,
+    "crf_head": 82.85
+   },
+   "fold1": {
+    "selected": 88.6,
+    "crf_head": 88.76
+   },
+   "fold2": {
+    "selected": 82.25,
+    "crf_head": 82.28
+   },
+   "fold3": {
+    "selected": 79.99,
+    "crf_head": 79.77
+   },
+   "fold4": {
+    "selected": 80.87,
+    "crf_head": 80.27
+   }
+  }
+ },
+ "fine_lopo": {
+  "system": "c1 (stored plain multi-task runs)",
+  "selected": {
+   "mean": 50.17,
+   "ci95": [
+    48.45,
+    51.9
+   ],
+   "n": 40
+  },
+  "crf_head": {
+   "mean": 46.46,
+   "ci95": [
+    45.04,
+    47.87
+   ],
+   "n": 40
+  },
+  "paired_difference": {
+   "estimate": 3.72,
+   "ci95": [
+    2.38,
+    5.05
+   ],
+   "n": 40,
+   "sd": 4.17
+  },
+  "per_fold": {
+   "10.1007_s11340-021-00758-x.conll": {
+    "selected": 57.35,
+    "crf_head": 51.0
+   },
+   "10.1038_ncomms7164.conll": {
+    "selected": 47.31,
+    "crf_head": 43.74
+   },
+   "10.1038_s41467-020-19071-7.conll": {
+    "selected": 50.27,
+    "crf_head": 48.73
+   },
+   "10.3390_met10111458.conll": {
+    "selected": 45.77,
+    "crf_head": 42.36
+   }
+  }
+ },
+ "mulms": "not run: it waits for code that scores the nested system on held-out subfields"
+}

@@ -776,3 +776,18 @@ run):
 
 The re-tests replicate. SOFC-Exp's cross-validation, MuLMS and MaterioMiner
 coarse-grained are not shown above their comparisons.
+
+The SOTA plan's P3, reported (ROADMAP §4; batch `p3a`, kernel version 35,
+bundle of `d369b0a`):
+- `gpu_p3/` holds the selected systems on the held-out-document protocols,
+  at the stored CRF head's seed offsets 0-900.
+- `gpu/sota_p3.json` is the report, from `python src/graph/sota_p3.py
+  report`. It pairs each system with the stored CRF head by fold and offset.
+
+Results:
+- MaterioMiner fine-grained, leave-one-paper-out (C1, the stored multi-task
+  runs): +3.72 [+2.38, +5.05];
+- coarse-grained (A3 with A6): −0.20 [−1.23, +0.84];
+- SOFC-Exp's document folds (A6 with C1): +0.07 [−0.21, +0.35].
+
+MuLMS has not run.

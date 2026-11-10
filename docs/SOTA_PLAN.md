@@ -9,6 +9,15 @@ typeset TACL version. A protocol in `docs/ROADMAP.md` §4 fixes it in detail
 before any run. The published numbers come from a literature audit of
 4 November, every number read in its paper.*
 
+*P3, 10 November: reported on the held-out-document protocols, with no
+decision and no claim (ROADMAP §4, `results/gpu/sota_p3.json`). Each is
+against the stored CRF head, paired by fold and seed:
+- MaterioMiner fine-grained on unseen papers: C1 scores 50.17 against 46.46,
+  +3.72 [+2.38, +5.05], and is higher on every paper.
+- Coarse-grained, A3 with A6: −0.20 [−1.23, +0.84].
+- SOFC-Exp's document folds, A6 with C1: +0.07 [−0.21, +0.35].
+- MuLMS waits for the nested system's held-out-subfield code.*
+
 *P2, 10 November: the decisions are in (ROADMAP §4, `results/gpu/sota_p2.json`).
 6 of the 15 live decisions pass; with no effect, at most about 0.4 would
 pass by chance. All 4 re-tests replicate.

@@ -8333,6 +8333,30 @@ before the 14 November reset.
 - No referee check: nothing here is decided.
 - Code: `sota_p3.py` (jobs, checks, report), and batch `p3a` in
   `kaggle_jobs.py`.
+- **Batch `p3a`, 10 November** (main kernel, version 35, bundle of `d369b0a`;
+  21 jobs, 224 minutes, every job done; 3.74 GPU-hours, leaving 1.93).
+  - smoke4's repeat passed.
+  - Every file passed the report's checks: settings, P1's environment,
+    seeds equal to offsets, and test sentences equal to the stored CRF
+    head's.
+  - Its 30 files are in `results/gpu_p3/`, and the report is
+    `results/gpu/sota_p3.json`.
+- **P3's numbers** (reported, no decision and no claim). Each is the selected
+  system against the stored CRF head, paired by fold and offset:
+
+  | Protocol | Selected system | Its mean | CRF head | Paired difference |
+  |---|---|---|---|---|
+  | MaterioMiner fine-grained, leave-one-paper-out (n = 40) | C1 (stored multi-task runs) | 50.17 [48.45, 51.90] | 46.46 | +3.72 [+2.38, +5.05] |
+  | MaterioMiner coarse-grained, leave-one-paper-out (n = 40) | A3 with A6 | 58.41 [56.99, 59.82] | 58.60 | −0.20 [−1.23, +0.84] |
+  | SOFC-Exp, 5 document folds (n = 50) | A6 with C1 | 82.86 [81.97, 83.74] | 82.79 | +0.07 [−0.21, +0.35] |
+
+  - Fine-grained C1 is higher than the CRF head on every held-out paper, by
+    1.54 to 6.35 points. Its gain on the released split (P2's decision 9,
+    +3.31) carries over to unseen papers.
+  - Coarse-grained A3 with A6 and SOFC-Exp's A6 with C1 gain nothing on
+    held-out documents. On the released split, coarse-grained was not
+    shown to gain either (P2's decision 11).
+  - MuLMS waits for the nested system's held-out-subfield code, as fixed.
 
 *TACL (paper B), for later.* The paper goes to 10 pages, references
 uncounted, with appendices after them within TACL's caps (as last read: up
